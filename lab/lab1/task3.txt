@@ -1,0 +1,36 @@
+日志1：gc_log_default.txt（默认大内存）
+        GC类型
+	只有“Pause Young (Normal) (G1 Evacuation Pause)”（年轻代GC），共9次（GC(0)~GC(8)）。
+	没有“Pause Full”或“Full GC”。
+        GC耗时
+	年轻代GC耗时随着内存使用增加略有变长，但没有异常。
+	程序正常结束，无OutOfMemoryError
+日志2：gc_log_64m.txt（最大堆64m）
+        GC类型
+	“Pause Young (Normal) (G1 Evacuation Pause)”，“Pause Full (G1 Compaction Pause)”（Full GC），还有“Evacuation Failure”等异常情况。
+	年轻代GC有多达18次（GC(0)~GC(17)），Full GC有8次（GC(8), GC(10), GC(13), GC(15), GC(16), GC(19)等，注意有的编号不是完全连续）。
+        GC耗时
+	随着内存紧张，GC变得更频繁，Full GC时间增加，出现Evacuation Failure说明内存已经撑不住了。
+	程序崩溃，抛出OutOfMemoryError
+
+通过多次修改Example2的循环次数（如100、1000、2000、3000、5000），并**每次都用java -Xmx64m -XX:+PrintGCDetails Example2**运行，把GC日志保存到了不同的txt文件。
+
+100、1000、1500次时，程序运行正常并输出“Done”，没有出现OutOfMemoryError（OOM）。
+1800、2000、3000、5000次时，程序会抛出OOM异常，终端提示Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+
+在数组长度为10000、JVM最大堆为64MB时，循环次数的极限阈值在1500~1800之间。
+在循环次数为10000、JVM最大堆为64MB时，数组大小的极限阈值在1600~1700之间。
+
+1. 随着循环次数（或数组大小）增加，GC日志中**Young GC（年轻代垃圾回收）**的次数变多，GC耗时也变长。
+2. 当内存压力大时，会出现Evacuation Failure和Full GC（老年代全回收），但即使这样也回收不了足够空间，最终导致OOM。
+3. OOM发生前日志一般会出现“Pause Full (G1 Compaction Pause)”等字样，说明JVM已经尽力做了全堆回收。
+
+如何避免内存溢出？（代码和JVM参数两个角度）
+（1）代码层面
+减小单个数组的长度（如int[5000]甚至更小）
+减少循环次数（分批处理，处理一批释放一批）
+及时释放不用的对象（如list.clear() 或 data = null，帮助GC更早回收）
+避免一次性持有大量对象（比如不用List缓存全部数据）
+（2）JVM参数层面
+增大堆内存限制，比如 -Xmx128m、-Xmx256m，允许更多对象同时存在
+调优GC策略（如设置新生代/老年代比例等，在大实验中可用）
