@@ -2,30 +2,17 @@ import java.util.*;
 class Task implements Comparable<Task> {
     private String description;
     private int priority;
-
     public Task(String description, int priority) {
         this.description = description;
         this.priority = priority;
     }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
     @Override
     public int compareTo(Task other) {
-        // Order by priority (higher priority first)
         if (this.priority != other.priority) {
             return Integer.compare(other.priority, this.priority);
         }
-        // If priorities are the same, order lexicographically by description
         return this.description.compareTo(other.description);
     }
-
     @Override
     public String toString() {
         return "Task{description='" + description + "', priority=" + priority + "}";
@@ -34,23 +21,16 @@ class Task implements Comparable<Task> {
 
 class TaskScheduler {
     private PriorityQueue<Task> taskQueue;
-
     public TaskScheduler() {
-        // Initialize the priority queue with a custom comparator
         taskQueue = new PriorityQueue<>();
     }
-
-    // Adds a new task to the task scheduler
     public void addTask(String description, int priority) {
         taskQueue.offer(new Task(description, priority));
     }
-
-    // Retrieves the top K tasks with the highest priorities without modifying the queue
     public List<Task> getTopKTasks(int k) {
         List<Task> result = new ArrayList<>();
         Iterator<Task> iterator = taskQueue.iterator();
 
-        // Use a temporary list to sort and fetch the top K elements
         List<Task> tempList = new ArrayList<>(taskQueue);
         Collections.sort(tempList);
 
@@ -59,8 +39,6 @@ class TaskScheduler {
         }
         return result;
     }
-
-    // Finishes (removes) the task with the highest priority
     public void finishNextTask() {
         if (!taskQueue.isEmpty()) {
             taskQueue.poll();

@@ -4,37 +4,13 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-public class FilterProgram {
+public class task2 {
     public static <T> List<T> filter(List<T> list, MyPredicate<T> p) {
-        List<T> result = new ArrayList<>();
-        for (T item : list) {
-            if (p.test(item)) {
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-    public static boolean isEven(int number) {
-        return number % 2 == 0;
-    }
-
-    public static boolean isOdd(int number) {
-        return number % 2 != 0;
-    }
-
-    public static boolean isPrime(int number) {
-        if (number <= 1) return false;
-        for (int i = 2; i <= Math.sqrt(number); i++) {
-            if (number % i == 0) {
-                return false;
-            }
-        }
-        return true;
+        return list.stream().filter(p::test).collect(Collectors.toList());
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        Scanner input = new Scanner(System.in);
         while (true) {
             System.out.println("Please input the function no:");
             System.out.println("1 - Get even numbers");
@@ -42,37 +18,44 @@ public class FilterProgram {
             System.out.println("3 - Get prime numbers");
             System.out.println("0 - Quit");
 
-            int choice = scanner.nextInt();
+            int choice = input.nextInt();
             if (choice == 0) {
                 System.out.println("Exiting program...");
                 break;
             }
 
             System.out.println("Input the integer list (space separated):");
-            scanner.nextLine(); // Consume the leftover newline
-            List<Integer> numbers = Arrays.stream(scanner.nextLine().split(" "))
+            input.nextLine();
+            List<Integer> numbers = Arrays.stream(input.nextLine().split(" "))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
 
-            List<Integer> results = new ArrayList<>();
+            MyPredicate<Integer> predicate;
             switch (choice) {
                 case 1:
-                    results = filter(numbers, FilterProgram::isEven);
+                    predicate = x -> x % 2 == 0;
                     break;
                 case 2:
-                    results = filter(numbers, FilterProgram::isOdd);
+                    predicate = x -> x % 2 != 0;
                     break;
                 case 3:
-                    results = filter(numbers, FilterProgram::isPrime);
+                    predicate = x -> {
+                        if (x <= 1) return false;
+                        for (int i = 2; i <= Math.sqrt(x); i++) {
+                            if (x % i == 0) return false;
+                        }
+                        return true;
+                    };
                     break;
                 default:
                     System.out.println("Invalid choice. Try again.");
                     continue;
             }
 
+            List<Integer> results = filter(numbers, predicate);
             System.out.println("Filter results:");
             System.out.println(results);
         }
-        scanner.close();
+        input.close();
     }
 }

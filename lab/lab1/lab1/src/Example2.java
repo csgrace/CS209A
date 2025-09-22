@@ -4,8 +4,8 @@ import java.util.List;
 public class Example2 {
     public static void main(String[] args) {
         List<int[]> list = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
-            int[] data = new int[1600];
+        for (int i = 0; i < 2000; i++) {
+            int[] data = new int[10000];
             list.add(data);
         }
         System.out.println("Done");
