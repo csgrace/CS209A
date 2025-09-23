@@ -50,7 +50,7 @@ public class practice2_task1 {
 
             public T draw() {
                 if (items.isEmpty()) {
-                    return null; // or throw an exception
+                    return null;
                 }
                 int index = random.nextInt(items.size());
                 return items.remove(index);
