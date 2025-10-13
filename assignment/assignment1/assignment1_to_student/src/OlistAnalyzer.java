@@ -13,24 +13,39 @@ public class OlistAnalyzer {
   private final Path orderItemsCsv;
   private final Map<String, String> productIdToCategoryName = new HashMap<>();
   private final Map<String, String> categoryNameToEn = new HashMap<>();
-  private final Map<String, Boolean> orderIdOnTime = new HashMap<>();   // order_id -> 是否准时（仅当两列时间都能解析）
-  // reviews：按订单累加“总分与条数”，避免订单层平均
-  private final Map<String, Double> orderIdToReviewSum = new HashMap<>();   // order_id -> 该订单所有评分的总和
-  private final Map<String, Integer> orderIdToReviewCount = new HashMap<>(); // order_id -> 该订单评分条数
-
-  // 销售额：新增以“分”为单位的精确累计，避免 double 误差
+  private final Map<String, Boolean> orderIdOnTime = new HashMap<>();
+  private final Map<String, Double> orderIdToReviewSum = new HashMap<>();
+  private final Map<String, Integer> orderIdToReviewCount = new HashMap<>();
   private final Map<String, Long> sellerTotalSalesCents = new HashMap<>();
-
-  // 保留原有结构（去重订单、商品数）
   private final Map<String, Set<String>> sellerOrders = new HashMap<>();
   private final Map<String, Set<String>> sellerProducts = new HashMap<>();
+  private final Map<String, Long> productSalesCount = new HashMap<>();
+  private final Map<String, Set<String>> productOrders = new HashMap<>();
+  private final Map<String, Long> productFirstPriceCents = new HashMap<>();
+  private final Map<String, Long> productTotalPriceCents = new HashMap<>();
 
   public OlistAnalyzer(String datasetFolderPath) {
     this.baseDir = Path.of(datasetFolderPath);
 
+    /* 第一问：
+    从“olist_order_items_dataset.csv”得到product_id
+    然后在“olist_products_dataset.csv”得到product_category_name
+    然后在“product_category_name_translation”得到product_category_name_english */
+
     this.orderItemsCsv = baseDir.resolve("olist_order_items_dataset.csv");
     readProducts(baseDir.resolve("olist_products_dataset.csv"));
     readCategoryTranslation(baseDir.resolve("product_category_name_translation.csv"));
+
+    /* 第三问：
+    从“olist_order_items_dataset.csv”得到price和product_id
+    然后在“olist_products_dataset.csv”得到product_id和product_category_name
+    然后在“product_category_name_translation”得到product_category_name_english和product_category_name  */
+
+    /* 第四问：
+    从“olist_order_items_dataset.csv”得到seller_id，order_id, product_id和price，得到1，2，3
+    然后在“olist_orders_dataset.csv”得到order_id,order_delivered_customer_date和order_estimated_delivery_date，得到5
+    然后在“olist_order_reviews_dataset”得到review_score和order_id，得到4
+    仅保留订单数（去重后）≥ 50 的卖家；最后按总销售额降序、seller_id 升序排序返回  */
 
     readOrders(orderItemsCsv);
     readDeliveries(baseDir.resolve("olist_orders_dataset.csv"));
@@ -121,47 +136,22 @@ public class OlistAnalyzer {
   }
 
   public Map<String, Map<String, Long>> getPriceRangeDistribution() {
-    Map<String, Double> pidToMinPrice = new HashMap<>();
-    try (BufferedReader br = Files.newBufferedReader(orderItemsCsv, StandardCharsets.UTF_8)) {
-      String headerLine = br.readLine();
-      if (headerLine == null) return Collections.emptyMap();
-      String[] header = splitCsv(headerLine);
-
-      int idxProductId = indexOf(header, "product_id");
-      int idxPrice = indexOf(header, "price");
-      if (idxProductId < 0 || idxPrice < 0) return Collections.emptyMap();
-
-      for (String line; (line = br.readLine()) != null; ) {
-        if (line.isEmpty()) continue;
-        String[] cols = splitCsv(line);
-        if (cols.length <= Math.max(idxProductId, idxPrice)) continue;
-
-        String productId = cols[idxProductId];
-        String priceRaw = cols[idxPrice];
-        if (productId == null || productId.isBlank() || priceRaw == null || priceRaw.isBlank()) {
-          continue;
-        }
-
-        Double price = parsePriceStrict(priceRaw);
-        if (price == null || price <= 0) continue;
-
-        pidToMinPrice.merge(productId, price, Math::min);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
     Map<String, Map<String, Long>> result = new TreeMap<>();
-    for (Map.Entry<String, Double> e : pidToMinPrice.entrySet()) {
+    for (Map.Entry<String, Long> e : productTotalPriceCents.entrySet()) {
       String productId = e.getKey();
-      double price = e.getValue();
+      long totalCents = e.getValue();
+
+      Long count = productSalesCount.get(productId);
+      if (count == null || count <= 0) continue;
+
+      long avgCents = Math.round(totalCents / (double) count);
 
       String catPt = productIdToCategoryName.get(productId);
       if (catPt == null || catPt.isBlank()) continue;
       String catEn = categoryNameToEn.get(catPt);
       if (catEn == null || catEn.isBlank()) continue;
 
-      String bucket = toPriceBucketStrict(price);
+      String bucket = toPriceBucketByCents(avgCents);
       if (bucket == null) continue;
 
       Map<String, Long> inner = result.computeIfAbsent(catEn, k -> {
@@ -186,13 +176,9 @@ public class OlistAnalyzer {
 
       long totalSalesCents = sellerTotalSalesCents.getOrDefault(sellerId, 0L);
       double totalSales = round2(totalSalesCents / 100.0);
-
-      // 平均客单价：用“分”的整数和订单数计算，避免精度误差
       double avgOrderValue = round2(orderCount == 0 ? 0.0 : (totalSalesCents / 100.0) / orderCount);
-
       double uniqueProducts = (double) sellerProducts.getOrDefault(sellerId, Collections.emptySet()).size();
 
-      // 卖家平均评分：累计 sum & count 后一次性平均
       double sellerReviewSum = 0.0;
       int sellerReviewCount = 0;
       for (String oid : orders) {
@@ -238,7 +224,87 @@ public class OlistAnalyzer {
   }
 
   public Map<String, List<String>> recommendedProducts() {
-    return Map.of();
+    Map<String, List<ProductAgg>> byCategory = new HashMap<>();
+
+    for (Map.Entry<String, Long> e : productSalesCount.entrySet()) {
+      String productId = e.getKey();
+      long sales = e.getValue() == null ? 0L : e.getValue();
+
+      String catPt = productIdToCategoryName.get(productId);
+      if (catPt == null || catPt.isBlank()) continue;
+      String catEn = categoryNameToEn.get(catPt);
+      if (catEn == null || catEn.isBlank()) continue;
+
+      Set<String> orders = productOrders.getOrDefault(productId, Collections.emptySet());
+      double reviewSum = 0.0;
+      int reviewCnt = 0;
+      for (String oid : orders) {
+        Double s = orderIdToReviewSum.get(oid);
+        Integer c = orderIdToReviewCount.get(oid);
+        if (s != null && c != null && c > 0) {
+          reviewSum += s;
+          reviewCnt += c;
+        }
+      }
+      if (sales < 10 || reviewCnt < 5) continue;
+
+      double avgRating = reviewCnt == 0 ? 0.0 : (reviewSum / reviewCnt);
+
+      ProductAgg agg = new ProductAgg(productId, sales, reviewCnt, avgRating);
+      byCategory.computeIfAbsent(catEn, k -> new ArrayList<>()).add(agg);
+    }
+
+    Set<String> categoriesInData = new TreeSet<>();
+    for (String pid : productSalesCount.keySet()) {
+      String catPt = productIdToCategoryName.get(pid);
+      if (catPt == null || catPt.isBlank()) continue;
+      String catEn = categoryNameToEn.get(catPt);
+      if (catEn == null || catEn.isBlank()) continue;
+      categoriesInData.add(catEn);
+    }
+
+    Map<String, List<String>> result = new LinkedHashMap<>();
+    for (String cat : categoriesInData) {
+      List<ProductAgg> list = byCategory.getOrDefault(cat, Collections.emptyList());
+      if (list.isEmpty()) {
+        result.put(cat, List.of());
+        continue;
+      }
+
+      double minSales = Double.POSITIVE_INFINITY, maxSales = Double.NEGATIVE_INFINITY;
+      double minReviews = Double.POSITIVE_INFINITY, maxReviews = Double.NEGATIVE_INFINITY;
+      double minRating = Double.POSITIVE_INFINITY, maxRating = Double.NEGATIVE_INFINITY;
+
+      for (ProductAgg a : list) {
+        minSales = Math.min(minSales, a.sales);
+        maxSales = Math.max(maxSales, a.sales);
+        minReviews = Math.min(minReviews, a.reviewCount);
+        maxReviews = Math.max(maxReviews, a.reviewCount);
+        minRating = Math.min(minRating, a.avgRating);
+        maxRating = Math.max(maxRating, a.avgRating);
+      }
+
+      for (ProductAgg a : list) {
+        double salesScore = normalize(a.sales, minSales, maxSales);
+        double reviewCountScore = normalize(a.reviewCount, minReviews, maxReviews);
+        double avgRatingScore = normalize(a.avgRating, minRating, maxRating);
+        a.score = 0.5 * salesScore + 0.3 * reviewCountScore + 0.2 * avgRatingScore;
+      }
+
+      list.sort((a, b) -> {
+        int cmp = Double.compare(b.score, a.score);
+        if (cmp != 0) return cmp;
+        return a.productId.compareTo(b.productId);
+      });
+
+      List<String> top = new ArrayList<>();
+      for (int i = 0; i < Math.min(10, list.size()); i++) {
+        top.add(list.get(i).productId);
+      }
+      result.put(cat, top);
+    }
+
+    return result;
   }
 
   private void readProducts(Path productsCsv){
@@ -313,7 +379,6 @@ public class OlistAnalyzer {
     }
   }
 
-  // 从字符串价格解析为“分”（long），避免浮点累计误差
   private static Long parseCents(String raw) {
     String s = raw.replace("\"", "").trim();
     if (s.isEmpty()) return null;
@@ -326,16 +391,15 @@ public class OlistAnalyzer {
     }
   }
 
-  private static String toPriceBucketStrict(double p) {
-    if (p <= 0) return null;
-    if (p <= 50) return "(0,50]";
-    if (p <= 100) return "(50,100]";
-    if (p <= 200) return "(100,200]";
-    if (p <= 500) return "(200,500]";
+  private static String toPriceBucketByCents(long cents) {
+    if (cents <= 0) return null;
+    if (cents <= 5000) return "(0,50]";
+    if (cents <= 10000) return "(50,100]";
+    if (cents <= 20000) return "(100,200]";
+    if (cents <= 50000) return "(200,500]";
     return "(500,)";
   }
 
-  // 从 order_items 读取 seller_id、order_id、product_id、price
   private void readOrders(Path ordersCsv){
     if(!Files.exists(ordersCsv)){
       throw new IllegalArgumentException("File not found: " + ordersCsv);
@@ -377,6 +441,11 @@ public class OlistAnalyzer {
         sellerTotalSalesCents.merge(sellerId, cents, Long::sum);
         sellerOrders.computeIfAbsent(sellerId, k -> new HashSet<>()).add(orderId);
         sellerProducts.computeIfAbsent(sellerId, k -> new HashSet<>()).add(productId);
+
+        productSalesCount.merge(productId, 1L, Long::sum);
+        productOrders.computeIfAbsent(productId, k -> new HashSet<>()).add(orderId);
+        productFirstPriceCents.putIfAbsent(productId, cents);
+        productTotalPriceCents.merge(productId, cents, Long::sum);
       }
     } catch (Exception e){
       e.printStackTrace();
@@ -489,5 +558,27 @@ public class OlistAnalyzer {
       if (colName.equals(cell)) return i;
     }
     return -1;
+  }
+
+  private static double normalize(double v, double min, double max) {
+    if (Double.isNaN(v) || Double.isInfinite(v)) return 0.0;
+    if (max <= min) return 0.0;
+    return (v - min) / (max - min);
+  }
+
+  private static final class ProductAgg {
+    final String productId;
+    final double sales;
+    final double reviewCount;
+    final double avgRating;
+    double score;
+
+    ProductAgg(String productId, long sales, int reviewCount, double avgRating) {
+      this.productId = productId;
+      this.sales = sales;
+      this.reviewCount = reviewCount;
+      this.avgRating = avgRating;
+      this.score = 0.0;
+    }
   }
 }
