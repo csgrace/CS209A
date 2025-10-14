@@ -4,9 +4,22 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class OlistAnalyzer {
   private final Path baseDir;
@@ -22,10 +35,11 @@ public class OlistAnalyzer {
   private final Map<String, Long> productSalesCount = new HashMap<>();
   private final Map<String, Set<String>> productOrders = new HashMap<>();
   private final Map<String, Long> productFirstPriceCents = new HashMap<>();
+  // 累加每个 product 的总价，用于按“总价/总数”的平均价分桶
   private final Map<String, Long> productTotalPriceCents = new HashMap<>();
 
   public OlistAnalyzer(String datasetFolderPath) {
-    this.baseDir = Path.of(datasetFolderPath);
+    this.baseDir = Paths.get(datasetFolderPath);
 
     /* 第一问：
     从“olist_order_items_dataset.csv”得到product_id
@@ -69,15 +83,16 @@ public class OlistAnalyzer {
         String productId = cells[productIdIndex];
         String categoryName = productIdToCategoryName.get(productId);
 
-        if (categoryName == null || categoryName.isBlank()) continue;
+        if (isBlank(categoryName)) continue;
 
         String categoryNameEn = categoryNameToEn.get(categoryName);
-        if (categoryNameEn == null || categoryNameEn.isBlank()) continue;
+        if (isBlank(categoryNameEn)) continue;
 
         categoryCount.merge(categoryNameEn, 1L, Long::sum);
       }
 
-      return categoryCount.entrySet().stream()
+      LinkedHashMap<String, Integer> out = new LinkedHashMap<>();
+      categoryCount.entrySet().stream()
               .sorted(
                       Comparator
                               .comparing(Map.Entry<String, Long>::getValue)
@@ -85,15 +100,12 @@ public class OlistAnalyzer {
                               .thenComparing(Map.Entry::getKey)
               )
               .limit(10)
-              .collect(
-                      LinkedHashMap::new,
-                      (m, e) -> m.put(e.getKey(), e.getValue().intValue()),
-                      LinkedHashMap::putAll
-              );
+              .forEach(e -> out.put(e.getKey(), e.getValue().intValue()));
+      return out;
 
     } catch (Exception e) {
       e.printStackTrace();
-      return Map.of();
+      return Collections.emptyMap();
     }
   }
 
@@ -123,7 +135,7 @@ public class OlistAnalyzer {
         if(cells.length <= Math.max(orderStatusIndex, orderPurchaseTimestampIndex)) continue;
         String orderStatus = cells[orderStatusIndex];
         String orderPurchaseTimestamp = cells[orderPurchaseTimestampIndex];
-        if (orderStatus != null && orderStatus.equals("delivered") && orderPurchaseTimestamp != null && !orderPurchaseTimestamp.isBlank()) {
+        if ("delivered".equals(orderStatus) && !isBlank(orderPurchaseTimestamp)) {
           String hour = orderPurchaseTimestamp.substring(11,13);
           String hourKey = hour + ":00";
           ByHour.put(hourKey,ByHour.get(hourKey)+1);
@@ -147,9 +159,9 @@ public class OlistAnalyzer {
       long avgCents = Math.round(totalCents / (double) count);
 
       String catPt = productIdToCategoryName.get(productId);
-      if (catPt == null || catPt.isBlank()) continue;
+      if (isBlank(catPt)) continue;
       String catEn = categoryNameToEn.get(catPt);
-      if (catEn == null || catEn.isBlank()) continue;
+      if (isBlank(catEn)) continue;
 
       String bucket = toPriceBucketByCents(avgCents);
       if (bucket == null) continue;
@@ -177,7 +189,7 @@ public class OlistAnalyzer {
       long totalSalesCents = sellerTotalSalesCents.getOrDefault(sellerId, 0L);
       double totalSales = round2(totalSalesCents / 100.0);
       double avgOrderValue = round2(orderCount == 0 ? 0.0 : (totalSalesCents / 100.0) / orderCount);
-      double uniqueProducts = (double) sellerProducts.getOrDefault(sellerId, Collections.emptySet()).size();
+      double uniqueProducts = (double) sellerProducts.getOrDefault(sellerId, Collections.<String>emptySet()).size();
 
       double sellerReviewSum = 0.0;
       int sellerReviewCount = 0;
@@ -191,10 +203,14 @@ public class OlistAnalyzer {
       }
       double avgReview = round2(sellerReviewCount == 0 ? 0.0 : (sellerReviewSum / sellerReviewCount));
 
-      int denom = 0, ontime = 0;
+      int denom = 0;
+      int ontime = 0;
       for (String oid : orders) {
         Boolean on = orderIdOnTime.get(oid);
-        if (on != null) { denom++; if (on) ontime++; }
+        if (on != null) {
+          denom++;
+          if (on) ontime++;
+        }
       }
       double onTimeRate = round2(denom == 0 ? 0.0 : (double) ontime / denom);
 
@@ -205,7 +221,7 @@ public class OlistAnalyzer {
       metrics.add(avgReview);
       metrics.add(onTimeRate);
 
-      rows.add(Map.entry(sellerId, metrics));
+      rows.add(new AbstractMap.SimpleEntry<>(sellerId, metrics));
     }
 
     rows.sort((e1, e2) -> {
@@ -231,11 +247,11 @@ public class OlistAnalyzer {
       long sales = e.getValue() == null ? 0L : e.getValue();
 
       String catPt = productIdToCategoryName.get(productId);
-      if (catPt == null || catPt.isBlank()) continue;
+      if (isBlank(catPt)) continue;
       String catEn = categoryNameToEn.get(catPt);
-      if (catEn == null || catEn.isBlank()) continue;
+      if (isBlank(catEn)) continue;
 
-      Set<String> orders = productOrders.getOrDefault(productId, Collections.emptySet());
+      Set<String> orders = productOrders.getOrDefault(productId, Collections.<String>emptySet());
       double reviewSum = 0.0;
       int reviewCnt = 0;
       for (String oid : orders) {
@@ -257,17 +273,17 @@ public class OlistAnalyzer {
     Set<String> categoriesInData = new TreeSet<>();
     for (String pid : productSalesCount.keySet()) {
       String catPt = productIdToCategoryName.get(pid);
-      if (catPt == null || catPt.isBlank()) continue;
+      if (isBlank(catPt)) continue;
       String catEn = categoryNameToEn.get(catPt);
-      if (catEn == null || catEn.isBlank()) continue;
+      if (isBlank(catEn)) continue;
       categoriesInData.add(catEn);
     }
 
     Map<String, List<String>> result = new LinkedHashMap<>();
     for (String cat : categoriesInData) {
-      List<ProductAgg> list = byCategory.getOrDefault(cat, Collections.emptyList());
+      List<ProductAgg> list = byCategory.getOrDefault(cat, Collections.<ProductAgg>emptyList());
       if (list.isEmpty()) {
-        result.put(cat, List.of());
+        result.put(cat, Collections.<String>emptyList());
         continue;
       }
 
@@ -327,7 +343,7 @@ public class OlistAnalyzer {
         if(cells.length <= Math.max(productIdIndex, categoryNameIndex)) continue;
         String productId = cells[productIdIndex];
         String categoryName = cells[categoryNameIndex];
-        if (productId != null && !productId.isBlank() && categoryName != null && !categoryName.isBlank()) {
+        if (!isBlank(productId) && !isBlank(categoryName)) {
           productIdToCategoryName.put(productId, categoryName);
         }
       }
@@ -356,7 +372,7 @@ public class OlistAnalyzer {
         if(cells.length <= Math.max(categoryNameIndex, categoryNameEnIndex)) continue;
         String categoryName = cells[categoryNameIndex];
         String categoryNameEn = cells[categoryNameEnIndex];
-        if (categoryName != null && !categoryName.isBlank() && categoryNameEn != null && !categoryNameEn.isBlank()) {
+        if (!isBlank(categoryName) && !isBlank(categoryNameEn)) {
           categoryNameToEn.put(categoryName, categoryNameEn);
         }
       }
@@ -428,10 +444,7 @@ public class OlistAnalyzer {
         String productId = cells[productIdIndex];
         String priceRaw = cells[priceIndex];
 
-        if (orderId == null || orderId.isBlank() ||
-                sellerId == null || sellerId.isBlank() ||
-                productId == null || productId.isBlank() ||
-                priceRaw == null || priceRaw.isBlank() ) {
+        if (isBlank(orderId) || isBlank(sellerId) || isBlank(productId) || isBlank(priceRaw)) {
           continue;
         }
 
@@ -439,12 +452,14 @@ public class OlistAnalyzer {
         if (cents == null) continue;
 
         sellerTotalSalesCents.merge(sellerId, cents, Long::sum);
-        sellerOrders.computeIfAbsent(sellerId, k -> new HashSet<>()).add(orderId);
-        sellerProducts.computeIfAbsent(sellerId, k -> new HashSet<>()).add(productId);
+        sellerOrders.computeIfAbsent(sellerId, k -> new HashSet<String>()).add(orderId);
+        sellerProducts.computeIfAbsent(sellerId, k -> new HashSet<String>()).add(productId);
 
         productSalesCount.merge(productId, 1L, Long::sum);
-        productOrders.computeIfAbsent(productId, k -> new HashSet<>()).add(orderId);
+        productOrders.computeIfAbsent(productId, k -> new HashSet<String>()).add(orderId);
         productFirstPriceCents.putIfAbsent(productId, cents);
+
+        // 为“第三问”累加单价，用于后续 total/ count 求平均价
         productTotalPriceCents.merge(productId, cents, Long::sum);
       }
     } catch (Exception e){
@@ -477,9 +492,7 @@ public class OlistAnalyzer {
         String actualArrival = cells[actualArrivalIndex];
         String estimateArrival = cells[estimateArrivalIndex];
 
-        if (orderId == null || orderId.isBlank() ||
-                actualArrival == null || actualArrival.isBlank() ||
-                estimateArrival == null || estimateArrival.isBlank()) {
+        if (isBlank(orderId) || isBlank(actualArrival) || isBlank(estimateArrival)) {
           continue;
         }
         try{
@@ -515,7 +528,7 @@ public class OlistAnalyzer {
         if(cells.length <= Math.max(orderIdIndex, reviewScoreIndex)) continue;
         String orderId = cells[orderIdIndex];
         String reviewScore = cells[reviewScoreIndex];
-        if (orderId == null || orderId.isBlank() || reviewScore == null || reviewScore.isBlank()) {
+        if (isBlank(orderId) || isBlank(reviewScore)) {
           continue;
         }
         Double score = parsePriceStrict(reviewScore);
@@ -564,6 +577,10 @@ public class OlistAnalyzer {
     if (Double.isNaN(v) || Double.isInfinite(v)) return 0.0;
     if (max <= min) return 0.0;
     return (v - min) / (max - min);
+  }
+
+  private static boolean isBlank(String s) {
+    return s == null || s.trim().isEmpty();
   }
 
   private static final class ProductAgg {
