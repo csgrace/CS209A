@@ -35,31 +35,14 @@ public class OlistAnalyzer {
   private final Map<String, Long> productSalesCount = new HashMap<>();
   private final Map<String, Set<String>> productOrders = new HashMap<>();
   private final Map<String, Long> productFirstPriceCents = new HashMap<>();
-  // 累加每个 product 的总价，用于按“总价/总数”的平均价分桶
   private final Map<String, Long> productTotalPriceCents = new HashMap<>();
 
   public OlistAnalyzer(String datasetFolderPath) {
     this.baseDir = Paths.get(datasetFolderPath);
 
-    /* 第一问：
-    从“olist_order_items_dataset.csv”得到product_id
-    然后在“olist_products_dataset.csv”得到product_category_name
-    然后在“product_category_name_translation”得到product_category_name_english */
-
     this.orderItemsCsv = baseDir.resolve("olist_order_items_dataset.csv");
     readProducts(baseDir.resolve("olist_products_dataset.csv"));
     readCategoryTranslation(baseDir.resolve("product_category_name_translation.csv"));
-
-    /* 第三问：
-    从“olist_order_items_dataset.csv”得到price和product_id
-    然后在“olist_products_dataset.csv”得到product_id和product_category_name
-    然后在“product_category_name_translation”得到product_category_name_english和product_category_name  */
-
-    /* 第四问：
-    从“olist_order_items_dataset.csv”得到seller_id，order_id, product_id和price，得到1，2，3
-    然后在“olist_orders_dataset.csv”得到order_id,order_delivered_customer_date和order_estimated_delivery_date，得到5
-    然后在“olist_order_reviews_dataset”得到review_score和order_id，得到4
-    仅保留订单数（去重后）≥ 50 的卖家；最后按总销售额降序、seller_id 升序排序返回  */
 
     readOrders(orderItemsCsv);
     readDeliveries(baseDir.resolve("olist_orders_dataset.csv"));
@@ -109,39 +92,37 @@ public class OlistAnalyzer {
     }
   }
 
-  public Map<String, Long> getPurchasePatternByHour(){
+  public Map<String, Long> getPurchasePatternByHour() {
     Path ordersCsv = baseDir.resolve("olist_orders_dataset.csv");
 
-    LinkedHashMap<String,Long> ByHour = new LinkedHashMap<>();
+    LinkedHashMap<String, Long> ByHour = new LinkedHashMap<>();
     for (int i = 0; i < 24; i++) {
-      ByHour.put(String.format("%02d:00",i),0L);
+      ByHour.put(String.format("%02d:00", i), 0L);
     }
-    if(!Files.exists(ordersCsv)){
+    if (!Files.exists(ordersCsv)) {
       throw new IllegalArgumentException("File not found: " + ordersCsv);
     }
-    try(BufferedReader br = Files.newBufferedReader(ordersCsv, StandardCharsets.UTF_8)){
+    try (BufferedReader br = Files.newBufferedReader(ordersCsv, StandardCharsets.UTF_8)) {
       String headerLine = br.readLine();
-      if(headerLine == null){
+      if (headerLine == null) {
         throw new IllegalArgumentException("Empty file: " + ordersCsv);
       }
       String[] header = splitCsv(headerLine);
-      int orderStatusIndex = indexOf(header, "order_status");
       int orderPurchaseTimestampIndex = indexOf(header, "order_purchase_timestamp");
-      if (orderStatusIndex < 0 || orderPurchaseTimestampIndex < 0) return ByHour;
+      if (orderPurchaseTimestampIndex < 0) return ByHour;
 
-      for(String line; (line = br.readLine()) != null; ){
+      for (String line; (line = br.readLine()) != null; ) {
         if (line.isEmpty()) continue;
         String[] cells = splitCsv(line);
-        if(cells.length <= Math.max(orderStatusIndex, orderPurchaseTimestampIndex)) continue;
-        String orderStatus = cells[orderStatusIndex];
+        if (cells.length <= orderPurchaseTimestampIndex) continue;
         String orderPurchaseTimestamp = cells[orderPurchaseTimestampIndex];
-        if ("delivered".equals(orderStatus) && !isBlank(orderPurchaseTimestamp)) {
-          String hour = orderPurchaseTimestamp.substring(11,13);
+        if (!isBlank(orderPurchaseTimestamp)) {
+          String hour = orderPurchaseTimestamp.substring(11, 13);
           String hourKey = hour + ":00";
-          ByHour.put(hourKey,ByHour.get(hourKey)+1);
+          ByHour.put(hourKey, ByHour.get(hourKey) + 1);
         }
       }
-    } catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return ByHour;
@@ -240,7 +221,7 @@ public class OlistAnalyzer {
   }
 
   public Map<String, List<String>> recommendedProducts() {
-    Map<String, List<ProductAgg>> byCategory = new HashMap<>();
+    Map<String, List<ProductInformation>> byCategory = new HashMap<>();
 
     for (Map.Entry<String, Long> e : productSalesCount.entrySet()) {
       String productId = e.getKey();
@@ -266,7 +247,7 @@ public class OlistAnalyzer {
 
       double avgRating = reviewCnt == 0 ? 0.0 : (reviewSum / reviewCnt);
 
-      ProductAgg agg = new ProductAgg(productId, sales, reviewCnt, avgRating);
+      ProductInformation agg = new ProductInformation(productId, sales, reviewCnt, avgRating);
       byCategory.computeIfAbsent(catEn, k -> new ArrayList<>()).add(agg);
     }
 
@@ -281,7 +262,7 @@ public class OlistAnalyzer {
 
     Map<String, List<String>> result = new LinkedHashMap<>();
     for (String cat : categoriesInData) {
-      List<ProductAgg> list = byCategory.getOrDefault(cat, Collections.<ProductAgg>emptyList());
+      List<ProductInformation> list = byCategory.getOrDefault(cat, Collections.<ProductInformation>emptyList());
       if (list.isEmpty()) {
         result.put(cat, Collections.<String>emptyList());
         continue;
@@ -291,7 +272,7 @@ public class OlistAnalyzer {
       double minReviews = Double.POSITIVE_INFINITY, maxReviews = Double.NEGATIVE_INFINITY;
       double minRating = Double.POSITIVE_INFINITY, maxRating = Double.NEGATIVE_INFINITY;
 
-      for (ProductAgg a : list) {
+      for (ProductInformation a : list) {
         minSales = Math.min(minSales, a.sales);
         maxSales = Math.max(maxSales, a.sales);
         minReviews = Math.min(minReviews, a.reviewCount);
@@ -300,7 +281,7 @@ public class OlistAnalyzer {
         maxRating = Math.max(maxRating, a.avgRating);
       }
 
-      for (ProductAgg a : list) {
+      for (ProductInformation a : list) {
         double salesScore = normalize(a.sales, minSales, maxSales);
         double reviewCountScore = normalize(a.reviewCount, minReviews, maxReviews);
         double avgRatingScore = normalize(a.avgRating, minRating, maxRating);
@@ -400,7 +381,6 @@ public class OlistAnalyzer {
     if (s.isEmpty()) return null;
     try {
       BigDecimal bd = new BigDecimal(s);
-      // 单价本身已有两位小数，这里稳妥起见仍做 HALF_UP 到分
       return bd.movePointRight(2).setScale(0, RoundingMode.HALF_UP).longValueExact();
     } catch (Exception e) {
       return null;
@@ -459,7 +439,6 @@ public class OlistAnalyzer {
         productOrders.computeIfAbsent(productId, k -> new HashSet<String>()).add(orderId);
         productFirstPriceCents.putIfAbsent(productId, cents);
 
-        // 为“第三问”累加单价，用于后续 total/ count 求平均价
         productTotalPriceCents.merge(productId, cents, Long::sum);
       }
     } catch (Exception e){
@@ -500,7 +479,6 @@ public class OlistAnalyzer {
           LocalDateTime estimate = LocalDateTime.parse(estimateArrival, dtf);
           orderIdOnTime.put(orderId, !actual.isAfter(estimate));
         } catch (Exception e){
-          // 解析失败则不记录该订单
         }
       }
     } catch (Exception e){
@@ -583,14 +561,14 @@ public class OlistAnalyzer {
     return s == null || s.trim().isEmpty();
   }
 
-  private static final class ProductAgg {
+  private static final class ProductInformation {
     final String productId;
     final double sales;
     final double reviewCount;
     final double avgRating;
     double score;
 
-    ProductAgg(String productId, long sales, int reviewCount, double avgRating) {
+    ProductInformation(String productId, long sales, int reviewCount, double avgRating) {
       this.productId = productId;
       this.sales = sales;
       this.reviewCount = reviewCount;
