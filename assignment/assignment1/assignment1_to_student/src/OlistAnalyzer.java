@@ -12,14 +12,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class OlistAnalyzer {
   private final Path baseDir;
@@ -59,20 +63,16 @@ public class OlistAnalyzer {
       int productIdIndex = indexOf(header, "product_id");
       if (productIdIndex < 0) return Collections.emptyMap();
 
-      for (String line; (line = br.readLine()) != null; ) {
-        if (line.isEmpty()) continue;
-        String[] cells = splitCsv(line);
-        if (cells.length <= productIdIndex) continue;
-        String productId = cells[productIdIndex];
-        String categoryName = productIdToCategoryName.get(productId);
-
-        if (isBlank(categoryName)) continue;
-
-        String categoryNameEn = categoryNameToEn.get(categoryName);
-        if (isBlank(categoryNameEn)) continue;
-
-        categoryCount.merge(categoryNameEn, 1L, Long::sum);
-      }
+      categoryCount = br.lines()
+              .filter(line -> !line.isEmpty())
+              .map(this::splitCsv)
+              .filter(cells -> cells.length > productIdIndex)
+              .map(cells -> cells[productIdIndex])
+              .map(productIdToCategoryName::get)
+              .filter(catPt -> !isBlank(catPt))
+              .map(categoryNameToEn::get)
+              .filter(catEn -> !isBlank(catEn))
+              .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
       LinkedHashMap<String, Integer> out = new LinkedHashMap<>();
       categoryCount.entrySet().stream()
@@ -95,9 +95,9 @@ public class OlistAnalyzer {
   public Map<String, Long> getPurchasePatternByHour() {
     Path ordersCsv = baseDir.resolve("olist_orders_dataset.csv");
 
-    LinkedHashMap<String, Long> ByHour = new LinkedHashMap<>();
+    LinkedHashMap<String, Long> byHour = new LinkedHashMap<>();
     for (int i = 0; i < 24; i++) {
-      ByHour.put(String.format("%02d:00", i), 0L);
+      byHour.put(String.format("%02d:00", i), 0L);
     }
     if (!Files.exists(ordersCsv)) {
       throw new IllegalArgumentException("File not found: " + ordersCsv);
@@ -109,195 +109,190 @@ public class OlistAnalyzer {
       }
       String[] header = splitCsv(headerLine);
       int orderPurchaseTimestampIndex = indexOf(header, "order_purchase_timestamp");
-      if (orderPurchaseTimestampIndex < 0) return ByHour;
+      if (orderPurchaseTimestampIndex < 0) return byHour;
 
-      for (String line; (line = br.readLine()) != null; ) {
-        if (line.isEmpty()) continue;
-        String[] cells = splitCsv(line);
-        if (cells.length <= orderPurchaseTimestampIndex) continue;
-        String orderPurchaseTimestamp = cells[orderPurchaseTimestampIndex];
-        if (!isBlank(orderPurchaseTimestamp)) {
-          String hour = orderPurchaseTimestamp.substring(11, 13);
-          String hourKey = hour + ":00";
-          ByHour.put(hourKey, ByHour.get(hourKey) + 1);
-        }
-      }
+      Map<String, Long> counts = br.lines()
+              .filter(line -> !line.isEmpty())
+              .map(this::splitCsv)
+              .filter(cells -> cells.length > orderPurchaseTimestampIndex)
+              .map(cells -> cells[orderPurchaseTimestampIndex])
+              .filter(ts -> !isBlank(ts) && ts.length() >= 13)
+              .map(ts -> ts.substring(11, 13) + ":00")
+              .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+      counts.forEach((k, v) -> byHour.put(k, byHour.getOrDefault(k, 0L) + v));
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return ByHour;
+    return byHour;
   }
 
   public Map<String, Map<String, Long>> getPriceRangeDistribution() {
+    Map<String, Map<String, Long>> tmp = productTotalPriceCents.entrySet().stream()
+            .map(e -> {
+              String productId = e.getKey();
+              long totalCents = e.getValue();
+              Long count = productSalesCount.get(productId);
+              if (count == null || count <= 0) return null;
+
+              long avgCents = Math.round(totalCents / (double) count);
+
+              String catPt = productIdToCategoryName.get(productId);
+              if (isBlank(catPt)) return null;
+              String catEn = categoryNameToEn.get(catPt);
+              if (isBlank(catEn)) return null;
+
+              String bucket = toPriceBucketByCents(avgCents);
+              if (bucket == null) return null;
+
+              return new AbstractMap.SimpleEntry<>(catEn, bucket);
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.groupingBy(
+                    Map.Entry::getKey,
+                    Collectors.groupingBy(Map.Entry::getValue, Collectors.counting())
+            ));
+
     Map<String, Map<String, Long>> result = new TreeMap<>();
-    for (Map.Entry<String, Long> e : productTotalPriceCents.entrySet()) {
-      String productId = e.getKey();
-      long totalCents = e.getValue();
-
-      Long count = productSalesCount.get(productId);
-      if (count == null || count <= 0) continue;
-
-      long avgCents = Math.round(totalCents / (double) count);
-
-      String catPt = productIdToCategoryName.get(productId);
-      if (isBlank(catPt)) continue;
-      String catEn = categoryNameToEn.get(catPt);
-      if (isBlank(catEn)) continue;
-
-      String bucket = toPriceBucketByCents(avgCents);
-      if (bucket == null) continue;
-
-      Map<String, Long> inner = result.computeIfAbsent(catEn, k -> {
-        LinkedHashMap<String, Long> m = new LinkedHashMap<>();
-        for (String b : fixedBuckets()) m.put(b, 0L);
-        return m;
-      });
-      inner.put(bucket, inner.get(bucket) + 1);
-    }
+    List<String> buckets = fixedBuckets();
+    tmp.forEach((cat, bucketCounts) -> {
+      LinkedHashMap<String, Long> inner = new LinkedHashMap<>();
+      buckets.forEach(b -> inner.put(b, 0L));
+      bucketCounts.forEach((b, c) -> inner.put(b, inner.getOrDefault(b, 0L) + c));
+      result.put(cat, inner);
+    });
 
     return result;
   }
 
   public Map<String, List<Double>> analyzeSellerPerformance(){
-    List<Map.Entry<String, List<Double>>> rows = new ArrayList<>();
-    for (Map.Entry<String, Set<String>> entry : sellerOrders.entrySet()) {
-      String sellerId = entry.getKey();
-      Set<String> orders = entry.getValue();
+    List<Map.Entry<String, List<Double>>> rows = sellerOrders.entrySet().stream()
+            .filter(e -> e.getValue() != null && e.getValue().size() >= 50)
+            .map(entry -> {
+              String sellerId = entry.getKey();
+              Set<String> orders = entry.getValue();
 
-      int orderCount = orders.size();
-      if (orderCount < 50) continue;
+              int orderCount = orders.size();
 
-      long totalSalesCents = sellerTotalSalesCents.getOrDefault(sellerId, 0L);
-      double totalSales = round2(totalSalesCents / 100.0);
-      double avgOrderValue = round2(orderCount == 0 ? 0.0 : (totalSalesCents / 100.0) / orderCount);
-      double uniqueProducts = (double) sellerProducts.getOrDefault(sellerId, Collections.<String>emptySet()).size();
+              long totalSalesCents = sellerTotalSalesCents.getOrDefault(sellerId, 0L);
+              double totalSales = round2(totalSalesCents / 100.0);
+              double avgOrderValue = round2(orderCount == 0 ? 0.0 : (totalSalesCents / 100.0) / orderCount);
+              double uniqueProducts = (double) sellerProducts.getOrDefault(sellerId, Collections.emptySet()).size();
 
-      double sellerReviewSum = 0.0;
-      int sellerReviewCount = 0;
-      for (String oid : orders) {
-        Double sum = orderIdToReviewSum.get(oid);
-        Integer cnt = orderIdToReviewCount.get(oid);
-        if (sum != null && cnt != null && cnt > 0) {
-          sellerReviewSum += sum;
-          sellerReviewCount += cnt;
-        }
-      }
-      double avgReview = round2(sellerReviewCount == 0 ? 0.0 : (sellerReviewSum / sellerReviewCount));
+              double[] sumCnt = orders.stream()
+                      .map(oid -> {
+                        Double s = orderIdToReviewSum.get(oid);
+                        Integer c = orderIdToReviewCount.get(oid);
+                        if (s != null && c != null && c > 0) {
+                          return new double[]{s, c.doubleValue()};
+                        }
+                        return new double[]{0.0, 0.0};
+                      })
+                      .reduce(new double[]{0.0, 0.0}, (a, b) -> new double[]{a[0] + b[0], a[1] + b[1]});
+              double sellerReviewSum = sumCnt[0];
+              double sellerReviewCount = sumCnt[1];
+              double avgReview = round2(sellerReviewCount == 0 ? 0.0 : (sellerReviewSum / sellerReviewCount));
 
-      int denom = 0;
-      int ontime = 0;
-      for (String oid : orders) {
-        Boolean on = orderIdOnTime.get(oid);
-        if (on != null) {
-          denom++;
-          if (on) ontime++;
-        }
-      }
-      double onTimeRate = round2(denom == 0 ? 0.0 : (double) ontime / denom);
+              long denom = orders.stream().map(orderIdOnTime::get).filter(Objects::nonNull).count();
+              long ontime = orders.stream().map(orderIdOnTime::get).filter(Boolean.TRUE::equals).count();
+              double onTimeRate = round2(denom == 0 ? 0.0 : (double) ontime / denom);
 
-      List<Double> metrics = new ArrayList<>(5);
-      metrics.add(totalSales);
-      metrics.add(avgOrderValue);
-      metrics.add(uniqueProducts);
-      metrics.add(avgReview);
-      metrics.add(onTimeRate);
+              List<Double> metrics = new ArrayList<>(5);
+              metrics.add(totalSales);
+              metrics.add(avgOrderValue);
+              metrics.add(uniqueProducts);
+              metrics.add(avgReview);
+              metrics.add(onTimeRate);
 
-      rows.add(new AbstractMap.SimpleEntry<>(sellerId, metrics));
-    }
-
-    rows.sort((e1, e2) -> {
-      double t1 = e1.getValue().get(0);
-      double t2 = e2.getValue().get(0);
-      int cmp = Double.compare(t2, t1);
-      if (cmp != 0) return cmp;
-      return e1.getKey().compareTo(e2.getKey());
-    });
+              return new AbstractMap.SimpleEntry<>(sellerId, metrics);
+            })
+            .sorted((e1, e2) -> {
+              double t1 = e1.getValue().get(0);
+              double t2 = e2.getValue().get(0);
+              int cmp = Double.compare(t2, t1);
+              if (cmp != 0) return cmp;
+              return e1.getKey().compareTo(e2.getKey());
+            })
+            .collect(Collectors.toList());
 
     LinkedHashMap<String, List<Double>> out = new LinkedHashMap<>();
-    for (Map.Entry<String, List<Double>> e : rows) {
-      out.put(e.getKey(), e.getValue());
-    }
+    rows.forEach(e -> out.put(e.getKey(), e.getValue()));
     return out;
   }
 
   public Map<String, List<String>> recommendedProducts() {
-    Map<String, List<ProductInformation>> byCategory = new HashMap<>();
+    Map<String, List<ProductInformation>> byCategory = productSalesCount.entrySet().stream()
+            .map(e -> {
+              String productId = e.getKey();
+              long sales = e.getValue() == null ? 0L : e.getValue();
 
-    for (Map.Entry<String, Long> e : productSalesCount.entrySet()) {
-      String productId = e.getKey();
-      long sales = e.getValue() == null ? 0L : e.getValue();
+              String catPt = productIdToCategoryName.get(productId);
+              if (isBlank(catPt)) return null;
+              String catEn = categoryNameToEn.get(catPt);
+              if (isBlank(catEn)) return null;
 
-      String catPt = productIdToCategoryName.get(productId);
-      if (isBlank(catPt)) continue;
-      String catEn = categoryNameToEn.get(catPt);
-      if (isBlank(catEn)) continue;
+              Set<String> orders = productOrders.getOrDefault(productId, Collections.emptySet());
+              double[] sumCnt = orders.stream()
+                      .map(oid -> {
+                        Double s = orderIdToReviewSum.get(oid);
+                        Integer c = orderIdToReviewCount.get(oid);
+                        if (s != null && c != null && c > 0) {
+                          return new double[]{s, c.doubleValue()};
+                        }
+                        return new double[]{0.0, 0.0};
+                      })
+                      .reduce(new double[]{0.0, 0.0}, (a, b) -> new double[]{a[0] + b[0], a[1] + b[1]});
 
-      Set<String> orders = productOrders.getOrDefault(productId, Collections.<String>emptySet());
-      double reviewSum = 0.0;
-      int reviewCnt = 0;
-      for (String oid : orders) {
-        Double s = orderIdToReviewSum.get(oid);
-        Integer c = orderIdToReviewCount.get(oid);
-        if (s != null && c != null && c > 0) {
-          reviewSum += s;
-          reviewCnt += c;
-        }
-      }
-      if (sales < 10 || reviewCnt < 5) continue;
+              int reviewCnt = (int) Math.round(sumCnt[1]);
+              if (sales < 10 || reviewCnt < 5) return null;
 
-      double avgRating = reviewCnt == 0 ? 0.0 : (reviewSum / reviewCnt);
+              double avgRating = reviewCnt == 0 ? 0.0 : (sumCnt[0] / reviewCnt);
+              return new AbstractMap.SimpleEntry<>(catEn, new ProductInformation(productId, sales, reviewCnt, avgRating));
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.groupingBy(Map.Entry::getKey,
+                    Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
 
-      ProductInformation agg = new ProductInformation(productId, sales, reviewCnt, avgRating);
-      byCategory.computeIfAbsent(catEn, k -> new ArrayList<>()).add(agg);
-    }
-
-    Set<String> categoriesInData = new TreeSet<>();
-    for (String pid : productSalesCount.keySet()) {
-      String catPt = productIdToCategoryName.get(pid);
-      if (isBlank(catPt)) continue;
-      String catEn = categoryNameToEn.get(catPt);
-      if (isBlank(catEn)) continue;
-      categoriesInData.add(catEn);
-    }
+    Set<String> categoriesInData = productSalesCount.keySet().stream()
+            .map(productIdToCategoryName::get)
+            .filter(catPt -> !isBlank(catPt))
+            .map(categoryNameToEn::get)
+            .filter(catEn -> !isBlank(catEn))
+            .collect(Collectors.toCollection(TreeSet::new));
 
     Map<String, List<String>> result = new LinkedHashMap<>();
     for (String cat : categoriesInData) {
-      List<ProductInformation> list = byCategory.getOrDefault(cat, Collections.<ProductInformation>emptyList());
+      List<ProductInformation> list = byCategory.getOrDefault(cat, Collections.emptyList());
       if (list.isEmpty()) {
-        result.put(cat, Collections.<String>emptyList());
+        result.put(cat, Collections.emptyList());
         continue;
       }
 
-      double minSales = Double.POSITIVE_INFINITY, maxSales = Double.NEGATIVE_INFINITY;
-      double minReviews = Double.POSITIVE_INFINITY, maxReviews = Double.NEGATIVE_INFINITY;
-      double minRating = Double.POSITIVE_INFINITY, maxRating = Double.NEGATIVE_INFINITY;
+      DoubleSummaryStatistics salesStats = list.stream().mapToDouble(a -> a.sales).summaryStatistics();
+      DoubleSummaryStatistics reviewStats = list.stream().mapToDouble(a -> a.reviewCount).summaryStatistics();
+      DoubleSummaryStatistics ratingStats = list.stream().mapToDouble(a -> a.avgRating).summaryStatistics();
 
-      for (ProductInformation a : list) {
-        minSales = Math.min(minSales, a.sales);
-        maxSales = Math.max(maxSales, a.sales);
-        minReviews = Math.min(minReviews, a.reviewCount);
-        maxReviews = Math.max(maxReviews, a.reviewCount);
-        minRating = Math.min(minRating, a.avgRating);
-        maxRating = Math.max(maxRating, a.avgRating);
-      }
+      double minSales = salesStats.getMin(), maxSales = salesStats.getMax();
+      double minReviews = reviewStats.getMin(), maxReviews = reviewStats.getMax();
+      double minRating = ratingStats.getMin(), maxRating = ratingStats.getMax();
 
-      for (ProductInformation a : list) {
+      list.forEach(a -> {
         double salesScore = normalize(a.sales, minSales, maxSales);
         double reviewCountScore = normalize(a.reviewCount, minReviews, maxReviews);
         double avgRatingScore = normalize(a.avgRating, minRating, maxRating);
         a.score = 0.5 * salesScore + 0.3 * reviewCountScore + 0.2 * avgRatingScore;
-      }
-
-      list.sort((a, b) -> {
-        int cmp = Double.compare(b.score, a.score);
-        if (cmp != 0) return cmp;
-        return a.productId.compareTo(b.productId);
       });
 
-      List<String> top = new ArrayList<>();
-      for (int i = 0; i < Math.min(10, list.size()); i++) {
-        top.add(list.get(i).productId);
-      }
+      List<String> top = list.stream()
+              .sorted((a, b) -> {
+                int cmp = Double.compare(b.score, a.score);
+                if (cmp != 0) return cmp;
+                return a.productId.compareTo(b.productId);
+              })
+              .limit(10)
+              .map(a -> a.productId)
+              .collect(Collectors.toList());
+
       result.put(cat, top);
     }
 
@@ -318,16 +313,17 @@ public class OlistAnalyzer {
       int categoryNameIndex = indexOf(header, "product_category_name");
       if (productIdIndex < 0 || categoryNameIndex < 0) return;
 
-      for(String line; (line = br.readLine()) != null; ){
-        if (line.isEmpty()) continue;
-        String[] cells = splitCsv(line);
-        if(cells.length <= Math.max(productIdIndex, categoryNameIndex)) continue;
-        String productId = cells[productIdIndex];
-        String categoryName = cells[categoryNameIndex];
-        if (!isBlank(productId) && !isBlank(categoryName)) {
-          productIdToCategoryName.put(productId, categoryName);
-        }
-      }
+      br.lines()
+              .filter(line -> !line.isEmpty())
+              .map(this::splitCsv)
+              .filter(cells -> cells.length > Math.max(productIdIndex, categoryNameIndex))
+              .forEach(cells -> {
+                String productId = cells[productIdIndex];
+                String categoryName = cells[categoryNameIndex];
+                if (!isBlank(productId) && !isBlank(categoryName)) {
+                  productIdToCategoryName.put(productId, categoryName);
+                }
+              });
     } catch (Exception e){
       e.printStackTrace();
     }
@@ -347,16 +343,17 @@ public class OlistAnalyzer {
       int categoryNameEnIndex = indexOf(header, "product_category_name_english");
       if (categoryNameIndex < 0 || categoryNameEnIndex < 0) return;
 
-      for(String line; (line = br.readLine()) != null; ){
-        if (line.isEmpty()) continue;
-        String[] cells = splitCsv(line);
-        if(cells.length <= Math.max(categoryNameIndex, categoryNameEnIndex)) continue;
-        String categoryName = cells[categoryNameIndex];
-        String categoryNameEn = cells[categoryNameEnIndex];
-        if (!isBlank(categoryName) && !isBlank(categoryNameEn)) {
-          categoryNameToEn.put(categoryName, categoryNameEn);
-        }
-      }
+      br.lines()
+              .filter(line -> !line.isEmpty())
+              .map(this::splitCsv)
+              .filter(cells -> cells.length > Math.max(categoryNameIndex, categoryNameEnIndex))
+              .forEach(cells -> {
+                String categoryName = cells[categoryNameIndex];
+                String categoryNameEn = cells[categoryNameEnIndex];
+                if (!isBlank(categoryName) && !isBlank(categoryNameEn)) {
+                  categoryNameToEn.put(categoryName, categoryNameEn);
+                }
+              });
     } catch (Exception e){
       e.printStackTrace();
     }
@@ -413,34 +410,33 @@ public class OlistAnalyzer {
 
       if (sellerIdIndex < 0 || orderIdIndex < 0 || productIdIndex < 0 || priceIndex < 0 ) return;
 
-      for(String line; (line = br.readLine()) != null; ){
-        if (line.isEmpty()) continue;
-        String[] cells = splitCsv(line);
-        int maxIdx = Math.max(Math.max(sellerIdIndex, orderIdIndex), Math.max(productIdIndex, priceIndex));
-        if(cells.length <= maxIdx) continue;
+      br.lines()
+              .filter(line -> !line.isEmpty())
+              .map(this::splitCsv)
+              .filter(cells -> cells.length > Math.max(Math.max(sellerIdIndex, orderIdIndex), Math.max(productIdIndex, priceIndex)))
+              .forEach(cells -> {
+                String sellerId = cells[sellerIdIndex];
+                String orderId = cells[orderIdIndex];
+                String productId = cells[productIdIndex];
+                String priceRaw = cells[priceIndex];
 
-        String sellerId = cells[sellerIdIndex];
-        String orderId = cells[orderIdIndex];
-        String productId = cells[productIdIndex];
-        String priceRaw = cells[priceIndex];
+                if (isBlank(orderId) || isBlank(sellerId) || isBlank(productId) || isBlank(priceRaw)) {
+                  return;
+                }
 
-        if (isBlank(orderId) || isBlank(sellerId) || isBlank(productId) || isBlank(priceRaw)) {
-          continue;
-        }
+                Long cents = parseCents(priceRaw);
+                if (cents == null) return;
 
-        Long cents = parseCents(priceRaw);
-        if (cents == null) continue;
+                sellerTotalSalesCents.merge(sellerId, cents, Long::sum);
+                sellerOrders.computeIfAbsent(sellerId, k -> new HashSet<>()).add(orderId);
+                sellerProducts.computeIfAbsent(sellerId, k -> new HashSet<>()).add(productId);
 
-        sellerTotalSalesCents.merge(sellerId, cents, Long::sum);
-        sellerOrders.computeIfAbsent(sellerId, k -> new HashSet<String>()).add(orderId);
-        sellerProducts.computeIfAbsent(sellerId, k -> new HashSet<String>()).add(productId);
+                productSalesCount.merge(productId, 1L, Long::sum);
+                productOrders.computeIfAbsent(productId, k -> new HashSet<>()).add(orderId);
+                productFirstPriceCents.putIfAbsent(productId, cents);
 
-        productSalesCount.merge(productId, 1L, Long::sum);
-        productOrders.computeIfAbsent(productId, k -> new HashSet<String>()).add(orderId);
-        productFirstPriceCents.putIfAbsent(productId, cents);
-
-        productTotalPriceCents.merge(productId, cents, Long::sum);
-      }
+                productTotalPriceCents.merge(productId, cents, Long::sum);
+              });
     } catch (Exception e){
       e.printStackTrace();
     }
@@ -463,24 +459,25 @@ public class OlistAnalyzer {
 
       DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-      for(String line; (line = br.readLine()) != null; ){
-        if (line.isEmpty()) continue;
-        String[] cells = splitCsv(line);
-        if(cells.length <= Math.max(orderIdIndex, Math.max(actualArrivalIndex, estimateArrivalIndex))) continue;
-        String orderId = cells[orderIdIndex];
-        String actualArrival = cells[actualArrivalIndex];
-        String estimateArrival = cells[estimateArrivalIndex];
+      br.lines()
+              .filter(line -> !line.isEmpty())
+              .map(this::splitCsv)
+              .filter(cells -> cells.length > Math.max(orderIdIndex, Math.max(actualArrivalIndex, estimateArrivalIndex)))
+              .forEach(cells -> {
+                String orderId = cells[orderIdIndex];
+                String actualArrival = cells[actualArrivalIndex];
+                String estimateArrival = cells[estimateArrivalIndex];
 
-        if (isBlank(orderId) || isBlank(actualArrival) || isBlank(estimateArrival)) {
-          continue;
-        }
-        try{
-          LocalDateTime actual = LocalDateTime.parse(actualArrival, dtf);
-          LocalDateTime estimate = LocalDateTime.parse(estimateArrival, dtf);
-          orderIdOnTime.put(orderId, !actual.isAfter(estimate));
-        } catch (Exception e){
-        }
-      }
+                if (isBlank(orderId) || isBlank(actualArrival) || isBlank(estimateArrival)) {
+                  return;
+                }
+                try{
+                  LocalDateTime actual = LocalDateTime.parse(actualArrival, dtf);
+                  LocalDateTime estimate = LocalDateTime.parse(estimateArrival, dtf);
+                  orderIdOnTime.put(orderId, !actual.isAfter(estimate));
+                } catch (Exception ignored){
+                }
+              });
     } catch (Exception e){
       e.printStackTrace();
     }
@@ -500,21 +497,22 @@ public class OlistAnalyzer {
       int reviewScoreIndex = indexOf(header, "review_score");
       if (orderIdIndex < 0 || reviewScoreIndex < 0) return;
 
-      for(String line; (line = br.readLine()) != null; ){
-        if (line.isEmpty()) continue;
-        String[] cells = splitCsv(line);
-        if(cells.length <= Math.max(orderIdIndex, reviewScoreIndex)) continue;
-        String orderId = cells[orderIdIndex];
-        String reviewScore = cells[reviewScoreIndex];
-        if (isBlank(orderId) || isBlank(reviewScore)) {
-          continue;
-        }
-        Double score = parsePriceStrict(reviewScore);
-        if (score == null) continue;
+      br.lines()
+              .filter(line -> !line.isEmpty())
+              .map(this::splitCsv)
+              .filter(cells -> cells.length > Math.max(orderIdIndex, reviewScoreIndex))
+              .forEach(cells -> {
+                String orderId = cells[orderIdIndex];
+                String reviewScore = cells[reviewScoreIndex];
+                if (isBlank(orderId) || isBlank(reviewScore)) {
+                  return;
+                }
+                Double score = parsePriceStrict(reviewScore);
+                if (score == null) return;
 
-        orderIdToReviewSum.merge(orderId, score, Double::sum);
-        orderIdToReviewCount.merge(orderId, 1, Integer::sum);
-      }
+                orderIdToReviewSum.merge(orderId, score, Double::sum);
+                orderIdToReviewCount.merge(orderId, 1, Integer::sum);
+              });
     } catch (Exception e){
       e.printStackTrace();
     }
