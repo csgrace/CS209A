@@ -67,7 +67,8 @@ public class ChatClientController {
         try {
             String msg;
             while ((msg = in.readLine()) != null) {
-                Platform.runLater(() -> appendMessage(msg));
+                String finalMsg = msg;
+                Platform.runLater(() -> appendMessage(finalMsg));
             }
         } catch (IOException e) {
             Platform.runLater(() -> appendMessage("Disconnected from server"));
