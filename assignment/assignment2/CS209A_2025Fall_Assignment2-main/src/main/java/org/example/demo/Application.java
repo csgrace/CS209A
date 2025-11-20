@@ -11,15 +11,28 @@ public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // 不再使用FXML，直接创建Controller
+        // 🔥 修复1：先显示登录窗口，等待用户输入
+        LoginWindow loginWindow = new LoginWindow(stage);
+
+        if (!loginWindow.isConfirmed()) {
+            // 用户取消登录，直接退出
+            System.exit(0);
+            return;
+        }
+
+        String playerName = loginWindow.getUsername();
+        System.out.println("User logged in as: " + playerName);
+
+        // 🔥 修复2：只有在用户登录成功后，才创建Controller和Game
         Controller controller = new Controller();
-        controller.init(new Game());
+        Game game = new Game();
+        controller.init(game, playerName); // 🔥 修改：传入playerName给controller
 
         // 创建UI并获取根节点
         Scene scene = new Scene(controller.createUI(), 700, 600);
 
-        // TODO: 在此处建立与服务器的真实连接，并把共享的 Game 状态换成网络同步模型。
-        controller.connectAndLogin("alice"); // 新增方法（见 Controller.java）
+        // 使用登录窗口返回的用户名建立连接
+        controller.connectAndLogin(playerName);
 
         stage.setTitle("QQ Farm Demo");
         stage.setScene(scene);

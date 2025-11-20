@@ -32,7 +32,10 @@ public class Controller {
     private Button visitButton;
     private Button backButton;
 
-    private Game game;
+    // 🔥 新增：维护两个Game对象
+    private Game myFarmGame;      // 自己的农场数据
+    private Game viewingFarmGame; // 正在查看的农场数据
+
     private ToggleButton[][] cells;
     private Timeline refreshTimeline;
     private String statusMessage = "Ready.";
@@ -40,24 +43,24 @@ public class Controller {
     private int selectedRow = -1;
     private int selectedCol = -1;
 
+    private String myPlayerName;
+    private String viewingPlayerName;
+
     // 任务4：网络 - 2.2 Networking & Updates
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private Thread listenThread;
-    // 在字段声明处直接初始化，避免null问题
-    private String myPlayerName = "alice"; // 默认值
-    private String viewingPlayerName = "alice"; // 默认值，避免null
 
-    public void init(Game game) {
-        this.game = game;
-        // 确保viewingPlayerName有初始值
-        if (this.viewingPlayerName == null) {
-            this.viewingPlayerName = "alice";
-        }
-        if (this.myPlayerName == null) {
-            this.myPlayerName = "alice";
-        }
+    // 🔥 修改：init方法改为接收playerName参数
+    public void init(Game game, String playerName) {
+        this.myFarmGame = game;           // 自己的农场
+        this.viewingFarmGame = game;      // 初始时查看自己的农场（引用同一个对象）
+        this.myPlayerName = playerName;
+        this.viewingPlayerName = playerName;
+
+        System.out.println("Controller initialized for player: " + playerName);
+
         // createBoard will be called after UI creation
         startRefreshTicker(); // 2.2 Responsiveness - keep UI interactive
     }
@@ -76,17 +79,18 @@ public class Controller {
         VBox headerBox = new VBox(5);
         headerBox.setAlignment(Pos.CENTER);
 
-        coinsLabel = new Label("Player: alice | Coins: 40 | Ready");
+        // 🔥 修改：初始化时显示自己的农场信息
+        coinsLabel = new Label("Player: " + myPlayerName + " | Your Farm | Coins: 40");
         coinsLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2E8B57;");
 
-        statusLabel = new Label("🌱 Welcome to QQ Farm! Select a plot and choose an action.");
+        statusLabel = new Label("Welcome to QQ Farm! Select a plot and choose an action.");
         statusLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4169E1;");
         statusLabel.setWrapText(true);
         statusLabel.setMaxWidth(600);
 
         headerBox.getChildren().addAll(coinsLabel, statusLabel);
 
-        // 🔥 1. 先创建所有按钮，避免null问题
+        // 创建所有按钮，避免null问题
         createAllButtons();
 
         // 2.2 Action Controls - Visit Friends functionality
@@ -95,7 +99,7 @@ public class Controller {
         friendBox.setPadding(new Insets(10));
         friendBox.setStyle("-fx-border-color: #DDA0DD; -fx-border-width: 2px; -fx-border-radius: 5px; -fx-background-color: #F8F8FF;");
 
-        Label friendLabel = new Label("👥 Visit Friends:");
+        Label friendLabel = new Label("Visit Friends:");
         friendLabel.setStyle("-fx-font-weight: bold;");
 
         friendField = new TextField();
@@ -106,7 +110,7 @@ public class Controller {
         friendBox.getChildren().addAll(friendLabel, friendField, visitButton, backButton);
 
         // 2.2 Core GUI Layout - 4x4 grid display with clear visuals
-        Label gridLabel = new Label("🚜 Your Farm (4x4 Grid)");
+        Label gridLabel = new Label("Farm (4x4 Grid)");
         gridLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #8B4513;");
 
         gameBoard = new GridPane();
@@ -115,7 +119,7 @@ public class Controller {
         gameBoard.setAlignment(Pos.CENTER);
         gameBoard.setStyle("-fx-border-color: #8B4513; -fx-border-width: 3px; -fx-background-color: #F5DEB3; -fx-padding: 10px;");
 
-        // 🔥 2. 现在安全调用 createBoard，因为按钮已经创建了
+        // 现在安全调用 createBoard，因为按钮已经创建了
         createBoard(); // Initialize the 4x4 grid
 
         // 2.2 Action Controls - Plant, Harvest, Visit Friends, Steal with enable/disable
@@ -127,7 +131,7 @@ public class Controller {
         actionBox.getChildren().addAll(plantButton, harvestButton, stealButton);
 
         // Instructions
-        Label instructions = new Label("💡 Click a plot to select it, then choose an action. Visit friends to see their farms!");
+        Label instructions = new Label("Click a plot to select it, then choose an action. Visit friends to see their farms!");
         instructions.setStyle("-fx-font-size: 12px; -fx-text-fill: #696969; -fx-font-style: italic;");
         instructions.setWrapText(true);
         instructions.setMaxWidth(600);
@@ -139,29 +143,29 @@ public class Controller {
         return root;
     }
 
-    // 🔥 新增方法：统一创建所有按钮
+    // 创建所有按钮
     private void createAllButtons() {
         // Visit buttons
-        visitButton = new Button("🚀 Visit");
+        visitButton = new Button("Visit");
         visitButton.setOnAction(e -> handleVisit());
         visitButton.setStyle("-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5px;");
 
-        backButton = new Button("🏠 Back Home");
+        backButton = new Button("Back Home");
         backButton.setOnAction(e -> handleBack());
         backButton.setStyle("-fx-background-color: #98FB98; -fx-text-fill: #2F4F4F; -fx-font-weight: bold; -fx-border-radius: 5px;");
 
         // Action buttons
-        plantButton = new Button("🌱 Plant (Cost: 5 coins)");
+        plantButton = new Button("Plant (Cost: 5 coins)");
         plantButton.setOnAction(e -> handlePlant());
         plantButton.setStyle("-fx-background-color: #90EE90; -fx-text-fill: #006400; -fx-font-weight: bold; -fx-padding: 10px; -fx-border-radius: 5px;");
         plantButton.setTooltip(new Tooltip("Plant a crop - costs 5 coins, grows automatically"));
 
-        harvestButton = new Button("🌾 Harvest (+12 coins)");
+        harvestButton = new Button("Harvest (+12 coins)");
         harvestButton.setOnAction(e -> handleHarvest());
         harvestButton.setStyle("-fx-background-color: #FFD700; -fx-text-fill: #B8860B; -fx-font-weight: bold; -fx-padding: 10px; -fx-border-radius: 5px;");
         harvestButton.setTooltip(new Tooltip("Harvest ripe crops - gain 12 coins per crop"));
 
-        stealButton = new Button("🏴‍☠️ Steal (+3 coins)");
+        stealButton = new Button("Steal (+3 coins)");
         stealButton.setOnAction(e -> handleSteal());
         stealButton.setStyle("-fx-background-color: #FF6B6B; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px; -fx-border-radius: 5px;");
         stealButton.setTooltip(new Tooltip("Steal from friend's farm when they're away"));
@@ -170,10 +174,6 @@ public class Controller {
     // 任务4：登录 + 建立网络连接 - 2.2 Networking & Updates
     public void connectAndLogin(String playerName) {
         try {
-            // 🔥 确保在网络连接前就设置好名字
-            this.myPlayerName = playerName;
-            this.viewingPlayerName = playerName;
-
             socket = new Socket("127.0.0.1", 5050);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
@@ -184,9 +184,9 @@ public class Controller {
             listenThread.start();
 
             out.println("LOGIN " + playerName); // 发送登录
-            showStatus("🔄 Connecting to server...");
+            showStatus("Connecting to server...");
         } catch (IOException e) {
-            showStatus("❌ Connect failed: " + e.getMessage());
+            showStatus("Connect failed: " + e.getMessage());
             disableAllActions(); // 2.5 Exception Handling - graceful degradation
         }
     }
@@ -197,7 +197,7 @@ public class Controller {
         try {
             while ((line = in.readLine()) != null) {
                 final String msg = line;
-                System.out.println("🔄 Received from server: " + msg); // 2.4 Concurrency logging
+                System.out.println("Received from server: " + msg);
 
                 if (msg.startsWith("UPDATE ")) {
                     // 格式：UPDATE <player> <json>
@@ -207,59 +207,79 @@ public class Controller {
                         String player = msg.substring(firstSpace + 1, secondSpace);
                         String json = msg.substring(secondSpace + 1);
 
-                        // 🔥 修复：只有正在查看的玩家才更新UI
-                        if (player.equals(viewingPlayerName)) {
+                        // 🔥 修复关键逻辑：区分自己和正在查看的农场
+                        if (player.equals(myPlayerName)) {
+                            // 更新自己的农场数据（后台更新）
                             Platform.runLater(() -> {
-                                updateGameFromSnapshot(json);
+                                updateGameSnapshot(myFarmGame, json);
+                                System.out.println("Updated own farm data in background");
+                                // 只有在查看自己的农场时才刷新UI
+                                if (viewingPlayerName.equals(myPlayerName)) {
+                                    refreshBoardFromGameState();
+                                }
+                                // 始终更新coins显示
+                                updateCoinsDisplay();
+                            });
+                        } else if (player.equals(viewingPlayerName)) {
+                            // 更新正在查看的农场数据，并刷新UI
+                            Platform.runLater(() -> {
+                                updateGameSnapshot(viewingFarmGame, json);
                                 refreshBoardFromGameState();
-                                System.out.println("✅ Updated UI for: " + player);
+                                System.out.println("Updated viewing farm: " + player);
+                                updateCoinsDisplay();
                             });
                         }
 
                         // 2.2 Visual Feedback - show toast/status messages
                         Platform.runLater(() -> {
                             if (player.equals(myPlayerName)) {
-                                showStatus("✅ Your farm updated!");
+                                showStatus("Your farm updated!");
                             } else {
-                                showStatus("📢 Friend " + player + " updated");
+                                showStatus("Friend " + player + " updated");
                             }
                         });
                     }
-                } else if (msg.startsWith("OK ") || msg.startsWith("ERR ")) {
-                    // 2.2 Visual Feedback - show success/failure messages
+                } else if (msg.startsWith("OK ")) {
                     Platform.runLater(() -> {
                         if (msg.startsWith("OK LOGGED_IN")) {
-                            showStatus("✅ Successfully connected to farm server!");
-                        } else if (msg.startsWith("ERR")) {
-                            showStatus("❌ " + msg.substring(4));
-                        } else {
-                            showStatus("ℹ️ " + msg.substring(3));
+                            showStatus("Successfully connected to farm server!");
+                        } else if (msg.startsWith("OK ")) {
+                            if (msg.contains("{")) {
+                                String json = msg.substring(3);
+                                // 判断这个响应是属于自己还是别人的农场
+                                if (viewingPlayerName.equals(myPlayerName)) {
+                                    updateGameSnapshot(myFarmGame, json);
+                                } else {
+                                    updateGameSnapshot(viewingFarmGame, json);
+                                }
+                                refreshBoardFromGameState();
+                                updateCoinsDisplay();
+                            }
                         }
                     });
-
-                    // 🔥 修复：处理包含JSON数据的OK响应
-                    if (msg.startsWith("OK {")) {
-                        String json = msg.substring(3);
-                        Platform.runLater(() -> {
-                            updateGameFromSnapshot(json);
-                            refreshBoardFromGameState();
-                            System.out.println("✅ Direct snapshot updated");
-                        });
-                    }
+                } else if (msg.startsWith("ERR ")) {
+                    Platform.runLater(() -> {
+                        showStatus("Error: " + msg.substring(4));
+                    });
                 }
             }
         } catch (IOException e) {
             Platform.runLater(() -> {
-                showStatus("❌ Disconnected from server"); // 2.5 Exception Handling
+                showStatus("Disconnected from server");
                 disableAllActions();
             });
         }
     }
 
-    // 🔥 新方法：专门用于更新游戏状态（修复JSON解析）
-    private void updateGameFromSnapshot(String json) {
+    // 🔥 新方法：更新指定Game对象的快照
+    private void updateGameSnapshot(Game targetGame, String json) {
+        if (json == null || json.isEmpty()) {
+            System.err.println("Empty JSON snapshot");
+            return;
+        }
+
         try {
-            System.out.println("📊 Parsing JSON: " + json);
+            System.out.println("Parsing JSON: " + json);
 
             // 解析coins
             int coinsIdx = json.indexOf("\"coins\":");
@@ -270,9 +290,13 @@ public class Controller {
 
                 if (comma > colon) {
                     String coinsStr = json.substring(colon, comma).trim();
-                    int newCoins = Integer.parseInt(coinsStr);
-                    game.setCoins(newCoins); // 需要添加这个方法到Game类
-                    System.out.println("💰 Updated coins: " + newCoins);
+                    try {
+                        int newCoins = Integer.parseInt(coinsStr);
+                        targetGame.setCoins(newCoins);
+                        System.out.println("Updated coins: " + newCoins);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid coins value: " + coinsStr);
+                    }
                 }
             }
 
@@ -280,25 +304,23 @@ public class Controller {
             int boardStart = json.indexOf("\"board\":[");
             if (boardStart >= 0) {
                 int arrStart = json.indexOf("[", boardStart + 8);
-                int arrEnd = json.lastIndexOf("]]") + 1;
-
-                if (arrStart > 0 && arrEnd > arrStart) {
+                int arrEnd = json.lastIndexOf("]]");
+                if (arrEnd >= 0) {
+                    arrEnd += 1;
                     String boardContent = json.substring(arrStart, arrEnd + 1);
-                    System.out.println("🎯 Board content: " + boardContent);
-
-                    // 更精确的JSON解析
-                    parseBoardData(boardContent);
+                    System.out.println("Board content: " + boardContent);
+                    parseBoardData(targetGame, boardContent);
                 }
             }
 
         } catch (Exception e) {
-            System.err.println("❌ JSON parsing error: " + e.getMessage());
+            System.err.println("JSON parsing error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // 🔥 新方法：更精确的解析农场数据
-    private void parseBoardData(String boardJson) {
+    // 新方法：更精确的解析农场数据
+    private void parseBoardData(Game targetGame, String boardJson) {
         try {
             // 移除外层方括号
             String content = boardJson.substring(1, boardJson.length() - 1);
@@ -306,7 +328,7 @@ public class Controller {
             // 分割行
             String[] rows = splitRows(content);
 
-            for (int r = 0; r < rows.length && r < game.getRows(); r++) {
+            for (int r = 0; r < rows.length && r < targetGame.getRows(); r++) {
                 String row = rows[r].trim();
                 // 移除行的方括号
                 if (row.startsWith("[")) row = row.substring(1);
@@ -315,26 +337,25 @@ public class Controller {
                 // 分割单元格
                 String[] cells = row.split(",");
 
-                for (int c = 0; c < cells.length && c < game.getCols(); c++) {
+                for (int c = 0; c < cells.length && c < targetGame.getCols(); c++) {
                     String cell = cells[c].trim().replace("\"", "");
                     try {
                         Game.PlotState state = Game.PlotState.valueOf(cell);
-                        game.setState(r, c, state); // 需要添加这个方法到Game类
-                        System.out.println("🎲 Set (" + r + "," + c + ") = " + state);
+                        targetGame.setState(r, c, state);
+                        System.out.println("Set (" + r + "," + c + ") = " + state);
                     } catch (IllegalArgumentException e) {
-                        System.err.println("⚠️ Invalid state: " + cell);
+                        System.err.println("Invalid state: " + cell);
                     }
                 }
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Board parsing error: " + e.getMessage());
+            System.err.println("Board parsing error: " + e.getMessage());
         }
     }
 
     // 辅助方法：分割JSON数组的行
     private String[] splitRows(String content) {
-        // 简单的状态机解析器，处理嵌套的方括号
         java.util.List<String> rows = new java.util.ArrayList<>();
         StringBuilder current = new StringBuilder();
         int depth = 0;
@@ -351,13 +372,11 @@ public class Controller {
                 if (depth == 0) {
                     rows.add(current.toString());
                     current = new StringBuilder();
-                    // 跳过逗号
                     if (i + 1 < content.length() && content.charAt(i + 1) == ',') {
                         i++;
                     }
                 }
             } else if (c == ',' && depth == 0) {
-                // 顶级逗号，分割行
                 if (current.length() > 0) {
                     rows.add(current.toString());
                     current = new StringBuilder();
@@ -374,16 +393,16 @@ public class Controller {
         return rows.toArray(new String[0]);
     }
 
-    // 🔥 新方法：专门刷新界面显示
+    // 新方法：专门刷新界面显示
     private void refreshBoardFromGameState() {
-        if (cells == null || game == null) {
+        if (cells == null || viewingFarmGame == null) {
             return;
         }
 
-        System.out.println("🎨 Refreshing board from game state");
+        System.out.println("Refreshing board from game state");
 
-        for (int row = 0; row < game.getRows(); row++) {
-            for (int col = 0; col < game.getCols(); col++) {
+        for (int row = 0; row < viewingFarmGame.getRows(); row++) {
+            for (int col = 0; col < viewingFarmGame.getCols(); col++) {
                 ToggleButton cell = cells[row][col];
                 if (cell != null) {
                     boolean isSelected = (row == selectedRow && col == selectedCol);
@@ -393,39 +412,39 @@ public class Controller {
             }
         }
 
-        updateCoins(statusMessage);
         updateButtonStates();
     }
 
     // 2.2 Core GUI Layout - Display 4x4 grid of plots with clear visuals for empty/growing/ripe states
     private void createBoard() {
-        if (gameBoard == null) return;
+        if (gameBoard == null || viewingFarmGame == null) {
+            System.err.println("ERROR: gameBoard or viewingFarmGame is null!");
+            return;
+        }
 
         gameBoard.getChildren().clear();
-        cells = new ToggleButton[game.getRows()][game.getCols()];
+        cells = new ToggleButton[viewingFarmGame.getRows()][viewingFarmGame.getCols()];
 
-        for (int row = 0; row < game.getRows(); row++) {
-            for (int col = 0; col < game.getCols(); col++) {
+        for (int row = 0; row < viewingFarmGame.getRows(); row++) {
+            for (int col = 0; col < viewingFarmGame.getCols(); col++) {
                 ToggleButton cell = new ToggleButton();
                 cell.setPrefSize(80, 80);
                 cell.setMinSize(80, 80);
                 cell.setMaxSize(80, 80);
 
-                // 🔥 初始样式设置
                 cell.setStyle("-fx-font-size: 11px; -fx-border-width: 2px; -fx-background-radius: 5px; -fx-border-radius: 5px;");
 
-                // 2.2 Visual Feedback - Tooltip for plot information
                 Tooltip tooltip = new Tooltip("Plot (" + row + "," + col + ") - Click to select");
                 cell.setTooltip(tooltip);
 
                 int r = row;
                 int c = col;
                 cell.setOnAction(event -> {
-                    System.out.println("🖱️ Clicked plot (" + r + "," + c + ")");
+                    System.out.println("Clicked plot (" + r + "," + c + ")");
                     selectedRow = r;
                     selectedCol = c;
-                    refreshBoardFromGameState(); // 使用新的刷新方法
-                    showStatus("📍 Selected plot (" + r + "," + c + ") - Choose an action below");
+                    refreshBoardFromGameState();
+                    showStatus("Selected plot (" + r + "," + c + ") - Choose an action below");
                 });
 
                 gameBoard.add(cell, col, row);
@@ -433,7 +452,6 @@ public class Controller {
             }
         }
 
-        // 🔥 初始刷新
         Platform.runLater(this::refreshBoardFromGameState);
     }
 
@@ -444,18 +462,17 @@ public class Controller {
 
     // 2.2 Action Controls - enable/disable feedback based on game state
     private void updateButtonStates() {
-        boolean onOwnFarm = viewingPlayerName != null && viewingPlayerName.equals(myPlayerName);
+        boolean onOwnFarm = viewingPlayerName.equals(myPlayerName);
         boolean connected = socket != null && !socket.isClosed();
 
-        // 🔥 添加null检查，防止按钮还未创建时调用
         if (plantButton != null) {
-            plantButton.setDisable(!onOwnFarm || !connected);   // 2.2 Controls + 2.5 Disable on disconnect
+            plantButton.setDisable(!onOwnFarm || !connected);
         }
         if (harvestButton != null) {
-            harvestButton.setDisable(!onOwnFarm || !connected); // 同上
+            harvestButton.setDisable(!onOwnFarm || !connected);
         }
         if (stealButton != null) {
-            stealButton.setDisable(onOwnFarm || !connected);    // 自己农场不能偷 2.3 Rule
+            stealButton.setDisable(onOwnFarm || !connected);
         }
 
         if (backButton != null) {
@@ -469,39 +486,43 @@ public class Controller {
 
     // 2.2 Visual Feedback - icons, colors, tooltips for different states
     private void updateCellState(ToggleButton cell, int row, int col, boolean isSelected) {
-        Game.PlotState state = game.getState(row, col);
+        if (cell == null || viewingFarmGame == null) {
+            return;
+        }
 
-        // 🔥 清除所有之前的样式，避免样式冲突
+        Game.PlotState state = viewingFarmGame.getState(row, col);
+
         cell.getStyleClass().clear();
 
-        // 基础文字和颜色设置
         String text = "";
         String backgroundColor = "";
         String textColor = "";
 
+        if (state == null) {
+            state = Game.PlotState.EMPTY;
+        }
+
         switch (state) {
             case EMPTY -> {
                 text = "Empty";
-                backgroundColor = "#F5DEB3"; // 浅棕色
-                textColor = "#8B4513"; // 深棕色
+                backgroundColor = "#F5DEB3";
+                textColor = "#8B4513";
             }
             case GROWING -> {
                 text = "Growing";
-                backgroundColor = "#90EE90"; // 浅绿色
-                textColor = "#006400"; // 深绿色
+                backgroundColor = "#90EE90";
+                textColor = "#006400";
             }
             case RIPE -> {
                 text = "RIPE!";
-                backgroundColor = "#FFD700"; // 金色
-                textColor = "#FF8C00"; // 橙色
+                backgroundColor = "#FFD700";
+                textColor = "#FF8C00";
             }
         }
 
-        // 🔥 选中状态的边框处理
         String borderColor = isSelected ? "#FF0000" : "#8B4513";
         String borderWidth = isSelected ? "4px" : "2px";
 
-        // 🔥 组合完整样式，确保每次都是全新的样式
         String completeStyle = String.format(
                 "-fx-background-color: %s; " +
                         "-fx-text-fill: %s; " +
@@ -517,143 +538,158 @@ public class Controller {
 
         cell.setText(text);
         cell.setStyle(completeStyle);
-
-        // 🔥 强制刷新显示
         cell.applyCss();
 
-        // 2.2 Visual Feedback - updated tooltip content with null safety
+        // 更新Tooltip
         if (cell.getTooltip() != null) {
-            String currentPlayer = (myPlayerName != null) ? myPlayerName : "unknown";
-            String viewingPlayer = (viewingPlayerName != null) ? viewingPlayerName : "unknown";
-
-            String ownerInfo = viewingPlayer.equals(currentPlayer) ? "Your farm" : viewingPlayer + "'s farm";
+            String ownerInfo = viewingPlayerName.equals(myPlayerName) ? "Your farm" : viewingPlayerName + "'s farm";
             cell.getTooltip().setText("Plot (" + row + "," + col + ")\nState: " + state + "\n" + ownerInfo);
         }
     }
 
-    // 2.2 Core GUI Layout - Surface player name, coin balance, and contextual status messages
-    private void updateCoins(String message) {
-        statusMessage = message;
+    // 🔥 新方法：更新coins显示（显示两个coins）
+    // 🔥 新方法：更新coins显示（根据查看的农场显示不同信息）
+    private void updateCoinsDisplay() {
+        if (coinsLabel == null) {
+            return;
+        }
+        String labelText;
+        if (viewingPlayerName.equals(myPlayerName)) {
+            // 在自己的农场
+            labelText = "Player: " + myPlayerName + " | Your Farm | Coins: " + myFarmGame.getCoins();
+        } else {
+            // 在别人的农场
+            labelText = "Player: " + myPlayerName + " | Viewing: " + viewingPlayerName + "'s Farm | My Coins: "
+                    + myFarmGame.getCoins() + " | " + viewingPlayerName + "'s Coins: " + viewingFarmGame.getCoins();
+        }
 
-        // 🔥 修复空指针问题：添加null检查
-        String currentPlayer = (myPlayerName != null) ? myPlayerName : "Player";
-        String viewingPlayer = (viewingPlayerName != null) ? viewingPlayerName : "Unknown";
-
-        String farmOwner = viewingPlayer.equals(currentPlayer) ? "Your Farm" : viewingPlayer + "'s Farm";
-        coinsLabel.setText("Player: " + currentPlayer + " | Viewing: " + farmOwner + " | Coins: " + game.getCoins());
+        coinsLabel.setText(labelText);
     }
 
     // 2.2 Visual Feedback - contextual status messages
     private void showStatus(String msg) {
-        statusMessage = msg;
-        if (statusLabel != null) {
-            statusLabel.setText(msg);
+        if (msg == null || msg.isEmpty()) {
+            statusMessage = "Ready.";
+        } else {
+            statusMessage = msg;
         }
-        updateCoins(statusMessage);
+
+        if (statusLabel != null) {
+            statusLabel.setText(statusMessage);
+        }
+        updateCoinsDisplay();
     }
 
-    // 🔥 修复：访问好友逻辑
+    // 修复：访问好友逻辑
     private void handleVisit() {
         if (friendField == null) {
-            showStatus("❌ No friend field available");
+            showStatus("No friend field available");
             return;
         }
         String friend = friendField.getText().trim();
         if (friend.isEmpty()) {
-            showStatus("⚠️ Please enter a friend's name to visit");
+            showStatus("Please enter a friend's name to visit");
             return;
         }
 
         if (out != null) {
-            viewingPlayerName = friend; // 更新当前查看对象
-            out.println("VIEW " + friend); // 发送VIEW命令
-            showStatus("🚀 Visiting " + friend + "'s farm...");
+            viewingPlayerName = friend;
+            // 🔥 新增：创建一个新的Game对象来存储朋友的农场数据
+            viewingFarmGame = new Game();
+            selectedRow = -1;
+            selectedCol = -1;
+            out.println("VIEW " + friend);
+            showStatus("Visiting " + friend + "'s farm...");
         } else {
-            showStatus("❌ Not connected to server");
+            showStatus("Not connected to server");
         }
     }
 
     private void handleBack() {
         if (out != null) {
-            viewingPlayerName = myPlayerName; // 返回自己农场
-            out.println("GET"); // 请求自家快照
-            showStatus("🏠 Returning to your farm...");
+            viewingPlayerName = myPlayerName;
+            viewingFarmGame = myFarmGame;  // 🔥 新增：切换回自己的农场数据
+            selectedRow = -1;
+            selectedCol = -1;
+            out.println("GET");
+            showStatus("Returning to your farm...");
         }
     }
 
-    // 🔥 修复：种植逻辑
+    // 修复：种植逻辑
     private void handlePlant() {
         if (!ensureSelection()) {
-            showStatus("⚠️ Please select a plot first");
+            showStatus("Please select a plot first");
             return;
         }
 
         if (!viewingPlayerName.equals(myPlayerName)) {
-            showStatus("❌ You can only plant on your own farm!");
+            showStatus("You can only plant on your own farm!");
             return;
         }
 
         if (out != null) {
             out.println("PLANT " + selectedRow + " " + selectedCol);
-            showStatus("🌱 Planting crop at (" + selectedRow + "," + selectedCol + ")...");
+            showStatus("Planting crop at (" + selectedRow + "," + selectedCol + ")...");
         } else {
-            // 离线降级
             try {
-                game.plant(selectedRow, selectedCol);
+                myFarmGame.plant(selectedRow, selectedCol);
                 refreshBoardFromGameState();
-                showStatus("🌱 Local plant (offline mode)");
+                showStatus("Local plant (offline mode)");
             } catch (Exception e) {
-                showStatus("❌ " + e.getMessage());
+                showStatus("Error: " + e.getMessage());
             }
         }
     }
 
-    // 🔥 修复：收获逻辑
+    // 修复：收获逻辑
     private void handleHarvest() {
         if (!ensureSelection()) {
-            showStatus("⚠️ Please select a plot first");
+            showStatus("Please select a plot first");
             return;
         }
 
         if (!viewingPlayerName.equals(myPlayerName)) {
-            showStatus("❌ You can only harvest your own crops!");
+            showStatus("You can only harvest your own crops!");
             return;
         }
 
         if (out != null) {
             out.println("HARVEST " + selectedRow + " " + selectedCol);
-            showStatus("🌾 Harvesting crop at (" + selectedRow + "," + selectedCol + ")...");
+            showStatus("Harvesting crop at (" + selectedRow + "," + selectedCol + ")...");
         } else {
             try {
-                game.harvest(selectedRow, selectedCol);
+                myFarmGame.harvest(selectedRow, selectedCol);
                 refreshBoardFromGameState();
-                showStatus("✅ Harvest successful!");
+                showStatus("Harvest successful!");
             } catch (Exception e) {
-                showStatus("❌ " + e.getMessage());
+                showStatus("Error: " + e.getMessage());
             }
         }
     }
 
-    // 🔥 修复：偷菜逻辑
+    // 🔥 修复：偷菜逻辑 - 保持在当前农场视图
     private void handleSteal() {
         if (viewingPlayerName == null || viewingPlayerName.equals(myPlayerName)) {
-            showStatus("⚠️ Visit a friend's farm first to steal!");
+            showStatus("Visit a friend's farm first to steal!");
             return;
         }
 
         if (out != null) {
-            out.println("STEAL " + viewingPlayerName); // 偷当前查看玩家的菜
-            showStatus("🏴‍☠️ Attempting to steal from " + viewingPlayerName + "...");
+            String victimName = viewingPlayerName;
+            out.println("STEAL " + victimName);
+            showStatus("Attempting to steal from " + victimName + "...");
+            // 关键：不改变 viewingPlayerName 和 viewingFarmGame，保持在该农场视图中
         } else {
-            game.stealRandom();
+            myFarmGame.stealRandom();
             refreshBoardFromGameState();
-            showStatus("🏴‍☠️ Local simulated steal (offline mode)");
+            showStatus("Local simulated steal (offline mode)");
         }
     }
 
     public void shutdown() {
         if (refreshTimeline != null) refreshTimeline.stop();
-        if (game != null) game.shutdown();
+        if (myFarmGame != null) myFarmGame.shutdown();
         try {
             if (socket != null) socket.close();
         } catch (IOException ignored) {}
