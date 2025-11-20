@@ -31,8 +31,6 @@ public class Controller {
     private TextField friendField;
     private Button visitButton;
     private Button backButton;
-
-    // 🔥 新增：维护两个Game对象
     private Game myFarmGame;      // 自己的农场数据
     private Game viewingFarmGame; // 正在查看的农场数据
 
@@ -51,6 +49,7 @@ public class Controller {
     private BufferedReader in;
     private PrintWriter out;
     private Thread listenThread;
+    private String lastCommand = "";
 
     // 🔥 修改：init方法改为接收playerName参数
     public void init(Game game, String playerName) {
@@ -244,16 +243,45 @@ public class Controller {
                         if (msg.startsWith("OK LOGGED_IN")) {
                             showStatus("Successfully connected to farm server!");
                         } else if (msg.startsWith("OK ")) {
+                            // 🔥 修复关键部分：根据上一个命令来判断这个响应属于谁
                             if (msg.contains("{")) {
                                 String json = msg.substring(3);
-                                // 判断这个响应是属于自己还是别人的农场
-                                if (viewingPlayerName.equals(myPlayerName)) {
+
+                                // 根据最后执行的命令来决定更新哪个Game对象
+                                if (lastCommand.startsWith("STEAL")) {
+                                    // STEAL命令的响应：更新自己的coins，但不改变当前查看的农场
                                     updateGameSnapshot(myFarmGame, json);
-                                } else {
+                                    System.out.println("Steal successful! Coins updated");
+                                    // 关键：不刷新网格，保持在原来的农场视图
+                                    updateCoinsDisplay();
+                                } else if (lastCommand.startsWith("VIEW")) {
+                                    // VIEW命令的响应：更新查看的农场
                                     updateGameSnapshot(viewingFarmGame, json);
+                                    refreshBoardFromGameState();
+                                    System.out.println("Viewing farm updated");
+                                    updateCoinsDisplay();
+                                } else if (lastCommand.startsWith("GET")) {
+                                    // GET命令的响应：更新自己的农场
+                                    updateGameSnapshot(myFarmGame, json);
+                                    refreshBoardFromGameState();
+                                    System.out.println("Own farm updated");
+                                    updateCoinsDisplay();
+                                } else if (lastCommand.startsWith("PLANT") || lastCommand.startsWith("HARVEST")) {
+                                    // PLANT/HARVEST命令的响应：更新自己的农场
+                                    updateGameSnapshot(myFarmGame, json);
+                                    refreshBoardFromGameState();
+                                    System.out.println("Farm action completed");
+                                    updateCoinsDisplay();
+                                } else {
+                                    // 默认：根据当前查看的农场来决定
+                                    if (viewingPlayerName.equals(myPlayerName)) {
+                                        updateGameSnapshot(myFarmGame, json);
+                                    } else {
+                                        updateGameSnapshot(viewingFarmGame, json);
+                                    }
+                                    refreshBoardFromGameState();
+                                    updateCoinsDisplay();
                                 }
-                                refreshBoardFromGameState();
-                                updateCoinsDisplay();
                             }
                         }
                     });
@@ -594,10 +622,11 @@ public class Controller {
 
         if (out != null) {
             viewingPlayerName = friend;
-            // 🔥 新增：创建一个新的Game对象来存储朋友的农场数据
+            // 创建一个新的Game对象来存储朋友的农场数据
             viewingFarmGame = new Game();
             selectedRow = -1;
             selectedCol = -1;
+            lastCommand = "VIEW " + friend;  // 🔥 新增：记录命令
             out.println("VIEW " + friend);
             showStatus("Visiting " + friend + "'s farm...");
         } else {
@@ -608,15 +637,15 @@ public class Controller {
     private void handleBack() {
         if (out != null) {
             viewingPlayerName = myPlayerName;
-            viewingFarmGame = myFarmGame;  // 🔥 新增：切换回自己的农场数据
+            viewingFarmGame = myFarmGame;
             selectedRow = -1;
             selectedCol = -1;
+            lastCommand = "GET";  // 🔥 新增：记录命令
             out.println("GET");
             showStatus("Returning to your farm...");
         }
     }
 
-    // 修复：种植逻辑
     private void handlePlant() {
         if (!ensureSelection()) {
             showStatus("Please select a plot first");
@@ -629,6 +658,7 @@ public class Controller {
         }
 
         if (out != null) {
+            lastCommand = "PLANT " + selectedRow + " " + selectedCol;  // 🔥 新增：记录命令
             out.println("PLANT " + selectedRow + " " + selectedCol);
             showStatus("Planting crop at (" + selectedRow + "," + selectedCol + ")...");
         } else {
@@ -641,6 +671,7 @@ public class Controller {
             }
         }
     }
+
 
     // 修复：收获逻辑
     private void handleHarvest() {
@@ -655,6 +686,7 @@ public class Controller {
         }
 
         if (out != null) {
+            lastCommand = "HARVEST " + selectedRow + " " + selectedCol;  // 🔥 新增：记录命令
             out.println("HARVEST " + selectedRow + " " + selectedCol);
             showStatus("Harvesting crop at (" + selectedRow + "," + selectedCol + ")...");
         } else {
@@ -677,6 +709,7 @@ public class Controller {
 
         if (out != null) {
             String victimName = viewingPlayerName;
+            lastCommand = "STEAL " + victimName;  // 🔥 新增：记录命令（这是关键！）
             out.println("STEAL " + victimName);
             showStatus("Attempting to steal from " + victimName + "...");
             // 关键：不改变 viewingPlayerName 和 viewingFarmGame，保持在该农场视图中
