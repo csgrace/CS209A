@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Minimal game logic to demonstrate multithreading and synchronization.
@@ -28,6 +29,7 @@ public class Game {
     private final Random random = new Random();
     private Consumer<Game> onStateChange; // 新增字段
     private int coins = 40;
+
 
     public Game() {
         for (int r = 0; r < ROWS; r++) {

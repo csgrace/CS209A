@@ -50,6 +50,8 @@ public class Controller {
     private PrintWriter out;
     private Thread listenThread;
     private String lastCommand = "";
+    private final java.util.concurrent.ConcurrentHashMap<String, Game> friendFarmsCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
 
     // 🔥 修改：init方法改为接收playerName参数
     public void init(Game game, String playerName) {
@@ -608,7 +610,6 @@ public class Controller {
         updateCoinsDisplay();
     }
 
-    // 修复：访问好友逻辑
     private void handleVisit() {
         if (friendField == null) {
             showStatus("No friend field available");
@@ -622,11 +623,16 @@ public class Controller {
 
         if (out != null) {
             viewingPlayerName = friend;
-            // 创建一个新的Game对象来存储朋友的农场数据
-            viewingFarmGame = new Game();
+
+            // 🔥 改进：从缓存中获取或创建新的Game对象
+            viewingFarmGame = friendFarmsCache.computeIfAbsent(friend, k -> {
+                System.out.println("Creating new cache entry for friend: " + friend);
+                return new Game();
+            });
+
             selectedRow = -1;
             selectedCol = -1;
-            lastCommand = "VIEW " + friend;  // 🔥 新增：记录命令
+            lastCommand = "VIEW " + friend;
             out.println("VIEW " + friend);
             showStatus("Visiting " + friend + "'s farm...");
         } else {
