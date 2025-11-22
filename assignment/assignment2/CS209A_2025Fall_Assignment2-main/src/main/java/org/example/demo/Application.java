@@ -1,12 +1,8 @@
 package org.example.demo;
-
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.demo.game.Game;
 
-/**
- * Entry point for the simplified QQ Farm demo.
- */
 public class Application extends javafx.application.Application {
 
     @Override

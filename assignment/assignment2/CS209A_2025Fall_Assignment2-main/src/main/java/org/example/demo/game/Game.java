@@ -6,6 +6,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Minimal game logic to demonstrate multithreading and synchronization.
@@ -82,8 +85,8 @@ public class Game {
 
     public synchronized void stealRandom() {
         if (stealOneRipe()) {
-            coins = Math.max(0, coins - STEAL_REWARD);
-            System.out.println(Thread.currentThread().getName() + " LOCAL STEAL_RANDOM"); // [Task 2.4 Concurrency Log]
+            coins += STEAL_REWARD;
+            System.out.println(Thread.currentThread().getName() + " LOCAL STEAL"); // [Task 2.4 Concurrency Log]
             if (onStateChange != null) onStateChange.accept(this); // [Task 2.2 Push Update local steal]
         }
     }
@@ -92,15 +95,32 @@ public class Game {
         this.coins = Math.max(0, this.coins + delta); // 保底不小于 0
     }
     public synchronized boolean stealOneRipe() {
+        List<int[]> ripePositions = new ArrayList<>();
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
                 if (board[r][c] == PlotState.RIPE) {
-                    board[r][c] = PlotState.EMPTY; // 清空一个成熟格子，表示产量被偷
-                    return true;
+                    ripePositions.add(new int[]{r, c});
                 }
             }
         }
-        return false; // 没有成熟作物可偷
+        if (ripePositions.isEmpty()) {
+            return false;
+        }
+        // Randomly select one
+        int[] pos = ripePositions.get(random.nextInt(ripePositions.size()));
+        board[pos[0]][pos[1]] = PlotState.EMPTY;
+        return true;
+    }
+    public synchronized int getRipeCount() {
+        int count = 0;
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLS; c++) {
+                if (board[r][c] == PlotState.RIPE) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
     public int getRows() {
         return ROWS;

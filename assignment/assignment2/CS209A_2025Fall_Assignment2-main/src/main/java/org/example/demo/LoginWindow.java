@@ -1,5 +1,5 @@
 package org.example.demo;
-
+// mvn compile exec:java "-Dexec.mainClass=org.example.demo.server.Server"
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
