@@ -8,10 +8,6 @@ import java.util.function.Consumer;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Game logic with timestamp-based persistence for GROWING crops.
- * When server restarts, GROWING crops will resume their countdown based on elapsed time.
- */
 public class Game {
 
     public enum PlotState {EMPTY, GROWING, RIPE}
@@ -242,60 +238,4 @@ public class Game {
         }
     }
 
-    // ========== 网络协议用 JSON 解析（用于 UPDATE 消息） ==========
-
-    /**
-     * Update game from snapshot JSON (for network protocol).
-     * Expected format: {"coins":X,"board":[["EMPTY","RIPE",...],...]]}
-     * 注意：这个方法不处理时间戳，只处理实时状态同步。
-     */
-    public synchronized void updateFromSnapshot(String json) {
-        try {
-            if (json == null || json.isEmpty()) return;
-
-            int coinsIdx = json.indexOf("\"coins\":");
-            if (coinsIdx >= 0) {
-                int comma = json.indexOf(",", coinsIdx);
-                if (comma < 0) comma = json.indexOf("}", coinsIdx);
-                if (comma > coinsIdx) {
-                    String coinsStr = json.substring(coinsIdx + 8, comma).trim();
-                    this.coins = Integer.parseInt(coinsStr);
-                }
-            }
-
-            int boardStart = json.indexOf("\"board\":[");
-            if (boardStart >= 0) {
-                int arrStart = json.indexOf("[", boardStart + 8);
-                int arrEnd = json.lastIndexOf("]");
-                if (arrStart >= 0 && arrEnd > arrStart) {
-                    String boardContent = json.substring(arrStart, arrEnd + 1);
-                    String rowsStr = boardContent.substring(1, boardContent.length() - 1);
-                    String[] rowParts = splitTopLevel(rowsStr);
-                    for (int r = 0; r < rowParts.length && r < ROWS; r++) {
-                        String row = rowParts[r].trim();
-                        if (row.startsWith("[")) row = row.substring(1);
-                        if (row.endsWith("]")) row = row.substring(0, row.length() - 1);
-                        String[] cells = splitTopLevel(row);
-                        for (int c = 0; c < cells.length && c < COLS; c++) {
-                            String cell = cells[c].replace("\"", "").trim();
-                            PlotState newState = PlotState.valueOf(cell);
-                            // 如果状态变了（例如从 GROWING 变成 RIPE），更新并清空时间戳
-                            if (board[r][c] != newState) {
-                                board[r][c] = newState;
-                                if (newState == PlotState.RIPE || newState == PlotState.EMPTY) {
-                                    plantTimestamps[r][c] = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            System.out.println("[Game.updateFromSnapshot] Failed: " + ex.getMessage());
-        }
-    }
-
-    private String[] splitTopLevel(String s) {
-        return s.split("\\s*,\\s*");
-    }
 }

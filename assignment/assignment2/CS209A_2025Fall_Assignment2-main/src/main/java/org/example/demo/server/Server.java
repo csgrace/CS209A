@@ -52,7 +52,6 @@ public class Server {
 
         // 纳秒级时间戳（系统单调时间，用于计算时间间隔）
         long nanoTime = System.nanoTime();
-
         System.out.printf(
                 "[%s][thread=%s][time=%s][nano=%d] %s%n",
                 tag, // 标签，例如 "STEAL", "CLIENT"
@@ -452,7 +451,6 @@ public class Server {
         return sb.toString();
     }
 
-    // ========== 简单且稳定的持久化实现（用 Game.toSaveString / fromSaveString） ==========
 
     private synchronized void saveFarmsToDisk() {
         try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(SAVE_FILE), StandardCharsets.UTF_8))) {

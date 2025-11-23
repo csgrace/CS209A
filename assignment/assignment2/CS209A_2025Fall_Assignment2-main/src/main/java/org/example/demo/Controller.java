@@ -392,10 +392,6 @@ public class Controller {
         startReconnectLoop();
     }
 
-    /**
-     * 自动重连：后台线程尝试多次重建 socket 并 LOGIN、GET。
-     * 成功后自动刷新棋盘并恢复按钮状态。
-     */
     private synchronized void startReconnectLoop() {
         if (reconnecting) return;
         reconnecting = true;

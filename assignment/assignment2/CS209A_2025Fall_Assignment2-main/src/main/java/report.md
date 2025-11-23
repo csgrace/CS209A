@@ -394,3 +394,147 @@ Catch network I/O errors without crashing the UI.
 - Graceful Handling: All socket operations are wrapped in try-catch blocks.
 - No UI Crashes: Exceptions are logged to console; UI remains functional and displays error messages.
 
+## 3. Self-Check
+
+### Thread Pools and Timers :
+This part mainly talks about the Thread pools and timers, their configuration and how they avoid the deadlocks.
+
+- Thread Pool Configuration:
+  - `pool` for network operations.
+    - **Pool**: Created using `Executors.newCachedThreadPool`, which scales dynamically depending on task demand.
+    - **Thread Naming**: Threads have identifiable names like `client-io`, enabling debugging.
+    - **Daemon Threads**: Set to daemon status so they don't block JVM from exiting.
+  - `statsExecutor` for periodic tasks.
+    - **StatsExecutor**: Created using `Executors.newScheduledThreadPool(1)`, designed for periodic tasks like server statistics monitoring.
+    - **Single Thread**: Configured with one thread to ensure serialized task execution.
+- Deadlock Prevention Strategy:
+Ensure deadlock avoidance by using proper locking, thread isolation, and sequential resource access.
+  - **Order of Locks**: Synchronization is applied to a single resource at a time, avoiding nested locks.
+  - **Separate Tasks**: Long-running tasks are assigned to `pool`, preventing UI freeze or blocking the main thread.
+- Platform.runLater for UI Updates:
+All UI updates are safely submitted to the JavaFX Application Thread using `Platform.runLater`.
+  - Ensures Thread Safety: Prevents UI updates from competing with background threads.
+  - Keeps UI Responsive: Long tasks never directly interact with JavaFX Application Thread.
+
+    
+### Handling Unsent Actions During Crashes :
+This part mainly explains how unsent actions are handled when the crash occurs.
+
+- Persistent data (e.g., farm states and player coins) are saved to disk and reloaded during server restart.
+```java
+private synchronized void saveFarmsToDisk() {
+    try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(SAVE_FILE),(StandardCharsets.UTF_8)))) {
+        for (var entry : farms.entrySet()) {
+            String name = entry.getKey();
+            Game g = entry.getValue();
+            pw.println(name + " " + g.toSaveString());
+        }
+        pw.flush();
+        log("PERSIST", "saved file=" + SAVE_FILE + " farms=" + farms.size());
+    } catch (IOException ex) {
+        log("PERSIST-ERR", "error=" + ex.getMessage());
+    }
+}
+```
+- Ensures that game-critical data is not lost during abrupt crashes or interruptions.
+```java
+public synchronized void fromSaveString(String saveStr) {
+    long now = System.currentTimeMillis(); // 当前时间
+    for (int r = 0; r < ROWS; r++) {
+        for (int c = 0; c < COLS; c++) {
+            long timestamp = Long.parseLong(tokens[idx + 1].trim()); // 恢复存储的时间戳
+            if (state == PlotState.GROWING && now - timestamp < GROW_TIME_MS) {
+                scheduleRipen(r, c, remainingTime); // 未成熟则再次倒计时
+            } else {
+                board[r][c] = PlotState.RIPE; // 超时直接成熟
+            }
+        }
+    }
+}
+```
+
+### Evaluation Rubric :
+This part summarizes which parts of the rubric the code has covered (server logic, client UI, concurrency, error handling).
+
+| **Category**       | **Focus Areas**                                                                |
+|---------------------|-------------------------------------------------------------------------------|
+| **Server**          | Thread safety, state consistency, and protocol design.                       |
+| **Client**          | Networking logic, responsiveness, and usability.                            |
+| **GUI**             | Visual clarity, feedback cues, and interaction design.                       |
+| **Concurrency**     | Race-condition handling and synchronized operations.                         |
+| **Error Handling**  | Graceful recovery from client/server/network failures.                       |
+
+#### Server:
+- Implements synchronized access control for farm operations like planting and stealing to ensure thread safety.
+- Persists farm states in `farms.txt` to guarantee state consistency across sessions.
+- Designs the communication protocol (e.g., `LOGIN`, `STEAL`, `PLANT`, `GET`) for clear and reliable client-server interaction.
+
+#### Client:
+- Provides seamless reconnect logic (`startReconnectLoop`) for handling network disruptions.
+- Ensures responsiveness with actions such as `STEAL`, `PLANT`, and `HARVEST` displaying immediate feedback even during network instability.
+- Uses error prompts (e.g., "Disconnected from server") to enhance usability.
+
+#### GUI:
+- Designed with JavaFX for real-time UI updates and interactive feedback (e.g., plot selection).
+- Displays game state (coins, crop status) dynamically for visual clarity.
+- Uses animations (e.g., button color transition) to improve user experience.
+
+#### Concurrency:
+- Handles simultaneous operations from multiple clients (e.g., planting and stealing) using thread pools (`client-io`).
+- Synchronizes shared resources via `synchronized` blocks (e.g., victim farm locking during steal actions).
+- Ensures clean execution of scheduled tasks (e.g., crop ripening) without race conditions.
+
+#### Error Handling:
+- Catches network errors in `listenLoop` and gracefully handles client disconnections.
+- Displays detailed error messages (e.g., unable to plant crops due to server downtime) directly on the UI.
+- Reties queued operations upon reconnection, minimizing action loss.
+
+### Discussion Points :
+
+#### Data Consistency Guarantees 数据一致性保证 :
+1. **Synchronized Farm States**: 
+    - During operations (e.g., stealing, planting), synchronized blocks are applied to ensure only one thread can modify the farm state at a time. 使用同步块，确保一次只有一个线程可以修改农场状态
+    - For example, `synchronized (victim)` in stealing logic prevents conflicting updates between multiple threads.
+
+2. **Persistent Storage**:
+    - Farm states (e.g., coins, plot status) are periodically saved to a file (`farms.txt`) using the `saveFarmsToDisk()` method in `Server.java`.
+    - If the system crashes, data is reloaded using the `loadFarmsFromDisk()` method.
+
+3. **Real-Time Synchronization**:
+    - Client-side farm updates are immediately broadcasted to other players using the `broadcastUpdate()` method, ensuring consistent views across all players.
+
+
+#### Thread Synchronization Choices 线程同步选择 :
+1. **Synchronized Blocks**:
+    - Applied to shared resources like farm states (e.g., `synchronized(victim)`).
+    - Ensures thread safety without deadlocks as no nested locks are used.
+
+2. **Thread Pools**:
+    - Uses `client-io` thread pool for network-related operations (e.g., handling `STEAL` requests asynchronously).
+    - `stats-monitor` thread pool handles periodic server monitoring tasks.
+
+3. **Minimized Critical Sections**:
+    - Ensures only critical parts of operations are synchronized, such as updating farm states during stealing.
+
+
+#### System Extension Opportunities 系统扩展机会 :
+1. **Global Leaderboard**:
+    - Add a leaderboard displaying top players based on coins or overall farm productivity.
+
+2. **Enhanced Farm Mechanics**:
+    - Introduce new gameplay features like trading crops between players or collaborative farming.
+    - Implement different crop types with varying growth times and rewards.
+    - Use the coins earned to buy upgrades or decorations for the farm.
+    - Besides growing plants, allow players to raise animals (e.g., chickens, cows) or go fishing that produce resources over time.
+
+3. **Security Enhancements**:
+    - Implement encryption or user authentication for secure client-server interactions.
+
+4. **Real-Time Event Scheduling**:
+    - Introduce special events (e.g., crop festivals or competitions) to improve engagement.
+
+
+## 4. Architecture
+
+## 5. Protocol Descriptions
+
