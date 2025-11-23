@@ -314,16 +314,10 @@ public class Server {
                             boolean success = victim.stealOneRipe();
                             if (success) {
                                 thief.addCoins(Game.STEAL_REWARD);
-                            } else {
-                                System.out.println("[STEAL] Atomic steal failed - no crops");
-                            }
-
-                            if (success) {
                                 thiefSession.put(victimName, sessionCount + 1);
                                 out.println("OK " + snapshot(thief));
                                 System.out.println("[STEAL] " + player + " successfully stole from " + victimName
                                         + " | session count: " + (sessionCount + 1));
-
                                 if ((sessionCount + 1) >= maxSteal) {
                                     thiefCanSteal.put(victimName, false);
                                     System.out.println("[STEAL] " + player + " reached maxSteal for " + victimName + " in this session");

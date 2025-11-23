@@ -112,20 +112,6 @@ public class Game {
         if (callback != null) callback.accept(this);
     }
 
-    public void stealRandom() {
-        boolean success;
-        Consumer<Game> callback;
-        synchronized (this) {
-            success = stealOneRipe();
-            if (success) {
-                coins += STEAL_REWARD;
-                System.out.println(Thread.currentThread().getName() + " LOCAL STEAL");
-            }
-            callback = onStateChange;
-        }
-        if (success && callback != null) callback.accept(this);
-    }
-
     public synchronized void addCoins(int delta) {
         this.coins = Math.max(0, this.coins + delta);
     }
