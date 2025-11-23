@@ -5,13 +5,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Minimal game logic to demonstrate multithreading and synchronization.
+ * Updated: Move onStateChange callbacks out of synchronized blocks to reduce lock hold time.
  */
 public class Game {
 
@@ -30,9 +29,8 @@ public class Game {
         return thread;
     });
     private final Random random = new Random();
-    private Consumer<Game> onStateChange; // 新增字段
+    private Consumer<Game> onStateChange; // 回调
     private int coins = 40;
-
 
     public Game() {
         for (int r = 0; r < ROWS; r++) {
@@ -41,59 +39,99 @@ public class Game {
             }
         }
     }
+
     public synchronized void setOnStateChange(Consumer<Game> listener) {
-        this.onStateChange = listener; // [Task 2.2 Networking Push] 设置成熟回调
+        this.onStateChange = listener;
     }
+
     public synchronized int getCoins() {
         return coins;
     }
+
     public synchronized PlotState getState(int row, int col) {
         return board[row][col];
     }
-    public synchronized void plant(int row, int col) {
-        if (board[row][col] != PlotState.EMPTY) {
-            throw new IllegalStateException("Plot occupied");
+
+    /**
+     * Plant a crop and schedule ripening.
+     * Callback moved outside synchronized lock.
+     */
+    public void plant(int row, int col) {
+        Consumer<Game> callback;
+        synchronized (this) {
+            if (board[row][col] != PlotState.EMPTY) {
+                throw new IllegalStateException("Plot occupied");
+            }
+            if (coins < PLANT_COST) {
+                throw new IllegalStateException("Not enough coins");
+            }
+            coins -= PLANT_COST;
+            board[row][col] = PlotState.GROWING;
+            System.out.println(Thread.currentThread().getName() + " PLANT (" + row + "," + col + ")");
+            callback = onStateChange;
         }
-        if (coins < PLANT_COST) {
-            throw new IllegalStateException("Not enough coins");
-        }
-        coins -= PLANT_COST;
-        board[row][col] = PlotState.GROWING;
-        System.out.println(Thread.currentThread().getName() + " PLANT (" + row + "," + col + ")"); // [Task 2.4 Concurrency Log]
-        // Simulate growth finishing after 5 seconds
+        // 广播在锁外
+        if (callback != null) callback.accept(this);
+
+        // 成熟任务：内部修改后再在锁外调用回调
         scheduler.schedule(() -> {
+            boolean ripened = false;
+            Consumer<Game> cb;
             synchronized (Game.this) {
                 if (board[row][col] == PlotState.GROWING) {
                     board[row][col] = PlotState.RIPE;
-                    System.out.println(Thread.currentThread().getName() + " RIPEN (" + row + "," + col + ")"); // [Task 2.4 Concurrency Log]
-                    if (onStateChange != null) onStateChange.accept(Game.this); // [Task 2.2 Push Update on maturation]
+                    ripened = true;
+                    System.out.println(Thread.currentThread().getName() + " RIPEN (" + row + "," + col + ")");
                 }
+                cb = onStateChange;
             }
-        }, 5, TimeUnit.SECONDS); // e.g., mature in 10 seconds)
-        if (onStateChange != null) onStateChange.accept(this); // 立即广播该玩家状态（显示 GROWING）[Task 2.2]
+            if (ripened && cb != null) cb.accept(Game.this);
+        }, 10, TimeUnit.SECONDS);
     }
 
-    public synchronized void harvest(int row, int col) {
-        if (board[row][col] != PlotState.RIPE) {
-            throw new IllegalStateException("Crop not ripe");
+    /**
+     * Harvest a ripe crop.
+     * Callback moved outside synchronized lock.
+     */
+    public void harvest(int row, int col) {
+        Consumer<Game> callback;
+        synchronized (this) {
+            if (board[row][col] != PlotState.RIPE) {
+                throw new IllegalStateException("Crop not ripe");
+            }
+            board[row][col] = PlotState.EMPTY;
+            coins += HARVEST_REWARD;
+            System.out.println(Thread.currentThread().getName() + " HARVEST (" + row + "," + col + ")");
+            callback = onStateChange;
         }
-        board[row][col] = PlotState.EMPTY;
-        coins += HARVEST_REWARD;
-        System.out.println(Thread.currentThread().getName() + " HARVEST (" + row + "," + col + ")"); // [Task 2.4 Concurrency Log]
-        if (onStateChange != null) onStateChange.accept(this); // [Task 2.2 Push Update harvest]
+        if (callback != null) callback.accept(this);
     }
 
-    public synchronized void stealRandom() {
-        if (stealOneRipe()) {
-            coins += STEAL_REWARD;
-            System.out.println(Thread.currentThread().getName() + " LOCAL STEAL"); // [Task 2.4 Concurrency Log]
-            if (onStateChange != null) onStateChange.accept(this); // [Task 2.2 Push Update local steal]
+    /**
+     * Local random steal (client-side simulation).
+     * Callback moved outside synchronized lock.
+     */
+    public void stealRandom() {
+        boolean success;
+        Consumer<Game> callback;
+        synchronized (this) {
+            success = stealOneRipe();
+            if (success) {
+                coins += STEAL_REWARD;
+                System.out.println(Thread.currentThread().getName() + " LOCAL STEAL");
+            }
+            callback = onStateChange;
         }
+        if (success && callback != null) callback.accept(this);
     }
 
     public synchronized void addCoins(int delta) {
-        this.coins = Math.max(0, this.coins + delta); // 保底不小于 0
+        this.coins = Math.max(0, this.coins + delta);
     }
+
+    /**
+     * Steal one ripe crop (internal, no callback).
+     */
     public synchronized boolean stealOneRipe() {
         List<int[]> ripePositions = new ArrayList<>();
         for (int r = 0; r < ROWS; r++) {
@@ -106,11 +144,11 @@ public class Game {
         if (ripePositions.isEmpty()) {
             return false;
         }
-        // Randomly select one
         int[] pos = ripePositions.get(random.nextInt(ripePositions.size()));
         board[pos[0]][pos[1]] = PlotState.EMPTY;
         return true;
     }
+
     public synchronized int getRipeCount() {
         int count = 0;
         for (int r = 0; r < ROWS; r++) {
@@ -122,16 +160,19 @@ public class Game {
         }
         return count;
     }
+
     public int getRows() {
         return ROWS;
     }
+
     public int getCols() {
         return COLS;
     }
+
     public void shutdown() {
         scheduler.shutdownNow();
     }
-    // 在Game.java中添加这两个方法
+
     public synchronized void setCoins(int coins) {
         this.coins = coins;
     }
@@ -141,9 +182,10 @@ public class Game {
             this.board[row][col] = state;
         }
     }
-    // 任务4：客户端解析服务器快照更新本地镜像
-    // 简易手写解析（不依赖第三方库），假设格式固定 {"coins":X,"board":[["EMPTY","GROWING",...], ...]}
-    // 客户端快照更新 —— [Task 2.2 Networking & Updates]
+
+    /**
+     * Update game from snapshot JSON (best-effort, silent on errors).
+     */
     public synchronized void updateFromSnapshot(String json) {
         try {
             int coinsIdx = json.indexOf("\"coins\":");
@@ -171,11 +213,10 @@ public class Game {
                 }
             }
         } catch (Exception ignored) {
-            // [Task 2.5 Exception Handling] 出错时保留旧状态，避免崩溃
+            // 保留旧状态
         }
     }
 
-    // 简易分割：按逗号分，但不拆内部嵌套（这里结构简单可行）
     private String[] splitTopLevel(String s) {
         return s.split("\\s*,\\s*");
     }

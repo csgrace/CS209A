@@ -8,9 +8,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- * 登录窗口 - 用户输入用户名并连接服务器
- */
 public class LoginWindow {
     private String username;
     private boolean confirmed = false;
