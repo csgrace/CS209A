@@ -1,7 +1,93 @@
 # QQ Farm Report
 #### 12311043 魏宇晴
 
-## 1. Overview
+
+## 1. Architecture
+```
+src/
+└── main/
+    └── java/
+        └── org.example.demo/
+            ├── game/
+            │   └── Game.java
+            ├── server/
+            │   └── Server.java
+            ├── Application.java
+            ├── ConcurrencyTest.java
+            ├── Controller.java
+            └── LoginWindow.java
+```
+### **1. Game Module (`game/Game.java`)**
+The `Game` class encapsulates the main business logic and farm mechanics of the application.
+
+**Responsibilities:**
+- Tracks the state of each farm plot (`EMPTY`, `GROWING`, `RIPE`).
+- Manages planting, harvesting, and stealing operations.
+- Includes persistence logic for saving and loading farm states (e.g., `toSaveString()`, `fromSaveString()`).
+- Controls crop growth using `ScheduledExecutorService` for asynchronous timers.
+
+### **2. Server Module (`server/Server.java`)**
+The `Server` class implements the backend server that handles client connections and operations.
+
+**Responsibilities:**
+- Processes client commands (`LOGIN`, `GET`, `PLANT`, `HARVEST`, `STEAL`, etc.).
+- Manages client connections using `client-io` thread pool.
+- Persists farm states to disk (`farms.txt`) and reloads them upon restart.
+- Broadcasts state updates to all connected clients.
+
+### **3. Application Entry Point (`Application.java`)**
+The `Application` class serves as the entry point for the JavaFX application and initializes the UI components.
+
+**Responsibilities:**
+- Displays the login window (`LoginWindow`).
+- Initializes the `Controller` and `Game` after successful login.
+- Connects the client to the server and handles session setup.
+
+---
+
+### **4. Concurrency Test (`ConcurrencyTest.java`)**
+The `ConcurrencyTest` class is a standalone test suite for evaluating server behavior under concurrent client actions.
+
+**Responsibilities:**
+- Simulates multiple clients performing concurrent actions like stealing and planting.
+- Uses `CountDownLatch` to coordinate simultaneous actions.
+- Logs interactions for debugging race conditions.
+
+
+### **5. Controller Module (`Controller.java`)**
+The `Controller` serves as the intermediary between the client UI and the server logic.
+
+**Responsibilities:**
+- Updates the UI on game state changes.
+- Handles commands sent to the server (`STEAL`, `PLANT`, `HARVEST`).
+- Includes reconnect logic (`startReconnectLoop`) to maintain seamless client experience.
+
+
+### **6. Login Window (`LoginWindow.java`)**
+The `LoginWindow` class provides the initial login UI for the application.
+
+**Responsibilities:**
+- Captures the user’s login credentials and passes them to the `Controller`.
+- Displays error messages for invalid input (e.g., empty username).
+- Sets up a modal window for blocking interactions until login succeeds.
+
+### **System Architectural Features**
+
+1. **Modular Design**:
+    - Clear separation between UI (`Controller`, `LoginWindow`) and business logic (`Game`, `Server`).
+
+2. **Concurrency**:
+    - Thread pools (`client-io`, `stats-monitor`) ensure scalable and responsive operations across multiple clients.
+
+3. **Persistence**:
+    - Saves farm states in `farms.txt` to ensure data consistency across system crashes or disconnects.
+
+4. **Error Recovery**:
+    - Implements reconnect logic (`startReconnectLoop`) and user-friendly error messages for handling disconnections.
+
+
+## 2. Run Instructions
+
 Instructions on to run the programme:
 1. The environment of this project is JDK 22.
 2. Open a terminal and navigate to the directory containing the source code.
@@ -64,10 +150,10 @@ Instructions on to run the programme:
     [STEAL] bob failed - session limit reached, current: 1, max: 1
     ```
    
-## 2. Key Implementations 
+## 3. Key Implementations 
 This part is written mainly to match the **Key Requirements** in the project description pdf.
 
-### 2.1 Server-Side Implementation
+### 3.1 Server-Side Implementation
 The server manages all players, crop growth, and concurrent stealing requests. It ensures that updates to shared data (e.g., crop yield) are **atomic** and **thread-safe**.
 
 #### Connection Management :
@@ -191,7 +277,7 @@ The stealing logic is implemented on the server to ensure thread-safe and atomic
   }
   ```
 
-### 2.2 Client & GUI Implementation
+### 3.2 Client & GUI Implementation
 The client provides a JavaFX GUI for interacting with the farm. All network operations run on background threads to keep the UI responsive.
 
 #### Core GUI Layout :
@@ -312,7 +398,7 @@ private void listenLoop() {
     }
 }
 ```
-### 2.3 Gameplay Rules
+### 3.3 Gameplay Rules
 
 | **Action** | **Behavior**                                                                                       |
 |-------|---------------------------------------------------------------------------------------------------|
@@ -321,7 +407,7 @@ private void listenLoop() {
 | Steal | Allowed only when target crop is RIPE and owner is away; thief gets +3 coins; victim loses 1 crop; max floor(ripe × 0.25) steals per session |
 | Visit Friends | Switches UI to display friend's farm; retains navigation back home                              |
 
-### 2.4 Concurrency & Synchronization
+### 3.4 Concurrency & Synchronization
 
 #### Server-Side Locking
   - Synchronized Blocks: All critical sections (planting, harvesting, stealing) use `synchronized (this)` to prevent race conditions.
@@ -373,7 +459,7 @@ private void listenLoop() {
       - Each thief's coin balance increases appropriately.
       - No over-stealing occurs; maxSteal limits are enforced.
 
-### 2.5 Exception Handling
+### 3.5 Exception Handling
 
 #### Server Crashes :
 Handle server crashes or disconnects gracefully with user notice.
@@ -394,7 +480,7 @@ Catch network I/O errors without crashing the UI.
 - Graceful Handling: All socket operations are wrapped in try-catch blocks.
 - No UI Crashes: Exceptions are logged to console; UI remains functional and displays error messages.
 
-## 3. Self-Check
+## 4. Self-Check
 
 ### Thread Pools and Timers :
 This part mainly talks about the Thread pools and timers, their configuration and how they avoid the deadlocks.
@@ -533,118 +619,65 @@ This part summarizes which parts of the rubric the code has covered (server logi
 4. **Real-Time Event Scheduling**:
     - Introduce special events (e.g., crop festivals or competitions) to improve engagement.
 
-
-## 4. Architecture
-```
-src/
-└── main/
-    └── java/
-        └── org.example.demo/
-            ├── game/
-            │   └── Game.java
-            ├── server/
-            │   └── Server.java
-            ├── Application.java
-            ├── ConcurrencyTest.java
-            ├── Controller.java
-            └── LoginWindow.java
-```
-### **1. Game Module (`game/Game.java`)**
-The `Game` class encapsulates the main business logic and farm mechanics of the application.
-
-**Responsibilities:**
-- Tracks the state of each farm plot (`EMPTY`, `GROWING`, `RIPE`).
-- Manages planting, harvesting, and stealing operations.
-- Includes persistence logic for saving and loading farm states (e.g., `toSaveString()`, `fromSaveString()`).
-- Controls crop growth using `ScheduledExecutorService` for asynchronous timers.
-
-### **2. Server Module (`server/Server.java`)**
-The `Server` class implements the backend server that handles client connections and operations.
-
-**Responsibilities:**
-- Processes client commands (`LOGIN`, `GET`, `PLANT`, `HARVEST`, `STEAL`, etc.).
-- Manages client connections using `client-io` thread pool.
-- Persists farm states to disk (`farms.txt`) and reloads them upon restart.
-- Broadcasts state updates to all connected clients.
-
-### **3. Application Entry Point (`Application.java`)**
-The `Application` class serves as the entry point for the JavaFX application and initializes the UI components.
-
-**Responsibilities:**
-- Displays the login window (`LoginWindow`).
-- Initializes the `Controller` and `Game` after successful login.
-- Connects the client to the server and handles session setup.
-
----
-
-### **4. Concurrency Test (`ConcurrencyTest.java`)**
-#### **并发测试：`ConcurrencyTest.java`**
-The `ConcurrencyTest` class is a standalone test suite for evaluating server behavior under concurrent client actions.
-#### `ConcurrencyTest`类是一个独立的测试套件，用于评估服务器在并发客户端操作下的行为。
-
-**Responsibilities:**
-- Simulates multiple clients performing concurrent actions like stealing and planting.
-#### 负责：模拟多个客户端执行并发操作，例如偷窃和种植。
-- Uses `CountDownLatch` to coordinate simultaneous actions.
-#### 使用`CountDownLatch`协调同时的操作。
-- Logs interactions for debugging race conditions.
-#### 记录交互信息以调试竞争状况。
-
----
-
-### **5. Controller Module (`Controller.java`)**
-#### **控制模块：`Controller.java`**
-The `Controller` serves as the intermediary between the client UI and the server logic.
-#### `Controller` 作为客户端UI和服务器逻辑之间的中介。
-
-**Responsibilities:**
-- Updates the UI on game state changes.
-#### 在游戏状态改变时更新UI。
-- Handles commands sent to the server (`STEAL`, `PLANT`, `HARVEST`).
-#### 处理发送到服务器的命令（`STEAL`，`PLANT`，`HARVEST`）。
-- Includes reconnect logic (`startReconnectLoop`) to maintain seamless client experience.
-#### 包括重新连接逻辑（`startReconnectLoop`），以保持流畅的客户端体验。
-
----
-
-### **6. Login Window (`LoginWindow.java`)**
-#### **登录窗口：`LoginWindow.java`**
-The `LoginWindow` class provides the initial login UI for the application.
-#### `LoginWindow`类提供了程序的初始登录界面。
-
-**Responsibilities:**
-- Captures the user’s login credentials and passes them to the `Controller`.
-#### 捕获用户的登录凭据并将其传递给`Controller`。
-- Displays error messages for invalid input (e.g., empty username).
-#### 显示无效输入的错误消息（例如，用户名为空）。
-- Sets up a modal window for blocking interactions until login succeeds.
-#### 设置模态窗口，阻止交互直到登录成功。
-
----
-
-### **System Architectural Features**
-#### **系统架构特点**
-
-1. **Modular Design**:
-    - Clear separation between UI (`Controller`, `LoginWindow`) and business logic (`Game`, `Server`).
-   #### **模块化设计**：
-    - UI（`Controller`、`LoginWindow`）与业务逻辑（`Game`、`Server`）之间有清晰的分离。
-
-2. **Concurrency**:
-    - Thread pools (`client-io`, `stats-monitor`) ensure scalable and responsive operations across multiple clients.
-   #### **并发**：
-    - 线程池（`client-io`、`stats-monitor`）确保跨多个客户端的可扩展和响应式操作。
-
-3. **Persistence**:
-    - Saves farm states in `farms.txt` to ensure data consistency across system crashes or disconnects.
-   #### **持久化**：
-    - 将农场状态保存到`farms.txt`中，确保在系统崩溃或断连后的一致性。
-
-4. **Error Recovery**:
-    - Implements reconnect logic (`startReconnectLoop`) and user-friendly error messages for handling disconnections.
-   #### **错误恢复**：
-    - 实现重连逻辑（`startReconnectLoop`）和用户友好的错误消息，以处理断连情况。
-
-
+    
 ## 5. Protocol Descriptions
+
+The project's communication protocol between the client and server is based on simple **command-driven interactions**. Commands are sent as plain text strings from client to server, and responses are returned as plain text as well. The following describes the protocols implemented in the code.
+
+
+### **1. LOGIN**
+- **Description:** Registers a new player with the server or reconnects an existing player.
+- **Command Format:** `LOGIN <playerName>`
+  - Example: `LOGIN alice`
+- **Server Action:**
+    - Creates or fetches the player's farm object.
+    - Initializes the player's session.
+- **Response Format:** `OK LOGGED_IN <playerName>`
+
+
+### **2. GET**
+- **Description:** Retrieves the current state of the player's own farm.
+- **Command Format:** `GET`
+- **Server Action:**
+    - Returns the farm's state including plot information and coins.
+- **Response Format:** `OK {"coins":40,"board":[["EMPTY","RIPE"],...]}`
+
+
+### **3. VIEW**
+- **Description:** Retrieves the state of another player's farm.
+- **Command Format:** `VIEW <playerName>`
+  - Example: `VIEW bob`
+- **Server Action:**
+    - Returns the requested player's farm state.
+- **Response Format:** `OK {"coins":20,"board":[["GROWING","EMPTY"],...]}`
+
+
+### **4. PLANT**
+- **Description:** Plants crops in a specified plot in the player's farm.
+- **Command Format:** `PLANT <row> <column>`
+  - **Example:** `PLANT 1 2`
+- **Server Action:**
+    - Updates the specified plot to `GROWING`.
+    - Deducts coins from the player.
+- **Response Format:** `OK PLANTED at (1,2)`
+
+
+### **5. HARVEST**
+- **Description:** Harvests crops from a specified plot in the player's farm.
+- **Command Format:** `HARVEST <row> <column>`
+  - Example: `HARVEST 0 3`
+- **Server Action:**
+    - Updates the specified plot to `EMPTY`.
+    - Adds coins to the player's balance.
+- **Response Format:** `OK HARVESTED at (0,3)`
+
+
+### **6. STEAL**
+- **Description:** Attempts to steal a ripe crop from another player's farm.
+- **Command Format:** `STEAL <playerName>`
+  - Example: `STEAL bob`
+- **Server Action:**
+    - Locks the victim farm to prevent concurrent changes.
+    - Transfers one ripe crop (if available) to the thief's farm.
+- **Response Format:** `OK STEAL successful` or `ERR No ripe crops`
 
