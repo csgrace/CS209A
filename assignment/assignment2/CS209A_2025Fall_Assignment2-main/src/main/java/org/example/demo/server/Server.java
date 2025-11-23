@@ -29,13 +29,10 @@ public class Server {
     private final ConcurrentHashMap<String, Game> farms = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<PrintWriter> allClients = new CopyOnWriteArrayList<>();
     private final ConcurrentHashMap<String, String> currentView = new ConcurrentHashMap<>();
-
     private final ConcurrentHashMap<String, Integer> playerActionStats = new ConcurrentHashMap<>();
     private long serverStartTime;
-
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Boolean>> canStealThisCycle = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Integer>> sessionStealCounts = new ConcurrentHashMap<>();
-
     private static final String SAVE_FILE = "farms.txt";
 
     public Server(int port) {
@@ -43,13 +40,10 @@ public class Server {
     }
 
     private static void log(String tag, String msg) {
-        // 当前时间戳（毫秒级）
-        long millis = System.currentTimeMillis();
-
+        long millis = System.currentTimeMillis(); // 当前时间戳（毫秒级）
         // 当前时间格式化为可读的 HH:mm:ss.SSS
         String humanReadableTime = new java.text.SimpleDateFormat("HH:mm:ss.SSS")
                 .format(new java.util.Date(millis));
-
         // 纳秒级时间戳（系统单调时间，用于计算时间间隔）
         long nanoTime = System.nanoTime();
         System.out.printf(

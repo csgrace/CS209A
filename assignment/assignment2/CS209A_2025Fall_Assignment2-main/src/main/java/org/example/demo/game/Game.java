@@ -9,16 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
-
     public enum PlotState {EMPTY, GROWING, RIPE}
-
     private static final int ROWS = 4;
     private static final int COLS = 4;
     private static final int PLANT_COST = 5;
     private static final int HARVEST_REWARD = 12;
     public static final int STEAL_REWARD = 3;
     private static final long GROW_TIME_MS = 10_000; // 10 seconds
-
     private final PlotState[][] board = new PlotState[ROWS][COLS];
     private final long[][] plantTimestamps = new long[ROWS][COLS]; // 种植时间戳（毫秒）
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, runnable -> {
@@ -69,14 +66,9 @@ public class Game {
             callback = onStateChange;
         }
         if (callback != null) callback.accept(this);
-
-        // 10秒后成熟
         scheduleRipen(row, col, GROW_TIME_MS);
     }
 
-    /**
-     * 启动定时任务让作物在 delayMs 后成熟。
-     */
     private void scheduleRipen(int row, int col, long delayMs) {
         scheduler.schedule(() -> {
             boolean ripened = false;
@@ -167,13 +159,6 @@ public class Game {
         }
     }
 
-    // ========== 持久化方法（带时间戳） ==========
-
-    /**
-     * 生成持久化字符串：
-     * coins|state0,timestamp0,state1,timestamp1,...,state15,timestamp15
-     * 每个格子保存"状态名,时间戳"对。
-     */
     public synchronized String toSaveString() {
         StringBuilder sb = new StringBuilder();
         sb.append(coins).append("|");
@@ -188,9 +173,6 @@ public class Game {
         return sb.toString();
     }
 
-    /**
-     * 从持久化字符串恢复，并对 GROWING 格子根据时间戳恢复定时任务。
-     */
     public synchronized void fromSaveString(String saveStr) {
         if (saveStr == null || saveStr.isEmpty()) return;
         try {

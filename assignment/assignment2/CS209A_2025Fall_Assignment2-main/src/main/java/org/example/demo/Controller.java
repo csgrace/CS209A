@@ -17,15 +17,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.example.demo.game.Game;
 
-/**
- * Controller:
- * - JavaFX UI for QQ Farm
- * - Asynchronous networking with server
- * - Visual feedback for plots and actions
- * - Improved failure handling + automatic reconnect when server crashes
- */
 public class Controller {
-
     private GridPane gameBoard;
     private Label coinsLabel;
     private Label statusLabel;
@@ -37,17 +29,13 @@ public class Controller {
     private Button backButton;
     private Game myFarmGame;
     private Game viewingFarmGame;
-
     private ToggleButton[][] cells;
     private Timeline refreshTimeline;
     private String statusMessage = "Ready.";
-
     private int selectedRow = -1;
     private int selectedCol = -1;
-
     private String myPlayerName;
     private String viewingPlayerName;
-
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
@@ -56,14 +44,11 @@ public class Controller {
     private final java.util.concurrent.ConcurrentHashMap<String, Game> friendFarmsCache =
             new java.util.concurrent.ConcurrentHashMap<>();
 
-    // Connection / reconnect state
     private volatile boolean connected = false; // 当前是否与服务器连接正常
     private volatile boolean reconnecting = false;  // 是否正在自动重连
     private int reconnectAttempts = 0;
-    private static final int MAX_RECONNECT_ATTEMPTS = 10;
     private static final int RECONNECT_DELAY_MS = 3000;
 
-    // Styles for visit button
     private static final String VISIT_BASE_STYLE =
             "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5px;";
     private static final String VISIT_FINAL_STYLE =
@@ -179,10 +164,6 @@ public class Controller {
         stealButton.setStyle("-fx-background-color: #FF6B6B; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px; -fx-border-radius: 5px;");
     }
 
-    /**
-     * 动作前统一检查连接状态：
-     * - 若已断线，则仅显示“Disconnected from server. Unable to <action>.”，不发任何命令。
-     */
     private boolean checkConnectedForAction(String actionName) {
         if (!connected) {
             String msg = "Disconnected from server. Unable to " + actionName + ".";
@@ -192,9 +173,6 @@ public class Controller {
         return true;
     }
 
-    /**
-     * 渐变动画：Visit 按钮从浅蓝过渡到深蓝
-     */
     private void animateVisitButton() {
         String[] colors = {
                 "#87CEEB", "#76B9E4", "#65A5DD", "#5490D6",
@@ -240,7 +218,6 @@ public class Controller {
             startReconnectLoop(); // 初次连接失败也尝试重连
         }
     }
-
 
     private void listenLoop() {
         String line;
@@ -354,12 +331,9 @@ public class Controller {
                     Platform.runLater(() -> showStatus("Error: " + msg.substring(4)));
                 }
             }
-
-            // readLine 返回 null -> 服务器关闭连接
-            Platform.runLater(this::onDisconnected);
+            Platform.runLater(this::onDisconnected); // readLine 返回 null -> 服务器关闭连接
         } catch (IOException e) {
-            // 网络错误（服务器崩溃 / 断网）
-            Platform.runLater(this::onDisconnected);
+            Platform.runLater(this::onDisconnected); // 网络错误（服务器崩溃 / 断网）
         }
     }
     private void handleServerMsg(String msg) {
@@ -436,7 +410,6 @@ public class Controller {
             }
         }, "reconnect-loop").start();
     }
-
 
     private void updateGameSnapshot(Game targetGame, String json) {
         if (json == null || json.isEmpty()) return;
@@ -644,15 +617,6 @@ public class Controller {
         if (statusLabel != null) {
             statusLabel.setText(statusMessage);
         }
-    }
-
-    private String extractCoordinates(String msg) {
-        int start = msg.indexOf('(');
-        int end = msg.indexOf(')');
-        if (start >= 0 && end > start) {
-            return msg.substring(start, end + 1);
-        }
-        return "";
     }
 
     private void handleVisit() {

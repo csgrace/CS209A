@@ -1,5 +1,4 @@
 package org.example.demo;
-// mvn compile exec:java "-Dexec.mainClass=org.example.demo.server.Server"
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,7 +10,6 @@ import javafx.stage.Stage;
 public class LoginWindow {
     private String username;
     private boolean confirmed = false;
-
     public LoginWindow(Stage primaryStage) {
         // 创建登录窗口
         Stage loginStage = new Stage();
@@ -25,21 +23,17 @@ public class LoginWindow {
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-background-color: #F0F8FF;");
 
-        // 标题
         Label title = new Label("🌱 QQ Farm - Welcome");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2E8B57;");
 
-        // 提示文本
         Label hint = new Label("Please enter your username to login:");
         hint.setStyle("-fx-font-size: 14px; -fx-text-fill: #4169E1;");
 
-        // 用户名输入框
         TextField usernameField = new TextField();
         usernameField.setPromptText("Enter your username (e.g., alice, bob)");
         usernameField.setPrefHeight(40);
         usernameField.setStyle("-fx-font-size: 14px; -fx-padding: 10px; -fx-border-radius: 5px;");
 
-        // 按钮区域
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
 
@@ -53,7 +47,6 @@ public class LoginWindow {
         exitBtn.setPrefHeight(40);
         exitBtn.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #FF6B6B; -fx-text-fill: white; -fx-border-radius: 5px;");
 
-        // 登录按钮处理
         loginBtn.setOnAction(e -> {
             String input = usernameField.getText().trim();
             if (input.isEmpty()) {
@@ -65,11 +58,9 @@ public class LoginWindow {
             loginStage.close();
         });
 
-        // 退出按钮
         exitBtn.setOnAction(e -> System.exit(0));
 
-        // 支持回车登录
-        usernameField.setOnKeyPressed(e -> {
+        usernameField.setOnKeyPressed(e -> { // 支持回车登录
             if (e.getCode().toString().equals("ENTER")) {
                 loginBtn.fire();
             }

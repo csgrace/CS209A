@@ -535,6 +535,116 @@ This part summarizes which parts of the rubric the code has covered (server logi
 
 
 ## 4. Architecture
+```
+src/
+└── main/
+    └── java/
+        └── org.example.demo/
+            ├── game/
+            │   └── Game.java
+            ├── server/
+            │   └── Server.java
+            ├── Application.java
+            ├── ConcurrencyTest.java
+            ├── Controller.java
+            └── LoginWindow.java
+```
+### **1. Game Module (`game/Game.java`)**
+The `Game` class encapsulates the main business logic and farm mechanics of the application.
+
+**Responsibilities:**
+- Tracks the state of each farm plot (`EMPTY`, `GROWING`, `RIPE`).
+- Manages planting, harvesting, and stealing operations.
+- Includes persistence logic for saving and loading farm states (e.g., `toSaveString()`, `fromSaveString()`).
+- Controls crop growth using `ScheduledExecutorService` for asynchronous timers.
+
+### **2. Server Module (`server/Server.java`)**
+The `Server` class implements the backend server that handles client connections and operations.
+
+**Responsibilities:**
+- Processes client commands (`LOGIN`, `GET`, `PLANT`, `HARVEST`, `STEAL`, etc.).
+- Manages client connections using `client-io` thread pool.
+- Persists farm states to disk (`farms.txt`) and reloads them upon restart.
+- Broadcasts state updates to all connected clients.
+
+### **3. Application Entry Point (`Application.java`)**
+The `Application` class serves as the entry point for the JavaFX application and initializes the UI components.
+
+**Responsibilities:**
+- Displays the login window (`LoginWindow`).
+- Initializes the `Controller` and `Game` after successful login.
+- Connects the client to the server and handles session setup.
+
+---
+
+### **4. Concurrency Test (`ConcurrencyTest.java`)**
+#### **并发测试：`ConcurrencyTest.java`**
+The `ConcurrencyTest` class is a standalone test suite for evaluating server behavior under concurrent client actions.
+#### `ConcurrencyTest`类是一个独立的测试套件，用于评估服务器在并发客户端操作下的行为。
+
+**Responsibilities:**
+- Simulates multiple clients performing concurrent actions like stealing and planting.
+#### 负责：模拟多个客户端执行并发操作，例如偷窃和种植。
+- Uses `CountDownLatch` to coordinate simultaneous actions.
+#### 使用`CountDownLatch`协调同时的操作。
+- Logs interactions for debugging race conditions.
+#### 记录交互信息以调试竞争状况。
+
+---
+
+### **5. Controller Module (`Controller.java`)**
+#### **控制模块：`Controller.java`**
+The `Controller` serves as the intermediary between the client UI and the server logic.
+#### `Controller` 作为客户端UI和服务器逻辑之间的中介。
+
+**Responsibilities:**
+- Updates the UI on game state changes.
+#### 在游戏状态改变时更新UI。
+- Handles commands sent to the server (`STEAL`, `PLANT`, `HARVEST`).
+#### 处理发送到服务器的命令（`STEAL`，`PLANT`，`HARVEST`）。
+- Includes reconnect logic (`startReconnectLoop`) to maintain seamless client experience.
+#### 包括重新连接逻辑（`startReconnectLoop`），以保持流畅的客户端体验。
+
+---
+
+### **6. Login Window (`LoginWindow.java`)**
+#### **登录窗口：`LoginWindow.java`**
+The `LoginWindow` class provides the initial login UI for the application.
+#### `LoginWindow`类提供了程序的初始登录界面。
+
+**Responsibilities:**
+- Captures the user’s login credentials and passes them to the `Controller`.
+#### 捕获用户的登录凭据并将其传递给`Controller`。
+- Displays error messages for invalid input (e.g., empty username).
+#### 显示无效输入的错误消息（例如，用户名为空）。
+- Sets up a modal window for blocking interactions until login succeeds.
+#### 设置模态窗口，阻止交互直到登录成功。
+
+---
+
+### **System Architectural Features**
+#### **系统架构特点**
+
+1. **Modular Design**:
+    - Clear separation between UI (`Controller`, `LoginWindow`) and business logic (`Game`, `Server`).
+   #### **模块化设计**：
+    - UI（`Controller`、`LoginWindow`）与业务逻辑（`Game`、`Server`）之间有清晰的分离。
+
+2. **Concurrency**:
+    - Thread pools (`client-io`, `stats-monitor`) ensure scalable and responsive operations across multiple clients.
+   #### **并发**：
+    - 线程池（`client-io`、`stats-monitor`）确保跨多个客户端的可扩展和响应式操作。
+
+3. **Persistence**:
+    - Saves farm states in `farms.txt` to ensure data consistency across system crashes or disconnects.
+   #### **持久化**：
+    - 将农场状态保存到`farms.txt`中，确保在系统崩溃或断连后的一致性。
+
+4. **Error Recovery**:
+    - Implements reconnect logic (`startReconnectLoop`) and user-friendly error messages for handling disconnections.
+   #### **错误恢复**：
+    - 实现重连逻辑（`startReconnectLoop`）和用户友好的错误消息，以处理断连情况。
+
 
 ## 5. Protocol Descriptions
 
