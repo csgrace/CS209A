@@ -19,9 +19,10 @@ import org.example.demo.game.Game;
 
 /**
  * Controller:
- * - Improved visit button color transition (animated)
- * - Added comments near network I/O lines
- * - No change to protocol; integrates with updated Game (callbacks outside locks)
+ * - JavaFX UI for QQ Farm
+ * - Asynchronous networking with server
+ * - Visual feedback for plots and actions
+ * - Improved failure handling + automatic reconnect when server crashes
  */
 public class Controller {
 
@@ -54,6 +55,13 @@ public class Controller {
     private String lastCommand = "";
     private final java.util.concurrent.ConcurrentHashMap<String, Game> friendFarmsCache =
             new java.util.concurrent.ConcurrentHashMap<>();
+
+    // Connection / reconnect state
+    private volatile boolean connected = false;     // 当前是否与服务器连接正常
+    private volatile boolean reconnecting = false;  // 是否正在自动重连
+    private int reconnectAttempts = 0;
+    private static final int MAX_RECONNECT_ATTEMPTS = 10;
+    private static final int RECONNECT_DELAY_MS = 3000;
 
     // Styles for visit button
     private static final String VISIT_BASE_STYLE =
@@ -136,28 +144,52 @@ public class Controller {
         visitButton = new Button("Visit");
         visitButton.setStyle(VISIT_BASE_STYLE);
         visitButton.setOnAction(e -> {
-            animateVisitButton(); // 颜色渐变动画
+            if (!checkConnectedForAction("visit a friend")) return;
+            animateVisitButton();
             handleVisit();
         });
 
         backButton = new Button("Back Home");
         backButton.setOnAction(e -> {
+            if (!checkConnectedForAction("go back home")) return;
             handleBack();
             resetVisitButtonStyle();
         });
         backButton.setStyle("-fx-background-color: #98FB98; -fx-text-fill: #2F4F4F; -fx-font-weight: bold; -fx-border-radius: 5px;");
 
         plantButton = new Button("Plant (Cost: 5 coins)");
-        plantButton.setOnAction(e -> handlePlant());
+        plantButton.setOnAction(e -> {
+            if (!checkConnectedForAction("plant")) return;
+            handlePlant();
+        });
         plantButton.setStyle("-fx-background-color: #90EE90; -fx-text-fill: #006400; -fx-font-weight: bold; -fx-padding: 10px; -fx-border-radius: 5px;");
 
         harvestButton = new Button("Harvest (+12 coins)");
-        harvestButton.setOnAction(e -> handleHarvest());
+        harvestButton.setOnAction(e -> {
+            if (!checkConnectedForAction("harvest")) return;
+            handleHarvest();
+        });
         harvestButton.setStyle("-fx-background-color: #FFD700; -fx-text-fill: #B8860B; -fx-font-weight: bold; -fx-padding: 10px; -fx-border-radius: 5px;");
 
         stealButton = new Button("Steal (+3 coins)");
-        stealButton.setOnAction(e -> handleSteal());
+        stealButton.setOnAction(e -> {
+            if (!checkConnectedForAction("steal")) return;
+            handleSteal();
+        });
         stealButton.setStyle("-fx-background-color: #FF6B6B; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px; -fx-border-radius: 5px;");
+    }
+
+    /**
+     * 动作前统一检查连接状态：
+     * - 若已断线，则仅显示“Disconnected from server. Unable to <action>.”，不发任何命令。
+     */
+    private boolean checkConnectedForAction(String actionName) {
+        if (!connected) {
+            String msg = "Disconnected from server. Unable to " + actionName + ".";
+            showStatus(msg);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -188,9 +220,12 @@ public class Controller {
     public void connectAndLogin(String playerName) {
         try {
             socket = new Socket("127.0.0.1", 5050);
-            // 使用 UTF-8 + 行缓冲。PrintWriter(true) -> autoFlush on println
             in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
             out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+
+            connected = true;
+            reconnecting = false;
+            reconnectAttempts = 0;
 
             listenThread = new Thread(this::listenLoop, "server-listener");
             listenThread.setDaemon(true);
@@ -199,8 +234,10 @@ public class Controller {
             out.println("LOGIN " + playerName);
             showStatus("Connecting to server...");
         } catch (IOException e) {
+            connected = false;
             showStatus("Connect failed: " + e.getMessage());
-            disableAllActions();
+            updateButtonStates();
+            startReconnectLoop(); // 初次连接失败也尝试重连
         }
     }
 
@@ -245,7 +282,9 @@ public class Controller {
                 } else if (msg.startsWith("OK ")) {
                     Platform.runLater(() -> {
                         if (msg.startsWith("OK LOGGED_IN")) {
+                            connected = true;
                             showStatus("Successfully connected to farm server!");
+                            updateButtonStates();
                         } else if (msg.contains("{")) {
                             String json = msg.substring(3);
                             if (lastCommand.startsWith("STEAL")) {
@@ -257,6 +296,8 @@ public class Controller {
                                 updateCoinsDisplay();
                             } else if (lastCommand.startsWith("GET")) {
                                 updateGameSnapshot(myFarmGame, json);
+                                viewingFarmGame = myFarmGame;
+                                viewingPlayerName = myPlayerName;
                                 refreshBoardFromGameState();
                                 updateCoinsDisplay();
                             } else if (lastCommand.startsWith("PLANT") || lastCommand.startsWith("HARVEST")) {
@@ -278,12 +319,93 @@ public class Controller {
                     Platform.runLater(() -> showStatus("Error: " + msg.substring(4)));
                 }
             }
+
+            // readLine 返回 null -> 服务器关闭连接
+            Platform.runLater(this::onDisconnected);
         } catch (IOException e) {
-            Platform.runLater(() -> {
-                showStatus("Disconnected from server");
-                disableAllActions();
-            });
+            // 网络错误（服务器崩溃 / 断网）
+            Platform.runLater(this::onDisconnected);
         }
+    }
+
+    /** 统一的断线处理：提示、按钮禁用、启动自动重连。 */
+    private void onDisconnected() {
+        if (!connected && reconnecting) {
+            // 已经在重连中，避免重复触发
+            return;
+        }
+        connected = false;
+        showStatus("Disconnected from server. Attempting to reconnect...");
+        updateButtonStates();
+        startReconnectLoop();
+    }
+
+    /**
+     * 自动重连：后台线程尝试多次重建 socket 并 LOGIN、GET。
+     * 成功后自动刷新棋盘并恢复按钮状态。
+     */
+    private synchronized void startReconnectLoop() {
+        if (reconnecting) return;
+        reconnecting = true;
+
+        new Thread(() -> {
+            while (!connected && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                reconnectAttempts++;
+                try {
+                    System.out.println("[RECONNECT] Attempt " + reconnectAttempts);
+                    Socket newSocket = new Socket("127.0.0.1", 5050);
+                    BufferedReader newIn = new BufferedReader(
+                            new InputStreamReader(newSocket.getInputStream(), StandardCharsets.UTF_8));
+                    PrintWriter newOut = new PrintWriter(
+                            new OutputStreamWriter(newSocket.getOutputStream(), StandardCharsets.UTF_8), true);
+
+                    // 替换旧 socket / 流
+                    this.socket = newSocket;
+                    this.in = newIn;
+                    this.out = newOut;
+
+                    // 启动新的 listener
+                    listenThread = new Thread(this::listenLoop, "server-listener");
+                    listenThread.setDaemon(true);
+                    listenThread.start();
+
+                    // 重新登录并请求自己的农场状态
+                    out.println("LOGIN " + myPlayerName);
+                    lastCommand = "GET";
+                    out.println("GET");
+
+                    connected = true;
+                    reconnecting = false;
+                    reconnectAttempts = 0;
+
+                    Platform.runLater(() -> {
+                        viewingPlayerName = myPlayerName;
+                        viewingFarmGame = myFarmGame;
+                        showStatus("Reconnected to server as " + myPlayerName + ".");
+                        refreshBoardFromGameState();
+                        updateButtonStates();
+                    });
+
+                    System.out.println("[RECONNECT] Success");
+                    return; // 成功就退出循环
+
+                } catch (IOException ex) {
+                    System.out.println("[RECONNECT] Failed attempt " + reconnectAttempts + ": " + ex.getMessage());
+                    try {
+                        Thread.sleep(RECONNECT_DELAY_MS);
+                    } catch (InterruptedException ignored) {}
+                }
+            }
+
+            // 超过最大重连次数，放弃
+            if (!connected) {
+                reconnecting = false;
+                Platform.runLater(() -> {
+                    showStatus("Disconnected from server. Please restart the client.");
+                    updateButtonStates(); // 按钮保持禁用
+                });
+            }
+        }, "reconnect-loop").start();
     }
 
     private void updateGameSnapshot(Game targetGame, String json) {
@@ -410,14 +532,15 @@ public class Controller {
     }
 
     private void updateButtonStates() {
-        boolean onOwnFarm = viewingPlayerName.equals(myPlayerName);
-        boolean connected = socket != null && !socket.isClosed();
-        if (plantButton != null) plantButton.setDisable(!onOwnFarm || !connected);
-        if (harvestButton != null) harvestButton.setDisable(!onOwnFarm || !connected);
-        if (stealButton != null) stealButton.setDisable(onOwnFarm || !connected);
-        if (backButton != null) backButton.setDisable(onOwnFarm || !connected);
+        boolean onOwnFarm = viewingPlayerName != null && viewingPlayerName.equals(myPlayerName);
+        boolean canUse = connected;
+
+        if (plantButton != null) plantButton.setDisable(!canUse || !onOwnFarm);
+        if (harvestButton != null) harvestButton.setDisable(!canUse || !onOwnFarm);
+        if (stealButton != null) stealButton.setDisable(!canUse || onOwnFarm);
+        if (backButton != null) backButton.setDisable(!canUse || onOwnFarm);
         if (visitButton != null && friendField != null) {
-            visitButton.setDisable(!connected || friendField.getText().trim().isEmpty());
+            visitButton.setDisable(!canUse || friendField.getText().trim().isEmpty());
         }
     }
 
@@ -464,7 +587,9 @@ public class Controller {
         cell.setStyle(style);
 
         if (cell.getTooltip() != null) {
-            String ownerInfo = viewingPlayerName.equals(myPlayerName) ? "Your farm" : viewingPlayerName + "'s farm";
+            String ownerInfo = viewingPlayerName != null && viewingPlayerName.equals(myPlayerName)
+                    ? "Your farm"
+                    : (viewingPlayerName == null ? "" : viewingPlayerName + "'s farm");
             cell.getTooltip().setText("Plot (" + row + "," + col + ")\nState: " + state + "\n" + ownerInfo);
         }
     }
@@ -472,11 +597,11 @@ public class Controller {
     private void updateCoinsDisplay() {
         if (coinsLabel == null) return;
         String labelText;
-        if (viewingPlayerName.equals(myPlayerName)) {
+        if (viewingPlayerName != null && viewingPlayerName.equals(myPlayerName)) {
             labelText = "Player: " + myPlayerName + " | Your Farm | Coins: " + myFarmGame.getCoins();
         } else {
             labelText = "Player: " + myPlayerName + " | Viewing: " + viewingPlayerName + " | My Coins: "
-                    + myFarmGame.getCoins() + " | " + viewingPlayerName + "'s Coins: " + viewingFarmGame.getCoins();
+                    + myFarmGame.getCoins() + " | " + viewingFarmGame.getCoins();
         }
         coinsLabel.setText(labelText);
     }
@@ -497,7 +622,7 @@ public class Controller {
             showStatus("Enter a friend's name");
             return;
         }
-        if (out != null) {
+        if (out != null && connected) {
             viewingPlayerName = friend;
             viewingFarmGame = friendFarmsCache.computeIfAbsent(friend, k -> new Game());
             selectedRow = -1;
@@ -506,12 +631,12 @@ public class Controller {
             out.println("VIEW " + friend);
             showStatus("Visiting " + friend + "'s farm...");
         } else {
-            showStatus("Not connected");
+            showStatus("Disconnected from server. Unable to visit.");
         }
     }
 
     private void handleBack() {
-        if (out != null) {
+        if (out != null && connected) {
             viewingPlayerName = myPlayerName;
             viewingFarmGame = myFarmGame;
             selectedRow = -1;
@@ -519,6 +644,8 @@ public class Controller {
             lastCommand = "GET";
             out.println("GET");
             showStatus("Back to your farm");
+        } else {
+            showStatus("Disconnected from server. Unable to go back home.");
         }
     }
 
@@ -531,18 +658,12 @@ public class Controller {
             showStatus("You can only plant on your own farm");
             return;
         }
-        if (out != null) {
+        if (out != null && connected) {
             lastCommand = "PLANT " + selectedRow + " " + selectedCol;
             out.println("PLANT " + selectedRow + " " + selectedCol);
             showStatus("Planting (" + selectedRow + "," + selectedCol + ")...");
         } else {
-            try {
-                myFarmGame.plant(selectedRow, selectedCol);
-                refreshBoardFromGameState();
-                showStatus("Local plant");
-            } catch (Exception e) {
-                showStatus("Error: " + e.getMessage());
-            }
+            showStatus("Disconnected from server. Unable to plant.");
         }
     }
 
@@ -555,18 +676,12 @@ public class Controller {
             showStatus("You can only harvest your own crops");
             return;
         }
-        if (out != null) {
+        if (out != null && connected) {
             lastCommand = "HARVEST " + selectedRow + " " + selectedCol;
             out.println("HARVEST " + selectedRow + " " + selectedCol);
             showStatus("Harvesting (" + selectedRow + "," + selectedCol + ")...");
         } else {
-            try {
-                myFarmGame.harvest(selectedRow, selectedCol);
-                refreshBoardFromGameState();
-                showStatus("Harvested locally");
-            } catch (Exception e) {
-                showStatus("Error: " + e.getMessage());
-            }
+            showStatus("Disconnected from server. Unable to harvest.");
         }
     }
 
@@ -575,21 +690,21 @@ public class Controller {
             showStatus("Visit a friend's farm first");
             return;
         }
-        if (out != null) {
+        if (out != null && connected) {
             String victimName = viewingPlayerName;
             lastCommand = "STEAL " + victimName;
             out.println("STEAL " + victimName);
             showStatus("Stealing from " + victimName + "...");
         } else {
-            myFarmGame.stealRandom();
-            refreshBoardFromGameState();
-            showStatus("Local simulated steal");
+            showStatus("Disconnected from server. Unable to steal.");
         }
     }
 
     public void shutdown() {
         if (refreshTimeline != null) refreshTimeline.stop();
         if (myFarmGame != null) myFarmGame.shutdown();
+        connected = false;
+        reconnecting = false;
         try {
             if (socket != null) socket.close();
         } catch (IOException ignored) {}
@@ -605,13 +720,5 @@ public class Controller {
         }));
         refreshTimeline.setCycleCount(Timeline.INDEFINITE);
         refreshTimeline.play();
-    }
-
-    private void disableAllActions() {
-        if (plantButton != null) plantButton.setDisable(true);
-        if (harvestButton != null) harvestButton.setDisable(true);
-        if (stealButton != null) stealButton.setDisable(true);
-        if (visitButton != null) visitButton.setDisable(true);
-        if (backButton != null) backButton.setDisable(true);
     }
 }

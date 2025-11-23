@@ -1,9 +1,8 @@
 package org.example.demo.server;
-
-// mvn compile exec:java "-Dexec.mainClass=org.example.demo.server.Server"
-
+/*
+mvn compile exec:java "-Dexec.mainClass=org.example.demo.server.Server"
+*/
 import org.example.demo.game.Game;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,20 +12,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Server:
- * - 2.1 Connection / Game State / Crop Growth (调用 Game 内线程)
- * - 2.2 Networking push UPDATE
- * - 2.3 Gameplay Rules (偷菜限制 + 奖励调整)
- * - 2.4 Concurrency logs + atomic double-lock
- * - 2.5 Exception handling (I/O 捕获不中断整体, 输入校验)
- * - NEW: ScheduledExecutorService for server statistics monitoring (Multithreading)
- *
- * NOTE: STEAL 逻辑已更新：在 synchronized(victim) 内重新计算 currentRipe/maxSteal，
- *       并执行 stealOneRipe + addCoins + sessionStealCounts 更新，保证 25% 上限
- *       对并发请求也是严格的。例如 ripe=4 时，两名小偷并发只会有一人成功，
- *       第二个线程进入时看到的是 currentRipe=3 -> maxSteal=0 -> 被拒绝。
- */
+
 public class Server {
 
     private final int port;
@@ -36,7 +22,6 @@ public class Server {
         return t;
     });
 
-    // 统计监控线程池
     private final ScheduledExecutorService statsExecutor = Executors.newScheduledThreadPool(1, (Runnable runnable) -> {
         Thread t = new Thread(runnable, "stats-monitor");
         t.setDaemon(true);
@@ -47,15 +32,13 @@ public class Server {
     private final CopyOnWriteArrayList<PrintWriter> allClients = new CopyOnWriteArrayList<>();
     private final ConcurrentHashMap<String, String> currentView = new ConcurrentHashMap<>();
 
-    // 统计信息
     private final ConcurrentHashMap<String, Integer> playerActionStats = new ConcurrentHashMap<>();
     private long serverStartTime;
 
-    // 偷窃周期控制
-    // canStealThisCycle: thief -> (victim -> can start a NEW stealing session?)
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Boolean>> canStealThisCycle = new ConcurrentHashMap<>();
-    // sessionStealCounts: thief -> (victim -> times stolen in current session)
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Integer>> sessionStealCounts = new ConcurrentHashMap<>();
+
+    private static final String SAVE_FILE = "farms.txt";
 
     public Server(int port) {
         this.port = port;
@@ -64,13 +47,14 @@ public class Server {
     public void start() throws IOException {
         serverStartTime = System.currentTimeMillis();
 
+        loadFarmsFromDisk();
+
         try (ServerSocket server = new ServerSocket(port)) {
             System.out.println("========================================");
             System.out.println("Server started on port: " + port);
             System.out.println("Waiting for clients...");
             System.out.println("========================================\n");
 
-            // 启动统计监控线程
             startStatsMonitor();
 
             while (true) {
@@ -83,17 +67,15 @@ public class Server {
         }
     }
 
-    // 启动统计监控线程
     private void startStatsMonitor() {
         statsExecutor.scheduleAtFixedRate(
                 this::printServerStats,
-                10,          // 初始延迟10秒
-                60,          // 每60秒执行一次
+                10,
+                60,
                 TimeUnit.SECONDS
         );
     }
 
-    // 打印服务器统计信息
     private void printServerStats() {
         long uptime = System.currentTimeMillis() - serverStartTime;
         long seconds = uptime / 1000;
@@ -152,7 +134,6 @@ public class Server {
             } finally {
                 allClients.remove(out);
                 if (player != null) {
-                    // 当玩家断开时，若其正在某个偷窃会话中（sessionStealCounts>0），需要把 canStealThisCycle[player][victim] 置为 false
                     ConcurrentHashMap<String, Integer> sessions = sessionStealCounts.get(player);
                     if (sessions != null) {
                         for (var entry : sessions.entrySet()) {
@@ -175,7 +156,6 @@ public class Server {
                 String[] parts = line.split("\\s+");
                 String cmd = parts[0].toUpperCase(Locale.ROOT);
 
-                // 记录玩家操作统计
                 if (player != null) {
                     playerActionStats.merge(player, 1, (old, nev) -> old + nev);
                 }
@@ -184,20 +164,19 @@ public class Server {
                     case "LOGIN": {
                         ensure(parts.length == 2, "Usage: LOGIN <name>");
                         String newPlayer = parts[1];
-                        String prev = player;
                         player = newPlayer;
                         farms.computeIfAbsent(player, k -> {
                             Game g = new Game();
                             g.setOnStateChange(game -> broadcastUpdate(k, game));
                             return g;
                         });
-                        // 当登录时，把视图设置为自己（并处理从可能的 previous view 离开行为）
                         handleViewChange(player, player);
                         currentView.put(player, player);
                         playerActionStats.putIfAbsent(player, 0);
                         out.println("OK LOGGED_IN " + player);
                         System.out.println("[LOGIN] " + player + " logged in");
                         broadcastUpdate(player, farms.get(player));
+                        saveFarmsToDisk();
                         break;
                     }
                     case "PLAYERS": {
@@ -206,7 +185,6 @@ public class Server {
                     }
                     case "GET": {
                         requireLogin();
-                        // 切换视图到自己——如果之前在看别人并且会话开始过，需要结束会话
                         handleViewChange(player, player);
                         currentView.put(player, player);
                         Game g = farms.get(player);
@@ -221,14 +199,13 @@ public class Server {
                         if (g == null) {
                             out.println("ERR Player not found");
                         } else {
-                            // 在改变 currentView 之前，处理离开以前视图的逻辑
                             handleViewChange(player, target);
                             currentView.put(player, target);
                             out.println("OK " + snapshot(g));
                             System.out.println("[VIEW] " + player + " is viewing " + target + "'s farm");
 
-                            // 只有当允许开始新会话（canStealThisCycle == true）并且 target 不在自己的农场时，才把 sessionStealCounts 重置为 0
-                            ConcurrentHashMap<String, Boolean> thiefCanMap = canStealThisCycle.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
+                            ConcurrentHashMap<String, Boolean> thiefCanMap =
+                                    canStealThisCycle.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
                             boolean canStart = thiefCanMap.getOrDefault(target, true);
                             boolean victimAtHome = target.equals(currentView.get(target));
                             if (canStart && !victimAtHome) {
@@ -248,14 +225,13 @@ public class Server {
                         broadcastUpdate(player, g);
                         out.println("OK " + snapshot(g));
                         System.out.println("[PLANT] " + player + " planted at (" + r + "," + c + ")");
-                        // 重置所有小偷的 canStealThisCycle 为 true（owner plant 重置被偷周期）
                         for (String thief : farms.keySet()) {
                             if (!thief.equals(player)) {
                                 canStealThisCycle.computeIfAbsent(thief, k -> new ConcurrentHashMap<>()).put(player, true);
-                                // 同时重置其会话计数为 0（允许下次进入开始新的会话）
                                 sessionStealCounts.computeIfAbsent(thief, k -> new ConcurrentHashMap<>()).put(player, 0);
                             }
                         }
+                        saveFarmsToDisk();
                         break;
                     }
                     case "HARVEST": {
@@ -269,6 +245,7 @@ public class Server {
                         broadcastUpdate(player, g);
                         out.println("OK " + snapshot(g));
                         System.out.println("[HARVEST] " + player + " harvested at (" + r + "," + c + ")");
+                        saveFarmsToDisk();
                         break;
                     }
                     case "STEAL": {
@@ -277,14 +254,12 @@ public class Server {
                         String victimName = parts[1];
                         ensure(!victimName.equals(player), "Cannot steal yourself");
 
-                        // victim 在家（自己在看自己的农场）时不能被偷
                         if (victimName.equals(currentView.get(victimName))) {
                             out.println("ERR Victim at home (cannot steal)");
                             System.out.println("[STEAL] " + player + " failed - " + victimName + " is at home");
                             break;
                         }
 
-                        // 要求小偷当前视图必须是 victim（只有在看 victim 的时候才可以发起偷）
                         String myView = currentView.get(player);
                         if (myView == null || !myView.equals(victimName)) {
                             out.println("ERR Must VIEW victim before stealing");
@@ -303,7 +278,6 @@ public class Server {
                             return g;
                         });
 
-                        // 检查是否允许开始/继续当前会话（周期级别）
                         ConcurrentHashMap<String, Boolean> thiefCanSteal =
                                 canStealThisCycle.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
                         boolean allowedToStart = thiefCanSteal.getOrDefault(victimName, true);
@@ -313,11 +287,9 @@ public class Server {
                             break;
                         }
 
-                        // ==== 关键修改：在 synchronized(victim) 里重新计算 currentRipe / maxSteal，
-                        //      检查 sessionStealCounts，并执行 stealOneRipe + addCoins。 ====
                         synchronized (victim) {
                             int currentRipe = victim.getRipeCount();
-                            int maxSteal = (int) (currentRipe * 0.25); // floor
+                            int maxSteal = (int) (currentRipe * 0.25);
 
                             if (maxSteal <= 0) {
                                 out.println("ERR No allowed steals (maxSteal=0)");
@@ -339,7 +311,6 @@ public class Server {
                                 break;
                             }
 
-                            // 在 victim 锁保护下实际扣减 1 个 RIPE，并给 thief 加 STEAL_REWARD
                             boolean success = victim.stealOneRipe();
                             if (success) {
                                 thief.addCoins(Game.STEAL_REWARD);
@@ -347,7 +318,6 @@ public class Server {
                                 System.out.println("[STEAL] Atomic steal failed - no crops");
                             }
 
-                            // 同步区里就可以安全更新 sessionStealCounts 和 canStealThisCycle
                             if (success) {
                                 thiefSession.put(victimName, sessionCount + 1);
                                 out.println("OK " + snapshot(thief));
@@ -362,15 +332,11 @@ public class Server {
                                 out.println("ERR No ripe crops to steal");
                                 System.out.println("[STEAL] " + player + " failed - no ripe crops in " + victimName + "'s farm");
                             }
-
-                            // 注意：broadcastUpdate 需要在 synchronized 块外调用，以减少锁持有时间，
-                            // 但此时 victim/thief 的状态已经在锁中原子更新完毕。
                         }
 
-                        // 同步区外广播（不会影响上面原子性的判断）
                         broadcastUpdate(player, farms.get(player));
                         broadcastUpdate(victimName, farms.get(victimName));
-
+                        saveFarmsToDisk();
                         break;
                     }
                     default:
@@ -382,36 +348,24 @@ public class Server {
             }
         }
 
-        /**
-         * 统一处理“视图切换”引发的会话结束逻辑：
-         * - prev = currentView.get(player)
-         * - newView = newView
-         * 如果 prev != null && !prev.equals(newView) 并且 prev 是某个 victim，
-         *   如果 sessionStealCounts[player][prev] > 0 (说明会话已经开始过)，
-         *   则把 canStealThisCycle[player][prev] = false —— 直到 victim 下次 PLANT 才能重置为 true。
-         */
         private void handleViewChange(String playerName, String newView) {
             if (playerName == null) return;
             String prev = currentView.get(playerName);
             if (prev == null) {
                 // no-op
             } else if (!prev.equals(newView)) {
-                // 离开 prev
-                if (!prev.equals(playerName)) { // 离开的是别人的农场（否则是回到自己农场）
+                if (!prev.equals(playerName)) {
                     ConcurrentHashMap<String, Integer> sessions = sessionStealCounts.get(playerName);
                     if (sessions != null) {
                         Integer cnt = sessions.getOrDefault(prev, 0);
                         if (cnt != null && cnt > 0) {
-                            // 会话已经开始，离开时必须把 canStealThisCycle 置为 false
                             canStealThisCycle.computeIfAbsent(playerName, k -> new ConcurrentHashMap<>()).put(prev, false);
                             System.out.println("[VIEW CHANGE] " + playerName + " left " + prev + "'s farm after stealing session -> block future steals until victim PLANT");
                         }
-                        // 无论是否曾偷过，都清理该会话计数（离开视图就不保留会话计数）
                         sessions.remove(prev);
                     }
                 }
             }
-            // 不在这里 put newView 到 currentView —— 调用者负责写入 currentView
         }
 
         private void requireLogin() {
@@ -438,24 +392,6 @@ public class Server {
         }
     }
 
-    // 现在 STEAL 分支不再调用这个方法；保留以防你将来复用。
-    private static boolean stealAtomic(Game thief, Game victim) {
-        Game first = System.identityHashCode(thief) < System.identityHashCode(victim) ? thief : victim;
-        Game second = (first == thief) ? victim : thief;
-
-        synchronized (first) {
-            synchronized (second) {
-                boolean ok = victim.stealOneRipe();
-                if (ok) {
-                    thief.addCoins(Game.STEAL_REWARD);
-                } else {
-                    System.out.println("[STEAL] Atomic steal failed - no crops");
-                }
-                return ok;
-            }
-        }
-    }
-
     private static String snapshot(Game g) {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"coins\":").append(g.getCoins()).append(",\"board\":[");
@@ -472,8 +408,50 @@ public class Server {
         return sb.toString();
     }
 
+    // ========== 简单且稳定的持久化实现（用 Game.toSaveString / fromSaveString） ==========
+
+    private synchronized void saveFarmsToDisk() {
+        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(SAVE_FILE), StandardCharsets.UTF_8))) {
+            for (var entry : farms.entrySet()) {
+                String name = entry.getKey();
+                Game g = entry.getValue();
+                pw.println(name + " " + g.toSaveString());
+            }
+            pw.flush();
+            System.out.println("[PERSIST] Farms saved to " + SAVE_FILE);
+        } catch (IOException ex) {
+            System.out.println("[PERSIST] Save failed: " + ex.getMessage());
+        }
+    }
+
+    private synchronized void loadFarmsFromDisk() {
+        File f = new File(SAVE_FILE);
+        if (!f.exists()) {
+            System.out.println("[PERSIST] No existing save file, starting with empty farms.");
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+                int spaceIdx = line.indexOf(' ');
+                if (spaceIdx < 0) continue;
+                String name = line.substring(0, spaceIdx);
+                String saveData = line.substring(spaceIdx + 1);
+
+                Game g = new Game();
+                g.setOnStateChange(game -> broadcastUpdate(name, game));
+                g.fromSaveString(saveData);
+                farms.put(name, g);
+            }
+            System.out.println("[PERSIST] Farms loaded from " + SAVE_FILE + ": " + farms.keySet());
+        } catch (Exception ex) {
+            System.out.println("[PERSIST] Load failed: " + ex.getMessage());
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         new Server(5050).start();
     }
-
 }
