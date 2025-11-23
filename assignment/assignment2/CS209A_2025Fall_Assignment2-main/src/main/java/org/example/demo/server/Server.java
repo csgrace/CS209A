@@ -20,7 +20,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * - 2.3 Gameplay Rules (偷菜限制 + 奖励调整)
  * - 2.4 Concurrency logs + atomic double-lock
  * - 2.5 Exception handling (I/O 捕获不中断整体, 输入校验)
- * - 🔥 NEW: ScheduledExecutorService for server statistics monitoring (Multithreading)
+ * - NEW: ScheduledExecutorService for server statistics monitoring (Multithreading)
+ *
+ * NOTE: STEAL 逻辑已更新：在 synchronized(victim) 内重新计算 currentRipe/maxSteal，
+ *       并执行 stealOneRipe + addCoins + sessionStealCounts 更新，保证 25% 上限
+ *       对并发请求也是严格的。例如 ripe=4 时，两名小偷并发只会有一人成功，
+ *       第二个线程进入时看到的是 currentRipe=3 -> maxSteal=0 -> 被拒绝。
  */
 public class Server {
 
@@ -31,7 +36,7 @@ public class Server {
         return t;
     });
 
-    // 🔥 新增：统计监控线程池
+    // 统计监控线程池
     private final ScheduledExecutorService statsExecutor = Executors.newScheduledThreadPool(1, (Runnable runnable) -> {
         Thread t = new Thread(runnable, "stats-monitor");
         t.setDaemon(true);
@@ -42,11 +47,11 @@ public class Server {
     private final CopyOnWriteArrayList<PrintWriter> allClients = new CopyOnWriteArrayList<>();
     private final ConcurrentHashMap<String, String> currentView = new ConcurrentHashMap<>();
 
-    // 🔥 新增：统计信息
+    // 统计信息
     private final ConcurrentHashMap<String, Integer> playerActionStats = new ConcurrentHashMap<>();
     private long serverStartTime;
 
-    // 🔥 新增：偷窃周期控制
+    // 偷窃周期控制
     // canStealThisCycle: thief -> (victim -> can start a NEW stealing session?)
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Boolean>> canStealThisCycle = new ConcurrentHashMap<>();
     // sessionStealCounts: thief -> (victim -> times stolen in current session)
@@ -65,7 +70,7 @@ public class Server {
             System.out.println("Waiting for clients...");
             System.out.println("========================================\n");
 
-            // 🔥 启动统计监控线程
+            // 启动统计监控线程
             startStatsMonitor();
 
             while (true) {
@@ -73,13 +78,12 @@ public class Server {
                 pool.submit(new ClientHandler(socket));
             }
         } finally {
-            // 优雅关闭
             pool.shutdown();
             statsExecutor.shutdown();
         }
     }
 
-    // 🔥 新增：启动统计监控线程
+    // 启动统计监控线程
     private void startStatsMonitor() {
         statsExecutor.scheduleAtFixedRate(
                 this::printServerStats,
@@ -89,7 +93,7 @@ public class Server {
         );
     }
 
-    // 🔥 新增：打印服务器统计信息
+    // 打印服务器统计信息
     private void printServerStats() {
         long uptime = System.currentTimeMillis() - serverStartTime;
         long seconds = uptime / 1000;
@@ -171,7 +175,7 @@ public class Server {
                 String[] parts = line.split("\\s+");
                 String cmd = parts[0].toUpperCase(Locale.ROOT);
 
-                // 🔥 记录玩家操作统计
+                // 记录玩家操作统计
                 if (player != null) {
                     playerActionStats.merge(player, 1, (old, nev) -> old + nev);
                 }
@@ -223,10 +227,9 @@ public class Server {
                             out.println("OK " + snapshot(g));
                             System.out.println("[VIEW] " + player + " is viewing " + target + "'s farm");
 
-                            // 只有当允许开始新会话（canStealThisCycle == true）并且 target 不在自己的农场时，才把 sessionStealCounts 重置为 0（标志一个新会话可以开始）
+                            // 只有当允许开始新会话（canStealThisCycle == true）并且 target 不在自己的农场时，才把 sessionStealCounts 重置为 0
                             ConcurrentHashMap<String, Boolean> thiefCanMap = canStealThisCycle.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
                             boolean canStart = thiefCanMap.getOrDefault(target, true);
-                            // 如果 victim 在家则不允许偷，也不需要重置会话
                             boolean victimAtHome = target.equals(currentView.get(target));
                             if (canStart && !victimAtHome) {
                                 sessionStealCounts.computeIfAbsent(player, k -> new ConcurrentHashMap<>()).put(target, 0);
@@ -245,7 +248,7 @@ public class Server {
                         broadcastUpdate(player, g);
                         out.println("OK " + snapshot(g));
                         System.out.println("[PLANT] " + player + " planted at (" + r + "," + c + ")");
-                        // 🔥 重置所有小偷的 canStealThisCycle 为 true（owner plant 重置被偷周期）
+                        // 重置所有小偷的 canStealThisCycle 为 true（owner plant 重置被偷周期）
                         for (String thief : farms.keySet()) {
                             if (!thief.equals(player)) {
                                 canStealThisCycle.computeIfAbsent(thief, k -> new ConcurrentHashMap<>()).put(player, true);
@@ -300,8 +303,9 @@ public class Server {
                             return g;
                         });
 
-                        // 检查是否允许开始/继续当前会话
-                        ConcurrentHashMap<String, Boolean> thiefCanSteal = canStealThisCycle.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
+                        // 检查是否允许开始/继续当前会话（周期级别）
+                        ConcurrentHashMap<String, Boolean> thiefCanSteal =
+                                canStealThisCycle.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
                         boolean allowedToStart = thiefCanSteal.getOrDefault(victimName, true);
                         if (!allowedToStart) {
                             out.println("ERR Cannot steal this cycle");
@@ -309,44 +313,64 @@ public class Server {
                             break;
                         }
 
-                        int currentRipe = victim.getRipeCount();
-                        int maxSteal = (int) (currentRipe * 0.25); // floor
-                        // If maxSteal == 0 -> cannot steal at all
-                        if (maxSteal <= 0) {
-                            out.println("ERR No allowed steals (maxSteal=0)");
-                            System.out.println("[STEAL] " + player + " failed - maxSteal 0");
-                            break;
-                        }
+                        // ==== 关键修改：在 synchronized(victim) 里重新计算 currentRipe / maxSteal，
+                        //      检查 sessionStealCounts，并执行 stealOneRipe + addCoins。 ====
+                        synchronized (victim) {
+                            int currentRipe = victim.getRipeCount();
+                            int maxSteal = (int) (currentRipe * 0.25); // floor
 
-                        System.out.println("[STEAL ATTEMPT] Player: " + player + " | Victim: " + victimName + " | currentRipe: " + currentRipe + " | maxSteal: " + maxSteal);
-                        ConcurrentHashMap<String, Integer> thiefSession = sessionStealCounts.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
-                        int sessionCount = thiefSession.getOrDefault(victimName, 0);
-
-                        if (sessionCount >= maxSteal) {
-                            out.println("ERR Cannot steal more in this session");
-                            System.out.println("[STEAL] " + player + " failed - session limit reached, current: " + sessionCount + ", max: " + maxSteal);
-                            break;
-                        }
-
-                        boolean success = stealAtomic(thief, victim);
-                        broadcastUpdate(player, thief);
-                        broadcastUpdate(victimName, victim);
-                        if (success) {
-                            // 增加当前会话计数
-                            thiefSession.put(victimName, sessionCount + 1);
-                            out.println("OK " + snapshot(thief));
-                            System.out.println("[STEAL] " + player + " successfully stole from " + victimName + " | session count: " + (sessionCount + 1));
-                            // 注意：不在第一次偷后立即把 canStealThisCycle 设为 false，
-                            // 只有当离开视图（handleViewChange）或达到 session limit 才会阻止下次开启
-                            if ((sessionCount + 1) >= maxSteal) {
-                                // 达到该次会话上限，防止继续偷
-                                thiefCanSteal.put(victimName, false);
-                                System.out.println("[STEAL] " + player + " reached maxSteal for " + victimName + " in this session");
+                            if (maxSteal <= 0) {
+                                out.println("ERR No allowed steals (maxSteal=0)");
+                                System.out.println("[STEAL] " + player + " failed - maxSteal 0 (currentRipe=" + currentRipe + ")");
+                                break;
                             }
-                        } else {
-                            out.println("ERR No ripe crops to steal");
-                            System.out.println("[STEAL] " + player + " failed - no ripe crops in " + victimName + "'s farm");
+
+                            System.out.println("[STEAL ATTEMPT] Player: " + player + " | Victim: " + victimName
+                                    + " | currentRipe: " + currentRipe + " | maxSteal: " + maxSteal);
+
+                            ConcurrentHashMap<String, Integer> thiefSession =
+                                    sessionStealCounts.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
+                            int sessionCount = thiefSession.getOrDefault(victimName, 0);
+
+                            if (sessionCount >= maxSteal) {
+                                out.println("ERR Cannot steal more in this session");
+                                System.out.println("[STEAL] " + player + " failed - session limit reached, current: "
+                                        + sessionCount + ", max: " + maxSteal);
+                                break;
+                            }
+
+                            // 在 victim 锁保护下实际扣减 1 个 RIPE，并给 thief 加 STEAL_REWARD
+                            boolean success = victim.stealOneRipe();
+                            if (success) {
+                                thief.addCoins(Game.STEAL_REWARD);
+                            } else {
+                                System.out.println("[STEAL] Atomic steal failed - no crops");
+                            }
+
+                            // 同步区里就可以安全更新 sessionStealCounts 和 canStealThisCycle
+                            if (success) {
+                                thiefSession.put(victimName, sessionCount + 1);
+                                out.println("OK " + snapshot(thief));
+                                System.out.println("[STEAL] " + player + " successfully stole from " + victimName
+                                        + " | session count: " + (sessionCount + 1));
+
+                                if ((sessionCount + 1) >= maxSteal) {
+                                    thiefCanSteal.put(victimName, false);
+                                    System.out.println("[STEAL] " + player + " reached maxSteal for " + victimName + " in this session");
+                                }
+                            } else {
+                                out.println("ERR No ripe crops to steal");
+                                System.out.println("[STEAL] " + player + " failed - no ripe crops in " + victimName + "'s farm");
+                            }
+
+                            // 注意：broadcastUpdate 需要在 synchronized 块外调用，以减少锁持有时间，
+                            // 但此时 victim/thief 的状态已经在锁中原子更新完毕。
                         }
+
+                        // 同步区外广播（不会影响上面原子性的判断）
+                        broadcastUpdate(player, farms.get(player));
+                        broadcastUpdate(victimName, farms.get(victimName));
+
                         break;
                     }
                     default:
@@ -365,7 +389,6 @@ public class Server {
          * 如果 prev != null && !prev.equals(newView) 并且 prev 是某个 victim，
          *   如果 sessionStealCounts[player][prev] > 0 (说明会话已经开始过)，
          *   则把 canStealThisCycle[player][prev] = false —— 直到 victim 下次 PLANT 才能重置为 true。
-         * 这个实现保证了：只要小偷在一次会话中离开（即便未达到 maxSteal），就不能再次偷，直到被偷者 PLANT。
          */
         private void handleViewChange(String playerName, String newView) {
             if (playerName == null) return;
@@ -415,6 +438,7 @@ public class Server {
         }
     }
 
+    // 现在 STEAL 分支不再调用这个方法；保留以防你将来复用。
     private static boolean stealAtomic(Game thief, Game victim) {
         Game first = System.identityHashCode(thief) < System.identityHashCode(victim) ? thief : victim;
         Game second = (first == thief) ? victim : thief;
