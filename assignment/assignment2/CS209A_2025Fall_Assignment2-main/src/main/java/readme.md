@@ -36,33 +36,6 @@
 A snapshot is JSON: `{"coins":<int>,"board":[["EMPTY","GROWING",...], ...]}`.  
 Current implementation builds snapshot by repeated synchronized getters. (Recommended enhancement: enclose entire snapshot build in a single synchronized block to guarantee a single-timestamp view.)
 
-## 3. Build & Run Instructions
-
-### 3.1 Requirements
-- JDK 17+ (tested on Java 17)
-- Maven 3.x
-- JavaFX runtime (if not bundled, ensure module path includes JavaFX libs)
-
-### 3.2 Start Server
-```bash
-mvn compile
-mvn exec:java -Dexec.mainClass=org.example.demo.server.Server
-```
-Server starts on port 5050 by default.
-
-### 3.3 Start Client
-In a new terminal (repeat for multiple clients):
-```bash
-mvn exec:java -Dexec.mainClass=org.example.demo.Application
-```
-Login window appears; enter a unique username (e.g., `alice`, `bob`, `carol`).
-
-### 3.4 Multi-Client Demo
-Launch 2–3 clients with distinct names. Use “Visit” to view a friend’s farm and “Back Home” to return.
-
-### 3.5 Clean Shutdown
-- Close client window → `Controller.shutdown()` stops timers, closes socket.
-- Press Ctrl+C on server terminal → thread pools attempt graceful termination.
 
 ## 4. Network Protocol Description
 
