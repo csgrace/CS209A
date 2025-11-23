@@ -598,10 +598,13 @@ public class Controller {
         if (coinsLabel == null) return;
         String labelText;
         if (viewingPlayerName != null && viewingPlayerName.equals(myPlayerName)) {
+            // 在自己的农场
             labelText = "Player: " + myPlayerName + " | Your Farm | Coins: " + myFarmGame.getCoins();
         } else {
-            labelText = "Player: " + myPlayerName + " | Viewing: " + viewingPlayerName + " | My Coins: "
-                    + myFarmGame.getCoins() + " | " + viewingFarmGame.getCoins();
+            // 在别人的农场
+            labelText = "Player: " + myPlayerName + " | Viewing: " + viewingPlayerName + "'s Farm | " +
+                    "My Coins: " + myFarmGame.getCoins() + " | " +
+                    viewingPlayerName + "'s Coins: " + viewingFarmGame.getCoins();
         }
         coinsLabel.setText(labelText);
     }
