@@ -57,7 +57,7 @@ public class Controller {
             new java.util.concurrent.ConcurrentHashMap<>();
 
     // Connection / reconnect state
-    private volatile boolean connected = false;     // 当前是否与服务器连接正常
+    private volatile boolean connected = false; // 当前是否与服务器连接正常
     private volatile boolean reconnecting = false;  // 是否正在自动重连
     private int reconnectAttempts = 0;
     private static final int MAX_RECONNECT_ATTEMPTS = 10;
@@ -241,11 +241,13 @@ public class Controller {
         }
     }
 
+
     private void listenLoop() {
         String line;
         try {
             while ((line = in.readLine()) != null) {
                 final String msg = line;
+                handleServerMsg(line);
                 System.out.println("Received from server: " + msg);
 
                 if (msg.startsWith("UPDATE ")) {
@@ -253,11 +255,36 @@ public class Controller {
                     int secondSpace = msg.indexOf(' ', firstSpace + 1);
                     if (secondSpace > 0) {
                         String player = msg.substring(firstSpace + 1, secondSpace);
-                        String json = msg.substring(secondSpace + 1);
+                        String updateDetails = msg.substring(secondSpace + 1); // 更详细的内容
+                        String updateType;
+                        String coordinates;
+
+                        if (updateDetails.startsWith("PLANT")) {
+                            updateType = "PLANT";
+                            int coordStart = updateDetails.indexOf('(');
+                            int coordEnd = updateDetails.indexOf(')', coordStart);
+                            if (coordStart >= 0 && coordEnd > coordStart) {
+                                coordinates = updateDetails.substring(coordStart, coordEnd + 1);
+                            } else {
+                                coordinates = null;
+                            }
+                        } else if (updateDetails.startsWith("HARVEST")) {
+                            updateType = "HARVEST";
+                            int coordStart = updateDetails.indexOf('(');
+                            int coordEnd = updateDetails.indexOf(')', coordStart);
+                            if (coordStart >= 0 && coordEnd > coordStart) {
+                                coordinates = updateDetails.substring(coordStart, coordEnd + 1);
+                            } else {
+                                coordinates = null;
+                            }
+                        } else {
+                            coordinates = null;
+                            updateType = null;
+                        }
 
                         if (player.equals(myPlayerName)) {
                             Platform.runLater(() -> {
-                                updateGameSnapshot(myFarmGame, json);
+                                updateGameSnapshot(myFarmGame, updateDetails);
                                 if (viewingPlayerName.equals(myPlayerName)) {
                                     refreshBoardFromGameState();
                                 }
@@ -265,7 +292,7 @@ public class Controller {
                             });
                         } else if (player.equals(viewingPlayerName)) {
                             Platform.runLater(() -> {
-                                updateGameSnapshot(viewingFarmGame, json);
+                                updateGameSnapshot(viewingFarmGame, updateDetails);
                                 refreshBoardFromGameState();
                                 updateCoinsDisplay();
                             });
@@ -273,9 +300,17 @@ public class Controller {
 
                         Platform.runLater(() -> {
                             if (player.equals(myPlayerName)) {
-                                showStatus("Your farm updated!");
+                                if (updateType != null && coordinates != null) {
+                                    showStatus("Successfully performed " + updateType.toLowerCase() + " at " + coordinates);
+                                } else {
+                                    showStatus("Your farm updated!");
+                                }
                             } else {
-                                showStatus("Friend " + player + " updated");
+                                if (updateType != null && coordinates != null) {
+                                    showStatus("Friend " + player + " performed " + updateType.toLowerCase() + " at " + coordinates);
+                                } else {
+                                    showStatus("Friend " + player + " updated");
+                                }
                             }
                         });
                     }
@@ -327,13 +362,30 @@ public class Controller {
             Platform.runLater(this::onDisconnected);
         }
     }
-
-    /** 统一的断线处理：提示、按钮禁用、启动自动重连。 */
-    private void onDisconnected() {
-        if (!connected && reconnecting) {
-            // 已经在重连中，避免重复触发
-            return;
+    private void handleServerMsg(String msg) {
+        Platform.runLater(() -> {
+            if (msg.startsWith("UPDATE")) {
+                // Process update message
+            } else if (msg.startsWith("OK ")) {
+                handleOkResponse(msg);
+            } else if (msg.startsWith("ERR ")) {
+                showStatus("Error: " + msg.substring(4));
+            }
+        });
+    }
+    private void handleOkResponse(String msg) {
+        if (msg.startsWith("OK LOGGED_IN")) {
+            connected = true;
+            showStatus("Successfully connected to farm server!");
+            updateButtonStates();
+        } else if (msg.contains("{")) {
+            String json = msg.substring(3);
+            updateGameSnapshot(myFarmGame, json);
+            refreshBoardFromGameState();
         }
+    }
+    private void onDisconnected() {
+        if (reconnecting) return;
         connected = false;
         showStatus("Disconnected from server. Attempting to reconnect...");
         updateButtonStates();
@@ -349,64 +401,46 @@ public class Controller {
         reconnecting = true;
 
         new Thread(() -> {
-            while (!connected && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                reconnectAttempts++;
+            while (!connected) {
                 try {
+                    reconnectAttempts++;
                     System.out.println("[RECONNECT] Attempt " + reconnectAttempts);
+
                     Socket newSocket = new Socket("127.0.0.1", 5050);
                     BufferedReader newIn = new BufferedReader(
                             new InputStreamReader(newSocket.getInputStream(), StandardCharsets.UTF_8));
                     PrintWriter newOut = new PrintWriter(
                             new OutputStreamWriter(newSocket.getOutputStream(), StandardCharsets.UTF_8), true);
 
-                    // 替换旧 socket / 流
-                    this.socket = newSocket;
-                    this.in = newIn;
-                    this.out = newOut;
+                    socket = newSocket;
+                    in = newIn;
+                    out = newOut;
 
-                    // 启动新的 listener
                     listenThread = new Thread(this::listenLoop, "server-listener");
                     listenThread.setDaemon(true);
                     listenThread.start();
 
-                    // 重新登录并请求自己的农场状态
                     out.println("LOGIN " + myPlayerName);
-                    lastCommand = "GET";
                     out.println("GET");
 
                     connected = true;
                     reconnecting = false;
-                    reconnectAttempts = 0;
 
                     Platform.runLater(() -> {
-                        viewingPlayerName = myPlayerName;
-                        viewingFarmGame = myFarmGame;
-                        showStatus("Reconnected to server as " + myPlayerName + ".");
+                        showStatus("Reconnected to server as " + myPlayerName);
                         refreshBoardFromGameState();
-                        updateButtonStates();
                     });
-
-                    System.out.println("[RECONNECT] Success");
-                    return; // 成功就退出循环
-
-                } catch (IOException ex) {
-                    System.out.println("[RECONNECT] Failed attempt " + reconnectAttempts + ": " + ex.getMessage());
+                    return;
+                } catch (IOException e) {
+                    System.out.println("[RECONNECT] Failed to reconnect: " + e.getMessage());
                     try {
                         Thread.sleep(RECONNECT_DELAY_MS);
                     } catch (InterruptedException ignored) {}
                 }
             }
-
-            // 超过最大重连次数，放弃
-            if (!connected) {
-                reconnecting = false;
-                Platform.runLater(() -> {
-                    showStatus("Disconnected from server. Please restart the client.");
-                    updateButtonStates(); // 按钮保持禁用
-                });
-            }
         }, "reconnect-loop").start();
     }
+
 
     private void updateGameSnapshot(Game targetGame, String json) {
         if (json == null || json.isEmpty()) return;
@@ -609,10 +643,20 @@ public class Controller {
         coinsLabel.setText(labelText);
     }
 
-    private void showStatus(String msg) {
-        statusMessage = (msg == null || msg.isEmpty()) ? "Ready." : msg;
-        if (statusLabel != null) statusLabel.setText(statusMessage);
-        updateCoinsDisplay();
+    private void showStatus(String message) {
+        statusMessage = (message == null || message.isEmpty()) ? "Ready." : message;
+        if (statusLabel != null) {
+            statusLabel.setText(statusMessage);
+        }
+    }
+
+    private String extractCoordinates(String msg) {
+        int start = msg.indexOf('(');
+        int end = msg.indexOf(')');
+        if (start >= 0 && end > start) {
+            return msg.substring(start, end + 1);
+        }
+        return "";
     }
 
     private void handleVisit() {
@@ -663,7 +707,7 @@ public class Controller {
         }
         if (out != null && connected) {
             lastCommand = "PLANT " + selectedRow + " " + selectedCol;
-            out.println("PLANT " + selectedRow + " " + selectedCol);
+            out.println(lastCommand);
             showStatus("Planting (" + selectedRow + "," + selectedCol + ")...");
         } else {
             showStatus("Disconnected from server. Unable to plant.");
@@ -681,7 +725,7 @@ public class Controller {
         }
         if (out != null && connected) {
             lastCommand = "HARVEST " + selectedRow + " " + selectedCol;
-            out.println("HARVEST " + selectedRow + " " + selectedCol);
+            out.println(lastCommand);
             showStatus("Harvesting (" + selectedRow + "," + selectedCol + ")...");
         } else {
             showStatus("Disconnected from server. Unable to harvest.");

@@ -68,7 +68,8 @@ public class Game {
             coins -= PLANT_COST;
             board[row][col] = PlotState.GROWING;
             plantTimestamps[row][col] = plantTime;
-            System.out.println(Thread.currentThread().getName() + " PLANT (" + row + "," + col + ") at " + plantTime);
+            System.out.printf("[PLANT][thread=%s][ts=%d] (%d,%d) coins=%d%n",
+                    Thread.currentThread().getName(), System.nanoTime(), row, col, coins);
             callback = onStateChange;
         }
         if (callback != null) callback.accept(this);
@@ -89,7 +90,8 @@ public class Game {
                     board[row][col] = PlotState.RIPE;
                     plantTimestamps[row][col] = 0; // 成熟后清空时间戳
                     ripened = true;
-                    System.out.println(Thread.currentThread().getName() + " RIPEN (" + row + "," + col + ")");
+                    System.out.printf("[RIPEN][thread=%s][ts=%d] (%d,%d) matured%n",
+                            Thread.currentThread().getName(), System.nanoTime(), row, col);
                 }
                 cb = onStateChange;
             }
@@ -106,7 +108,8 @@ public class Game {
             board[row][col] = PlotState.EMPTY;
             plantTimestamps[row][col] = 0;
             coins += HARVEST_REWARD;
-            System.out.println(Thread.currentThread().getName() + " HARVEST (" + row + "," + col + ")");
+            System.out.printf("[HARVEST][thread=%s][ts=%d] (%d,%d) coins=%d%n",
+                    Thread.currentThread().getName(), System.nanoTime(), row, col, coins);
             callback = onStateChange;
         }
         if (callback != null) callback.accept(this);

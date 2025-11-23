@@ -367,7 +367,7 @@ private void listenLoop() {
   - `ConcurrencyTest.java` simulates two thieves (alice, bob) simultaneously stealing from victim (who has 4 ripe crops):
   - Both thieves send STEAL victim at the same time using CountDownLatch.
     Server logs show:
-    <img src="img_8.png" alt="img_8.png" width="600">
+    ![img_9.png](img_9.png)
     - Results:
       - Victim's ripe count decreases correctly.
       - Each thief's coin balance increases appropriately.
@@ -378,9 +378,10 @@ private void listenLoop() {
 #### Server Crashes :
 Handle server crashes or disconnects gracefully with user notice.
 - Client Detection: listenLoop catches IOException when server disconnects.
-- User Notice: UI displays "Disconnected from server. Attempting to reconnect...".
+- User Notice: UI displays "Disconnected from server. Attempting to reconnect...". The buttons all become grey to indicate that they are unable to use.
 - Auto-Reconnect: Client retries connection up to 10 times (3-second intervals).
 - State Recovery: When server restarts, it loads farms.txt and restores all farm states (including GROWING timers).
+![img_10.png](img_10.png)
 
 #### User Input Validation :
 Validate user inputs (e.g., cannot plant on occupied plot).

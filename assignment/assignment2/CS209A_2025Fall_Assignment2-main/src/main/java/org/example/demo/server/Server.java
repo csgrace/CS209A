@@ -12,9 +12,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-
 public class Server {
-
     private final int port;
     private final ExecutorService pool = Executors.newCachedThreadPool((Runnable runnable) -> {
         Thread t = new Thread(runnable, "client-io");
@@ -44,6 +42,27 @@ public class Server {
         this.port = port;
     }
 
+    private static void log(String tag, String msg) {
+        // 当前时间戳（毫秒级）
+        long millis = System.currentTimeMillis();
+
+        // 当前时间格式化为可读的 HH:mm:ss.SSS
+        String humanReadableTime = new java.text.SimpleDateFormat("HH:mm:ss.SSS")
+                .format(new java.util.Date(millis));
+
+        // 纳秒级时间戳（系统单调时间，用于计算时间间隔）
+        long nanoTime = System.nanoTime();
+
+        System.out.printf(
+                "[%s][thread=%s][time=%s][nano=%d] %s%n",
+                tag, // 标签，例如 "STEAL", "CLIENT"
+                Thread.currentThread().getName(), // 当前线程名
+                humanReadableTime, // 人类时间
+                nanoTime, // 纳秒级别精准时间
+                msg // 日志消息内容
+        );
+    }
+
     public void start() throws IOException {
         serverStartTime = System.currentTimeMillis();
 
@@ -59,6 +78,7 @@ public class Server {
 
             while (true) {
                 Socket socket = server.accept();
+                log("ACCEPT", "New socket accepted from " + socket.getInetAddress());
                 pool.submit(new ClientHandler(socket));
             }
         } finally {
@@ -103,6 +123,7 @@ public class Server {
             }
         }
         System.out.println("----------------------------\n");
+        log("STATS", "Reported status: clients=" + allClients.size() + " farms=" + farms.size());
     }
 
     private class ClientHandler implements Runnable {
@@ -122,6 +143,7 @@ public class Server {
                 out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
                 allClients.add(out);
                 System.out.println("[CONNECT] New client connected: " + socket.getInetAddress());
+                log("CLIENT", "Connection established from " + socket.getInetAddress());
 
                 out.println("OK WELCOME Use: LOGIN <name>|GET|VIEW <player>|PLANT r c|HARVEST r c|STEAL <victim>|PLAYERS");
 
@@ -131,6 +153,7 @@ public class Server {
                 }
             } catch (Exception e) {
                 System.out.println("[ERROR] Connection error: " + e.getMessage());
+                log("CLIENT-ERROR", "player=" + player + " msg=" + e.getMessage());
             } finally {
                 allClients.remove(out);
                 if (player != null) {
@@ -146,6 +169,7 @@ public class Server {
                     }
                     currentView.remove(player);
                     System.out.println("[DISCONNECT] Player: " + player);
+                    log("DISCONNECT", "player=" + player);
                 }
             }
         }
@@ -155,6 +179,8 @@ public class Server {
                 if (line.isEmpty()) return;
                 String[] parts = line.split("\\s+");
                 String cmd = parts[0].toUpperCase(Locale.ROOT);
+
+                log("HANDLE", "player=" + (player == null ? "(unauth)" : player) + " raw=\"" + line + "\"");
 
                 if (player != null) {
                     playerActionStats.merge(player, 1, (old, nev) -> old + nev);
@@ -175,12 +201,14 @@ public class Server {
                         playerActionStats.putIfAbsent(player, 0);
                         out.println("OK LOGGED_IN " + player);
                         System.out.println("[LOGIN] " + player + " logged in");
+                        log("LOGIN", "player=" + player);
                         broadcastUpdate(player, farms.get(player));
                         saveFarmsToDisk();
                         break;
                     }
                     case "PLAYERS": {
                         out.println("OK " + String.join(",", farms.keySet()));
+                        log("PLAYERS", "count=" + farms.keySet().size());
                         break;
                     }
                     case "GET": {
@@ -189,6 +217,7 @@ public class Server {
                         currentView.put(player, player);
                         Game g = farms.get(player);
                         out.println("OK " + snapshot(g));
+                        log("GET", "player=" + player);
                         break;
                     }
                     case "VIEW": {
@@ -198,11 +227,13 @@ public class Server {
                         Game g = farms.get(target);
                         if (g == null) {
                             out.println("ERR Player not found");
+                            log("VIEW-ERR", "player=" + player + " target=" + target + " reason=not-found");
                         } else {
                             handleViewChange(player, target);
                             currentView.put(player, target);
                             out.println("OK " + snapshot(g));
                             System.out.println("[VIEW] " + player + " is viewing " + target + "'s farm");
+                            log("VIEW", "viewer=" + player + " target=" + target);
 
                             ConcurrentHashMap<String, Boolean> thiefCanMap =
                                     canStealThisCycle.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
@@ -210,6 +241,7 @@ public class Server {
                             boolean victimAtHome = target.equals(currentView.get(target));
                             if (canStart && !victimAtHome) {
                                 sessionStealCounts.computeIfAbsent(player, k -> new ConcurrentHashMap<>()).put(target, 0);
+                                log("VIEW-SESSION", "start potential steal session viewer=" + player + " victim=" + target);
                             }
                         }
                         break;
@@ -223,8 +255,9 @@ public class Server {
                         ensure(inBounds(g, r, c), "Index out of bounds");
                         g.plant(r, c);
                         broadcastUpdate(player, g);
-                        out.println("OK " + snapshot(g));
+                        out.println("OK PLANTED at (" + r + "," + c + ") | Snapshot: " + snapshot(g));
                         System.out.println("[PLANT] " + player + " planted at (" + r + "," + c + ")");
+                        log("PLANT", "player=" + player + " pos=(" + r + "," + c + ")");
                         for (String thief : farms.keySet()) {
                             if (!thief.equals(player)) {
                                 canStealThisCycle.computeIfAbsent(thief, k -> new ConcurrentHashMap<>()).put(player, true);
@@ -243,8 +276,9 @@ public class Server {
                         ensure(inBounds(g, r, c), "Index out of bounds");
                         g.harvest(r, c);
                         broadcastUpdate(player, g);
-                        out.println("OK " + snapshot(g));
+                        out.println("OK HARVESTED at (" + r + "," + c + ") | Snapshot: " + snapshot(g));
                         System.out.println("[HARVEST] " + player + " harvested at (" + r + "," + c + ")");
+                        log("HARVEST", "player=" + player + " pos=(" + r + "," + c + ")");
                         saveFarmsToDisk();
                         break;
                     }
@@ -257,6 +291,7 @@ public class Server {
                         if (victimName.equals(currentView.get(victimName))) {
                             out.println("ERR Victim at home (cannot steal)");
                             System.out.println("[STEAL] " + player + " failed - " + victimName + " is at home");
+                            log("STEAL-DENY", "thief=" + player + " victim=" + victimName + " reason=victim-at-home");
                             break;
                         }
 
@@ -264,6 +299,7 @@ public class Server {
                         if (myView == null || !myView.equals(victimName)) {
                             out.println("ERR Must VIEW victim before stealing");
                             System.out.println("[STEAL] " + player + " failed - not viewing victim");
+                            log("STEAL-DENY", "thief=" + player + " victim=" + victimName + " reason=not-viewing");
                             break;
                         }
 
@@ -284,8 +320,11 @@ public class Server {
                         if (!allowedToStart) {
                             out.println("ERR Cannot steal this cycle");
                             System.out.println("[STEAL] " + player + " failed - cannot steal this cycle");
+                            log("STEAL-DENY", "thief=" + player + " victim=" + victimName + " reason=cycle-blocked");
                             break;
                         }
+
+                        log("STEAL-ENTER", "thief=" + player + " victim=" + victimName + " preRipe=" + victim.getRipeCount());
 
                         synchronized (victim) {
                             int currentRipe = victim.getRipeCount();
@@ -294,11 +333,13 @@ public class Server {
                             if (maxSteal <= 0) {
                                 out.println("ERR No allowed steals (maxSteal=0)");
                                 System.out.println("[STEAL] " + player + " failed - maxSteal 0 (currentRipe=" + currentRipe + ")");
+                                log("STEAL-DENY", "thief=" + player + " victim=" + victimName + " currentRipe=" + currentRipe + " maxSteal=0");
                                 break;
                             }
 
                             System.out.println("[STEAL ATTEMPT] Player: " + player + " | Victim: " + victimName
                                     + " | currentRipe: " + currentRipe + " | maxSteal: " + maxSteal);
+                            log("STEAL-CHECK", "thief=" + player + " victim=" + victimName + " currentRipe=" + currentRipe + " maxSteal=" + maxSteal);
 
                             ConcurrentHashMap<String, Integer> thiefSession =
                                     sessionStealCounts.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
@@ -308,6 +349,7 @@ public class Server {
                                 out.println("ERR Cannot steal more in this session");
                                 System.out.println("[STEAL] " + player + " failed - session limit reached, current: "
                                         + sessionCount + ", max: " + maxSteal);
+                                log("STEAL-DENY", "thief=" + player + " victim=" + victimName + " reason=session-limit sessionCount=" + sessionCount);
                                 break;
                             }
 
@@ -318,16 +360,20 @@ public class Server {
                                 out.println("OK " + snapshot(thief));
                                 System.out.println("[STEAL] " + player + " successfully stole from " + victimName
                                         + " | session count: " + (sessionCount + 1));
+                                log("STEAL-SUCCESS", "thief=" + player + " victim=" + victimName + " newSessionCount=" + (sessionCount + 1) + " victimRipeNow=" + victim.getRipeCount());
                                 if ((sessionCount + 1) >= maxSteal) {
                                     thiefCanSteal.put(victimName, false);
                                     System.out.println("[STEAL] " + player + " reached maxSteal for " + victimName + " in this session");
+                                    log("STEAL-LIMIT", "thief=" + player + " victim=" + victimName + " reached maxSteal");
                                 }
                             } else {
                                 out.println("ERR No ripe crops to steal");
                                 System.out.println("[STEAL] " + player + " failed - no ripe crops in " + victimName + "'s farm");
+                                log("STEAL-FAIL", "thief=" + player + " victim=" + victimName + " reason=no-ripe");
                             }
                         }
 
+                        log("STEAL-EXIT", "thief=" + player + " victim=" + victimName + " postRipe=" + farms.get(victimName).getRipeCount());
                         broadcastUpdate(player, farms.get(player));
                         broadcastUpdate(victimName, farms.get(victimName));
                         saveFarmsToDisk();
@@ -335,10 +381,12 @@ public class Server {
                     }
                     default:
                         out.println("ERR Unknown command: " + cmd);
+                        log("HANDLE-ERR", "player=" + player + " cmd=" + cmd + " reason=unknown");
                 }
 
             } catch (Exception e) {
                 out.println("ERR " + e.getMessage());
+                log("HANDLE-EX", "player=" + player + " error=" + e.getMessage());
             }
         }
 
@@ -355,6 +403,7 @@ public class Server {
                         if (cnt != null && cnt > 0) {
                             canStealThisCycle.computeIfAbsent(playerName, k -> new ConcurrentHashMap<>()).put(prev, false);
                             System.out.println("[VIEW CHANGE] " + playerName + " left " + prev + "'s farm after stealing session -> block future steals until victim PLANT");
+                            log("VIEW-CHANGE", "player=" + playerName + " leaving=" + prev + " stoleCnt=" + cnt);
                         }
                         sessions.remove(prev);
                     }
@@ -384,6 +433,7 @@ public class Server {
         for (PrintWriter w : allClients) {
             w.println(line);
         }
+        log("UPDATE-BROADCAST", "player=" + playerName + " sent to clients=" + allClients.size());
     }
 
     private static String snapshot(Game g) {
@@ -413,8 +463,10 @@ public class Server {
             }
             pw.flush();
             System.out.println("[PERSIST] Farms saved to " + SAVE_FILE);
+            log("PERSIST", "saved file=" + SAVE_FILE + " farms=" + farms.size());
         } catch (IOException ex) {
             System.out.println("[PERSIST] Save failed: " + ex.getMessage());
+            log("PERSIST-ERR", "error=" + ex.getMessage());
         }
     }
 
@@ -422,6 +474,7 @@ public class Server {
         File f = new File(SAVE_FILE);
         if (!f.exists()) {
             System.out.println("[PERSIST] No existing save file, starting with empty farms.");
+            log("PERSIST-LOAD", "no-file-start-empty");
             return;
         }
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
@@ -439,9 +492,11 @@ public class Server {
                 g.fromSaveString(saveData);
                 farms.put(name, g);
             }
-            System.out.println("[PERSIST] Farms loaded from " + SAVE_FILE + ": " + farms.keySet());
+            System.out.println("[PERSIST] Farms loaded from " + SAVE_FILE + " farms.keySet())");
+            log("PERSIST-LOAD", "loaded file=" + SAVE_FILE + " farms=" + farms.size());
         } catch (Exception ex) {
             System.out.println("[PERSIST] Load failed: " + ex.getMessage());
+            log("PERSIST-ERR", "load-failed error=" + ex.getMessage());
         }
     }
 

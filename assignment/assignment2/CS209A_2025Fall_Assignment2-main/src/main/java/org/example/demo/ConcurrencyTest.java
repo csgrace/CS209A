@@ -64,8 +64,14 @@ public class ConcurrencyTest {
         victim.send("VIEW alice");
         victim.drain(5, 800);
 
-        alice.send("VIEW victim"); alice.drain(5, 800);
-        bob.send("VIEW victim");   bob.drain(5, 800);
+        alice.send("VIEW victim");
+        alice.drain(5, 800);
+        bob.send("VIEW victim");
+        bob.drain(5, 800);
+
+        System.out.println("[victim] Confirming victim is 'away' (VIEW alice)");
+        victim.send("VIEW alice");
+        victim.drain(5, 800);
 
         System.out.println("\n--- Concurrent STEAL Attempt (victim has 4 RIPE) ---");
         runConcurrentSteal(alice, bob);
