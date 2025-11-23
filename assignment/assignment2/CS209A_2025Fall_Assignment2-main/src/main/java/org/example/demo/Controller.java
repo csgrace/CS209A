@@ -354,8 +354,21 @@ public class Controller {
             updateButtonStates();
         } else if (msg.contains("{")) {
             String json = msg.substring(3);
-            updateGameSnapshot(myFarmGame, json);
-            refreshBoardFromGameState();
+            if (lastCommand.startsWith("STEAL")) {
+                updateGameSnapshot(myFarmGame, json);
+                updateCoinsDisplay();
+            } else if (lastCommand.startsWith("VIEW")) {
+                // 确保针对不同玩家的 farm 确认 farmGame 不互相混用。
+                updateGameSnapshot(viewingFarmGame, json);
+                refreshBoardFromGameState();
+                updateCoinsDisplay();
+            } else if (lastCommand.startsWith("GET")) {
+                updateGameSnapshot(myFarmGame, json);
+                viewingFarmGame = myFarmGame;
+                viewingPlayerName = myPlayerName;
+                refreshBoardFromGameState();
+                updateCoinsDisplay();
+            }
         }
     }
     private void onDisconnected() {
@@ -631,7 +644,13 @@ public class Controller {
         }
         if (out != null && connected) {
             viewingPlayerName = friend;
-            viewingFarmGame = friendFarmsCache.computeIfAbsent(friend, k -> new Game());
+            if (friend.equals(myPlayerName)) {
+                // 访问自己的农场，直接引用自己的游戏状态
+                viewingFarmGame = myFarmGame;
+            } else {
+                // 确保缓存的朋友农场对象使用最新数据
+                viewingFarmGame = friendFarmsCache.computeIfAbsent(friend, k -> new Game());
+            }
             selectedRow = -1;
             selectedCol = -1;
             lastCommand = "VIEW " + friend;
