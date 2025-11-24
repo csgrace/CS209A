@@ -1,0 +1,315 @@
+{
+  "question": {
+    "tags": [
+      "java",
+      "spring-boot",
+      "jpa",
+      "spring-data-jpa"
+    ],
+    "owner": {
+      "account_id": 23153848,
+      "reputation": 23,
+      "user_id": 19284946,
+      "user_type": "registered",
+      "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+      "display_name": "Rikelo",
+      "link": "https://stackoverflow.com/users/19284946/rikelo"
+    },
+    "is_answered": true,
+    "view_count": 116,
+    "answer_count": 2,
+    "score": 2,
+    "last_activity_date": 1762290620,
+    "creation_date": 1762001683,
+    "last_edit_date": 1762162474,
+    "question_id": 79806535,
+    "content_license": "CC BY-SA 4.0",
+    "link": "https://stackoverflow.com/questions/79806535/jpa-recursive-hierarchy-read-stackoverflowerror-with-fetchtype-eager-but-lazyi",
+    "title": "JPA recursive hierarchy read - StackOverflowError with FetchType.EAGER but LazyInitializationException with FetchType.LAZY"
+  },
+  "answers": [
+    {
+      "owner": {
+        "account_id": 3284439,
+        "reputation": 40384,
+        "user_id": 2764255,
+        "user_type": "registered",
+        "accept_rate": 50,
+        "profile_image": "https://www.gravatar.com/avatar/2c14e217d79c08ca104e6e11d8e1710f?s=256&d=identicon&r=PG&f=y&so-version=2",
+        "display_name": "Nikos Paraskevopoulos",
+        "link": "https://stackoverflow.com/users/2764255/nikos-paraskevopoulos"
+      },
+      "is_accepted": false,
+      "score": 1,
+      "last_activity_date": 1762166354,
+      "creation_date": 1762166354,
+      "answer_id": 79807765,
+      "question_id": 79806535,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<blockquote>\n<p>Can I retrieve a <code>BerryInventoryEntity</code> that its <code>UserEntity</code> doesn't also come with a <code>BerryInventoryEntity</code>?</p>\n</blockquote>\n<p>No. As long as they are linked through the relation fields (<code>UserEntity.berryInventory</code> &amp; <code>BerryInventoryEntity.user</code>) the code will always be able to access them and lead to potential circular reference/stack overflow OR lazy initialization errors.</p>\n<p>JPA offers you ways of stopping it from querying the DB in a circular way (<code>LAZY</code>, Entity Graphs), but as long as it's in the code, you can always use it.</p>\n<blockquote>\n<p>What is the correct way of fixing this issue?</p>\n</blockquote>\n<p>There are many ways actually, choose the one that works better for you! Pick one or more:</p>\n<h4>Fix only the immediate symptom</h4>\n<p>This can be treacherous as it may solve your problem now, only to cause more problems down the way, beware! Anyway here it goes:</p>\n<p>Obviously the problem is caused by Lombok over-eagerly using all the entity fields for the <code>toString()</code> it generates. What we are using in this case is white-listing of fields to include by annotating the class with <code>@ToString(onlyExplicitlyIncluded = true)</code> and then each field we actually want to include in <code>toString()</code> with <code>@ToString.Include</code>. Collections and relations are almost always a no-no for inclusion.</p>\n<p>Another way the circular dependency may come back to bite you is if you are serializing the entities themselves. I see this happening all the time, using the JPA entity as an entity (ok obviously), domain model (i.e. used in the business logic) and DTO. Single responsibility principle totally violated. Anyway, if you have the option of using separate DTOs for serialization (if ever needed), I advise you to do it, even though you will have to write a bit more code. Otherwise this is frequently solved e.g. with Jackson annotations on the entity class.</p>\n<h4>Slightly revise the design</h4>\n<p>The root of the problem is the circular dependency. Ask yourself, do you really need the &quot;to many&quot; side of the relationship, i.e. the <code>berryInventory</code>, to be explicitly declared in the <code>UserEntity</code>? Can't you live without this property? I have found out that, in most cases I can! Probably this is why you are using a method in the repository to fetch the berry inventory of a user - <code>repo.findInventoryOfUser(userCreated)</code>, instead of <code>userCreated.getBerryInventory()</code>.</p>\n<p><code>UserEntity.berryInventory</code> gone, problem gone! And you can still use the relation in your queries, perhaps with a little more effort if you relied on JPA's fancy collection operators.</p>\n",
+      "comments": [
+        {
+          "owner": {
+            "account_id": 3284439,
+            "reputation": 40384,
+            "user_id": 2764255,
+            "user_type": "registered",
+            "accept_rate": 50,
+            "profile_image": "https://www.gravatar.com/avatar/2c14e217d79c08ca104e6e11d8e1710f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "display_name": "Nikos Paraskevopoulos",
+            "link": "https://stackoverflow.com/users/2764255/nikos-paraskevopoulos"
+          },
+          "reply_to_user": {
+            "account_id": 23153848,
+            "reputation": 23,
+            "user_id": 19284946,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+            "display_name": "Rikelo",
+            "link": "https://stackoverflow.com/users/19284946/rikelo"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762217404,
+          "post_id": 79807765,
+          "comment_id": 140834758,
+          "content_license": "CC BY-SA 4.0",
+          "body": "@Rikelo Since you are using Hibernate there is a Hibernate-specific solution presented in <a href=\"https://stackoverflow.com/a/38495206\">this answer</a>. Another answer for the same question gives a DB-based solution. I would hesitate to choose proprietary or DB solutions, but I wouldn&#39;t rule them out completely. Your choice!"
+        },
+        {
+          "owner": {
+            "account_id": 3284439,
+            "reputation": 40384,
+            "user_id": 2764255,
+            "user_type": "registered",
+            "accept_rate": 50,
+            "profile_image": "https://www.gravatar.com/avatar/2c14e217d79c08ca104e6e11d8e1710f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "display_name": "Nikos Paraskevopoulos",
+            "link": "https://stackoverflow.com/users/2764255/nikos-paraskevopoulos"
+          },
+          "reply_to_user": {
+            "account_id": 23153848,
+            "reputation": 23,
+            "user_id": 19284946,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+            "display_name": "Rikelo",
+            "link": "https://stackoverflow.com/users/19284946/rikelo"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762216857,
+          "post_id": 79807765,
+          "comment_id": 140834748,
+          "content_license": "CC BY-SA 4.0",
+          "body": "@Rikelo Oh, indeed, this is one valid case for keeping the &quot;to many&quot; side of the relationship. Unless you would be willing to do some extra effort and, in the service method that handles the deletion of the user, you also manually delete the inventory. But this is a manual, error prone step (e.g. someone may forget to do it). Go for the whitelisting of fields to include in <code>toString</code> then. Are you facing any other problems?"
+        },
+        {
+          "owner": {
+            "account_id": 23153848,
+            "reputation": 23,
+            "user_id": 19284946,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+            "display_name": "Rikelo",
+            "link": "https://stackoverflow.com/users/19284946/rikelo"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762216425,
+          "post_id": 79807765,
+          "comment_id": 140834742,
+          "content_license": "CC BY-SA 4.0",
+          "body": "Yes, as you say, the intention of the findInventoryOfUser function was to get the inventory of a user separating it from getting it from the UserEntity itself.    Getting rid of the berryInventory on UserEntity doesn&#39;t sound bad. But losing the &quot;toMany&quot; side of the relationship would cause that a user being deleted won&#39;t automatically delete its inventory.    In the case I decide to go with that option. What do you think it would be the best way to implement said function?"
+        }
+      ]
+    },
+    {
+      "owner": {
+        "account_id": 10941198,
+        "reputation": 5783,
+        "user_id": 8041003,
+        "user_type": "registered",
+        "profile_image": "https://i.sstatic.net/cAZ4d.jpg?s=256",
+        "display_name": "John Williams",
+        "link": "https://stackoverflow.com/users/8041003/john-williams"
+      },
+      "is_accepted": false,
+      "score": 0,
+      "last_activity_date": 1762162328,
+      "creation_date": 1762162328,
+      "answer_id": 79807697,
+      "question_id": 79806535,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<p>As you say, you have a cycle:\nBerryInventoryEntity -&gt; UserEntity -&gt; BerryInventoryEntity -&gt; UserEntity -&gt; ad infinitum.</p>\n<p>The <strong>only solution is to not use EAGER</strong> and stay with the default, ie LAZY.</p>\n<p>Then allow spring-data-jpa (without the <code>@Query</code> annotation) to build a query that takes the user id as a parameter rather than the UserEntity, ie:</p>\n<pre><code>Iterable&lt;BerryInventoryEntity&gt; findByUserId(Long userId);\n\n</code></pre>\n<p>and use it thus:</p>\n<pre><code>Iterable&lt;BerryInventoryEntity&gt; berryInventoryCreated = berryInventoryRepository.findByUserId(userCreated.getId());\n\n</code></pre>\n",
+      "comments": [
+        {
+          "owner": {
+            "account_id": 23153848,
+            "reputation": 23,
+            "user_id": 19284946,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+            "display_name": "Rikelo",
+            "link": "https://stackoverflow.com/users/19284946/rikelo"
+          },
+          "reply_to_user": {
+            "account_id": 231721,
+            "reputation": 21335,
+            "user_id": 496099,
+            "user_type": "registered",
+            "profile_image": "https://www.gravatar.com/avatar/efa7510cf47d7bd79e80486246e7e39e?s=256&d=identicon&r=PG",
+            "display_name": "Chris",
+            "link": "https://stackoverflow.com/users/496099/chris"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762297370,
+          "post_id": 79807697,
+          "comment_id": 140836801,
+          "content_license": "CC BY-SA 4.0",
+          "body": "@Chris I&#39;m curious about this. Now that I solved the problems I had with the <code>toString</code> function and other stuff that was causing trouble. When i retrieve a <code>BerryInventoryEntity</code> fetching the <code>User</code>, it comes with a <code>UserEntity</code> that comes with a <code>BerryInventoryEntity</code> and so on. I&#39;m not getting a StackOverFlow error anymore. I&#39;m guessing based on your comment this is normal behavior?"
+        },
+        {
+          "owner": {
+            "account_id": 23153848,
+            "reputation": 23,
+            "user_id": 19284946,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+            "display_name": "Rikelo",
+            "link": "https://stackoverflow.com/users/19284946/rikelo"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762297336,
+          "post_id": 79807697,
+          "comment_id": 140836799,
+          "content_license": "CC BY-SA 4.0",
+          "body": "Tried this but didn&#39;t seem to behave differently."
+        },
+        {
+          "owner": {
+            "account_id": 231721,
+            "reputation": 21335,
+            "user_id": 496099,
+            "user_type": "registered",
+            "profile_image": "https://www.gravatar.com/avatar/efa7510cf47d7bd79e80486246e7e39e?s=256&d=identicon&r=PG",
+            "display_name": "Chris",
+            "link": "https://stackoverflow.com/users/496099/chris"
+          },
+          "edited": false,
+          "score": 1,
+          "creation_date": 1762290150,
+          "post_id": 79807697,
+          "comment_id": 140836642,
+          "content_license": "CC BY-SA 4.0",
+          "body": "JPA providers should have no problem with recursive object graphs. It is part of the requirements that parent/children relationships be bidirectional, and lazy is only a hint, not a requirement. That is the point of entities having IDs; they know what has already been fetched and can cache it when building an object graph"
+        },
+        {
+          "owner": {
+            "account_id": 10941198,
+            "reputation": 5783,
+            "user_id": 8041003,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/cAZ4d.jpg?s=256",
+            "display_name": "John Williams",
+            "link": "https://stackoverflow.com/users/8041003/john-williams"
+          },
+          "reply_to_user": {
+            "account_id": 23153848,
+            "reputation": 23,
+            "user_id": 19284946,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+            "display_name": "Rikelo",
+            "link": "https://stackoverflow.com/users/19284946/rikelo"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762250720,
+          "post_id": 79807697,
+          "comment_id": 140835383,
+          "content_license": "CC BY-SA 4.0",
+          "body": "@Rikelo What happens if you set the following parameter to true: spring.jpa.properties.hibernate.enable_lazy_load_no_trans ?"
+        },
+        {
+          "owner": {
+            "account_id": 23153848,
+            "reputation": 23,
+            "user_id": 19284946,
+            "user_type": "registered",
+            "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+            "display_name": "Rikelo",
+            "link": "https://stackoverflow.com/users/19284946/rikelo"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762216283,
+          "post_id": 79807697,
+          "comment_id": 140834739,
+          "content_license": "CC BY-SA 4.0",
+          "body": "Not using EAGER seems the way to go. Still, when using the query you suggest i still get the same result. Passing a UserEntity or the Id doesn&#39;t change what the function returns. The BerryInventoryEntity will always come with an entity of User and Berry regardless."
+        }
+      ]
+    }
+  ],
+  "question_comments": [
+    {
+      "owner": {
+        "account_id": 23153848,
+        "reputation": 23,
+        "user_id": 19284946,
+        "user_type": "registered",
+        "profile_image": "https://i.sstatic.net/ttEG7.jpg?s=256",
+        "display_name": "Rikelo",
+        "link": "https://stackoverflow.com/users/19284946/rikelo"
+      },
+      "reply_to_user": {
+        "account_id": 231721,
+        "reputation": 21335,
+        "user_id": 496099,
+        "user_type": "registered",
+        "profile_image": "https://www.gravatar.com/avatar/efa7510cf47d7bd79e80486246e7e39e?s=256&d=identicon&r=PG",
+        "display_name": "Chris",
+        "link": "https://stackoverflow.com/users/496099/chris"
+      },
+      "edited": false,
+      "score": 0,
+      "creation_date": 1762297293,
+      "post_id": 79806535,
+      "comment_id": 140836798,
+      "content_license": "CC BY-SA 4.0",
+      "body": "Yes, thank you @Chris and @talex . I&#39;m using Lombok, and it seems the <code>toString</code> method was causing some trouble. Changed the <code>@Data</code> annotation for <code>@Getter</code> and <code>@Setter</code> and implemented my own <code>toString</code>. Apparently it was also causing an AssertionError on another part of the code. Seems to be working better now."
+    },
+    {
+      "owner": {
+        "account_id": 231721,
+        "reputation": 21335,
+        "user_id": 496099,
+        "user_type": "registered",
+        "profile_image": "https://www.gravatar.com/avatar/efa7510cf47d7bd79e80486246e7e39e?s=256&d=identicon&r=PG",
+        "display_name": "Chris",
+        "link": "https://stackoverflow.com/users/496099/chris"
+      },
+      "reply_to_user": {
+        "account_id": 4497436,
+        "reputation": 20796,
+        "user_id": 3656904,
+        "user_type": "registered",
+        "accept_rate": 67,
+        "profile_image": "https://www.gravatar.com/avatar/8bdbd1f89f8907e8e8b15ab88c084c65?s=256&d=identicon&r=PG&f=y&so-version=2",
+        "display_name": "talex",
+        "link": "https://stackoverflow.com/users/3656904/talex"
+      },
+      "edited": false,
+      "score": 1,
+      "creation_date": 1762290301,
+      "post_id": 79806535,
+      "comment_id": 140836647,
+      "content_license": "CC BY-SA 4.0",
+      "body": "Revisit @Talex &#39;s comment. The error states it can&#39;t execute UserEntity.toString() and getting the exception - so your toString implementation IS the problem. You must ensure it isn&#39;t going to turn the entire object graph into a String - Lombok is awful if you don&#39;t understand what it is generating, and likely is the cause of both your issues as it traverses the object graph recursively to build a string. Just print the entity ID if you really need a toString implementation."
+    }
+  ],
+  "answer_comments": {}
+}

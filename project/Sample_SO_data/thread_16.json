@@ -1,0 +1,92 @@
+{
+  "question": {
+    "tags": [
+      "java",
+      "json",
+      "spring-boot"
+    ],
+    "owner": {
+      "account_id": 6090414,
+      "reputation": 460,
+      "user_id": 11758203,
+      "user_type": "registered",
+      "profile_image": "https://www.gravatar.com/avatar/f7d9923a650b2f308ff23c654e5688c7?s=256&d=identicon&r=PG&f=y&so-version=2",
+      "display_name": "Rahul SK",
+      "link": "https://stackoverflow.com/users/11758203/rahul-sk"
+    },
+    "is_answered": false,
+    "view_count": 68,
+    "answer_count": 2,
+    "score": 1,
+    "last_activity_date": 1762271760,
+    "creation_date": 1762224797,
+    "question_id": 79808476,
+    "content_license": "CC BY-SA 4.0",
+    "link": "https://stackoverflow.com/questions/79808476/spring-boot-api-receive-generic-field",
+    "title": "Spring boot API, receive generic field"
+  },
+  "answers": [
+    {
+      "owner": {
+        "account_id": 16241015,
+        "reputation": 44,
+        "user_id": 11727342,
+        "user_type": "registered",
+        "profile_image": "https://www.gravatar.com/avatar/7ba9d3f71c6af7364a98d21d76296ebe?s=256&d=identicon&r=PG&f=y&so-version=2",
+        "display_name": "Deepak Kumar",
+        "link": "https://stackoverflow.com/users/11727342/deepak-kumar"
+      },
+      "is_accepted": false,
+      "score": 0,
+      "last_activity_date": 1762271760,
+      "creation_date": 1762271760,
+      "answer_id": 79809115,
+      "question_id": 79808476,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<p>Read about jackson/gson libraries in spring boot, they will be helpful in this case.\nReplace <code>Object Message</code> with <code>JsonNode</code> (from Jackson).</p>\n<pre class=\"lang-java prettyprint-override\"><code>public class CallBackDTO {\n    private String msgRefNo;\n    private JsonNode Message;  // &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;\n    \n    // getters and setters\n}\n</code></pre>\n<p>Now you can access the unknown fields.</p>\n<pre class=\"lang-java prettyprint-override\"><code>@PostMapping(&quot;/call-back&quot;) \npublic BaseResponse&lt;String&gt; callBack(@RequestBody CallBackDTO callbackRequest) { \n    var data = callbackRequest.getMessage().get(&quot;random&quot;); \n}\n</code></pre>\n<p>do exception handling too if field <code>random</code> isn't present in the message.</p>\n",
+      "comments": []
+    },
+    {
+      "owner": {
+        "account_id": 20525751,
+        "reputation": 1159,
+        "user_id": 15064224,
+        "user_type": "registered",
+        "profile_image": "https://i.sstatic.net/ieYaG.jpg?s=256",
+        "display_name": "Issa Khodadadi",
+        "link": "https://stackoverflow.com/users/15064224/issa-khodadadi"
+      },
+      "is_accepted": false,
+      "score": 0,
+      "last_activity_date": 1762260723,
+      "last_edit_date": 1762260723,
+      "creation_date": 1762260374,
+      "answer_id": 79808923,
+      "question_id": 79808476,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<p>To add to @Gil's answer, You can use <code>Map&lt;String, Object&gt;</code> in your <code>CallBackDTO</code> as following:</p>\n<pre><code>public class CallBackDTO {  \n    private String msgRefNo;  \n    private Map&lt;String, Object&gt; message;  \n\n    // setter / getter  \n}  \n</code></pre>\n<p>now your JSON will deserialized to a Map like this:</p>\n<pre><code>{     \n    &quot;msgRefNo&quot;: &quot;20250411070605&quot;,     \n    &quot;Message&quot;: {       \n        &quot;keyA&quot;: &quot;test&quot;,       \n        &quot;keyB&quot;: 123  \n    }   \n}\n</code></pre>\n<p>with this approach you could easily invoke each message separately by its key, as follow:</p>\n<pre><code>request.getMessage.get(&quot;keyA&quot;):   \n-\\&gt; test  \n</code></pre>\n",
+      "comments": []
+    }
+  ],
+  "question_comments": [
+    {
+      "owner": {
+        "account_id": 16241015,
+        "reputation": 44,
+        "user_id": 11727342,
+        "user_type": "registered",
+        "profile_image": "https://www.gravatar.com/avatar/7ba9d3f71c6af7364a98d21d76296ebe?s=256&d=identicon&r=PG&f=y&so-version=2",
+        "display_name": "Deepak Kumar",
+        "link": "https://stackoverflow.com/users/11727342/deepak-kumar"
+      },
+      "edited": false,
+      "score": 0,
+      "creation_date": 1762271978,
+      "post_id": 79808476,
+      "comment_id": 140836073,
+      "content_license": "CC BY-SA 4.0",
+      "body": "Although I did not try, but if structure is nested and you are using <code>Map&lt;String, Object&gt;</code> then same problem will arise again.  you can make use of jackson(comes builtin with mvc) or gson(google&#39;s library). These 2 libraries help java devs to read data from Json, when type is thing that you are not sure about."
+    }
+  ],
+  "answer_comments": {}
+}
