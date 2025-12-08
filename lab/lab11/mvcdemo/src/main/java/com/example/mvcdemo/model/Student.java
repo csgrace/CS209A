@@ -1,31 +1,30 @@
 package com.example.mvcdemo.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table
+@Table(name = "students")
 public class Student {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String email;
-
+    private Integer age;
     public Student() {
     }
 
-    public Student(String name, String email) {
+    public Student(String name, String email, Integer age) {
         this.name = name;
         this.email = email;
+        this.age = age;
     }
 
-    public Student(Long id, String name, String email) {
+    public Student(Long id, String name, String email, Integer age) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.age = age;
     }
 
     public Long getId() {
@@ -52,12 +51,16 @@ public class Student {
         this.email = email;
     }
 
+    public Integer getAge() { return age; }
+    public void setAge(Integer age) { this.age = age; }
+
     @Override
     public String toString() {
         return "Student{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
+                ", age=" + age +
                 '}';
     }
 }
