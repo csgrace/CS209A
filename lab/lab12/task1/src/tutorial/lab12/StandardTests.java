@@ -2,7 +2,7 @@ package tutorial.lab12;
 
 import org.junit.jupiter.api.*;
 
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class StandardTests {
 
     static int a = 100;
