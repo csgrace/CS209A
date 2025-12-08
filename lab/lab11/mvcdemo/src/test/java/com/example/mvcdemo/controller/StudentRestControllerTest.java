@@ -2,6 +2,7 @@ package com.example.mvcdemo.controller;
 
 import com.example.mvcdemo.model.Student;
 import com.example.mvcdemo.service.StudentService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 
 @WebMvcTest(controllers = StudentRestController.class)
 public class StudentRestControllerTest {
@@ -50,9 +51,8 @@ public class StudentRestControllerTest {
 
     @Test
     void getStudentsByEmail_returnsMatching() throws Exception {
-        // 查询包含 "example" 的 email -> s1, s3
         List<Student> matched = Arrays.asList(s1, s3);
-        when(studentService.findByEmailContains("example")).thenReturn(matched);
+        when(studentService.findByEmailContains(eq("example"))).thenReturn(matched);
 
         mockMvc.perform(get("/api/students").param("email", "example"))
                 .andExpect(status().isOk())
@@ -62,9 +62,8 @@ public class StudentRestControllerTest {
 
     @Test
     void getStudentsByAge_returnsLessEqual() throws Exception {
-        // age <= 22 -> s1 (20), s3 (22)
         List<Student> matched = Arrays.asList(s1, s3);
-        when(studentService.findByAgeLessThanEqual(22)).thenReturn(matched);
+        when(studentService.findByAgeLessThanEqual(eq(22))).thenReturn(matched);
 
         mockMvc.perform(get("/api/students").param("age", "22"))
                 .andExpect(status().isOk())
@@ -74,9 +73,8 @@ public class StudentRestControllerTest {
 
     @Test
     void getStudentsByEmailAndAge_returnsMatching() throws Exception {
-        // email contains "example" and age <= 21 -> s1 only
         List<Student> matched = Arrays.asList(s1);
-        when(studentService.findByEmailContainsAndAgeLessThanEqual("example", 21)).thenReturn(matched);
+        when(studentService.findByEmailContainsAndAgeLessThanEqual(eq("example"), eq(21))).thenReturn(matched);
 
         mockMvc.perform(get("/api/students").param("email", "example").param("age", "21"))
                 .andExpect(status().isOk())
