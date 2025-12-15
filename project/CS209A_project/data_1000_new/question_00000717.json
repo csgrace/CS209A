@@ -1,0 +1,134 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/144f9d2f79751bef5be2c150b4291d85?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5012857,
+            "user_type": "registered",
+            "user_id": 4028589,
+            "link": "https://stackoverflow.com/users/4028589/abdullah",
+            "reputation": 2789,
+            "display_name": "Abdullah",
+            "accept_rate": 43
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25801823/scramble-some-letter-in-arraylist-assignment",
+        "last_activity_date": 1429140101,
+        "creation_date": 1410502159,
+        "answer_count": 1,
+        "title": "scramble some letter in ArrayList assignment",
+        "body": "<p>This assignment involves reasoning about strings made up of uppercase letters. You will implement several static methods that appear in the same class (not shown).  Here are the details.\n1.  The first method takes a single string parameter and returns a scrambled version of that string. The scrambling process begins at the first letter of the word and continues from left to right.  If two consecutive letters consist of an \"A\" followed by a letter that is not an \"A\", then the two letters are swapped in the resulting string.  Once the letters in two adjacent positions have been swapped, neither of those two positions can be involved in a future swap. \n <strong>public static String scrambleWord(String word)<\/strong>\nThe method takes a given word (an empty string or a string containing only upper case letters) and returns a string that contains a scrambled version of the word according to the rules given above.  The following table shows several examples of words and their scrambled versions.\n<strong>Original word After scrambling\n\"TAN\"   \"TNA\"\n\"ABRACADABRA\"   \"BARCADABARA\" \n\"WHOA\"  \"WHOA\"\n\"AARDVARK\"  \"ARADVRAK\"\n\"EGGS\"  \"EGGS\"\n\"A\" \"A\"\n\"\"  \"\"<\/strong><\/p>\n\n<p>the code i used but it dose not work is<\/p>\n\n<pre><code>public class ScrambleWord { \n\npublic static void main(String[] args) {\n    List&lt;String&gt; strList = new ArrayList&lt;String&gt;();\n    strList.add(\"TAN\");\n    strList.add(\"ABRACADABRA\");\n    strList.add(\"WHOA\");\n    strList.add(\"EGGS\");\n    strList.add(\"A\");\n    strList.add(\"\");\n    System.out.prentln(MainMethod.scrambleWordMeth(strList));\n}\n\nclass MainMethod {\n    public static void scrambleWordMeth(List&lt;String&gt; strList) {\n        int curr = 0;\n        String res = \"\";\n        while (curr &lt; strList.size()) {\n            String currentString = strList.get(curr);\n            for(int i = 0; i &lt; currentString.length(); i++){\n                if (currentString.charAt(i) == 'A' &amp;&amp; !(currentString.charAt(i + 1) == 'A')) {\n                    res = res + currentString.substring(curr + 1, curr + 2);\n                    res = res + 'A';\n                    curr = curr + 2;\n\n                }\n                else {\n                    res = res + currentString.substring(curr, curr + 1);\n                    curr++;\n                }\n            }\n            if (curr &lt; strList.size()) {\n                res = res + currentString.charAt(curr);\n                //res=res + strList.substring(curr);\n            }\n        }\n        return res;      \n    }\n}\n}\n<\/code><\/pre>\n",
+        "question_id": 25801823,
+        "tags": ["java"],
+        "score": -5,
+        "is_answered": true,
+        "view_count": 1568,
+        "last_edit_date": 1410503701
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/98e74e03b5b1cd2dad5f5dc5c245bb0f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3415784,
+                "user_type": "registered",
+                "user_id": 2864740,
+                "link": "https://stackoverflow.com/users/2864740/user2864740",
+                "reputation": 62481,
+                "display_name": "user2864740",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25801823,
+            "edited": false,
+            "creation_date": 1410502470,
+            "comment_id": 40358743
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7Kj0N.png?s=256",
+                "account_id": 3354520,
+                "user_type": "registered",
+                "user_id": 2817802,
+                "link": "https://stackoverflow.com/users/2817802/baby",
+                "reputation": 5112,
+                "display_name": "Baby",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 25801823,
+            "edited": false,
+            "creation_date": 1410502444,
+            "comment_id": 40358736
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/98e74e03b5b1cd2dad5f5dc5c245bb0f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3415784,
+            "user_type": "registered",
+            "user_id": 2864740,
+            "link": "https://stackoverflow.com/users/2864740/user2864740",
+            "reputation": 62481,
+            "display_name": "user2864740",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1410554089,
+        "creation_date": 1410503033,
+        "body": "<p>Here is template for how to setup the methods such that the algorithm can be worked on in a more clear and isolated manner (note how the task states for \"several methods\"). This will prevent some issues in the posted code such as the incorrect usage of <code>curr<\/code> (which did not related to characters at all) in the inner loop. The usage of the array for the letters makes the task itself more logical to focus on without needing to perform slicing and concatenation. <\/p>\n\n<pre><code>static void scrambleAllWords(List&lt;String&gt; words) {\n    // Iterate through the list of word applying the scramble\n    // function and replacing the original item with the result.\n    for (int i = 0; i &lt; words.size(); i++) {\n        String scrambled = scrambleWord(words.get(i));\n        words.set(i, scrambled);\n    }\n}\n\nstatic String scrambleWord(String word) {\n    // Get the letters that make up the word\n    char[] letters = word.toCharArray();\n\n    // Perform the algorithm on the letters\n    // for (int i = 0; i &lt; ..\n\n    // Create a new string from the now-scrambled letters        \n    return new String(letters);\n}\n<\/code><\/pre>\n\n<p>The algorithm itself is rather simple and can be read as the following pseudo-code, which should be trivial to apply to <code>letters<\/code> as it is now an array clearly separated from the other cruft.<\/p>\n\n<pre class=\"lang-none prettyprint-override\"><code>for i in the range [0, the number of letters in the word - 1)\n   if the letter at i is an 'A' and the following letter at i+1 is not an 'A' then\n      swap the letter at i with the letter at i+1 and\n      skip the next letter by advancing i by 1\n         (so that the current-now-next 'A' letter cannot be swapped again)\n   otherwise\n      do nothing\n<\/code><\/pre>\n",
+        "answer_id": 25802010,
+        "question_id": 25801823,
+        "last_edit_date": 1410554089
+    }],
+    "answer_comments": {"25802010": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/98e74e03b5b1cd2dad5f5dc5c245bb0f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3415784,
+                "user_type": "registered",
+                "user_id": 2864740,
+                "link": "https://stackoverflow.com/users/2864740/user2864740",
+                "reputation": 62481,
+                "display_name": "user2864740",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25802010,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/144f9d2f79751bef5be2c150b4291d85?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5012857,
+                "user_type": "registered",
+                "user_id": 4028589,
+                "link": "https://stackoverflow.com/users/4028589/abdullah",
+                "reputation": 2789,
+                "display_name": "Abdullah",
+                "accept_rate": 43
+            },
+            "edited": false,
+            "creation_date": 1410554245,
+            "comment_id": 40385569
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/144f9d2f79751bef5be2c150b4291d85?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5012857,
+                "user_type": "registered",
+                "user_id": 4028589,
+                "link": "https://stackoverflow.com/users/4028589/abdullah",
+                "reputation": 2789,
+                "display_name": "Abdullah",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25802010,
+            "edited": false,
+            "creation_date": 1410537174,
+            "comment_id": 40376879
+        }
+    ]}
+}

@@ -1,0 +1,68 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/tWLgu.jpg?s=256",
+            "account_id": 28332188,
+            "user_type": "registered",
+            "user_id": 21666290,
+            "link": "https://stackoverflow.com/users/21666290/jan-potarski",
+            "reputation": 21,
+            "display_name": "Jan Potarski"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76079077/failed-to-read-post-request-in-spring-boot-app-400",
+        "last_activity_date": 1682171829,
+        "creation_date": 1682158187,
+        "answer_count": 1,
+        "title": "Failed to read post request in Spring Boot app (400)",
+        "body": "<p>I wrote simple CRUD Spring Boot app, but the POST endpoints don't work for some reason. I send the correct set of key-value pairs,\nBut I get the same error every time:<\/p>\n<pre><code>{\n    &quot;nickname&quot;: &quot;bob&quot;,\n    &quot;kind&quot;: &quot;cat&quot;,\n    &quot;birthday&quot;: &quot;12.02.2020&quot;,\n    &quot;vetRecords&quot;: null\n}\n\n{\n    &quot;type&quot;: &quot;about:blank&quot;,\n    &quot;title&quot;: &quot;Bad Request&quot;,\n    &quot;status&quot;: 400,\n    &quot;detail&quot;: &quot;Failed to read request&quot;,\n    &quot;instance&quot;: &quot;/api/v1/users/4/animals&quot;\n}\n\n<\/code><\/pre>\n<p>I tried sending same request with debugger, but it doesn't stop in moment when I provide request. CommonsRequestLoggingFilter also shows only this:<\/p>\n<pre><code>2023-04-22T13:59:47.087+04:00 DEBUG 22330 --- [nio-8080-exec-1] o.s.w.f.CommonsRequestLoggingFilter      : Before request [POST /api/v1/users/4/animals]\n2023-04-22T13:59:47.344+04:00 DEBUG 22330 --- [nio-8080-exec-1] o.s.w.f.CommonsRequestLoggingFilter      : REQUEST DATA: POST /api/v1/users/4/animals, payload=\n{\n    &quot;nickname&quot;: &quot;bob&quot;,\n    &quot;kind&quot;: &quot;cat&quot;,\n    &quot;birthday&quot;: &quot;12.02.2020&quot;,\n    &quot;vetRecords&quot;: null\n}]\n<\/code><\/pre>\n<p>Controller:<\/p>\n<pre><code>@PostMapping(&quot;{id}/animals&quot;)\n    public AnimalDto createAnimal(@PathVariable Long id,\n                                  @Validated(OnCreate.class) @RequestBody AnimalDto animalDto) {\n        Animal animal = animalMapper.toEntity(animalDto);\n        Animal createdAnimal = animalService.create(animal, id);\n        return animalMapper.toDto(createdAnimal);\n    }\n<\/code><\/pre>\n<p>DTO:<\/p>\n<pre><code>@Data\n@NoArgsConstructor\n@AllArgsConstructor\npublic class AnimalDto {\n    @NotNull(message = &quot;Id must be not null&quot;, groups = OnUpdate.class)\n    private Long id;\n\n    @NotNull(message = &quot;Animal name must not be null&quot;, groups = {OnUpdate.class, OnCreate.class})\n    @Length(max = 256, message = &quot;Animal name must be less than 256 symbols&quot;)\n    private String nickname;\n\n    @NotNull(message = &quot;Animal kind must not be null&quot;, groups = {OnUpdate.class, OnCreate.class})\n    @Length(max = 256, message = &quot;Animal kind must be less than 256 symbols&quot;)\n    private String kind;\n\n    @NotNull(message = &quot;Animal age must not be null&quot;, groups = {OnUpdate.class, OnCreate.class})\n    private Date birthday;\n\n    private List&lt;VetRecord&gt; vetRecords;\n}\n<\/code><\/pre>\n<p>Entity:<\/p>\n<pre><code>@Data\n@AllArgsConstructor\n@NoArgsConstructor\npublic class Animal {\n\n    private Long id;\n    private String nickname;\n    private String kind;\n    private Date birthday;\n    private List&lt;VetRecord&gt; vetRecords;\n}\n<\/code><\/pre>\n<p>Mapper (MapStruct):<\/p>\n<pre><code>@Mapper(componentModel = &quot;spring&quot;)\npublic interface AnimalMapper {\n\n    AnimalDto toDto(Animal animal);\n\n    List&lt;AnimalDto&gt; toDto(List&lt;Animal&gt; animals);\n\n    Animal toEntity(AnimalDto animalDto);\n}\n<\/code><\/pre>\n",
+        "question_id": 76079077,
+        "tags": [
+            "java",
+            "json",
+            "spring-boot"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 10712,
+        "last_edit_date": 1682158276
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2404c3e4304714294c0458b3feb39ff0?s=256&d=identicon&r=PG",
+            "account_id": 291162,
+            "user_type": "registered",
+            "user_id": 593146,
+            "link": "https://stackoverflow.com/users/593146/zyl",
+            "reputation": 3448,
+            "display_name": "Zyl",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 76079077,
+        "edited": false,
+        "creation_date": 1712765022,
+        "comment_id": 138050838
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/r6omN.png?s=256",
+            "account_id": 28362251,
+            "user_type": "registered",
+            "user_id": 21692077,
+            "link": "https://stackoverflow.com/users/21692077/durfen",
+            "reputation": 56,
+            "display_name": "Durfen"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1682171829,
+        "creation_date": 1682171829,
+        "body": "<p>It appears that there is an error in the birthday parameter you are trying to send. The format is not correct. It should be something like this:<\/p>\n<pre><code>{ 'nickname': 'bob', 'kind': 'cat', 'birthday': '2023-04-22T15:00:00Z' }\n<\/code><\/pre>\n<p>If you only want to store just the year, month, and day, please refer to <a href=\"https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html<\/a>.<\/p>\n",
+        "answer_id": 76080022,
+        "question_id": 76079077
+    }],
+    "answer_comments": {}
+}

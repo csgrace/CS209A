@@ -1,0 +1,152 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/MDuWh.jpg?s=256",
+            "account_id": 1801257,
+            "user_type": "registered",
+            "user_id": 1639556,
+            "link": "https://stackoverflow.com/users/1639556/leos-literak",
+            "reputation": 9460,
+            "display_name": "Leos Literak",
+            "accept_rate": 79
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/22028399/log4j2-property-substitution-default",
+        "last_activity_date": 1716811177,
+        "creation_date": 1393370477,
+        "answer_count": 2,
+        "title": "Log4J2 property substitution - default",
+        "body": "<p>I just wonder if there is any way to provide default value for property substitution in LOG4J?<\/p>\n\n<p>I want to pass file path in java system property and then use it with \"${env:mySystemProperty}\". But what if developer forgets to set this property? Then I would like to have some meaningful default value defined in log4j2.xml.<\/p>\n\n<p>Any idea how to achieve this functionality?<\/p>\n\n<p>EDIT:<\/p>\n\n<p>The env substitution does not work for me:<\/p>\n\n<p>standalone.conf<\/p>\n\n<pre><code>-DoauthLoginLogPath=/path/oauth2.log\n<\/code><\/pre>\n\n<p>log4j2.xml<\/p>\n\n<pre><code>&lt;Appender type=\"File\" name=\"File\" fileName=\"${env:oauthLoginLogPath}\" immediateFlush=\"true\"&gt;\n&lt;Appender type=\"File\" name=\"File\" fileName=\"${sys:oauthLoginLogPath}\" immediateFlush=\"true\"&gt;\n<\/code><\/pre>\n\n<p>I can see in wildfly console the property, I restarted server but I cannot get it done.<\/p>\n",
+        "question_id": 22028399,
+        "tags": [
+            "java",
+            "logging",
+            "log4j",
+            "log4j2"
+        ],
+        "score": 64,
+        "accepted_answer_id": 22029761,
+        "is_answered": true,
+        "view_count": 75704,
+        "last_edit_date": 1584705863
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/886bfa218820b99918fc666bd8919b71?s=256&d=identicon&r=PG",
+                "account_id": 1555751,
+                "user_type": "registered",
+                "user_id": 1446916,
+                "link": "https://stackoverflow.com/users/1446916/remko-popma",
+                "reputation": 37177,
+                "display_name": "Remko Popma"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 89,
+            "is_accepted": true,
+            "last_activity_date": 1716811177,
+            "creation_date": 1393377572,
+            "body": "<p><strong>Default Property map<\/strong><\/p>\n<p>Looking at <a href=\"http://logging.apache.org/log4j/2.x/manual/configuration.html#PropertySubstitution\" rel=\"nofollow noreferrer\">http://logging.apache.org/log4j/2.x/manual/configuration.html#PropertySubstitution<\/a>\nyou can specify a default property map in the configuration file. That takes this form:<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;Configuration status=&quot;debug&quot;&gt;\n  &lt;Properties&gt;\n    &lt;Property name=&quot;oauthLoginLogPath&quot;&gt;default/location/of/oauth2.log&lt;/Property&gt;\n  &lt;/Properties&gt;\n  ...\n  &lt;Appenders&gt;\n    &lt;Appender type=&quot;File&quot; name=&quot;File&quot; fileName=&quot;${sys:oauthLoginLogPath}&quot;&gt;\n    ...\n&lt;/Configuration&gt;\n<\/code><\/pre>\n<p>Then, if you start your app with system property <code>-DoauthLoginLogPath=/path/oauth2.log<\/code>, the File appender <code>fileName<\/code> value will first be looked up in system properties, but if that fails, it will fall back to the property defined in the <code>Properties<\/code> section at the top of the log4j2.xml configuration file.<\/p>\n<p><strong>Inline<\/strong><\/p>\n<p>A second way is to provide the default value inline:<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;Appender type=&quot;File&quot; name=&quot;File&quot; fileName=&quot;${sys:oauthLoginLogPath:-default/location/of/oauth2.log}&quot;&gt;\n<\/code><\/pre>\n<p>Generally, all Log4j2 lookups follow this pattern: <code>${type:key:-defaultValue}<\/code>.<\/p>\n<p><strong>Env vs sys<\/strong><\/p>\n<p>By the way, the <code>env<\/code> prefix is for environment variables (like %PATH% on Windows), and is not related to <code>sys<\/code>, which is Java system properties. See also <a href=\"http://logging.apache.org/log4j/2.x/manual/lookups.html\" rel=\"nofollow noreferrer\">http://logging.apache.org/log4j/2.x/manual/lookups.html<\/a><\/p>\n",
+            "answer_id": 22029761,
+            "question_id": 22028399,
+            "last_edit_date": 1716811177
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/8fzHf.jpg?s=256",
+                "account_id": 2489020,
+                "user_type": "registered",
+                "user_id": 2166900,
+                "link": "https://stackoverflow.com/users/2166900/gogoris",
+                "reputation": 840,
+                "display_name": "GoGoris"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 22,
+            "is_accepted": false,
+            "last_activity_date": 1492074284,
+            "creation_date": 1465887494,
+            "body": "<p>You can use the same <code>${sys:propName:-default}<\/code>syntax. Notice the ':-', it is is called \"<strong><em>variable default value delimiter<\/em><\/strong>\". The <em>default<\/em> value for the \"<em>variable default value delimiter<\/em>\" is <code>:-<\/code>, as in <em>bash<\/em> and other <em>*nix<\/em> shells.<\/p>\n\n<p>You can read more about this in the Log4j 2 documentation for the <a href=\"https://logging.apache.org/log4j/log4j-2.2/log4j-core/apidocs/org/apache/logging/log4j/core/lookup/StrSubstitutor.html\" rel=\"noreferrer\"><em>StrSubstitutor<\/em><\/a> class.<\/p>\n\n<p>To use the same example:<\/p>\n\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;Configuration status=\"debug\"&gt;\n  ...\n    &lt;Appenders&gt;\n        &lt;Appender type=\"File\" name=\"File\"\n                  fileName=\"${sys:oauthLoginLogPath:-default/location/of/oauth2.log}\"&gt;\n        ....\n    &lt;/Appenders&gt;\n&lt;/Configuration&gt;\n<\/code><\/pre>\n",
+            "answer_id": 37804992,
+            "question_id": 22028399,
+            "last_edit_date": 1492074284
+        }
+    ],
+    "answer_comments": {
+        "37804992": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d0273c47d1d1d45e9394e4a2521e4fa8?s=256&d=identicon&r=PG",
+                    "account_id": 2930965,
+                    "user_type": "registered",
+                    "user_id": 2511197,
+                    "link": "https://stackoverflow.com/users/2511197/rec",
+                    "reputation": 11015,
+                    "display_name": "rec",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 6,
+                "post_id": 37804992,
+                "edited": false,
+                "creation_date": 1500236652,
+                "comment_id": 77235231
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d0273c47d1d1d45e9394e4a2521e4fa8?s=256&d=identicon&r=PG",
+                    "account_id": 2930965,
+                    "user_type": "registered",
+                    "user_id": 2511197,
+                    "link": "https://stackoverflow.com/users/2511197/rec",
+                    "reputation": 11015,
+                    "display_name": "rec",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 37804992,
+                "edited": false,
+                "creation_date": 1500236450,
+                "comment_id": 77235190
+            }
+        ],
+        "22029761": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3171eb332288875851ca073cd519aa3d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4852359,
+                    "user_type": "registered",
+                    "user_id": 3914327,
+                    "link": "https://stackoverflow.com/users/3914327/jose-duarte",
+                    "reputation": 129,
+                    "display_name": "Jose Duarte"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 22029761,
+                "edited": false,
+                "creation_date": 1634684789,
+                "comment_id": 123090406
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/8fzHf.jpg?s=256",
+                    "account_id": 2489020,
+                    "user_type": "registered",
+                    "user_id": 2166900,
+                    "link": "https://stackoverflow.com/users/2166900/gogoris",
+                    "reputation": 840,
+                    "display_name": "GoGoris"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22029761,
+                "edited": false,
+                "creation_date": 1465887397,
+                "comment_id": 63074535
+            }
+        ]
+    }
+}

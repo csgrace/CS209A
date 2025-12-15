@@ -1,0 +1,115 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f91746e05b4a9bbd9df6f6667dcb80e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4920689,
+            "user_type": "registered",
+            "user_id": 3963330,
+            "link": "https://stackoverflow.com/users/3963330/tob%c3%adas",
+            "reputation": 6317,
+            "display_name": "Tob&#237;as",
+            "accept_rate": 73
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/35322784/include-a-fragment-from-the-same-thymeleaf-template-using-this-content-or",
+        "last_activity_date": 1457008733,
+        "creation_date": 1455127769,
+        "answer_count": 1,
+        "title": "Include a fragment from the same thymeleaf template using &quot;this :: content&quot; or &quot;:: content&quot; not working as expected",
+        "body": "<p>I'm including a template fragment from the same template file. Section \"<a href=\"http://www.thymeleaf.org/doc/tutorials/2.1/usingthymeleaf.html#including-template-fragments\" rel=\"noreferrer\">8.1 Including template fragments - Defining and referencing fragments<\/a>\" of the docs states that:<\/p>\n\n<blockquote>\n  <p>\"<strong>::domselector<\/strong>\" or \"<strong>this::domselector<\/strong>\" Includes a fragment from the\n  same template.<\/p>\n<\/blockquote>\n\n<p>If I haven't misunderstood, I should be able to reference the fragment as follows: <code>th:include=\"this :: contentB\"<\/code> or <code>th:include=\":: contentB\"<\/code>\nbut only making full reference <code>th:include=\"test-fragment :: contentB\"<\/code> works for me.<\/p>\n\n<p>This is the sample code:<\/p>\n\n<p><em>HomeController.java<\/em><\/p>\n\n<pre><code>@Controller\nclass HomeController {\n  @RequestMapping({ \"/\", \"index\", \"home\" })\n  String index(Model model) {\n    return \"test\";\n  }\n}\n<\/code><\/pre>\n\n<p><em>test.html<\/em><\/p>\n\n<pre><code>&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n  &lt;head&gt;&lt;/head&gt;\n  &lt;body&gt;\n    &lt;ul th:replace=\"test-fragment :: contentA\" /&gt;\n  &lt;/body&gt;\n&lt;/html&gt;\n<\/code><\/pre>\n\n<p><em>test-fragment.html<\/em><\/p>\n\n<pre><code>&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n  &lt;head&gt;&lt;/head&gt;\n  &lt;body&gt;\n    &lt;ul th:fragment=\"contentA\"&gt;\n      &lt;li th:each=\"idx : ${#numbers.sequence(1,4)}\" th:switch=\"${idx}\"&gt;\n\n        &lt;th:block th:case=\"1\" \n            th:include=\"test-fragment :: contentB\" \n            th:with=\"strVar = 'One'\"/&gt;\n\n        &lt;th:block th:case=\"2\" \n            th:include=\"this :: contentB\"\n            th:with=\"strVar = 'Two'\"/&gt;\n\n        &lt;th:block th:case=\"3\" \n            th:include=\" :: contentB\"\n            th:with=\"strVar = 'Three'\"/&gt;\n\n        &lt;th:block th:case=\"*\" \n            th:include=\"/test-fragment :: contentB\" \n            th:with=\"strVar = 'Other'\"/&gt;\n      &lt;/li&gt;\n    &lt;/ul&gt;\n\n    &lt;span th:fragment=\"contentB\"&gt;\n      &lt;span th:text=\"|value: ${strVar}|\" /&gt;\n    &lt;/span&gt;\n  &lt;/body&gt;\n&lt;/html&gt;\n<\/code><\/pre>\n\n<p>Output is:<\/p>\n\n<pre><code>&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n   &lt;head&gt;&lt;/head&gt;\n   &lt;body&gt;\n      &lt;ul&gt;\n         &lt;li&gt;&lt;span&gt;value: One&lt;/span&gt;&lt;/li&gt;\n         &lt;li&gt;&lt;/li&gt;\n         &lt;li&gt;&lt;/li&gt;\n         &lt;li&gt;&lt;span&gt;value: Other&lt;/span&gt;&lt;/li&gt;\n      &lt;/ul&gt;\n   &lt;/body&gt;\n&lt;/html&gt;\n<\/code><\/pre>\n\n<p>Case 2 and 3 are missing. What am I doing wrong? <\/p>\n\n<p>I'm testing using <a href=\"http://projects.spring.io/spring-boot/\" rel=\"noreferrer\">Spring Boot<\/a> 1.3.2.RELEASE<\/p>\n\n<p>EDIT:<\/p>\n\n<p>I've made a small test project to reproduce the issue, it can be found here: <a href=\"https://github.com/t-cst/thymeleaf-springboot-test\" rel=\"noreferrer\">https://github.com/t-cst/thymeleaf-springboot-test<\/a><\/p>\n\n<p>EDIT:<\/p>\n\n<p>After some debug, I find out that when the fragment selector is <code>\"this :: contentB\"<\/code> or  <code>\" :: contentB\"<\/code> then the template name is resolved as <code>test<\/code>  instead of <code>test-framgent<\/code>. This is done at:<\/p>\n\n<p><code>StandardFragment#extractFragment:189<\/code> from thymeleaf-2.1.4.RELEASE:<\/p>\n\n<pre><code>/* 186 */  String targetTemplateName = getTemplateName();\n           if (targetTemplateName == null) {\n               if (context != null &amp;&amp; context instanceof Arguments) {\n                   targetTemplateName = ((Arguments)context).getTemplateName();\n/* 190 */      } else {\n                   throw new TemplateProcessingException(\n                           \"In order to extract fragment from current template (templateName == null), processing context \" +\n                           \"must be a non-null instance of the Arguments class (but is: \" +\n                           (context == null? null : context.getClass().getName()) + \")\");\n/* 195 */      }\n           }\n<\/code><\/pre>\n\n<p>But I still don't know why this happens in my test.<\/p>\n\n<p>EDIT:<\/p>\n\n<p>I've also asked  at <a href=\"http://forum.thymeleaf.org/Include-a-fragment-from-the-same-thymeleaf-template-using-quot-this-content-quot-or-quot-content-quod-td4029523.html\" rel=\"noreferrer\">thymeleaf forum<\/a>. Maybe it's a bug. I've opened an <a href=\"https://github.com/thymeleaf/thymeleaf/issues/466\" rel=\"noreferrer\">issue<\/a>.<\/p>\n",
+        "question_id": 35322784,
+        "tags": [
+            "java",
+            "thymeleaf"
+        ],
+        "score": 5,
+        "accepted_answer_id": 35772431,
+        "is_answered": true,
+        "view_count": 5359,
+        "last_edit_date": 1456395153
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/clgoJ.png?s=256",
+                "account_id": 4767548,
+                "user_type": "registered",
+                "user_id": 3853283,
+                "link": "https://stackoverflow.com/users/3853283/aboodz",
+                "reputation": 1624,
+                "display_name": "Aboodz"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 35322784,
+            "edited": false,
+            "creation_date": 1455275503,
+            "comment_id": 58428120
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f91746e05b4a9bbd9df6f6667dcb80e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4920689,
+                "user_type": "registered",
+                "user_id": 3963330,
+                "link": "https://stackoverflow.com/users/3963330/tob%c3%adas",
+                "reputation": 6317,
+                "display_name": "Tob&#237;as",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 35322784,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/clgoJ.png?s=256",
+                "account_id": 4767548,
+                "user_type": "registered",
+                "user_id": 3853283,
+                "link": "https://stackoverflow.com/users/3853283/aboodz",
+                "reputation": 1624,
+                "display_name": "Aboodz"
+            },
+            "edited": false,
+            "creation_date": 1455268942,
+            "comment_id": 58423774
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/clgoJ.png?s=256",
+                "account_id": 4767548,
+                "user_type": "registered",
+                "user_id": 3853283,
+                "link": "https://stackoverflow.com/users/3853283/aboodz",
+                "reputation": 1624,
+                "display_name": "Aboodz"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 35322784,
+            "edited": false,
+            "creation_date": 1455193036,
+            "comment_id": 58385478
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f91746e05b4a9bbd9df6f6667dcb80e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4920689,
+            "user_type": "registered",
+            "user_id": 3963330,
+            "link": "https://stackoverflow.com/users/3963330/tob%c3%adas",
+            "reputation": 6317,
+            "display_name": "Tob&#237;as",
+            "accept_rate": 73
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1457008733,
+        "creation_date": 1457008733,
+        "body": "<p>In case someone ends here with the same issue, this is not possible in <code>thymeleaf 2.1.4.RELEASE<\/code> version, but it will be in next version <code>3.0<\/code><\/p>\n\n<p>A comprehensive explanation can be found at this <a href=\"https://github.com/thymeleaf/thymeleaf/issues/466#issuecomment-188984196\" rel=\"nofollow\">issue comment<\/a>.<\/p>\n",
+        "answer_id": 35772431,
+        "question_id": 35322784
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,102 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d2bf82f9287b88ad80ecb92e81e653e5?s=256&d=identicon&r=PG",
+            "account_id": 434034,
+            "user_type": "registered",
+            "user_id": 819732,
+            "link": "https://stackoverflow.com/users/819732/kasdega",
+            "reputation": 18886,
+            "display_name": "kasdega",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/46778369/how-to-change-the-currency-symbol-for-any-one-specific-locale",
+        "last_activity_date": 1509050089,
+        "creation_date": 1508184794,
+        "answer_count": 1,
+        "title": "How to change the currency symbol for any one specific locale?",
+        "body": "<p>I'm using jstl to display a currency value like so...<\/p>\n\n<pre><code>&lt;fmt:formatNumber value=\"${sellingPrice}\" type=\"currency\"/&gt;\n<\/code><\/pre>\n\n<p>which works 99% of the time.  Now I have a requirement that for a given locale, the customer does not want to show ANY currency symbol at all.<\/p>\n\n<p>I tried this:<\/p>\n\n<pre><code>&lt;fmt:formatNumber currencySymbol=\"\" value=\"${sellingPrice}\" type=\"currency\"/&gt;\n<\/code><\/pre>\n\n<p>...removes the currency symbols no matter what the locale is.<\/p>\n\n<p>and I thought about using spring message like this:<\/p>\n\n<pre><code>&lt;fmt:formatNumber currencySymbol=\"&lt;spring:message code='myCurrency.symbol' /&gt;\" value=\"${sellingPrice}\" type=\"currency\"/&gt;\n<\/code><\/pre>\n\n<p>but the problem is then I'd need to go back and create the correct currency symbol for all the other locales I support as well as adding that spring message for any new locales that may come up...<\/p>\n\n<p>What I really need is to be able to say something like: <\/p>\n\n<p><code>if(locale == 'EN_XX') {\n    currencySymbol=' ';\n} else {\n // otherwise use whatever the normal currency symbol would be for that locale\n}<\/code><\/p>\n\n<p>Is there any way to override the default currency symbol for a specific locale at a lower level than the JSP?  I mean the value has to come from somewhere right?  <\/p>\n",
+        "question_id": 46778369,
+        "tags": [
+            "java",
+            "spring",
+            "jsp",
+            "jstl",
+            "el"
+        ],
+        "score": 0,
+        "accepted_answer_id": 46963338,
+        "is_answered": true,
+        "view_count": 815
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d2bf82f9287b88ad80ecb92e81e653e5?s=256&d=identicon&r=PG",
+                "account_id": 434034,
+                "user_type": "registered",
+                "user_id": 819732,
+                "link": "https://stackoverflow.com/users/819732/kasdega",
+                "reputation": 18886,
+                "display_name": "kasdega",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778369,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/41bf03526866687e26d626c0fcb07a5d?s=256&d=identicon&r=PG",
+                "account_id": 1022086,
+                "user_type": "registered",
+                "user_id": 1032167,
+                "link": "https://stackoverflow.com/users/1032167/varren",
+                "reputation": 14751,
+                "display_name": "varren",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1508185710,
+            "comment_id": 80502956
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/41bf03526866687e26d626c0fcb07a5d?s=256&d=identicon&r=PG",
+                "account_id": 1022086,
+                "user_type": "registered",
+                "user_id": 1032167,
+                "link": "https://stackoverflow.com/users/1032167/varren",
+                "reputation": 14751,
+                "display_name": "varren",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778369,
+            "edited": false,
+            "creation_date": 1508185340,
+            "comment_id": 80502806
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d2bf82f9287b88ad80ecb92e81e653e5?s=256&d=identicon&r=PG",
+            "account_id": 434034,
+            "user_type": "registered",
+            "user_id": 819732,
+            "link": "https://stackoverflow.com/users/819732/kasdega",
+            "reputation": 18886,
+            "display_name": "kasdega",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1509050089,
+        "creation_date": 1509050089,
+        "body": "<p>I ended up creating my own custom tag that extends FormatNumberTag.  It figures out the correct Locale and then calls the FormatNumberTag.setCurrencySymbol(\"...\");<\/p>\n\n<pre><code>public class MyFormatNumberTag extends FormatNumberTag {\n\n   public MyFormatNumberTag() {\n       super();\n   }\n\n   //...snip...\n\n   @Override\n   public int doStartTag() throws JspException {\n       Locale locale = getMyRequestLocale();\n\n       if(locale == Locale.EN_GB) setCurrencySymbol(\"\");\n\n       return super.doStartTag();\n   }\n}\n<\/code><\/pre>\n\n<p>Hope this helps someone.<\/p>\n",
+        "answer_id": 46963338,
+        "question_id": 46778369
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,208 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/48652f397d7648c40b4e2a443dee9932?s=256&d=identicon&r=PG",
+            "account_id": 744098,
+            "user_type": "registered",
+            "user_id": 715439,
+            "link": "https://stackoverflow.com/users/715439/ran",
+            "reputation": 652,
+            "display_name": "Ran",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/38321745/calling-a-spring-controller-with-post-in-android-result-in-a-null-parameter",
+        "last_activity_date": 1468316641,
+        "creation_date": 1468305913,
+        "answer_count": 1,
+        "title": "Calling a spring controller with POST in android result in a null parameter",
+        "body": "<p>I am posting data by this <a href=\"http://hmkcode.com/android-send-json-data-to-server/\" rel=\"nofollow noreferrer\">POST method<\/a> or by the <a href=\"https://stackoverflow.com/questions/9767952/how-to-add-parameters-to-httpurlconnection-using-post\">first answer<\/a> to this question, posting the data to a spring servlet configured with: <\/p>\n\n<pre><code>@RequestMapping(value = \"/insert\", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })\n@ResponseStatus(HttpStatus.OK)\npublic @ResponseBody String insert(String a) {\n<\/code><\/pre>\n\n<p>The servlet-method is called, but its parameter 'a' is null. Why?<\/p>\n\n<p><strong>Edit<\/strong>: The main method and the AsyncTask:<\/p>\n\n<p><strong>main method<\/strong><\/p>\n\n<pre><code>ServerCaller serverCaller = new ServerCaller();\n        try {\n            serverCaller.execute(new URL(\"http://192.168.56.1:8080/SpringHibernateExample/insert\"));\n        }\n<\/code><\/pre>\n\n<p><strong>AsyncTask<\/strong><\/p>\n\n<pre><code>package com.test.insert;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.InputStreamReader;\nimport java.io.UnsupportedEncodingException;\nimport java.net.URL;\nimport java.net.URLEncoder;\nimport java.util.List;\n\nimport org.apache.http.HttpResponse;\nimport org.apache.http.NameValuePair;\nimport org.apache.http.client.HttpClient;\nimport org.apache.http.client.methods.HttpPost;\nimport org.apache.http.entity.StringEntity;\nimport org.apache.http.impl.client.DefaultHttpClient;\nimport org.json.JSONObject;\n\nimport android.os.AsyncTask;\n\npublic class ServerCaller extends AsyncTask&lt;URL, Integer, Long&gt; {\n    @Override\n    protected Long doInBackground(URL... params1) {\n        try {               \n            POST(params1[0].toString());\n        }\n        catch (Exception e) {\n            Log.realException(e);\n            throw new RuntimeException(e);\n        }\n\n        return 22l;\n    }\n\n    private String getQuery(List&lt;NameValuePair&gt; params) throws UnsupportedEncodingException {\n        StringBuilder result = new StringBuilder();\n        boolean first = true;\n\n        for (NameValuePair pair : params) {\n            if (first)\n                first = false;\n            else\n                result.append(\"&amp;\");\n\n            result.append(URLEncoder.encode(pair.getName(), \"UTF-8\"));\n            result.append(\"=\");\n            result.append(URLEncoder.encode(pair.getValue(), \"UTF-8\"));\n        }\n\n        return result.toString();\n    }\n\n    public static String POST(String url) {\n        InputStream inputStream = null;\n        String result = \"\";\n        try {\n\n            // 1. create HttpClient\n            HttpClient httpclient = new DefaultHttpClient();\n\n            // 2. make POST request to the given URL\n            HttpPost httpPost = new HttpPost(url);\n\n            String json = \"\";\n\n            // 3. build jsonObject\n            JSONObject jsonObject = new JSONObject();\n            jsonObject.accumulate(\"name\", \"a\");\n            jsonObject.accumulate(\"country\", \"b\");\n            jsonObject.accumulate(\"twitter\", \"c\");\n\n            // 4. convert JSONObject to JSON to String\n            json = jsonObject.toString();\n\n            // ** Alternative way to convert Person object to JSON string usin Jackson Lib \n            // ObjectMapper mapper = new ObjectMapper();\n            // json = mapper.writeValueAsString(person); \n\n            // 5. set json to StringEntity\n            StringEntity se = new StringEntity(json);\n\n            // 6. set httpPost Entity\n            httpPost.setEntity(se);\n\n            // 7. Set some headers to inform server about the type of the content   \n            httpPost.setHeader(\"Accept\", \"application/json\");\n            httpPost.setHeader(\"Content-type\", \"application/json\");\n\n            // 8. Execute POST request to the given URL\n            HttpResponse httpResponse = httpclient.execute(httpPost);\n\n            // 9. receive response as inputStream\n            inputStream = httpResponse.getEntity().getContent();\n\n            // 10. convert inputstream to string\n            if (inputStream != null)\n                result = convertInputStreamToString(inputStream);\n            else\n                result = \"Did not work!\";\n\n        }\n        catch (Exception e) {\n            Log.e(e.getLocalizedMessage());\n        }\n\n        // 11. return result\n        return result;\n    }\n\n    private static String convertInputStreamToString(InputStream inputStream) throws IOException {\n        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));\n        String line = \"\";\n        String result = \"\";\n        while ((line = bufferedReader.readLine()) != null)\n            result += line;\n\n        inputStream.close();\n        return result;\n\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 38321745,
+        "tags": [
+            "java",
+            "android",
+            "spring",
+            "spring-mvc",
+            "servlets"
+        ],
+        "score": 0,
+        "accepted_answer_id": 38325263,
+        "is_answered": true,
+        "view_count": 632,
+        "last_edit_date": 1495540286
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/750aa5195b20699d5b102c2ed69b1923?s=256&d=identicon&r=PG",
+                "account_id": 1687209,
+                "user_type": "registered",
+                "user_id": 1550230,
+                "link": "https://stackoverflow.com/users/1550230/nangsaigon",
+                "reputation": 1261,
+                "display_name": "NangSaigon"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38321745,
+            "edited": false,
+            "creation_date": 1468314426,
+            "comment_id": 64063766
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/48652f397d7648c40b4e2a443dee9932?s=256&d=identicon&r=PG",
+                "account_id": 744098,
+                "user_type": "registered",
+                "user_id": 715439,
+                "link": "https://stackoverflow.com/users/715439/ran",
+                "reputation": 652,
+                "display_name": "Ran",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38321745,
+            "edited": false,
+            "creation_date": 1468313616,
+            "comment_id": 64063250
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ae6c2c85cd101fc39c5dbed42ef6089e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8136328,
+                "user_type": "registered",
+                "user_id": 6127820,
+                "link": "https://stackoverflow.com/users/6127820/vaibs",
+                "reputation": 1616,
+                "display_name": "Vaibs",
+                "accept_rate": 33
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38321745,
+            "edited": false,
+            "creation_date": 1468312618,
+            "comment_id": 64062599
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/48652f397d7648c40b4e2a443dee9932?s=256&d=identicon&r=PG",
+                "account_id": 744098,
+                "user_type": "registered",
+                "user_id": 715439,
+                "link": "https://stackoverflow.com/users/715439/ran",
+                "reputation": 652,
+                "display_name": "Ran",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38321745,
+            "edited": false,
+            "creation_date": 1468311940,
+            "comment_id": 64062175
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ae6c2c85cd101fc39c5dbed42ef6089e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8136328,
+                "user_type": "registered",
+                "user_id": 6127820,
+                "link": "https://stackoverflow.com/users/6127820/vaibs",
+                "reputation": 1616,
+                "display_name": "Vaibs",
+                "accept_rate": 33
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38321745,
+            "edited": false,
+            "creation_date": 1468311175,
+            "comment_id": 64061759
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/48652f397d7648c40b4e2a443dee9932?s=256&d=identicon&r=PG",
+                "account_id": 744098,
+                "user_type": "registered",
+                "user_id": 715439,
+                "link": "https://stackoverflow.com/users/715439/ran",
+                "reputation": 652,
+                "display_name": "Ran",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38321745,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/HylR8.png?s=256",
+                "account_id": 7890476,
+                "user_type": "registered",
+                "user_id": 5960800,
+                "link": "https://stackoverflow.com/users/5960800/blank",
+                "reputation": 12378,
+                "display_name": "Blank",
+                "accept_rate": 67
+            },
+            "edited": false,
+            "creation_date": 1468307131,
+            "comment_id": 64059389
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/HylR8.png?s=256",
+                "account_id": 7890476,
+                "user_type": "registered",
+                "user_id": 5960800,
+                "link": "https://stackoverflow.com/users/5960800/blank",
+                "reputation": 12378,
+                "display_name": "Blank",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38321745,
+            "edited": false,
+            "creation_date": 1468306244,
+            "comment_id": 64058919
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a366cdf835ecb6f590cada828d24cce9?s=256&d=identicon&r=PG",
+            "account_id": 4289058,
+            "user_type": "registered",
+            "user_id": 3505897,
+            "link": "https://stackoverflow.com/users/3505897/periklis-douvitsas",
+            "reputation": 2501,
+            "display_name": "Periklis Douvitsas"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1468316641,
+        "creation_date": 1468316641,
+        "body": "<p>i think you pass a json object but you do not map it in spring.\nIn Spring you have to create a class ie CustomClass with properties name, country, twitter<\/p>\n\n<pre><code>public class CustomClass{\n  private String name;\n  private String country;\n  private String twitter;\n\n  //getters and setters should be here\n} \n<\/code><\/pre>\n\n<p>then the code in Spring should look like this<\/p>\n\n<pre><code>@RequestMapping(value = \"/insert\", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })\n@ResponseStatus(HttpStatus.OK)\npublic @ResponseBody String insert(@RequestBody CustomClass cs) {\n   cs.getName(); \n<\/code><\/pre>\n\n<p>Let me know if this helped<\/p>\n",
+        "answer_id": 38325263,
+        "question_id": 38321745
+    }],
+    "answer_comments": {"38325263": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/48652f397d7648c40b4e2a443dee9932?s=256&d=identicon&r=PG",
+            "account_id": 744098,
+            "user_type": "registered",
+            "user_id": 715439,
+            "link": "https://stackoverflow.com/users/715439/ran",
+            "reputation": 652,
+            "display_name": "Ran",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 38325263,
+        "edited": false,
+        "creation_date": 1468318195,
+        "comment_id": 64066420
+    }]}
+}

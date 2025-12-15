@@ -1,0 +1,533 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4db80d63dfbdf17ec220d9c007af45e7?s=256&d=identicon&r=PG",
+            "account_id": 2135995,
+            "user_type": "registered",
+            "user_id": 1895785,
+            "link": "https://stackoverflow.com/users/1895785/zolointo",
+            "reputation": 123,
+            "display_name": "zolointo"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13827625/sending-object-over-socket-results-in-socketexception",
+        "last_activity_date": 1355361800,
+        "creation_date": 1355256267,
+        "answer_count": 3,
+        "title": "Sending Object over socket results in SocketException",
+        "body": "<p>How can I stop the SocketException from occurring?<\/p>\n\n<p>I am trying to do a simple transfer of a serialized object from a client to a server on my local machine. <\/p>\n\n<p>I have been able to use a slight variation of the following code to send strings, but when I try to send an object<\/p>\n\n<pre><code>Customer customerToReceive = (Customer) input.readObject();// EXCEPTION OCCURS RIGHT HERE\n<\/code><\/pre>\n\n<p>I get a SocketException that I don't understand how to interpret.<\/p>\n\n<pre><code>java.net.SocketException: Connection reset\nat java.net.SocketInputStream.read(Unknown Source)\nat java.io.ObjectInputStream$PeekInputStream.read(Unknown Source)\nat java.io.ObjectInputStream$BlockDataInputStream.read(Unknown Source)\nat java.io.ObjectInputStream$BlockDataInputStream.readFully(Unknown Source)\nat java.io.ObjectInputStream.defaultReadFields(Unknown Source)\nat java.io.ObjectInputStream.readSerialData(Unknown Source)\nat java.io.ObjectInputStream.readOrdinaryObject(Unknown Source)\nat java.io.ObjectInputStream.readObject0(Unknown Source)\nat java.io.ObjectInputStream.readObject(Unknown Source)\nat MattServer.runCustomerServer(MattServer.java:44)\nat MattServer.&lt;init&gt;(MattServer.java:14)\nat MattServerTest.main(MattServerTest.java:10)\n<\/code><\/pre>\n\n<p>Here is the Client code, which doesn't seem to complain at all:\n    public class MattClient\n    {\n    Socket client;\n    ObjectOutputStream output;\n    ObjectInputStream input;\n    String message;<\/p>\n\n<pre><code>public MattClient()\n{\n    runCustomerClient();\n}\n\npublic void runCustomerClient()\n{\n    try\n    {\n        //Connection:\n        System.out.println(\"Attempting connection...\");\n        client = new Socket(\"localhost\",12345);\n        System.out.println(\"Connected to server...\");\n\n        //Connect Streams:\n\n        //output.flush();\n        System.out.println(\"Got IO Streams...\");\n\n        //SEND MESSAGES:\n        try\n        {\n            for(int i = 1;i&lt;=10;i++)\n            {\n                output = new ObjectOutputStream(client.getOutputStream());\n                Customer customerToSend = new Customer(\"Matt\", \"1234 fake street\", i);\n                System.out.println(\"Created customer:\");\n                System.out.println(customerToSend.toString());\n                output.writeObject(customerToSend);\n                output.flush();\n            };\n            message = \"TERMINATE\";\n            System.out.println(message);\n            output.writeObject(message);\n            output.reset();\n            output.flush();\n        }\n        catch (IOException e)\n        {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        }\n        catch(Exception e2)\n        {\n            e2.printStackTrace();\n        }\n        finally\n        {\n\n        }\n    }\n    catch (IOException e1)\n    {\n        // TODO Auto-generated catch block\n        e1.printStackTrace();\n    }\n    catch(Exception e3)\n    {\n        e3.printStackTrace();\n    }\n    finally\n    {\n\n    }\n}\n<\/code><\/pre>\n\n<p>And the server which revolts :<\/p>\n\n<pre><code>public class MattServer\n{\nServerSocket server;\nSocket socket;\nObjectInputStream input;\nObjectOutputStream output;\nString message;\n\npublic MattServer()\n{\n    runCustomerServer();\n}\n\npublic void runCustomerServer()\n{\n    try\n    {\n        server = new ServerSocket(12345,100000);\n        while(true)\n        {\n            //CONNECTION:\n            System.out.println(\"Waiting for connection\");\n            socket = server.accept();\n            System.out.println(\"Connection received...\");\n\n            //CONNECT STREAMS:\n            //output = new ObjectOutputStream(socket.getOutputStream());\n            //output.flush();\n            input = new ObjectInputStream(socket.getInputStream());\n            System.out.println(\"Got IO Streams...\");\n\n            //PROCESS STREAMS:\n            System.out.println(\"Connection successful!\");\n            do\n            {\n                System.out.println(\"Started loop\");\n                try\n                {\n                    System.out.println(\"in try...\");\n                    System.out.println(socket.getInetAddress().getHostName());\n                    Customer customerToReceive = (Customer) input.readObject();// EXCEPTION OCCURS RIGHT HERE\n                    Object o = input.readObject();\n                    System.out.println(\"Object of class \" + o.getClass().getName() + \" is \" + o);\n                    System.out.println(\"Got customer object\");\n                    System.out.println(customerToReceive.toString());\n                }\n                catch(ClassNotFoundException cnfE)\n                {\n                    System.out.println(\"Can't convert input to string\");\n                }\n            } while(!message.equals(\"TERMINATE\"));\n\n            System.out.println(\"Finished.\");\n\n        }\n    }\n    catch(IOException ioE)\n    {\n        ioE.printStackTrace();\n    }\n    finally\n    {\n        try\n        {\n            input.close();\n            socket.close();\n            server.close();\n        }\n        catch (IOException e)\n        {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        }\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 13827625,
+        "tags": [
+            "java",
+            "sockets",
+            "serversocket"
+        ],
+        "score": 3,
+        "accepted_answer_id": 13827988,
+        "is_answered": true,
+        "view_count": 5004,
+        "last_edit_date": 1355298664
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13827625,
+            "edited": false,
+            "creation_date": 1355261232,
+            "comment_id": 19031326
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dde3b34749219173bbf3e07ca710eccc?s=256&d=identicon&r=PG",
+                "account_id": 44379,
+                "user_type": "registered",
+                "user_id": 130224,
+                "link": "https://stackoverflow.com/users/130224/reprogrammer",
+                "reputation": 14798,
+                "display_name": "reprogrammer",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 13827625,
+            "edited": false,
+            "creation_date": 1355256375,
+            "comment_id": 19029193
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                "account_id": 1000314,
+                "user_type": "registered",
+                "user_id": 1015327,
+                "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                "reputation": 12800,
+                "display_name": "JimmyB"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1355352970,
+            "creation_date": 1355257735,
+            "body": "<p>This exception is the result of closing the connection too early, that is, the client sends its data and immediatly closes the connection. In this case, the server usually has not been able to read all data sent by the client and the termination of the connection comes in the middle of the transfer as seen by the server side.<\/p>\n\n<p>Note that <code>flush()<\/code>-ing a network <code>OutputStream<\/code> does <em>not<\/em> mean or guarantee that any/all data has actually been transmitted. In the best scenario this only makes sure that all data is passed on <em>to the network stack<\/em> on the local machine, which will decide at its discretion when to actually transfer the data.<\/p>\n\n<p>One solution to this is to let the <em>server<\/em> close the connection when it is ready to. The client should then wait, e.g. in a blocking <code>read()<\/code> operation, and will then be notified by the named exception when the <em>server<\/em> signals the end of the transmission.<\/p>\n\n<p>Another way is to implement your own acknowledgement so that the client will wait for the server to send an acknowledgement message back, after which the connection can be safely closed by both sides.<\/p>\n\n<p>For reference, there are socket options which influence the behavior of the connection in cases like yours, namely:<\/p>\n\n<p><a href=\"http://download.java.net/jdk7/archive/b123/docs/api/java/net/SocketOptions.html#SO_LINGER\" rel=\"nofollow\" title=\"SO_LINGER\">SO_LINGER<\/a> and\n<a href=\"http://download.java.net/jdk7/archive/b123/docs/api/java/net/SocketOptions.html#TCP_NODELAY\" rel=\"nofollow\" title=\"TCP_NODELAY\">TCP_NODELAY<\/a><\/p>\n\n<p>(These socket options are <em>not<\/em> a solution to your problem but may change the observed behavior in some cases.)<\/p>\n\n<p>EDIT:<\/p>\n\n<p>It appears the relevance of the <code>SO_LINGER<\/code> option for the observed behavior is not as obvious as I thought it was from the referenced documentation. Therefore, I will try to make the point clearer:<\/p>\n\n<p>In Java there are basically <em>two<\/em> ways to terminate a TCP connection via <code>close()<\/code>:<\/p>\n\n<ol>\n<li><p><em>Without<\/em> enabling the <code>SO_LINGER<\/code> option. In this case, a TCP connection <em>reset<\/em> (<code>RST<\/code>) is immediatly sent and the call to <code>close()<\/code> returns. The peer side of the connection will receive an exception stating that the 'connection has been reset' when trying to use the connection (read or write) after the <code>RST<\/code> has been received.<\/p><\/li>\n<li><p>With <em>enabled<\/em> <code>SO_LINGER<\/code> option. In this case, a TCP <code>FIN<\/code> is generated to orderly shut down the connection. Then, <em>if<\/em> the peer does not acknowlege the data sent within the given time frame, a timeout occurs and the local party issuing the <code>close()<\/code> continues as in case #1, sending an <code>RST<\/code> and then declaring the connection 'dead'.<\/p><\/li>\n<\/ol>\n\n<p>So, usually one wants to enable <code>SO_LINGER<\/code> to allow the peer to process the data and then tear down the connection cleanly. If <code>SO_LINGER<\/code> is not enabled <em>and<\/em> <code>close()<\/code> is called <em>before<\/em> all data has been processed by the peer (i.e. 'too early') the named exception re the <em>reset<\/em> connection occurs at the peer.<\/p>\n\n<p>As said above, the <code>TCP_NODELAY<\/code> option <em>may<\/em> change the observed behavior in a non-deterministic way, because the data written is more likely to already be transferred across the network <em>before<\/em> the call to <code>close()<\/code> causes the reset of the connection.<\/p>\n",
+            "answer_id": 13827988,
+            "question_id": 13827625,
+            "last_edit_date": 1355352970
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Tt0Tg.jpg?s=256",
+                "account_id": 1977055,
+                "user_type": "registered",
+                "user_id": 1774618,
+                "link": "https://stackoverflow.com/users/1774618/dashrb",
+                "reputation": 980,
+                "display_name": "dashrb"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1355257384,
+            "creation_date": 1355257384,
+            "body": "<p>Don't call output.reset() from the client; seems like that could be causing the server to think the connection was reset.  Irrelevant, but you probably don't need the flush() either.<\/p>\n\n<p>I also don't think you should create a new ObjectOutputStream in each loop of the for-loop.  Initialize that outside (above) the loop, and reuse it.<\/p>\n",
+            "answer_id": 13827900,
+            "question_id": 13827625
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1355361800,
+            "creation_date": 1355260353,
+            "body": "<p>This exception has several causes, but the most usual one is that you wrote to a connection that had already been closed by the other end. In other words an application protocol problem: you are writing more data than you are reading.<\/p>\n\n<p>In this case it is because you are using one ObjectInputStream for the life of the socket, but a new ObjectOutputStream for every message, which cannot possibly work. Use one of each for the life of the connection, at both ends.<\/p>\n\n<p>You must also have got an 'invalid type code AC' message in an IOException at the receiver. Were you aware of that?<\/p>\n\n<p><strong>EDIT:<\/strong> For adherents to the 'early-closing' fallacy being adumbrated elsewhere in this thread:<\/p>\n\n<ol>\n<li><p><a href=\"http://www.ietf.org/rfc/rfc793.txt\" rel=\"nofollow\">RFC 793 #3.5<\/a> states (a) 'CLOSE is an operation meaning \"I have no more data to send\"', (b) 'A TCP will reliably deliver all buffers SENT before the connection was CLOSED', and (c) 'Local user initiates the close: in this case a FIN segment can be constructed <em>and placed on the outgoing segment queue<\/em>' [my emphasis]. The FIN does not arrive before any pending data, and the close does not abort transmission of pending data.<\/p><\/li>\n<li><p>Setting a positive <code>SO_LINGER<\/code> timeout causes close() to block until all pending data is sent or the timeout expires. Without setting <code>SO_LINGER<\/code> at all, pending data is sent anyway, but asynchronously to the close unless a +ve linger timeout is set. There is a third possibility which deliberately discards pending data and sends an RST instead of a FIN. The OP isn't doing that here and it isn't any kind of a solution to a problem that already involves an RST.<\/p><\/li>\n<li><p>I did a throughput experiment over the Internet a few years ago in which I varied every possible TCP parameter <em>except<\/em> <code>SO_LINGER<\/code>, which I left in its default state. Every test consisted of a timed one-way transmission of several megabytes followed by a normal close without any positive 'linger' timeout or any waiting for the peer. In 1700 connections 'connection reset' was encountered zero times. The onus is on adherents to explain these results, also to explain why the overwhelming majority of TCP problems don't mess with SO_LINGER. The onus is also indeed on them to produce a test case that does exhibit the claimed behaviour. Conditions: a client which connects, sends a large amount of data, and closes, without messing with SO_LINGER or indeed any socket option whatsoever, and a server that listens, accepts, <em>reads to EOS,<\/em> and closes. Over to you.<\/p><\/li>\n<\/ol>\n\n<p>There is no such thing as closing a connection 'too early' in TCP.<\/p>\n",
+            "answer_id": 13828587,
+            "question_id": 13827625,
+            "last_edit_date": 1355361800
+        }
+    ],
+    "answer_comments": {
+        "13828587": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13828587,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "edited": false,
+                "creation_date": 1478218553,
+                "comment_id": 68076604
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13828587,
+                "edited": false,
+                "creation_date": 1355386568,
+                "comment_id": 19076003
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13828587,
+                "edited": false,
+                "creation_date": 1355385833,
+                "comment_id": 19075734
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13828587,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "edited": false,
+                "creation_date": 1355362195,
+                "comment_id": 19069959
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13828587,
+                "edited": false,
+                "creation_date": 1355355337,
+                "comment_id": 19068082
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13828587,
+                "edited": false,
+                "creation_date": 1355354802,
+                "comment_id": 19067918
+            }
+        ],
+        "13827988": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "edited": false,
+                "creation_date": 1355362276,
+                "comment_id": 19069974
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1355354598,
+                "comment_id": 19067854
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "edited": false,
+                "creation_date": 1355336452,
+                "comment_id": 19059848
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4db80d63dfbdf17ec220d9c007af45e7?s=256&d=identicon&r=PG",
+                    "account_id": 2135995,
+                    "user_type": "registered",
+                    "user_id": 1895785,
+                    "link": "https://stackoverflow.com/users/1895785/zolointo",
+                    "reputation": 123,
+                    "display_name": "zolointo"
+                },
+                "edited": false,
+                "creation_date": 1355320417,
+                "comment_id": 19051386
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1355318832,
+                "comment_id": 19050595
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "edited": false,
+                "creation_date": 1355314787,
+                "comment_id": 19048714
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1355307421,
+                "comment_id": 19045249
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                    "account_id": 1000314,
+                    "user_type": "registered",
+                    "user_id": 1015327,
+                    "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                    "reputation": 12800,
+                    "display_name": "JimmyB"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1355306982,
+                "comment_id": 19045050
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "edited": false,
+                "creation_date": 1355264491,
+                "comment_id": 19032608
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4db80d63dfbdf17ec220d9c007af45e7?s=256&d=identicon&r=PG",
+                    "account_id": 2135995,
+                    "user_type": "registered",
+                    "user_id": 1895785,
+                    "link": "https://stackoverflow.com/users/1895785/zolointo",
+                    "reputation": 123,
+                    "display_name": "zolointo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "edited": false,
+                "creation_date": 1355259244,
+                "comment_id": 19030507
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4db80d63dfbdf17ec220d9c007af45e7?s=256&d=identicon&r=PG",
+                    "account_id": 2135995,
+                    "user_type": "registered",
+                    "user_id": 1895785,
+                    "link": "https://stackoverflow.com/users/1895785/zolointo",
+                    "reputation": 123,
+                    "display_name": "zolointo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "edited": false,
+                "creation_date": 1355259156,
+                "comment_id": 19030469
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4db80d63dfbdf17ec220d9c007af45e7?s=256&d=identicon&r=PG",
+                    "account_id": 2135995,
+                    "user_type": "registered",
+                    "user_id": 1895785,
+                    "link": "https://stackoverflow.com/users/1895785/zolointo",
+                    "reputation": 123,
+                    "display_name": "zolointo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13827988,
+                "edited": false,
+                "creation_date": 1355258319,
+                "comment_id": 19030078
+            }
+        ],
+        "13827900": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/00d71e011fc61cad60c5ffc9bf48c5ef?s=256&d=identicon&r=PG",
+                "account_id": 1000314,
+                "user_type": "registered",
+                "user_id": 1015327,
+                "link": "https://stackoverflow.com/users/1015327/jimmyb",
+                "reputation": 12800,
+                "display_name": "JimmyB"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 13827900,
+            "edited": false,
+            "creation_date": 1355257928,
+            "comment_id": 19029902
+        }]
+    }
+}

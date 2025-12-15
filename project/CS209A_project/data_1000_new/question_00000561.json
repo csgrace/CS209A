@@ -1,0 +1,190 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/gxUfX.jpg?s=256",
+            "account_id": 263754,
+            "user_type": "registered",
+            "user_id": 549534,
+            "link": "https://stackoverflow.com/users/549534/ivanenok",
+            "reputation": 624,
+            "display_name": "ivanenok"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/31359000/how-to-cancel-long-running-query-in-postgresql-with-jdbc",
+        "last_activity_date": 1452609029,
+        "creation_date": 1436630293,
+        "answer_count": 2,
+        "title": "How to cancel long running query in PostgreSQL with JDBC?",
+        "body": "<p>In my project i have some legacy plugins. These plugins used for read only queries from PostgreSQL. Most of plugins works well, but other part is really slow. It's reason for hangups on acquiring connection from C3P0.\nIt's looks like changes for connection timeout on pool has no effect.<\/p>\n\n<p>How i can set timeout for effective cancelation these queries? \nI think timeout for server side can be nice solution but i don't want set timeouts for all server in configs. Also i don't want drop this connection and need cancel current query only.<\/p>\n\n<p>Can you share your ideas about solution for this problem? <\/p>\n",
+        "question_id": 31359000,
+        "tags": [
+            "java",
+            "postgresql"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 5870,
+        "last_edit_date": 1452609029
+    },
+    "question_comments": [{
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user330315"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 31359000,
+        "edited": false,
+        "creation_date": 1452609965,
+        "comment_id": 57238924
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/fXrVi.png?s=256",
+                "account_id": 2267495,
+                "user_type": "registered",
+                "user_id": 1995738,
+                "link": "https://stackoverflow.com/users/1995738/klin",
+                "reputation": 123399,
+                "display_name": "klin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1436729250,
+            "creation_date": 1436652792,
+            "body": "<p>If you set configuration parameter <code>statement_timeout<\/code> dynamically, this parameter affects only the current session:\nAn execution of a query longer than the given time will be canceled without dropping a connection.<\/p>\n\n<pre><code>test=# set statement_timeout to 1000;  -- 1s\nSET\ntest=# select pg_sleep(5);             -- 5s\nERROR:  canceling statement due to statement timeout\ntest=# set statement_timeout to 0;     -- turn off\nSET\n<\/code><\/pre>\n\n<p><strong>Update - a brief overview of means to control Postgres processes.<\/strong><\/p>\n\n<p>You can list all running processes of a server:<\/p>\n\n<pre><code>test=# select pid, query_start, state, query from pg_stat_activity;\n pid  |        query_start         | state  |                            query\n------+----------------------------+--------+--------------------------------------------------------------\n 4004 | 2015-07-12 20:50:01.033+02 | active | select pid, query_start, state, query from pg_stat_activity;\n<\/code><\/pre>\n\n<p>For example, this query lists queries, which execution time is longer than 5 minutes:<\/p>\n\n<pre><code>select *\nfrom pg_stat_activity\nwhere state = 'active'\nand now() - query_start &gt; '5m';\n<\/code><\/pre>\n\n<p>You can manually cancel a long running query:<\/p>\n\n<pre><code>select pg_cancel_backend(pid);\n<\/code><\/pre>\n\n<p>or terminate a process:<\/p>\n\n<pre><code>select pg_terminate_backend(pid);\n<\/code><\/pre>\n\n<p>You can run a program, which automatically cancels long running queries.\nIt may be a background process <code>(daemon)<\/code> or may be executed with <code>cron<\/code>.<\/p>\n\n<p>This query automatically cancels queries which execution time are longer than 5 minutes:<\/p>\n\n<pre><code>select pg_cancel_backend(pid)\nfrom pg_stat_activity\nwhere state = 'active'\nand now() - query_start &gt; '5m';\n<\/code><\/pre>\n\n<p>Of course, this kind of automated solutions must be implemented with great <strong>caution<\/strong> and with full awareness of the consequences.<\/p>\n\n<p>More in the documentation: <a href=\"http://www.postgresql.org/docs/9.4/static/monitoring-stats.html#PG-STAT-ACTIVITY-VIEW\" rel=\"nofollow\">pg_stat_activity<\/a>, <a href=\"http://www.postgresql.org/docs/9.4/static/functions-admin.html\" rel=\"nofollow\">pg_cancel_backend()<\/a>.<\/p>\n",
+            "answer_id": 31362352,
+            "question_id": 31359000,
+            "last_edit_date": 1436729250
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gxUfX.jpg?s=256",
+                "account_id": 263754,
+                "user_type": "registered",
+                "user_id": 549534,
+                "link": "https://stackoverflow.com/users/549534/ivanenok",
+                "reputation": 624,
+                "display_name": "ivanenok"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1436863521,
+            "creation_date": 1436863521,
+            "body": "<p>after some research and hints about postgres behaviour by @klin, i have resolved my problem.\nc3p0 connection pool are used in legacy plugins. i have found ability for adding custom extensions to pools behaviour.<\/p>\n\n<p><a href=\"http://www.mchange.com/projects/c3p0/#user_extensions_to_configurations\" rel=\"nofollow\">http://www.mchange.com/projects/c3p0/#user_extensions_to_configurations<\/a><\/p>\n\n<p>There are initSql extension provided in c3p0 by default. In this way we can put command<\/p>\n\n<blockquote>\n  <p>set statement_timeout to 1000;<\/p>\n<\/blockquote>\n\n<p>in your configuration file and it will works without any changes in your source code. All you need after it that rebuild your plugins jar only!<\/p>\n",
+            "answer_id": 31401912,
+            "question_id": 31359000
+        }
+    ],
+    "answer_comments": {"31362352": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-RalSA3nL3oo/AAAAAAAAAAI/AAAAAAAAAcI/ZO8sOmY90yU/s256-rj/photo.jpg",
+                "account_id": 8913316,
+                "user_type": "registered",
+                "user_id": 6652689,
+                "link": "https://stackoverflow.com/users/6652689/thetank",
+                "reputation": 505,
+                "display_name": "TheTank",
+                "accept_rate": 30
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 31362352,
+            "edited": false,
+            "creation_date": 1591800477,
+            "comment_id": 110195112
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/fXrVi.png?s=256",
+                "account_id": 2267495,
+                "user_type": "registered",
+                "user_id": 1995738,
+                "link": "https://stackoverflow.com/users/1995738/klin",
+                "reputation": 123399,
+                "display_name": "klin"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 31362352,
+            "reply_to_user": {
+                "profile_image": "https://lh5.googleusercontent.com/-RalSA3nL3oo/AAAAAAAAAAI/AAAAAAAAAcI/ZO8sOmY90yU/s256-rj/photo.jpg",
+                "account_id": 8913316,
+                "user_type": "registered",
+                "user_id": 6652689,
+                "link": "https://stackoverflow.com/users/6652689/thetank",
+                "reputation": 505,
+                "display_name": "TheTank",
+                "accept_rate": 30
+            },
+            "edited": false,
+            "creation_date": 1591737296,
+            "comment_id": 110169198
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-RalSA3nL3oo/AAAAAAAAAAI/AAAAAAAAAcI/ZO8sOmY90yU/s256-rj/photo.jpg",
+                "account_id": 8913316,
+                "user_type": "registered",
+                "user_id": 6652689,
+                "link": "https://stackoverflow.com/users/6652689/thetank",
+                "reputation": 505,
+                "display_name": "TheTank",
+                "accept_rate": 30
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 31362352,
+            "edited": false,
+            "creation_date": 1591733322,
+            "comment_id": 110167378
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/fXrVi.png?s=256",
+                "account_id": 2267495,
+                "user_type": "registered",
+                "user_id": 1995738,
+                "link": "https://stackoverflow.com/users/1995738/klin",
+                "reputation": 123399,
+                "display_name": "klin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 31362352,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/gxUfX.jpg?s=256",
+                "account_id": 263754,
+                "user_type": "registered",
+                "user_id": 549534,
+                "link": "https://stackoverflow.com/users/549534/ivanenok",
+                "reputation": 624,
+                "display_name": "ivanenok"
+            },
+            "edited": false,
+            "creation_date": 1436723918,
+            "comment_id": 50720847
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gxUfX.jpg?s=256",
+                "account_id": 263754,
+                "user_type": "registered",
+                "user_id": 549534,
+                "link": "https://stackoverflow.com/users/549534/ivanenok",
+                "reputation": 624,
+                "display_name": "ivanenok"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31362352,
+            "edited": false,
+            "creation_date": 1436722984,
+            "comment_id": 50720546
+        }
+    ]}
+}

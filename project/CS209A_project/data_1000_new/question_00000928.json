@@ -1,0 +1,178 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d1560926c5455a207ac82a1b1cebb63b?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 9583234,
+            "user_type": "registered",
+            "user_id": 7117015,
+            "link": "https://stackoverflow.com/users/7117015/kenertj",
+            "reputation": 57,
+            "display_name": "Kenertj",
+            "accept_rate": 22
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/40562486/imagebutton-not-doing-anything-onclick",
+        "last_activity_date": 1478952240,
+        "creation_date": 1478950776,
+        "answer_count": 1,
+        "title": "ImageButton not doing anything onClick",
+        "body": "<p>Within the application theres an imagebutton, which turns the flashlight on and off and if the the flashlight is on, then you can adjust the strobo frequency with a seekbaar, but when i tried running the application on my phone, then the imagebutton does nothing at all.\nHeres the code :<\/p>\n\n<pre><code>import android.content.Context;\nimport android.content.DialogInterface;\nimport android.content.Intent;\nimport android.content.pm.PackageManager;\nimport android.hardware.camera2.CameraAccessException;\nimport android.hardware.camera2.CameraManager;\nimport android.os.Build;\nimport android.support.v7.app.AlertDialog;\nimport android.support.v7.app.AppCompatActivity;\nimport android.os.Bundle;\nimport android.view.View;\nimport android.widget.ImageButton;\nimport android.widget.SeekBar;\n\nimport static android.content.DialogInterface.*;\n\npublic class Flashlight extends AppCompatActivity {\n\nCameraManager cm;\nprivate ImageButton flashlightButton;\nprivate boolean flashlightOnOrOff;\nprivate String mCameraId;\nint freg;\nThread th;\nStrobo sr;\n\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_flashlight);\n    flashlightButton = (ImageButton) findViewById(R.id.flashOnOffButton);\n    flashlightOnOrOff = false;\n\n\n    //Error if device does not have flashlight\n    boolean hasFlash = this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);\n    if (hasFlash == false)\n\n    {\n        final AlertDialog dialo = new AlertDialog.Builder(Flashlight.this).create();\n        dialo.setTitle(\"Error\");\n        dialo.setMessage(\"Sorry your device does not have flashlight!\");\n        dialo.setButton(BUTTON_POSITIVE, \"OK\", new OnClickListener() {\n            @Override\n            public void onClick(DialogInterface dialogInterface, int i) {\n\n                dialo.cancel();\n\n            }\n        });\n        dialo.show();\n\n\n    }\n    cm = (CameraManager) getSystemService(Context.CAMERA_SERVICE);\n    try {\n\n        mCameraId = cm.getCameraIdList()[0];\n    } catch (CameraAccessException ec) {\n        ec.printStackTrace();\n    }\n    //Seekbar\n    SeekBar skbar = (SeekBar) findViewById(R.id.seekBar);\n    skbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {\n        @Override\n        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {\n            freg = i;\n        }\n\n        @Override\n        public void onStartTrackingTouch(SeekBar seekBar) {\n\n        }\n\n        @Override\n        public void onStopTrackingTouch(SeekBar seekBar) {\n\n        }\n    });\n\n\n}\n\npublic void flashButtonClicked(View view) {\n\n    try {\n        if (flashlightOnOrOff) {\n            flashlightOnOrOff = false;\n\n            if (th != null) {\n                sr.stopRunning = true;\n                th = null;\n                return;\n            } else {\n                turnOffFlashlight();\n            }\n\n\n        } else {\n            flashlightOnOrOff = true;\n\n            if (freg != 0) {\n                sr = new Strobo();\n                sr.freg = freg;\n                th = new Thread(sr);\n                th.start();\n                return;\n            } else {\n                turnOnFlashlight();\n            }\n        }\n    } catch (Exception ec) {\n        ec.printStackTrace();\n    }\n}\n\npublic class Strobo implements Runnable {\n    int freg;\n    boolean stopRunning = false;\n\n    @Override\n    public void run() {\n\n        try {\n            while (!stopRunning) {\n                turnOnFlashlight();\n                Thread.sleep(100 - freg);\n                turnOffFlashlight();\n                Thread.sleep(freg);\n            }\n        } catch (Exception e) {\n            e.printStackTrace();\n        }\n\n    }\n\n}\n\n\npublic void turnOffFlashlight() {\n    try {\n        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) {\n            cm.setTorchMode(mCameraId, false);\n            flashlightButton.setImageResource(R.drawable.offbutton2);\n        }\n    } catch (Exception e) {\n        e.printStackTrace();\n    }\n}\n\npublic void turnOnFlashlight() {\n    try {\n        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) {\n            cm.setTorchMode(mCameraId, true);\n            flashlightButton.setImageResource(R.drawable.onbutton2);\n\n        }\n    } catch (Exception e) {\n        e.printStackTrace();\n    }\n}\n<\/code><\/pre>\n\n<p>XML :<\/p>\n\n<pre><code>&lt;ImageButton\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        app:srcCompat=\"@drawable/offbutton2\"\n        android:layout_centerVertical=\"true\"\n        android:layout_centerHorizontal=\"true\"\n        android:id=\"@+id/flashOnOffButton\"\n        android:background=\"#000\"\n        android:onClick=\"flashButtonClicked\"\n        android:clickable=\"true\"\n        android:scaleType=\"fitCenter\"\n        android:adjustViewBounds=\"false\" /&gt;\n\n    &lt;SeekBar\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"wrap_content\"\n        android:max=\"100\"\n        android:id=\"@+id/seekBar\"\n        android:layout_marginLeft=\"25dp\"\n        android:layout_marginRight=\"25dp\"\n        android:layout_marginTop=\"25dp\"\n        style=\"@style/Widget.AppCompat.SeekBar\"\n        android:thumbTint=\"@color/Greeny\"\n        android:layout_below=\"@+id/flashOnOffButton\"\n        android:layout_alignParentStart=\"true\" /&gt;\n<\/code><\/pre>\n",
+        "question_id": 40562486,
+        "tags": [
+            "java",
+            "android",
+            "android-studio",
+            "imagebutton"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 67
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hEB3l.jpg?s=256",
+                "account_id": 2575060,
+                "user_type": "registered",
+                "user_id": 2259854,
+                "link": "https://stackoverflow.com/users/2259854/clownba0t",
+                "reputation": 1163,
+                "display_name": "clownba0t"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40562486,
+            "edited": false,
+            "creation_date": 1478951422,
+            "comment_id": 68362023
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/y84zS.jpg?s=256",
+                "account_id": 8471976,
+                "user_type": "registered",
+                "user_id": 6354265,
+                "link": "https://stackoverflow.com/users/6354265/ahad",
+                "reputation": 672,
+                "display_name": "Ahad"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 40562486,
+            "edited": false,
+            "creation_date": 1478951135,
+            "comment_id": 68361963
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/khueQ.jpg?s=256",
+                "account_id": 1972221,
+                "user_type": "registered",
+                "user_id": 1770868,
+                "link": "https://stackoverflow.com/users/1770868/ahmad-aghazadeh",
+                "reputation": 17181,
+                "display_name": "Ahmad Aghazadeh",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40562486,
+            "edited": false,
+            "creation_date": 1478951028,
+            "comment_id": 68361930
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/oayZQ.jpg?s=256",
+            "account_id": 6949444,
+            "user_type": "registered",
+            "user_id": 5332531,
+            "link": "https://stackoverflow.com/users/5332531/bali",
+            "reputation": 759,
+            "display_name": "Bali"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1478952240,
+        "creation_date": 1478952240,
+        "body": "<p>your code looks fine but it'll run on devices with OS version after Marshmallow and you can run app in debug mode to check if it throws exception.<\/p>\n",
+        "answer_id": 40562648,
+        "question_id": 40562486
+    }],
+    "answer_comments": {"40562648": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/oayZQ.jpg?s=256",
+                "account_id": 6949444,
+                "user_type": "registered",
+                "user_id": 5332531,
+                "link": "https://stackoverflow.com/users/5332531/bali",
+                "reputation": 759,
+                "display_name": "Bali"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40562648,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d1560926c5455a207ac82a1b1cebb63b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9583234,
+                "user_type": "registered",
+                "user_id": 7117015,
+                "link": "https://stackoverflow.com/users/7117015/kenertj",
+                "reputation": 57,
+                "display_name": "Kenertj",
+                "accept_rate": 22
+            },
+            "edited": false,
+            "creation_date": 1478954299,
+            "comment_id": 68362712
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/oayZQ.jpg?s=256",
+                "account_id": 6949444,
+                "user_type": "registered",
+                "user_id": 5332531,
+                "link": "https://stackoverflow.com/users/5332531/bali",
+                "reputation": 759,
+                "display_name": "Bali"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40562648,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d1560926c5455a207ac82a1b1cebb63b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9583234,
+                "user_type": "registered",
+                "user_id": 7117015,
+                "link": "https://stackoverflow.com/users/7117015/kenertj",
+                "reputation": 57,
+                "display_name": "Kenertj",
+                "accept_rate": 22
+            },
+            "edited": false,
+            "creation_date": 1478954116,
+            "comment_id": 68362671
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d1560926c5455a207ac82a1b1cebb63b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9583234,
+                "user_type": "registered",
+                "user_id": 7117015,
+                "link": "https://stackoverflow.com/users/7117015/kenertj",
+                "reputation": 57,
+                "display_name": "Kenertj",
+                "accept_rate": 22
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40562648,
+            "edited": false,
+            "creation_date": 1478953288,
+            "comment_id": 68362449
+        }
+    ]}
+}

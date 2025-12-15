@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-IN581rNvkAU/AAAAAAAAAAI/AAAAAAAAAQs/lgLP64jpUl4/s256-rj/photo.jpg",
+            "account_id": 14552846,
+            "user_type": "registered",
+            "user_id": 10511177,
+            "link": "https://stackoverflow.com/users/10511177/raj",
+            "reputation": 23,
+            "display_name": "Raj"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/52830122/java-and-python-integration-using-jep",
+        "last_activity_date": 1539886118,
+        "creation_date": 1539675046,
+        "answer_count": 1,
+        "title": "Java and Python Integration using Jep",
+        "body": "<p>I am trying python and java integration using Jep. I have loaded randomforest model from pickle file (rf.pkl) as  sklearn.ensemble.forest.RandomForestClassifier object from java program using Jep.\nI want this loading to be one time so that I wanted to execute a python function defined in python script prediction.py (to predict using rf model) by sending \"rfmodel\" argument from java to call python function.\nBut the argument sent to python from java is read as string in python. How can I retain the datatype of argument in python as sklearn.ensemble.forest.RandomForestClassifier?<\/p>\n\n<pre><code>Jep jep = new Jep();\njep.eval(\"import pickle\");\njep.eval(\"clf = pickle.load(open('C:/Downloads/DSRFmodel.pkl', 'rb'))\");\njep.eval(\"print(type(clf))\");\nObject randomForest = jep.getValue(\"clf\");\n\njep.eval(\"import integration\");\njep.set(\"arg1\", requestId);\njep.set(\"arg2\", randomForest);\njep.eval(\"result = integration.trainmodel(arg1, arg2)\");\n\n------------\npython.py\n\nimport pickle\ndef trainmodel(requestid, rf):\n\n//when rf is printed it is 'str' format.\n<\/code><\/pre>\n",
+        "question_id": 52830122,
+        "tags": [
+            "java",
+            "python",
+            "jepp"
+        ],
+        "score": 2,
+        "accepted_answer_id": 52880080,
+        "is_answered": true,
+        "view_count": 3891,
+        "last_edit_date": 1539690281
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e455e21e8753b907e1fe96bd1e9f33ca?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5715690,
+            "user_type": "registered",
+            "user_id": 4515989,
+            "link": "https://stackoverflow.com/users/4515989/felix",
+            "reputation": 2406,
+            "display_name": "Felix",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 52830122,
+        "edited": false,
+        "creation_date": 1539681014,
+        "comment_id": 92580023
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e51a2e6218ffb6c637ccb7456a7192ba?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10477676,
+            "user_type": "registered",
+            "user_id": 7723708,
+            "link": "https://stackoverflow.com/users/7723708/bsteffen",
+            "reputation": 381,
+            "display_name": "bsteffen"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1539886118,
+        "creation_date": 1539886118,
+        "body": "<p>When Jep converts a Python object into a Java object if it does not recognize the Python type it will return the String representation of the Python object, see <a href=\"https://github.com/ninia/jep/issues/43\" rel=\"nofollow noreferrer\">this bug<\/a> for discussion on that behavior. If you are running the latest version of Jep(3.8) you can override this behavior by passing a Java class to the getValue function. The PyObject class was created to serve as a generic wrapper around arbitrary python objects. The following code should do what you want:<\/p>\n\n<pre><code>Jep jep = new Jep();\njep.eval(\"import pickle\");\njep.eval(\"clf = pickle.load(open('C:/Downloads/DSRFmodel.pkl', 'rb'))\");\njep.eval(\"print(type(clf))\");\nObject randomForest = jep.getValue(\"clf\", PyObject.class);\n\njep.eval(\"import integration\");\njep.set(\"arg1\", requestId);\njep.set(\"arg2\", randomForest);\njep.eval(\"result = integration.trainmodel(arg1, arg2)\");\n<\/code><\/pre>\n",
+        "answer_id": 52880080,
+        "question_id": 52830122
+    }],
+    "answer_comments": {}
+}

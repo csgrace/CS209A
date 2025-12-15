@@ -1,0 +1,234 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8900088,
+            "user_type": "registered",
+            "user_id": 6643803,
+            "link": "https://stackoverflow.com/users/6643803/akuma8",
+            "reputation": 4713,
+            "display_name": "akuma8",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73198158/classes-and-packages-encapsulation-in-an-hexagonal-architecture",
+        "last_activity_date": 1661343488,
+        "creation_date": 1659378941,
+        "answer_count": 2,
+        "title": "Classes and packages encapsulation in an hexagonal architecture",
+        "body": "<p>I would like to know if in Java (JDK 17) there is a way to easily handle classes and packages encapsulation in an hexagonal architure. I would like to make unavailable classes present in an <code>adapter<\/code> to the domain.\nTo illustrate my goal, say we have this package organisation:<\/p>\n<pre><code>com.company\n           |-domain\n                  |-model\n                        |-Customer.java\n                        |-Product.java\n                  |-ports\n                        |-DbPort.java\n                        |-ServiceBusPort.java\n                  |-services\n                           |-CustomerService.java\n                           |-ProductService.java\n           |-adapters \n                   |-inbound\n                           |-rest\n                               |-CustomerRestAdapter.java\n                               |-ProductRestAdapter.java\n                           |-bus\n                               |-ServiceBusAdapter.java\n                               |-RabbitAdapter.java\n                   |-outbound\n                           |-db\n                              |-entities\n                                      |-Customer.java\n                                      |-Product.java\n                              |-repositories\n                                      |-CustomerRepository.java\n                                      |-ProductRepository.java\n                              |-mappers\n                           |-bus\n                               |-dtos\n                                   |-CutomerDto.java\n                                   |-ProductDto.java\n                               |-mappers\n<\/code><\/pre>\n<p>What I want to achieve is: all classes and packages under <code>com.company.adapters<\/code> should not be visible from the <code>com.company.domain<\/code> package. The goal is to prevent developers to use for example the class <code>com.company.adapters.outbound.db.entities.Customer<\/code> in <code>com.company.domain.services.CustomerService<\/code>. But classes inside <code>com.company.domain<\/code> should be accessible from everywhere.<\/p>\n",
+        "question_id": 73198158,
+        "tags": [
+            "java",
+            "package",
+            "encapsulation",
+            "hexagonal-architecture",
+            "archunit"
+        ],
+        "score": 3,
+        "accepted_answer_id": 73344956,
+        "is_answered": true,
+        "view_count": 1120,
+        "last_edit_date": 1661343488
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ddQNg.png?s=256",
+                "account_id": 7395051,
+                "user_type": "registered",
+                "user_id": 5627271,
+                "link": "https://stackoverflow.com/users/5627271/r%c3%a9mi-bantos",
+                "reputation": 1977,
+                "display_name": "R&#233;mi Bantos"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1661264102,
+            "creation_date": 1660399677,
+            "body": "<p>To achieve strong encapsulation with Java, you could make use of maven modules per layer, left, right and domain.\nI have not tried but I guess Java 9 modules would also help here. Check <a href=\"https://medium.com/swlh/a-practical-example-of-applying-java-modules-in-a-hexagonal-architecture-d345deec654b\" rel=\"nofollow noreferrer\">this link<\/a>.<\/p>\n<p>Another approach I use for the sake of simplicity and code readability, is to use a single module, without strong encapsulation, but different packages per layers, one for domain, another for infra..<\/p>\n<p>And, to <strong>enforce architecture rules<\/strong> within this module, like hexagonal ones, I usually define a unit test which fails in case of any violation, for example when some domain package code directly depends on a technical API client implem defined outside the domain.\nSo far I have used <a href=\"https://www.archunit.org/\" rel=\"nofollow noreferrer\">Archunit<\/a> framework for that.<\/p>\n<p>Also I prefer this approach because, as a developer or new joiner for example, IMO it is much easier to break some architecture rules / encapsulation patterns, not being aware till the code review, rather than breaking / ignoring a test which would fail the build, and which would also act as a spec for these rules.<\/p>\n",
+            "answer_id": 73344956,
+            "question_id": 73198158,
+            "last_edit_date": 1661264102
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/416696430ab23f397a5dbeda73e72896?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5289146,
+                "user_type": "registered",
+                "user_id": 4222206,
+                "link": "https://stackoverflow.com/users/4222206/queeg",
+                "reputation": 9940,
+                "display_name": "queeg"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1659433044,
+            "creation_date": 1659379531,
+            "body": "<p>What you want to achieve is definitey doable in Java.<\/p>\n<p>There are numerous examples - for example check out the JAXP library:<\/p>\n<p>While you use the DocumentBuilderFactory to instantiate a DocumentBuilder and ultimately parse a Document, everything but the factory are interfaces abstracting away a concise implementation, which is the pattern you are aiming at.<\/p>\n<p>To get more concise: All that you need to do is come up with the right combination of classes, interfaces and packages. Have a look at <a href=\"https://en.wikipedia.org/wiki/Software_design_pattern\" rel=\"nofollow noreferrer\">Design Patterns<\/a> which describe what you need to do. The book <a href=\"https://springframework.guru/gang-of-four-design-patterns/\" rel=\"nofollow noreferrer\">&quot;Design Patterns&quot; by the Gang of Four<\/a> is very helpful in that respect.<\/p>\n",
+            "answer_id": 73198239,
+            "question_id": 73198158,
+            "last_edit_date": 1659433044
+        }
+    ],
+    "answer_comments": {
+        "73344956": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8900088,
+                "user_type": "registered",
+                "user_id": 6643803,
+                "link": "https://stackoverflow.com/users/6643803/akuma8",
+                "reputation": 4713,
+                "display_name": "akuma8",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73344956,
+            "edited": false,
+            "creation_date": 1661262656,
+            "comment_id": 129726668
+        }],
+        "73198239": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/416696430ab23f397a5dbeda73e72896?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5289146,
+                    "user_type": "registered",
+                    "user_id": 4222206,
+                    "link": "https://stackoverflow.com/users/4222206/queeg",
+                    "reputation": 9940,
+                    "display_name": "queeg"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 73198239,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8900088,
+                    "user_type": "registered",
+                    "user_id": 6643803,
+                    "link": "https://stackoverflow.com/users/6643803/akuma8",
+                    "reputation": 4713,
+                    "display_name": "akuma8",
+                    "accept_rate": 81
+                },
+                "edited": false,
+                "creation_date": 1659800438,
+                "comment_id": 129383449
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8900088,
+                    "user_type": "registered",
+                    "user_id": 6643803,
+                    "link": "https://stackoverflow.com/users/6643803/akuma8",
+                    "reputation": 4713,
+                    "display_name": "akuma8",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 73198239,
+                "edited": false,
+                "creation_date": 1659799468,
+                "comment_id": 129383252
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/416696430ab23f397a5dbeda73e72896?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5289146,
+                    "user_type": "registered",
+                    "user_id": 4222206,
+                    "link": "https://stackoverflow.com/users/4222206/queeg",
+                    "reputation": 9940,
+                    "display_name": "queeg"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 73198239,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8900088,
+                    "user_type": "registered",
+                    "user_id": 6643803,
+                    "link": "https://stackoverflow.com/users/6643803/akuma8",
+                    "reputation": 4713,
+                    "display_name": "akuma8",
+                    "accept_rate": 81
+                },
+                "edited": false,
+                "creation_date": 1659796487,
+                "comment_id": 129382626
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8900088,
+                    "user_type": "registered",
+                    "user_id": 6643803,
+                    "link": "https://stackoverflow.com/users/6643803/akuma8",
+                    "reputation": 4713,
+                    "display_name": "akuma8",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 73198239,
+                "edited": false,
+                "creation_date": 1659778195,
+                "comment_id": 129379002
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/416696430ab23f397a5dbeda73e72896?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5289146,
+                    "user_type": "registered",
+                    "user_id": 4222206,
+                    "link": "https://stackoverflow.com/users/4222206/queeg",
+                    "reputation": 9940,
+                    "display_name": "queeg"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 73198239,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8900088,
+                    "user_type": "registered",
+                    "user_id": 6643803,
+                    "link": "https://stackoverflow.com/users/6643803/akuma8",
+                    "reputation": 4713,
+                    "display_name": "akuma8",
+                    "accept_rate": 81
+                },
+                "edited": false,
+                "creation_date": 1659432845,
+                "comment_id": 129287963
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/52a7bd2e6a59dca8d6c95ec60d0121ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8900088,
+                    "user_type": "registered",
+                    "user_id": 6643803,
+                    "link": "https://stackoverflow.com/users/6643803/akuma8",
+                    "reputation": 4713,
+                    "display_name": "akuma8",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 73198239,
+                "edited": false,
+                "creation_date": 1659431956,
+                "comment_id": 129287652
+            }
+        ]
+    }
+}

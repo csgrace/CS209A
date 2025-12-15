@@ -1,0 +1,1572 @@
+{
+    "question": {
+        "owner": {
+            "account_id": 18480,
+            "user_type": "registered",
+            "user_id": 42372,
+            "link": "https://stackoverflow.com/users/42372/veera",
+            "reputation": 33342,
+            "display_name": "Veera",
+            "accept_rate": 95
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/869033/how-do-i-copy-an-object-in-java",
+        "last_activity_date": 1714593579,
+        "creation_date": 1242397826,
+        "answer_count": 23,
+        "title": "How do I copy an object in Java?",
+        "body": "<p>Consider the code below:<\/p>\n\n<pre><code>DummyBean dum = new DummyBean();\ndum.setDummy(\"foo\");\nSystem.out.println(dum.getDummy()); // prints 'foo'\n\nDummyBean dumtwo = dum;\nSystem.out.println(dumtwo.getDummy()); // prints 'foo'\n\ndum.setDummy(\"bar\");\nSystem.out.println(dumtwo.getDummy()); // prints 'bar' but it should print 'foo'\n<\/code><\/pre>\n\n<p>So, I want to copy the <code>dum<\/code> to <code>dumtwo<\/code> and change <code>dum<\/code> without affecting the <code>dumtwo<\/code>. But the code above is not doing that. When I change something in <code>dum<\/code>, the same change is happening in <code>dumtwo<\/code> also.<\/p>\n\n<p>I guess, when I say <code>dumtwo = dum<\/code>, Java copies the <strong>reference only<\/strong>. So, is there any way to create a fresh copy of <code>dum<\/code> and assign it to <code>dumtwo<\/code>?<\/p>\n",
+        "question_id": 869033,
+        "tags": [
+            "java",
+            "object",
+            "copy",
+            "clone"
+        ],
+        "score": 937,
+        "accepted_answer_id": 869078,
+        "protected_date": 1381505944,
+        "is_answered": true,
+        "view_count": 1590799,
+        "last_edit_date": 1514056519
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d05ec76b03bb3cc3f9189b0f5a9817f4?s=256&d=identicon&r=PG",
+                "account_id": 36160,
+                "user_type": "registered",
+                "user_id": 103014,
+                "link": "https://stackoverflow.com/users/103014/egaga",
+                "reputation": 21972,
+                "display_name": "egaga",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 714,
+            "is_accepted": true,
+            "last_activity_date": 1242398860,
+            "creation_date": 1242398142,
+            "body": "<p>Create a copy constructor:<\/p>\n\n<pre><code>class DummyBean {\n  private String dummy;\n\n  public DummyBean(DummyBean another) {\n    this.dummy = another.dummy; // you can access  \n  }\n}\n<\/code><\/pre>\n\n<p>Every object has also a clone method which can be used to copy the object, but don't use it. It's way too easy to create a class and do improper clone method. If you are going to do that, read at least what Joshua Bloch has to say about it in <em><a href=\"http://books.google.com/books?id=ka2VUBqHiWkC&amp;pg=PA55&amp;lpg=PA55&amp;dq=effective+java+clone&amp;source=bl&amp;ots=yXGhLnv4O4&amp;sig=zvEip5tp5KGgwqO1sCWgtGyJ1Ns&amp;hl=en&amp;ei=CYANSqygK8jktgfM-JGcCA&amp;sa=X&amp;oi=book_result&amp;ct=result&amp;resnum=3#PPA54,M1\" rel=\"noreferrer\">Effective Java<\/a><\/em>.<\/p>\n",
+            "answer_id": 869078,
+            "question_id": 869033,
+            "last_edit_date": 1242398860
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7b7cbef75a2a4050ecbd28f8008c6f80?s=256&d=identicon&r=PG",
+                "account_id": 197516,
+                "user_type": "registered",
+                "user_id": 1213738,
+                "link": "https://stackoverflow.com/users/1213738/chandra-sekhar-k",
+                "reputation": 16574,
+                "display_name": "Chandra Sekhar K",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 460,
+            "is_accepted": false,
+            "last_activity_date": 1367470210,
+            "creation_date": 1332481654,
+            "body": "<p><strong>Basic:<\/strong> Object Copying in Java.<br/><\/p>\n\n<p>Let us Assume an object- <code>obj1<\/code>, that contains two objects, <strong>containedObj1<\/strong> and <strong>containedObj2<\/strong>. <br/>\n<img src=\"https://i.sstatic.net/ZK4pQ.gif\" alt=\"enter image description here\"><br/><\/p>\n\n<p><strong>shallow copying:<\/strong><br/>\nshallow copying creates a new <code>instance<\/code> of the same class and copies all the fields to the new instance and returns it. <strong>Object class<\/strong> provides a <code>clone<\/code> method and provides support for the shallow copying.<br/> \n<img src=\"https://i.sstatic.net/xhF9B.gif\" alt=\"enter image description here\"><br/><\/p>\n\n<p><strong>Deep copying:<\/strong><br/>\nA deep copy occurs when <em>an object is copied along with the objects to which it refers<\/em>. Below image shows <code>obj1<\/code> after a deep copy has been performed on it. <em>Not only has <code>obj1<\/code> been copied<\/em>, but the objects contained within it have been copied as well. We can use <code>Java Object Serialization<\/code> to make a deep copy. Unfortunately, this approach has some problems too(<a href=\"http://javatechniques.com/blog/faster-deep-copies-of-java-objects/\" rel=\"noreferrer\">detailed examples<\/a>). <br/>\n<img src=\"https://i.sstatic.net/mtNjt.gif\" alt=\"enter image description here\"><\/p>\n\n<p><strong>Possible Problems:<\/strong><br/>\n<code>clone<\/code> is tricky to implement correctly.<br/>\nIt's better to use <a href=\"http://www.javapractices.com/topic/TopicAction.do?Id=15\" rel=\"noreferrer\">Defensive copying<\/a>, <a href=\"http://www.javapractices.com/topic/TopicAction.do?Id=12\" rel=\"noreferrer\">copy constructors<\/a>(as @egaga reply) or <a href=\"http://www.javapractices.com/topic/TopicAction.do?Id=21\" rel=\"noreferrer\">static factory methods<\/a>.<br/><\/p>\n\n<ol>\n<li>If you have an object, that you know has a public <code>clone()<\/code> method, but you don\u2019t know the type of the object at compile time, then you have problem. Java has an interface called <code>Cloneable<\/code>. In practice, we should implement this interface if we want to make an object <code>Cloneable<\/code>. <code>Object.clone<\/code> is <strong>protected<\/strong>, so we must <em>override<\/em> it with a public method in order for it to be accessible.<br/><\/li>\n<li>Another problem arises when we try <strong>deep copying<\/strong> of a <em>complex object<\/em>. Assume that the <code>clone()<\/code> method of all member object variables also does deep copy, this is too risky of an assumption. You must control the code in all classes.<br/><\/li>\n<\/ol>\n\n<p>For example <a href=\"http://commons.apache.org/lang/api-2.5/org/apache/commons/lang/SerializationUtils.html#clone%28java.io.Serializable%29\" rel=\"noreferrer\">org.apache.commons.lang.SerializationUtils<\/a> will have method for Deep clone using serialization(<a href=\"http://www.jarvana.com/jarvana/view/commons-lang/commons-lang/2.4/commons-lang-2.4-sources.jar!/org/apache/commons/lang/SerializationUtils.java?format=ok\" rel=\"noreferrer\">Source<\/a>). If we need to clone Bean then there are couple of utility methods in <a href=\"http://commons.apache.org/beanutils/api/org/apache/commons/beanutils/BeanUtils.html\" rel=\"noreferrer\">org.apache.commons.beanutils<\/a> (<a href=\"http://grepcode.com/file/repo1.maven.org/maven2/commons-beanutils/commons-beanutils/1.8.0/org/apache/commons/beanutils/BeanUtils.java\" rel=\"noreferrer\">Source<\/a>).<\/p>\n\n<ul>\n<li><code>cloneBean<\/code> will Clone a bean based on the available property getters and setters, even if the bean class itself does not implement Cloneable.<\/li>\n<li><code>copyProperties<\/code> will Copy property values from the origin bean to the destination bean for all cases where the property names are the same.<\/li>\n<\/ul>\n",
+            "answer_id": 9834683,
+            "question_id": 869033,
+            "last_edit_date": 1367470210
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5ad882c2caeaf59d1faae22b892edab9?s=256&d=identicon&r=PG",
+                "account_id": 2717478,
+                "user_type": "registered",
+                "user_id": 2344523,
+                "link": "https://stackoverflow.com/users/2344523/pacheco",
+                "reputation": 1717,
+                "display_name": "pacheco"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 170,
+            "is_accepted": false,
+            "last_activity_date": 1367525694,
+            "creation_date": 1367523903,
+            "body": "<p>In the package <code>import org.apache.commons.lang.SerializationUtils;<\/code> there is a method:<\/p>\n\n<pre><code>SerializationUtils.clone(Object);\n<\/code><\/pre>\n\n<p>Example:<\/p>\n\n<pre><code>this.myObjectCloned = SerializationUtils.clone(this.object);\n<\/code><\/pre>\n",
+            "answer_id": 16346442,
+            "question_id": 869033,
+            "last_edit_date": 1367525694
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a5fcbaf739efb815004b7b664581da17?s=256&d=identicon&r=PG",
+                "account_id": 613601,
+                "user_type": "unregistered",
+                "user_id": 342892,
+                "link": "https://stackoverflow.com/users/342892/bhasker-tiwari",
+                "reputation": 1149,
+                "display_name": "Bhasker Tiwari"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 114,
+            "is_accepted": false,
+            "last_activity_date": 1319125565,
+            "creation_date": 1274088445,
+            "body": "<p>Just follow as below:<\/p>\n\n<pre><code>public class Deletable implements Cloneable{\n\n    private String str;\n    public Deletable(){\n    }\n    public void setStr(String str){\n        this.str = str;\n    }\n    public void display(){\n        System.out.println(\"The String is \"+str);\n    }\n    protected Object clone() throws CloneNotSupportedException {\n        return super.clone();\n    }\n}\n<\/code><\/pre>\n\n<p>and wherever you want to get another object, simple perform cloning.\ne.g: <\/p>\n\n<pre><code>Deletable del = new Deletable();\nDeletable delTemp = (Deletable ) del.clone(); // this line will return you an independent\n                                 // object, the changes made to this object will\n                                 // not be reflected to other object\n<\/code><\/pre>\n",
+            "answer_id": 2847896,
+            "question_id": 869033,
+            "last_edit_date": 1319125565
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/806733e00c81de7add981d069cfa3014?s=256&d=identicon&r=PG",
+                "account_id": 1466650,
+                "user_type": "registered",
+                "user_id": 1379294,
+                "link": "https://stackoverflow.com/users/1379294/willinglearner",
+                "reputation": 749,
+                "display_name": "WillingLearner"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 48,
+            "is_accepted": false,
+            "last_activity_date": 1409305790,
+            "creation_date": 1408181245,
+            "body": "<p>Why is there no answer for using Reflection API?<\/p>\n\n<pre><code>private static Object cloneObject(Object obj){\n        try{\n            Object clone = obj.getClass().newInstance();\n            for (Field field : obj.getClass().getDeclaredFields()) {\n                field.setAccessible(true);\n                field.set(clone, field.get(obj));\n            }\n            return clone;\n        }catch(Exception e){\n            return null;\n        }\n    }\n<\/code><\/pre>\n\n<p>It's really simple.<\/p>\n\n<p>EDIT: Include child object via recursion<\/p>\n\n<pre><code>private static Object cloneObject(Object obj){\n        try{\n            Object clone = obj.getClass().newInstance();\n            for (Field field : obj.getClass().getDeclaredFields()) {\n                field.setAccessible(true);\n                if(field.get(obj) == null || Modifier.isFinal(field.getModifiers())){\n                    continue;\n                }\n                if(field.getType().isPrimitive() || field.getType().equals(String.class)\n                        || field.getType().getSuperclass().equals(Number.class)\n                        || field.getType().equals(Boolean.class)){\n                    field.set(clone, field.get(obj));\n                }else{\n                    Object childObj = field.get(obj);\n                    if(childObj == obj){\n                        field.set(clone, clone);\n                    }else{\n                        field.set(clone, cloneObject(field.get(obj)));\n                    }\n                }\n            }\n            return clone;\n        }catch(Exception e){\n            return null;\n        }\n    }\n<\/code><\/pre>\n",
+            "answer_id": 25338780,
+            "question_id": 869033,
+            "last_edit_date": 1409305790
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/5DPUE.jpg?s=256",
+                "account_id": 1948827,
+                "user_type": "registered",
+                "user_id": 1753389,
+                "link": "https://stackoverflow.com/users/1753389/peter",
+                "reputation": 854,
+                "display_name": "Peter",
+                "accept_rate": 14
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 34,
+            "is_accepted": false,
+            "last_activity_date": 1373400864,
+            "creation_date": 1373400864,
+            "body": "<p>I use Google's JSON library to serialize it then create a new instance of the serialized object. It does deep copy with a few restrictions:<\/p>\n\n<ul>\n<li><p>there can't be any recursive references<\/p><\/li>\n<li><p>it won't copy arrays of disparate types<\/p><\/li>\n<li><p>arrays and lists should be typed or it won't find the class to instantiate<\/p><\/li>\n<li><p>you may need to encapsulate strings in a class you declare yourself<\/p><\/li>\n<\/ul>\n\n<p>I also use this class to save user preferences, windows and whatnot to be reloaded at runtime. It is very easy to use and effective.<\/p>\n\n<pre><code>import com.google.gson.*;\n\npublic class SerialUtils {\n\n//___________________________________________________________________________________\n\npublic static String serializeObject(Object o) {\n    Gson gson = new Gson();\n    String serializedObject = gson.toJson(o);\n    return serializedObject;\n}\n//___________________________________________________________________________________\n\npublic static Object unserializeObject(String s, Object o){\n    Gson gson = new Gson();\n    Object object = gson.fromJson(s, o.getClass());\n    return object;\n}\n       //___________________________________________________________________________________\npublic static Object cloneObject(Object o){\n    String s = serializeObject(o);\n    Object object = unserializeObject(s,o);\n    return object;\n}\n}\n<\/code><\/pre>\n",
+            "answer_id": 17557343,
+            "question_id": 869033
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/36cba474843a863ca1a9c14b8c1027b5?s=256&d=identicon&r=PG",
+                "account_id": 877368,
+                "user_type": "registered",
+                "user_id": 86232,
+                "link": "https://stackoverflow.com/users/86232/chrisb",
+                "reputation": 729,
+                "display_name": "Chrisb"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 24,
+            "is_accepted": false,
+            "last_activity_date": 1469698826,
+            "creation_date": 1242398185,
+            "body": "<p>Yes, you are just making a reference to the object. You can clone the object if it implements <code>Cloneable<\/code>.<\/p>\n\n<p>Check out this wiki article about copying objects.<\/p>\n\n<p><a href=\"http://en.wikipedia.org/wiki/Object_copy#Copying_in_Java\" rel=\"noreferrer\">Refer here: Object copying<\/a><\/p>\n",
+            "answer_id": 869085,
+            "question_id": 869033,
+            "last_edit_date": 1469698826
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dc064a0af5b489a8a5aec8dcf53cc21e?s=256&d=identicon&r=PG",
+                "account_id": 2109967,
+                "user_type": "registered",
+                "user_id": 1875434,
+                "link": "https://stackoverflow.com/users/1875434/abbas",
+                "reputation": 7219,
+                "display_name": "abbas",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 19,
+            "is_accepted": false,
+            "last_activity_date": 1714593579,
+            "creation_date": 1404839649,
+            "body": "<p>Deep Cloning is your answer, which requires implementing the <code>Cloneable<\/code> interface and overriding the <code>clone()<\/code> method.<\/p>\n<pre><code>public class DummyBean implements Cloneable {\n\n   private String dummy;\n\n   public void setDummy(String dummy) {\n      this.dummy = dummy;\n   }\n\n   public String getDummy() {\n      return dummy;\n   }\n\n   @Override\n   public Object clone() throws CloneNotSupportedException {\n      DummyBean cloned = (DummyBean)super.clone();\n      // TODO: copy mutable state here, so the clone can't change the internals of the original\n      return cloned;\n   }\n}\n<\/code><\/pre>\n<p>You will call it like this\n<code>DummyBean dumtwo = dum.clone();<\/code><\/p>\n",
+            "answer_id": 24637827,
+            "question_id": 869033,
+            "last_edit_date": 1714593579
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/203f068afe2fa13faca15cc1d4a952bf?s=256&d=identicon&r=PG",
+                "account_id": 1999580,
+                "user_type": "registered",
+                "user_id": 2504864,
+                "link": "https://stackoverflow.com/users/2504864/teja-maridu",
+                "reputation": 545,
+                "display_name": "Teja Maridu",
+                "accept_rate": 30
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 18,
+            "is_accepted": false,
+            "last_activity_date": 1375282804,
+            "creation_date": 1375282804,
+            "body": "<p>Add <code>Cloneable<\/code> and below code to your class<\/p>\n\n<pre><code>public Object clone() throws CloneNotSupportedException {\n        return super.clone();\n    }\n<\/code><\/pre>\n\n<p>Use this  <code>clonedObject = (YourClass) yourClassObject.clone();<\/code><\/p>\n",
+            "answer_id": 17973959,
+            "question_id": 869033
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/B3Fv0.jpg?s=256",
+                "account_id": 7518082,
+                "user_type": "registered",
+                "user_id": 5710872,
+                "link": "https://stackoverflow.com/users/5710872/qamar",
+                "reputation": 5197,
+                "display_name": "Qamar",
+                "accept_rate": 57
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 13,
+            "is_accepted": false,
+            "last_activity_date": 1506147855,
+            "creation_date": 1485420646,
+            "body": "<p>This works too. Assuming model<\/p>\n\n<pre><code>class UserAccount{\n   public int id;\n   public String name;\n}\n<\/code><\/pre>\n\n<p>First add\n<code>compile 'com.google.code.gson:gson:2.8.1'<\/code> to your app>gradle &amp; sync. Then<\/p>\n\n<pre><code>Gson gson = new Gson();\nupdateUser = gson.fromJson(gson.toJson(mUser),UserAccount.class);\n<\/code><\/pre>\n\n<p>You can exclude using a field by using <code>transient<\/code> keyword after access modifier.<\/p>\n\n<p><strong>Note:<\/strong> This is bad practice. Also don't recommend to use <code>Cloneable<\/code> or <code>JavaSerialization<\/code> It's slow and broken. Write copy constructor for best performance <a href=\"http://www.javapractices.com/topic/TopicAction.do?Id=12\" rel=\"noreferrer\">ref<\/a>.<\/p>\n\n<p>Something like<\/p>\n\n<pre><code>class UserAccount{\n        public int id;\n        public String name;\n        //empty constructor\n        public UserAccount(){}\n        //parameterize constructor\n        public UserAccount(int id, String name) {\n            this.id = id;\n            this.name = name;\n        }\n\n        //copy constructor\n        public UserAccount(UserAccount in){\n            this(in.id,in.name);\n        }\n    }\n<\/code><\/pre>\n\n<p><strong>Test stats of 90000 iteration:<\/strong><br/>\nLine <code>UserAccount clone = gson.fromJson(gson.toJson(aO), UserAccount.class);<\/code> takes <strong>808ms<\/strong><\/p>\n\n<p>Line <code>UserAccount clone = new UserAccount(aO);<\/code> takes less than <strong>1ms<\/strong><\/p>\n\n<p><strong>Conclusion:<\/strong> Use gson if your boss is crazy and you prefer speed. Use second copy constructor if you prefer quality.<\/p>\n\n<p>You can also use copy constructor code <a href=\"https://plugins.jetbrains.com/plugin/7225-generatecopyconstructor\" rel=\"noreferrer\">generator plugin<\/a> in Android Studio.<\/p>\n",
+            "answer_id": 41869728,
+            "question_id": 869033,
+            "last_edit_date": 1506147855
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/07bfd40aeb33b36c5c984689761723cd?s=256&d=identicon&r=PG",
+                "account_id": 37662,
+                "user_type": "registered",
+                "user_id": 107728,
+                "link": "https://stackoverflow.com/users/107728/jon-bringhurst",
+                "reputation": 1358,
+                "display_name": "Jon Bringhurst",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 10,
+            "is_accepted": false,
+            "last_activity_date": 1469698862,
+            "creation_date": 1242398132,
+            "body": "<p>Here's a decent explanation of <code>clone()<\/code> if you end up needing it...<\/p>\n\n<p><a href=\"http://en.wikipedia.org/wiki/Clone_%28Java_method%29\" rel=\"noreferrer\">Here: clone (Java method)<\/a><\/p>\n",
+            "answer_id": 869075,
+            "question_id": 869033,
+            "last_edit_date": 1469698862
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9fa4a4fc71539778009dce1d00b6c73f?s=256&d=identicon&r=PG",
+                "account_id": 276903,
+                "user_type": "registered",
+                "user_id": 570584,
+                "link": "https://stackoverflow.com/users/570584/cojones",
+                "reputation": 1954,
+                "display_name": "Cojones",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 10,
+            "is_accepted": false,
+            "last_activity_date": 1481640202,
+            "creation_date": 1319386326,
+            "body": "<p>Use a deep cloning utility: <\/p>\n\n<pre><code>SomeObjectType copy = new Cloner().deepClone(someObject);\n<\/code><\/pre>\n\n<p>This will deep copy any java object, check it out at <a href=\"https://github.com/kostaskougios/cloning\" rel=\"noreferrer\">https://github.com/kostaskougios/cloning<\/a><\/p>\n",
+            "answer_id": 7867345,
+            "question_id": 869033,
+            "last_edit_date": 1481640202
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jAyUZ.png?s=256",
+                "account_id": 2111085,
+                "user_type": "registered",
+                "user_id": 1876355,
+                "link": "https://stackoverflow.com/users/1876355/pierre",
+                "reputation": 9170,
+                "display_name": "Pierre",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 10,
+            "is_accepted": false,
+            "last_activity_date": 1568881763,
+            "creation_date": 1568881763,
+            "body": "<p>Alternative to <a href=\"https://stackoverflow.com/a/869078/1876355\">egaga's<\/a> constructor method of copy. You probably already have a POJO, so just add another method <code>copy()<\/code> which returns a copy of the initialized object.<\/p>\n\n<pre><code>class DummyBean {\n    private String dummyStr;\n    private int dummyInt;\n\n    public DummyBean(String dummyStr, int dummyInt) {\n        this.dummyStr = dummyStr;\n        this.dummyInt = dummyInt;\n    }\n\n    public DummyBean copy() {\n        return new DummyBean(dummyStr, dummyInt);\n    }\n\n    //... Getters &amp; Setters\n}\n<\/code><\/pre>\n\n<p>If you already have a <code>DummyBean<\/code> and want a copy:<\/p>\n\n<pre><code>DummyBean bean1 = new DummyBean(\"peet\", 2);\nDummyBean bean2 = bean1.copy(); // &lt;-- Create copy of bean1 \n\nSystem.out.println(\"bean1: \" + bean1.getDummyStr() + \" \" + bean1.getDummyInt());\nSystem.out.println(\"bean2: \" + bean2.getDummyStr() + \" \" + bean2.getDummyInt());\n\n//Change bean1\nbean1.setDummyStr(\"koos\");\nbean1.setDummyInt(88);\n\nSystem.out.println(\"bean1: \" + bean1.getDummyStr() + \" \" + bean1.getDummyInt());\nSystem.out.println(\"bean2: \" + bean2.getDummyStr() + \" \" + bean2.getDummyInt());\n<\/code><\/pre>\n\n<blockquote>\n  <p>Output:<\/p>\n\n<pre><code>bean1: peet 2\nbean2: peet 2\n\nbean1: koos 88\nbean2: peet 2\n<\/code><\/pre>\n<\/blockquote>\n\n<p>But both works well, it is ultimately up to you...<\/p>\n",
+            "answer_id": 58006813,
+            "question_id": 869033
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-JyjApRcucyQ/AAAAAAAAAAI/AAAAAAAAAec/f02wOy6WWn0/s256-rj/photo.jpg",
+                "account_id": 10153177,
+                "user_type": "registered",
+                "user_id": 7499069,
+                "link": "https://stackoverflow.com/users/7499069/tuhin47",
+                "reputation": 6273,
+                "display_name": "tuhin47"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 9,
+            "is_accepted": false,
+            "last_activity_date": 1604409567,
+            "creation_date": 1589476562,
+            "body": "<p>Use <code>gson<\/code> for duplicating an object.<\/p>\n<pre><code>public static &lt;T&gt;T copyObject(Object object){\n    Gson gson = new Gson();\n    JsonObject jsonObject = gson.toJsonTree(object).getAsJsonObject();\n    return gson.fromJson(jsonObject,(Type) object.getClass());\n}\n<\/code><\/pre>\n<p>Assume I have an object <code>person<\/code>.So<\/p>\n<pre><code>Person copyPerson = copyObject(person);\n<\/code><\/pre>\n<p><strong>Note:<\/strong> The performance is much slower.<\/p>\n",
+            "answer_id": 61803414,
+            "question_id": 869033,
+            "last_edit_date": 1604409567
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1a62456c71b0851726898e87ec88b69c?s=256&d=identicon&r=PG",
+                "account_id": 28947,
+                "user_type": "registered",
+                "user_id": 77779,
+                "link": "https://stackoverflow.com/users/77779/yishai",
+                "reputation": 92391,
+                "display_name": "Yishai",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": false,
+            "last_activity_date": 1319125669,
+            "creation_date": 1242397987,
+            "body": "<p>To do that you have to clone the object in some way. Although Java has a cloning mechanism, don't use it if you don't have to. Create a copy method that does the copy work for you, and then do:<\/p>\n\n<pre><code>dumtwo = dum.copy();\n<\/code><\/pre>\n\n<p><a href=\"https://stackoverflow.com/questions/475842/copy-an-object-in-java\">Here<\/a> is some more advice on different techniques for accomplishing a copy.<\/p>\n",
+            "answer_id": 869051,
+            "question_id": 869033,
+            "last_edit_date": 1495542402
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-HfISldjmK34/AAAAAAAAAAI/AAAAAAAAAJw/CRemsMPW8aw/s256-rj/photo.jpg",
+                "account_id": 3428198,
+                "user_type": "registered",
+                "user_id": 3690456,
+                "link": "https://stackoverflow.com/users/3690456/a-droid-tech",
+                "reputation": 2331,
+                "display_name": "A-Droid Tech"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 7,
+            "is_accepted": false,
+            "last_activity_date": 1539923664,
+            "creation_date": 1419338795,
+            "body": "<p>Pass the object that you want to copy and get the object you want:<\/p>\n\n<pre><code>private Object copyObject(Object objSource) {\n        try {\n            ByteArrayOutputStream bos = new ByteArrayOutputStream();\n            ObjectOutputStream oos = new ObjectOutputStream(bos);\n            oos.writeObject(objSource);\n            oos.flush();\n            oos.close();\n            bos.close();\n            byte[] byteData = bos.toByteArray();\n            ByteArrayInputStream bais = new ByteArrayInputStream(byteData);\n            try {\n                objDest = new ObjectInputStream(bais).readObject();\n            } catch (ClassNotFoundException e) {\n                e.printStackTrace();\n            }\n        } catch (IOException e) {\n            e.printStackTrace();\n        }\n        return objDest;\n\n    }\n<\/code><\/pre>\n\n<p>Now parse the <code>objDest<\/code> to desired object.<\/p>\n\n<p>Happy Coding!<\/p>\n",
+            "answer_id": 27620675,
+            "question_id": 869033,
+            "last_edit_date": 1539923664
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/B53xA.jpg?s=256",
+                "account_id": 3282,
+                "user_type": "registered",
+                "user_id": 4725,
+                "link": "https://stackoverflow.com/users/4725/tom-hawtin-tackline",
+                "reputation": 147602,
+                "display_name": "Tom Hawtin - tackline",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1242398615,
+            "creation_date": 1242398615,
+            "body": "<p>Other than explicitly copying, another approach is to make the object immutable (no <code>set<\/code> or other mutator methods). In this way the question never arises. Immutability becomes more difficult with larger objects, but that other side of that is that it pushes you in the direction of splitting into coherent small objects and composites.<\/p>\n",
+            "answer_id": 869123,
+            "question_id": 869033
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K6tEB.jpg?s=256",
+                "account_id": 3254280,
+                "user_type": "registered",
+                "user_id": 2743815,
+                "link": "https://stackoverflow.com/users/2743815/mahdi-abdi",
+                "reputation": 692,
+                "display_name": "Mahdi Abdi"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1393767320,
+            "creation_date": 1393767320,
+            "body": "<pre><code>class DB {\n  private String dummy;\n\n  public DB(DB one) {\n    this.dummy = one.dummy; \n  }\n}\n<\/code><\/pre>\n",
+            "answer_id": 22128254,
+            "question_id": 869033
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ml7OP.jpg?s=256",
+                "account_id": 125069,
+                "user_type": "registered",
+                "user_id": 320594,
+                "link": "https://stackoverflow.com/users/320594/jaime-hablutzel",
+                "reputation": 6412,
+                "display_name": "Jaime Hablutzel",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1439318131,
+            "creation_date": 1311613182,
+            "body": "<p>You can deep copy automatically with XStream, from <a href=\"http://x-stream.github.io/\" rel=\"nofollow\">http://x-stream.github.io/<\/a>:<\/p>\n\n<blockquote>\n  <p>XStream is a simple library to serialize objects to XML and back\n  again.<\/p>\n<\/blockquote>\n\n<p>Add it to your project (if using maven)<\/p>\n\n<pre><code>&lt;dependency&gt;\n    &lt;groupId&gt;com.thoughtworks.xstream&lt;/groupId&gt;\n    &lt;artifactId&gt;xstream&lt;/artifactId&gt;\n    &lt;version&gt;1.3.1&lt;/version&gt;                \n&lt;/dependency&gt;\n<\/code><\/pre>\n\n<p>Then<\/p>\n\n<pre><code>DummyBean dum = new DummyBean();\ndum.setDummy(\"foo\");\nDummyBean dumCopy = (DummyBean) XSTREAM.fromXML(XSTREAM.toXML(dum));\n<\/code><\/pre>\n\n<p>With this you have a copy without the need to implement any cloning interface.<\/p>\n",
+            "answer_id": 6819701,
+            "question_id": 869033,
+            "last_edit_date": 1439318131
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/22TKg.jpg?s=256",
+                "account_id": 3135843,
+                "user_type": "registered",
+                "user_id": 2652368,
+                "link": "https://stackoverflow.com/users/2652368/amirhossein-ghasemi",
+                "reputation": 22307,
+                "display_name": "Amirhossein Ghasemi",
+                "accept_rate": 57
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1533907608,
+            "creation_date": 1517732870,
+            "body": "<pre><code>public class MyClass implements Cloneable {\n\nprivate boolean myField= false;\n// and other fields or objects\n\npublic MyClass (){}\n\n@Override\npublic MyClass clone() throws CloneNotSupportedException {\n   try\n   {\n       MyClass clonedMyClass = (MyClass)super.clone();\n       // if you have custom object, then you need create a new one in here\n       return clonedMyClass ;\n   } catch (CloneNotSupportedException e) {\n       e.printStackTrace();\n       return new MyClass();\n   }\n\n  }\n}\n<\/code><\/pre>\n\n<p>and in your code:<\/p>\n\n<pre><code>MyClass myClass = new MyClass();\n// do some work with this object\nMyClass clonedMyClass = myClass.clone();\n<\/code><\/pre>\n",
+            "answer_id": 48606170,
+            "question_id": 869033,
+            "last_edit_date": 1533907608
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/yVtka.png?s=256",
+                "account_id": 8531550,
+                "user_type": "registered",
+                "user_id": 6395022,
+                "link": "https://stackoverflow.com/users/6395022/ngima-sherpa",
+                "reputation": 1565,
+                "display_name": "Ngima Sherpa"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1638964658,
+            "creation_date": 1623782638,
+            "body": "<h1>Using Kotlin extension function<\/h1>\n<pre><code>fun &lt;T : Any?&gt; T.duplicate(): T? {\n    var copyObject: T? = null\n    try {\n        val byteArrayOutputStream = ByteArrayOutputStream()\n        val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)\n        objectOutputStream.writeObject(this)\n        objectOutputStream.flush()\n        objectOutputStream.close()\n        byteArrayOutputStream.close()\n        val byteData = byteArrayOutputStream.toByteArray()\n        val byteArrayInputStream = ByteArrayInputStream(byteData)\n        try {\n            copyObject = ObjectInputStream(byteArrayInputStream).readObject() as T\n        } catch (e: ClassNotFoundException) {\n            e.printStackTrace()\n        }\n    } catch (e: IOException) {\n        e.printStackTrace()\n    }\n    return copyObject\n}\n<\/code><\/pre>\n<h3>Use case<\/h3>\n<pre><code>var object = Any()\nvar duplicateObject = object.duplicate()\n<\/code><\/pre>\n<h1>Java<\/h1>\n<pre><code>&lt;T extends Object&gt; T copyObject(T sourceObject) {\n\n    T copyObject = null;\n\n    try {\n        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);\n        objectOutputStream.writeObject(sourceObject);\n        objectOutputStream.flush();\n        objectOutputStream.close();\n        byteArrayOutputStream.close();\n        byte[] byteData = byteArrayOutputStream.toByteArray();\n        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteData);\n        try {\n            copyObject = (T) new ObjectInputStream(byteArrayInputStream).readObject();\n        } catch (ClassNotFoundException e) {\n            e.printStackTrace();\n        }\n    } catch (IOException e) {\n        e.printStackTrace();\n    }\n    return copyObject;\n}\n<\/code><\/pre>\n<h3>Use case<\/h3>\n<pre><code>Object object = new Object();\nObject duplicateObject = copyObject(object);\n<\/code><\/pre>\n<p>==============================================<\/p>\n<h1>Kotlin Update<\/h1>\n<p>If you use data class then you will have copy method that copies the Kotlin data class. Cool thing is you could also pass some values to modify the object with new copy. I would recommend this way.<\/p>\n<p>Example:<\/p>\n<p>//class<\/p>\n<pre><code>data class TestModel(val title: String, var subtitle: String)\n<\/code><\/pre>\n<h3>Use case<\/h3>\n<pre><code>val testClass = TestModel(&quot;Test title&quot;, &quot;Test subtitle&quot;)\n\nval newInstance = testClass.copy(subtitle = &quot;new subtitle for copy instance&quot;)\n<\/code><\/pre>\n",
+            "answer_id": 67991861,
+            "question_id": 869033,
+            "last_edit_date": 1638964658
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "John W"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1319125655,
+            "creation_date": 1242416999,
+            "body": "<p>You can try to implement <code>Cloneable<\/code> and use the <code>clone()<\/code> method; however, if you use the clone method you should - by standard - ALWAYS override <code>Object<\/code>'s <code>public Object clone()<\/code> method.<\/p>\n",
+            "answer_id": 870530,
+            "question_id": 869033,
+            "last_edit_date": 1319125655
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/eeUws.jpg?s=256",
+                "account_id": 195831,
+                "user_type": "registered",
+                "user_id": 438960,
+                "link": "https://stackoverflow.com/users/438960/lars-bohl",
+                "reputation": 1011,
+                "display_name": "Lars Bohl",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1487051149,
+            "creation_date": 1486311431,
+            "body": "<p>If you can add an annotation to the source file, an annotation processor or code generator like <a href=\"https://github.com/h908714124/zerobuilder\" rel=\"nofollow noreferrer\" title=\"zerobuilder\">this one<\/a> can be used.<\/p>\n\n<pre><code>import net.zerobuilder.BeanBuilder\n\n@BeanBuilder\npublic class DummyBean { \n  // bean stuff\n}\n<\/code><\/pre>\n\n<p>A class <code>DummyBeanBuilders<\/code> will be generates, which has a static method <code>dummyBeanUpdater<\/code> to create shallow copies, the same way as you would do it manually.<\/p>\n\n<pre><code>DummyBean bean = new DummyBean();\n// Call some setters ...\n// Now make a copy\nDummyBean copy = DummyBeanBuilders.dummyBeanUpdater(bean).done();\n<\/code><\/pre>\n",
+            "answer_id": 42054337,
+            "question_id": 869033,
+            "last_edit_date": 1487051149
+        }
+    ],
+    "answer_comments": {
+        "6819701": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XjtEa.jpg?s=256",
+                    "account_id": 262423,
+                    "user_type": "registered",
+                    "user_id": 547268,
+                    "link": "https://stackoverflow.com/users/547268/nithdi",
+                    "reputation": 1027,
+                    "display_name": "NiThDi",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 6819701,
+                "edited": false,
+                "creation_date": 1479824834,
+                "comment_id": 68714356
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/6mFpY.jpg?s=256",
+                    "account_id": 1678345,
+                    "user_type": "registered",
+                    "user_id": 1543306,
+                    "link": "https://stackoverflow.com/users/1543306/mahieddine",
+                    "reputation": 565,
+                    "display_name": "mahieddine",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 6819701,
+                "edited": false,
+                "creation_date": 1461613653,
+                "comment_id": 61268394
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/ml7OP.jpg?s=256",
+                    "account_id": 125069,
+                    "user_type": "registered",
+                    "user_id": 320594,
+                    "link": "https://stackoverflow.com/users/320594/jaime-hablutzel",
+                    "reputation": 6412,
+                    "display_name": "Jaime Hablutzel",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 6819701,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/34a66330977044d70165288c56740d4b?s=256&d=identicon&r=PG",
+                    "account_id": 97993,
+                    "user_type": "registered",
+                    "user_id": 265521,
+                    "link": "https://stackoverflow.com/users/265521/timmmm",
+                    "reputation": 99274,
+                    "display_name": "Timmmm",
+                    "accept_rate": 58
+                },
+                "edited": false,
+                "creation_date": 1439318107,
+                "comment_id": 51808357
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/34a66330977044d70165288c56740d4b?s=256&d=identicon&r=PG",
+                    "account_id": 97993,
+                    "user_type": "registered",
+                    "user_id": 265521,
+                    "link": "https://stackoverflow.com/users/265521/timmmm",
+                    "reputation": 99274,
+                    "display_name": "Timmmm",
+                    "accept_rate": 58
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 31,
+                "post_id": 6819701,
+                "edited": false,
+                "creation_date": 1327670450,
+                "comment_id": 11330443
+            }
+        ],
+        "17557343": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/9SDBW.png?s=256",
+                "account_id": 1194771,
+                "user_type": "registered",
+                "user_id": 1166722,
+                "link": "https://stackoverflow.com/users/1166722/paakjis",
+                "reputation": 405,
+                "display_name": "paakjis",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 17557343,
+            "edited": false,
+            "creation_date": 1571990562,
+            "comment_id": 103428602
+        }],
+        "16346442": [
+            {
+                "owner": {
+                    "profile_image": "https://lh4.googleusercontent.com/-qV4ezityhTU/AAAAAAAAAAI/AAAAAAAAang/NgK4ztvpeNQ/s256-rj/photo.jpg",
+                    "account_id": 11049892,
+                    "user_type": "registered",
+                    "user_id": 8114716,
+                    "link": "https://stackoverflow.com/users/8114716/rehmanali-momin",
+                    "reputation": 409,
+                    "display_name": "Rehmanali Momin"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 16346442,
+                "edited": false,
+                "creation_date": 1615317648,
+                "comment_id": 117652585
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f35c32ba89e793ce8d4a672d616c273c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 6258909,
+                    "user_type": "registered",
+                    "user_id": 4866667,
+                    "link": "https://stackoverflow.com/users/4866667/mikhail",
+                    "reputation": 3442,
+                    "display_name": "Mikhail",
+                    "accept_rate": 64
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 16346442,
+                "edited": false,
+                "creation_date": 1598688135,
+                "comment_id": 112545077
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J93qq.jpg?s=256",
+                    "account_id": 1122900,
+                    "user_type": "registered",
+                    "user_id": 1110820,
+                    "link": "https://stackoverflow.com/users/1110820/charles-wood",
+                    "reputation": 922,
+                    "display_name": "Charles Wood",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 9,
+                "post_id": 16346442,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/TGtrk.png?s=256",
+                    "account_id": 5408631,
+                    "user_type": "registered",
+                    "user_id": 4306260,
+                    "link": "https://stackoverflow.com/users/4306260/user",
+                    "reputation": 4261,
+                    "display_name": "User",
+                    "accept_rate": 30
+                },
+                "edited": false,
+                "creation_date": 1526506493,
+                "comment_id": 87776664
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/TGtrk.png?s=256",
+                    "account_id": 5408631,
+                    "user_type": "registered",
+                    "user_id": 4306260,
+                    "link": "https://stackoverflow.com/users/4306260/user",
+                    "reputation": 4261,
+                    "display_name": "User",
+                    "accept_rate": 30
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 14,
+                "post_id": 16346442,
+                "edited": false,
+                "creation_date": 1492519899,
+                "comment_id": 74000209
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a8eac8e9e38bca22b12b41559cecefbe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4879335,
+                    "user_type": "registered",
+                    "user_id": 3933559,
+                    "link": "https://stackoverflow.com/users/3933559/dante",
+                    "reputation": 297,
+                    "display_name": "Dante",
+                    "accept_rate": 57
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 16346442,
+                "edited": false,
+                "creation_date": 1461068768,
+                "comment_id": 61021797
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/MaMxf.jpg?s=256",
+                    "account_id": 402975,
+                    "user_type": "registered",
+                    "user_id": 770467,
+                    "link": "https://stackoverflow.com/users/770467/androiderson",
+                    "reputation": 17081,
+                    "display_name": "Androiderson",
+                    "accept_rate": 74
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 87,
+                "post_id": 16346442,
+                "edited": false,
+                "creation_date": 1371751358,
+                "comment_id": 24947189
+            }
+        ],
+        "9834683": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/88f795a7a60c07ce9690538a416dfb70?s=256&d=identicon&r=PG",
+                    "account_id": 3124728,
+                    "user_type": "registered",
+                    "user_id": 2643815,
+                    "link": "https://stackoverflow.com/users/2643815/smart-coder",
+                    "reputation": 1786,
+                    "display_name": "Smart Coder"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 9834683,
+                "edited": false,
+                "creation_date": 1666900082,
+                "comment_id": 131050689
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/75807746d41c9905452d252595f7b89d?s=256&d=identicon&r=PG",
+                    "account_id": 68306,
+                    "user_type": "registered",
+                    "user_id": 199364,
+                    "link": "https://stackoverflow.com/users/199364/toolmakersteve",
+                    "reputation": 22155,
+                    "display_name": "ToolmakerSteve",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 9834683,
+                "edited": false,
+                "creation_date": 1409006862,
+                "comment_id": 39795144
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/75807746d41c9905452d252595f7b89d?s=256&d=identicon&r=PG",
+                    "account_id": 68306,
+                    "user_type": "registered",
+                    "user_id": 199364,
+                    "link": "https://stackoverflow.com/users/199364/toolmakersteve",
+                    "reputation": 22155,
+                    "display_name": "ToolmakerSteve",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 5,
+                "post_id": 9834683,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/12SO7.jpg?s=256",
+                    "account_id": 2538149,
+                    "user_type": "registered",
+                    "user_id": 2204672,
+                    "link": "https://stackoverflow.com/users/2204672/srikanth-nadimpally",
+                    "reputation": 564,
+                    "display_name": "Srikanth nadimpally",
+                    "accept_rate": 71
+                },
+                "edited": false,
+                "creation_date": 1409006462,
+                "comment_id": 39795035
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/12SO7.jpg?s=256",
+                    "account_id": 2538149,
+                    "user_type": "registered",
+                    "user_id": 2204672,
+                    "link": "https://stackoverflow.com/users/2204672/srikanth-nadimpally",
+                    "reputation": 564,
+                    "display_name": "Srikanth nadimpally",
+                    "accept_rate": 71
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 9834683,
+                "edited": false,
+                "creation_date": 1383047353,
+                "comment_id": 29189473
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/7gPX6.jpg?s=256",
+                    "account_id": 1118279,
+                    "user_type": "registered",
+                    "user_id": 1107115,
+                    "link": "https://stackoverflow.com/users/1107115/freakyuser",
+                    "reputation": 2814,
+                    "display_name": "Freakyuser",
+                    "accept_rate": 65
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 9834683,
+                "edited": false,
+                "creation_date": 1371106170,
+                "comment_id": 24704476
+            }
+        ],
+        "24637827": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/160d6580f280b5e9e5a1188b32c4ef2d?s=256&d=identicon&r=PG",
+                "account_id": 12404,
+                "user_type": "registered",
+                "user_id": 24396,
+                "link": "https://stackoverflow.com/users/24396/steve-kuo",
+                "reputation": 63291,
+                "display_name": "Steve Kuo",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "post_id": 24637827,
+            "edited": false,
+            "creation_date": 1427992099,
+            "comment_id": 47007792
+        }],
+        "7867345": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c062340c0c10e7e1077f76ae683bd18a?s=256&d=identicon&r=PG",
+                "account_id": 1026050,
+                "user_type": "registered",
+                "user_id": 1035349,
+                "link": "https://stackoverflow.com/users/1035349/stefanjunker",
+                "reputation": 367,
+                "display_name": "stefanjunker"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 7867345,
+            "edited": false,
+            "creation_date": 1339601323,
+            "comment_id": 14402633
+        }],
+        "61803414": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UmYus.jpg?s=256",
+                "account_id": 2468471,
+                "user_type": "registered",
+                "user_id": 2150971,
+                "link": "https://stackoverflow.com/users/2150971/javad",
+                "reputation": 835,
+                "display_name": "javad",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 61803414,
+            "edited": false,
+            "creation_date": 1630143499,
+            "comment_id": 121878996
+        }],
+        "27620675": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lmosh.jpg?s=256",
+                "account_id": 6868918,
+                "user_type": "registered",
+                "user_id": 5280144,
+                "link": "https://stackoverflow.com/users/5280144/iman-kazemayni",
+                "reputation": 1333,
+                "display_name": "iman kazemayni"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 27620675,
+            "edited": false,
+            "creation_date": 1682218753,
+            "comment_id": 134179900
+        }],
+        "41869728": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/B3Fv0.jpg?s=256",
+                    "account_id": 7518082,
+                    "user_type": "registered",
+                    "user_id": 5710872,
+                    "link": "https://stackoverflow.com/users/5710872/qamar",
+                    "reputation": 5197,
+                    "display_name": "Qamar",
+                    "accept_rate": 57
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 41869728,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/ALWw7.jpg?s=256",
+                    "account_id": 1058912,
+                    "user_type": "registered",
+                    "user_id": 1060955,
+                    "link": "https://stackoverflow.com/users/1060955/parth-mehrotra",
+                    "reputation": 3140,
+                    "display_name": "Parth Mehrotra",
+                    "accept_rate": 67
+                },
+                "edited": false,
+                "creation_date": 1506146230,
+                "comment_id": 79711889
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/ALWw7.jpg?s=256",
+                    "account_id": 1058912,
+                    "user_type": "registered",
+                    "user_id": 1060955,
+                    "link": "https://stackoverflow.com/users/1060955/parth-mehrotra",
+                    "reputation": 3140,
+                    "display_name": "Parth Mehrotra",
+                    "accept_rate": 67
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 41869728,
+                "edited": false,
+                "creation_date": 1506099586,
+                "comment_id": 79699010
+            }
+        ],
+        "25338780": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/UcrhR.jpg?s=256",
+                    "account_id": 102965,
+                    "user_type": "registered",
+                    "user_id": 276052,
+                    "link": "https://stackoverflow.com/users/276052/aioobe",
+                    "reputation": 422640,
+                    "display_name": "aioobe",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1525179317,
+                "comment_id": 87250899
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7253953e22cc6dbf31aef624f03e5cc3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 543631,
+                    "user_type": "registered",
+                    "user_id": 912829,
+                    "link": "https://stackoverflow.com/users/912829/acv",
+                    "reputation": 10695,
+                    "display_name": "ACV",
+                    "accept_rate": 53
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1498580778,
+                "comment_id": 76551504
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c2ab25926e68d6897da205117b1fe9fd?s=256&d=identicon&r=PG",
+                    "account_id": 3906953,
+                    "user_type": "registered",
+                    "user_id": 3233398,
+                    "link": "https://stackoverflow.com/users/3233398/eliux",
+                    "reputation": 12835,
+                    "display_name": "EliuX",
+                    "accept_rate": 9
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1492042061,
+                "comment_id": 73825096
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dbf20288505f5b9bed72f0af04ccd895?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4136952,
+                    "user_type": "registered",
+                    "user_id": 3393404,
+                    "link": "https://stackoverflow.com/users/3393404/dustin",
+                    "reputation": 368,
+                    "display_name": "Dustin"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1480885552,
+                "comment_id": 69136601
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8ca2323525d798c9d06faf17db76c7b8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7797669,
+                    "user_type": "registered",
+                    "user_id": 5898205,
+                    "link": "https://stackoverflow.com/users/5898205/varshney-p",
+                    "reputation": 258,
+                    "display_name": "Varshney P."
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1474609618,
+                "comment_id": 66609497
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/nzaqb.png?s=256",
+                    "account_id": 2178400,
+                    "user_type": "registered",
+                    "user_id": 1928525,
+                    "link": "https://stackoverflow.com/users/1928525/j%c3%a1n-%d0%afab%c4%8dan",
+                    "reputation": 773,
+                    "display_name": "J&#225;n Яabčan",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1474062007,
+                "comment_id": 66394876
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/47ed5ce77357cd4e0dee13bcb7250dd9?s=256&d=identicon&r=PG",
+                    "account_id": 1211007,
+                    "user_type": "registered",
+                    "user_id": 1179536,
+                    "link": "https://stackoverflow.com/users/1179536/nhthai",
+                    "reputation": 318,
+                    "display_name": "nhthai"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1455618359,
+                "comment_id": 58558254
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ce2bdf03db9d6eea0cf5adb14f0c7853?s=256&d=identicon&r=PG",
+                    "account_id": 1199784,
+                    "user_type": "registered",
+                    "user_id": 1170677,
+                    "link": "https://stackoverflow.com/users/1170677/adelin",
+                    "reputation": 19171,
+                    "display_name": "Adelin",
+                    "accept_rate": 54
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1454943166,
+                "comment_id": 58256534
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/aCwKY.jpg?s=256",
+                    "account_id": 1621536,
+                    "user_type": "registered",
+                    "user_id": 1497972,
+                    "link": "https://stackoverflow.com/users/1497972/max",
+                    "reputation": 741,
+                    "display_name": "Max",
+                    "accept_rate": 67
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25338780,
+                "edited": false,
+                "creation_date": 1408612344,
+                "comment_id": 39658597
+            }
+        ],
+        "48606170": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/6vJ82.jpg?s=256",
+                "account_id": 5695571,
+                "user_type": "registered",
+                "user_id": 4502200,
+                "link": "https://stackoverflow.com/users/4502200/christian",
+                "reputation": 419,
+                "display_name": "Christian"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "post_id": 48606170,
+            "edited": false,
+            "creation_date": 1529924919,
+            "comment_id": 89036483
+        }],
+        "2847896": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/UcrhR.jpg?s=256",
+                    "account_id": 102965,
+                    "user_type": "registered",
+                    "user_id": 276052,
+                    "link": "https://stackoverflow.com/users/276052/aioobe",
+                    "reputation": 422640,
+                    "display_name": "aioobe",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 2847896,
+                "edited": false,
+                "creation_date": 1525179075,
+                "comment_id": 87250775
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/oTR3RELA.jpg?s=256",
+                    "account_id": 2130434,
+                    "user_type": "registered",
+                    "user_id": 2294985,
+                    "link": "https://stackoverflow.com/users/2294985/omar-hossameldin",
+                    "reputation": 3121,
+                    "display_name": "Omar HossamEldin",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 2847896,
+                "edited": false,
+                "creation_date": 1518612578,
+                "comment_id": 84576834
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/555e83d264ba264b3369c5b74903259c?s=256&d=identicon&r=PG",
+                    "account_id": 42437,
+                    "user_type": "registered",
+                    "user_id": 123623,
+                    "link": "https://stackoverflow.com/users/123623/bluehorn",
+                    "reputation": 3131,
+                    "display_name": "Bluehorn"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 13,
+                "post_id": 2847896,
+                "edited": false,
+                "creation_date": 1509970249,
+                "comment_id": 81222588
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/034937f09dca51c642d27a1723fef3ab?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4746687,
+                    "user_type": "registered",
+                    "user_id": 4194335,
+                    "link": "https://stackoverflow.com/users/4194335/jmoran",
+                    "reputation": 164,
+                    "display_name": "jmoran"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 2847896,
+                "edited": false,
+                "creation_date": 1507317511,
+                "comment_id": 80177152
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/gSbYu.png?s=256",
+                    "account_id": 2504755,
+                    "user_type": "registered",
+                    "user_id": 2178809,
+                    "link": "https://stackoverflow.com/users/2178809/sibish",
+                    "reputation": 908,
+                    "display_name": "Sibish",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 2847896,
+                "edited": false,
+                "creation_date": 1504137493,
+                "comment_id": 78901705
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5b211518f35a1640f992b6b44e738594?s=256&d=identicon&r=PG",
+                    "account_id": 2050082,
+                    "user_type": "registered",
+                    "user_id": 1829281,
+                    "link": "https://stackoverflow.com/users/1829281/andrii-kovalchuk",
+                    "reputation": 4946,
+                    "display_name": "Andrii Kovalchuk"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 2847896,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/746ebbca9b54799d053b4c23e7a13015?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5408602,
+                    "user_type": "registered",
+                    "user_id": 4306242,
+                    "link": "https://stackoverflow.com/users/4306242/misty",
+                    "reputation": 123,
+                    "display_name": "misty",
+                    "accept_rate": 91
+                },
+                "edited": false,
+                "creation_date": 1474976252,
+                "comment_id": 66744683
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/746ebbca9b54799d053b4c23e7a13015?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5408602,
+                    "user_type": "registered",
+                    "user_id": 4306242,
+                    "link": "https://stackoverflow.com/users/4306242/misty",
+                    "reputation": 123,
+                    "display_name": "misty",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 2847896,
+                "edited": false,
+                "creation_date": 1472074662,
+                "comment_id": 65612202
+            }
+        ],
+        "869078": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8554ce4e2c007be9ccebcc8389704470?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 6241436,
+                    "user_type": "registered",
+                    "user_id": 4854931,
+                    "link": "https://stackoverflow.com/users/4854931/alex78191",
+                    "reputation": 3273,
+                    "display_name": "Alex78191",
+                    "accept_rate": 33
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1551639134,
+                "comment_id": 96704202
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/g15oI.png?s=256",
+                    "account_id": 14381595,
+                    "user_type": "registered",
+                    "user_id": 10388629,
+                    "link": "https://stackoverflow.com/users/10388629/picachieu",
+                    "reputation": 3810,
+                    "display_name": "Picachieu"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1539920679,
+                "comment_id": 92684120
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/z8IL6.png?s=256",
+                    "account_id": 4806580,
+                    "user_type": "registered",
+                    "user_id": 3881432,
+                    "link": "https://stackoverflow.com/users/3881432/zulkarnain-shah",
+                    "reputation": 1059,
+                    "display_name": "zulkarnain shah",
+                    "accept_rate": 33
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1499688686,
+                "comment_id": 76996811
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7253953e22cc6dbf31aef624f03e5cc3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 543631,
+                    "user_type": "registered",
+                    "user_id": 912829,
+                    "link": "https://stackoverflow.com/users/912829/acv",
+                    "reputation": 10695,
+                    "display_name": "ACV",
+                    "accept_rate": 53
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 4,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1498580679,
+                "comment_id": 76551441
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2c945185d94691ff306607c311d2d510?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8412470,
+                    "user_type": "registered",
+                    "user_id": 6313907,
+                    "link": "https://stackoverflow.com/users/6313907/thread-game",
+                    "reputation": 65,
+                    "display_name": "thread-game"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1491547520,
+                "comment_id": 73611037
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c94c6ea772afeeb297ec29eaa2cd00c6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5531638,
+                    "user_type": "registered",
+                    "user_id": 4391450,
+                    "link": "https://stackoverflow.com/users/4391450/axelh",
+                    "reputation": 14592,
+                    "display_name": "AxelH"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 4,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1483087606,
+                "comment_id": 69988316
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f275c40d3a1fefc35699d94b20bb4acd?s=256&d=identicon&r=PG",
+                    "account_id": 540420,
+                    "user_type": "registered",
+                    "user_id": 908621,
+                    "link": "https://stackoverflow.com/users/908621/fishinear",
+                    "reputation": 6382,
+                    "display_name": "fishinear",
+                    "accept_rate": 61
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1479747694,
+                "comment_id": 68678179
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/e643d47c57b984078c3b67560f7649b6?s=256&d=identicon&r=PG",
+                    "account_id": 32775,
+                    "user_type": "registered",
+                    "user_id": 91208,
+                    "link": "https://stackoverflow.com/users/91208/lolo",
+                    "reputation": 4219,
+                    "display_name": "Lolo",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1398356254,
+                "comment_id": 35621083
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/21dfdd82b179972af12332a8db35ac64?s=256&d=identicon&r=PG",
+                    "account_id": 476302,
+                    "user_type": "registered",
+                    "user_id": 887128,
+                    "link": "https://stackoverflow.com/users/887128/max",
+                    "reputation": 16095,
+                    "display_name": "Max",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 4,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1390603950,
+                "comment_id": 32179583
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f3f205b245a05bb42534079e3b39167e?s=256&d=identicon&r=PG",
+                    "account_id": 25684,
+                    "user_type": "registered",
+                    "user_id": 66207,
+                    "link": "https://stackoverflow.com/users/66207/keulej",
+                    "reputation": 3521,
+                    "display_name": "keuleJ",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 8,
+                "post_id": 869078,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/msXZD.jpg?s=256",
+                    "account_id": 517348,
+                    "user_type": "registered",
+                    "user_id": 1238957,
+                    "link": "https://stackoverflow.com/users/1238957/christian-vielma",
+                    "reputation": 16165,
+                    "display_name": "Christian Vielma",
+                    "accept_rate": 70
+                },
+                "edited": false,
+                "creation_date": 1340900768,
+                "comment_id": 14782681
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/msXZD.jpg?s=256",
+                    "account_id": 517348,
+                    "user_type": "registered",
+                    "user_id": 1238957,
+                    "link": "https://stackoverflow.com/users/1238957/christian-vielma",
+                    "reputation": 16165,
+                    "display_name": "Christian Vielma",
+                    "accept_rate": 70
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1340825912,
+                "comment_id": 14757908
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d05ec76b03bb3cc3f9189b0f5a9817f4?s=256&d=identicon&r=PG",
+                    "account_id": 36160,
+                    "user_type": "registered",
+                    "user_id": 103014,
+                    "link": "https://stackoverflow.com/users/103014/egaga",
+                    "reputation": 21972,
+                    "display_name": "egaga",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 19,
+                "post_id": 869078,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/34a66330977044d70165288c56740d4b?s=256&d=identicon&r=PG",
+                    "account_id": 97993,
+                    "user_type": "registered",
+                    "user_id": 265521,
+                    "link": "https://stackoverflow.com/users/265521/timmmm",
+                    "reputation": 99274,
+                    "display_name": "Timmmm",
+                    "accept_rate": 58
+                },
+                "edited": false,
+                "creation_date": 1328292179,
+                "comment_id": 11479044
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/34a66330977044d70165288c56740d4b?s=256&d=identicon&r=PG",
+                    "account_id": 97993,
+                    "user_type": "registered",
+                    "user_id": 265521,
+                    "link": "https://stackoverflow.com/users/265521/timmmm",
+                    "reputation": 99274,
+                    "display_name": "Timmmm",
+                    "accept_rate": 58
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 4,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1327670579,
+                "comment_id": 11330480
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/CrJNW.png?s=256",
+                    "account_id": 58685,
+                    "user_type": "registered",
+                    "user_id": 175679,
+                    "link": "https://stackoverflow.com/users/175679/sliverninja",
+                    "reputation": 31687,
+                    "display_name": "SliverNinja",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 142,
+                "post_id": 869078,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/fe09e6b86d47ad12c7e07691f8a70f10?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 39770,
+                    "user_type": "registered",
+                    "user_id": 114887,
+                    "link": "https://stackoverflow.com/users/114887/matthew-piziak",
+                    "reputation": 3538,
+                    "display_name": "Matthew Piziak",
+                    "accept_rate": 85
+                },
+                "edited": false,
+                "creation_date": 1321788809,
+                "comment_id": 10078912
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fe09e6b86d47ad12c7e07691f8a70f10?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 39770,
+                    "user_type": "registered",
+                    "user_id": 114887,
+                    "link": "https://stackoverflow.com/users/114887/matthew-piziak",
+                    "reputation": 3538,
+                    "display_name": "Matthew Piziak",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 13,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1310582790,
+                "comment_id": 7906978
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a174b4521f9e80327c0e63fb88657933?s=256&d=identicon&r=PG",
+                    "account_id": 21342,
+                    "user_type": "registered",
+                    "user_id": 51789,
+                    "link": "https://stackoverflow.com/users/51789/chris-k",
+                    "reputation": 12399,
+                    "display_name": "Chris K",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 47,
+                "post_id": 869078,
+                "edited": false,
+                "creation_date": 1274118198,
+                "comment_id": 2894529
+            }
+        ]
+    }
+}

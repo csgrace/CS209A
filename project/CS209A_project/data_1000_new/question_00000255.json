@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5ad9a924396c37aad94b791eca298e0a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15569966,
+            "user_type": "registered",
+            "user_id": 11232692,
+            "link": "https://stackoverflow.com/users/11232692/juyebgastro",
+            "reputation": 51,
+            "display_name": "juyebgastro"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/74466822/how-to-perform-integration-tests-on-mysql-service-layer-and-omit-the-id-of-entit",
+        "last_activity_date": 1668650524,
+        "creation_date": 1668630533,
+        "answer_count": 1,
+        "title": "How to perform integration tests on MySQL service layer and omit the ID of entities?",
+        "body": "<p>I'm writing a Spring application using JPA to connect to a MySQL database. I'm using Testcontainers to perform integration tests on the service layer of my app, which is working very smoothly. In the test class I construct the entities to be stored in the database, and I use the builder pattern for this:<\/p>\n<pre><code>private static final OrderDTO VALID_ORDER = OrderDTO.builder()\n    .withId(1L) // primary key\n    .withOrderId(&quot;orderId&quot;) // fetched from external API\n    .withAddress(validAddress)\n    ...\n    .build();\n<\/code><\/pre>\n<p>I then have a test:<\/p>\n<pre><code>void shouldSaveNewOrder() {\n    OrderDTO order = orderService.saveNewOrder(VALID_ORDER);\n    assertThat(orderService.findByOrderId(&quot;orderId&quot;)).isEqualTo(order);\n}\n<\/code><\/pre>\n<p>My issue is - I have another test class which also constructs <code>OrderDTO<\/code> entities and stores them in the same database, meaning I have to hardcode specific IDs in the tests so they don't conflict between classes. This creates unnecessary confusion in the test classes, so ideally I'd like to omit the ID from the tests as it's not important - I only need to test the other fields. Of course, the ID is the primary key so it can't be null so I can't simply remove the <code>withId()<\/code> from the builder.<\/p>\n<p>My question is how can I achieve this? The other option was to wipe the database table and reset the auto-increment after the test class runs, but afaik that will involve invoking an EntityManager or JdbcTemplate, and I'm writing this application at the Repository level so that doesn't seem the best approach. I'd rather have clean tests anyway!<\/p>\n",
+        "question_id": 74466822,
+        "tags": [
+            "java",
+            "spring",
+            "hibernate",
+            "spring-data-jpa",
+            "testcontainers"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 160
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cf9e8d46103d66657d9c6817a5aa35d3?s=256&d=identicon&r=PG",
+            "account_id": 2537085,
+            "user_type": "registered",
+            "user_id": 2203890,
+            "link": "https://stackoverflow.com/users/2203890/edd%c3%ba-mel%c3%a9ndez",
+            "reputation": 6619,
+            "display_name": "Edd&#250; Mel&#233;ndez"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1668650524,
+        "creation_date": 1668650524,
+        "body": "<p>AssertJ provides really cool features to extract information. Look at the example below<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Test\nvoid test() {\n    var person = new Person(1l, &quot;Eddú&quot;, &quot;Meléndez&quot;);\n    assertThat(person)\n            .extracting(Person::name, Person::lastname)\n            .contains(&quot;Eddú&quot;, &quot;Meléndez&quot;);\n\n    var expected = new PersonName(&quot;Eddú&quot;, &quot;Meléndez&quot;);\n    assertThat(person)\n            .extracting(data -&gt; new PersonName(data.name(), data.lastname()), as(InstanceOfAssertFactories.type(PersonName.class)))\n            .isEqualTo(expected);\n}\n\nrecord Person(Long id, String name, String lastname){}\nrecord PersonName(String name, String lastname){}\n<\/code><\/pre>\n<p>The first assertions extract the name and lastname and match with the information provided. The second, useful if you use fixture data, allows to extract and map the data, in the example to <code>PersonName<\/code><\/p>\n",
+        "answer_id": 74469315,
+        "question_id": 74466822
+    }],
+    "answer_comments": {}
+}

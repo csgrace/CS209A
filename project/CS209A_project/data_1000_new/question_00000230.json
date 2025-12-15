@@ -1,0 +1,73 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/35620afb8978c8f731e6b916e5d24583?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6124324,
+            "user_type": "registered",
+            "user_id": 4776843,
+            "link": "https://stackoverflow.com/users/4776843/coder123",
+            "reputation": 461,
+            "display_name": "coder123",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/61596249/what-is-the-alternative-to-autowiring-while-running-a-class-through-testng",
+        "last_activity_date": 1588616474,
+        "creation_date": 1588607351,
+        "answer_count": 2,
+        "title": "What is the alternative to autowiring while running a class through testNG?",
+        "body": "<p>I am validating the method testValidateABC() in ABCValidatorTest.java<\/p>\n\n<p><strong>ABCValidatorTest.java<\/strong><\/p>\n\n<pre><code>public class ABCValidatorTest {\n\n @Test\n    public void testValidateABC() {\n        ABCValidator validator = new ABCValidator();\n        List&lt;String&gt; input = Arrays.asList(\"0\", \"1234\", \"abcd\");\n        List&lt;Boolean&gt; expectedOutput = Arrays.asList(false, true, false);\n        boolean output;\n\n        for (int i = 0; i &lt; input.size(); i++) {\n            if (StringUtils.isNotEmpty(input.get(i))) {\n                output = validator.validateABC(input.get(i));\n            } else {\n                output = false;\n            }\n            Assert.assertEquals((boolean) expectedOutput.get(i), output);\n\n        }\n    }\n\n}\n<\/code><\/pre>\n\n<p>Here I am creating an object of ABCValidator and below is its class:<\/p>\n\n<p><strong>ABCValidator.java<\/strong><\/p>\n\n<pre><code>public class ABCValidator {\n\n    @Autowired(required = false)\n    private ABCSearch abcRestClient;\n\n    public boolean validateABC(String abc_code) {\n        String response = abcRestClient.searchABCCodes(abc_code);\n        boolean hasValidabc = true;\n        if ((response.startsWith(\"null\", 1)) || (response.equals(\"[]\"))) {\n            hasValidabc = false;\n        }\n        return hasValidabc;\n    }\n}\n<\/code><\/pre>\n\n<p>Here I have autowired ABCSearch to get the method searchABCCodes(). <\/p>\n\n<p>I am getting a NullPointerException when i run this since abcRestClient is not intitalized. How can I fix this without changing anything in ABCValidator.java?<\/p>\n",
+        "question_id": 61596249,
+        "tags": [
+            "java",
+            "testng"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 47
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DLHqU.png?s=256",
+                "account_id": 1223835,
+                "user_type": "registered",
+                "user_id": 1189885,
+                "link": "https://stackoverflow.com/users/1189885/chrylis-cautiouslyoptimistic",
+                "reputation": 77469,
+                "display_name": "chrylis -cautiouslyoptimistic-",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1588608985,
+            "creation_date": 1588608985,
+            "body": "<p>The clean answer is to use constructor injection instead of field injection. (This is a good idea for a number of reasons, including that it prevents several categories of bugs.)<\/p>\n\n<p>Then you don't need any special Spring or reflection support, just a normal mock:<\/p>\n\n<pre><code>@Test\npublic void testValidateABC() {\n    ABCSearch mockRestClient = Mockito.mock(ABCSearch.class);\n    ABCValidator validator = new ABCValidator(mockRestClient);\n    List&lt;String&gt; input = Arrays.asList(\"0\", \"1234\", \"abcd\");\n    List&lt;Boolean&gt; expectedOutput = Arrays.asList(false, true, false);\n\n    for (int i = 0; i &lt; input.size(); i++) {\n        when(mockRestClient.searchABCCodes(input.get(i)).thenReturn(/* the correct boolean */);\n        Assert.assertEquals((boolean) expectedOutput.get(i), validator.validateABC(input.get(i)));\n    }\n}\n<\/code><\/pre>\n\n<p>Note that what you're doing here is called a <em>parameterized test<\/em>; I'm not especially familiar with TestNG but expect there is support for it. I am a fan of <a href=\"http://spockframework.org/\" rel=\"nofollow noreferrer\">Spock<\/a> (a test DSL that runs on top of JUnit) that makes this kind of test very clean.<\/p>\n",
+            "answer_id": 61596775,
+            "question_id": 61596249
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Z4M4Wbvm.jpg?s=256",
+                "account_id": 3280644,
+                "user_type": "registered",
+                "user_id": 3582831,
+                "link": "https://stackoverflow.com/users/3582831/0xh3xa",
+                "reputation": 4867,
+                "display_name": "0xh3xa"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1588616474,
+            "creation_date": 1588608022,
+            "body": "<p>If you want to write a unit test you can use Mocktio and parameterized test in Testng<\/p>\n\n<pre><code>@RunWith(MockitoRunner.class)\npublic class ABCValidatorTest {\n\n    @Mock\n    private ABCSearch search;\n\n    @DataProvider(name = \"dataSet\")\n    public static Object[][] createdataSet() {\n        return new Object[][] { { \"one\", true }, { \"three\", true }, { \"four\", true }, { \"five\", true }, };\n    }\n\n    @Test(dataProvider = \"dataSet\")\n    public void testValidateABC(String input, Boolean expectedResult) {\n        ABCValidator validator = new ABCValidator();\n        Whitebox.setInternalState(validator, \"abcRestClient\", search);\n        output = validator.validateABC(input);\n        Assert.assertEquals(expectedResult, output);\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 61596451,
+            "question_id": 61596249,
+            "last_edit_date": 1588616474
+        }
+    ],
+    "answer_comments": {}
+}

@@ -1,0 +1,259 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/640f65d2b6a31ac0a4dfa0f366b06248?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11522424,
+            "user_type": "registered",
+            "user_id": 8443811,
+            "link": "https://stackoverflow.com/users/8443811/timegate",
+            "reputation": 73,
+            "display_name": "Timegate"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45608300/java-multiple-hashmaps-pointing-to-the-same-key",
+        "last_activity_date": 1502360613,
+        "creation_date": 1502353617,
+        "answer_count": 4,
+        "title": "Java - multiple hashmaps pointing to the same key",
+        "body": "<p>I have multiple files which contains key=value string pairs. The keys are the same between the files, but the values differs. Each file can have 1000 plus of such pairs.<\/p>\n\n<p>I want to store each file in a separate hashmap, ie <code>map&lt;KeyString, ValueString&gt;<\/code>, so if there are five files, then there will be five hashmaps.<\/p>\n\n<p>To avoid duplicating the keys across each hashmap, is it possible to have each map reference the same key? Note that once the keys are added to the map, it will not be deleted.<\/p>\n\n<p>I considered making the first file the 'base' as in the flyweight pattern, this base would be the intrinsic set of keys/values. The other remaining files would be the extrinsic set of values, but I don't know how to relate the values back to the base (intrinsic) keys without duplicating the keys?<\/p>\n\n<p>I am open to a simpler/better approach.<\/p>\n",
+        "question_id": 45608300,
+        "tags": [
+            "java",
+            "hashmap"
+        ],
+        "score": 7,
+        "accepted_answer_id": 45608608,
+        "is_answered": true,
+        "view_count": 1011,
+        "last_edit_date": 1502354149
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/640f65d2b6a31ac0a4dfa0f366b06248?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11522424,
+            "user_type": "registered",
+            "user_id": 8443811,
+            "link": "https://stackoverflow.com/users/8443811/timegate",
+            "reputation": 73,
+            "display_name": "Timegate"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 45608300,
+        "edited": false,
+        "creation_date": 1502392355,
+        "comment_id": 78203099
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/980705688614873/picture?type=large",
+                "account_id": 6014409,
+                "user_type": "registered",
+                "user_id": 4723795,
+                "link": "https://stackoverflow.com/users/4723795/xenteros",
+                "reputation": 15883,
+                "display_name": "xenteros",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1502354042,
+            "creation_date": 1502354042,
+            "body": "<p>I can think about a simpler approach. Instead of having <code>Map&lt;String, String&gt;<\/code> think of <code>Map&lt;String, List&lt;String&gt;<\/code> or directly <code>MultiMap&lt;String, String&gt;<\/code> from <code>guava<\/code>.<\/p>\n\n<p>If each key is in each file and all have values, you could store values from first file at 0th index, from the second at 1st index etc.<\/p>\n\n<p>If it wouldn't work, I recommend a <code>Collection&lt;Map&lt;String, String&gt;<\/code>, so you're able to iterate through your <code>Map<\/code>s. Then when you want to add value to one of the <code>Map<\/code>s, go through all <code>keySet<\/code>s and if one of them contains that key, just put with object returned from this <code>keySet<\/code>.<\/p>\n\n<p>Other solution would be to have a <code>HashSet<\/code> of keys that have already been put. This would be more efficient. <\/p>\n",
+            "answer_id": 45608448,
+            "question_id": 45608300
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jXcg4.png?s=256",
+                "account_id": 1263831,
+                "user_type": "registered",
+                "user_id": 1221571,
+                "link": "https://stackoverflow.com/users/1221571/eran",
+                "reputation": 395099,
+                "display_name": "Eran",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1502354022,
+            "creation_date": 1502354022,
+            "body": "<p>First of all, I don't see the problem with storing multiple instances of your String keys. 5 <code>HashMap<\/code>s * 1000 keys is a very small number, and you shouldn't have memory issues.<\/p>\n\n<p>That said, if you still want to avoid duplicating the <code>String<\/code>s, you can create the first <code>HashMap<\/code>, and then you the exact same keys for the other <code>HashMap<\/code>s.<\/p>\n\n<p>For example, suppose <code>map1<\/code> is the first <code>HashMap<\/code> and it is already populated with the contents of the first file.<\/p>\n\n<p>You can write something like this to populate the 2nd <code>HashMap<\/code>:<\/p>\n\n<pre><code>for (String key : map1.keySet()) {\n    map2.put (key, someValue);\n} \n<\/code><\/pre>\n\n<p>Of course you will have to find for each <code>key<\/code> of the first map the corresponding value of the second map. If the keys are not stored in the same order in the input files, this may require some preliminary sorting step.<\/p>\n",
+            "answer_id": 45608444,
+            "question_id": 45608300
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c3fdc6415ad45e62a9972b42981b1ea8?s=256&d=identicon&r=PG",
+                "account_id": 3703601,
+                "user_type": "registered",
+                "user_id": 3082668,
+                "link": "https://stackoverflow.com/users/3082668/kewne",
+                "reputation": 2298,
+                "display_name": "kewne"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1502354490,
+            "creation_date": 1502354490,
+            "body": "<p>After reading in the keys, you can use <code>String.intern()<\/code>.\nWhen called, what it does is either:<\/p>\n\n<ul>\n<li>add the String to the internal pool if it didn't exist already;<\/li>\n<li>return the equivalent String from the pool if it already existed.<\/li>\n<\/ul>\n\n<p><a href=\"https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#intern--\" rel=\"nofollow noreferrer\">String#intern Javadoc<\/a><\/p>\n",
+            "answer_id": 45608608,
+            "question_id": 45608300
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                "account_id": 775068,
+                "user_type": "registered",
+                "user_id": 823393,
+                "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                "reputation": 66057,
+                "display_name": "OldCurmudgeon",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1502360613,
+            "creation_date": 1502357601,
+            "body": "<p>Perhaps you could hold a <code>static Map&lt;&gt;<\/code> to map your keys to unique <code>Integers<\/code> and use those <code>Integer<\/code>s for the keys to your map?<\/p>\n\n<p>Something like:<\/p>\n\n<pre><code>class KeySharedMap&lt;K,V&gt; {\n    // The next key to use. Using Atomics for the auto-increment.\n    static final AtomicInteger next = new AtomicInteger(0);\n    // Static mapping of keys to unique Integers.\n    static final ConcurrentMap&lt;Object,Integer&gt; keys = new ConcurrentHashMap&lt;&gt;();\n    // The map indexed by Integer from the `keys`.\n    Map&lt;Integer, V&gt; map = new HashMap&lt;&gt;();\n\n\n    public V get(Object key) {\n        return map.get(keys.get(key));\n    }\n\n    public V put(Object key, V value) {\n        // Associate a unique integer for each unique key.\n        keys.computeIfAbsent(key,x -&gt; next.getAndIncrement());\n        // Put it in my map.\n        return map.put(keys.get(key),value);\n    }\n}\n<\/code><\/pre>\n\n<p>Yes, I realise that <code>K<\/code> is not used here but I suspect it would be necessary if you wish to implement <code>Map&lt;K,V&gt;<\/code>.<\/p>\n",
+            "answer_id": 45609798,
+            "question_id": 45608300,
+            "last_edit_date": 1502360613
+        }
+    ],
+    "answer_comments": {
+        "45608608": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c3fdc6415ad45e62a9972b42981b1ea8?s=256&d=identicon&r=PG",
+                    "account_id": 3703601,
+                    "user_type": "registered",
+                    "user_id": 3082668,
+                    "link": "https://stackoverflow.com/users/3082668/kewne",
+                    "reputation": 2298,
+                    "display_name": "kewne"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45608608,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/W6OMC.png?s=256",
+                    "account_id": 1056871,
+                    "user_type": "registered",
+                    "user_id": 1059372,
+                    "link": "https://stackoverflow.com/users/1059372/eugene",
+                    "reputation": 121845,
+                    "display_name": "Eugene",
+                    "accept_rate": 97
+                },
+                "edited": false,
+                "creation_date": 1502357808,
+                "comment_id": 78178283
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/W6OMC.png?s=256",
+                    "account_id": 1056871,
+                    "user_type": "registered",
+                    "user_id": 1059372,
+                    "link": "https://stackoverflow.com/users/1059372/eugene",
+                    "reputation": 121845,
+                    "display_name": "Eugene",
+                    "accept_rate": 97
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45608608,
+                "edited": false,
+                "creation_date": 1502356252,
+                "comment_id": 78177139
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c3fdc6415ad45e62a9972b42981b1ea8?s=256&d=identicon&r=PG",
+                    "account_id": 3703601,
+                    "user_type": "registered",
+                    "user_id": 3082668,
+                    "link": "https://stackoverflow.com/users/3082668/kewne",
+                    "reputation": 2298,
+                    "display_name": "kewne"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 45608608,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/W6OMC.png?s=256",
+                    "account_id": 1056871,
+                    "user_type": "registered",
+                    "user_id": 1059372,
+                    "link": "https://stackoverflow.com/users/1059372/eugene",
+                    "reputation": 121845,
+                    "display_name": "Eugene",
+                    "accept_rate": 97
+                },
+                "edited": false,
+                "creation_date": 1502356088,
+                "comment_id": 78177016
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/W6OMC.png?s=256",
+                    "account_id": 1056871,
+                    "user_type": "registered",
+                    "user_id": 1059372,
+                    "link": "https://stackoverflow.com/users/1059372/eugene",
+                    "reputation": 121845,
+                    "display_name": "Eugene",
+                    "accept_rate": 97
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45608608,
+                "edited": false,
+                "creation_date": 1502355646,
+                "comment_id": 78176671
+            },
+            {
+                "owner": {
+                    "profile_image": "https://graph.facebook.com/980705688614873/picture?type=large",
+                    "account_id": 6014409,
+                    "user_type": "registered",
+                    "user_id": 4723795,
+                    "link": "https://stackoverflow.com/users/4723795/xenteros",
+                    "reputation": 15883,
+                    "display_name": "xenteros",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45608608,
+                "edited": false,
+                "creation_date": 1502354562,
+                "comment_id": 78175835
+            }
+        ],
+        "45608444": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/W6OMC.png?s=256",
+                "account_id": 1056871,
+                "user_type": "registered",
+                "user_id": 1059372,
+                "link": "https://stackoverflow.com/users/1059372/eugene",
+                "reputation": 121845,
+                "display_name": "Eugene",
+                "accept_rate": 97
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45608444,
+            "edited": false,
+            "creation_date": 1502355779,
+            "comment_id": 78176787
+        }]
+    }
+}

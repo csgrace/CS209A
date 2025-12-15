@@ -1,0 +1,256 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7131098,
+            "user_type": "registered",
+            "user_id": 11622300,
+            "link": "https://stackoverflow.com/users/11622300/dean",
+            "reputation": 119,
+            "display_name": "Dean"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60025804/how-to-get-the-random-key-paired-with-a-specific-value-in-firebase-database-and",
+        "last_activity_date": 1580661358,
+        "creation_date": 1580644337,
+        "answer_count": 2,
+        "title": "How to get the random key paired with a specific value in firebase database and delete the value?",
+        "body": "<p>I have a simple database structure like so:<\/p>\n\n<p><a href=\"https://i.sstatic.net/S1rcS.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/S1rcS.png\" alt=\"database jason\"><\/a><\/p>\n\n<p>I need to remove the value <code>earphone<\/code> by using its key which is <code>-M-4XBDqv-ve396r5EHm<\/code>.\nI have a button for deleting that value,\nand I want to use this line of code to remove it:\n<code>mReferenceForListA.child(\"List A\").child(\"Items\").child(key).removeValue()<\/code>.<\/p>\n\n<p>But how do I get the key for <code>earphone<\/code>?<\/p>\n\n<p>I know I can just write \n<code>mReferenceForListA.child(\"List A\").child(\"Items\").child(-M-4XBDqv-ve396r5EHm).removeValue()<\/code>\nto delete <code>earphone<\/code> straight away,\nbut what if I need to delete other items in the list?<\/p>\n\n<p>I'll need to pass a specific key into a variable called \"key\" to delete a specific value.\nSo, again, how could I get a specific key for the value that I want to delete in my current JSON structure?<\/p>\n\n<hr>\n\n<p>This is what I tried:<\/p>\n\n<p>Reading through related posts for days in stackoverflow and I came down to writing the following codes, but I don't think I got the hang of this thing yet and seriously need help. The following codes always delete the whole \"List A\" node, but in this case I just need to delete one specified value and keep the others intact in the node.<\/p>\n\n<pre><code>public static DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference();\npublic static DatabaseReference mReferenceForListA = mRootReference.child(\"List A\");\n\ndeleteButton= findViewById(R.id.delete_button)  \n\ndeleteButton.setOnClickListener(new View.OnClickListener() {\n    @Override\n    public void onClick(View v) {\n\n        mReferenceForListA.child(\"Items\").addValueEventListener(new ValueEventListener() {\n            @Override\n            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {\n\n                for (DataSnapshot postsnapshot :dataSnapshot.getChildren()) {\n                    String key = postsnapshot.getKey();\n                    mReferenceForListA.child(\"Items\").child(key).removeValue();\n                }\n\n            }\n\n            @Override\n            public void onCancelled(@NonNull DatabaseError databaseError) {\n\n            }\n        });\n\n    }\n});\n<\/code><\/pre>\n",
+        "question_id": 60025804,
+        "tags": [
+            "java",
+            "android",
+            "firebase",
+            "firebase-realtime-database",
+            "nodes"
+        ],
+        "score": 0,
+        "accepted_answer_id": 60027980,
+        "is_answered": true,
+        "view_count": 216,
+        "last_edit_date": 1580659192
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/12d378e6a9788ab9c94bbafe242b82b4?s=256&d=identicon&r=PG",
+                "account_id": 72426,
+                "user_type": "registered",
+                "user_id": 209103,
+                "link": "https://stackoverflow.com/users/209103/frank-van-puffelen",
+                "reputation": 603403,
+                "display_name": "Frank van Puffelen",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1580661358,
+            "creation_date": 1580659601,
+            "body": "<p>To delete a node you need to know its complete path. If you only know a value of (a property of) the node, you can run a query to find all nodes that match that value.<\/p>\n\n<p>Something like:<\/p>\n\n<pre><code>public static DatabaseReference mRootReference = FirebaseDatabase.getInstance().getReference();\npublic static DatabaseReference mReferenceForListA = mRootReference.child(\"List A\");\nQuery query = mReferenceForListA.child(\"Items\").orderByValue().equalTo(\"earphone\");\n\nquery.addListenerForSingleValueEvent(new ValueEventListener() {\n    @Override\n    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {\n        for (DataSnapshot snapshot: dataSnapshot.getChildren()) {\n            snapshot.getRef().removeValue();\n        }\n    }\n\n    @Override\n    public void onCancelled(@NonNull DatabaseError databaseError) {\n        throw databaseError.toException();\n    }\n});\n<\/code><\/pre>\n\n<p>The main changes: <\/p>\n\n<ul>\n<li>The above uses a query on <code>orderByValue()<\/code> on the <code>Items<\/code> child. This means Firebase searches all child nodes directly under <code>List A/Items<\/code> and returns the ones whose value matches <code>earphones<\/code>.<\/li>\n<li>It also uses <code>addListenerForSingleValueEvent<\/code>, so that the delete only runs once, instead of continuously.<\/li>\n<li>It uses <code>snapshot.getRef().removeValue()<\/code> for a much shorter way to remove the node.<\/li>\n<li>It implements <code>onCancelled<\/code>, since you should never ignore errors.<\/li>\n<\/ul>\n",
+            "answer_id": 60027980,
+            "question_id": 60025804,
+            "last_edit_date": 1580661358
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/569319814/picture?type=large",
+                "account_id": 3487412,
+                "user_type": "registered",
+                "user_id": 2917947,
+                "link": "https://stackoverflow.com/users/2917947/garren-fitzenreiter",
+                "reputation": 847,
+                "display_name": "Garren Fitzenreiter",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1580645390,
+            "creation_date": 1580645390,
+            "body": "<p>You should iterate through the <code>DataSnapshot<\/code> as you have done, but you also need to supply it with a condition to delete the entry with a specific value.<\/p>\n\n<pre><code>for (DataSnapshot postsnapshot : dataSnapshot.getChildren()) {\n\n     if(postsnapshot.child(postsnapshot.getKey()).getValue(String.class)).equals(\"earphone\"){\n\n         mReferenceForListA.child(\"List A\").child(\"Items\").child(postsnapshot.getkey()).removeValue();\n\n     }\n}\n<\/code><\/pre>\n\n<p>Let me know if this works as I am trying to write this from memory.<\/p>\n",
+            "answer_id": 60025945,
+            "question_id": 60025804
+        }
+    ],
+    "answer_comments": {
+        "60027980": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60027980,
+                "edited": false,
+                "creation_date": 1580753536,
+                "comment_id": 106193194
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/12d378e6a9788ab9c94bbafe242b82b4?s=256&d=identicon&r=PG",
+                    "account_id": 72426,
+                    "user_type": "registered",
+                    "user_id": 209103,
+                    "link": "https://stackoverflow.com/users/209103/frank-van-puffelen",
+                    "reputation": 603403,
+                    "display_name": "Frank van Puffelen",
+                    "accept_rate": 73
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60027980,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "edited": false,
+                "creation_date": 1580673411,
+                "comment_id": 106165117
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60027980,
+                "edited": false,
+                "creation_date": 1580666535,
+                "comment_id": 106163343
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60027980,
+                "edited": false,
+                "creation_date": 1580664142,
+                "comment_id": 106162707
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/12d378e6a9788ab9c94bbafe242b82b4?s=256&d=identicon&r=PG",
+                    "account_id": 72426,
+                    "user_type": "registered",
+                    "user_id": 209103,
+                    "link": "https://stackoverflow.com/users/209103/frank-van-puffelen",
+                    "reputation": 603403,
+                    "display_name": "Frank van Puffelen",
+                    "accept_rate": 73
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 60027980,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "edited": false,
+                "creation_date": 1580661406,
+                "comment_id": 106162027
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60027980,
+                "edited": false,
+                "creation_date": 1580661356,
+                "comment_id": 106162012
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60027980,
+                "edited": false,
+                "creation_date": 1580660860,
+                "comment_id": 106161898
+            }
+        ],
+        "60025945": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60025945,
+                "edited": false,
+                "creation_date": 1580664384,
+                "comment_id": 106162771
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/81eda4e26e4226bc719f4de5c00f4ccf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7131098,
+                    "user_type": "registered",
+                    "user_id": 11622300,
+                    "link": "https://stackoverflow.com/users/11622300/dean",
+                    "reputation": 119,
+                    "display_name": "Dean"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60025945,
+                "edited": false,
+                "creation_date": 1580659693,
+                "comment_id": 106161585
+            }
+        ]
+    }
+}

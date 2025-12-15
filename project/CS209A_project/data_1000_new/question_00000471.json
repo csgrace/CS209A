@@ -1,0 +1,77 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/7mTBc.jpg?s=256",
+            "account_id": 4392464,
+            "user_type": "registered",
+            "user_id": 3580433,
+            "link": "https://stackoverflow.com/users/3580433/ebrahim-ghasemi",
+            "reputation": 6214,
+            "display_name": "Ebrahim Ghasemi",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37907039/how-does-visa2-key-diversification-works-in-gemalto-cards-and-in-gpp-tool",
+        "last_activity_date": 1619431008,
+        "creation_date": 1466337934,
+        "answer_count": 2,
+        "title": "How does &quot;Visa2&quot; key diversification works in Gemalto cards and in GPP tool?",
+        "body": "<p>I have a bunch of Gemalto java cards and as you see below, I'm okay with mutual authentication process using <a href=\"https://github.com/martinpaljak/GlobalPlatformPro\" rel=\"nofollow noreferrer\">GlobalPlatformPro<\/a>:<\/p>\n\n<pre><code>C:\\globalPlatformPro&gt; gp -visa2 -key 47454d5850524553534f53414d504c45 -list -debug -verbose -info\n\nReader: ACS ACR1281 1S Dual Reader ICC 0\nATR: 3B7D96000080318065B0831111E583009000\n\nA&gt;&gt; 00A40400 00\nA&lt;&lt; 6F198408A000000018434D00A50D9F6E061291921101009F6501FF 9000\n\n***** Card info:\nA&gt;&gt; 80CA9F7F 00\nA&lt;&lt; 9F7F2A4090612812919211010041849D08192420C3033241840333418403344184000003250000000000000000 9000\n\n***** KEY INFO\nA&gt;&gt; 80CA00E0 00\nA&lt;&lt; E012C00401FF8010C00402FF8010C00403FF8010 9000\nVER:255 ID:1 TYPE:DES3 LEN:16\nVER:255 ID:2 TYPE:DES3 LEN:16\nVER:255 ID:3 TYPE:DES3 LEN:16\nKey version suggests factory keys\n\nA&gt;&gt; 80500000 08 2CA286A611F6CAFD 00\nA&lt;&lt; 4D0041849D08192420C3FF0131D644E9913234DDE1F0A6A462C71805 9000\nA&gt;&gt; 84820100 10 CC2D0CC35F6BD64F816A774D3ADB18F2\nA&lt;&lt; 9000\n\n//Useless lines for censored!\n\nC:\\globalPlatformPro&gt;\n<\/code><\/pre>\n\n<p>As VISA documents are not publicly available, I took a look at GlobalPlatformPro source code to find out how the key diversification happens in for <code>visa2<\/code>, and I found these methods there:<\/p>\n\n<pre><code>public static GPKeySet diversify(GPKeySet keys, byte[] diversification_data, Diversification mode, int scp) throws GPException {\n    try {\n        GPKeySet result = new GPKeySet();\n        Cipher cipher = Cipher.getInstance(\"DESede/ECB/NoPadding\");\n        for (KeyType v : KeyType.values()) {\n            if (v == KeyType.RMAC)\n                continue;\n            byte [] kv = null;\n            // shift around and fill initialize update data as required.\n            if (mode == Diversification.VISA2) {\n                kv = fillVisa(diversification_data, v);\n            } else if (mode == Diversification.EMV) {\n                kv = fillEmv(diversification_data, v);\n            }\n\n            // Encrypt with current master key\n            cipher.init(Cipher.ENCRYPT_MODE, keys.getKey(v).getKey(Type.DES3));\n\n            byte [] keybytes = cipher.doFinal(kv);\n            // Replace the key, possibly changing type. G&amp;D SCE 6.0 uses EMV 3DES and resulting keys\n            // must be interpreted as AES-128\n            GPKey nk = new GPKey(keybytes, scp == 3 ? Type.AES : Type.DES3);\n            result.setKey(v, nk);\n        }\n        return result;\n    } catch (BadPaddingException |InvalidKeyException | IllegalBlockSizeException e) {\n        throw new GPException(\"Diversification failed.\", e);\n    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {\n        throw new RuntimeException(\"Diversification failed.\", e);\n    }\n}\n\npublic static byte[] fillVisa(byte[] init_update_response, KeyType key) {\n    byte[] data = new byte[16];\n    System.arraycopy(init_update_response, 0, data, 0, 2);\n    System.arraycopy(init_update_response, 4, data, 2, 4);\n    data[6] = (byte) 0xF0;\n    data[7] = key.getValue();\n    System.arraycopy(init_update_response, 0, data, 8, 2);\n    System.arraycopy(init_update_response, 4, data, 10, 4);\n    data[14] = (byte) 0x0F;\n    data[15] = key.getValue();\n    return data;\n}\n<\/code><\/pre>\n\n<p>So I tried to repeat the <em>host cryptogram<\/em> generation for above communication. I have:<\/p>\n\n<p>Master Key = <code>47454d5850524553534f53414d504c45<\/code><\/p>\n\n<p>Based on <a href=\"http://globalplatform.org/specificationform.asp?fid=7843\" rel=\"nofollow noreferrer\">GlobalPlatform v 2.3 Card Specification<\/a>:<\/p>\n\n<p>Host_Challenge = <code>2CA286A611F6CAFD<\/code><\/p>\n\n<p><em>INITIAL UPDATE<\/em> response: <code>4D0041849D08192420C3 FF01 31D644E9913234DD E1F0A6A462C71805<\/code><\/p>\n\n<ul>\n<li>Key Diversification Data = <code>4D0041849D08192420C3<\/code><\/li>\n<li>Key Information = <code>FF01<\/code> : So <strong>SCP01<\/strong> is used.<\/li>\n<li>Card Challenge = <code>31D644E9913234DD<\/code><\/li>\n<li>Card Cryptogram = <code>E1F0A6A462C71805<\/code><\/li>\n<\/ul>\n\n<p>So, based on the GPP source code above:<\/p>\n\n<ul>\n<li>Diversification_Data = <code>4D00 9D081924 F001 4D00 9D081924 0F01<\/code><\/li>\n<\/ul>\n\n<p>And then the Static ENC Key is:<\/p>\n\n<pre><code>Static_ENC = Encrypt(MasterKey, Diversification_Data )\n<\/code><\/pre>\n\n<p>So, using <a href=\"http://tripledes.online-domain-tools.com/\" rel=\"nofollow noreferrer\">this online tool<\/a>, I have:<\/p>\n\n<p><a href=\"https://i.sstatic.net/Cf0Zd.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/Cf0Zd.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>It means:<\/p>\n\n<p><strong>Static_ENC_KEY = <code>84f2a84ecdade8cacc9e7e07faebe4e6<\/code><\/strong><\/p>\n\n<p>To calculate ENC Session Key, I used GlobalPlatform Specification again:<\/p>\n\n<p><a href=\"https://i.sstatic.net/jNqPj.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/jNqPj.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>So I have: <\/p>\n\n<ul>\n<li>Derivation_Data = <code>913234DD 2CA286A6 31D644E9 11F6CAFD<\/code><\/li>\n<\/ul>\n\n<p><a href=\"https://i.sstatic.net/ppGYd.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/ppGYd.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>And so the <code>ENC_Session_Key<\/code> is:<\/p>\n\n<p><strong>ENC_Session_Key = <code>b1ed5ea3f69978274d2ffe0de467ec1c<\/code><\/strong><\/p>\n\n<p>Finally, The generation and verification of the host cryptogram is performed by concatenating the 8-byte card challenge and 8-byte host challenge resulting in a 16-byte block and concatenating this 16-byte array with <code>80 00 00 00 00 00 00 00<\/code>. Then signing this with the ENC session key in CBC mode with a zero ICV:<\/p>\n\n<p>Data2Encrypt = <code>31D644E9913234DD 2CA286A611F6CAFD 8000000000000000<\/code><\/p>\n\n<p>And I have:<\/p>\n\n<p><a href=\"https://i.sstatic.net/ZoDDr.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/ZoDDr.jpg\" alt=\"enter image description here\"><\/a><\/p>\n",
+        "question_id": 37907039,
+        "tags": [
+            "java",
+            "cryptography",
+            "smartcard",
+            "emv",
+            "visa"
+        ],
+        "score": 1,
+        "accepted_answer_id": 37907040,
+        "is_answered": true,
+        "view_count": 2198
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7mTBc.jpg?s=256",
+                "account_id": 4392464,
+                "user_type": "registered",
+                "user_id": 3580433,
+                "link": "https://stackoverflow.com/users/3580433/ebrahim-ghasemi",
+                "reputation": 6214,
+                "display_name": "Ebrahim Ghasemi",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1466337934,
+            "creation_date": 1466337934,
+            "body": "<p>Well, I tried above steps twice and each time, at the end I was faced with a wrong host_cryptogram value! But when I repeat the steps and wrote those line by line in my question, I finally noticed that the final result that I have is equal with the GPP result at the first of my question! So instead of deleting my question, I preferred to keep it here for future viewers. <\/p>\n\n<p>So to conclusion:<\/p>\n\n<p>Having key diversification schemes in a smart card, adds one step to those steps that is mentioned in GlobalPlatform Card Specification for calculating Card Cryptogram and MAC values. And that step is calculating Static Keys. <\/p>\n\n<p>Diversification_Data for Static Keys calculation are (<a href=\"https://www.informatik.uni-augsburg.de/lehrstuehle/swt/se/teaching/fruehere_semester/ws0506/javacard/Dokumentation/UserGuide.pdf\" rel=\"nofollow noreferrer\">source<\/a>):<\/p>\n\n<p><a href=\"https://i.sstatic.net/NmcYK.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/NmcYK.jpg\" alt=\"enter image description here\"><\/a> <\/p>\n\n<p>First two bytes of INITAL UPDATE response data is the same <code>xxh xxh<\/code> and bytes[4:8] of it are <code>IC Serial Number<\/code>.<\/p>\n\n<p>Encrypting Diversification data using Triple DES Algorithm in ECB mode with Master Key, returns Static Keys.<\/p>\n",
+            "answer_id": 37907040,
+            "question_id": 37907039
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GjhNBXVu2fa8_UunC1a00M86W0OYhiwREIgpVE9=k-s256",
+                "account_id": 21405090,
+                "user_type": "registered",
+                "user_id": 15766463,
+                "link": "https://stackoverflow.com/users/15766463/navid-shirmohammad",
+                "reputation": 1,
+                "display_name": "Navid Shirmohammad"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1619431008,
+            "creation_date": 1619425779,
+            "body": "<p>For check the card cryptogram you have to concatenating the 8-byte of host challenge and the 8-byte of card challenge and &quot;8000000000000000&quot;.\nafter make the string, Then signing this with the ENC session key in CBC mode with a zero ICV.<\/p>\n<p><img src=\"https://i.sstatic.net/YBgdL.jpg\" alt=\"enter image description here\" /><\/p>\n",
+            "answer_id": 67263259,
+            "question_id": 37907039,
+            "last_edit_date": 1619431008
+        }
+    ],
+    "answer_comments": {}
+}

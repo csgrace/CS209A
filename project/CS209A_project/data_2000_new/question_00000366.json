@@ -1,0 +1,143 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8d069a55fa769812730461b355a92b04?s=256&d=identicon&r=PG",
+            "account_id": 26295,
+            "user_type": "registered",
+            "user_id": 68283,
+            "link": "https://stackoverflow.com/users/68283/rich",
+            "reputation": 15805,
+            "display_name": "Rich",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47887829/unmarshalling-to-static-types-using-xstream",
+        "last_activity_date": 1513691400,
+        "creation_date": 1513689138,
+        "answer_count": 1,
+        "title": "Unmarshalling to static types using XStream",
+        "body": "<p>I have an XML file of the following format:<\/p>\n\n<pre><code>&lt;TRequest&gt;\n    &lt;Item&gt;\n        &lt;ItemIdentification&gt;\n            &lt;ItemStandardID Qualifier=\"XX\"&gt;egosdhgsuh&lt;/ItemStandardID&gt;\n        &lt;/ItemIdentification&gt;\n    &lt;/Item&gt;\n    &lt;Item&gt;\n    ....\n    &lt;/Item&gt;\n&lt;/TRequest&gt;\n<\/code><\/pre>\n\n<p>From the associated WSLD's XSD I have generated Java code using JaxB. This gives me the following hierarchy:<\/p>\n\n<pre><code>public class TRequest extends Request {\n\n    protected List&lt;TRequest.Item&gt; item;\n\n    public static class Item {\n\n        protected TRequest.Item.ItemIdentification itemIdentification;\n\n        public static class ItemIdentification {\n\n            protected TRequest.Item.ItemIdentification.ItemStandardID itemStandardID;\n\n            public static class ItemStandardID {\n\n            }\n\n        }\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>I am trying to read the <code>Item<\/code>s inside a <code>TRequest<\/code> using <code>XStreamMarshaller<\/code>:<\/p>\n\n<pre><code>    final XStreamMarshaller unmarshaller = new XStreamMarshaller();\n    final ImmutableMap&lt;String, ?&gt; of = ImmutableMap.of(\n            \"Item\", TRequest.Item.class,\n            \"ItemIdentification\", TRequest.Item.ItemIdentification.class\n    );\n    unmarshaller.setAliasesByType(of);\n<\/code><\/pre>\n\n<p>But when I try to unmarshall it I get the following error:<\/p>\n\n<pre><code>org.springframework.oxm.UnmarshallingFailureException: XStream unmarshalling exception; nested exception is com.thoughtworks.xstream.converters.reflection.AbstractReflectionConverter$UnknownFieldException: No such field com.mycompany.TRequest$Item.ItemIdentification\n---- Debugging information ----\nfield               : ItemIdentification\nclass               : com.mycompany.TRequest$Item\nrequired-type       : com.mycompany.TRequest$Item\nconverter-type      : com.thoughtworks.xstream.converters.reflection.ReflectionConverter\npath                : /Item/ItemIdentification\nline number         : 2\nversion             : 4.3.13.RELEASE\n-------------------------------\n<\/code><\/pre>\n\n<p>In the above call to setAliasesByType, I have tried things such as <code>Item.ItemIdentification<\/code>, <code>Item$ItemIdentification<\/code> etc as the key mapping to <code>TRequest.Item.ItemIdentification.class<\/code>.<\/p>\n\n<p>What is the correct way to achieve this?<\/p>\n",
+        "question_id": 47887829,
+        "tags": [
+            "java",
+            "xstream",
+            "jaxb2"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 314,
+        "last_edit_date": 1513691400
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-rfK5tDtADWs/AAAAAAAAAAI/AAAAAAAANaU/rYJJgnFZN1s/s256-rj/photo.jpg",
+            "account_id": 12459950,
+            "user_type": "registered",
+            "user_id": 9071912,
+            "link": "https://stackoverflow.com/users/9071912/adampillingtech",
+            "reputation": 476,
+            "display_name": "AdamPillingTech"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1513689740,
+        "creation_date": 1513689740,
+        "body": "<p>I believe that in addition to having the correct classes defined you also need to define the relationships between those classes as variables.<\/p>\n\n<p>ie.<\/p>\n\n<pre><code>public class TRequest extends Request {\n    Item Item;\n}\n\npublic class Item {\n    ItemIdentification ItemIdentification;\n}\n\n\npublic class ItemIdentification {\n    ItemStandardID ItemStandardID;\n}\n\npublic class ItemStandardID {\n    String Qualifier;\n}\n<\/code><\/pre>\n\n<p>etc.<\/p>\n",
+        "answer_id": 47888000,
+        "question_id": 47887829
+    }],
+    "answer_comments": {"47888000": [
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-rfK5tDtADWs/AAAAAAAAAAI/AAAAAAAANaU/rYJJgnFZN1s/s256-rj/photo.jpg",
+                "account_id": 12459950,
+                "user_type": "registered",
+                "user_id": 9071912,
+                "link": "https://stackoverflow.com/users/9071912/adampillingtech",
+                "reputation": 476,
+                "display_name": "AdamPillingTech"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888000,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8d069a55fa769812730461b355a92b04?s=256&d=identicon&r=PG",
+                "account_id": 26295,
+                "user_type": "registered",
+                "user_id": 68283,
+                "link": "https://stackoverflow.com/users/68283/rich",
+                "reputation": 15805,
+                "display_name": "Rich",
+                "accept_rate": 82
+            },
+            "edited": false,
+            "creation_date": 1513691587,
+            "comment_id": 82742914
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8d069a55fa769812730461b355a92b04?s=256&d=identicon&r=PG",
+                "account_id": 26295,
+                "user_type": "registered",
+                "user_id": 68283,
+                "link": "https://stackoverflow.com/users/68283/rich",
+                "reputation": 15805,
+                "display_name": "Rich",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888000,
+            "edited": false,
+            "creation_date": 1513691425,
+            "comment_id": 82742821
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-rfK5tDtADWs/AAAAAAAAAAI/AAAAAAAANaU/rYJJgnFZN1s/s256-rj/photo.jpg",
+                "account_id": 12459950,
+                "user_type": "registered",
+                "user_id": 9071912,
+                "link": "https://stackoverflow.com/users/9071912/adampillingtech",
+                "reputation": 476,
+                "display_name": "AdamPillingTech"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888000,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8d069a55fa769812730461b355a92b04?s=256&d=identicon&r=PG",
+                "account_id": 26295,
+                "user_type": "registered",
+                "user_id": 68283,
+                "link": "https://stackoverflow.com/users/68283/rich",
+                "reputation": 15805,
+                "display_name": "Rich",
+                "accept_rate": 82
+            },
+            "edited": false,
+            "creation_date": 1513690718,
+            "comment_id": 82742365
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8d069a55fa769812730461b355a92b04?s=256&d=identicon&r=PG",
+                "account_id": 26295,
+                "user_type": "registered",
+                "user_id": 68283,
+                "link": "https://stackoverflow.com/users/68283/rich",
+                "reputation": 15805,
+                "display_name": "Rich",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888000,
+            "edited": false,
+            "creation_date": 1513690497,
+            "comment_id": 82742220
+        }
+    ]}
+}

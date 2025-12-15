@@ -1,0 +1,86 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/cNQmW.jpg?s=256",
+            "account_id": 17752902,
+            "user_type": "registered",
+            "user_id": 12890567,
+            "link": "https://stackoverflow.com/users/12890567/stefanello-cs",
+            "reputation": 3,
+            "display_name": "stefanello_cs"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60208668/two-steps-signing-of-pdf-with-itextpdf-for-java-using-existing-certificate-inte",
+        "last_activity_date": 1581612234,
+        "creation_date": 1581599462,
+        "answer_count": 1,
+        "title": "Two-steps signing of PDF with itextpdf for Java using existing certificate, intermediary file and remote created signature",
+        "body": "<p>The use-case is as following: a local application must sign a PDF document using a full <strong>PKCS#7<\/strong> detached signature generated on a remote server which requires a one-time-password sent by e-mail/SMS; the remote server generates the detached signature based on the associated document hash and the resulting signature is an \u201cexternal\nsignature\u201d, as defined in the CMS RFC (RFC5652), section 5.2, such as the resulting signature file is a separate file.<\/p>\n\n<hr>\n\n<p>I'm struggling for days now to implement a working solution for this use-case (using <strong>itextpdf 5.5.13.1<\/strong>), but the final signed file has the  signature in error with the message \"Certification by is invalid\" -- see the \"signed_with_error\" file attached.\nThe conceptual \"two-steps signing\" implemented process is:<\/p>\n\n<p><strong>1st step:<\/strong> from the original document file -- see the \"original\" attached file -- I create an intermediary file -- see the \"intermediary\" file attached -- in which I've inserted an empty signature based on which the associated document hash is created. In this step, the signature digest is saved to be used in the next step<\/p>\n\n<p><strong>2nd step:<\/strong> remote server is called, the detached signature file is received and I'm creating the signed file by inserting content in the signature from the pre-signed file using the signature digest from previous step and detached signature content received from the remote server.<\/p>\n\n<p><strong>Original, intermediary and signed with error sample files are:<\/strong>\n<br/>\n<a href=\"https://drive.google.com/file/d/1KG65l0jjcUULZMR507rk5Fex4dz0U0bH/view?usp=sharing\" rel=\"nofollow noreferrer\">original<\/a> <br/>\n<a href=\"https://drive.google.com/file/d/1ogeKHLpJCQIFrABptit8U9KvgS9ZsoHE/view?usp=sharing\" rel=\"nofollow noreferrer\">intermediary<\/a> <br/>\n<a href=\"https://drive.google.com/file/d/14NHuQVQ6sf1YbluMPhF_SpKFn_ExWnwP/view?usp=sharing\" rel=\"nofollow noreferrer\">signed_with_error<\/a><\/p>\n\n<p>Anyone has any idea of what could be wrong with my code beloow?<br/>\nRelevant code parts are as following:<\/p>\n\n<p><strong>1st step:<\/strong><\/p>\n\n<pre><code>        ByteArrayOutputStream preSignedDocument = new ByteArrayOutputStream();\n        Path customerPathInDataStorage = storageService.resolveCustomerPathInDataStorage(customerExternalId);\n        PdfReader pdfReader = new PdfReader(originalDocumentContent);\n        PdfStamper stamper = PdfStamper.createSignature(pdfReader, preSignedDocument, '\\0', customerPathInDataStorage.toFile(), true);\n\n        // create certificate chain using certificate received from remote server system\n        byte[] certificateContent = certificateInfo.getData(); // this is the customer certificate received one time from the remote server and used for every document signing initialization\n        X509Certificate certificate = SigningUtils.buildCertificateFromCertificateContent(certificateContent);\n        java.security.cert.Certificate[] certificatesChain = CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertPath(\n                Collections.singletonList(certificate)).getCertificates().toArray(new java.security.cert.Certificate[0]);\n\n        // create empty digital signature inside pre-signed document\n        PdfSignatureAppearance signatureAppearance = stamper.getSignatureAppearance();\n        signatureAppearance.setVisibleSignature(new Rectangle(72, 750, 400, 770), 1, \"Signature_\" + customerExternalId);\n        signatureAppearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);\n        signatureAppearance.setCertificate(certificate);\n        CustomPreSignExternalSignature externalSignatureContainer =\n                new CustomPreSignExternalSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);\n        MakeSignature.signExternalContainer(signatureAppearance, externalSignatureContainer, 8192);\n\n        ExternalDigest digest = new SignExternalDigest();\n        PdfPKCS7 pdfPKCS7 = new PdfPKCS7(null, certificatesChain, DOCUMENT_HASHING_ALGORITHM, null, digest, false);\n        byte[] signatureDigest = externalSignatureContainer.getSignatureDigest();\n        byte[] authAttributes = pdfPKCS7.getAuthenticatedAttributeBytes(signatureDigest, null, null,\n                MakeSignature.CryptoStandard.CMS);\n\n        pdfReader.close();\n\n        documentDetails.setPreSignedContent(preSignedDocument.toByteArray()); // this is the intermediary document content used in 2nd step in the line with the comment ***PRESIGNED_CONTENT****\n        documentDetails.setSignatureDigest(signatureDigest); // this is the signature digest used in 2nd step in the line with comment ****SIGNATURE_DIGEST****\n        byte[] hashForSigning = DigestAlgorithms.digest(new ByteArrayInputStream(authAttributes),\n                digest.getMessageDigest(DOCUMENT_HASHING_ALGORITHM));\n        documentDetails.setSigningHash(hashForSigning); // this is the hash sent to remote server for signing\n<\/code><\/pre>\n\n<p><strong>2nd step:<\/strong><\/p>\n\n<pre><code>        // create certificate chain from detached signature\n        byte[] detachedSignatureContent = documentDetachedSignature.getSignature(); // this is the detached signature file content received from the remote server which contains also customer the certificate\n        X509Certificate certificate = SigningUtils.extractCertificateFromDetachedSignatureContent(detachedSignatureContent);\n        java.security.cert.Certificate[] certificatesChain = CertificateFactory.getInstance(CERTIFICATE_TYPE).generateCertPath(\n                    Collections.singletonList(certificate)).getCertificates().toArray(new java.security.cert.Certificate[0]);\n\n        // create digital signature from detached signature\n        ExternalDigest digest = new SignExternalDigest();\n        PdfPKCS7 pdfPKCS7 = new PdfPKCS7(null, certificatesChain, DOCUMENT_HASHING_ALGORITHM, null, digest, false);\n\n        pdfPKCS7.setExternalDigest(detachedSignatureContent, null, SIGNATURE_ENCRYPTION_ALGORITHM);\n        byte[] signatureDigest = documentVersion.getSignatureDigest(); // this is the value from 1st step for ****SIGNATURE_DIGEST****\n        byte[] encodedSignature = pdfPKCS7.getEncodedPKCS7(signatureDigest, null, null, null, MakeSignature.CryptoStandard.CMS);\n        ExternalSignatureContainer externalSignatureContainer = new CustomExternalSignature(encodedSignature);\n\n        // add signature content to existing signature container of the intermediary PDF document\n        PdfReader pdfReader = new PdfReader(preSignedDocumentContent);// this is the value from 1st step for ***PRESIGNED_CONTENT****\n        ByteArrayOutputStream signedPdfOutput = new ByteArrayOutputStream();\n        MakeSignature.signDeferred(pdfReader, \"Signature_\" + customerExternalId, signedPdfOutput, externalSignatureContainer);\n\n        return signedPdfOutput.toByteArray();\n<\/code><\/pre>\n\n<p><strong>dependencies:<\/strong><\/p>\n\n<pre><code>public static final String DOCUMENT_HASHING_ALGORITHM = \"SHA256\";\npublic static final String CERTIFICATE_TYPE = \"X.509\";\npublic static final String SIGNATURE_ENCRYPTION_ALGORITHM = \"RSA\";\n<\/code><\/pre>\n\n<hr>\n\n<pre><code>public class CustomPreSignExternalSignature implements ExternalSignatureContainer {\n\n    private static final Logger logger = LoggerFactory.getLogger(CustomPreSignExternalSignature.class);\n\n    private PdfDictionary dictionary;\n    private byte[] signatureDigest;\n\n    public CustomPreSignExternalSignature(PdfName filter, PdfName subFilter) {\n        dictionary = new PdfDictionary();\n        dictionary.put(PdfName.FILTER, filter);\n        dictionary.put(PdfName.SUBFILTER, subFilter);\n    }\n\n    @Override\n    public byte[] sign(InputStream data) throws GeneralSecurityException {\n        try {\n            ExternalDigest digest = new SignExternalDigest();\n            signatureDigest = DigestAlgorithms.digest(data, digest.getMessageDigest(DOCUMENT_HASHING_ALGORITHM));\n        } catch (IOException e) {\n            logger.error(\"CustomSignExternalSignature - can not create hash to be signed\", e);\n            throw new GeneralSecurityException(\"CustomPreSignExternalSignature - can not create hash to be signed\", e);\n        }\n\n        return new byte[0];\n    }\n\n    @Override\n    public void modifySigningDictionary(PdfDictionary pdfDictionary) {\n        pdfDictionary.putAll(dictionary);\n    }\n\n    public byte[] getSignatureDigest() {\n        return signatureDigest;\n    }\n}\n<\/code><\/pre>\n\n<hr>\n\n<pre><code>public class CustomExternalSignature implements ExternalSignatureContainer {\n\n        private byte[] signatureContent;\n\n        public CustomExternalSignature(byte[] signatureContent) {\n            this.signatureContent = signatureContent;\n        }\n\n        @Override\n        public byte[] sign(InputStream data) throws GeneralSecurityException {\n            return signatureContent;\n        }\n\n        @Override\n        public void modifySigningDictionary(PdfDictionary pdfDictionary) {\n        }\n    }\n<\/code><\/pre>\n\n<hr>\n\n<pre><code>public class SignExternalDigest implements ExternalDigest {\n\n    @Override\n    public MessageDigest getMessageDigest(String hashAlgorithm) throws GeneralSecurityException {\n        return DigestAlgorithms.getMessageDigest(hashAlgorithm.toUpperCase(), null);\n    }\n\n}\n<\/code><\/pre>\n\n<p><strong>Later comment:<\/strong><\/p>\n\n<p>Even if it is not correct, I've observed that if, in 2nd step, instead of line:<\/p>\n\n<pre><code>byte[] signatureDigest = documentVersion.getSignatureDigest(); // this is the value from 1st step for ****SIGNATURE_DIGEST****\n<\/code><\/pre>\n\n<p>I'll use:<\/p>\n\n<pre><code>byte[] signatureDigest = new byte[0];\n<\/code><\/pre>\n\n<p>than the signed file will be generated with a visible certificate which can be validate but the PDF document is invalid with error \"Document certification is INVALID\". --- \"The document has been altered or corrupted since Certification was applied.\" - see attached file <a href=\"https://drive.google.com/file/d/1mBbBPsHE8HLKU1O2Q2OHNMZgYmvGejO-/view?usp=sharing\" rel=\"nofollow noreferrer\">signed_certification_invalid<\/a>. It looks legit to be invalid, but for me is strange why in this case certification is displayed in document but it is broken when using - what I consider - \"the right\" signatureDigest value.<\/p>\n",
+        "question_id": 60208668,
+        "tags": [
+            "java",
+            "itext",
+            "digital-signature",
+            "x509certificate",
+            "pkcs#7"
+        ],
+        "score": 0,
+        "accepted_answer_id": 60212768,
+        "is_answered": true,
+        "view_count": 1800,
+        "last_edit_date": 1581609741
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rU3n7UYk.jpg?s=256",
+            "account_id": 13386014,
+            "user_type": "registered",
+            "user_id": 9659885,
+            "link": "https://stackoverflow.com/users/9659885/bharat-vasant",
+            "reputation": 945,
+            "display_name": "Bharat Vasant"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 60208668,
+        "edited": false,
+        "creation_date": 1581661047,
+        "comment_id": 106518595
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/VMMeP.jpg?s=256",
+            "account_id": 1916831,
+            "user_type": "registered",
+            "user_id": 1729265,
+            "link": "https://stackoverflow.com/users/1729265/mkl",
+            "reputation": 97023,
+            "display_name": "mkl"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1581612234,
+        "creation_date": 1581612234,
+        "body": "<p>You say<\/p>\n\n<blockquote>\n  <p>the remote server generates the detached signature based on the associated document hash and the resulting signature is an \u201cexternal signature\u201d, as defined in the CMS RFC (RFC5652), section 5.2<\/p>\n<\/blockquote>\n\n<p>thus, what you retrieve here in step 2:<\/p>\n\n<pre><code>// create certificate chain from detached signature\nbyte[] detachedSignatureContent = documentDetachedSignature.getSignature(); // this is the detached signature file content received from the remote server which contains also customer the certificate\n<\/code><\/pre>\n\n<p>already is a CMS signature container. Consequentially you must not insert this into a PKCS#7 / CMS signature container anymore as you do in the following lines but can immediately inject it into the PDF.<\/p>\n\n<p>So your second step should just be<\/p>\n\n<pre><code>// create certificate chain from detached signature\nbyte[] detachedSignatureContent = documentDetachedSignature.getSignature(); // this is the detached signature file content received from the remote server which contains also customer the certificate\nExternalSignatureContainer externalSignatureContainer = new CustomExternalSignature(detachedSignatureContent);\n\n// add signature content to existing signature container of the intermediary PDF document\nPdfReader pdfReader = new PdfReader(preSignedDocumentContent);// this is the value from 1st step for ***PRESIGNED_CONTENT****\nByteArrayOutputStream signedPdfOutput = new ByteArrayOutputStream();\nMakeSignature.signDeferred(pdfReader, \"Signature_\" + customerExternalId, signedPdfOutput, externalSignatureContainer);\n\nreturn signedPdfOutput.toByteArray();\n<\/code><\/pre>\n\n<hr>\n\n<p>Furthermore, the wrong hash gets signed. Indeed, in step 1 you should not play around with the <code>PdfPKCS7<\/code> class either but simply use<\/p>\n\n<pre><code>documentDetails.setSigningHash(externalSignatureContainer.getSignatureDigest()); // this is the hash sent to remote server for signing\n<\/code><\/pre>\n",
+        "answer_id": 60212768,
+        "question_id": 60208668
+    }],
+    "answer_comments": {"60212768": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/cNQmW.jpg?s=256",
+            "account_id": 17752902,
+            "user_type": "registered",
+            "user_id": 12890567,
+            "link": "https://stackoverflow.com/users/12890567/stefanello-cs",
+            "reputation": 3,
+            "display_name": "stefanello_cs"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 60212768,
+        "edited": false,
+        "creation_date": 1581688093,
+        "comment_id": 106530408
+    }]}
+}

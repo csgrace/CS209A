@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100004607761385/picture?type=large",
+            "account_id": 6070104,
+            "user_type": "registered",
+            "user_id": 4739210,
+            "link": "https://stackoverflow.com/users/4739210/aymen-kanzari",
+            "reputation": 2053,
+            "display_name": "Aymen Kanzari",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73229134/thymeleaf-catch-exception-in-controller",
+        "last_activity_date": 1659619485,
+        "creation_date": 1659572760,
+        "answer_count": 1,
+        "title": "Thymeleaf: Catch exception in controller",
+        "body": "<p>I have the below method in the controller that I catch an error inside it<\/p>\n<pre><code>@Controller\n@RequestMapping(&quot;/popup&quot;)\npublic class PopupResource {\n\n    @GetMapping\n    public String popup() {\n        try {\n             service.generate(new ExistOTPValidQuery().requestNumber(&quot;test&quot;), Boolean.class).get();\n        } catch (OTPException e) {\n              return &quot;user&quot;;\n        }\n        return &quot;error&quot;;\n    }\n}\n<\/code><\/pre>\n<p>I defined the exception<\/p>\n<pre><code>@Order(Ordered.HIGHEST_PRECEDENCE)\n@ControllerAdvice()\npublic class GlobalExceptionHandler {\n\n    @ExceptionHandler(OTPException.class)\n    public ResponseEntity&lt;Object&gt; otpException(OTPException ex) {\n        return buildResponseEntity(new ApiError(CustomHttpStatus.OTP_REQUEST, new Date(), ex.getMessage()),\n            HttpStatus.BAD_REQUEST);\n    }\n\n    private ResponseEntity&lt;Object&gt; buildResponseEntity(ApiError apiError, HttpStatus status) {\n        return new ResponseEntity&lt;&gt;(apiError, status);\n    }\n    \n}\n<\/code><\/pre>\n<p>The problem when the service throws the exception <code>OTPException<\/code>, it's not catched in the controller<\/p>\n<p>when I put a break point on this catch block, I get the values like in the picture below<\/p>\n<pre><code>catch (Exception e) {\n  if (e instanceof OTPException) { //it does not enter here\n      return &quot;user&quot;;\n  }\n}\n<\/code><\/pre>\n<p><a href=\"https://i.sstatic.net/P5oz8.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/P5oz8.png\" alt=\"enter image description here\" /><\/a><\/p>\n",
+        "question_id": 73229134,
+        "tags": [
+            "java",
+            "spring-boot",
+            "spring-mvc",
+            "thymeleaf"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 323,
+        "last_edit_date": 1659617832
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/bp4fF.jpg?s=256",
+            "account_id": 24430255,
+            "user_type": "registered",
+            "user_id": 18355295,
+            "link": "https://stackoverflow.com/users/18355295/stefan-billmaier",
+            "reputation": 63,
+            "display_name": "Stefan Billmaier"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1659619485,
+        "creation_date": 1659619485,
+        "body": "<p>As your screenshot states the type of variable <code>e<\/code> is not an OTPException, but an ExecutionException.\nThe cause of ExecutionException is an OTPException.<\/p>\n<p>Either change that <code>service.generate(...)<\/code> throws directly an OTPException (and does not wrap it into an ExectionException).\nOr change the catch block in your controller to catch ExecutionException and check the cause of the catched exception.<\/p>\n",
+        "answer_id": 73236791,
+        "question_id": 73229134
+    }],
+    "answer_comments": {}
+}

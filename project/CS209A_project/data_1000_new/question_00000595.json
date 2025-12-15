@@ -1,0 +1,177 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8ef0b1a76cc2f549d5b8d37c502b12f0?s=256&d=identicon&r=PG",
+            "account_id": 1818352,
+            "user_type": "registered",
+            "user_id": 1652984,
+            "link": "https://stackoverflow.com/users/1652984/alan-snyder",
+            "reputation": 558,
+            "display_name": "Alan Snyder",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45777932/how-can-i-implement-java-swing-controls-that-are-disabled-until-after-the-window",
+        "last_activity_date": 1503244466,
+        "creation_date": 1503196284,
+        "answer_count": 2,
+        "title": "How can I implement Java/Swing controls that are disabled until after the window is activated?",
+        "body": "<p>I am implementing a Java/Swing application for macOS, where it is common for most mouse button related behavior to be disabled until the window is activated. In other words, when a mouse button is pressed over an inactive window, the window is activated but nothing else happens. (There are exceptions. Some buttons when clicked will activate the window and also run their normal action.) Is there a way to do this? The basic problem is that by the time the application gets a mouse pressed event, the window is already active. My only thought so far is to correlate the window activated event and the mouse pressed event by time, which might not be completely reliable.<\/p>\n",
+        "question_id": 45777932,
+        "tags": [
+            "java",
+            "macos",
+            "swing",
+            "focus"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 130
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ef0b1a76cc2f549d5b8d37c502b12f0?s=256&d=identicon&r=PG",
+                "account_id": 1818352,
+                "user_type": "registered",
+                "user_id": 1652984,
+                "link": "https://stackoverflow.com/users/1652984/alan-snyder",
+                "reputation": 558,
+                "display_name": "Alan Snyder",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45777932,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/TqQRB.jpg?s=256",
+                "account_id": 9722462,
+                "user_type": "registered",
+                "user_id": 7210739,
+                "link": "https://stackoverflow.com/users/7210739/dontknowmuchbut-getting-better",
+                "reputation": 4385,
+                "display_name": "DontKnowMuchBut Getting Better"
+            },
+            "edited": false,
+            "creation_date": 1503235778,
+            "comment_id": 78522660
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TqQRB.jpg?s=256",
+                "account_id": 9722462,
+                "user_type": "registered",
+                "user_id": 7210739,
+                "link": "https://stackoverflow.com/users/7210739/dontknowmuchbut-getting-better",
+                "reputation": 4385,
+                "display_name": "DontKnowMuchBut Getting Better"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45777932,
+            "edited": false,
+            "creation_date": 1503199949,
+            "comment_id": 78514010
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ON2FE.jpg?s=256",
+                "account_id": 7108780,
+                "user_type": "registered",
+                "user_id": 5437524,
+                "link": "https://stackoverflow.com/users/5437524/antony-ng",
+                "reputation": 807,
+                "display_name": "Antony Ng",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1503223540,
+            "creation_date": 1503223540,
+            "body": "<p>You can make button's contains() depends on frame's currently active or not:<\/p>\n\n<pre><code>    final JFrame frame = new JFrame();\n\n    JButton button = new JButton() {\n        @Override\n        public boolean contains(int x, int y) {\n            return super.contains(x, y) &amp;&amp; frame.isActive();\n        }\n    };\n<\/code><\/pre>\n\n<p>When frame is deactive and the region of button get clicked, button won't accept the mouse event since contains() returns false, button's parent get tested contains() instead (and parent's parent until any returns true), it still makes frame finally active, just button will not be given a chance to response to the mouse click.<\/p>\n",
+            "answer_id": 45780932,
+            "question_id": 45777932
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ON2FE.jpg?s=256",
+                "account_id": 7108780,
+                "user_type": "registered",
+                "user_id": 5437524,
+                "link": "https://stackoverflow.com/users/5437524/antony-ng",
+                "reputation": 807,
+                "display_name": "Antony Ng",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1503244466,
+            "creation_date": 1503244466,
+            "body": "<p>Since the first answer I posted didn't work in Mac OSX, let's try a solution using AWTListener (which I do not prefer since it can be devastating when not handled properly):<\/p>\n\n<pre><code>    frame.addWindowListener(new WindowAdapter() {\n        private final AWTEventListener awtEventListener = new AWTEventListener() {\n            @Override\n            public void eventDispatched(AWTEvent event) {\n                if (event instanceof MouseEvent &amp;&amp; event.getID() == MouseEvent.MOUSE_PRESSED\n                        &amp;&amp; event.getSource() == button) {\n                    ((MouseEvent) event).consume();\n                    frame.toFront();\n\n                    System.out.println(\"Special handled\");\n                }\n            }\n        };\n\n        @Override\n        public void windowActivated(WindowEvent aE) {\n            SwingUtilities.invokeLater(new Runnable() {\n                @Override\n                public void run() {\n                    Toolkit.getDefaultToolkit().removeAWTEventListener(awtEventListener);\n                }\n            });\n        }\n\n        @Override\n        public void windowDeactivated(WindowEvent aE) {\n            Toolkit.getDefaultToolkit().addAWTEventListener(awtEventListener, MouseEvent.MOUSE_EVENT_MASK);\n        }\n    });\n<\/code><\/pre>\n\n<p>The idea is when frame deactivate, we intercept all mouse events, and when a mouse press event target at the button is encountered, it is consumed and we artificially activate the frame using toFront() (I tried without toFront() the frame also activate naturally in Linux, but it does no harm to call again).<\/p>\n\n<p>When the frame is activated, we delay the removal of AWTEventListener using invokeLater() so that the button will not get clicked immediately right after we removed the AWTEventListener.<\/p>\n",
+            "answer_id": 45784041,
+            "question_id": 45777932
+        }
+    ],
+    "answer_comments": {
+        "45784041": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ef0b1a76cc2f549d5b8d37c502b12f0?s=256&d=identicon&r=PG",
+                "account_id": 1818352,
+                "user_type": "registered",
+                "user_id": 1652984,
+                "link": "https://stackoverflow.com/users/1652984/alan-snyder",
+                "reputation": 558,
+                "display_name": "Alan Snyder",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45784041,
+            "edited": false,
+            "creation_date": 1503267910,
+            "comment_id": 78532382
+        }],
+        "45780932": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/ON2FE.jpg?s=256",
+                    "account_id": 7108780,
+                    "user_type": "registered",
+                    "user_id": 5437524,
+                    "link": "https://stackoverflow.com/users/5437524/antony-ng",
+                    "reputation": 807,
+                    "display_name": "Antony Ng",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45780932,
+                "edited": false,
+                "creation_date": 1503238424,
+                "comment_id": 78523438
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8ef0b1a76cc2f549d5b8d37c502b12f0?s=256&d=identicon&r=PG",
+                    "account_id": 1818352,
+                    "user_type": "registered",
+                    "user_id": 1652984,
+                    "link": "https://stackoverflow.com/users/1652984/alan-snyder",
+                    "reputation": 558,
+                    "display_name": "Alan Snyder",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 45780932,
+                "edited": false,
+                "creation_date": 1503235929,
+                "comment_id": 78522698
+            }
+        ]
+    }
+}

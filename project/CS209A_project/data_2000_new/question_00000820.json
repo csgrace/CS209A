@@ -1,0 +1,68 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/704085f8e36c3e25dea45f5af763983d?s=256&d=identicon&r=PG",
+            "account_id": 2084758,
+            "user_type": "registered",
+            "user_id": 1855970,
+            "link": "https://stackoverflow.com/users/1855970/andy-cobley",
+            "reputation": 316,
+            "display_name": "Andy Cobley"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/33434097/using-java-httpurlconnection-to-authenticate-to-restheart-for-mongodb",
+        "last_activity_date": 1446205198,
+        "creation_date": 1446201895,
+        "answer_count": 1,
+        "title": "Using Java (HttpURLConnection) to authenticate to Restheart (for Mongodb)",
+        "body": "<p>I am using restheart to provide a restful interface to mongodb.  The interface is set up and running and provides the correct answer if a GET request is sent through Chrome.  However if I use the following java code using a HttpURLConnection I get a 201 response with no content.<\/p>\n\n<pre><code>try {\n    videos = new URL(\"http://www.example.com:8080/myflix/videos\");\n    } catch (Exception et) {\n        System.out.println(\"Videos URL is broken\");\n        return null;\n    }\n    HttpURLConnection hc = null;\n    try {\n        hc = (HttpURLConnection) videos.openConnection();\n        String login=\"admin:admin\"; \n        final byte[] authBytes = login.getBytes(StandardCharsets.UTF_8);\n        final String encoded = Base64.getEncoder().encodeToString(authBytes);\n        hc.addRequestProperty(\"Authorization\", \"Basic \"+encoded);\n        hc.setDoInput(true);\n        hc.setDoOutput(true);\n        hc.setUseCaches(false);\n        hc.setRequestMethod(\"GET\");\n        hc.setRequestProperty(\"Accept-Encoding\", \"gzip, deflate, sdch\");\n        hc.setRequestProperty(\"Content-Type\", \"application/json\");\n        hc.setRequestProperty(\"Accept\", \"application/json,text/html,application/hal+json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*\");\n    } catch (Exception et) {\n        System.out.println(\"Can't prepare http URL con\");\n        return (null);\n    }\n    BufferedReader br = null;\n    try {\n        OutputStreamWriter writer = new OutputStreamWriter(\n                hc.getOutputStream());\n    } catch (Exception et) {\n        System.out.println(\"Can't get reader to videos stream\");\n    }\n    String inputLine;\n    String sJSON = null;\n\n    try {\n        int rc = hc.getResponseCode();\n<\/code><\/pre>\n\n<p>What is the correct way to authenticate using  Java to the resthert interface? (Details on the restheart authentication is here <a href=\"https://softinstigate.atlassian.net/wiki/display/RH/How+Clients+authenticate#HowClientsauthenticate-BasicAuthenticationfordummies\" rel=\"nofollow\">Restheart authentication<\/a><\/p>\n",
+        "question_id": 33434097,
+        "tags": [
+            "java",
+            "mongodb",
+            "restheart"
+        ],
+        "score": 0,
+        "accepted_answer_id": 33435124,
+        "is_answered": true,
+        "view_count": 450,
+        "last_edit_date": 1446204886
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/mTMCk.jpg?s=256",
+            "account_id": 5665367,
+            "user_type": "registered",
+            "user_id": 4481670,
+            "link": "https://stackoverflow.com/users/4481670/andrea-di-cesare",
+            "reputation": 1253,
+            "display_name": "Andrea Di Cesare"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1446205198,
+        "creation_date": 1446205198,
+        "body": "<p>I made few changes (look for inline comments starting with &lt;==) and it works:<\/p>\n\n<p>The way you generate the authentication request header is correct. When I run your code I actually got 415 Unsupported Media Type, that went away commenting out hc.setDoOutput(true). A GET is a input operation, in fact you were also trying to get an OutStream from the connection: you need to get an InputStream actually.<\/p>\n\n<pre><code>    URL url;\n\n    try {\n        url = new URL(\"http://127.0.0.1:8080/test/huge\");\n    } catch (Exception et) {\n        System.out.println(\"Videos URL is broken\");\n        Assert.fail(et.getMessage());\n        return;\n    }\n\n    HttpURLConnection hc = null;\n\n    try {\n        hc = (HttpURLConnection) url.openConnection();\n\n        String login = \"admin:admin\";\n        final byte[] authBytes = login.getBytes(StandardCharsets.UTF_8);\n\n        final String encoded = Base64.getEncoder().encodeToString(authBytes);\n        hc.addRequestProperty(\"Authorization\", \"Basic \" + encoded);\n\n        System.out.println(\"Authorization: \" + hc.getRequestProperty(\"Authorization\"));\n\n        hc.setDoInput(true);\n        //hc.setDoOutput(true); &lt;== removed, otherwise 415 unsupported media type\n        hc.setUseCaches(false);\n\n        hc.setRequestMethod(\"GET\");\n        hc.setRequestProperty(\"Accept-Encoding\", \"gzip, deflate, sdch\");\n        hc.setRequestProperty(\"Accept\", \"application/json,text/html,application/hal+json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*\");\n    } catch (Exception et) {\n        System.out.println(\"Can't prepare http URL con\");\n    }\n\n    System.out.println(hc.toString());\n\n    BufferedReader br = null;\n\n    try {\n        InputStreamReader reader = new InputStreamReader(hc.getInputStream()); // &lt;== the request is a GET, data is in input\n    } catch (Exception et) {\n        System.out.println(\"Can't get reader to videos stream\");\n    }\n\n    int rc = hc.getResponseCode();\n\n    System.out.println(\"response code: \" + rc);\n    System.out.println(\"response message: \" + hc.getResponseMessage());\n\n    Assert.assertEquals(200, rc);\n<\/code><\/pre>\n",
+        "answer_id": 33435124,
+        "question_id": 33434097
+    }],
+    "answer_comments": {"33435124": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/704085f8e36c3e25dea45f5af763983d?s=256&d=identicon&r=PG",
+            "account_id": 2084758,
+            "user_type": "registered",
+            "user_id": 1855970,
+            "link": "https://stackoverflow.com/users/1855970/andy-cobley",
+            "reputation": 316,
+            "display_name": "Andy Cobley"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 33435124,
+        "edited": false,
+        "creation_date": 1446205862,
+        "comment_id": 54658628
+    }]}
+}

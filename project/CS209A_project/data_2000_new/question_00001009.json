@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cf72261d33ab65f0d5d0ecd8672403dd?s=256&d=identicon&r=PG",
+            "account_id": 5914240,
+            "user_type": "registered",
+            "user_id": 4653517,
+            "link": "https://stackoverflow.com/users/4653517/james-mudd",
+            "reputation": 2493,
+            "display_name": "James Mudd"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/67502515/find-distinct-arrays-with-java-stream",
+        "last_activity_date": 1638356826,
+        "creation_date": 1620817983,
+        "answer_count": 1,
+        "title": "Find distinct arrays with Java stream",
+        "body": "<p>Consider this code<\/p>\n<pre><code>String[] colours1 = new String[]{&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;};\nString[] colours2 = new String[]{&quot;red&quot;, &quot;yellow&quot;, &quot;blue&quot;};\nString[] colours3 = new String[]{&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;};\n\nList&lt;String[]&gt; distinct = Stream.of(colours1, colours2, colours3)\n        .distinct() // Do something here to compare arrays better\n        .collect(Collectors.toList());\n<\/code><\/pre>\n<p>I want the <code>distinct<\/code> list to contain only 2 elements <code>colours1<\/code> and <code>colours2<\/code> (as 1 and 3 are equivalent). However because the stream <code>distinct()<\/code> method performs equals comparison it still contains all 3 colours arrays. I want a custom distinct function where you can provide a comparator. In this case <code>Objects#deepEquals<\/code> would be sufficient. Is there a easy way to achieve this?<\/p>\n",
+        "question_id": 67502515,
+        "tags": [
+            "java",
+            "java-stream"
+        ],
+        "score": 4,
+        "accepted_answer_id": 67502637,
+        "is_answered": true,
+        "view_count": 742,
+        "last_edit_date": 1638356826
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/44c841338e1646af9a977f1fa0e23948?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 162699,
+            "user_type": "registered",
+            "user_id": 3788176,
+            "link": "https://stackoverflow.com/users/3788176/andy-turner",
+            "reputation": 141045,
+            "display_name": "Andy Turner",
+            "accept_rate": 54
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 5,
+        "is_accepted": true,
+        "last_activity_date": 1620819325,
+        "creation_date": 1620818479,
+        "body": "<p>Wrap the arrays in lists, use <code>distinct()<\/code>, unwrap them again:<\/p>\n<pre><code>Stream.of(colours1, colours2, colours3)\n    .map(Arrays::asList)\n    .distinct()\n    .map(list -&gt; list.toArray(new String[0]))\n    .collect(toList())\n<\/code><\/pre>\n<p>This works because <a href=\"https://docs.oracle.com/javase/8/docs/api/java/util/List.html#equals-java.lang.Object-\" rel=\"nofollow noreferrer\"><code>List.equals<\/code><\/a> considers two lists equal if they have the same contents (the same number of elements, and equality of the elements at corresponding positions in the two lists).<\/p>\n<p>However, this doesn't return the same array instances. If you need (some of) the same array instances in the final list, you can do something like so:<\/p>\n<pre><code>class MyArrayList&lt;T&gt; extends AbstractList&lt;T&gt; {\n  final T[] arr;\n\n  MyArrayList(T[] arr) { this.arr = arr; }\n  @Override public int size() { return arr.length; }\n  @Override public T get(int i) { return arr[i]; }\n}\n\nList&lt;String&gt; distinct =\n    Stream.of(colours1, colours2, colours3)\n        .map(MyArrayList::new)\n        .distinct()\n        .map(el -&gt; el.arr)\n        .collect(toList());\n<\/code><\/pre>\n",
+        "answer_id": 67502637,
+        "question_id": 67502515,
+        "last_edit_date": 1620819325
+    }],
+    "answer_comments": {}
+}

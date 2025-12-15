@@ -1,0 +1,159 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/65817ee84ac2d0957067a8a4cbc6503d?s=256&d=identicon&r=PG",
+            "account_id": 6536618,
+            "user_type": "registered",
+            "user_id": 5055865,
+            "link": "https://stackoverflow.com/users/5055865/johnybro",
+            "reputation": 361,
+            "display_name": "JohnyBro",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34243346/get-the-last-location-in-android",
+        "last_activity_date": 1450020127,
+        "creation_date": 1449944462,
+        "answer_count": 3,
+        "title": "Get the last location in Android",
+        "body": "<p>I followed this tutorial <a href=\"http://developer.android.com/training/location/retrieve-current.html\" rel=\"nofollow\">http://developer.android.com/training/location/retrieve-current.html<\/a> to retrieve the position of my device but it don't work.<\/p>\n\n<p>When I do this :<\/p>\n\n<pre><code>mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);\n<\/code><\/pre>\n\n<p>\"mLastLocation\" is null, why ?<\/p>\n\n<p>Edit<\/p>\n\n<p>I tried to do like in the answere of Niru :<\/p>\n\n<pre><code>public Location setLocation()\n    {\n        Location location;\n        final int MIN_TIME_BW_UPDATES = 300;\n        final int MIN_DISTANCE_CHANGE_FOR_UPDATES = 50;\n        Criteria criteria = new Criteria();\n        criteria.setAccuracy(Criteria.ACCURACY_FINE);\n        criteria.setAltitudeRequired(false);\n        criteria.setBearingRequired(false);\n        criteria.setCostAllowed(true);\n        criteria.setPowerRequirement(Criteria.POWER_LOW);\n\n        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);\n\n        String bestProvider = locationManager.getBestProvider(criteria, true);\n\n        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M)\n        {\n            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &amp;&amp; checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {}\n        }\n\n        location = locationManager.getLastKnownLocation(bestProvider);\n\n        localStorage.putFloat(\"latitude\", (float) location.getLatitude());\n        localStorage.putFloat(\"longitude\", (float) location.getLongitude());\n        localStorage.commit();\n\n        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, (LocationListener) this);\n\n\n\n        return location;\n    }\n\n    @Override\n    public void onLocationChanged(Location location)\n    {\n        localStorage.putFloat(\"latitude\", (float) location.getLatitude());\n        localStorage.putFloat(\"longitude\", (float) location.getLongitude());\n        localStorage.commit();\n    }\n<\/code><\/pre>\n\n<p>But \"location\" is Null, Why ?<\/p>\n",
+        "question_id": 34243346,
+        "tags": [
+            "java",
+            "android",
+            "google-api",
+            "location"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 2075,
+        "last_edit_date": 1449949485
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/L1nOm.jpg?s=256",
+                "account_id": 6546314,
+                "user_type": "registered",
+                "user_id": 5062220,
+                "link": "https://stackoverflow.com/users/5062220/nicolas-mauti",
+                "reputation": 546,
+                "display_name": "Nicolas Mauti"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 34243346,
+            "edited": false,
+            "creation_date": 1449945231,
+            "comment_id": 56228646
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/JVZu9.jpg?s=256",
+                "account_id": 424773,
+                "user_type": "registered",
+                "user_id": 804967,
+                "link": "https://stackoverflow.com/users/804967/fweigl",
+                "reputation": 22208,
+                "display_name": "fweigl",
+                "accept_rate": 64
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 34243346,
+            "edited": false,
+            "creation_date": 1449944554,
+            "comment_id": 56228439
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/388f403f3bd35ddc2d6722bab829c416?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7461426,
+                "user_type": "registered",
+                "user_id": 5672743,
+                "link": "https://stackoverflow.com/users/5672743/niru",
+                "reputation": 489,
+                "display_name": "Niru"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1449945178,
+            "creation_date": 1449945112,
+            "body": "<p>You can try the following code snippet:<\/p>\n\n<pre><code>public class LocationProvider\n{\n    private static final String     TAG         = \"DEBUG\";\n    private static final String[]   provider    = new String[]\n                                                {\n            LocationManager.GPS_PROVIDER,\n            LocationManager.NETWORK_PROVIDER,\n            LocationManager.PASSIVE_PROVIDER\n                                                };\n\n    public Location getLocationByProvider(Context context)\n    {\n        Location location = null;\n        // LocationManager locationManager = (LocationManager) context.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);\n        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);\n        try\n        {\n            for (int i = 0; i &lt; provider.length; i++)\n            {\n                if (locationManager.isProviderEnabled(provider[i]))\n                {\n                    // locationManager.requestLocationUpdates(provider[i], 0, 0, locationListenerGps);\n                    location = locationManager.getLastKnownLocation(provider[i]);\n                    if (location != null)\n                    {\n                        break;\n                    }\n                }\n            }\n        }\n        catch (IllegalArgumentException e)\n        {\n            Log.d(TAG, \"Cannot acces Provider \" + provider);\n        }\n        return location;\n    }\n\n}\n<\/code><\/pre>\n\n<p>you can also get best provider and then get location from best provider.<\/p>\n\n<pre><code>mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);\n            Criteria criteria = new Criteria();\n            criteria.setAccuracy(Criteria.ACCURACY_FINE);\n            criteria.setAltitudeRequired(false);\n            criteria.setBearingRequired(false);\n            criteria.setCostAllowed(true);\n            criteria.setPowerRequirement(Criteria.POWER_LOW);\n            bestProvider = mLocationManager.getBestProvider(criteria, true);\n<\/code><\/pre>\n\n<p>Hope this will helps you. :-)<\/p>\n",
+            "answer_id": 34243441,
+            "question_id": 34243346,
+            "last_edit_date": 1449945178
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dc9f3182374833190fe874138b405458?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2461408,
+                "user_type": "registered",
+                "user_id": 5292292,
+                "link": "https://stackoverflow.com/users/5292292/proy31",
+                "reputation": 123,
+                "display_name": "proy31",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1449951639,
+            "creation_date": 1449945279,
+            "body": "<p>The documentation itself says that getLastLocation may return null in cases when location is not available. \nWhen it is null, call requestLocationUpdate method in the OnConnected() method, like this :<\/p>\n\n<pre><code>@Override\npublic void onConnected(Bundle connectionHint) {\n    mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);\n    if (mCurrentLocation == null) {\n        LocationServices.FusedLocationApi.requestLocationUpdates(\n            mGoogleApiClient, mLocationRequest, this);\n    }\n}\n<\/code><\/pre>\n\n<p>Before calling the requestLocationUpdates, create the mLocationRequest object:<\/p>\n\n<pre><code>mLocationRequest = new LocationRequest();\nmLocationRequest.setInterval(10000);   \nmLocationRequest.setFastestInterval(5000);\nmLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);\n<\/code><\/pre>\n\n<p>When the location will be available, OnLocationChanged will get fired automatically. The rate of getting this callback is defined by the interval you put in setInterval() while creating the request object.<\/p>\n\n<pre><code>@Override\npublic void onLocationChanged(Location location) {\n    mCurrentLocation = location;        \n}\n<\/code><\/pre>\n\n<p>Your location object will get updated then.<\/p>\n\n<p>Follow this link: <a href=\"http://developer.android.com/training/location/receive-location-updates.html\" rel=\"nofollow\">http://developer.android.com/training/location/receive-location-updates.html<\/a><\/p>\n",
+            "answer_id": 34243467,
+            "question_id": 34243346,
+            "last_edit_date": 1449951639
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/L1nOm.jpg?s=256",
+                "account_id": 6546314,
+                "user_type": "registered",
+                "user_id": 5062220,
+                "link": "https://stackoverflow.com/users/5062220/nicolas-mauti",
+                "reputation": 546,
+                "display_name": "Nicolas Mauti"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1450020127,
+            "creation_date": 1450020127,
+            "body": "<p>I solve my similar issue thanks to this post : <a href=\"https://stackoverflow.com/questions/33579280/permission-issues-for-location-in-android-marshmallow-applicaton\">Permission issues for location in android Marshmallow applicaton<\/a>.<\/p>\n\n<p>In fact, if you use <code>compileSdkVersion 23<\/code> (or higher) you have to handle the new android permission system if you want that your application run correctly on Android 6.0+ devices... More informations can be found here : <a href=\"http://developer.android.com/training/permissions/index.html\" rel=\"nofollow noreferrer\">http://developer.android.com/training/permissions/index.html<\/a>.<\/p>\n\n<p>One quick-and-dirty workaround for testing your app can be to change your <code>compileSdkVersion<\/code>and <code>targetSdkVersion<\/code> in your build.gradle to 22...<\/p>\n\n<p>However, I think it's stupid that there is no clear error message about this but just a null...<\/p>\n",
+            "answer_id": 34252661,
+            "question_id": 34243346,
+            "last_edit_date": 1495542192
+        }
+    ],
+    "answer_comments": {"34243441": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/388f403f3bd35ddc2d6722bab829c416?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7461426,
+            "user_type": "registered",
+            "user_id": 5672743,
+            "link": "https://stackoverflow.com/users/5672743/niru",
+            "reputation": 489,
+            "display_name": "Niru"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 34243441,
+        "reply_to_user": {
+            "profile_image": "https://www.gravatar.com/avatar/65817ee84ac2d0957067a8a4cbc6503d?s=256&d=identicon&r=PG",
+            "account_id": 6536618,
+            "user_type": "registered",
+            "user_id": 5055865,
+            "link": "https://stackoverflow.com/users/5055865/johnybro",
+            "reputation": 361,
+            "display_name": "JohnyBro",
+            "accept_rate": 80
+        },
+        "edited": false,
+        "creation_date": 1449945334,
+        "comment_id": 56228671
+    }]}
+}

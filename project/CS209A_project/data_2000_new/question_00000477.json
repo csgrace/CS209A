@@ -1,0 +1,112 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/292c4f563bef4f6d4c527ca1a3f2fd3a?s=256&d=identicon&r=PG",
+            "account_id": 4750,
+            "user_type": "registered",
+            "user_id": 7286,
+            "link": "https://stackoverflow.com/users/7286/john-shields",
+            "reputation": 734,
+            "display_name": "John Shields"
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/180713/how-do-you-determine-if-a-jdbc-connection-was-retrieved-from-a-jta-enabled-datas",
+        "last_activity_date": 1302032349,
+        "creation_date": 1223419147,
+        "answer_count": 3,
+        "title": "How do you determine if a JDBC Connection was retrieved from a JTA enabled DataSource or straight JDBC?",
+        "body": "<p>I'm using a vendor API to obtain a JDBC connection to the application's database. The API works when running in the application server or when running in a stand-alone mode. I want to run a series of SQL statements in a single transaction. I'm fine with them occurring in the context of the JTA transaction if it exists. However, if it doesn't then I need to use the JDBC transaction demarcation methods. (Calling these methods on a JDBC connection that is participating in a JTA transaction causes a SQLException.)<\/p>\n\n<p>So I need to be able to determine whether the Connection came from the JTA enabled DataSource or if it's just a straight JDBC connection.<\/p>\n\n<p>Is there a straight forward way to make this determination?<\/p>\n\n<p>Thanks!<\/p>\n",
+        "question_id": 180713,
+        "tags": [
+            "java",
+            "jdbc",
+            "transactions",
+            "jta"
+        ],
+        "score": 4,
+        "accepted_answer_id": 195346,
+        "is_answered": true,
+        "view_count": 3008
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/677cba6d46e32c6b10b5abc03f1893ad?s=256&d=identicon&r=PG",
+                "account_id": 13475,
+                "user_type": "registered",
+                "user_id": 27092,
+                "link": "https://stackoverflow.com/users/27092/jkrupka",
+                "reputation": 56,
+                "display_name": "jkrupka"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1223809396,
+            "creation_date": 1223809396,
+            "body": "<p>Even if it's straight JDBC, you can have a JTA transaction enabled. Checking the autoCommit flag will NOT help in this regard. You can be in a transaction, distributed or otherwise, with autoCommit set to false. autoCommit set to true would tell you you're not in a distributed transaction but a value of false just means you won't auto-commit... it could be in any kind of transaction.<\/p>\n\n<p>I think you're going to have to call UserTransaction.getStatus() and verify that it is not equal to Status.NoTransaction(). This would tell you if you're in a JTA transaction.<\/p>\n",
+            "answer_id": 195346,
+            "question_id": 180713
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bea5dab764a7a4945d874b9fecfc1802?s=256&d=identicon&r=PG",
+                "account_id": 6590,
+                "user_type": "registered",
+                "user_id": 11142,
+                "link": "https://stackoverflow.com/users/11142/anjanb",
+                "reputation": 14142,
+                "display_name": "anjanb",
+                "accept_rate": 49
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1223419629,
+            "creation_date": 1223419629,
+            "body": "<p>What thilo says does make sense.<\/p>\n\n<p>Otherwise, Not sure of a straight way BUT I will give you a \"hack\" way<\/p>\n\n<p>write a BAD SQL which you know will give a DB exception.\nThat will result in a stack trace. From the stack trace, you can find out if it is a JTA derived connection or NOT ?<\/p>\n",
+            "answer_id": 180737,
+            "question_id": 180713
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/5DblQ.png?s=256",
+                "account_id": 8326,
+                "user_type": "registered",
+                "user_id": 14955,
+                "link": "https://stackoverflow.com/users/14955/thilo",
+                "reputation": 263746,
+                "display_name": "Thilo",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1297299119,
+            "creation_date": 1223419524,
+            "body": "<p><strike>You could try to check the Connection's autoCommit flag to see if it is in a transaction (regardless of where it came from).\n<\/strike>\n(Apparently, see the accepted answer, this does not work too well. I am not deleting this answer because the following still stands: )<\/p>\n\n<p>But I think you should really modify your API to depend on external transactions exclusively. If you still want to support plain JDBC, wrap it into a separate API that just starts the transaction.<\/p>\n\n<p>Update: Just re-read your question and saw that you are not providing an API, but want to use a container-managed connection. But still, can you just mandate (as part of your application's requirements) that JTA be in effect? If not, you could provide a configuration option to fall back to manually managed transactions. For such a critical feature it seems reasonable to require the proper configuration (as opposed to try to guess what would be appropriate).<\/p>\n",
+            "answer_id": 180732,
+            "question_id": 180713,
+            "last_edit_date": 1297299119
+        }
+    ],
+    "answer_comments": {"180732": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9a1273a8ce5fb4afe0ed14aec6484878?s=256&d=identicon&r=PG",
+            "account_id": 22774,
+            "user_type": "registered",
+            "user_id": 56524,
+            "link": "https://stackoverflow.com/users/56524/mp",
+            "reputation": 18294,
+            "display_name": "mP.",
+            "accept_rate": 45
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "post_id": 180732,
+        "edited": false,
+        "creation_date": 1297241153,
+        "comment_id": 5511867
+    }]}
+}

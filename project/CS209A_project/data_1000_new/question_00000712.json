@@ -1,0 +1,272 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/845263fc7132ba37e29d0a6a56cd4599?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4464388,
+            "user_type": "registered",
+            "user_id": 3632410,
+            "link": "https://stackoverflow.com/users/3632410/frq",
+            "reputation": 29,
+            "display_name": "frq",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25802249/string-literals-and-string-which-is-acted-upon-intern-method-will-go-in-scp-ar",
+        "last_activity_date": 1410506032,
+        "creation_date": 1410504024,
+        "answer_count": 2,
+        "title": "String literals and String which is acted upon intern() method will go in SCP area. Rest all in heap",
+        "body": "<p><code>String literals<\/code> and <code>String<\/code> which is acted upon <code>intern()<\/code> method will go in <code>SCP area<\/code>. Rest all in heap.<\/p>\n\n<p>If that is the case if i create <\/p>\n\n<p><code>String s = new String(\"apple\");<\/code> <\/p>\n\n<p>Obviously it will create one object in <code>heap<\/code>, my doubt is it will create \"<code>apple<\/code>\" in <code>SCP(String Constant Pool)<\/code> also. (Lets assume \"apple\" is not there in SCP).<\/p>\n\n<p>What about <code>String[] arrays<\/code>?<\/p>\n\n<p>Can you please elaborate in detail.. <\/p>\n",
+        "question_id": 25802249,
+        "tags": [
+            "java",
+            "arrays"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 141,
+        "last_edit_date": 1410504261
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/tr7wR.jpg?s=256",
+            "account_id": 2524075,
+            "user_type": "registered",
+            "user_id": 2193767,
+            "link": "https://stackoverflow.com/users/2193767/thelostmind",
+            "reputation": 36294,
+            "display_name": "TheLostMind",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 25802249,
+        "edited": false,
+        "creation_date": 1410504164,
+        "comment_id": 40359510
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/pX6ku.jpg?s=256",
+                "account_id": 1275953,
+                "user_type": "registered",
+                "user_id": 1231230,
+                "link": "https://stackoverflow.com/users/1231230/ankur-singhal",
+                "reputation": 26120,
+                "display_name": "Ankur Singhal",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1410506032,
+            "creation_date": 1410504555,
+            "body": "<p><code>String<\/code> objects created with the new operator do not refer to objects in the string pool but can be made to using String\u2019s <code>intern()<\/code> method. The <code>java.lang.String.intern()<\/code> returns an interned <code>String<\/code>, that is, one that has an entry in the global <code>String literal pool<\/code>. If the <code>String<\/code> is not already in the global <code>String literal pool<\/code>, then it will be added.<\/p>\n\n<p>Each time your code create a string literal, the JVM checks the string literal pool first. If the string already exists in the pool, a reference to the pooled instance returns. If the string does not exist in the pool, a new String object instantiates, then is placed in the pool.<\/p>\n\n<pre><code>String[] stringArray = new String[] { \"abc\", \"xyz\" };\n<\/code><\/pre>\n\n<p>Executing this line there are two String literals created \"<code>abc<\/code>\" and \"<code>xyz<\/code>\" in <code>PERMGEN space<\/code>.<\/p>\n\n<p>All objects, except <code>string literals<\/code>, are created on the heap. From <code>Java 7<\/code>, string literals are created on the <code>heap<\/code> as well.<\/p>\n",
+            "answer_id": 25802386,
+            "question_id": 25802249,
+            "last_edit_date": 1410506032
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                "account_id": 52616,
+                "user_type": "registered",
+                "user_id": 157247,
+                "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                "reputation": 1081806,
+                "display_name": "T.J. Crowder",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1410505311,
+            "creation_date": 1410504561,
+            "body": "<blockquote>\n  <p>Obviously it will create one object in heap, my doubt is it will create <code>\"apple\"<\/code> in SCP(String Constant Pool) also. (Lets assume \"apple\" is not there in SCP).<\/p>\n<\/blockquote>\n\n<p>Yes. When the class containing that code is loaded, <code>\"apple\"<\/code> will be added to the SCP if it's not already there. Then, later, when that line of code <em>executes<\/em>, a <code>String<\/code> object is created on the heap. The heap object will be different from the SCP object, but they'll both use the <em>same<\/em> underlying character array, as we can see from the Java 8 source:<\/p>\n\n<pre><code>public String(String original) {\n    this.value = original.value;\n    this.hash = original.hash;\n}\n<\/code><\/pre>\n\n<p>or the Java 7 source:<\/p>\n\n<pre><code>public String(String original) {\n    int size = original.count;\n    char[] originalValue = original.value;\n    char[] v;\n    if (originalValue.length &gt; size) {\n        // The array representing the String is bigger than the new\n        // String itself.  Perhaps this constructor is being called\n        // in order to trim the baggage, so make a copy of the array.\n        int off = original.offset;\n        v = Arrays.copyOfRange(originalValue, off, off+size);\n    } else {\n        // The array representing the String is the same\n        // size as the String, so no point in making a copy.\n        v = originalValue;\n    }\n    this.offset = 0;\n    this.count = size;\n    this.value = v;\n}\n<\/code><\/pre>\n\n<p>Since <code>\"apple\"<\/code> is in the SCP and its value length is the same as its size, the <code>else<\/code> is used and both end up using the same character array.<\/p>\n",
+            "answer_id": 25802390,
+            "question_id": 25802249,
+            "last_edit_date": 1410505311
+        }
+    ],
+    "answer_comments": {
+        "25802390": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802390,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/845263fc7132ba37e29d0a6a56cd4599?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4464388,
+                    "user_type": "registered",
+                    "user_id": 3632410,
+                    "link": "https://stackoverflow.com/users/3632410/frq",
+                    "reputation": 29,
+                    "display_name": "frq",
+                    "accept_rate": 0
+                },
+                "edited": false,
+                "creation_date": 1410515418,
+                "comment_id": 40364836
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/845263fc7132ba37e29d0a6a56cd4599?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4464388,
+                    "user_type": "registered",
+                    "user_id": 3632410,
+                    "link": "https://stackoverflow.com/users/3632410/frq",
+                    "reputation": 29,
+                    "display_name": "frq",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802390,
+                "edited": false,
+                "creation_date": 1410513576,
+                "comment_id": 40363839
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/845263fc7132ba37e29d0a6a56cd4599?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4464388,
+                    "user_type": "registered",
+                    "user_id": 3632410,
+                    "link": "https://stackoverflow.com/users/3632410/frq",
+                    "reputation": 29,
+                    "display_name": "frq",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802390,
+                "edited": false,
+                "creation_date": 1410513117,
+                "comment_id": 40363611
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802390,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/845263fc7132ba37e29d0a6a56cd4599?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4464388,
+                    "user_type": "registered",
+                    "user_id": 3632410,
+                    "link": "https://stackoverflow.com/users/3632410/frq",
+                    "reputation": 29,
+                    "display_name": "frq",
+                    "accept_rate": 0
+                },
+                "edited": false,
+                "creation_date": 1410511347,
+                "comment_id": 40362755
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/845263fc7132ba37e29d0a6a56cd4599?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4464388,
+                    "user_type": "registered",
+                    "user_id": 3632410,
+                    "link": "https://stackoverflow.com/users/3632410/frq",
+                    "reputation": 29,
+                    "display_name": "frq",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802390,
+                "edited": false,
+                "creation_date": 1410510874,
+                "comment_id": 40362536
+            }
+        ],
+        "25802386": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802386,
+                "edited": false,
+                "creation_date": 1410505561,
+                "comment_id": 40360134
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/pX6ku.jpg?s=256",
+                    "account_id": 1275953,
+                    "user_type": "registered",
+                    "user_id": 1231230,
+                    "link": "https://stackoverflow.com/users/1231230/ankur-singhal",
+                    "reputation": 26120,
+                    "display_name": "Ankur Singhal",
+                    "accept_rate": 76
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802386,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "edited": false,
+                "creation_date": 1410505436,
+                "comment_id": 40360080
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25802386,
+                "edited": false,
+                "creation_date": 1410505282,
+                "comment_id": 40360008
+            }
+        ]
+    }
+}

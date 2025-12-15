@@ -1,0 +1,160 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2db2480c305336729cf382d8d0f6eb88?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4279833,
+            "user_type": "registered",
+            "user_id": 3499571,
+            "link": "https://stackoverflow.com/users/3499571/user3499571",
+            "reputation": 15,
+            "display_name": "user3499571"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22872133/decision-tree-node-method-in-java",
+        "last_activity_date": 1396915435,
+        "creation_date": 1396642220,
+        "answer_count": 1,
+        "title": "Decision Tree Node method in Java",
+        "body": "<p>I'm trying to program a node class for a Decision Tree program. I'm not sure how to make a constructor that calls itself recursively until all the leaves are reached, and what helper methods I'll need. Here's what I have so far.<\/p>\n\n<pre><code>package DecisionTree;\n\npublic class DecisionTNode {\n\n    Instance[] a;\n    double testValue;\n    DTNode left, right;\n\n\n\n    public static DTNode sortedArrayToBST(Instance[] num, int start, int end) {\n      if (start &gt; end) {\n        return null; \n      }\n      int mid = start + (end-start)/2;\n      DTNode root = new DTNode(num.length, num);\n      root.left = sortedArrayToBST(num, start, mid-1);\n      root.right = sortedArrayToBST(num, mid+1, end);\n      return root;\n    }\n} \n<\/code><\/pre>\n",
+        "question_id": 22872133,
+        "tags": [
+            "java",
+            "algorithm",
+            "tree"
+        ],
+        "score": 1,
+        "accepted_answer_id": 22872790,
+        "is_answered": true,
+        "view_count": 2025,
+        "last_edit_date": 1396915435
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/6pRI7.png?s=256",
+            "account_id": 1894536,
+            "user_type": "registered",
+            "user_id": 1711796,
+            "link": "https://stackoverflow.com/users/1711796/bernhard-barker",
+            "reputation": 55749,
+            "display_name": "Bernhard Barker",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1396654783,
+        "creation_date": 1396644685,
+        "body": "<p>Your <code>sortedArrayToBST<\/code> will create all the nodes recursively.<\/p>\n\n<p>You don't need to have a recursive constructor, you only need a very simple one that takes <code>testValue<\/code>'s value as parameter and sets it.<\/p>\n\n<pre><code>private DTNode(double data)\n{\n  testValue = data;\n}\n<\/code><\/pre>\n\n<p>And change the call to:<\/p>\n\n<pre><code>DTNode root = new DTNode(num[mid].getAttribute());\n<\/code><\/pre>\n\n<p>Well, that's assuming you want your class to pretty much the way it does now. You may instead want to have a <code>Instance<\/code> member and set that instead (or whatever else), but the code will look very similar.<\/p>\n\n<p>The ideal would be to use <a href=\"http://docs.oracle.com/javase/tutorial/java/generics/\" rel=\"nofollow\">generics<\/a>, but one step at a time.<\/p>\n\n<p>You'd call it in <code>DecisionTree<\/code> (which you'd presumably add a <code>DTNode root<\/code> member to) with something like:<\/p>\n\n<pre><code>root = sortedArrayToBST(instances, 0, instances.length);\n<\/code><\/pre>\n\n<hr>\n\n<p>If you <em>want<\/em> a recursive constructor, you'd probably want to replace your <code>sortedArrayToBST<\/code> function with that - they will look very similar, just remove the <code>DTNode root = ...<\/code> line and set the member variable's value as suggested above, and remove the <code>return null<\/code> if statement and instead don't make the call that would trigger that at all.<\/p>\n\n<pre><code>public DTNode(Instance[] num, int start, int end)\n{\n  int mid = start + (end-start)/2;\n\n  // do what you would've done in the constructor\n  testValue = num[mid].getAttribute();\n\n  // no 'return null' if statement, instead, prevent the call from ever happening\n  //   leaving 'left' / 'right' as 'null' if it doesn't\n  if (start &lt;= mid-1)\n    left = new DTNode(num, start, mid-1);\n  if (mid+1 &lt;= end)\n    right = new DTNode(num, mid+1, end);\n\n  // no return statement - constructors can't return anything\n}\n<\/code><\/pre>\n\n<p>You'd call the recursive constructor like:<\/p>\n\n<pre><code>root = new DTNode(instances, 0, instances.length);\n<\/code><\/pre>\n\n<hr>\n\n<p>Also, from the code shown, there's no need to have <code>Instance[] a;<\/code> as a member of <code>DTNode<\/code>.<\/p>\n",
+        "answer_id": 22872790,
+        "question_id": 22872133,
+        "last_edit_date": 1396654783
+    }],
+    "answer_comments": {"22872790": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2db2480c305336729cf382d8d0f6eb88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4279833,
+                "user_type": "registered",
+                "user_id": 3499571,
+                "link": "https://stackoverflow.com/users/3499571/user3499571",
+                "reputation": 15,
+                "display_name": "user3499571"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872790,
+            "edited": false,
+            "creation_date": 1396648575,
+            "comment_id": 34900819
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/6pRI7.png?s=256",
+                "account_id": 1894536,
+                "user_type": "registered",
+                "user_id": 1711796,
+                "link": "https://stackoverflow.com/users/1711796/bernhard-barker",
+                "reputation": 55749,
+                "display_name": "Bernhard Barker",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872790,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2db2480c305336729cf382d8d0f6eb88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4279833,
+                "user_type": "registered",
+                "user_id": 3499571,
+                "link": "https://stackoverflow.com/users/3499571/user3499571",
+                "reputation": 15,
+                "display_name": "user3499571"
+            },
+            "edited": false,
+            "creation_date": 1396647818,
+            "comment_id": 34900509
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2db2480c305336729cf382d8d0f6eb88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4279833,
+                "user_type": "registered",
+                "user_id": 3499571,
+                "link": "https://stackoverflow.com/users/3499571/user3499571",
+                "reputation": 15,
+                "display_name": "user3499571"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872790,
+            "edited": false,
+            "creation_date": 1396647043,
+            "comment_id": 34900125
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/6pRI7.png?s=256",
+                "account_id": 1894536,
+                "user_type": "registered",
+                "user_id": 1711796,
+                "link": "https://stackoverflow.com/users/1711796/bernhard-barker",
+                "reputation": 55749,
+                "display_name": "Bernhard Barker",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872790,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2db2480c305336729cf382d8d0f6eb88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4279833,
+                "user_type": "registered",
+                "user_id": 3499571,
+                "link": "https://stackoverflow.com/users/3499571/user3499571",
+                "reputation": 15,
+                "display_name": "user3499571"
+            },
+            "edited": false,
+            "creation_date": 1396646583,
+            "comment_id": 34899907
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2db2480c305336729cf382d8d0f6eb88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4279833,
+                "user_type": "registered",
+                "user_id": 3499571,
+                "link": "https://stackoverflow.com/users/3499571/user3499571",
+                "reputation": 15,
+                "display_name": "user3499571"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872790,
+            "edited": false,
+            "creation_date": 1396646154,
+            "comment_id": 34899683
+        }
+    ]}
+}

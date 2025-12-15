@@ -1,0 +1,159 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/478a313e26473d9ee919ca026a33d796?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 28828413,
+            "user_type": "registered",
+            "user_id": 22079441,
+            "link": "https://stackoverflow.com/users/22079441/juicewizard",
+            "reputation": 3,
+            "display_name": "JuiceWizard"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/78812340/find-all-pageable-entities-with-only-specific-attributes-selected",
+        "last_activity_date": 1722411550,
+        "creation_date": 1722350114,
+        "answer_count": 0,
+        "title": "Find all Pageable entities with only specific attributes selected",
+        "body": "<p>As the title described, I'm having trouble in selecting only the data I want from a database given my entity classes:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Entity(name = &quot;Movie&quot;)\n@Table(name = &quot;movie&quot;)\npublic class Movie implements Serializable {\n    \n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;\n\n    @NotBlank\n    @Size(max = 300)\n    @Column(name = &quot;title&quot;, nullable = false, length = 300)\n    private String title;\n\n    @NotBlank\n    @Size(max = 1000)\n    @Column(name = &quot;description&quot;, nullable = false, length = 1000)\n    private String description;\n\n    @ManyToMany(targetEntity = Genre.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})\n    @JoinTable(name = &quot;movie_genres&quot;,\n            joinColumns = @JoinColumn(name = &quot;movie_id&quot;, referencedColumnName = &quot;id&quot;, nullable = false),\n            inverseJoinColumns = @JoinColumn(name = &quot;genre_id&quot;, referencedColumnName = &quot;id&quot;, nullable = false))\n    private List&lt;Genre&gt; genres = new ArrayList&lt;&gt;();\n\n    //Constructors, getters and setters excluded for brevity\n\n}\n\n@Entity(name = &quot;Genre&quot;)\n@Table(name = &quot;genre&quot;)\npublic class Genre implements Serializable {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;\n\n    @NotBlank\n    @Size(max = 300)\n    @Column(name = &quot;name&quot;, nullable = false, length = 300)\n    private String name;\n\n    //Constructors, getters and setters excluded for brevity\n\n}\n<\/code><\/pre>\n<p>Is there a way to write a Spring Data JPA repository method that returns all paged movies, with only <code>id<\/code> and <code>title<\/code> selected (without <code>description<\/code>), and <code>genres<\/code> eagerly loaded in this case alone? Something akin to this method:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>List&lt;Movie&gt; findAll(Pageable pageable);\n<\/code><\/pre>\n<p>Note that i wish for it to return a <code>List<\/code>, and not <code>Page<\/code>, as <code>Page<\/code> makes another count request to the database, which I don't need. I am using Spring Boot version 3.3, with <code>spring-boot-starter-data-jpa<\/code> and <code>spring-boot-starter-web<\/code> as dependencies. My database is MySQL.<\/p>\n<p>I tried everything, from reading the Spring Data JPA User Guide, to trying different combinations with <code>@Query<\/code> and <code>@EntityGraph<\/code>, only for it to not compile at all, or to favour only one of them, selecting all eager data including <code>description<\/code>.<\/p>\n<p>For instance the following does not compile as it does not recognize the constructor, even though I have such constructor in Movie entity:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Query(&quot;SELECT new Movie(m.id,m.title,m.genres) FROM Movie m&quot;)\nList&lt;Movie&gt; findAllPageable(Pageable pageable);\n<\/code><\/pre>\n",
+        "question_id": 78812340,
+        "tags": [
+            "java",
+            "spring-boot",
+            "hibernate",
+            "jpa",
+            "spring-data-jpa"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 58,
+        "last_edit_date": 1722411550
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1182b1d5518a596d4e8cfe0567a65c4d?s=256&d=identicon&r=PG",
+                "account_id": 2792262,
+                "user_type": "registered",
+                "user_id": 2402272,
+                "link": "https://stackoverflow.com/users/2402272/john-bollinger",
+                "reputation": 190832,
+                "display_name": "John Bollinger",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 78812340,
+            "edited": false,
+            "creation_date": 1722432372,
+            "comment_id": 138959849
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e352e0232513fec6a1085044daa631be?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 14982591,
+                "user_type": "registered",
+                "user_id": 10816178,
+                "link": "https://stackoverflow.com/users/10816178/n-sarj",
+                "reputation": 434,
+                "display_name": "N Sarj"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 78812340,
+            "edited": false,
+            "creation_date": 1722421582,
+            "comment_id": 138958435
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/478a313e26473d9ee919ca026a33d796?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 28828413,
+                "user_type": "registered",
+                "user_id": 22079441,
+                "link": "https://stackoverflow.com/users/22079441/juicewizard",
+                "reputation": 3,
+                "display_name": "JuiceWizard"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 78812340,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e352e0232513fec6a1085044daa631be?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 14982591,
+                "user_type": "registered",
+                "user_id": 10816178,
+                "link": "https://stackoverflow.com/users/10816178/n-sarj",
+                "reputation": 434,
+                "display_name": "N Sarj"
+            },
+            "edited": false,
+            "creation_date": 1722419826,
+            "comment_id": 138958235
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/478a313e26473d9ee919ca026a33d796?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 28828413,
+                "user_type": "registered",
+                "user_id": 22079441,
+                "link": "https://stackoverflow.com/users/22079441/juicewizard",
+                "reputation": 3,
+                "display_name": "JuiceWizard"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 78812340,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1182b1d5518a596d4e8cfe0567a65c4d?s=256&d=identicon&r=PG",
+                "account_id": 2792262,
+                "user_type": "registered",
+                "user_id": 2402272,
+                "link": "https://stackoverflow.com/users/2402272/john-bollinger",
+                "reputation": 190832,
+                "display_name": "John Bollinger",
+                "accept_rate": 85
+            },
+            "edited": false,
+            "creation_date": 1722419590,
+            "comment_id": 138958202
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e352e0232513fec6a1085044daa631be?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 14982591,
+                "user_type": "registered",
+                "user_id": 10816178,
+                "link": "https://stackoverflow.com/users/10816178/n-sarj",
+                "reputation": 434,
+                "display_name": "N Sarj"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 78812340,
+            "edited": false,
+            "creation_date": 1722409289,
+            "comment_id": 138956867
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1182b1d5518a596d4e8cfe0567a65c4d?s=256&d=identicon&r=PG",
+                "account_id": 2792262,
+                "user_type": "registered",
+                "user_id": 2402272,
+                "link": "https://stackoverflow.com/users/2402272/john-bollinger",
+                "reputation": 190832,
+                "display_name": "John Bollinger",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 78812340,
+            "edited": false,
+            "creation_date": 1722350670,
+            "comment_id": 138952352
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

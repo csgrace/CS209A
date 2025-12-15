@@ -1,0 +1,354 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+            "account_id": 1467301,
+            "user_type": "registered",
+            "user_id": 1379803,
+            "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+            "reputation": 2819,
+            "display_name": "Ashish Jagtap",
+            "accept_rate": 40
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15271567/hibernate-not-updating-child-object-while-updating-parent-object",
+        "last_activity_date": 1363073623,
+        "creation_date": 1362660217,
+        "answer_count": 4,
+        "title": "Hibernate not updating child object while updating parent object",
+        "body": "<p>I have two tables parent and child has @oneTomany relationship between them.\nfollowing is my table structure.<\/p>\n\n<p><strong>Table Structure<\/strong> <\/p>\n\n<pre><code>CREATE TABLE `parent` (\n  `id_parent` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id_parent`)\n)\n\nCREATE TABLE `child` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) DEFAULT NULL,\n  `parent_id` int(3) NOT NULL,\n  PRIMARY KEY (`id`),\n  KEY `fk_parent_child` (`group_id`),\n  CONSTRAINT `fk_parent_child` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`id_parent`)\n)\n<\/code><\/pre>\n\n<p>I have created Entity classes for this as follows<\/p>\n\n<p><strong>Parent Class.<\/strong><\/p>\n\n<pre><code>@Entity\n@Table(name = \"parent\")\npublic class Parent {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    @Column(name = \"id_parent\")\n    private int id;\n\n    @Column(name = \"name\")\n    private String name;\n\n    @OneToMany(mappedBy = \"defaultchild\", fetch = FetchType.EAGER)\n    @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.MERGE })\n    private Set&lt;Child&gt; childs;\n\n    //setter and getters.\n}\n<\/code><\/pre>\n\n<p><strong>Child Class.<\/strong><\/p>\n\n<pre><code>@Entity\n@Table (name = \"child\")\npublic class Report {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    @Column (name = \"id\")\n    private int id;\n    @Column (name = \"name\")\n    private String name;\n\n    @ManyToOne\n    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE,org.hibernate.annotations.CascadeType.MERGE})\n    @JoinColumn(name=\"parent_id\")\n    private Parent defaultchild;    \n\n    @ManyToMany(fetch = FetchType.LAZY)\n    @JoinTable(name = \"group\",joinColumns={@JoinColumn(name=\"fk_child_id\")},inverseJoinColumns={@JoinColumn(name=\"fk_group_id\")})\n    private Set&lt;XXX&gt; groups = new HashSet&lt;XXX&gt;(0);\n    //Setter and Getter methods\n}\n<\/code><\/pre>\n\n<p><strong>Service Class<\/strong><\/p>\n\n<pre><code>public UIGroup getParentByName(String name) {\n    return DAO.getParentByName(name);\n}\n\n@Transactional(readOnly = false, propagation = Propagation.REQUIRED)\npublic boolean updateParent(Parent parent) {\n    return DAO.updateParent(parent);\n}\n\n\n@Transactional(readOnly = false, propagation = Propagation.REQUIRED)\npublic boolean deleteParent(Parent parent) {\n    return DAO.deleteParent(parent);\n}\n<\/code><\/pre>\n\n<p><strong>DAO Class.<\/strong><\/p>\n\n<pre><code>public UIGroup getParentByName(String name) {\n    Query query;\n    Parent parent = null;\n    try {\n        String queryString = \" from Parent where name = :name\";\n        query = sessionFactory.getCurrentSession().createQuery(queryString);\n        query.setParameter(\"name\", name);\n        uiGroup = (Parent) query.uniqueResult();\n    } catch (Exception e) {\n        logger.error(e);\n    }\n    return parent;\n}\n\npublic boolean updateParent(Parent parent) {\n    boolean result = true;\n    Session session = null;\n    Transaction tx = null;\n    try {\n        session = sessionFactory.getCurrentSession();\n        tx = session.beginTransaction();\n        session.merge(parent);\n        tx.commit();\n        session.flush();\n    } catch (HibernateException e) {\n        result = false;\n        logger.error(e);\n    }// end of try-catch block.\n    return result;\n}\n\n\npublic boolean deleteParent(Parent parent) {\n    boolean result = true;\n    Session session = null;\n    try {\n        session = sessionFactory.getCurrentSession();\n        session.delete(parent);\n    } catch (HibernateException e) {\n        result = false;\n        logger.error( + e);\n    }\n    return result;\n}\n<\/code><\/pre>\n\n<p>but when I am trying to invoke following code <\/p>\n\n<pre><code>Parent otherParent = Service.getParentByName(\"Other\");\nParent parent = Service.getParentByName(\"XYZ\");\n//here I am assigning childs assign to XYX parent to other Parent\nSet&lt;Child&gt; childs = new TreeSet&lt;Child&gt;(Child.COMPARE_BY_ID);\nchilds.addAll(otherParent.getchildes());\nchilds.addAll(parent.getchilde());\notherParent.setChilds(childs);\nService.updateParent(otherParent);\nService.deleteParent(parent);\n<\/code><\/pre>\n\n<p>I am getting following error.<\/p>\n\n<p><em><strong>Error<\/em><\/strong><\/p>\n\n<pre><code>java.sql.BatchUpdateException: Cannot delete or update a parent row: a foreign key constraint fails (`database`.`child`, CONSTRAINT `fk_parent_child` FOREIGN KEY (`parent_id`) REFERENCES `child` (`id_parent`))\n<\/code><\/pre>\n\n<p>which means my update code is not working properly following is log of Service.updateParent(otherParent) statement<\/p>\n\n<pre><code>SELECT parent0_.id_parent AS id1_135_1_, parent0_.name AS name135_1_, childs1_.parent_id AS parent4_3_, childs1_.id AS id3_, childs1_.id AS id143_0_, childs1_.child_name AS child2_143_0_, childs1_.is_sea_child AS is3_143_0_, childs1_.parent_id AS parent4_143_0_ \nFROM ui_parent parent0_ \nLEFT OUTER JOIN child childs1_ ON parent0_.id_ui_parent=childs1_.parent_id \nWHERE parent0_.id_parent=1\n<\/code><\/pre>\n\n<p>please help me I don't know what went wrong with this code \nthanks in advance.<\/p>\n",
+        "question_id": 15271567,
+        "tags": [
+            "java",
+            "hibernate",
+            "jpa",
+            "orm",
+            "annotations"
+        ],
+        "score": 3,
+        "accepted_answer_id": 15298034,
+        "is_answered": true,
+        "view_count": 27735,
+        "last_edit_date": 1362736870
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0215f0a0870cd3011a2ace4a3cd574ec?s=256&d=identicon&r=PG",
+            "account_id": 55074,
+            "user_type": "registered",
+            "user_id": 164909,
+            "link": "https://stackoverflow.com/users/164909/wallenborn",
+            "reputation": 4263,
+            "display_name": "wallenborn",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 15271567,
+        "edited": false,
+        "creation_date": 1362757918,
+        "comment_id": 21589481
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kLjdY.png?s=256",
+                "account_id": 2357529,
+                "user_type": "registered",
+                "user_id": 2065017,
+                "link": "https://stackoverflow.com/users/2065017/blagae",
+                "reputation": 2412,
+                "display_name": "blagae",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1362661508,
+            "creation_date": 1362661508,
+            "body": "<p>If there is no specific reason why you chose to limit your <code>@Cascade<\/code> type, you can choose to switch to ALL.<\/p>\n\n<pre><code>  @Cascade({ CascadeType.ALL})\n<\/code><\/pre>\n\n<p>Or even just<\/p>\n\n<pre><code>  @OneToMany(cascade=CascadeType.ALL, mappedBy=\"defaultchild\")\n<\/code><\/pre>\n\n<p>EDIT: you have misspelled 'parent' a few times, it won't hurt to fix that either.<\/p>\n",
+            "answer_id": 15272008,
+            "question_id": 15271567
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0215f0a0870cd3011a2ace4a3cd574ec?s=256&d=identicon&r=PG",
+                "account_id": 55074,
+                "user_type": "registered",
+                "user_id": 164909,
+                "link": "https://stackoverflow.com/users/164909/wallenborn",
+                "reputation": 4263,
+                "display_name": "wallenborn",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1362758935,
+            "creation_date": 1362758147,
+            "body": "<p>I would probably just write a DAO method moveAllChildren(String srcName, String dstName), like this:<\/p>\n\n<pre><code>public class ParentDAO {\n    @PersistenceContext\n    private EntityManager em;\n\n    public Parent findParentByName(name) {\n      TypedQuery&lt;Parent&gt; q = em.createQuery(\"select p from Parent where p.name = :name\", Parent.class);\n      return q.setParameter(\"name\", name).getSingleResult();\n    }\n\n    public void moveAllChildren(String srcName, String dstName) {\n      Parent src = findParentByName(srcName);\n      Parent dst = findParentByName(dstName);\n      Set&lt;Child&gt; children = new HashSet&lt;Child&gt;();\n      for (Child c: src.getChildren()) {\n        children.add(c);\n      }\n      src.getChildren().removeAll(children);\n      dst.getChildren().addAll(children);\n    }\n}\n<\/code><\/pre>\n\n<p>In General, when using Cascading, it is Good Practice to add and remove the children explicitly, rather than to say dst.setChildren(allChildren), to give JPA a chance to manage both sides of the Relation. If you don't do that, you risk that a child still thinks src is their parent, and then you'll likely to see a constraint violation from your database.<\/p>\n\n<p>Additionally, it is a Good Idea to try to let JPA manage as much of your entity stuff as possible. So i'd rather not have the application call a service call a DAO to retrieve the parents only to move their children and then call the same service call the same DAO to merge these changes into the database. You're better off implementing this as a low-level operation on the DAO level and then add a service that calls that to handle the @Transaction.<\/p>\n",
+            "answer_id": 15298034,
+            "question_id": 15271567,
+            "last_edit_date": 1362758935
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a30df8927247bb158fb3cc9ba12a9280?s=256&d=identicon&r=PG",
+                "account_id": 188555,
+                "user_type": "registered",
+                "user_id": 427321,
+                "link": "https://stackoverflow.com/users/427321/bal%c3%a1zs-n%c3%a9meth",
+                "reputation": 6697,
+                "display_name": "Bal&#225;zs N&#233;meth",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1362744872,
+            "creation_date": 1362744872,
+            "body": "<p>You're trying to delete <code>parent<\/code> but it still has <code>childs<\/code> probably. Try to empty the <code>childs<\/code> collection before removal:<\/p>\n\n<pre><code>for(Child child : parent.getChilds()){\n    child.setParent(null);\n}\nparent.getChilds().clear();\nService.deleteParent(parent);\n<\/code><\/pre>\n\n<p>You can't delete <code>parent<\/code> if a <code>Child<\/code> still has a reference on it.<\/p>\n",
+            "answer_id": 15293788,
+            "question_id": 15271567
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                "account_id": 1467301,
+                "user_type": "registered",
+                "user_id": 1379803,
+                "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                "reputation": 2819,
+                "display_name": "Ashish Jagtap",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1363073623,
+            "creation_date": 1363073623,
+            "body": "<p>finaly I got the solution with the help of wallenborn and following link<\/p>\n\n<p><a href=\"https://stackoverflow.com/questions/814474/jpa-not-saving-foreign-key-to-onetomany-relation\">JPA not saving foreign key to @OneToMany relation<\/a><\/p>\n\n<p>here are the changes I have made in my classes.<\/p>\n\n<p><strong>Entity Class.<\/strong> <\/p>\n\n<pre><code>@Entity\n@Table(name = \"parent\")\npublic class Parent {\n\n    .....   \n\n    @OneToMany(cascade = CascadeType.PERSIST,mappedBy = \"defaultchild\", fetch = FetchType.EAGER)\n    private Set&lt;Child&gt; childs;\n\n    //setter and getters.\n}\n\n@Entity\n@Table (name = \"child\")\npublic class Child {\n\n    ....\n\n    @ManyToOne\n    @JoinColumn(name=\"parent_id\")\n    private Child defaultchild; \n\n    //Setter and Getter methods\n}\n<\/code><\/pre>\n\n<p>I have changed my service and DAO classes suggested by wallenborn as follows<\/p>\n\n<p><strong>Service Class.<\/strong><\/p>\n\n<pre><code>@Transactional(readOnly = false, propagation = Propagation.REQUIRED)\npublic void moveAllChildren(String srcName, String dstName) {\n    DAO.moveAllChildren(srcName, dstName);\n} \n<\/code><\/pre>\n\n<p><strong>DAO Class<\/strong><\/p>\n\n<pre><code>public Parent findParentByName(name) {\n      TypedQuery&lt;Parent&gt; q = em.createQuery(\"select p from Parent where p.name = :name\", Parent.class);\n      return q.setParameter(\"name\", name).getSingleResult();\n    }\n\n    public void moveAllChildren(String srcName, String dstName) {\n      Parent src = findParentByName(srcName);\n      Parent dst = findParentByName(dstName);\n      Set&lt;Child&gt; children = new HashSet&lt;Child&gt;();\n      for (Child c: src.getChildren()) {\n        children.add(c);\n    }\n    src.getChildren().removeAll(children);\n    dst.getChildren().addAll(children);\n}\n<\/code><\/pre>\n",
+            "answer_id": 15355640,
+            "question_id": 15271567,
+            "last_edit_date": 1495540229
+        }
+    ],
+    "answer_comments": {
+        "15298034": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15298034,
+                "edited": false,
+                "creation_date": 1363073774,
+                "comment_id": 21693181
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/0215f0a0870cd3011a2ace4a3cd574ec?s=256&d=identicon&r=PG",
+                    "account_id": 55074,
+                    "user_type": "registered",
+                    "user_id": 164909,
+                    "link": "https://stackoverflow.com/users/164909/wallenborn",
+                    "reputation": 4263,
+                    "display_name": "wallenborn",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15298034,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "edited": false,
+                "creation_date": 1363015388,
+                "comment_id": 21668977
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/0215f0a0870cd3011a2ace4a3cd574ec?s=256&d=identicon&r=PG",
+                    "account_id": 55074,
+                    "user_type": "registered",
+                    "user_id": 164909,
+                    "link": "https://stackoverflow.com/users/164909/wallenborn",
+                    "reputation": 4263,
+                    "display_name": "wallenborn",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15298034,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "edited": false,
+                "creation_date": 1363015168,
+                "comment_id": 21668811
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15298034,
+                "edited": false,
+                "creation_date": 1363001654,
+                "comment_id": 21660463
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15298034,
+                "edited": false,
+                "creation_date": 1362900106,
+                "comment_id": 21629906
+            }
+        ],
+        "15272008": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15272008,
+                "edited": false,
+                "creation_date": 1362665259,
+                "comment_id": 21546223
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15272008,
+                "edited": false,
+                "creation_date": 1362664809,
+                "comment_id": 21545913
+            }
+        ],
+        "15293788": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15293788,
+                "edited": false,
+                "creation_date": 1362746931,
+                "comment_id": 21583175
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a30df8927247bb158fb3cc9ba12a9280?s=256&d=identicon&r=PG",
+                    "account_id": 188555,
+                    "user_type": "registered",
+                    "user_id": 427321,
+                    "link": "https://stackoverflow.com/users/427321/bal%c3%a1zs-n%c3%a9meth",
+                    "reputation": 6697,
+                    "display_name": "Bal&#225;zs N&#233;meth",
+                    "accept_rate": 71
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15293788,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "edited": false,
+                "creation_date": 1362746575,
+                "comment_id": 21582985
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RI0d0.jpg?s=256",
+                    "account_id": 1467301,
+                    "user_type": "registered",
+                    "user_id": 1379803,
+                    "link": "https://stackoverflow.com/users/1379803/ashish-jagtap",
+                    "reputation": 2819,
+                    "display_name": "Ashish Jagtap",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15293788,
+                "edited": false,
+                "creation_date": 1362746171,
+                "comment_id": 21582770
+            }
+        ]
+    }
+}

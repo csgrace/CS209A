@@ -1,0 +1,222 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/987760981297688/picture?type=large",
+            "account_id": 7456415,
+            "user_type": "registered",
+            "user_id": 5669550,
+            "link": "https://stackoverflow.com/users/5669550/eduardo-krakhecke",
+            "reputation": 385,
+            "display_name": "Eduardo Krakhecke",
+            "accept_rate": 56
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47887908/how-to-set-user-in-audit-using-revision-listener",
+        "last_activity_date": 1513690168,
+        "creation_date": 1513689452,
+        "answer_count": 1,
+        "title": "How to set user in audit using Revision Listener",
+        "body": "<p>I am implementing audits in my application. So far I have been successful in recording the activities and the records in the audit table. The issue is that I am not able to implement the user.\nI researched in many places, I know it's simple, maybe I just do not see something, and at this point you can help me.\nI am using Hibernate Envers and the Revision Entity class\nim using Spring boot. <\/p>\n\n<p>this is my class that i get user <\/p>\n\n<pre><code>@RestController\npublic class LoginController {\n\n    @Autowired\n    UsuariosService uService;\n\n    @Autowired\n     PermissoesPaginasService ppService; \n\n    @Autowired\n    EntidadesAdministradoresService eaService; \n\n    @Autowired\n    UsuariosService usuariosService;\n\n    @RequestMapping(value = \"/autenticar\", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, method = RequestMethod.POST)\n    public LoginResponse autenticar(@RequestBody Usuarios usuarios)\n            throws ServletException {\n\n        // verifica se foram digitados o login e senha no front end\n        if (usuarios.getLogin() == null\n                || usuarios.getSenha() == null) {\n            throw new  ServletException(\"Nome ou senha obrigatório\");\n\n        }\n\n        // busca no banco de dados\n        Usuarios usuariosAutenticado = uService.buscarPorLogin(usuarios.getLogin());\n\n\n        if (usuariosAutenticado == null) {\n            return new LoginResponse(\"naoEncontrado\");\n        }\n\n\n        // compara a senha vinda do banco de dados com a senha vinda da tela\n        if (!usuariosAutenticado.getSenha()\n                .equals(usuarios.getSenha())) {\n            return new LoginResponse(\"senhaInvalida\");\n        }\n\n        String token = Jwts.builder().setSubject(usuariosAutenticado.getLogin())\n                .signWith(SignatureAlgorithm.HS512, \"digi2fred\")\n                .setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000)).compact();\n\n\n\n        return new LoginResponse(token);\n    }\n\n\n    private class LoginResponse {\n        public String token;\n\n        public LoginResponse(String token ) {\n            this.token = token;\n\n        }\n\n        public String getToken() {\n            return token;\n        }\n\n    }\n}\n<\/code><\/pre>\n\n<p>my class UsuarioRevEntity <\/p>\n\n<pre><code>@Entity\n@Table(name = \"usuario_rev_entity\", schema = \"aud\")\n@RevisionEntity(UsuarioListener.class)\npublic class UsuarioRevEntity {\n\n        @Id\n        @GeneratedValue(strategy = GenerationType.IDENTITY)\n        @RevisionNumber\n        private int id;\n\n        @RevisionTimestamp\n        private long timestamp;\n\n        private String usuario;\n\n\n\n        public int getId() {\n            return id;\n        }\n\n        public void setId(int id) {\n            this.id = id;\n        }\n\n        public long getTimestamp() {\n            return timestamp;\n        }\n\n        public void setTimestamp(long timestamp) {\n            this.timestamp = timestamp;\n        }\n\n        public String getUsuario() {\n            return usuario;\n        }\n\n        public void setUsuario(String usuario) {\n            this.usuario = usuario;\n        }\n\n\n}\n<\/code><\/pre>\n\n<p>and UsuarioListener <\/p>\n\n<pre><code>public class UsuarioListener implements RevisionListener {\n\n\n    public void newRevision(Object revisionEntity) {\n        UsuarioRevEntity usuarioRevEntity = (UsuarioRevEntity) revisionEntity;\n\n    // i guess that here i need to pass user log.\n    }\n\n\n\n\n}\n<\/code><\/pre>\n",
+        "question_id": 47887908,
+        "tags": [
+            "java",
+            "spring",
+            "hibernate",
+            "hibernate-envers"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 4597
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/13b37f856caad16aa521d0609e6f41af?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11026111,
+            "user_type": "registered",
+            "user_id": 8098978,
+            "link": "https://stackoverflow.com/users/8098978/lzagkaretos",
+            "reputation": 2920,
+            "display_name": "lzagkaretos"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1513690168,
+        "creation_date": 1513690168,
+        "body": "<p>Yes this is exactly where you have to set user information to be audited. This information can be extracted from <code>SecurityContextHolder<\/code> and how you get <code>username<\/code> depends on your explicit implementation.<\/p>\n\n<pre><code>public class UsuarioListener implements RevisionListener {\n\n    @Override\n    public void newRevision(Object revisionEntity) {\n\n        // Get username from SecurityContextHolder\n        // SecurityContextHolder.getContext().getAuthentication();\n        String usuario = ...\n\n        UsuarioRevEntity usuarioRevEntity = (UsuarioRevEntity) revisionEntity;\n        usuarioRevEntity.setUsuario(usuario);\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 47888114,
+        "question_id": 47887908
+    }],
+    "answer_comments": {"47888114": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/13b37f856caad16aa521d0609e6f41af?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11026111,
+                "user_type": "registered",
+                "user_id": 8098978,
+                "link": "https://stackoverflow.com/users/8098978/lzagkaretos",
+                "reputation": 2920,
+                "display_name": "lzagkaretos"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513750063,
+            "comment_id": 82766001
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/987760981297688/picture?type=large",
+                "account_id": 7456415,
+                "user_type": "registered",
+                "user_id": 5669550,
+                "link": "https://stackoverflow.com/users/5669550/eduardo-krakhecke",
+                "reputation": 385,
+                "display_name": "Eduardo Krakhecke",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513711719,
+            "comment_id": 82754378
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/987760981297688/picture?type=large",
+                "account_id": 7456415,
+                "user_type": "registered",
+                "user_id": 5669550,
+                "link": "https://stackoverflow.com/users/5669550/eduardo-krakhecke",
+                "reputation": 385,
+                "display_name": "Eduardo Krakhecke",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513697037,
+            "comment_id": 82746415
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/13b37f856caad16aa521d0609e6f41af?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11026111,
+                "user_type": "registered",
+                "user_id": 8098978,
+                "link": "https://stackoverflow.com/users/8098978/lzagkaretos",
+                "reputation": 2920,
+                "display_name": "lzagkaretos"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513695803,
+            "comment_id": 82745618
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/987760981297688/picture?type=large",
+                "account_id": 7456415,
+                "user_type": "registered",
+                "user_id": 5669550,
+                "link": "https://stackoverflow.com/users/5669550/eduardo-krakhecke",
+                "reputation": 385,
+                "display_name": "Eduardo Krakhecke",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513695038,
+            "comment_id": 82745122
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/987760981297688/picture?type=large",
+                "account_id": 7456415,
+                "user_type": "registered",
+                "user_id": 5669550,
+                "link": "https://stackoverflow.com/users/5669550/eduardo-krakhecke",
+                "reputation": 385,
+                "display_name": "Eduardo Krakhecke",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513694579,
+            "comment_id": 82744826
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/yxPQS.jpg?s=256",
+                "account_id": 1714975,
+                "user_type": "registered",
+                "user_id": 1572269,
+                "link": "https://stackoverflow.com/users/1572269/naros",
+                "reputation": 21303,
+                "display_name": "Naros",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513693407,
+            "comment_id": 82743985
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/13b37f856caad16aa521d0609e6f41af?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11026111,
+                "user_type": "registered",
+                "user_id": 8098978,
+                "link": "https://stackoverflow.com/users/8098978/lzagkaretos",
+                "reputation": 2920,
+                "display_name": "lzagkaretos"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "reply_to_user": {
+                "profile_image": "https://graph.facebook.com/987760981297688/picture?type=large",
+                "account_id": 7456415,
+                "user_type": "registered",
+                "user_id": 5669550,
+                "link": "https://stackoverflow.com/users/5669550/eduardo-krakhecke",
+                "reputation": 385,
+                "display_name": "Eduardo Krakhecke",
+                "accept_rate": 56
+            },
+            "edited": false,
+            "creation_date": 1513690746,
+            "comment_id": 82742386
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/987760981297688/picture?type=large",
+                "account_id": 7456415,
+                "user_type": "registered",
+                "user_id": 5669550,
+                "link": "https://stackoverflow.com/users/5669550/eduardo-krakhecke",
+                "reputation": 385,
+                "display_name": "Eduardo Krakhecke",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47888114,
+            "edited": false,
+            "creation_date": 1513690555,
+            "comment_id": 82742253
+        }
+    ]}
+}

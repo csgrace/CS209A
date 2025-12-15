@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/0u454.jpg?s=256",
+            "account_id": 22705,
+            "user_type": "registered",
+            "user_id": 56285,
+            "link": "https://stackoverflow.com/users/56285/jonik",
+            "reputation": 82096,
+            "display_name": "Jonik",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/4449874/how-to-conditionally-include-one-of-two-files-in-a-war-package-with-buildr",
+        "last_activity_date": 1292455500,
+        "creation_date": 1292416165,
+        "answer_count": 1,
+        "title": "How to conditionally include one of two files in a .war package with Buildr?",
+        "body": "<p>We're using Buildr to package an application as a <a href=\"http://en.wikipedia.org/wiki/WAR_%28Sun_file_format%29\" rel=\"nofollow\">.war<\/a> file. To streamline the automated deployment process further, I'd like to conditionally select one of these two files (from the directory <code>src/main/resources<\/code>)...<\/p>\n\n<ul>\n<li><code>database-hsql.properties<\/code><\/li>\n<li><code>database-postgres.properties<\/code> <\/li>\n<\/ul>\n\n<p>...and have it included in the resulting .war with the name <code>database.properties<\/code>. (In the same place inside the WAR, namely <code>WEB-INF/classes/<\/code>, where files from <code>src/main/resources<\/code> now end up.)<\/p>\n\n<p>Any simple way to do this? Any approach would be fine &mdash; e.g. parameterising \"package\" (somehow) or defining two different tasks/targets (I'm not sure of the terminology) such as \"package-hsql\" &amp; \"package-pgsql\" &mdash; as long as it works and is simple enough.<\/p>\n\n<p>Relevant bits of <code>buildfile<\/code>:<\/p>\n\n<pre><code>load 'dependencies' \nrequire 'buildr/hibernate'\n\ndesc \"...\"\ndefine \"foo\" do\n\n  project.version = VERSION_NUMBER\n  project.group = GROUP\n  manifest[\"Implementation-Vendor\"] = COPYRIGHT\n  compile.with WICKET,GUAVA,GSON, ... [many more libs]\n  test.with MOCKITO\n  resources\n\n  test.compile.with SERVLET,_('src/main/webapp'),_('src/main/resources')\n  package(:war).with(:libs=&gt; [WICKET,GUAVA,GSON, ... ])\n\nend\n<\/code><\/pre>\n\n<p><strong>Bonus question<\/strong>: how to execute an arbitrary shell command (I'd use something involving e.g. <code>&gt;&gt;<\/code> or <code>sed<\/code>) in each of the two cases to make changes to another config file? (I'd also want to \"inject\" some db settings to <code>applicationContext.xml<\/code> from another file; this would be preferable to keeping two copies of that file in VCS with mostly identical content.)<\/p>\n\n<p>Sorry if this is too basic; I'm a total newbie with Buildr, and don't really know Ruby. (And yes, it's not an optimal situation to be using a tool that no current team member is proficient with...) If anything needs clarifying, please point it out!<\/p>\n",
+        "question_id": 4449874,
+        "tags": [
+            "java",
+            "war",
+            "buildr"
+        ],
+        "score": 1,
+        "accepted_answer_id": 4455997,
+        "is_answered": true,
+        "view_count": 230
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/292ea489740972fd2437b28bbfbccac8?s=256&d=identicon&r=PG",
+            "account_id": 51501,
+            "user_type": "registered",
+            "user_id": 153896,
+            "link": "https://stackoverflow.com/users/153896/rhett-sutphin",
+            "reputation": 1045,
+            "display_name": "Rhett Sutphin"
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1292455500,
+        "creation_date": 1292455500,
+        "body": "<p>The usual way to parameterize a buildr build is with environment variables.  So for instance you might design your build to be executed like so:<\/p>\n\n<pre><code>$ buildr package DATABASE=postgres\n<\/code><\/pre>\n\n<p>In your buildfile you might then have:<\/p>\n\n<pre><code>ENV['DATABASE'] ||= 'hsql' # this line makes the default 'hsql'\n\ndefine \"foo\" do\n  # the rest of the definition\n\n  resources.enhance do\n    cp _(:source, :main, :resources, \"database-#{ENV['DATABASE']}.properties\"), _(:target, :resources, \"database.properties\")\n  end\nend\n<\/code><\/pre>\n\n<p>This is the simplest solution; one thing you might consider a drawback is that it will copy the two <code>database-*.properties<\/code> files in addition to the <code>database.properties<\/code> file that you'll actually use.  If that's a problem it could be worked around at the cost of some more complexity.<\/p>\n\n<p><strong>Bonus answer<\/strong>:  You can execute an arbitrary shell command using <code>system<\/code>.  E.g., at the cost of subshelling I could have implemented the above as:<\/p>\n\n<pre><code>resources.enhance do\n  system(\"cp '#{_(:source, :main, :resources, \"database-#{ENV['DATABASE']}.properties\")}' '#{_(:target, :resources, \"database.properties\")}'\")\nend\n<\/code><\/pre>\n\n<p>If you are wanting to inject properties into a configuration file, you might want to look at Buildr's <a href=\"http://buildr.apache.org/building.html#resources\" rel=\"nofollow\">filter<\/a> mechanism.<\/p>\n",
+        "answer_id": 4455997,
+        "question_id": 4449874
+    }],
+    "answer_comments": {"4455997": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/0u454.jpg?s=256",
+            "account_id": 22705,
+            "user_type": "registered",
+            "user_id": 56285,
+            "link": "https://stackoverflow.com/users/56285/jonik",
+            "reputation": 82096,
+            "display_name": "Jonik",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "post_id": 4455997,
+        "edited": false,
+        "creation_date": 1292493654,
+        "comment_id": 4872416
+    }]}
+}

@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/44d6f3165880aef59eb1b7bf2a70e4f0?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4247165,
+            "user_type": "registered",
+            "user_id": 3475485,
+            "link": "https://stackoverflow.com/users/3475485/user3475485",
+            "reputation": 31,
+            "display_name": "user3475485",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22836865/splitting-files-w-r-t-input-file-mapreduce",
+        "last_activity_date": 1396539176,
+        "creation_date": 1396525998,
+        "answer_count": 1,
+        "title": "Splitting Files w.r.t input file MapReduce",
+        "body": "<h2>Can someBody Suggest me Whats wrong in the Following Code.<\/h2>\n\n<p>Can u help me how to get the Below output using this Mapreduce program??\nActually This code works fine but the output is not as expected... output is generated in two files but either in Name.txt file or  Age.txt file the output is swaping<\/p>\n\n<h2>Input File:<\/h2>\n\n<pre><code>Name:A\nAge:28\n\nName:B\nAge:25\n\nName:K\nAge:20\n\nName:P\nAge:18\n\nName:Ak\nAge:11\n\nName:N\nAge:14\n\nName:Kr\nAge:26\n\nName:Ra\nAge:27\n<\/code><\/pre>\n\n<p>And my output should split into Name and Age<\/p>\n\n<h2>Name File:<\/h2>\n\n<pre><code>Name:A\n\nName:B\n\nName:K\n\nName:P\n\nName:Ak\n\nName:N\n\nName:Kr\n\nName:Ra\n<\/code><\/pre>\n\n<h2>Age File:<\/h2>\n\n<pre><code>Age:28\n\nAge:25\n\nAge:20\n\nAge:18\n\nAge:11\n\nAge:14\n\nAge:26\n\nAge:27\n<\/code><\/pre>\n\n<h2>My Code :<\/h2>\n\n<h2>MyMapper.java<\/h2>\n\n<pre><code>import java.io.IOException;\nimport org.apache.hadoop.io.LongWritable;\nimport org.apache.hadoop.io.Text;\nimport org.apache.hadoop.mapred.MapReduceBase;\nimport org.apache.hadoop.mapred.Mapper;\nimport org.apache.hadoop.mapred.OutputCollector;\nimport org.apache.hadoop.mapred.Reporter;\n\n\npublic class MyMapper extends MapReduceBase implements Mapper&lt;LongWritable, Text,     Text, Text&gt; {\n            public void map(LongWritable key, Text value,OutputCollector&lt;Text, Text&gt; output, Reporter reporter) throws IOException {\n                    String [] dall=value.toString().split(\":\");\n\n                        output.collect(new Text(dall[0]),new Text(dall[1]));\n\n            }\n    }\n<\/code><\/pre>\n\n<h2>MyReducer.Java:<\/h2>\n\n<pre><code>import java.io.IOException;\nimport java.util.Iterator;\n\nimport org.apache.hadoop.io.Text;\nimport org.apache.hadoop.mapred.MapReduceBase;\nimport org.apache.hadoop.mapred.OutputCollector;\nimport org.apache.hadoop.mapred.Reducer;\nimport org.apache.hadoop.mapred.Reporter;\n\n\n\n    public class MyReducer extends MapReduceBase implements Reducer&lt;Text, Text, Text, Text&gt; {\n            public void reduce(Text key, Iterator&lt;Text&gt; values,OutputCollector&lt;Text, Text&gt; output, Reporter reporter) throws IOException {\n                    while (values.hasNext()) {\n                            output.collect(new Text(key),new Text(values.next()));\n\n                    }\n            }\n    }\n<\/code><\/pre>\n\n<h2>MultiFileOutput.java:<\/h2>\n\n<pre><code>import org.apache.hadoop.fs.Path;\nimport org.apache.hadoop.io.Text;\nimport org.apache.hadoop.mapred.lib.*;\n\n    public class MultiFileOutput extends MultipleTextOutputFormat&lt;Text, Text&gt;{\n        protected String generateFileNameForKeyValue(Text key, Text value,String name) {\n                   //return new Path(key.toString(), name).toString();\n                    return key.toString();\n            }\n            protected Text generateActualKey(Text key, Text value) {\n                             //return new Text(key.toString());\n                                return null;\n\n                  }\n    }\n<\/code><\/pre>\n\n<h2>MyDriver.java:<\/h2>\n\n<pre><code>import java.io.IOException;\nimport java.lang.Exception;\n\nimport org.apache.hadoop.fs.Path;\nimport org.apache.hadoop.io.LongWritable;\nimport org.apache.hadoop.io.Text;\n\nimport org.apache.hadoop.mapred.JobClient;\nimport org.apache.hadoop.mapred.JobConf;\nimport org.apache.hadoop.mapred.FileInputFormat;\nimport org.apache.hadoop.mapred.FileOutputFormat;\nimport org.apache.hadoop.mapred.TextInputFormat;\nimport org.apache.hadoop.mapred.TextOutputFormat;\nimport org.apache.hadoop.conf.Configuration;\nimport org.apache.hadoop.conf.Configured;\n\npublic class MyDriver{\n        public static void main(String[] args) throws Exception,IOException {\n\n\n            Configuration mycon=new Configuration();\n            JobConf conf = new JobConf(mycon,MyDriver.class);\n        //JobConf conf = new JobConf(MyDriver.class);\n\n            conf.setJobName(\"Splitting\");\n\n            conf.setMapperClass(MyMapper.class);\n            conf.setReducerClass(MyReducer.class);\n\n\n            conf.setInputFormat(TextInputFormat.class);\n            conf.setOutputFormat(MultiFileOutput.class);\n\n            conf.setOutputKeyClass(Text.class);\n            conf.setMapOutputKeyClass(Text.class);\n\n            //conf.setOutputValueClass(Text.class);\n\n            conf.setMapOutputValueClass(Text.class);\n\n\n\n\n            FileInputFormat.setInputPaths(conf,new Path(args[0]));\n            FileOutputFormat.setOutputPath(conf,new Path(args[1]));\n            JobClient.runJob(conf);\n            //System.err.println(JobClient.runJob(conf));\n\n    }\n}\n<\/code><\/pre>\n\n<p>ThankYou<\/p>\n",
+        "question_id": 22836865,
+        "tags": [
+            "java",
+            "hadoop",
+            "mapreduce"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 447,
+        "last_edit_date": 1396526120
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/CE2Aq.jpg?s=256",
+            "account_id": 3972822,
+            "user_type": "registered",
+            "user_id": 3276920,
+            "link": "https://stackoverflow.com/users/3276920/venkat",
+            "reputation": 1810,
+            "display_name": "Venkat"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1396539176,
+        "creation_date": 1396539176,
+        "body": "<p>Ok this is a bit more complicated use case than simple word count :)<\/p>\n\n<p>So what you need is a complex key &amp; a partitioner. And set number of reducers =2<\/p>\n\n<p>Your complex key could be a Text(concatenation of Name|A or Age|28) or CustomWritable (that has 2 instance variables holding type(Name or Age) &amp; value)<\/p>\n\n<p>In the mapper you create the Text or CustomWritable anfd set it as output key and value can be just the name of the person or his age.<\/p>\n\n<p>Create a partitioner (which implements org.apache.hadoop.mapred.Partitioner). In the getPartition method you basically decide based on your key which reducer it will go to.<\/p>\n\n<p>Hope this helps.<\/p>\n",
+        "answer_id": 22842365,
+        "question_id": 22836865
+    }],
+    "answer_comments": {}
+}

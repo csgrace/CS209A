@@ -1,0 +1,229 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bd34ea8e48edf36562db2816a6752916?s=256&d=identicon&r=PG",
+            "account_id": 81384,
+            "user_type": "registered",
+            "user_id": 229535,
+            "link": "https://stackoverflow.com/users/229535/frank",
+            "reputation": 10581,
+            "display_name": "Frank",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28563304/why-does-javas-areaequals-method-not-override-objectequals",
+        "last_activity_date": 1429513698,
+        "creation_date": 1424182100,
+        "answer_count": 2,
+        "title": "Why does Java&#39;s Area#equals method not override Object#equals?",
+        "body": "<p>I just ran into a problem caused by Java's <code>java.awt.geom.Area#equals(Area)<\/code> method. The problem can be simplified to the following unit test:<\/p>\n\n<pre><code>@org.junit.Test\npublic void testEquals() {\n    java.awt.geom.Area a = new java.awt.geom.Area();\n    java.awt.geom.Area b = new java.awt.geom.Area();\n    assertTrue(a.equals(b)); // -&gt; true\n\n    java.lang.Object o = b;\n    assertTrue(a.equals(o)); // -&gt; false\n}\n<\/code><\/pre>\n\n<p>After some head scratching and debugging, I finally saw in the JDK source, that the signature of the <code>equals<\/code> method in <code>Area<\/code> looks like this:<\/p>\n\n<pre><code>public boolean equals(Area other)\n<\/code><\/pre>\n\n<p>Note that it does <em>not<\/em> <code>@Override<\/code> the normal <code>equals<\/code> method from <code>Object<\/code>, but instead just overloads the method with a more concrete type. Thus, the two calls in the example above end up calling different implementations of <code>equals<\/code>.<\/p>\n\n<p>As this behavior has been present since Java 1.2, I assume it is not considered a bug. I am, therefore, more interested in finding out <em>why<\/em> the decision was made to <em>not<\/em> properly override the <code>equals<\/code> method, but at the same time provide an overloaded variant. (Another hint that this was an actual decision made is the absence of an overwritten <code>hashCode()<\/code> method.)<\/p>\n\n<p>My only guess would be that the authors feared that the slow <code>equals<\/code> implementation for areas is unsuitable for comparing equality when placing <code>Area<\/code>s in <code>Set<\/code>,<code>Map<\/code>,etc. datastructures. (In the above example, you could add <code>a<\/code> to a <code>HashSet<\/code>, and although <code>b<\/code> is equal to <code>a<\/code>, calling <code>contains(b)<\/code> will fail.) Then again, why did they not just name the questionable method in a way that does not clash with such a fundamental concept as the <code>equals<\/code> method ?<\/p>\n",
+        "question_id": 28563304,
+        "tags": [
+            "java",
+            "equals"
+        ],
+        "score": 23,
+        "accepted_answer_id": 29741320,
+        "is_answered": true,
+        "view_count": 841
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TAHVV.jpg?s=256",
+                "account_id": 5150443,
+                "user_type": "registered",
+                "user_id": 4125191,
+                "link": "https://stackoverflow.com/users/4125191/realskeptic",
+                "reputation": 34778,
+                "display_name": "RealSkeptic"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "post_id": 28563304,
+            "edited": false,
+            "creation_date": 1424184238,
+            "comment_id": 45438435
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5abecc5a16092419eb6a4e22a022d494?s=256&d=identicon&r=PG",
+                "account_id": 2417243,
+                "user_type": "registered",
+                "user_id": 2111035,
+                "link": "https://stackoverflow.com/users/2111035/chris-k",
+                "reputation": 11925,
+                "display_name": "Chris K"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28563304,
+            "edited": false,
+            "creation_date": 1424183376,
+            "comment_id": 45437787
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TAHVV.jpg?s=256",
+                "account_id": 5150443,
+                "user_type": "registered",
+                "user_id": 4125191,
+                "link": "https://stackoverflow.com/users/4125191/realskeptic",
+                "reputation": 34778,
+                "display_name": "RealSkeptic"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 28563304,
+            "edited": false,
+            "creation_date": 1424182509,
+            "comment_id": 45437242
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4c7239f187e20979466ddd502e21733f?s=256&d=identicon&r=PG",
+                "account_id": 449078,
+                "user_type": "registered",
+                "user_id": 843660,
+                "link": "https://stackoverflow.com/users/843660/dskrvk",
+                "reputation": 1388,
+                "display_name": "dskrvk"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "is_accepted": true,
+            "last_activity_date": 1429513698,
+            "creation_date": 1429513698,
+            "body": "<p>RealSkeptic linked to <a href=\"https://bugs.openjdk.java.net/browse/JDK-4391558\" rel=\"noreferrer\">JDK-4391558<\/a> in a comment above. The <a href=\"https://bugs.openjdk.java.net/browse/JDK-4391558?focusedCommentId=12555043&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-12555043\" rel=\"noreferrer\">comment<\/a> in that bug explains the reasoning:<\/p>\n\n<blockquote>\n  <p>The problem with overriding equals(Object) is that you must also\n  override hashCode() to return a value which guarantees that equals()\n  is true only if the hashcodes of the two objects are also equal.<\/p>\n<\/blockquote>\n\n<p>but:<\/p>\n\n<blockquote>\n  <p>The problem here is that Area.equals(Area) does not perform a very\n  straight-forward comparison. It painstakingly examines each and every\n  piece of geometry in the two Areas and tests to see if they cover the\n  same enclosed spaces. Two Area objects could have a completely\n  different description of the same enclosed space and equals(Area)\n  would detect that they were the same.<\/p>\n<\/blockquote>\n\n<p>So basically we're left with an array of not-so-pleasant options, such as:<\/p>\n\n<blockquote>\n  <p>deprecate equals(Area) and create an alternate name for that\n  operation, such as \"areasEqual\" so as to avoid the confusion.\n  Unfortunately, the old method would remain and would be linkable and\n  would trap many people who were intending to invoke the equals(Object)\n  version.<\/p>\n<\/blockquote>\n\n<p>or:<\/p>\n\n<blockquote>\n  <p>deprecate equals(Area) and change its implementation to be exactly\n  that of equals(Object) so as to avoid semantic problems if the wrong\n  method is called. Create a new method with a different name to avoid\n  confusion to implement the old functionality provided by equals(Area).<\/p>\n<\/blockquote>\n\n<p>or:<\/p>\n\n<blockquote>\n  <p>implement equals(Object) to call equals(Area) and implement a dummy\n  hashCode() which honors the equals/hashCode contract in a degenerate\n  way by returning a constant. This would make the hashCode method\n  essentially useless and make Area objects nearly useless as keys in a\n  HashMap or Hashtable.<\/p>\n<\/blockquote>\n\n<p>or other ways to modify the <code>equals(Area)<\/code> behavior that would either change its semantics or make it inconsistent with <code>hashCode<\/code>.<\/p>\n\n<p>Looks like changing this method is deemed by the maintainers to be neither feasible (because neither option outlined in the bug comment quite solves the problem) nor important (since the method, as implemented, is quite slow and would probably only ever return true when comparing an instance of an <code>Area<\/code> with itself, as the commenter suggests).<\/p>\n",
+            "answer_id": 29741320,
+            "question_id": 28563304
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/so6yh.png?s=256",
+                "account_id": 182881,
+                "user_type": "registered",
+                "user_id": 417896,
+                "link": "https://stackoverflow.com/users/417896/bar",
+                "reputation": 17490,
+                "display_name": "BAR",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1424191156,
+            "creation_date": 1424190841,
+            "body": "<p>&quot;Why does Java's Area#equals method not override Object#equals?&quot;<\/p>\n<p>Because overriding is not necessary for overloaded methods where the parameters are of differing types.<\/p>\n<blockquote>\n<p>An overridden method would have the exact same method name, return type, number of parameters, and types of parameters as the method in the parent class, and the only difference would be the definition of the method.<\/p>\n<\/blockquote>\n<p>This case does not compel us to override but it is overloading as it follows these rules:<\/p>\n<blockquote>\n<p>1.) The number of parameters is different for the methods.<\/p>\n<p>2.) The parameter types are different (like  changing a parameter that was a float to an int).<\/p>\n<\/blockquote>\n<p>&quot;why did they not just name the questionable method in a way that does not clash with such a fundamental concept as the equals method?&quot;<\/p>\n<p>Because this could trip people up going into the future.  If we had a time machine to the 90's we could do it without this concern.<\/p>\n",
+            "answer_id": 28566278,
+            "question_id": 28563304,
+            "last_edit_date": 1592644375
+        }
+    ],
+    "answer_comments": {"28566278": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/so6yh.png?s=256",
+                "account_id": 182881,
+                "user_type": "registered",
+                "user_id": 417896,
+                "link": "https://stackoverflow.com/users/417896/bar",
+                "reputation": 17490,
+                "display_name": "BAR",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28566278,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/bd34ea8e48edf36562db2816a6752916?s=256&d=identicon&r=PG",
+                "account_id": 81384,
+                "user_type": "registered",
+                "user_id": 229535,
+                "link": "https://stackoverflow.com/users/229535/frank",
+                "reputation": 10581,
+                "display_name": "Frank",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1430803354,
+            "comment_id": 48204979
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bd34ea8e48edf36562db2816a6752916?s=256&d=identicon&r=PG",
+                "account_id": 81384,
+                "user_type": "registered",
+                "user_id": 229535,
+                "link": "https://stackoverflow.com/users/229535/frank",
+                "reputation": 10581,
+                "display_name": "Frank",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28566278,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/yYnXS.png?s=256",
+                "account_id": 441056,
+                "user_type": "registered",
+                "user_id": 830964,
+                "link": "https://stackoverflow.com/users/830964/deepak-bala",
+                "reputation": 11195,
+                "display_name": "Deepak Bala",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1424240209,
+            "comment_id": 45463188
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/so6yh.png?s=256",
+                "account_id": 182881,
+                "user_type": "registered",
+                "user_id": 417896,
+                "link": "https://stackoverflow.com/users/417896/bar",
+                "reputation": 17490,
+                "display_name": "BAR",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28566278,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/yYnXS.png?s=256",
+                "account_id": 441056,
+                "user_type": "registered",
+                "user_id": 830964,
+                "link": "https://stackoverflow.com/users/830964/deepak-bala",
+                "reputation": 11195,
+                "display_name": "Deepak Bala",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1424191259,
+            "comment_id": 45443083
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/yYnXS.png?s=256",
+                "account_id": 441056,
+                "user_type": "registered",
+                "user_id": 830964,
+                "link": "https://stackoverflow.com/users/830964/deepak-bala",
+                "reputation": 11195,
+                "display_name": "Deepak Bala",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 28566278,
+            "edited": false,
+            "creation_date": 1424191047,
+            "comment_id": 45442953
+        }
+    ]}
+}

@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8244db0fbb8666f53df8e3daafae5a12?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 28161260,
+            "user_type": "registered",
+            "user_id": 21521157,
+            "link": "https://stackoverflow.com/users/21521157/ad-cir-ds",
+            "reputation": 21,
+            "display_name": "ad_cir_ds"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75881244/java-swagger-setting-explode-to-false-for-query-parameter-not-working-properly",
+        "last_activity_date": 1708096769,
+        "creation_date": 1680116968,
+        "answer_count": 1,
+        "title": "Java Swagger - setting explode to false for query parameter not working properly?",
+        "body": "<p>I'm trying to set explode to false for some of the endpoints on an API I'm working with, but it doesn't seem to be working properly. I am using the latest version of Swagger (2.2.9 as of this post). I've come up with the following contrived example, where explode is being ignored:<\/p>\n<pre><code>    @GET\n    @Path(&quot;bogus&quot;)\n    @JSONP(queryParam = &quot;callback&quot;)\n    public void bogus(\n            @Parameter(description = &quot;Extended options&quot;, in = ParameterIn.QUERY,\n                    explode = Explode.FALSE,\n                    style = ParameterStyle.FORM\n            )\n            @QueryParam(&quot;extendedOptions&quot;) String extendedOptions) {\n\n    }\n<\/code><\/pre>\n<p>In general, I would like to have some specific options for the user to choose from defined in our spec, but let them know they need to include those in a comma-separated format. Code example:<\/p>\n<pre><code>    @GET\n    @Path(&quot;bogus&quot;)\n    @JSONP(queryParam = &quot;callback&quot;)\n    public void bogus(\n            @Parameter(description = &quot;Extended options&quot;, in = ParameterIn.QUERY,\n                    explode = Explode.FALSE,\n                    style = ParameterStyle.FORM\n                    array = @ArraySchema(schema = @Schema(type = &quot;array&quot;, allowableValues = {&quot;first&quot;, &quot;second&quot;, &quot;third&quot;}))\n            )\n            @QueryParam(&quot;extendedOptions&quot;) String extendedOptions) {\n\n    }\n<\/code><\/pre>\n<p>Where I'm hoping the spec will let the user know they need to format extendedOptions like this:<\/p>\n<pre><code>myapi.com/SomeStuffHere?extendedOptions=first,second,third\n<\/code><\/pre>\n<p>Not quite sure if I'm doing something wrong here, or if this option isn't completely supported in Swagger. My implementation seems to fit the documentation as far as I can tell.<\/p>\n",
+        "question_id": 75881244,
+        "tags": [
+            "java",
+            "swagger",
+            "openapi"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 1412,
+        "last_edit_date": 1680117097
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8a0e826b4975c0e04d46c1e6eea39657?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 738442,
+            "user_type": "registered",
+            "user_id": 871653,
+            "link": "https://stackoverflow.com/users/871653/sasynkamil",
+            "reputation": 944,
+            "display_name": "sasynkamil",
+            "accept_rate": 90
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1708096769,
+        "creation_date": 1708096264,
+        "body": "<p>Finally I found working solution for my case. Fortunately I don't need to set mediaType to application/x-www-form-urlencoded as mentioned here <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.2.md#user-content-encodingexplode\" rel=\"nofollow noreferrer\">OpenApi doc<\/a>. Also there is some open bug for this: <a href=\"https://github.com/swagger-api/swagger-core/issues/4065\" rel=\"nofollow noreferrer\">Github bug<\/a>. Here is openDoc: <a href=\"https://swagger.io/docs/specification/serialization/\" rel=\"nofollow noreferrer\">OpenApi doc<\/a><\/p>\n<p>My working solution:<\/p>\n<pre><code>        @Parameter(required = false, description = &quot;blah blah&quot;,\n                explode = Explode.FALSE, array = @ArraySchema(schema = @Schema(implementation = String.class)))\n        @RequestParam(required = false) List&lt;String&gt; ids,\n<\/code><\/pre>\n",
+        "answer_id": 78008306,
+        "question_id": 75881244,
+        "last_edit_date": 1708096769
+    }],
+    "answer_comments": {}
+}

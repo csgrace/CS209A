@@ -1,0 +1,183 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a51e5683ba613b7528cb78f9851bbeb2?s=256&d=identicon&r=PG",
+            "account_id": 233768,
+            "user_type": "registered",
+            "user_id": 499484,
+            "link": "https://stackoverflow.com/users/499484/mediocre-gopher",
+            "reputation": 2344,
+            "display_name": "Mediocre Gopher",
+            "accept_rate": 94
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/7773727/reading-a-large-file-in-functional-scala",
+        "last_activity_date": 1318704924,
+        "creation_date": 1318627457,
+        "answer_count": 1,
+        "title": "Reading a large file in functional scala",
+        "body": "<p>I'm attempting to process a large binary file with scala. If possible I'd like to use a functional approach. My main method for this looks like this right now:<\/p>\n\n<pre><code>def getFromBis( buffer:List[Byte], bis:BufferedInputStream ):(Byte,List[Byte],Boolean) = {\n    buffer match {\n        case Nil =&gt;\n            val buffer2 = new Array[Byte](100000)\n            bis.read(buffer2) match {\n                case -1 =&gt; (-1,Nil,false)\n                case _  =&gt; \n                    val buffer3 = buffer2.toList\n                    (buffer3.head,buffer3.tail,true)\n            }\n        case b::tail =&gt; return (b,tail,true)\n    }\n}\n<\/code><\/pre>\n\n<p>It takes a list buffer and a buffered input stream. If the buffer isn't empty it simply returns the head and tail, if it is empty it gets the next chunk from the file and uses that as the buffer instead.<\/p>\n\n<p>As you can see this isn't very functional. I'm trying to do this in a way where there's as few underlying io calls as possible, which is why I'm doing this in a chunked fashion. The problem here is the new Array. Everytime I run through the function it creates a new array, and judging by the constantly increasing memory usage as the program runs, I don't think they're getting destroyed.<\/p>\n\n<p>My question is this: Is there a better way to be reading a large file in a chunked fashion using scala? I'd like to keep a completely functional approach, but at the very least I need a function which could act as a black box for the rest of my functional program.<\/p>\n",
+        "question_id": 7773727,
+        "tags": [
+            "java",
+            "scala",
+            "file-io"
+        ],
+        "score": 4,
+        "accepted_answer_id": 7773984,
+        "is_answered": true,
+        "view_count": 2052,
+        "last_edit_date": 1318627943
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9359760602e36ed0e43ff61a14f1812d?s=256&d=identicon&r=PG",
+            "account_id": 113266,
+            "user_type": "registered",
+            "user_id": 298389,
+            "link": "https://stackoverflow.com/users/298389/om-nom-nom",
+            "reputation": 62953,
+            "display_name": "om-nom-nom",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 7773727,
+        "edited": false,
+        "creation_date": 1318629161,
+        "comment_id": 9466112
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3698349ad0b898d398a6573f4d1f867a?s=256&d=identicon&r=PG",
+            "account_id": 89797,
+            "user_type": "registered",
+            "user_id": 247533,
+            "link": "https://stackoverflow.com/users/247533/rex-kerr",
+            "reputation": 168081,
+            "display_name": "Rex Kerr",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 7,
+        "is_accepted": true,
+        "last_activity_date": 1318704924,
+        "creation_date": 1318629304,
+        "body": "<p>You almost certainly don't want to store bytes in a <code>List<\/code>.  You need a new object for each byte.  That's really inefficient, and will cause probably 20x more memory usage than you need.<\/p>\n\n<p>The easiest way to do this is to create an iterator that stores internal state:<\/p>\n\n<pre><code>class BisReader(bis: BufferedInputStream) {\n  val buffer = new Array[Byte](100000)\n  var n = 0\n  var i = 0\n  def hasNext: Boolean = (i &lt; n) || (n &gt;= 0 &amp;&amp; {\n    n = bis.read(buffer)\n    i = 0\n    hasNext\n  })\n  def next: Byte = {\n    if (i &lt; n) {\n      val b = buffer(i)\n      i += 1\n      b\n    }\n    else if (hasNext) next\n    else throw new IOException(\"Input stream empty\")\n  }\n}\nimplicit def reader_as_iterator(br: BisReader) = new Iterator[Byte] {\n  def hasNext = br.hasNext\n  def next = br.next\n}\n<\/code><\/pre>\n\n<p>One could have BisReader extend Iterator[Byte], but since Iterator isn't specialized, this would require boxing for raw next/hasNext access.  This way, you can get low-level (next/hasNext) access at full speed when you need it, and use handy iterator methods otherwise.<\/p>\n\n<p>Now you've isolated your ugly nonfunctional Java IO stuff in a single class with a clean interface, and can go back to being functional.<\/p>\n\n<hr>\n\n<p>Edit: except, of course, IO is order-dependent and has side effects, but the previous method doesn't get around that either.<\/p>\n",
+        "answer_id": 7773984,
+        "question_id": 7773727,
+        "last_edit_date": 1318704924
+    }],
+    "answer_comments": {"7773984": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lUxU7.jpg?s=256",
+                "account_id": 9178,
+                "user_type": "registered",
+                "user_id": 16853,
+                "link": "https://stackoverflow.com/users/16853/oxbow-lakes",
+                "reputation": 134550,
+                "display_name": "oxbow_lakes",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773984,
+            "edited": false,
+            "creation_date": 1318704278,
+            "comment_id": 9474015
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3698349ad0b898d398a6573f4d1f867a?s=256&d=identicon&r=PG",
+                "account_id": 89797,
+                "user_type": "registered",
+                "user_id": 247533,
+                "link": "https://stackoverflow.com/users/247533/rex-kerr",
+                "reputation": 168081,
+                "display_name": "Rex Kerr",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773984,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/lUxU7.jpg?s=256",
+                "account_id": 9178,
+                "user_type": "registered",
+                "user_id": 16853,
+                "link": "https://stackoverflow.com/users/16853/oxbow-lakes",
+                "reputation": 134550,
+                "display_name": "oxbow_lakes",
+                "accept_rate": 90
+            },
+            "edited": false,
+            "creation_date": 1318693598,
+            "comment_id": 9472602
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lUxU7.jpg?s=256",
+                "account_id": 9178,
+                "user_type": "registered",
+                "user_id": 16853,
+                "link": "https://stackoverflow.com/users/16853/oxbow-lakes",
+                "reputation": 134550,
+                "display_name": "oxbow_lakes",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773984,
+            "edited": false,
+            "creation_date": 1318685958,
+            "comment_id": 9471674
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3698349ad0b898d398a6573f4d1f867a?s=256&d=identicon&r=PG",
+                "account_id": 89797,
+                "user_type": "registered",
+                "user_id": 247533,
+                "link": "https://stackoverflow.com/users/247533/rex-kerr",
+                "reputation": 168081,
+                "display_name": "Rex Kerr",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773984,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/a51e5683ba613b7528cb78f9851bbeb2?s=256&d=identicon&r=PG",
+                "account_id": 233768,
+                "user_type": "registered",
+                "user_id": 499484,
+                "link": "https://stackoverflow.com/users/499484/mediocre-gopher",
+                "reputation": 2344,
+                "display_name": "Mediocre Gopher",
+                "accept_rate": 94
+            },
+            "edited": false,
+            "creation_date": 1318643553,
+            "comment_id": 9467859
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a51e5683ba613b7528cb78f9851bbeb2?s=256&d=identicon&r=PG",
+                "account_id": 233768,
+                "user_type": "registered",
+                "user_id": 499484,
+                "link": "https://stackoverflow.com/users/499484/mediocre-gopher",
+                "reputation": 2344,
+                "display_name": "Mediocre Gopher",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773984,
+            "edited": false,
+            "creation_date": 1318632424,
+            "comment_id": 9466631
+        }
+    ]}
+}

@@ -1,0 +1,132 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-kF3n-KiMyW8/AAAAAAAAAAI/AAAAAAAAAAs/_UBelpvQXd4/s256-rj/photo.jpg",
+            "account_id": 16028389,
+            "user_type": "registered",
+            "user_id": 11568052,
+            "link": "https://stackoverflow.com/users/11568052/armando-microsse",
+            "reputation": 150,
+            "display_name": "Armando Microsse"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58447685/spring-security-bcrypt-always-look-for-2a-regex",
+        "last_activity_date": 1690739772,
+        "creation_date": 1571390089,
+        "answer_count": 1,
+        "title": "Spring Security BCrypt always look for \u201c$2a\u201d regex",
+        "body": "<p>I am implementing <code>Spring Security<\/code> with <code>Spring Boot<\/code>. And I've generated password online using <code>BCrypt<\/code> generator. But when I try to login I got the error message:<\/p>\n<blockquote>\n<p>2019-10-18 11:10:56.983  WARN 53908 --- [io-9090-exec-10]\no.s.s.c.bcrypt.BCryptPasswordEncoder     : Encoded password does not\nlook like BCrypt.<\/p>\n<\/blockquote>\n<p>After some research, I found out that there is a bug in <code>Spring Security<\/code> where <code>BCrypt<\/code> only looks for <code>$2a<\/code> regex. Can anyone explain to me to solve these issues?<\/p>\n",
+        "question_id": 58447685,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "spring-security",
+            "bcrypt"
+        ],
+        "score": 1,
+        "accepted_answer_id": 58449183,
+        "is_answered": true,
+        "view_count": 1123,
+        "last_edit_date": 1690739659
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/LziUe.jpg?s=256",
+                "account_id": 3614596,
+                "user_type": "registered",
+                "user_id": 3014817,
+                "link": "https://stackoverflow.com/users/3014817/shailesh-chandra",
+                "reputation": 2340,
+                "display_name": "Shailesh Chandra"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447685,
+            "edited": false,
+            "creation_date": 1571392379,
+            "comment_id": 103234639
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-kF3n-KiMyW8/AAAAAAAAAAI/AAAAAAAAAAs/_UBelpvQXd4/s256-rj/photo.jpg",
+                "account_id": 16028389,
+                "user_type": "registered",
+                "user_id": 11568052,
+                "link": "https://stackoverflow.com/users/11568052/armando-microsse",
+                "reputation": 150,
+                "display_name": "Armando Microsse"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447685,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/LziUe.jpg?s=256",
+                "account_id": 3614596,
+                "user_type": "registered",
+                "user_id": 3014817,
+                "link": "https://stackoverflow.com/users/3014817/shailesh-chandra",
+                "reputation": 2340,
+                "display_name": "Shailesh Chandra"
+            },
+            "edited": false,
+            "creation_date": 1571392143,
+            "comment_id": 103234511
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/LziUe.jpg?s=256",
+                "account_id": 3614596,
+                "user_type": "registered",
+                "user_id": 3014817,
+                "link": "https://stackoverflow.com/users/3014817/shailesh-chandra",
+                "reputation": 2340,
+                "display_name": "Shailesh Chandra"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447685,
+            "edited": false,
+            "creation_date": 1571391349,
+            "comment_id": 103234108
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/LziUe.jpg?s=256",
+            "account_id": 3614596,
+            "user_type": "registered",
+            "user_id": 3014817,
+            "link": "https://stackoverflow.com/users/3014817/shailesh-chandra",
+            "reputation": 2340,
+            "display_name": "Shailesh Chandra"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1690739772,
+        "creation_date": 1571395236,
+        "body": "<p>By a default <code>Spring Boot<\/code> <strong>2.1.x<\/strong> supports <code>spring-security-core-5.1.x<\/code> which generally generate <code>BCrypt<\/code> of <code>$2a<\/code> version<\/p>\n<p>This version doesn't support <code>BCryptPasswordEncoder<\/code> with different versions.<\/p>\n<p>If you want to use other versions, you need to upgrade <code>spring-security-core<\/code> version<\/p>\n<p>Add below in your pom.xml<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code> &lt;dependency&gt;\n    &lt;groupId&gt;org.springframework.security&lt;/groupId&gt;\n    &lt;artifactId&gt;spring-security-core&lt;/artifactId&gt;\n    &lt;version&gt;5.2.0.RELEASE&lt;/version&gt;\n &lt;/dependency&gt;\n<\/code><\/pre>\n<p>then create your <code>BCryptPasswordEncoder<\/code> bean as below<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Bean(name = &quot;passwordEncoder&quot;)\npublic BCryptPasswordEncoder getPasswordEncoder() {\n\n    BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(BCryptVersion.$2B);\n    return bCryptPasswordEncoder;\n\n}\n<\/code><\/pre>\n<p><strong>you can pass your desired version in the constructor of BCryptPasswordEncoder.<\/strong><\/p>\n<p>possible values are<\/p>\n<blockquote>\n<ul>\n<li>BCryptVersion.$2A<\/li>\n<li>BCryptVersion.$2Y<\/li>\n<li>BCryptVersion.$2B<\/li>\n<\/ul>\n<\/blockquote>\n",
+        "answer_id": 58449183,
+        "question_id": 58447685,
+        "last_edit_date": 1690739772
+    }],
+    "answer_comments": {"58449183": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/LziUe.jpg?s=256",
+            "account_id": 3614596,
+            "user_type": "registered",
+            "user_id": 3014817,
+            "link": "https://stackoverflow.com/users/3014817/shailesh-chandra",
+            "reputation": 2340,
+            "display_name": "Shailesh Chandra"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "post_id": 58449183,
+        "edited": false,
+        "creation_date": 1571639488,
+        "comment_id": 103293522
+    }]}
+}

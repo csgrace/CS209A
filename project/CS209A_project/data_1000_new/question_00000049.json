@@ -1,0 +1,77 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1e0094a4b0e705a0fe607e4a1a8ff426?s=256&d=identicon&r=PG",
+            "account_id": 45775,
+            "user_type": "registered",
+            "user_id": 135078,
+            "link": "https://stackoverflow.com/users/135078/kelly-s-french",
+            "reputation": 12394,
+            "display_name": "Kelly S. French",
+            "accept_rate": 94
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/3660525/are-these-two-approaches-to-the-smallest-double-values-in-java-equivalent",
+        "last_activity_date": 1283880533,
+        "creation_date": 1283876408,
+        "answer_count": 2,
+        "title": "Are these two approaches to the smallest Double values in Java equivalent?",
+        "body": "<p><em>Alternative wording<\/em>: When will adding Double.MIN_VALUE to a double in Java <strong>not<\/strong> result in a different Double value? (See Jon Skeet's comment below)  <\/p>\n\n<p>This <a href=\"https://stackoverflow.com/questions/3658174/how-to-alter-a-float-by-its-smallest-increment-in-java\">SO question<\/a> about the minimum Double value in Java has some answers which seem to me to be equivalent.  <a href=\"https://stackoverflow.com/users/22656/jon-skeet\">Jon Skeet<\/a>'s <a href=\"https://stackoverflow.com/questions/3658174/how-to-alter-a-float-by-its-smallest-increment-in-java/3658280#3658280\">answer<\/a> no doubt works but his explanation hasn't convinced me how it is different from <a href=\"https://stackoverflow.com/users/427309/richard-j-ross-iii\">Richard's<\/a>   <a href=\"https://stackoverflow.com/questions/3658174/how-to-alter-a-float-by-its-smallest-increment-in-java/3658243#3658243\">answer<\/a>.<\/p>\n\n<p>Jon's answer uses the following:  <\/p>\n\n<pre><code>double d = // your existing value;\nlong bits = Double.doubleToLongBits(d);\nbits++;\nd = Double.longBitsToDouble();\n<\/code><\/pre>\n\n<p>Richards answer mentions the JavaDoc for <code>Double.MIN_VALUE<\/code><\/p>\n\n<blockquote>\n  <p>A constant holding the smallest\n  positive nonzero value of type double,\n  2-1074. It is equal to the hexadecimal\n  floating-point literal\n  0x0.0000000000001P-1022 and also equal\n  to <code>Double.longBitsToDouble(0x1L)<\/code>.<\/p>\n<\/blockquote>\n\n<p>My question is, how is <code>Double.logBitsToDouble(0x1L)<\/code> different from Jon's <code>bits++;<\/code>?<\/p>\n\n<p>Jon's comment focuses on the basic floating point issue.   <\/p>\n\n<blockquote>\n  <p>There's a difference between adding\n  Double.MIN_VALUE to a double value,\n  and incrementing the bit pattern\n  representing a double. They're\n  entirely different operations, due to\n  the way that floating point numbers\n  are stored. If you try to add a very\n  little number to a very big number,\n  the difference may well be so small\n  that the closest result is the same as\n  the original. Adding 1 to the current\n  bit pattern, however, will always\n  change the corresponding floating\n  point value, by the smallest possible\n  value which is visible at that scale.<\/p>\n<\/blockquote>\n\n<p>I don't see any difference to Jon's approach of incrementing a long, \"bits++\", with adding Double.MIN_VALUE.  When will they produce different results?<\/p>\n\n<p>I wrote the following code to test the differences.  Maybe someone could provide more/better sample double numbers or use a loop to find a number where there is a difference.<\/p>\n\n<pre><code>    double d = 3.14159269123456789; // sample double\n    long bits = Double.doubleToLongBits(d);\n    long bitsBefore = bits;\n    bits++;\n    long bitsAfter = bits;\n    long bitsDiff = bitsAfter - bitsBefore;\n    long bitsMinValue = Double.doubleToLongBits(Double.MIN_VALUE);\n    long bitsSmallValue = Double.doubleToLongBits(Double.longBitsToDouble(0x1L));\n\n    if (bitsMinValue == bitsSmallValue)\n    {\n        System.out.println(\"Double.doubleToLongBits(0x1L) is same as Double.doubleToLongBits(Double.MIN_VALUE)\");           \n    }        \n\n    if (bitsDiff == bitsMinValue)\n    {\n        System.out.println(\"bits++ increments the same amount as Double.MIN_VALUE\");\n    }\n\n    if (bitsDiff == bitsMinValue)\n    {\n        d = d + Double.MIN_VALUE;\n        System.out.println(\"Using Double.MIN_VALUE\");\n    }\n    else\n    {\n        d = Double.longBitsToDouble(bits);\n        System.out.println(\"Using doubleToLongBits/bits++\");\n    }\n\n    System.out.println(\"bits before: \" + bitsBefore);   \n    System.out.println(\"bits after: \" + bitsAfter);\n    System.out.println(\"bits diff: \" + bitsDiff);   \n    System.out.println(\"bits Min value: \" + bitsMinValue);\n    System.out.println(\"bits Small value: \" + bitsSmallValue);  \n<\/code><\/pre>\n\n<p>OUTPUT:  <\/p>\n\n<pre><code>Double.doubleToLongBits(Double.longBitsToDouble(0x1L)) is same as Double.doubleToLongBits(Double.MIN_VALUE)\nbits++ increments the same amount as Double.MIN_VALUE\nUsing doubleToLongBits/bits++\nbits before: 4614256656636814345\nbits after: 4614256656636814346\nbits diff: 1\nbits Min value: 1\nbits Small value: 1\n<\/code><\/pre>\n",
+        "question_id": 3660525,
+        "tags": [
+            "java",
+            "floating-point"
+        ],
+        "score": 1,
+        "accepted_answer_id": 3660687,
+        "is_answered": true,
+        "view_count": 1317,
+        "last_edit_date": 1495535474
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521060,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1283878240,
+            "creation_date": 1283877584,
+            "body": "<p>Okay, let's imagine it this way, sticking with decimal numbers. Suppose you have a floating decimal point type which allows you to represent 5 decimal digits, and a number between 0 and 3 for the exponent, to multiple the result by 1, 10, 100 or 1000.<\/p>\n\n<p>So the smallest non-zero value is just 1 (i.e. mantissa=00001, exponent=0). The largest value is 99999000 (mantissa=99999, exponent=3).<\/p>\n\n<p>Now, what happens when you add 1 to 50000000? You can't represent 50000001...the next representable number after 500000000 is 50001000. So if you try to add them together, the result is just going to be the closest value to the \"true\" result - which is still 500000000. That's like adding <code>Double.MIN_VALUE<\/code> to a large <code>double<\/code>.<\/p>\n\n<p>My version (converting to bits, incrementing and then converting back) is like taking that 50000000, splitting into mantissa and exponent (m=50000, e=3) then incrementing it the smallest amount, to (m=50001, e=3) and then reassembling to 50001000.<\/p>\n\n<p>Do you see how they're different?<\/p>\n\n<hr>\n\n<p>Now here's a concrete example:<\/p>\n\n<pre><code>public class Test{\n    public static void main(String[] args) {\n        double before = 100000000000000d;\n        double after = before + Double.MIN_VALUE;\n        System.out.println(before == after);\n\n        long bits = Double.doubleToLongBits(before);\n        bits++;\n        double afterBits = Double.longBitsToDouble(bits);\n        System.out.println(before == afterBits);\n        System.out.println(afterBits - before);\n    }\n}\n<\/code><\/pre>\n\n<p>This tries both approaches with a large number. The output is:<\/p>\n\n<pre><code>true\nfalse\n0.015625\n<\/code><\/pre>\n\n<p>Going through the output, that means:<\/p>\n\n<ul>\n<li>Adding <code>Double.MIN_VALUE<\/code> didn't have any effect<\/li>\n<li>Incrementing the bit <em>did<\/em> have an effect<\/li>\n<li>The difference between <code>afterBits<\/code> and <code>before<\/code> is 0.015625, which is <em>much<\/em> bigger than <code>Double.MIN_VALUE<\/code>. No wonder the simple addition had no effect!<\/li>\n<\/ul>\n",
+            "answer_id": 3660687,
+            "question_id": 3660525,
+            "last_edit_date": 1283878240
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e72946d7c81ee170b322f6e6abae3442?s=256&d=identicon&r=PG",
+                "account_id": 20130,
+                "user_type": "registered",
+                "user_id": 47773,
+                "link": "https://stackoverflow.com/users/47773/matthew-flaschen",
+                "reputation": 286409,
+                "display_name": "Matthew Flaschen",
+                "accept_rate": 52
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1283880533,
+            "creation_date": 1283876726,
+            "body": "<p>It's exactly as Jon said:<\/p>\n\n<blockquote>\n  <p>\"If you try to add a very little\n  number to a very big number, the\n  difference may well be so small that\n  the closest result is the same as the\n  original.\"<\/p>\n<\/blockquote>\n\n<p>For example:<\/p>\n\n<pre><code>// True:\n(Double.MAX_VALUE + Double.MIN_VALUE) == Double.MAX_VALUE\n// False:\nDouble.longBitsToDouble(Double.doubleToLongBits(Double.MAX_VALUE) + 1) == Double.MAX_VALUE)\n<\/code><\/pre>\n\n<p><code>MIN_VALUE<\/code> is the smallest representable positive double, but that certainly does not imply that adding it to an arbitrary double results in a unequal one.<\/p>\n\n<p>In contrast, adding 1 to the underlying bits results in a new bit pattern, and thus does result in a unequal double.<\/p>\n",
+            "answer_id": 3660565,
+            "question_id": 3660525,
+            "last_edit_date": 1283880533
+        }
+    ],
+    "answer_comments": {}
+}

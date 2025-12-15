@@ -1,0 +1,123 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f83cac928984eeb798c225b983b48120?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1068638,
+            "user_type": "registered",
+            "user_id": 1068470,
+            "link": "https://stackoverflow.com/users/1068470/theperson",
+            "reputation": 3256,
+            "display_name": "ThePerson",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26718522/changing-security-manager-within-synchronized-block",
+        "last_activity_date": 1415123941,
+        "creation_date": 1415032043,
+        "answer_count": 0,
+        "title": "Changing security manager within synchronized block",
+        "body": "<p>From within my java application, I have a requirement to run some untrusted code which is uploaded by a user. This can be done in a similar way to here:<\/p>\n\n<p><a href=\"https://stackoverflow.com/questions/3947558/java-security-sandboxing-plugins-loaded-via-urlclassloader\">Java security: Sandboxing plugins loaded via URLClassLoader<\/a><\/p>\n\n<p>However, let's assume I have many users (each with a thread), and many users uploading untrusted code at the same time. Using System.setSecurityManager once before their code is ran to lock down the permissions, and then once again after is no longer going to work, as it is possible that multiple threads are calling this method at the same time (For example, thread 2 just starts the method and sets the security manager to the sandbox version, just as thread 1 sets the security manager to the all allow all security manager), and we have a problem.<\/p>\n\n<p>To make this a bit more tricky, there are several different objects, lets just call them User objects, so if I make a synchronised block:<\/p>\n\n<pre><code>synchonize(this){\n    // set security manager lockdown permissions\n    // run untrusted code\n    // set security manager all permissions\n}\n<\/code><\/pre>\n\n<p>This almost works apart from the fact that this is synchronized using the object (many threads cannot be inside this method, for this object particular at the same time). <\/p>\n\n<p>What I ideally need to do is say, for all objects of this type (static?), synchronise this block. Therefore, locking out all users from using this block until it finishes. That's OK, these users can wait.<\/p>\n\n<p>Therefore, I can imagine this working, but I don't know if it does exactly what I expect.<\/p>\n\n<pre><code>synchronized(User.class){\n\n}\n<\/code><\/pre>\n\n<p>My question is, does all of this sound correct, and is it a sensible way to do it? I use timeouts etc (to avoid potentially the untrusted code hanging).<\/p>\n\n<p>I would test this, but it is actually not very easy to test, and it seems rather complex (usually, when I find I am doing something overly complex, it's because it's not what I should be doing). So before I go rampaging in on this one, does the above seem correct, or am I missing something obvious?<\/p>\n\n<p><strong>Edit: More info:<\/strong><\/p>\n\n<p>@edharned. A little more about what is happening here may help. The server has a set of JUnit tests, the user uploads some work, the server executes the JUnit tests, but wants to do so safely. The JUnit tests are not called in a new process, but instead are ran from within the main (and only) JVM. This is so JUnitCore can be used and the calling method can work out how many tests there were, and which/how many failed using the Result object (<a href=\"http://junit.sourceforge.net/javadoc/org/junit/runner/Result.html\" rel=\"nofollow noreferrer\">http://junit.sourceforge.net/javadoc/org/junit/runner/Result.html<\/a>) and the run listener. If these tests are ran from a new process using junit.textui.TestRunner then I believe it only shows which tests failed (and not which passed). <\/p>\n\n<p>Perhaps the solution is to run each in it's own JVM which can have certain privileges set using a security manager which is set from within the JUnit test class itself. However, there is now a new problem which is retrieving the test results (Which passed, which failed and with reasons).<\/p>\n",
+        "question_id": 26718522,
+        "tags": [
+            "java",
+            "multithreading",
+            "security"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 132,
+        "last_edit_date": 1495542040
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SD6L1.jpg?s=256",
+                "account_id": 381513,
+                "user_type": "registered",
+                "user_id": 978567,
+                "link": "https://stackoverflow.com/users/978567/edharned",
+                "reputation": 1904,
+                "display_name": "edharned"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718522,
+            "edited": false,
+            "creation_date": 1415135802,
+            "comment_id": 42075793
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f83cac928984eeb798c225b983b48120?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1068638,
+                "user_type": "registered",
+                "user_id": 1068470,
+                "link": "https://stackoverflow.com/users/1068470/theperson",
+                "reputation": 3256,
+                "display_name": "ThePerson",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718522,
+            "edited": false,
+            "creation_date": 1415123963,
+            "comment_id": 42069423
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f83cac928984eeb798c225b983b48120?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1068638,
+                "user_type": "registered",
+                "user_id": 1068470,
+                "link": "https://stackoverflow.com/users/1068470/theperson",
+                "reputation": 3256,
+                "display_name": "ThePerson",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718522,
+            "edited": false,
+            "creation_date": 1415122830,
+            "comment_id": 42068794
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/B53xA.jpg?s=256",
+                "account_id": 3282,
+                "user_type": "registered",
+                "user_id": 4725,
+                "link": "https://stackoverflow.com/users/4725/tom-hawtin-tackline",
+                "reputation": 147602,
+                "display_name": "Tom Hawtin - tackline",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 26718522,
+            "edited": false,
+            "creation_date": 1415120325,
+            "comment_id": 42067410
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SD6L1.jpg?s=256",
+                "account_id": 381513,
+                "user_type": "registered",
+                "user_id": 978567,
+                "link": "https://stackoverflow.com/users/978567/edharned",
+                "reputation": 1904,
+                "display_name": "edharned"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718522,
+            "edited": false,
+            "creation_date": 1415039790,
+            "comment_id": 42031320
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

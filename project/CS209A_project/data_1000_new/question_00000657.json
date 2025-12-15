@@ -1,0 +1,248 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lVkJs.jpg?s=256",
+            "account_id": 4881377,
+            "user_type": "registered",
+            "user_id": 3946482,
+            "link": "https://stackoverflow.com/users/3946482/plaidshirt",
+            "reputation": 5811,
+            "display_name": "plaidshirt",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/56161733/split-and-pair-substrings-by-condition",
+        "last_activity_date": 1558016611,
+        "creation_date": 1557986558,
+        "answer_count": 4,
+        "title": "Split and pair substrings by condition",
+        "body": "<p>I have a string like this: <code>\"aa-bb,ccdd,eeff,gg-gg,cc-gg\"<\/code>. I need to split the string by <code>'-'<\/code> signs and create two strings from it, but if the comma-delimited part of the original string doesn't contain <code>'-'<\/code>, some placeholder character needs to be used instead of substring. In case of above example output should be:<\/p>\n\n<p>String 1:<\/p>\n\n<pre><code>\"{aa,ccdd,eeff,gg,cc}\"\n<\/code><\/pre>\n\n<p>String 2:<\/p>\n\n<pre><code>\"{bb,0,0,gg,gg}\"\n<\/code><\/pre>\n\n<p>I can't use the <code>lastIndexOf()<\/code> method because input is in one string. I am not sure how to much the parts.<\/p>\n\n<pre><code>if(rawIndication.contains(\"-\")){\n    String[] parts = rawIndication.split(\"-\");\n    String part1 = parts[0];\n    String part2 = parts[1];\n}\n<\/code><\/pre>\n",
+        "question_id": 56161733,
+        "tags": [
+            "java",
+            "string",
+            "split",
+            "substring"
+        ],
+        "score": 1,
+        "accepted_answer_id": 56161913,
+        "is_answered": true,
+        "view_count": 80,
+        "last_edit_date": 1558016611
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/193965abcb7230d85c6264e55e2f0bda?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8306545,
+                "user_type": "registered",
+                "user_id": 6243352,
+                "link": "https://stackoverflow.com/users/6243352/ggorlen",
+                "reputation": 59405,
+                "display_name": "ggorlen"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 56161733,
+            "edited": false,
+            "creation_date": 1558016627,
+            "comment_id": 98968115
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lVkJs.jpg?s=256",
+                "account_id": 4881377,
+                "user_type": "registered",
+                "user_id": 3946482,
+                "link": "https://stackoverflow.com/users/3946482/plaidshirt",
+                "reputation": 5811,
+                "display_name": "plaidshirt",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56161733,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/193965abcb7230d85c6264e55e2f0bda?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8306545,
+                "user_type": "registered",
+                "user_id": 6243352,
+                "link": "https://stackoverflow.com/users/6243352/ggorlen",
+                "reputation": 59405,
+                "display_name": "ggorlen"
+            },
+            "edited": false,
+            "creation_date": 1557990931,
+            "comment_id": 98953078
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/193965abcb7230d85c6264e55e2f0bda?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8306545,
+                "user_type": "registered",
+                "user_id": 6243352,
+                "link": "https://stackoverflow.com/users/6243352/ggorlen",
+                "reputation": 59405,
+                "display_name": "ggorlen"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 56161733,
+            "edited": false,
+            "creation_date": 1557986702,
+            "comment_id": 98951206
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/4sh1l.png?s=256",
+                "account_id": 2094057,
+                "user_type": "registered",
+                "user_id": 1863229,
+                "link": "https://stackoverflow.com/users/1863229/tim-biegeleisen",
+                "reputation": 525986,
+                "display_name": "Tim Biegeleisen",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1557988311,
+            "creation_date": 1557987103,
+            "body": "<p>Here is a Java 8 solution, using streams.  The logic is to first split the input string on comma, generating an array of terms.  Then, for each term, we split again on dash, retaining the first entry.  In the case of a term having no dashes, the entire string would just be retained.  Finally, we concatenate back into an output string.<\/p>\n\n<pre><code>String input = \"aa-bb,ccdd,eeff,gg-gg,cc-gg\";\nint pos = 1;\nString output = String.join(\",\", Arrays.stream(parts) \n    .map(e -&gt; e.split(\"-\").length &gt;= (pos+1) ? e.split(\"-\")[pos] : \"0\")\n    .toArray(String[]::new));\n\nSystem.out.println(output);\n<\/code><\/pre>\n\n<p>This outputs:<\/p>\n\n<pre><code>bb,0,0,gg,gg\n<\/code><\/pre>\n",
+            "answer_id": 56161852,
+            "question_id": 56161733,
+            "last_edit_date": 1557988311
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7b3310e1ab01e476e770241fb51a74cd?s=256&d=identicon&r=PG",
+                "account_id": 5897936,
+                "user_type": "registered",
+                "user_id": 4642485,
+                "link": "https://stackoverflow.com/users/4642485/chris-gong",
+                "reputation": 8257,
+                "display_name": "Chris Gong",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1557987219,
+            "creation_date": 1557987219,
+            "body": "<p>With the way you structured the problem, you should actually be splitting by commas first. Then, you should iterate through the result of the call to <code>split<\/code> and split each string in the outputted array by hyphen if there exists one. If there isn't a hyphen, then you can add a <code>0<\/code> to string 2 and the string itself to string 1. If there is a hyphen, then add the left side to string 1 and the right side to string 2. Here's one way you can do this,<\/p>\n\n<pre><code>if(rawIndication.contains(\",\")){\n    String s1 = \"{\";\n    String s2 = \"{\";\n    String[] parts = rawIndication.split(\",\");\n    for(int i = 0; i &lt; parts.length; i++) {\n        if(parts[i].contains(\"-\") {\n            String[] moreParts = parts[i].split(\",\");\n            s1 = s1 + moreParts[0] + \",\";\n            s2 = s2 + moreParts[1] + \",\";\n        }\n        else{\n            s1 = s1 + parts[i] + \",\";\n            s2 = \"0,\";\n        }\n    }\n    s1 = s1.substring(0, s1.length() - 1); //remove last extra comma\n    s2 = s2.substring(0, s2.length() - 1); //remove last extra comma\n    s1 = s1 + \"}\";\n    s2 = s2 + \"}\";\n}\n<\/code><\/pre>\n",
+            "answer_id": 56161881,
+            "question_id": 56161733
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a24d10fc25aa54101a59c9752bc5240f?s=256&d=identicon&r=PG",
+                "account_id": 2332280,
+                "user_type": "registered",
+                "user_id": 2140633,
+                "link": "https://stackoverflow.com/users/2140633/udith-gunaratna",
+                "reputation": 2121,
+                "display_name": "Udith Gunaratna",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1557987679,
+            "creation_date": 1557987328,
+            "body": "<pre><code>    List&lt;String&gt; list1 = new ArrayList&lt;&gt;();\n    List&lt;String&gt; list2 = new ArrayList&lt;&gt;();\n\n    // First split the source String by comma to separate main parts\n    String[] mainParts = sourceStr.split(\",\");\n\n    for (String mainPart: mainParts) {\n        // Check if each part contains '-' character\n        if (mainPart.contains(\"-\")) {\n            // If contains '-', split and add the 2 parts to 2 arrays\n            String[] subParts = mainPart.split(\"-\");\n            list1.add(subParts[0]);\n            list2.add(subParts[1]);\n\n        } else {\n            // If does not contain '-', add complete part to 1st array and add placeholder to 2nd array\n            list1.add(mainPart);\n            list2.add(\"0\");\n        }\n    }\n\n    // Build the final Strings by joining String parts by commas and enclosing between parentheses\n    String str1 = \"{\" + String.join(\",\", list1) + \"}\";\n    String str2 = \"{\" + String.join(\",\", list2) + \"}\";\n\n    System.out.println(str1);\n    System.out.println(str2);\n<\/code><\/pre>\n",
+            "answer_id": 56161913,
+            "question_id": 56161733,
+            "last_edit_date": 1557987679
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-fcktzJ_NB7c/AAAAAAAAAAI/AAAAAAAACzY/SztjLXWJGwc/s256-rj/photo.jpg",
+                "account_id": 4672532,
+                "user_type": "registered",
+                "user_id": 7019608,
+                "link": "https://stackoverflow.com/users/7019608/sudhakar-mallampati",
+                "reputation": 11,
+                "display_name": "Sudhakar mallampati"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1557988550,
+            "creation_date": 1557987686,
+            "body": "<p>I think this solves your problem. <\/p>\n\n<pre><code>private static void splitStrings() {\n   List&lt;String&gt; list = Arrays.asList(\"aa-bb\", \"ccdd\", \"eeff\", \"gg-gg\", \"cc-gg\");\n    List firstPartList = new ArrayList&lt;&gt;();\n    List secondPartList = new ArrayList&lt;&gt;();\n    for (String undividedString : list){\n        if(undividedString.contains(\"-\")){\n            String[] dividedParts = undividedString.split(\"-\");\n            String firstPart = dividedParts[0];\n            String secondPart = dividedParts[1];\n            firstPartList.add(firstPart);\n            secondPartList.add(secondPart);\n        } else{\n            firstPartList.add(undividedString);\n            secondPartList.add(\"0\");\n        }\n    }\n\n    System.out.println(firstPartList);\n    System.out.println(secondPartList);\n}\n<\/code><\/pre>\n\n<p><strong>Output is -<\/strong><\/p>\n\n<pre><code>[aa, ccdd, eeff, gg, cc]\n[bb, 0, 0, gg, gg]\n<\/code><\/pre>\n",
+            "answer_id": 56162007,
+            "question_id": 56161733,
+            "last_edit_date": 1557988550
+        }
+    ],
+    "answer_comments": {
+        "56161852": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/4sh1l.png?s=256",
+                    "account_id": 2094057,
+                    "user_type": "registered",
+                    "user_id": 1863229,
+                    "link": "https://stackoverflow.com/users/1863229/tim-biegeleisen",
+                    "reputation": 525986,
+                    "display_name": "Tim Biegeleisen",
+                    "accept_rate": 58
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 56161852,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/a24d10fc25aa54101a59c9752bc5240f?s=256&d=identicon&r=PG",
+                    "account_id": 2332280,
+                    "user_type": "registered",
+                    "user_id": 2140633,
+                    "link": "https://stackoverflow.com/users/2140633/udith-gunaratna",
+                    "reputation": 2121,
+                    "display_name": "Udith Gunaratna",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1557988328,
+                "comment_id": 98951911
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a24d10fc25aa54101a59c9752bc5240f?s=256&d=identicon&r=PG",
+                    "account_id": 2332280,
+                    "user_type": "registered",
+                    "user_id": 2140633,
+                    "link": "https://stackoverflow.com/users/2140633/udith-gunaratna",
+                    "reputation": 2121,
+                    "display_name": "Udith Gunaratna",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 56161852,
+                "edited": false,
+                "creation_date": 1557988030,
+                "comment_id": 98951773
+            }
+        ],
+        "56162007": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lVkJs.jpg?s=256",
+                "account_id": 4881377,
+                "user_type": "registered",
+                "user_id": 3946482,
+                "link": "https://stackoverflow.com/users/3946482/plaidshirt",
+                "reputation": 5811,
+                "display_name": "plaidshirt",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56162007,
+            "edited": false,
+            "creation_date": 1557994780,
+            "comment_id": 98955154
+        }]
+    }
+}

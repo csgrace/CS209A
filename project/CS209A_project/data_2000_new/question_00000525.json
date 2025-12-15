@@ -1,0 +1,149 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/856bbf6c0cf14225e40215cdba3c1260?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 9187754,
+            "user_type": "registered",
+            "user_id": 6829291,
+            "link": "https://stackoverflow.com/users/6829291/bobby-gannard",
+            "reputation": 65,
+            "display_name": "Bobby Gannard",
+            "accept_rate": 57
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45069531/im-having-an-illegalstateexception-entityfactory-was-not-set-with-fxgl",
+        "last_activity_date": 1499930619,
+        "creation_date": 1499905212,
+        "answer_count": 1,
+        "title": "im having an illegalStateException : EntityFactory was not set! with fxgl",
+        "body": "<p>this is my code:\nMain:<\/p>\n\n<pre><code>import com.almasb.fxgl.app.GameApplication;\nimport com.almasb.fxgl.core.math.FXGLMath;\nimport com.almasb.fxgl.settings.GameSettings;\nimport javafx.util.Duration;\n\npublic class Main extends GameApplication\n{\n\n    public static void main(String[] args)\n    {\n        launch(args);\n    }\n\n    @Override\n    protected void initSettings(GameSettings gameSettings)\n    {\n        gameSettings.setTitle(\"Shooter\");\n        gameSettings.setVersion(\"1.0\");\n        gameSettings.setHeight(1000);\n        gameSettings.setWidth(1600);\n        gameSettings.setCloseConfirmation(false);\n        gameSettings.setProfilingEnabled(false);\n        gameSettings.setIntroEnabled(false);\n        gameSettings.setMenuEnabled(false);\n    }\n\n    @Override\n    protected void initGame()\n    {\n        getMasterTimer().runAtInterval(() -&gt; {\n\n                getGameWorld().spawn(\"Enemy\",\n                        FXGLMath.random(0, (int) getWidth() - 40),\n                        FXGLMath.random(0, (int) getHeight() / 2 - 40)\n                );\n\n        }, Duration.seconds(1));\n    }\n}\n<\/code><\/pre>\n\n<p>the problem is with getgamewolrd().spawn(\"Enemy\") it says\n.IllegalStateException : EntityFactory was not set! \nthis is my Factory class:<\/p>\n\n<pre><code>import com.almasb.fxgl.annotation.SetEntityFactory;\nimport com.almasb.fxgl.annotation.Spawns;\nimport com.almasb.fxgl.ecs.Entity;\nimport com.almasb.fxgl.entity.Entities;\nimport com.almasb.fxgl.entity.EntityFactory;\nimport com.almasb.fxgl.entity.SpawnData;\nimport com.almasb.fxgl.entity.component.CollidableComponent;\nimport com.almasb.fxgl.entity.control.ProjectileControl;\nimport javafx.geometry.Point2D;\nimport javafx.scene.paint.Color;\nimport javafx.scene.shape.Rectangle;\n\n@SetEntityFactory\npublic class Factory implements EntityFactory\n{\n    @Spawns(\"Bullet\")\n    public Entity newBullet(SpawnData data) {\n        return Entities.builder()\n                .from(data)\n                .type(EntityTypes.BULLET)\n                .viewFromNodeWithBBox(new Rectangle(10, 2, Color.BLUE))\n                .with(new CollidableComponent(true))\n                .with(new ProjectileControl(new Point2D(0, -1), 300))\n                .build();\n    }\n\n    @Spawns(\"Enemy\")\n    public Entity newEnemy(SpawnData data) {\n        return Entities.builder()\n                .from(data)\n                .type(EntityTypes.ENEMY)\n                .viewFromNodeWithBBox(new Rectangle(40, 40, Color.RED))\n                .with(new CollidableComponent(true))\n                .build();\n    }\n\n}\n<\/code><\/pre>\n\n<p>does anyone see anything wrong please help thanks!<\/p>\n",
+        "question_id": 45069531,
+        "tags": [
+            "java",
+            "javafx"
+        ],
+        "score": 0,
+        "accepted_answer_id": 45074004,
+        "is_answered": true,
+        "view_count": 490
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/PO7Uz.jpg?s=256",
+            "account_id": 2673407,
+            "user_type": "registered",
+            "user_id": 2310289,
+            "link": "https://stackoverflow.com/users/2310289/scary-wombat",
+            "reputation": 44872,
+            "display_name": "Scary Wombat"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 45069531,
+        "edited": false,
+        "creation_date": 1499906269,
+        "comment_id": 77112354
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/YJ1tg.jpg?s=256",
+            "account_id": 6251497,
+            "user_type": "registered",
+            "user_id": 4861405,
+            "link": "https://stackoverflow.com/users/4861405/almasb",
+            "reputation": 3407,
+            "display_name": "AlmasB"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1499930619,
+        "creation_date": 1499930619,
+        "body": "<p>It appears that you do not have a package. The annotation processor is disabled when the main class does not have a package. Just put both classes into the same package for the processor to pick up your factory class.<\/p>\n\n<p>Alternatively, you can set the factory manually by <code>getGameWorld().setEntityFactory(...)<\/code>. The former approach is preferred in case there are other annotations in use.<\/p>\n",
+        "answer_id": 45074004,
+        "question_id": 45069531
+    }],
+    "answer_comments": {"45074004": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/YJ1tg.jpg?s=256",
+                "account_id": 6251497,
+                "user_type": "registered",
+                "user_id": 4861405,
+                "link": "https://stackoverflow.com/users/4861405/almasb",
+                "reputation": 3407,
+                "display_name": "AlmasB"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45074004,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/856bbf6c0cf14225e40215cdba3c1260?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9187754,
+                "user_type": "registered",
+                "user_id": 6829291,
+                "link": "https://stackoverflow.com/users/6829291/bobby-gannard",
+                "reputation": 65,
+                "display_name": "Bobby Gannard",
+                "accept_rate": 57
+            },
+            "edited": false,
+            "creation_date": 1501865755,
+            "comment_id": 77985017
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/856bbf6c0cf14225e40215cdba3c1260?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9187754,
+                "user_type": "registered",
+                "user_id": 6829291,
+                "link": "https://stackoverflow.com/users/6829291/bobby-gannard",
+                "reputation": 65,
+                "display_name": "Bobby Gannard",
+                "accept_rate": 57
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45074004,
+            "edited": false,
+            "creation_date": 1499980484,
+            "comment_id": 77154587
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/856bbf6c0cf14225e40215cdba3c1260?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9187754,
+                "user_type": "registered",
+                "user_id": 6829291,
+                "link": "https://stackoverflow.com/users/6829291/bobby-gannard",
+                "reputation": 65,
+                "display_name": "Bobby Gannard",
+                "accept_rate": 57
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45074004,
+            "edited": false,
+            "creation_date": 1499980009,
+            "comment_id": 77154349
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/856bbf6c0cf14225e40215cdba3c1260?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9187754,
+                "user_type": "registered",
+                "user_id": 6829291,
+                "link": "https://stackoverflow.com/users/6829291/bobby-gannard",
+                "reputation": 65,
+                "display_name": "Bobby Gannard",
+                "accept_rate": 57
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45074004,
+            "edited": false,
+            "creation_date": 1499978848,
+            "comment_id": 77153751
+        }
+    ]}
+}

@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d214eba6d121d2b60c0b4dbac59cbe89?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7330492,
+            "user_type": "registered",
+            "user_id": 5583558,
+            "link": "https://stackoverflow.com/users/5583558/curlyhead",
+            "reputation": 131,
+            "display_name": "CurlyHead"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45747211/update-elements-of-a-table-that-is-connected-with-bridge-table",
+        "last_activity_date": 1503280731,
+        "creation_date": 1503020177,
+        "answer_count": 1,
+        "title": "update elements of a table that is connected with bridge table",
+        "body": "<p>I have following tables:<\/p>\n\n<pre><code>BOOK: id,name\nUSER: id,username,status\nBOOK_USER: book_id, user_id\n<\/code><\/pre>\n\n<p>I want to have functionality in my application where use can set the reading status. Example. Start reading stop reading.<\/p>\n\n<p>In my <code>Book.java<\/code> I have introduced <code>USER<\/code> table as a <code>ManyToMany<\/code><\/p>\n\n<pre><code>  @JsonIgnore\n  @ManyToMany\n  @JoinTable(name = \"user\",\n      joinColumns = @JoinColumn(name = \"book_id\", referencedColumnName = \"id\"),\n      inverseJoinColumns = @JoinColumn(name = \"user_id\", referencedColumnName = \"id\"))\n  public List&lt;User&gt; users;\n<\/code><\/pre>\n\n<p>and in my User.java <\/p>\n\n<pre><code>  @ManyToMany(mappedBy = \"users\")\n  public List&lt;Book&gt; bookList;\n<\/code><\/pre>\n\n<p>When user set the stop reading on start reading I want to update the User table. This method get called from my <code>BookController.java<\/code> update method. <\/p>\n\n<pre><code>  public void changeReadingStatus() {\n    for (User user : users) {\n      user.setStatus(\"Finished Reading\");\n      user.update();\n    }\n  }\n<\/code><\/pre>\n\n<p>I get an error<\/p>\n\n<pre><code>Caused by: io.ebean.DataIntegrityException: Error when batch flush on sql: insert into BOOK_USER (book_id, user_id) values (?, ?)\n        at io.ebean.config.dbplatform.SqlCodeTranslator.translate(SqlCodeTranslator.java:44)\n<\/code><\/pre>\n",
+        "question_id": 45747211,
+        "tags": [
+            "java",
+            "playframework",
+            "ebean",
+            "playframework-2.6"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 512,
+        "last_edit_date": 1503036163
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e10dba07dc1c2775942b298d131fedcc?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 9578705,
+            "user_type": "registered",
+            "user_id": 7113891,
+            "link": "https://stackoverflow.com/users/7113891/dai",
+            "reputation": 1085,
+            "display_name": "dai",
+            "accept_rate": 44
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1503280731,
+        "creation_date": 1503021202,
+        "body": "<p>I think you should configure it this way<\/p>\n\n<pre><code>@ManyToMany\n@JoinTable(name = \"BOOK_USER\",\n    joinColumns = @JoinColumn(name = \"book_id\"),\n    inverseJoinColumns = @JoinColumn(name = \"user_id\"))\npublic List&lt;User&gt; users;\n\n\n\n@ManyToMany(mappedBy = \"users\")\npublic List&lt;Book&gt; bookList;\n<\/code><\/pre>\n\n<p>more info <a href=\"http://docs.jboss.org/hibernate/jpa/2.1/api/javax/persistence/ManyToMany.html\" rel=\"nofollow noreferrer\">here<\/a><\/p>\n",
+        "answer_id": 45747324,
+        "question_id": 45747211,
+        "last_edit_date": 1503280731
+    }],
+    "answer_comments": {}
+}

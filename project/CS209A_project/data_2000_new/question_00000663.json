@@ -1,0 +1,158 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/21e5f8abb5dbe7422f3fb48ec1aec958?s=256&d=identicon&r=PG",
+            "account_id": 2737315,
+            "user_type": "registered",
+            "user_id": 3399255,
+            "link": "https://stackoverflow.com/users/3399255/voidwhisperer",
+            "reputation": 95,
+            "display_name": "VoidWhisperer",
+            "accept_rate": 36
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28563339/jsch-command-not-being-sent-to-shell",
+        "last_activity_date": 1424184494,
+        "creation_date": 1424182215,
+        "answer_count": 2,
+        "title": "JSch - command not being sent to shell?",
+        "body": "<p>I'm working on a project to restart something within a screen on a remote server using JSch... however I'm running into an issue. It will send the first 2 commands 100% of the time, but the 3rd command will only be sent some of the time. Any help would be appreciated.<\/p>\n\n<pre><code>public static void stopServer(String name, String ip, String passwd)\n{\n    try {\n        Session session = Main.jsch.getSession(\"user\",ip,22);\n        session.setConfig(\"StrictHostKeyChecking\", \"no\");\n        session.setPassword(passwd);\n        session.connect();\n        Channel channel = session.openChannel(\"shell\");\n        channel.connect();\n        ChannelShell cs = (ChannelShell) channel;\n        cs.setPty(true);\n        DataInputStream dataIn = new DataInputStream(channel.getInputStream());\n        PrintStream dataOut = new PrintStream(channel.getOutputStream());\n        dataOut.println(\"screen -x \"+name);\n        dataOut.flush();\n        dataOut.println(\"stop\");\n        dataOut.flush();\n        String line = dataIn.readLine();\n        System.out.println(line);\n        while(true) {\n            line = dataIn.readLine();\n            System.out.println(line);\n            if(line.contains(\"\\\"quit\\\"\"))\n            {\n                break;\n            }\n        }\n        TimeUnit.SECONDS.sleep(1);\n        dataOut.println(\"quit\");\n        dataOut.flush();\n        System.out.println(\"Shutdown\");\n        dataIn.close();\n        dataOut.close();\n        channel.disconnect();\n        session.disconnect();\n\n    }catch(Exception e)\n    {\n        e.printStackTrace();\n    }\n}\n<\/code><\/pre>\n\n<p>This sends the screen -x 'name' and the stop 100% of the time from what I've seen, but the 'quit' command only actually gets sent/understood by the console a fraction of the time. Any help would be appreciated!!<\/p>\n",
+        "question_id": 28563339,
+        "tags": [
+            "java",
+            "jsch"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 483
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/21e5f8abb5dbe7422f3fb48ec1aec958?s=256&d=identicon&r=PG",
+                "account_id": 2737315,
+                "user_type": "registered",
+                "user_id": 3399255,
+                "link": "https://stackoverflow.com/users/3399255/voidwhisperer",
+                "reputation": 95,
+                "display_name": "VoidWhisperer",
+                "accept_rate": 36
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1424184494,
+            "creation_date": 1424184494,
+            "body": "<p>I managed to fix  this in a way that doesn't use the shell channel, but it is reliable enough that it works:<\/p>\n\n<pre><code>//Start EXEC\n            ChannelExec ce = (ChannelExec) session.openChannel(\"exec\");\n            ce.setCommand(\"screen -S \" + name + \" -X stuff 'quit\\n'\");\n            ce.setInputStream(null);\n            ce.setErrStream(System.err);\n            InputStream in=ce.getInputStream();\n\n            ce.connect();\n\n            byte[] tmp=new byte[1024];\n            while(true){\n                while(in.available()&gt;0){\n                    int i=in.read(tmp, 0, 1024);\n                    if(i&lt;0)break;\n                    //System.out.print(new String(tmp, 0, i));\n                }\n                if(ce.isClosed()){\n                    if(in.available()&gt;0) continue;\n                    //System.out.println(\"exit-status: \"+ce.getExitStatus());\n                    break;\n                }\n                try{Thread.sleep(1000);}catch(Exception ee){}\n            }\n            ce.disconnect();\n            //STOP EXEC\n<\/code><\/pre>\n\n<p>As much as this doesn't work along the original vein of the problem, it fixed it for me.<\/p>\n",
+            "answer_id": 28564093,
+            "question_id": 28563339
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/653282KB.jpg?s=256",
+                "account_id": 7670,
+                "user_type": "registered",
+                "user_id": 13379,
+                "link": "https://stackoverflow.com/users/13379/michael",
+                "reputation": 35501,
+                "display_name": "Michael",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1424183637,
+            "creation_date": 1424183637,
+            "body": "<ol>\n<li><p>If an exception gets thrown sometime before the \"quit\" command gets sent, then the quit command will never get sent.<\/p><\/li>\n<li><p>If the while loop never breaks, then that will prevent the \"quit\"\ncommand from being sent too.<\/p><\/li>\n<\/ol>\n",
+            "answer_id": 28563794,
+            "question_id": 28563339
+        }
+    ],
+    "answer_comments": {
+        "28564093": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c287735beca76400cb9b6d08bf591cb9?s=256&d=identicon&r=PG",
+                "account_id": 453710,
+                "user_type": "registered",
+                "user_id": 850848,
+                "link": "https://stackoverflow.com/users/850848/martin-prikryl",
+                "reputation": 205063,
+                "display_name": "Martin Prikryl",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28564093,
+            "edited": false,
+            "creation_date": 1424187260,
+            "comment_id": 45440445
+        }],
+        "28563794": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/umD6Q.jpg?s=256",
+                    "account_id": 2016507,
+                    "user_type": "registered",
+                    "user_id": 1803692,
+                    "link": "https://stackoverflow.com/users/1803692/vogel612",
+                    "reputation": 5653,
+                    "display_name": "Vogel612",
+                    "accept_rate": 96
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 28563794,
+                "edited": false,
+                "creation_date": 1424184989,
+                "comment_id": 45438980
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/653282KB.jpg?s=256",
+                    "account_id": 7670,
+                    "user_type": "registered",
+                    "user_id": 13379,
+                    "link": "https://stackoverflow.com/users/13379/michael",
+                    "reputation": 35501,
+                    "display_name": "Michael",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 28563794,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/21e5f8abb5dbe7422f3fb48ec1aec958?s=256&d=identicon&r=PG",
+                    "account_id": 2737315,
+                    "user_type": "registered",
+                    "user_id": 3399255,
+                    "link": "https://stackoverflow.com/users/3399255/voidwhisperer",
+                    "reputation": 95,
+                    "display_name": "VoidWhisperer",
+                    "accept_rate": 36
+                },
+                "edited": false,
+                "creation_date": 1424183931,
+                "comment_id": 45438195
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/21e5f8abb5dbe7422f3fb48ec1aec958?s=256&d=identicon&r=PG",
+                    "account_id": 2737315,
+                    "user_type": "registered",
+                    "user_id": 3399255,
+                    "link": "https://stackoverflow.com/users/3399255/voidwhisperer",
+                    "reputation": 95,
+                    "display_name": "VoidWhisperer",
+                    "accept_rate": 36
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 28563794,
+                "edited": false,
+                "creation_date": 1424183741,
+                "comment_id": 45438033
+            }
+        ]
+    }
+}

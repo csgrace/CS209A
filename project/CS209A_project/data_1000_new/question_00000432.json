@@ -1,0 +1,164 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b62089e23b87f97fbf1a3f9de9afb983?s=256&d=identicon&r=PG",
+            "account_id": 517169,
+            "user_type": "registered",
+            "user_id": 1300654,
+            "link": "https://stackoverflow.com/users/1300654/yktoo",
+            "reputation": 2996,
+            "display_name": "yktoo",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37434109/maven-run-plugin-twice-during-a-phase-interleaved-with-another-plugin",
+        "last_activity_date": 1464262531,
+        "creation_date": 1464171376,
+        "answer_count": 1,
+        "title": "Maven: run plugin twice during a phase, interleaved with another plugin",
+        "body": "<p>For our end-2-end test we need to execute the following logical flow:<\/p>\n\n<ol>\n<li>Create and set up e2e schema (user) in the database (<code>pre-integration-test<\/code>)<\/li>\n<li>Run Liquibase to initially populate the schema (<code>pre-integration-test<\/code>)<\/li>\n<li>Add e2e-specific test data to the DB tables (<code>pre-integration-test<\/code>)<\/li>\n<li>Start Tomcat (<code>pre-integration-test<\/code>)<\/li>\n<li>Run the web application in Tomcat (<code>integration-test<\/code>) using Protractor<\/li>\n<li>Shut down Tomcat (<code>post-integration-test<\/code>)<\/li>\n<li>Clean up the DB: drop the schema (<code>post-integration-test<\/code>)<\/li>\n<\/ol>\n\n<p>For running SQL the <code>sql-maven-plugin<\/code> is used, however this flow doesn't fit the regular POM layout:<\/p>\n\n<ul>\n<li>The SQL plugin has to run during <code>pre-integration-test<\/code> twice, <strong>before<\/strong> and <strong>after<\/strong> the <code>liquibase-maven-plugin<\/code><\/li>\n<li>The SQL plugin has to run <strong>before<\/strong> Tomcat plugin during <code>pre-integration-test<\/code>, however it has to run <strong>after<\/strong> during <code>post-integration-test<\/code>, so that the DB schema is dropped after Tomcat has shut down.<\/li>\n<\/ul>\n\n<p>As far as I could conclude from <a href=\"https://maven.apache.org/guides/mini/guide-default-execution-ids.html\" rel=\"nofollow noreferrer\">Maven docs<\/a>, the order of plugins in the POM defines the order of execution during the same phase, and a plugin cannot be mentioned twice in the same POM.<\/p>\n\n<p><strong>Question<\/strong>: Is there any way to achieve this, apart from writing a shell script that would invoke Maven multiple times?<\/p>\n\n<p>P.S. found a similar <a href=\"https://stackoverflow.com/questions/17137505/maven-interleave-multiple-executions-of-a-plugin-with-other-plugin-executions-i\">unanswered question<\/a>.<\/p>\n",
+        "question_id": 37434109,
+        "tags": [
+            "java",
+            "maven",
+            "tomcat",
+            "liquibase",
+            "sql-maven-plugin"
+        ],
+        "score": 7,
+        "is_answered": true,
+        "view_count": 1842,
+        "last_edit_date": 1495541276
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b62089e23b87f97fbf1a3f9de9afb983?s=256&d=identicon&r=PG",
+                "account_id": 517169,
+                "user_type": "registered",
+                "user_id": 1300654,
+                "link": "https://stackoverflow.com/users/1300654/yktoo",
+                "reputation": 2996,
+                "display_name": "yktoo",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37434109,
+            "edited": false,
+            "creation_date": 1464254481,
+            "comment_id": 62413159
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7o0W4.png?s=256",
+                "account_id": 7363499,
+                "user_type": "registered",
+                "user_id": 5606016,
+                "link": "https://stackoverflow.com/users/5606016/a-di-matteo",
+                "reputation": 28050,
+                "display_name": "A_Di-Matteo",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37434109,
+            "edited": false,
+            "creation_date": 1464193466,
+            "comment_id": 62387992
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5ea022daef7069a951075b5ea708e8b3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 940686,
+                "user_type": "registered",
+                "user_id": 6230174,
+                "link": "https://stackoverflow.com/users/6230174/hisham-khalil",
+                "reputation": 1084,
+                "display_name": "Hisham Khalil"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37434109,
+            "edited": false,
+            "creation_date": 1464185427,
+            "comment_id": 62381860
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/7o0W4.png?s=256",
+            "account_id": 7363499,
+            "user_type": "registered",
+            "user_id": 5606016,
+            "link": "https://stackoverflow.com/users/5606016/a-di-matteo",
+            "reputation": 28050,
+            "display_name": "A_Di-Matteo",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 4,
+        "is_accepted": false,
+        "last_activity_date": 1464258053,
+        "creation_date": 1464257008,
+        "body": "<p>Given the sample POM below:<\/p>\n\n<pre><code>&lt;project&gt;\n    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;\n\n    &lt;groupId&gt;com.sample&lt;/groupId&gt;\n    &lt;artifactId&gt;sample-project&lt;/artifactId&gt;\n    &lt;version&gt;0.0.2-SNAPSHOT&lt;/version&gt;\n\n    &lt;build&gt;\n        &lt;plugins&gt;\n            &lt;plugin&gt;\n                &lt;artifactId&gt;maven-antrun-plugin&lt;/artifactId&gt;\n                &lt;version&gt;1.5&lt;/version&gt;\n                &lt;executions&gt;\n                    &lt;execution&gt;\n                        &lt;id&gt;print-hello&lt;/id&gt;\n                        &lt;phase&gt;validate&lt;/phase&gt;\n                        &lt;goals&gt;\n                            &lt;goal&gt;run&lt;/goal&gt;\n                        &lt;/goals&gt;\n                        &lt;configuration&gt;\n                            &lt;target&gt;\n                                &lt;echo message=\"hello there!\" /&gt;\n                            &lt;/target&gt;\n                        &lt;/configuration&gt;\n                    &lt;/execution&gt;\n                &lt;/executions&gt;\n            &lt;/plugin&gt;\n            &lt;plugin&gt;\n                &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;\n                &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;\n                &lt;version&gt;1.5.0&lt;/version&gt;\n                &lt;executions&gt;\n                    &lt;execution&gt;\n                        &lt;id&gt;exec-echo&lt;/id&gt;\n                        &lt;phase&gt;validate&lt;/phase&gt;\n                        &lt;configuration&gt;\n                            &lt;executable&gt;cmd&lt;/executable&gt;\n                            &lt;arguments&gt;\n                                &lt;argument&gt;/C&lt;/argument&gt;\n                                &lt;argument&gt;echo&lt;/argument&gt;\n                                &lt;argument&gt;hello-from-exec&lt;/argument&gt;\n                            &lt;/arguments&gt;\n                        &lt;/configuration&gt;\n                        &lt;goals&gt;\n                            &lt;goal&gt;exec&lt;/goal&gt;\n                        &lt;/goals&gt;\n                    &lt;/execution&gt;\n                &lt;/executions&gt;\n            &lt;/plugin&gt;\n            &lt;plugin&gt;\n                &lt;artifactId&gt;maven-antrun-plugin&lt;/artifactId&gt;\n                &lt;version&gt;1.5&lt;/version&gt;\n                &lt;executions&gt;\n                    &lt;execution&gt;\n                        &lt;id&gt;print-hello-2&lt;/id&gt;\n                        &lt;phase&gt;validate&lt;/phase&gt;\n                        &lt;goals&gt;\n                            &lt;goal&gt;run&lt;/goal&gt;\n                        &lt;/goals&gt;\n                        &lt;configuration&gt;\n                            &lt;target&gt;\n                                &lt;echo message=\"hello there 2!\" /&gt;\n                            &lt;/target&gt;\n                        &lt;/configuration&gt;\n                    &lt;/execution&gt;\n                &lt;/executions&gt;\n            &lt;/plugin&gt;\n        &lt;/plugins&gt;\n    &lt;/build&gt;\n\n&lt;/project&gt;\n<\/code><\/pre>\n\n<p>We are actually configuring:<\/p>\n\n<ul>\n<li>The <code>maven-antrun-plugin<\/code> to print the <code>hello there!<\/code> message<\/li>\n<li>The <code>exec-maven-plugin<\/code> to print the <code>hello-from-exec<\/code> message<\/li>\n<li>The <code>maven-antrun-plugin<\/code> to print the <code>hello there 2!<\/code> message<\/li>\n<\/ul>\n\n<p>Goal executions are all attached to the same phase, <code>validate<\/code>, and we would expect to be executed in the same defined order.<\/p>\n\n<p>However, when invoking (the <code>-q<\/code> option is used to have exactly and only their output):<\/p>\n\n<pre><code>mvn validate -q\n<\/code><\/pre>\n\n<p>we would have as output:<\/p>\n\n<pre><code>main:\n     [echo] hello there!\n\nmain:\n     [echo] hello there 2!\nhello-from-exec\n<\/code><\/pre>\n\n<p>That is, for the same phase, Maven executed the defined plugins, however merging all of the defined executions for the same plugins (even if defined as different <code>plugin<\/code> sections) and then execute them in the order to merged definitions.<\/p>\n\n<p>Unfortunately, there is no mechanism to avoid this <em>merging<\/em>. The only options we have for configuring plugins execution behaviors are:<\/p>\n\n<ul>\n<li>The <a href=\"https://maven.apache.org/pom.html#Plugins\" rel=\"nofollow\"><code>inherited<\/code><\/a> configuration entry: \n\n<blockquote>\n  <p><code>true<\/code> or <code>false<\/code>, whether or not this plugin configuration should apply to POMs which inherit from this one. Default value is <code>true<\/code>.<\/p>\n<\/blockquote><\/li>\n<li>The <code>combine.children<\/code> and <code>combine.self<\/code> to\n\n<blockquote>\n  <p>control how child POMs inherit configuration from parent POMs by adding attributes to the children of the configuration element. <\/p>\n<\/blockquote><\/li>\n<\/ul>\n\n<p>None of these options would help us. In this case we would need a kind of <code>merge<\/code> attribute on the <code>execution<\/code> element or have a different behavior by default (that is, Maven should respect the definition order).<\/p>\n\n<hr>\n\n<p>Invoking the single executions from command line as below:<\/p>\n\n<pre><code>mvn antrun:run@print-hello exec:exec@exec-echo antrun:run@print-hello-2 -q\n<\/code><\/pre>\n\n<p>We would instead have the desired output:<\/p>\n\n<pre><code>main:\n     [echo] hello there!\nhello-from-exec\n\nmain:\n     [echo] hello there 2!\n<\/code><\/pre>\n\n<p>But in this case:<\/p>\n\n<ul>\n<li>We are not attached to any phase<\/li>\n<li>We are invoking directly specific executions (and their configurations) via command line (and via a new <a href=\"https://issues.apache.org/jira/browse/MNG-5768\" rel=\"nofollow\">feature<\/a> only available since Maven <strong>3.3.1<\/strong><\/li>\n<\/ul>\n\n<p>You can achieve exactly the same via scripting or via exec-maven-plugin invoking maven itself, but - again - the same would apply: no phase applied, only sequence of executions.<\/p>\n",
+        "answer_id": 37457614,
+        "question_id": 37434109,
+        "last_edit_date": 1464258053
+    }],
+    "answer_comments": {"37457614": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/99d1d4ee28260791f03b53f13a3bf6b2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9531412,
+                "user_type": "registered",
+                "user_id": 7082956,
+                "link": "https://stackoverflow.com/users/7082956/valerij-dobler",
+                "reputation": 2925,
+                "display_name": "Valerij Dobler"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 37457614,
+            "edited": false,
+            "creation_date": 1684934155,
+            "comment_id": 134589996
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e607337cf798b7182ead36e447beb35f?s=256&d=identicon&r=PG",
+                "account_id": 263257,
+                "user_type": "registered",
+                "user_id": 548701,
+                "link": "https://stackoverflow.com/users/548701/s%c3%a9bastien-tromp",
+                "reputation": 622,
+                "display_name": "S&#233;bastien Tromp",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 37457614,
+            "edited": false,
+            "creation_date": 1542040983,
+            "comment_id": 93417159
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7o0W4.png?s=256",
+                "account_id": 7363499,
+                "user_type": "registered",
+                "user_id": 5606016,
+                "link": "https://stackoverflow.com/users/5606016/a-di-matteo",
+                "reputation": 28050,
+                "display_name": "A_Di-Matteo",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37457614,
+            "edited": false,
+            "creation_date": 1465455839,
+            "comment_id": 62910526
+        }
+    ]}
+}

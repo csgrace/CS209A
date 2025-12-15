@@ -1,0 +1,307 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7700419,
+            "user_type": "registered",
+            "user_id": 5833217,
+            "link": "https://stackoverflow.com/users/5833217/michael",
+            "reputation": 33,
+            "display_name": "Michael",
+            "accept_rate": 75
+        },
+        "closed_date": 1618683971,
+        "link": "https://stackoverflow.com/questions/36231727/what-should-i-use-instead-of-get-userid-to-get-the-username-of-the-facebook-user",
+        "last_activity_date": 1459015015,
+        "creation_date": 1458967703,
+        "answer_count": 2,
+        "title": "What should i use instead of get.userId to get the username of the facebook user?",
+        "body": "<pre><code>import android.content.Intent;\nimport android.graphics.Typeface;\nimport android.os.Bundle;\nimport android.support.v7.app.AppCompatActivity;\nimport android.view.View;\nimport android.view.MenuItem;\nimport android.widget.TextView;\n\nimport com.facebook.CallbackManager;\nimport com.facebook.FacebookSdk;\nimport com.facebook.login.LoginManager;\nimport com.facebook.login.widget.LoginButton;\nimport android.widget.Toast;\nimport com.facebook.FacebookCallback;\nimport com.facebook.FacebookException;\nimport com.facebook.login.LoginResult;\n\npublic class MainActivity extends AppCompatActivity {\n\n    private CallbackManager callbackManager;\n    private LoginButton loginButton;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n\n\n        FacebookSdk.sdkInitialize(getApplicationContext());\n        callbackManager = CallbackManager.Factory.create();\n        setContentView(R.layout.login);\n        Typeface myTypeface = Typeface.createFromAsset(getAssets(), \"MAGNETOB.TTF\");\n        TextView myTextview = (TextView) findViewById(R.id.textview1);\n        myTextview.setTypeface(myTypeface);\n\n        loginButton = (LoginButton) findViewById(R.id.fb_login_button);\n        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback&lt;LoginResult&gt;() {\n\n\n            @Override\n            public void onSuccess(LoginResult loginResult) {\n\n                System.out.println(\"Facebook Login Successful!\");\n                System.out.println(\"Logged in user Details : \");\n                System.out.println(\"--------------------------\");\n                System.out.println(\"User ID  : \" + loginResult.getAccessToken().getUserId());\n                System.out.println(\"Authentication Token : \" + loginResult.getAccessToken().getToken());\n                Toast.makeText(MainActivity.this, \"Login Successful!\" + loginResult.getAccessToken().getUserId() , Toast.LENGTH_LONG).show();\n                  *** // Over here where it says get.UserId()***\n\n            }\n\n\n            @Override\n            public void onCancel() {\n                Toast.makeText(MainActivity.this, \"Login cancelled by user!\", Toast.LENGTH_LONG).show();\n                System.out.println(\"Facebook Login failed!!\");\n\n\n\n            }\n\n            @Override\n            public void onError(FacebookException e) {\n                Toast.makeText(MainActivity.this, \"Login unsuccessful!\", Toast.LENGTH_LONG).show();\n                System.out.println(\"Facebook Login failed!!\");\n            }\n        });\n\n\n    }\n\n    @Override\n    protected void onActivityResult(int reqCode, int resCode, Intent data) {\n        callbackManager.onActivityResult(reqCode, resCode, data);\n    }\n<\/code><\/pre>\n\n<p>In my onSucess method i want to print the username using toast but cant seem to find how to do so without textview which isnt what i want, i want to load the username using toast but currently im loading the userID.<\/p>\n\n<p>Please help thanks<\/p>\n",
+        "question_id": 36231727,
+        "tags": [
+            "java",
+            "android",
+            "facebook",
+            "methods"
+        ],
+        "score": -2,
+        "closed_reason": "Needs details or clarity",
+        "is_answered": true,
+        "view_count": 336,
+        "last_edit_date": 1458968057
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/YKQis.png?s=256",
+            "account_id": 394854,
+            "user_type": "registered",
+            "user_id": 757508,
+            "link": "https://stackoverflow.com/users/757508/andyrandy",
+            "reputation": 74104,
+            "display_name": "andyrandy"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 36231727,
+        "edited": false,
+        "creation_date": 1458987433,
+        "comment_id": 60098833
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9e42423c5552c6ef5e452eaf1105d4ce?s=256&d=identicon&r=PG",
+                "account_id": 1480700,
+                "user_type": "registered",
+                "user_id": 1392470,
+                "link": "https://stackoverflow.com/users/1392470/mukesh-y",
+                "reputation": 652,
+                "display_name": "Mukesh Y"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1459015015,
+            "creation_date": 1458969129,
+            "body": "<ul>\n<li><h2>Inside the onSuccess method tried this:<\/h2>\n\n<pre><code>    @Override \npublic void onSuccess(LoginResult loginResult) { \n\n  Profile profile = Profile.getCurrentProfile();\n  if(profile != null) {    \n   String fbid = profile.getId();\n\u2028           String name = profile.getFirstName();\n\u2028           String profileUrl = \"https://graph.facebook.com/\" + fbid\n\u2028                                   + \"/picture?type=large\";\u2028        }\n\n}\n<\/code><\/pre><\/li>\n - \n<\/ul>\n\n<h2>The Other way to do is using graph<\/h2>\n\n<pre><code>    @Override\n            public void onSuccess(final LoginResult loginResult) {\n                accessToken = loginResult.getAccessToken();\n                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {\n                    @Override\n                    public void onCompleted(JSONObject json, GraphResponse response) {\n                        if (response.getError() != null) {\n                            //show error message to user\n                        } else {\n                            loginResult.getRecentlyGrantedPermissions();\n                            Log.d(\"fb response\", json.toString());\n                            try {\n                                //check json response\n                            } catch (JSONException e) {\n                                e.printStackTrace();\n                            }\n                        }\n                    }\n                });\n                Bundle parameters = new Bundle();\n                parameters.putString(\"fields\", \"id,name,email,gender, birthday,location\");\n                request.setParameters(parameters);\n                request.executeAsync();\n\n            }\n<\/code><\/pre>\n",
+            "answer_id": 36231869,
+            "question_id": 36231727,
+            "last_edit_date": 1459015015
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K7Fbg.png?s=256",
+                "account_id": 1354645,
+                "user_type": "registered",
+                "user_id": 1293313,
+                "link": "https://stackoverflow.com/users/1293313/milaptank",
+                "reputation": 10076,
+                "display_name": "MilapTank",
+                "accept_rate": 44
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1458970983,
+            "creation_date": 1458970670,
+            "body": "<p>In your <code>onSuccess<\/code> method use Graph API for getting user info see <a href=\"https://developers.facebook.com/docs/facebook-login/permissions#reference-public_profile\" rel=\"nofollow\">official doc<\/a><\/p>\n\n<pre><code>@Override\npublic void onSuccess(LoginResult loginResult) {\n\n     Bundle params = new Bundle();\n     params.putString(\"fields\", \"id,name,first_name,last_name\");//here you can add more fields as you want \n     new GraphRequest(loginResult.getAccessToken(), \"me\"/*you can also  pass FB id of user instead of 'me'*/, params, HttpMethod.GET,\n     new GraphRequest.Callback() {\n        @Override\n        public void onCompleted(GraphResponse response) {\n            if (response != null) {\n                try {\n\n                      JSONObject userObj = response.getJSONObject();\n                      String fname =userObj.optString(\"first_name\");\n                      String lname =userObj.optString(\"last_name\");\n                      String fullName =userObj.optString(\"name\");\n\n                    }\n                } catch (Exception e) {\n                    e.printStackTrace();\n                }\n            }\n        }\n     }).executeAsync();\n}\n<\/code><\/pre>\n",
+            "answer_id": 36231989,
+            "question_id": 36231727,
+            "last_edit_date": 1458970983
+        }
+    ],
+    "answer_comments": {
+        "36231989": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231989,
+                "edited": false,
+                "creation_date": 1458986236,
+                "comment_id": 60098476
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231989,
+                "edited": false,
+                "creation_date": 1458976786,
+                "comment_id": 60096211
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/K7Fbg.png?s=256",
+                    "account_id": 1354645,
+                    "user_type": "registered",
+                    "user_id": 1293313,
+                    "link": "https://stackoverflow.com/users/1293313/milaptank",
+                    "reputation": 10076,
+                    "display_name": "MilapTank",
+                    "accept_rate": 44
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231989,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1458975022,
+                "comment_id": 60095854
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231989,
+                "edited": false,
+                "creation_date": 1458974673,
+                "comment_id": 60095793
+            }
+        ],
+        "36231869": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9e42423c5552c6ef5e452eaf1105d4ce?s=256&d=identicon&r=PG",
+                    "account_id": 1480700,
+                    "user_type": "registered",
+                    "user_id": 1392470,
+                    "link": "https://stackoverflow.com/users/1392470/mukesh-y",
+                    "reputation": 652,
+                    "display_name": "Mukesh Y"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231869,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1459015098,
+                "comment_id": 60107796
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231869,
+                "edited": false,
+                "creation_date": 1458986200,
+                "comment_id": 60098460
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231869,
+                "edited": false,
+                "creation_date": 1458985509,
+                "comment_id": 60098248
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231869,
+                "edited": false,
+                "creation_date": 1458972596,
+                "comment_id": 60095306
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9e42423c5552c6ef5e452eaf1105d4ce?s=256&d=identicon&r=PG",
+                    "account_id": 1480700,
+                    "user_type": "registered",
+                    "user_id": 1392470,
+                    "link": "https://stackoverflow.com/users/1392470/mukesh-y",
+                    "reputation": 652,
+                    "display_name": "Mukesh Y"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231869,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1458970079,
+                "comment_id": 60094813
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/30214556cdcc7fdce7594468ed36104f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7700419,
+                    "user_type": "registered",
+                    "user_id": 5833217,
+                    "link": "https://stackoverflow.com/users/5833217/michael",
+                    "reputation": 33,
+                    "display_name": "Michael",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36231869,
+                "edited": false,
+                "creation_date": 1458969958,
+                "comment_id": 60094795
+            }
+        ]
+    }
+}

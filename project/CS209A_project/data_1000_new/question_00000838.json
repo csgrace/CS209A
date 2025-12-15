@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/QTe0l.jpg?s=256",
+            "account_id": 1236579,
+            "user_type": "registered",
+            "user_id": 1200056,
+            "link": "https://stackoverflow.com/users/1200056/dlhextall",
+            "reputation": 121,
+            "display_name": "dlhextall"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/41883281/elasticsearch-spring-repository-search-using-multiple-fields",
+        "last_activity_date": 1485470361,
+        "creation_date": 1485466017,
+        "answer_count": 1,
+        "title": "Elasticsearch Spring repository search using multiple fields",
+        "body": "<p>I have a Spring Boot application connected to an Elasticsearch instance containing <a href=\"https://github.com/elastic/elasticsearch/blob/master/docs/src/test/resources/accounts.json?raw=true\" rel=\"nofollow noreferrer\">this sample data<\/a>. I am currently able to search for a specific field, but the moment I add the second one in the request, I don't have any results (each of the fields are fine on their own). How can I get the correct results?<\/p>\n\n<p>Here are my classes:<\/p>\n\n<pre><code>@Document(indexName = \"bank\", type = \"account\", replicas = 0)\npublic class Account {\n\n    @Id\n    private String id;\n    private long accountNumber;\n    private long balance;\n    private String firstname;\n    private String lastname;\n    private long age;\n    private String gender;\n    private String address;\n    private String employer;\n    private String email;\n    private String city;\n    private String state;\n\n}\n\n\npublic interface AccountRepository extends ElasticsearchRepository&lt;Account, String&gt; {\n\n    Page&lt;Account&gt; findByGenderAndStateAllIgnoreCase(String gender, String state, Pageable pageable);\n\n}\n\n\n@Service\npublic class AccountServiceImpl implements AccountService {\n\n    @Autowired\n    private AccountRepository repository;\n\n    @Override\n    public Account save(Account account) {\n        return repository.save(account);\n    }\n\n    @Override\n    public Account findOne(String id) {\n        return repository.findOne(id);\n    }\n\n    @Override\n    public Collection&lt;Account&gt; findAll(PageRequest request) {\n        return repository.findAll(request).getContent();\n    }\n\n    @Override\n    public Collection&lt;Account&gt; findByGenderAndState(String gender, String state, PageRequest request) {\n        return repository.findByGenderAndStateAllIgnoreCase(gender, state, request).getContent();\n    }\n\n}\n\n\n@Controller\n@RequestMapping(\"/bank\")\npublic class BankController {\n\n    @Autowired\n    private AccountService accountService;\n\n    @GetMapping(\"/accounts\")\n    public\n    @ResponseBody\n    Collection&lt;Account&gt; accounts(@RequestParam(name = \"gender\", required = false, defaultValue = \"*\") String gender,\n                                 @RequestParam(name = \"state\", required = false, defaultValue = \"*\") String state,\n                                 @RequestParam(name = \"page\", required = false, defaultValue = \"0\") int page,\n                                 @RequestParam(name = \"size\", required = false, defaultValue = \"10\") int size) {\n        return accountService.findByGenderAndState(gender, state, new PageRequest(page, size));\n    }\n\n}\n<\/code><\/pre>\n\n<p>Here is the query that is sent to Elasticsearch from Spring Boot:<\/p>\n\n<pre><code>[\n  {\n    \"from\": 20,\n    \"size\": 20,\n    \"query\": {\n      \"bool\": {\n        \"must\": [\n          {\n            \"query_string\": {\n              \"query\": \"f\",\n              \"fields\": [\n                \"gender\"\n              ],\n              \"default_operator\": \"and\"\n            }\n          },\n          {\n            \"query_string\": {\n              \"query\": \"dc\",\n              \"fields\": [\n                \"state\"\n              ],\n              \"default_operator\": \"and\"\n            }\n          }\n        ]\n      }\n    }\n  }\n]\n<\/code><\/pre>\n",
+        "question_id": 41883281,
+        "tags": [
+            "java",
+            "spring",
+            "elasticsearch",
+            "spring-boot"
+        ],
+        "score": 0,
+        "accepted_answer_id": 41884257,
+        "is_answered": true,
+        "view_count": 2434
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/QTe0l.jpg?s=256",
+            "account_id": 1236579,
+            "user_type": "registered",
+            "user_id": 1200056,
+            "link": "https://stackoverflow.com/users/1200056/dlhextall",
+            "reputation": 121,
+            "display_name": "dlhextall"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1485470361,
+        "creation_date": 1485470361,
+        "body": "<p>Turns out I was querying for the page #1, instead of #0. The results are showing correctly now.<\/p>\n",
+        "answer_id": 41884257,
+        "question_id": 41883281
+    }],
+    "answer_comments": {}
+}

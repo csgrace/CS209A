@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b353ff33cf432b7704e16ead8d1bbabf?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6967171,
+            "user_type": "registered",
+            "user_id": 5344750,
+            "link": "https://stackoverflow.com/users/5344750/abrar-ahamed",
+            "reputation": 199,
+            "display_name": "Abrar Ahamed",
+            "accept_rate": 79
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73229143/java-streams-how-to-filter-object-based-on-key-value",
+        "last_activity_date": 1659607995,
+        "creation_date": 1659572898,
+        "answer_count": 1,
+        "title": "Java Streams : how to filter object based on key value",
+        "body": "<p>I have a class as below which is mapped to the response of one of the api request. The response json is nothing but RootResponse[]<\/p>\n<pre><code>\npublic class RootResponse {\n\n    String header;\n    String tailer;\n    List&lt;Map&lt;Object, subRecords&gt;&gt; transactions;\n    DcfSummary summary;\n\n\n}\n<\/code><\/pre>\n<p>The json response which I received is mapped to the class as map&lt;string, Object&gt;<\/p>\n<p>below is the sample json response , In the transactions which is ( List&lt;Map&lt;Object, subRecords&gt;&gt; transactions;)  there is a  key for example &quot;789983333&quot; which is dynamic. so what I want to achieve if I give the key then I want to get that object which is<\/p>\n<pre><code>\n&quot;789983333&quot;: {\n                &quot;r_01&quot;: &quot;record1&quot;,\n                &quot;r_02&quot;: &quot;record2&quot;,\n                &quot;r_03&quot;: &quot;record3&quot;,\n                &quot;r_04&quot;: &quot;record4&quot;\n            }\n        }\n<\/code><\/pre>\n<pre><code>[{\n        &quot;header&quot;: &quot;header1&quot;,\n        &quot;transactions&quot;: [{\n            &quot;789983333&quot;: {\n                &quot;r_01&quot;: &quot;record1&quot;,\n                &quot;r_02&quot;: &quot;record2&quot;,\n                &quot;r_03&quot;: &quot;record3&quot;,\n                &quot;r_04&quot;: &quot;record4&quot;\n            }\n        }],\n        &quot;tailer&quot;: &quot;tailer1&quot;,\n        &quot;summary&quot;: {\n            &quot;item1&quot;: &quot;370840&quot;,\n            &quot;item2&quot;: &quot;0&quot;,\n            &quot;item3&quot;: &quot;0&quot;,\n            &quot;item4&quot;: &quot;0&quot;,\n            &quot;item5&quot;: &quot;0&quot;,\n            &quot;item6&quot;: &quot;0&quot;,\n            &quot;totaltransactions&quot;: &quot;00000000&quot;\n        }\n    },\n    {\n        &quot;header&quot;: &quot;header1&quot;,\n        &quot;transactions&quot;: [{\n            &quot;789983333&quot;: {\n                &quot;r_01&quot;: &quot;record1&quot;,\n                &quot;r_02&quot;: &quot;record2&quot;,\n                &quot;r_03&quot;: &quot;record3&quot;,\n                &quot;r_04&quot;: &quot;record4&quot;\n            }\n        }],\n        &quot;tailer&quot;: &quot;tailer1&quot;,\n        &quot;summary&quot;: {\n            &quot;item1&quot;: &quot;370840&quot;,\n            &quot;item2&quot;: &quot;0&quot;,\n            &quot;item3&quot;: &quot;0&quot;,\n            &quot;item4&quot;: &quot;0&quot;,\n            &quot;item5&quot;: &quot;0&quot;,\n            &quot;item6&quot;: &quot;0&quot;,\n            &quot;totaltransactions&quot;: &quot;00000000&quot;\n        }\n    }\n]\n\n<\/code><\/pre>\n<p>I was trying to use streams in java but no luck. The idea is once I get the object based on the reference key then I can get records and validate the response. tried various options not able to get it. Any help would be appreciated.<\/p>\n",
+        "question_id": 73229143,
+        "tags": [
+            "java",
+            "java-stream"
+        ],
+        "score": -2,
+        "is_answered": false,
+        "view_count": 324,
+        "last_edit_date": 1659583003
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/KeHyQ.jpg?s=256",
+            "account_id": 23959668,
+            "user_type": "registered",
+            "user_id": 17949945,
+            "link": "https://stackoverflow.com/users/17949945/alexander-ivanchenko",
+            "reputation": 29294,
+            "display_name": "Alexander Ivanchenko"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "post_id": 73229143,
+        "edited": false,
+        "creation_date": 1659573375,
+        "comment_id": 129328976
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b353ff33cf432b7704e16ead8d1bbabf?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6967171,
+            "user_type": "registered",
+            "user_id": 5344750,
+            "link": "https://stackoverflow.com/users/5344750/abrar-ahamed",
+            "reputation": 199,
+            "display_name": "Abrar Ahamed",
+            "accept_rate": 79
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1659607995,
+        "creation_date": 1659586637,
+        "body": "<p>Found the solution<\/p>\n<pre><code>            for (Map.Entry&lt;String, Object&gt; entry : RootResponse.entrySet()){\n\n                RootResponse[] ls = (RootResponse[]) entry.getValue();\n                for(RootResponse a : ls){\n                     List&lt;Map&lt;Object, SubRecords&gt;&gt; dcfrecord = (List&lt;Map&lt;Object, SubRecords&gt;&gt;) a.getTransactions();\n                   Optional&lt;SubRecords&gt; subRecords = Optional.of((SubRecords) dcfrecord.stream().flatMap(key -&gt; key.entrySet().stream().filter(k1 -&gt; k1.getKey().equals(rrn))).map(value -&gt; value.getValue()).findFirst().get());\n                   SubRecords subrecord = SubRecords.get();\n                    System.out.println(subrecord.getR_6220());\n                    if(gen4record != null){\n                        break;\n                    }\n                }\n            }\n\n<\/code><\/pre>\n",
+        "answer_id": 73230319,
+        "question_id": 73229143,
+        "last_edit_date": 1659607995
+    }],
+    "answer_comments": {}
+}

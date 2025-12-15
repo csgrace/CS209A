@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1202353023144143/picture?type=large",
+            "account_id": 9589797,
+            "user_type": "registered",
+            "user_id": 7121129,
+            "link": "https://stackoverflow.com/users/7121129/alex-kennedy",
+            "reputation": 21,
+            "display_name": "Alex Kennedy"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49138373/error-properly-reading-json-file-in-android",
+        "last_activity_date": 1520363745,
+        "creation_date": 1520363745,
+        "answer_count": 0,
+        "title": "Error properly reading JSON file in Android",
+        "body": "<p>I am having an odd issue reading in the following JSON formatted API - <a href=\"http://dev.theappsdr.com/apis/trivia_json/index.php\" rel=\"nofollow noreferrer\">Trivia API<\/a> (this URL is passed in through the Async). I will explain in more detail below, but basically my code appears to be not properly reading in a JSON file, which results in me being unable to loop through it and set my question objects accordingly.<\/p>\n\n<p>Logs revealed that the reading of the input stream at IOUtils seems to not finish reading the entire JSON file, often stopping by the 11th question object within the file.<\/p>\n\n<p>I think this has to do with a Log limit, as when I add more to the Log (such as \"This is the json String -\") it prints less, but this does not explain why it is not properly looping through the question objects and setting them accordingly. Other logs revealed that it does not even loop through the questions, it only goes through one time and only sets the title.<\/p>\n\n<p>I am clueless as to what is happening as I have parsed other JSON files literally the exact same way as this. <\/p>\n\n<pre><code>@Override\nprotected ArrayList&lt;Question&gt; doInBackground(String... strings) {\n    HttpURLConnection connection = null;\n    ArrayList&lt;Question&gt; result = new ArrayList&lt;&gt;();\n    try {\n        URL url = new URL(strings[0]);\n        connection = (HttpURLConnection) url.openConnection();\n        connection.connect();\n        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {\n\n            String json = IOUtils.toString(connection.getInputStream(), \"UTF-8\");\n            Log.d(\"demo\", \"This is the json String - \" + json);\n\n            JSONObject root = new JSONObject(json);\n            JSONArray questions = root.getJSONArray(\"questions\");\n            for (int i = 0; i &lt; questions.length(); i++) {\n                JSONObject questionsJSONObject = questions.getJSONObject(i);\n                Question question = new Question();\n\n                question.setText(questionsJSONObject.getString(\"text\"));\n\n                //Choice array\n                JSONObject choicesObject = questionsJSONObject.getJSONObject(\"choices\");\n                String[] temp = new String[choicesObject.getJSONArray(\"choice\").length()];\n                for (int j = 0; j &lt; choicesObject.getJSONArray(\"choice\").length(); j++) {\n                    temp[j] =  choicesObject.getJSONArray(\"choice\").getJSONObject(j).toString();\n                }\n                question.setChoices(temp);\n                //End of Choice array\n\n                question.setAnswer(questionsJSONObject.getInt(\"answer\");\n\n                question.setUrlToImage(questionsJSONObject.getString(\"image\"));\n\n                result.add(question);\n            }\n        }\n    } catch (Exception e) {\n        //Handle Exceptions\n    } finally {\n        //Close the connections\n    }\n    Log.d(\"demo\", \"toString - \" + result.toString());\n    return result;\n}\n<\/code><\/pre>\n",
+        "question_id": 49138373,
+        "tags": [
+            "java",
+            "android",
+            "json",
+            "android-studio",
+            "parsing"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 36
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3915b3b0af17096bba7ac8cec330138d?s=256&d=identicon&r=PG",
+                "account_id": 1084234,
+                "user_type": "registered",
+                "user_id": 1080355,
+                "link": "https://stackoverflow.com/users/1080355/vsb",
+                "reputation": 10455,
+                "display_name": "VSB",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49138373,
+            "edited": false,
+            "creation_date": 1520371954,
+            "comment_id": 85285873
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/PmvCk.jpg?s=256",
+                "account_id": 96440,
+                "user_type": "registered",
+                "user_id": 262119,
+                "link": "https://stackoverflow.com/users/262119/robert-nekic",
+                "reputation": 3117,
+                "display_name": "Robert Nekic",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49138373,
+            "edited": false,
+            "creation_date": 1520364161,
+            "comment_id": 85281979
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

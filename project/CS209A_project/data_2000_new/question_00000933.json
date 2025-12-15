@@ -1,0 +1,43 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user972946"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22836834/chained-optional-map-calls-cause-compilation-error",
+        "last_activity_date": 1396526302,
+        "creation_date": 1396525911,
+        "answer_count": 1,
+        "title": "Chained Optional.map calls cause compilation error",
+        "body": "<p>I am trying out Java 8 <code>Optional<\/code> class:<\/p>\n\n<pre><code>static Optional&lt;Integer&gt; test() {\n    return Optional.of(1).map(i -&gt; Optional.of(i.toString()).map(j -&gt; Integer.valueOf(j)));\n}\n<\/code><\/pre>\n\n<p>In my thought, the function should return an Optional of Integer object 1. However Java 8 compiler is not happy:<\/p>\n\n<pre><code>Test.java:5: error: incompatible types: inference variable U has incompatible bounds\n        return Optional.of(1).map(i -&gt; Optional.of(i.toString()).map(j -&gt; Integer.valueOf(j)));\n                                 ^\n    equality constraints: Integer\n    lower bounds: Optional&lt;U&gt;\n  where U,T are type-variables:\n    U extends Object declared in method &lt;U&gt;map(Function&lt;? super T,? extends U&gt;)\n    T extends Object declared in class Optional\n<\/code><\/pre>\n\n<p>Why is the compiler not happy?<\/p>\n",
+        "question_id": 22836834,
+        "tags": ["java"],
+        "score": 1,
+        "accepted_answer_id": 22837011,
+        "is_answered": true,
+        "view_count": 396
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/VjxwC.jpg?s=256",
+            "account_id": 1101161,
+            "user_type": "registered",
+            "user_id": 1093528,
+            "link": "https://stackoverflow.com/users/1093528/fge",
+            "reputation": 122410,
+            "display_name": "fge",
+            "accept_rate": 65
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1396526302,
+        "creation_date": 1396526302,
+        "body": "<p>The <a href=\"http://docs.oracle.com/javase/8/docs/api/java/util/Optional.html#map-java.util.function.Function-\" rel=\"nofollow\">signature of <code>Optional<\/code>'s <code>.map()<\/code><\/a> says that the <code>Function<\/code> given as an argument returns <code>U<\/code>, and not <code>Optional&lt;U&gt;<\/code>; this method will wrap <code>U<\/code> itself.<\/p>\n\n<p>Therefore you have to:<\/p>\n\n<pre><code>Optional.of(1).map(i -&gt; i.toString()).map(j -&gt; Integer.parseInt(j))\n<\/code><\/pre>\n\n<p>(note: also, <code>Integer.valueOf()<\/code> was not what you meant; it does not take a <code>String<\/code> as an argument)<\/p>\n\n<p>Finally, both your lambdas can be replaced with method references:<\/p>\n\n<pre><code>Optional.of(1).map(Object::toString).map(Integer::parseInt)\n<\/code><\/pre>\n",
+        "answer_id": 22837011,
+        "question_id": 22836834
+    }],
+    "answer_comments": {}
+}

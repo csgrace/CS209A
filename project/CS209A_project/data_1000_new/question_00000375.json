@@ -1,0 +1,175 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/23a45ba1074fe64c4054028e07bd24b1?s=256&d=identicon&r=PG",
+            "account_id": 90942,
+            "user_type": "registered",
+            "user_id": 250030,
+            "link": "https://stackoverflow.com/users/250030/elliott",
+            "reputation": 5617,
+            "display_name": "Elliott",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/7773545/what-part-of-my-code-is-in-the-event-dispatch-queue",
+        "last_activity_date": 1318636842,
+        "creation_date": 1318626283,
+        "answer_count": 3,
+        "title": "What part of my code is in the event dispatch queue",
+        "body": "<p>I thought I understood EDQ until I hit this problem.    I have the code shown below.   It reads from a Bufferred reader.   If the first character received is a \"Z\" I execute one set of code (displaying a JOptionPane) and if it is a 0 I execute another section of code (displaying another JOptionPane).   I am trying to do this within the EDQ and so I use SwingUtilities invokeAndWait.   When I test these error conditions, the first statement in the conditional works as designed, but I get a java error when testing the else clause.  Specifically:<\/p>\n\n<p>Exception in thread \"AWT-EventQueue-2\" java.lang.Error: Cannot call invokeAndWait from the event dispatcher thread\n    at java.awt.EventQueue.invokeAndWait(Unknown Source)<\/p>\n\n<p>It is all part of the same conditional.   How can one clause be part of the EDQ and another clause not be.<\/p>\n\n<p>This is crazy.<\/p>\n\n<p>Thanks for any help.<\/p>\n\n<p>Elliott<\/p>\n\n<pre><code>     while ((line = in.readLine()) != null) {\n        if (line.charAt(0) == 'Z') {\n            String theMsg;\n            theMsg = \"No records were found.\";\n            try {\n                SwingUtilities.invokeAndWait(new DoShowDialog(null, theMsg, 0));\n            } catch (java.lang.reflect.InvocationTargetException e1) {\n                e1.printStackTrace();\n            } catch (InterruptedException e2) {\n                // TODO Auto-generated catch block\n                e2.printStackTrace();\n            }\n            noDocs = true;\n            Object args[] = new Object[1];\n            args[0] = \"1\";\n            window.call(\"uploadConfig\", args);\n            downloadAccount.setEnabled(true);\n            uploadAccount.setEnabled(false);\n            deleteAllUnselectedCodes.setEnabled(false);\n            queue = null;\n            if (poll) {\n                polltimer.restart();\n            }\n        } else if (line.charAt(0) == 'O') {\n            String theMsg;\n            theMsg = \"Account is currently checked out \n            by user \"+ line.substring(1)\n            + \".  You can view this \n            account but you cannot modify it. \";\n            try {\n                SwingUtilities.invokeAndWait(new DoShowDialog(null, theMsg, 0));\n            } catch (java.lang.reflect.InvocationTargetException e1) {\n                e1.printStackTrace();\n            } catch (InterruptedException e2) {\n                // TODO Auto-generated catch block\n                e2.printStackTrace();\n            }\n            initialckBoxState = false;\n            accountfoundandnotcheckedout = true;\n            viewMode = true;\n            patientpane.setEditFields(false);\n            otherpane.setEditFields(false);\n            getAccountImages(acctEntered); // bluenoble\n        }\n        .....................\n        more stuff\n    }\n<\/code><\/pre>\n",
+        "question_id": 7773545,
+        "tags": [
+            "java",
+            "swing",
+            "event-handling"
+        ],
+        "score": 2,
+        "accepted_answer_id": 7773774,
+        "is_answered": true,
+        "view_count": 2021,
+        "last_edit_date": 1318629665
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+                "account_id": 247613,
+                "user_type": "registered",
+                "user_id": 522444,
+                "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+                "reputation": 285766,
+                "display_name": "Hovercraft Full Of Eels",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773545,
+            "edited": false,
+            "creation_date": 1318626952,
+            "comment_id": 9465650
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c89f021eb00606531b47ac046ebd810a?s=256&d=identicon&r=PG",
+                "account_id": 964327,
+                "user_type": "registered",
+                "user_id": 988052,
+                "link": "https://stackoverflow.com/users/988052/tacticalcoder",
+                "reputation": 6335,
+                "display_name": "TacticalCoder"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 7773545,
+            "edited": false,
+            "creation_date": 1318626950,
+            "comment_id": 9465649
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user166390"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1318628127,
+            "creation_date": 1318627814,
+            "body": "<p>Execution doesn't jump threads.<\/p>\n\n<p>Thus <em>all the code posted runs in the EDT<\/em> (Event Dispatch Thread) and it refuses to <code>invokeAndWait<\/code> because that causes an inherent deadlock. (Actually, it could be turned into an invoke-immediate as done with SynchronizationContexts in .NET, but it was not designed as such.)<\/p>\n\n<p>In this particular case I suspect the code is invoked from <em>within<\/em> an EDT callback (and copy'n'pasted from another scenario). The \"trivial fix\" (that would eliminate this exception) would be to eliminate the <code>invokeAndWait<\/code> methods, but that will have a negative impact if this code is invoked off the EDT as well -- the two situations much be handled differently. Take some time to determine <em>when/where<\/em> this code will run, and why.<\/p>\n\n<p>As others have pointed out, this code seems confused: if it's <em>off<\/em> the EDT, manipulating Swing objects is bad, and if it's <em>on<\/em> the EDT then there is no need to <code>invokeAndWait<\/code> and blocking is bad.<\/p>\n\n<p>Happy coding.<\/p>\n",
+            "answer_id": 7773774,
+            "question_id": 7773545,
+            "last_edit_date": 1318628127
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6e2168c4647a4f096a14c254bd3d3f68?s=256&d=identicon&r=PG",
+                "account_id": 378721,
+                "user_type": "registered",
+                "user_id": 731620,
+                "link": "https://stackoverflow.com/users/731620/ratchet-freak",
+                "reputation": 48366,
+                "display_name": "ratchet freak",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1318627137,
+            "creation_date": 1318627137,
+            "body": "<p>if that is eventually called from a event handler then it is called from the EDT (all your code will be unless you use swingworkers or explicitly create thread/use threadpools)<\/p>\n\n<p>check the stack trace to find were it comes from<\/p>\n\n<p>to fix it use aforementioned <a href=\"http://download.oracle.com/javase/6/docs/api/javax/swing/SwingWorker.html\" rel=\"nofollow\">SwingWorker<\/a> and override doInBackground() and you can check whether you are in the dispatch thread with <a href=\"http://download.oracle.com/javase/6/docs/api/javax/swing/SwingUtilities.html#isEventDispatchThread%28%29\" rel=\"nofollow\"><code>SwingUtilities.isEventDispatchThread()<\/code><\/a> <\/p>\n",
+            "answer_id": 7773680,
+            "question_id": 7773545
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/26b7ba37a641cd7db3a641867224fe7d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 368268,
+                "user_type": "registered",
+                "user_id": 714968,
+                "link": "https://stackoverflow.com/users/714968/mkorbel",
+                "reputation": 109896,
+                "display_name": "mKorbel",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1318636842,
+            "creation_date": 1318627948,
+            "body": "<p>1) theMsg look like crazy <code>theMsg = \"someString\" + localVariable + \"anotherString\"<\/code><\/p>\n\n<p>2a) why did you call Swing GUI inside Basic File I/O<\/p>\n\n<p>2b) why did you build GUI inside Basic File I/O<\/p>\n\n<p>read File, close(); I/O Stream in finally block<\/p>\n\n<p>3) you create lots of DoShowDialog(null, theMsg, 0));, every loop create one, and etc<\/p>\n\n<p>4) every true and false move outside this I/O Stream<\/p>\n\n<p>5) load every events to the some of Array, if I/O Stream <\/p>\n\n<p>6) you code probably freeze GUI, if exist<\/p>\n\n<p>7) move all Stream to the BackGround Task<\/p>\n",
+            "answer_id": 7773794,
+            "question_id": 7773545,
+            "last_edit_date": 1318636842
+        }
+    ],
+    "answer_comments": {"7773680": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6e2168c4647a4f096a14c254bd3d3f68?s=256&d=identicon&r=PG",
+                "account_id": 378721,
+                "user_type": "registered",
+                "user_id": 731620,
+                "link": "https://stackoverflow.com/users/731620/ratchet-freak",
+                "reputation": 48366,
+                "display_name": "ratchet freak",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773680,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/23a45ba1074fe64c4054028e07bd24b1?s=256&d=identicon&r=PG",
+                "account_id": 90942,
+                "user_type": "registered",
+                "user_id": 250030,
+                "link": "https://stackoverflow.com/users/250030/elliott",
+                "reputation": 5617,
+                "display_name": "Elliott",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1318628169,
+            "comment_id": 9465938
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23a45ba1074fe64c4054028e07bd24b1?s=256&d=identicon&r=PG",
+                "account_id": 90942,
+                "user_type": "registered",
+                "user_id": 250030,
+                "link": "https://stackoverflow.com/users/250030/elliott",
+                "reputation": 5617,
+                "display_name": "Elliott",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773680,
+            "edited": false,
+            "creation_date": 1318627847,
+            "comment_id": 9465869
+        }
+    ]}
+}

@@ -1,0 +1,324 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/35381a48d503b5dc635138ad9e20db81?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8414766,
+            "user_type": "registered",
+            "user_id": 6315562,
+            "link": "https://stackoverflow.com/users/6315562/christopher-barrett",
+            "reputation": 147,
+            "display_name": "Christopher Barrett"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45297901/argument-mismatch-when-using-the-collect-stream-method",
+        "last_activity_date": 1501225653,
+        "creation_date": 1500971437,
+        "answer_count": 2,
+        "title": "Argument Mismatch when using the collect Stream method",
+        "body": "<p>The following code:<\/p>\n\n<pre><code>names = Arrays.asList(\"A\",\"B\",\"C\").stream();\nList&lt;String&gt; namesAsList = names.collect(() -&gt; new ArrayList&lt;String&gt;(),List::add,List::add);\nSystem.out.println(\"Individual Strings put into a list: \" + namesAsList);\n<\/code><\/pre>\n\n<p>generates the following error during compilation:<\/p>\n\n<blockquote>\n  <p>List namesAsList = names.collect(() -> new\n  ArrayList(),List::add,List::add);\n                                                  ^ (argument mismatch; invalid method reference incompatible types: ArrayList cannot\n  be converted to int) where R,T are type-variables: R extends Object\n  declared in method collect(Supplier,BiConsumer,BiConsumer) T extends Object declared in interface Stream 1\n  error<\/p>\n<\/blockquote>\n\n<p>When I amend the code to remove the generic the code compiles with an unchecked expression warning:<\/p>\n\n<pre><code>Stream&lt;String&gt; names = Arrays.asList(\"A\",\"B\",\"C\").stream();\nList&lt;String&gt; namesAsList = names.collect(() -&gt; new ArrayList(),List::add,List::add);\nSystem.out.println(\"Individual Strings put into a list: \" + namesAsList);\n<\/code><\/pre>\n\n<p>Why would I be receiving this error? I do not expect the problem to be relating to an int. <\/p>\n\n<p>If the answer could include the way of figuring out the issue, this will be appreciated, so I can learn how to solve these problems myself.<\/p>\n",
+        "question_id": 45297901,
+        "tags": [
+            "java",
+            "java-8",
+            "java-stream"
+        ],
+        "score": 6,
+        "accepted_answer_id": 45297996,
+        "is_answered": true,
+        "view_count": 2183
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/35381a48d503b5dc635138ad9e20db81?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8414766,
+                "user_type": "registered",
+                "user_id": 6315562,
+                "link": "https://stackoverflow.com/users/6315562/christopher-barrett",
+                "reputation": 147,
+                "display_name": "Christopher Barrett"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45297901,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                "account_id": 3211603,
+                "user_type": "registered",
+                "user_id": 2711488,
+                "link": "https://stackoverflow.com/users/2711488/holger",
+                "reputation": 300991,
+                "display_name": "Holger"
+            },
+            "edited": false,
+            "creation_date": 1500979229,
+            "comment_id": 77563035
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                "account_id": 3211603,
+                "user_type": "registered",
+                "user_id": 2711488,
+                "link": "https://stackoverflow.com/users/2711488/holger",
+                "reputation": 300991,
+                "display_name": "Holger"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 45297901,
+            "edited": false,
+            "creation_date": 1500972222,
+            "comment_id": 77557842
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/o7UOwYA4.jpg?s=256",
+                "account_id": 2570598,
+                "user_type": "registered",
+                "user_id": 2229438,
+                "link": "https://stackoverflow.com/users/2229438/grzegorz-piwowarek",
+                "reputation": 14191,
+                "display_name": "Grzegorz Piwowarek",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1501225653,
+            "creation_date": 1500971719,
+            "body": "<p>The method reference passed for <code>combiner<\/code> does not really fit.\nTry:<\/p>\n\n<pre><code>List&lt;String&gt; namesAsList = names\n  .collect(ArrayList::new, List::add, List::addAll);\n<\/code><\/pre>\n\n<p>You passed the <code>List::add<\/code> and compiler is doing its best to try to interpret it as a combiner instance of <code>BiConsumer<\/code> type. Hence, the weird argument mismatch error.<\/p>\n\n<hr>\n\n<p>Also, I assume you are implementing this only for research purposes. If you want to collect a <code>Stream<\/code> to a <code>List<\/code>, you can simply use:<\/p>\n\n<pre><code>.collect(Collectors.toList());\n<\/code><\/pre>\n\n<p>If you want to collect you <code>Stream<\/code> to <code>ArrayList<\/code> specifically, you can go for:<\/p>\n\n<pre><code>.collect(Collectors.toCollection(ArrayList::new));\n<\/code><\/pre>\n",
+            "answer_id": 45297996,
+            "question_id": 45297901,
+            "last_edit_date": 1501225653
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/W6OMC.png?s=256",
+                "account_id": 1056871,
+                "user_type": "registered",
+                "user_id": 1059372,
+                "link": "https://stackoverflow.com/users/1059372/eugene",
+                "reputation": 121845,
+                "display_name": "Eugene",
+                "accept_rate": 97
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1500972103,
+            "creation_date": 1500971826,
+            "body": "<p>The problem is in the <code>combiner<\/code>, specifically: <code>List::add<\/code> should really be <code>List::addAll<\/code>.<\/p>\n\n<p>Or more readable like this:<\/p>\n\n<pre><code>List&lt;String&gt; namesAsList = names.collect(\n            () -&gt; new ArrayList&lt;&gt;(), \n            List::add, \n            List::addAll);\n<\/code><\/pre>\n\n<p>You can re-write that with lambda expression when you are un-sure btw:<\/p>\n\n<pre><code>List&lt;String&gt; namesAsList = names.collect(\n            () -&gt; new ArrayList&lt;&gt;(),\n            List::add,\n            (List&lt;String&gt; left, List&lt;String&gt; right) -&gt; {\n                left.addAll(right);\n            });\n<\/code><\/pre>\n\n<p>Notice that there are other problems as-well, like <code>() -&gt; new ArrayList&lt;String&gt;()<\/code>, the type will be inferred by the compiler here, so no need for a <code>&lt;String&gt;<\/code>, like this: <code>() -&gt; new ArrayList&lt;&gt;()<\/code>. Also this can be transformed to a method reference too: <code>ArrayList::new<\/code>, so ultimately it would be even simpler:<\/p>\n\n<pre><code> List&lt;String&gt; namesAsList = names.collect(\n            ArrayList::new,\n            List::add,\n            List::addAll);\n<\/code><\/pre>\n\n<p>This btw is the same thing that <code>Collectors.toList<\/code> does internally, so even further this can be simplified to:<\/p>\n\n<pre><code>List&lt;String&gt; namesAsList = names.collect(Collectors.toList());\n<\/code><\/pre>\n\n<p>The only problem is that the specification is free to change that (to return any <em>other<\/em>  <code>List<\/code> besides <code>ArrayList<\/code>), so it could be written:<\/p>\n\n<pre><code> List&lt;String&gt; namesAsList = names.collect(Collectors.toCollection(ArrayList::new));\n<\/code><\/pre>\n",
+            "answer_id": 45298038,
+            "question_id": 45297901,
+            "last_edit_date": 1500972103
+        }
+    ],
+    "answer_comments": {
+        "45297996": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/35381a48d503b5dc635138ad9e20db81?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8414766,
+                    "user_type": "registered",
+                    "user_id": 6315562,
+                    "link": "https://stackoverflow.com/users/6315562/christopher-barrett",
+                    "reputation": 147,
+                    "display_name": "Christopher Barrett"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 45297996,
+                "edited": false,
+                "creation_date": 1500979724,
+                "comment_id": 77563395
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 45297996,
+                "edited": false,
+                "creation_date": 1500972109,
+                "comment_id": 77557754
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/o7UOwYA4.jpg?s=256",
+                    "account_id": 2570598,
+                    "user_type": "registered",
+                    "user_id": 2229438,
+                    "link": "https://stackoverflow.com/users/2229438/grzegorz-piwowarek",
+                    "reputation": 14191,
+                    "display_name": "Grzegorz Piwowarek",
+                    "accept_rate": 94
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45297996,
+                "reply_to_user": {
+                    "profile_image": "https://graph.facebook.com/980705688614873/picture?type=large",
+                    "account_id": 6014409,
+                    "user_type": "registered",
+                    "user_id": 4723795,
+                    "link": "https://stackoverflow.com/users/4723795/xenteros",
+                    "reputation": 15883,
+                    "display_name": "xenteros",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1500972035,
+                "comment_id": 77557696
+            },
+            {
+                "owner": {
+                    "profile_image": "https://graph.facebook.com/980705688614873/picture?type=large",
+                    "account_id": 6014409,
+                    "user_type": "registered",
+                    "user_id": 4723795,
+                    "link": "https://stackoverflow.com/users/4723795/xenteros",
+                    "reputation": 15883,
+                    "display_name": "xenteros",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45297996,
+                "edited": false,
+                "creation_date": 1500972009,
+                "comment_id": 77557675
+            }
+        ],
+        "45298038": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/35381a48d503b5dc635138ad9e20db81?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8414766,
+                    "user_type": "registered",
+                    "user_id": 6315562,
+                    "link": "https://stackoverflow.com/users/6315562/christopher-barrett",
+                    "reputation": 147,
+                    "display_name": "Christopher Barrett"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45298038,
+                "edited": false,
+                "creation_date": 1500979678,
+                "comment_id": 77563366
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/o7UOwYA4.jpg?s=256",
+                    "account_id": 2570598,
+                    "user_type": "registered",
+                    "user_id": 2229438,
+                    "link": "https://stackoverflow.com/users/2229438/grzegorz-piwowarek",
+                    "reputation": 14191,
+                    "display_name": "Grzegorz Piwowarek",
+                    "accept_rate": 94
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45298038,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/HwqzS.png?s=256",
+                    "account_id": 5929686,
+                    "user_type": "registered",
+                    "user_id": 4664558,
+                    "link": "https://stackoverflow.com/users/4664558/lazerbanana",
+                    "reputation": 7281,
+                    "display_name": "LazerBanana",
+                    "accept_rate": 86
+                },
+                "edited": false,
+                "creation_date": 1500971985,
+                "comment_id": 77557658
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/HwqzS.png?s=256",
+                    "account_id": 5929686,
+                    "user_type": "registered",
+                    "user_id": 4664558,
+                    "link": "https://stackoverflow.com/users/4664558/lazerbanana",
+                    "reputation": 7281,
+                    "display_name": "LazerBanana",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 45298038,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/o7UOwYA4.jpg?s=256",
+                    "account_id": 2570598,
+                    "user_type": "registered",
+                    "user_id": 2229438,
+                    "link": "https://stackoverflow.com/users/2229438/grzegorz-piwowarek",
+                    "reputation": 14191,
+                    "display_name": "Grzegorz Piwowarek",
+                    "accept_rate": 94
+                },
+                "edited": false,
+                "creation_date": 1500971952,
+                "comment_id": 77557645
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/o7UOwYA4.jpg?s=256",
+                    "account_id": 2570598,
+                    "user_type": "registered",
+                    "user_id": 2229438,
+                    "link": "https://stackoverflow.com/users/2229438/grzegorz-piwowarek",
+                    "reputation": 14191,
+                    "display_name": "Grzegorz Piwowarek",
+                    "accept_rate": 94
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45298038,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/HwqzS.png?s=256",
+                    "account_id": 5929686,
+                    "user_type": "registered",
+                    "user_id": 4664558,
+                    "link": "https://stackoverflow.com/users/4664558/lazerbanana",
+                    "reputation": 7281,
+                    "display_name": "LazerBanana",
+                    "accept_rate": 86
+                },
+                "edited": false,
+                "creation_date": 1500971927,
+                "comment_id": 77557623
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/HwqzS.png?s=256",
+                    "account_id": 5929686,
+                    "user_type": "registered",
+                    "user_id": 4664558,
+                    "link": "https://stackoverflow.com/users/4664558/lazerbanana",
+                    "reputation": 7281,
+                    "display_name": "LazerBanana",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45298038,
+                "edited": false,
+                "creation_date": 1500971903,
+                "comment_id": 77557603
+            }
+        ]
+    }
+}

@@ -1,0 +1,158 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/12a257c50c156067b553b6236d8cc4c7?s=256&d=identicon&r=PG",
+            "account_id": 1571224,
+            "user_type": "registered",
+            "user_id": 1458877,
+            "link": "https://stackoverflow.com/users/1458877/marcel-overdijk",
+            "reputation": 11557,
+            "display_name": "Marcel Overdijk",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/23725707/adding-constraint-violation-manually",
+        "last_activity_date": 1400490394,
+        "creation_date": 1400439330,
+        "answer_count": 2,
+        "title": "Adding constraint violation manually",
+        "body": "<p>Is it possible to add constraint violation manually?<\/p>\n\n<p>E.g.:<\/p>\n\n<pre><code>// validate customer (using validation annotations)\nSet&lt;ConstraintViolation&lt;Customer&gt;&gt; violations = validator.validate(customer);\n\nif (someSpecialCase) {\n    violations.add(..) \n}\n<\/code><\/pre>\n\n<p>The problem is the <code>add<\/code> method accepts a ConstraintViolation interface but the javax.validation package contains no implementors that can be used.<\/p>\n\n<p>Any idea?<\/p>\n",
+        "question_id": 23725707,
+        "tags": [
+            "java",
+            "bean-validation"
+        ],
+        "score": 8,
+        "accepted_answer_id": 23733812,
+        "is_answered": true,
+        "view_count": 19159
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/53ee9941b3fefef67175daf212e62d41?s=256&d=identicon&r=PG",
+            "account_id": 23121,
+            "user_type": "registered",
+            "user_id": 57695,
+            "link": "https://stackoverflow.com/users/57695/peter-lawrey",
+            "reputation": 535107,
+            "display_name": "Peter Lawrey",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 23725707,
+        "edited": false,
+        "creation_date": 1400439936,
+        "comment_id": 36467796
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c17dd9cf3e2322be19639e96da9f3eb3?s=256&d=identicon&r=PG",
+                "account_id": 1082858,
+                "user_type": "registered",
+                "user_id": 1079354,
+                "link": "https://stackoverflow.com/users/1079354/makoto",
+                "reputation": 107091,
+                "display_name": "Makoto",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1400449283,
+            "creation_date": 1400449283,
+            "body": "<p>I believe that you're using Hibernate validators for this.<\/p>\n\n<p>If that's the case, then depending on the special case you have, you would want to write a custom class-level validator for a <code>Customer<\/code> instead, and let it be captured in the set of constraint violations.<\/p>\n\n<p>Since I don't know what your <code>Customer<\/code> bean looks like, I can only at best offer you a general direction on this approach.<\/p>\n\n<pre><code>// Annotation\n@Retention(RetentionPolicy.RUNTIME)\n@Target(ElementType.TYPE)\n@Constraint(validatedBy = CustomerValidator.class)\npublic @interface ValidCustomer {\n    String message() default \"Invalid customer (due to edge case)\";\n    Class&lt;?&gt;[] groups() default { };\n    Class&lt;? extends Payload&gt;[] payload() default { };\n}\n\n// Validator\n\npublic class CustomerValidator implements ConstraintValidator&lt;ValidCustomer, Customer&gt; {\n\n    @Override\n    public void initialize(final ValidCustomer constraintAnnotation) {\n\n    }\n\n    @Override\n    public boolean isValid(final Customer value,\n                           final ConstraintValidatorContext context) {\n        // logic for validation according to your edge case\n    }\n}\n<\/code><\/pre>\n\n<p>You would then annotate your <code>Customer<\/code> class with this validator.<\/p>\n\n<pre><code>@ValidCustomer\npublic class Customer {\n    // ...\n}\n<\/code><\/pre>\n\n<p>After this, your specific constraint will be captured in <code>violations<\/code>.<\/p>\n",
+            "answer_id": 23727169,
+            "question_id": 23725707
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a8b46078936d4b0439b7350aed251371?s=256&d=identicon&r=PG",
+                "account_id": 40043,
+                "user_type": "registered",
+                "user_id": 115835,
+                "link": "https://stackoverflow.com/users/115835/hardy",
+                "reputation": 19207,
+                "display_name": "Hardy"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1400490394,
+            "creation_date": 1400490394,
+            "body": "<p>The short answer is: \"No, there is no way to manually add constraint violations\". <\/p>\n\n<p>To elaborate a little bit. As you say, all classes involved are interfaces. If you really think you want to do it, you could implement your custom <em>ConstraintViolationImpl<\/em>. However, I am wondering what your actual use case is? Why do you want to add a constraint violation without validation? As the answer <a href=\"https://stackoverflow.com/a/23727169/115835\">https://stackoverflow.com/a/23727169/115835<\/a> suggest, you could always go via a class level custom constraint. As part of <em>isValid<\/em> in your custom <em>ConstraintValidator<\/em> implementation, you get an <em>ConstraintValidatorContext<\/em> which will allow you to add additional constraint violations.<\/p>\n",
+            "answer_id": 23733812,
+            "question_id": 23725707,
+            "last_edit_date": 1495540409
+        }
+    ],
+    "answer_comments": {
+        "23727169": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/12a257c50c156067b553b6236d8cc4c7?s=256&d=identicon&r=PG",
+                "account_id": 1571224,
+                "user_type": "registered",
+                "user_id": 1458877,
+                "link": "https://stackoverflow.com/users/1458877/marcel-overdijk",
+                "reputation": 11557,
+                "display_name": "Marcel Overdijk",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 23727169,
+            "edited": false,
+            "creation_date": 1400521588,
+            "comment_id": 36502207
+        }],
+        "23733812": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/s7SRO.png?s=256",
+                    "account_id": 1077256,
+                    "user_type": "registered",
+                    "user_id": 1075119,
+                    "link": "https://stackoverflow.com/users/1075119/mneri",
+                    "reputation": 2217,
+                    "display_name": "mneri",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 23733812,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/12a257c50c156067b553b6236d8cc4c7?s=256&d=identicon&r=PG",
+                    "account_id": 1571224,
+                    "user_type": "registered",
+                    "user_id": 1458877,
+                    "link": "https://stackoverflow.com/users/1458877/marcel-overdijk",
+                    "reputation": 11557,
+                    "display_name": "Marcel Overdijk",
+                    "accept_rate": 61
+                },
+                "edited": false,
+                "creation_date": 1575973421,
+                "comment_id": 104737897
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/12a257c50c156067b553b6236d8cc4c7?s=256&d=identicon&r=PG",
+                    "account_id": 1571224,
+                    "user_type": "registered",
+                    "user_id": 1458877,
+                    "link": "https://stackoverflow.com/users/1458877/marcel-overdijk",
+                    "reputation": 11557,
+                    "display_name": "Marcel Overdijk",
+                    "accept_rate": 61
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23733812,
+                "edited": false,
+                "creation_date": 1400504981,
+                "comment_id": 36491941
+            }
+        ]
+    }
+}

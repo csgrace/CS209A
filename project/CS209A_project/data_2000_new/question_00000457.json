@@ -1,0 +1,236 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/sYyAS.png?s=256",
+            "account_id": 3387766,
+            "user_type": "registered",
+            "user_id": 2843378,
+            "link": "https://stackoverflow.com/users/2843378/hellomojo",
+            "reputation": 367,
+            "display_name": "HelloMojo",
+            "accept_rate": 47
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19233197/debugger-will-not-reach-breakpoint-throws-exception-instead",
+        "last_activity_date": 1381178581,
+        "creation_date": 1381174826,
+        "answer_count": 1,
+        "title": "Debugger Will Not Reach Breakpoint - Throws Exception Instead",
+        "body": "<p>I'm setting a breakpoint at the line:<\/p>\n\n<pre><code>   doc = Jsoup.connect(params[0]).get();\n<\/code><\/pre>\n\n<p>but for some reason when I attempt to step over starting at this line it skips to the line  <\/p>\n\n<pre><code>} catch (IOException e) {\n                e.printStackTrace();\n<\/code><\/pre>\n\n<p>and throws an exception (therefore never getting a value for title) and I'm not sure why.<\/p>\n\n<p>Any suggestions?<\/p>\n\n<pre><code>package com.example.test;\n\nimport java.io.IOException;\nimport org.jsoup.Jsoup;\nimport org.jsoup.nodes.Document;\nimport org.jsoup.nodes.Element;\nimport org.jsoup.select.Elements;\nimport android.app.Activity;\nimport android.app.ProgressDialog;\nimport android.os.AsyncTask;\nimport android.os.Bundle;\nimport android.widget.TextView;\n\npublic class MainActivity extends Activity {\n\n    TextView tv;\n    String url = \"http://sheriff.org/apps/arrest/results.cfm?lname=ABBOTT&amp;fname=LAUREA\";\n    String tr;\n    Document doc;\n\n    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        tv = (TextView) findViewById(R.id.TextView01);\n        new MyTask().execute(url);\n    }\n\n    private class MyTask extends AsyncTask&lt;String, Void, String&gt; {\n\n        ProgressDialog prog;\n\n        String title = \"\";\n\n        @Override\n        protected void onPreExecute() {\n            prog = new ProgressDialog(MainActivity.this);\n            prog.setMessage(\"Loading....\");\n            prog.show();\n        }\n\n        @Override\n        protected String doInBackground(String... params) {\n            try {\n                doc = Jsoup.connect(params[0]).get();\n                Element tableElement = doc.select(\".datagrid\").first();\n\n                Elements tableRows = tableElement.select(\"tr\");\n                for (Element row : tableRows) {\n                    Elements cells = row.select(\"td\");\n                    if (cells.size() &gt; 0) {\n                        title = cells.get(0).text() + \"; \"\n                                + cells.get(1).text() + \"; \"\n                                + cells.get(2).text() + \"; \"\n                                + cells.get(3).text();\n                    }\n                }\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n            return title;\n        }\n\n        @Override\n        protected void onPostExecute(String title) {\n            super.onPostExecute(title);\n            prog.dismiss();\n            tv.setText(title);\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>LOGCAT:<\/p>\n\n<pre><code>10-07 15:42:21.591: I/Adreno200-EGLSUB(7981): &lt;ConfigWindowMatch:2165&gt;: Format RGBA_8888.\n10-07 15:42:21.611: D/memalloc(7981): ion: Mapped buffer base:0x5cbaa000 size:122880 offset:0 fd:60\n10-07 15:42:21.611: E/(7981): Can't open file for reading\n10-07 15:42:21.611: E/(7981): Can't open file for reading\n10-07 15:42:21.621: I/Adreno200-EGLSUB(7981): &lt;ConfigWindowMatch:2165&gt;: Format RGBA_8888.\n10-07 15:42:21.641: D/memalloc(7981): ion: Mapped buffer base:0x5ccd6000 size:614400 offset:0 fd:64\n10-07 15:42:21.681: D/memalloc(7981): ion: Mapped buffer base:0x5cf02000 size:122880 offset:0 fd:67\n10-07 15:42:21.721: D/memalloc(7981): ion: Mapped buffer base:0x5d166000 size:614400 offset:0 fd:70\n10-07 15:42:21.771: D/memalloc(7981): ion: Mapped buffer base:0x5d2fc000 size:122880 offset:0 fd:74\n10-07 15:42:22.091: W/System.err(7981): java.net.UnknownHostException: Unable to resolve host \"sheriff.org\": No address associated with hostname\n10-07 15:42:22.281: W/System.err(7981):     at java.net.InetAddress.lookupHostByName(InetAddress.java:463)\n10-07 15:42:22.281: W/System.err(7981):     at java.net.InetAddress.getAllByNameImpl(InetAddress.java:279)\n10-07 15:42:22.281: W/System.err(7981):     at java.net.InetAddress.getAllByName(InetAddress.java:253)\n10-07 15:42:22.281: W/System.err(7981):     at libcore.net.http.HttpConnection.&lt;init&gt;(HttpConnection.java:71)\n10-07 15:42:22.281: W/System.err(7981):     at libcore.net.http.HttpConnection.&lt;init&gt;(HttpConnection.java:50)\n10-07 15:42:22.281: W/System.err(7981):     at libcore.net.http.HttpConnection$Address.connect(HttpConnection.java:351)\n10-07 15:42:22.281: W/System.err(7981):     at libcore.net.http.HttpConnectionPool.get(HttpConnectionPool.java:86)\n10-07 15:42:22.291: W/System.err(7981):     at libcore.net.http.HttpConnection.connect(HttpConnection.java:128)\n10-07 15:42:22.291: W/System.err(7981):     at libcore.net.http.HttpEngine.openSocketConnection(HttpEngine.java:308)\n10-07 15:42:22.291: W/System.err(7981):     at libcore.net.http.HttpEngine.connect(HttpEngine.java:303)\n10-07 15:42:22.291: W/System.err(7981):     at libcore.net.http.HttpEngine.sendSocketRequest(HttpEngine.java:282)\n10-07 15:42:22.291: W/System.err(7981):     at libcore.net.http.HttpEngine.sendRequest(HttpEngine.java:232)\n10-07 15:42:22.291: W/System.err(7981):     at libcore.net.http.HttpURLConnectionImpl.connect(HttpURLConnectionImpl.java:80)\n10-07 15:42:22.291: W/System.err(7981):     at org.jsoup.helper.HttpConnection$Response.execute(HttpConnection.java:425)\n10-07 15:42:22.291: W/System.err(7981):     at org.jsoup.helper.HttpConnection$Response.execute(HttpConnection.java:410)\n10-07 15:42:22.291: W/System.err(7981):     at org.jsoup.helper.HttpConnection.execute(HttpConnection.java:164)\n10-07 15:42:22.291: W/System.err(7981):     at org.jsoup.helper.HttpConnection.get(HttpConnection.java:153)\n10-07 15:42:22.291: W/System.err(7981):     at com.example.test.MainActivity$MyTask.doInBackground(MainActivity.java:46)\n10-07 15:42:22.291: W/System.err(7981):     at com.example.test.MainActivity$MyTask.doInBackground(MainActivity.java:1)\n10-07 15:42:22.291: W/System.err(7981):     at android.os.AsyncTask$2.call(AsyncTask.java:264)\n10-07 15:42:22.291: W/System.err(7981):     at java.util.concurrent.FutureTask$Sync.innerRun(FutureTask.java:305)\n10-07 15:42:22.301: W/System.err(7981):     at java.util.concurrent.FutureTask.run(FutureTask.java:137)\n10-07 15:42:22.301: W/System.err(7981):     at android.os.AsyncTask$SerialExecutor$1.run(AsyncTask.java:208)\n10-07 15:42:22.301: W/System.err(7981):     at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1076)\n10-07 15:42:22.301: W/System.err(7981):     at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:569)\n10-07 15:42:22.301: W/System.err(7981):     at java.lang.Thread.run(Thread.java:856)\n10-07 15:42:22.301: W/System.err(7981): Caused by: libcore.io.GaiException: getaddrinfo failed: EAI_NODATA (No address associated with hostname)\n10-07 15:42:22.301: W/System.err(7981):     at libcore.io.Posix.getaddrinfo(Native Method)\n10-07 15:42:22.301: W/System.err(7981):     at libcore.io.ForwardingOs.getaddrinfo(ForwardingOs.java:55)\n10-07 15:42:22.301: W/System.err(7981):     at java.net.InetAddress.lookupHostByName(InetAddress.java:448)\n10-07 15:42:22.301: W/System.err(7981):     ... 25 more\n10-07 15:42:22.311: D/memalloc(7981): ion: Unmapping buffer  base:0x5cbaa000 size:122880\n10-07 15:42:22.311: D/memalloc(7981): ion: Unmapping buffer  base:0x5cf02000 size:122880\n10-07 15:42:22.311: D/memalloc(7981): ion: Unmapping buffer  base:0x5d2fc000 size:122880\n10-07 15:42:22.311: D/memalloc(7981): ion: Mapped buffer base:0x5ca92000 size:614400 offset:0 fd:54\n<\/code><\/pre>\n",
+        "question_id": 19233197,
+        "tags": [
+            "java",
+            "android",
+            "eclipse",
+            "debugging"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 206
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/03ef5a0987f8e09322461dc059972624?s=256&d=identicon&r=PG",
+                "account_id": 905922,
+                "user_type": "registered",
+                "user_id": 940834,
+                "link": "https://stackoverflow.com/users/940834/iamgroot",
+                "reputation": 13904,
+                "display_name": "IAmGroot",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 19233197,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/3fUHG.jpg?s=256",
+                "account_id": 1304625,
+                "user_type": "registered",
+                "user_id": 1253844,
+                "link": "https://stackoverflow.com/users/1253844/bryan-herbst",
+                "reputation": 67369,
+                "display_name": "Bryan Herbst",
+                "accept_rate": 70
+            },
+            "edited": false,
+            "creation_date": 1381175500,
+            "comment_id": 28467612
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/3fUHG.jpg?s=256",
+                "account_id": 1304625,
+                "user_type": "registered",
+                "user_id": 1253844,
+                "link": "https://stackoverflow.com/users/1253844/bryan-herbst",
+                "reputation": 67369,
+                "display_name": "Bryan Herbst",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233197,
+            "edited": false,
+            "creation_date": 1381175410,
+            "comment_id": 28467566
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/0RdXY.jpg?s=256",
+                "account_id": 2114322,
+                "user_type": "registered",
+                "user_id": 1878943,
+                "link": "https://stackoverflow.com/users/1878943/anddevmanu",
+                "reputation": 1459,
+                "display_name": "anddevmanu"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233197,
+            "edited": false,
+            "creation_date": 1381175368,
+            "comment_id": 28467542
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7ce82763bdd372a891bef23404512d1c?s=256&d=identicon&r=PG",
+                "account_id": 1318015,
+                "user_type": "registered",
+                "user_id": 1264476,
+                "link": "https://stackoverflow.com/users/1264476/germann-arlington",
+                "reputation": 3353,
+                "display_name": "Germann Arlington"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233197,
+            "edited": false,
+            "creation_date": 1381175064,
+            "comment_id": 28467387
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/teNzk.gif?s=256",
+                "account_id": 3321430,
+                "user_type": "registered",
+                "user_id": 2792531,
+                "link": "https://stackoverflow.com/users/2792531/nhgrif",
+                "reputation": 62188,
+                "display_name": "nhgrif",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233197,
+            "edited": false,
+            "creation_date": 1381175052,
+            "comment_id": 28467381
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/sYyAS.png?s=256",
+                "account_id": 3387766,
+                "user_type": "registered",
+                "user_id": 2843378,
+                "link": "https://stackoverflow.com/users/2843378/hellomojo",
+                "reputation": 367,
+                "display_name": "HelloMojo",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233197,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/9f215547193d8414a486415f61e9f0fd?s=256&d=identicon&r=PG",
+                "account_id": 297962,
+                "user_type": "registered",
+                "user_id": 603742,
+                "link": "https://stackoverflow.com/users/603742/stinepike",
+                "reputation": 54882,
+                "display_name": "stinepike",
+                "accept_rate": 33
+            },
+            "edited": false,
+            "creation_date": 1381175020,
+            "comment_id": 28467352
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9f215547193d8414a486415f61e9f0fd?s=256&d=identicon&r=PG",
+                "account_id": 297962,
+                "user_type": "registered",
+                "user_id": 603742,
+                "link": "https://stackoverflow.com/users/603742/stinepike",
+                "reputation": 54882,
+                "display_name": "stinepike",
+                "accept_rate": 33
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "post_id": 19233197,
+            "edited": false,
+            "creation_date": 1381174905,
+            "comment_id": 28467295
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/sYyAS.png?s=256",
+            "account_id": 3387766,
+            "user_type": "registered",
+            "user_id": 2843378,
+            "link": "https://stackoverflow.com/users/2843378/hellomojo",
+            "reputation": 367,
+            "display_name": "HelloMojo",
+            "accept_rate": 47
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1381178581,
+        "creation_date": 1381175648,
+        "body": "<p>I was missing the internet permission in my manifest which prevented the URL from being reached. <\/p>\n",
+        "answer_id": 19233477,
+        "question_id": 19233197,
+        "last_edit_date": 1381178581
+    }],
+    "answer_comments": {"19233477": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/sYyAS.png?s=256",
+                "account_id": 3387766,
+                "user_type": "registered",
+                "user_id": 2843378,
+                "link": "https://stackoverflow.com/users/2843378/hellomojo",
+                "reputation": 367,
+                "display_name": "HelloMojo",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233477,
+            "edited": false,
+            "creation_date": 1381246219,
+            "comment_id": 28498888
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/25b02331ea03bb3408ed04bfa4a885af?s=256&d=identicon&r=PG",
+                "account_id": 1282375,
+                "user_type": "registered",
+                "user_id": 1236185,
+                "link": "https://stackoverflow.com/users/1236185/tim",
+                "reputation": 36013,
+                "display_name": "Tim",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 19233477,
+            "edited": false,
+            "creation_date": 1381184442,
+            "comment_id": 28471852
+        }
+    ]}
+}

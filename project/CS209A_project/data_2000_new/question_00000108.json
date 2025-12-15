@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/16e4aaaaba5903d44a28ebc8044bd5bb?s=256&d=identicon&r=PG",
+            "account_id": 432002,
+            "user_type": "registered",
+            "user_id": 816456,
+            "link": "https://stackoverflow.com/users/816456/kurochenko",
+            "reputation": 1264,
+            "display_name": "kurochenko",
+            "accept_rate": 71
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/6834319/spring-3-handlerinterceptoradapter-request-ends-with-404-beforecalling-intercep",
+        "last_activity_date": 1311703992,
+        "creation_date": 1311702840,
+        "answer_count": 1,
+        "title": "Spring 3 HandlerInterceptorAdapter. Request ends with 404 beforecalling interceptor",
+        "body": "<p>I'm writting custom handler interceptor in order to have multilangual url addresses. For example, when user accesses uri <code>/de/auto<\/code> the deutsch content will appear, when user accesses <code>/en/car<\/code> then english content will appear. I want both requests redirect to same controller and same method:<\/p>\n\n<pre><code>@Controller\npublic class MultiLangController {\n\n    @RequestMapping(value=\"/en/car\", method = RequestMethod.GET)\n    public @ResponseBody String writePage() {\n\n        return \"some content\";\n    }\n<\/code><\/pre>\n\n<p>and my interceptor is implemented like this (simplified version):<\/p>\n\n<pre><code>public class MultiLangInterceptor extends HandlerInterceptorAdapter {\n\n    @Override\n    public boolean preHandle(HttpServletRequest request,\n    HttpServletResponse response, Object handler) throws Exception {\n\n        String requestUrl = request.getRequestURI().substring(request.getContextPath().length());\n\n        if (\"/de/auto\".equals(requestUrl)) {\n            String redirect = request.getContextPath() + \"/en/car\";\n\n            response.sendRedirect(redirect);\n            return false;\n        }\n        return true;        \n    }\n}\n<\/code><\/pre>\n\n<p>Now when I access <code>/en/car<\/code> url in browser, correct page is returned (with message \"some content\") and logs shows that request passed through my interceptor. When I access <code>/de/auto<\/code>, 404 error is returned and according to logs request didn't make it to my interceptor. <strong>But why? Shouldn't request go through all interceptors till one of them stops it by returning false?<\/strong> <\/p>\n\n<p>For clarity, I'm not using <code>mvc:annotation-driven<\/code> because it was <a href=\"https://stackoverflow.com/questions/3230633/how-to-register-handler-interceptors-with-spring-mvc-3-0\">hidding my custom interceptor<\/a>. I've defined all manualy<\/p>\n\n<pre><code>&lt;bean id=\"handlerMapping\"\nclass=\"org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping\"&gt;\n    &lt;property name=\"interceptors\"&gt;\n        &lt;ref bean=\"multiLangInterceptor\" /&gt;\n    &lt;/property&gt;\n&lt;/bean&gt;\n\n&lt;bean class=\"org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter\"&gt;\n    &lt;property name=\"messageConverters\"&gt;\n        &lt;list&gt;\n            &lt;ref bean=\"jacksonMessageConverter\"/&gt;\n            &lt;ref bean=\"stringHttpMessageConverter\"/&gt;\n        &lt;/list&gt;\n    &lt;/property&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"jacksonMessageConverter\" class=\"org.springframework.http.converter.json.MappingJacksonHttpMessageConverter\"/&gt;\n\n&lt;bean id=\"multiLangInterceptor\" class=\"example.MultiLangInterceptor\" /&gt;    \n\n&lt;bean id=\"stringHttpMessageConverter\" \n    class=\"org.springframework.http.converter.StringHttpMessageConverter\"/&gt; \n<\/code><\/pre>\n\n<p>Thanks for answers!<\/p>\n",
+        "question_id": 6834319,
+        "tags": [
+            "java",
+            "spring",
+            "url",
+            "interceptor",
+            "multilingual"
+        ],
+        "score": 1,
+        "accepted_answer_id": 6834553,
+        "is_answered": true,
+        "view_count": 7912,
+        "last_edit_date": 1495539919
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/67b69133382af2ecefb5470e210151d6?s=256&d=identicon&r=PG",
+            "account_id": 131213,
+            "user_type": "registered",
+            "user_id": 331052,
+            "link": "https://stackoverflow.com/users/331052/affe",
+            "reputation": 48144,
+            "display_name": "Affe"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 5,
+        "is_accepted": true,
+        "last_activity_date": 1311703992,
+        "creation_date": 1311703992,
+        "body": "<p>It can't really send every single incoming request to the interceptors before determining if there's a mapping.  Notice that one of the arguments to the interceptor is the Controller itself!  If the URL that's coming in is one that's not mapped anywhere, how is it supposed to know what handler that would be to pass in as a method argument?  URL rewriting needs to be done further up the stack, before the request hits the dispatcher servlet.  E.G., in a <a href=\"http://www.tuckey.org/urlrewrite/\">servlet filter for that purpose<\/a>.<\/p>\n\n<p>Another possible option is to map your Controller this way<\/p>\n\n<pre><code>@RequestMapping(value=\"/{languageCode}/car\", method = RequestMethod.GET)\n<\/code><\/pre>\n\n<p>As long as you don't have other mappings of /something/car in the same dispatcher that will collide.<\/p>\n",
+        "answer_id": 6834553,
+        "question_id": 6834319
+    }],
+    "answer_comments": {}
+}

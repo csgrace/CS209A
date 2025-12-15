@@ -1,0 +1,222 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6b2e482a1645c27f8d566b57a0c78638?s=256&d=identicon&r=PG",
+            "account_id": 177068,
+            "user_type": "registered",
+            "user_id": 408178,
+            "link": "https://stackoverflow.com/users/408178/snailer",
+            "reputation": 3839,
+            "display_name": "Snailer",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/4141636/variable-visibility-in-subclass",
+        "last_activity_date": 1289371405,
+        "creation_date": 1289368591,
+        "answer_count": 3,
+        "title": "Variable visibility in subclass",
+        "body": "<p>This is a very simple question, and I apologize for being so noobish :/<\/p>\n\n<p>I'm new(ish) to Java. I've got a game on the Market that works quite well, but the code is all rubbish. Basically, I wrote it like I was writing JavaScript. I'm trying to learn more about Object Oriented Programming. So, in my new game I've been creating Objects that extend from a custom class. For example (this isn't actually what I'm doing):<\/p>\n\n<pre><code>public class Color{\n    public final int STROKE_WIDTH = 3;\n\n    public Color(){}\n}\n<\/code><\/pre>\n\n<p><br><\/p>\n\n<pre><code>public class Orange extends Color{\n    public int alpha = 30;\n\n    public Orange(){\n        super();\n    }\n}\n<\/code><\/pre>\n\n<p>Now, say in my game's main thread I instantiate many Colors (Orange, Red, Purple) and I store them in an <code>ArrayList&lt;Color&gt;<\/code>. I iterate through this list at another point in the game, and I want to access the <code>Color<\/code>'s alpha. My problem is, since they're all wrapped into the superclass, I can't just say <code>colorObj.alpha<\/code>, but I do have access to <code>colorObj.STROKE_WIDTH<\/code>. Similarly, I wouldn't be able to access any methods in the Orange class.<\/p>\n\n<p>There must be a way to do this, I'm just new. I don't expect anyone to sit here and type out an explanation.. I wouldn't want to waste your time. But if someone could just paste a link to some beginner's tutorial or something that would help me out with this, I'd appreciate it!<\/p>\n",
+        "question_id": 4141636,
+        "tags": [
+            "java",
+            "android",
+            "oop",
+            "subclass",
+            "visibility"
+        ],
+        "score": 2,
+        "accepted_answer_id": 4141771,
+        "is_answered": true,
+        "view_count": 1807,
+        "last_edit_date": 1289369594
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/31db1c29db047cd9a34a43f7aebb4582?s=256&d=identicon&r=PG",
+                "account_id": 38090,
+                "user_type": "registered",
+                "user_id": 109112,
+                "link": "https://stackoverflow.com/users/109112/xandy",
+                "reputation": 27423,
+                "display_name": "xandy",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1289369557,
+            "creation_date": 1289369557,
+            "body": "<p>If you write:<\/p>\n\n<pre><code>Color c = new Orange();\nc.alpha = 10; // Won't compile\n<\/code><\/pre>\n\n<p>That won't compile not because the alpha is wrapped, but you have to define that in superclass. Similarly, all methods defined in Orange is not accessible in the above declaration, because, when you reference 'c', it means it's a Color, but it is not necessarily an Orange. To wrap up, the 'c' in above declaration let you access to all public members of Color but NOT those in Orange. <\/p>\n\n<p>Learning OOP is not easy especially for people come from Script dev. Instead of just reading online materials, I suggest you grab a good book about OOP or Java to start off. <a href=\"http://www.headfirstlabs.com/books/hfjava/\" rel=\"nofollow\">The Head First Series<\/a> is one of those I highly recommended.<\/p>\n",
+            "answer_id": 4141733,
+            "question_id": 4141636
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/29b9e5f5d700524e3a6eaef99de7d069?s=256&d=identicon&r=PG",
+                "account_id": 234965,
+                "user_type": "registered",
+                "user_id": 501459,
+                "link": "https://stackoverflow.com/users/501459/mud",
+                "reputation": 29158,
+                "display_name": "Mud",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1289371405,
+            "creation_date": 1289370310,
+            "body": "<blockquote>\n  <p>I iterate through this list at another point in the game, and I want to access the Color's alpha. My problem is, since they're all wrapped into the superclass, I can't just say colorObj.alpha<\/p>\n<\/blockquote>\n\n<p>If all your actual colors have alpha, then put that in the Color class. It should contain the attributes and behaviors that are common to all colors.<\/p>\n\n<p>Side note: one of the tentants of object oriented programming is <em>enscapsulation<\/em>. Public data members expose the internal representation of your class. Typically you hide that representation behind <em>accessor<\/em> methods, such as:<\/p>\n\n<pre><code>class Color {\n   private int alpha;\n   public int getAlpha() { return alpha; }\n}\n<\/code><\/pre>\n\n<p>Now nobody knows your representation; nobody can change alpha to a value that doesn't make sense for a Color, you could make it read-only or write-only, you could even change it to a computed value and none of the clients who use it are affected.<\/p>\n\n<p>In fact, a \"best practice\" in OOP is taking this to extreme and programming to interfaces, not classes. You would define an <em>interface<\/em> for Colors which has no data members and in fact cannot be instantiated. It represents the contract that Colors will obey and nothing more. For instance:<\/p>\n\n<pre><code>interface Color {\n   int getR();\n   int getG();\n   int getB();\n   int getA();\n}\n\nclass Red implements Color {\n   ...\n<\/code><\/pre>\n\n<p>Of course, this is overkill for something like a Color. I know it's a contrived example, but Colors don't have different <em>behavior<\/em>, just different <em>values<\/em>, so rather than having class Red, Orange, etc. you would have instances of a Color class which represent each.<\/p>\n\n<blockquote>\n  <p>Similarly, I wouldn't be able to access any methods in the Orange class.<\/p>\n<\/blockquote>\n\n<p>True. But the idea is that the code which is dealing with Colors doesn't <em>need to know<\/em> what actual colors they are. That's the power of polymorphism. If there <em>is<\/em> some special-case processing required, you can \"down cast\" a Color to a specific subtype, but the need to do that is often a symptom of sloppy design.<\/p>\n",
+            "answer_id": 4141771,
+            "question_id": 4141636,
+            "last_edit_date": 1289371405
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/76a0d0bd331ad7b05f199871de330087?s=256&d=identicon&r=PG",
+                "account_id": 27259,
+                "user_type": "registered",
+                "user_id": 1205130,
+                "link": "https://stackoverflow.com/users/1205130/marek-szanyi",
+                "reputation": 2318,
+                "display_name": "Marek Szanyi",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1289369772,
+            "creation_date": 1289369772,
+            "body": "<p>Well you have to move all the variables and methods which are the same for all classes in the inheritance hierarchy to the base class so in your case i would move the variable alpha to the base class. <\/p>\n\n<p>Later on if you want to access methods or variables specific to an inherited class you have to do a cast so in case you have a List myColors; and lets say the i-th object in the list is an Orange color and it has a method called mix(Color otherColor) then you have to simply do this :<\/p>\n\n<pre><code>((Orange)myColors.get(i)).mix(someOtherColor);\n<\/code><\/pre>\n\n<p>And one last thing, dont use public class member variables, always give them the lowest possible visibility (private, protected) and always use getters to access them and setters to modify them, as this is a very basic OO concept :)<\/p>\n",
+            "answer_id": 4141744,
+            "question_id": 4141636
+        }
+    ],
+    "answer_comments": {
+        "4141733": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/31db1c29db047cd9a34a43f7aebb4582?s=256&d=identicon&r=PG",
+                    "account_id": 38090,
+                    "user_type": "registered",
+                    "user_id": 109112,
+                    "link": "https://stackoverflow.com/users/109112/xandy",
+                    "reputation": 27423,
+                    "display_name": "xandy",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4141733,
+                "edited": false,
+                "creation_date": 1289370613,
+                "comment_id": 4467112
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6b2e482a1645c27f8d566b57a0c78638?s=256&d=identicon&r=PG",
+                    "account_id": 177068,
+                    "user_type": "registered",
+                    "user_id": 408178,
+                    "link": "https://stackoverflow.com/users/408178/snailer",
+                    "reputation": 3839,
+                    "display_name": "Snailer",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4141733,
+                "edited": false,
+                "creation_date": 1289370311,
+                "comment_id": 4467080
+            }
+        ],
+        "4141744": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/31db1c29db047cd9a34a43f7aebb4582?s=256&d=identicon&r=PG",
+                    "account_id": 38090,
+                    "user_type": "registered",
+                    "user_id": 109112,
+                    "link": "https://stackoverflow.com/users/109112/xandy",
+                    "reputation": 27423,
+                    "display_name": "xandy",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4141744,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/6b2e482a1645c27f8d566b57a0c78638?s=256&d=identicon&r=PG",
+                    "account_id": 177068,
+                    "user_type": "registered",
+                    "user_id": 408178,
+                    "link": "https://stackoverflow.com/users/408178/snailer",
+                    "reputation": 3839,
+                    "display_name": "Snailer",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1289370258,
+                "comment_id": 4467074
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/31db1c29db047cd9a34a43f7aebb4582?s=256&d=identicon&r=PG",
+                    "account_id": 38090,
+                    "user_type": "registered",
+                    "user_id": 109112,
+                    "link": "https://stackoverflow.com/users/109112/xandy",
+                    "reputation": 27423,
+                    "display_name": "xandy",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4141744,
+                "edited": false,
+                "creation_date": 1289370163,
+                "comment_id": 4467061
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6b2e482a1645c27f8d566b57a0c78638?s=256&d=identicon&r=PG",
+                    "account_id": 177068,
+                    "user_type": "registered",
+                    "user_id": 408178,
+                    "link": "https://stackoverflow.com/users/408178/snailer",
+                    "reputation": 3839,
+                    "display_name": "Snailer",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4141744,
+                "edited": false,
+                "creation_date": 1289370126,
+                "comment_id": 4467054
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6b2e482a1645c27f8d566b57a0c78638?s=256&d=identicon&r=PG",
+                    "account_id": 177068,
+                    "user_type": "registered",
+                    "user_id": 408178,
+                    "link": "https://stackoverflow.com/users/408178/snailer",
+                    "reputation": 3839,
+                    "display_name": "Snailer",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4141744,
+                "edited": false,
+                "creation_date": 1289370022,
+                "comment_id": 4467045
+            }
+        ]
+    }
+}

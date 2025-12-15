@@ -1,0 +1,131 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e8ae7e10eb930ee81b82283fc538a474?s=256&d=identicon&r=PG",
+            "account_id": 1903350,
+            "user_type": "registered",
+            "user_id": 1718719,
+            "link": "https://stackoverflow.com/users/1718719/roelandvanbeek",
+            "reputation": 669,
+            "display_name": "roelandvanbeek",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/12719085/how-to-zoom-in-to-jpanel-without-moving-the-center-math-or-swing",
+        "last_activity_date": 1349342307,
+        "creation_date": 1349313091,
+        "answer_count": 2,
+        "title": "How to zoom in to JPanel without moving the center: math or Swing?",
+        "body": "<p>I am trying to make a zoomable map with Swing. The map is a JPanel in a JScrollPane. When zoomed in, the map changes size and paint() paints the elements in a different position. This all works great.<\/p>\n\n<p>However, the ScrollPane didn't change the viewport while increasing the image size, so that zooming in always moved the elements I was looking at out of the screen. I tried to solve this with <code>scrollRectToVisible()<\/code>, but I don't manage to get the right coordinates for the rectangle, either because I fail at doing the geometry or because I don't understand Swing all that well.<\/p>\n\n<p>Here is what I have:<\/p>\n\n<pre><code>public class MapPanel extends JPanel {\n    [...]\n\npublic void setZoom(double zoom) {\n    // get the current viewport rectangle and its center in the scaled coordinate system\n    JViewport vp = (JViewport) this.getParent();\n    Rectangle rect = vp.getViewRect(); \n    Point middle = getMiddle(rect); \n    Dimension dim = rect.getSize();\n\n    // zoom in\n    scaler.setZoom(zoom);\n    setPreferredSize(scaler.transform(dim));    \n    this.revalidate();  \n\n// calculate the full size of the scaled coordinate system  \n    Dimension fullDim = scaler.transform(dim); \n    // calculate the non-scaled center of the viewport\n    Point nMiddle = new Point((int) ((double) (middle.x)/fullDim.width*dim.width),(int) ((double) (middle.y)/fullDim.height*dim.height));\n\n    // this should do the trick, but is always a bit off towards the origin\n    scrollRectToVisible(getRectangleAroundPoint(nMiddle)); \n\n    // the below alternative always zooms in perfectly to the center of the map \n    // scrollRectToVisible(getRectangleAroundPoint(new Point(400,300)));\n}\n\nprivate Rectangle getRectangleAroundPoint(Point p){\n    Point newP = scaler.transform(p);\n    Dimension d = railMap.getDimension();\n    Point corner = new Point(newP.x-d.width/2,newP.y-d.height/2);\n    return new Rectangle(corner,d);\n}\n\nprivate Point getMiddle(Rectangle r){\n    return new Point(r.x+r.width/2,r.y+r.height/2);\n}\n}\n<\/code><\/pre>\n\n<p>And here's the Scaler class (which does nothing very surprising, I think):<\/p>\n\n<pre><code>public class Scaler {\n    private double zoom = 1;\n\npublic void setZoom(double zoom) {\n    this.zoom = zoom;\n}\n\n\npublic Point transform(Point2D p){\n    return new Point((int) (p.getX()*zoom), (int) (p.getY()*zoom));\n}\n\n\npublic Dimension transform(Dimension d){\n    return new Dimension((int) (d.width*zoom), (int) (d.height*zoom));\n}\n\n}\n<\/code><\/pre>\n\n<p>Who can tell me where things are going wrong? It seems to me I did a valid calculation of the current center of the map, and with a fixed zoom point it does work...<\/p>\n\n<p><strong>Edit:<\/strong> so the hard thing here is to create the new viewport rectangle based on the old viewport rectangle.<\/p>\n",
+        "question_id": 12719085,
+        "tags": [
+            "java",
+            "swing",
+            "scroll",
+            "zooming",
+            "viewport"
+        ],
+        "score": 5,
+        "accepted_answer_id": 12719389,
+        "is_answered": true,
+        "view_count": 10146,
+        "last_edit_date": 1349338508
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/39b58e41f5263ea81227ea734b0f9ae6?s=256&d=identicon&r=PG",
+            "account_id": 199731,
+            "user_type": "registered",
+            "user_id": 445215,
+            "link": "https://stackoverflow.com/users/445215/geowar",
+            "reputation": 4463,
+            "display_name": "geowar"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 12719085,
+        "edited": false,
+        "creation_date": 1495387723,
+        "comment_id": 75219941
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1349316324,
+            "creation_date": 1349316324,
+            "body": "<p>I just did this really quick example, which basically tries to keep the scroll pane center around the middle of the supplied image<\/p>\n\n<pre><code>public class TestZooming {\n\n    public static void main(String[] args) {\n        new TestZooming();\n    }\n\n    public TestZooming() {\n\n        EventQueue.invokeLater(new Runnable() {\n            @Override\n            public void run() {\n\n                try {\n                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());\n                } catch (ClassNotFoundException classNotFoundException) {\n                } catch (InstantiationException instantiationException) {\n                } catch (IllegalAccessException illegalAccessException) {\n                } catch (UnsupportedLookAndFeelException unsupportedLookAndFeelException) {\n                }\n\n                JFrame frame = new JFrame();\n                frame = new JFrame();\n                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n                frame.setSize(400, 400);\n                frame.setLocationRelativeTo(null);\n                frame.setLayout(new BorderLayout());\n                final ZoomPane pane = new ZoomPane();\n                frame.add(new JScrollPane(pane));\n                frame.setVisible(true);\n\n                SwingUtilities.invokeLater(new Runnable() {\n\n                    @Override\n                    public void run() {\n                        pane.centerInViewport();\n                    }\n\n                });\n\n            }\n        });\n\n    }\n\n    protected class ZoomPane extends JPanel {\n\n        private Image background;\n        private Image scaled;\n        private float zoom = 1f;\n\n        private Dimension scaledSize;\n        private JViewport con;\n\n        public ZoomPane() {\n\n            try {\n                background = ImageIO.read(new File(\"...\"));\n                scaled = background;\n                scaledSize = new Dimension(background.getWidth(this), background.getHeight(this));\n            } catch (IOException ex) {\n                ex.printStackTrace();\n            }\n\n            InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);\n            ActionMap am = getActionMap();\n\n            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, 0), \"plus\");\n            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.SHIFT_DOWN_MASK), \"plus\");\n            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0), \"minus\");\n\n            am.put(\"plus\", new AbstractAction() {\n                @Override\n                public void actionPerformed(ActionEvent e) {\n                    setZoom(getZoom() + 0.1f);\n                }\n            });\n            am.put(\"minus\", new AbstractAction() {\n                @Override\n                public void actionPerformed(ActionEvent e) {\n                    setZoom(getZoom() - 0.1f);\n                }\n            });\n\n            setFocusable(true);\n            requestFocusInWindow();\n\n        }\n\n        @Override\n        public void addNotify() {\n\n            super.addNotify();\n\n        }\n\n        public float getZoom() {\n            return zoom;\n        }\n\n        public void setZoom(float value) {\n            if (zoom != value) {\n                zoom = value;\n\n                if (zoom &lt; 0) {\n                    zoom = 0f;\n                }\n\n                int width = (int) Math.floor(background.getWidth(this) * zoom);\n                int height = (int) Math.floor(background.getHeight(this) * zoom);\n                scaled = background.getScaledInstance(width, height, Image.SCALE_SMOOTH);\n                scaledSize = new Dimension(width, height);\n\n                if (getParent() instanceof JViewport) {\n\n                    int centerX = width / 2;\n                    int centerY = height / 2;\n\n                    JViewport parent = (JViewport) getParent();\n                    Rectangle viewRect = parent.getViewRect();\n                    viewRect.x = centerX - (viewRect.width / 2);\n                    viewRect.y = centerY - (viewRect.height / 2);\n                    scrollRectToVisible(viewRect);\n                }\n\n                invalidate();\n                repaint();\n\n            }\n        }\n\n        @Override\n        public Dimension getPreferredSize() {\n\n            return scaledSize;\n\n        }\n\n        @Override\n        protected void paintComponent(Graphics g) {\n\n            super.paintComponent(g);\n\n            if (scaled != null) {\n\n                g.drawImage(scaled, 0, 0, this);\n\n            }\n\n        }\n\n        protected void centerInViewport() {\n\n            Container container = getParent();\n            if (container instanceof JViewport) {\n\n                JViewport port = (JViewport) container;\n                Rectangle viewRect = port.getViewRect();\n\n                int width = getWidth();\n                int height = getHeight();\n\n                viewRect.x = (width - viewRect.width) / 2;\n                viewRect.y = (height - viewRect.height) / 2;\n\n                scrollRectToVisible(viewRect);\n\n            }\n\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>As to why yours doesn't work, I can't say, I can't run the example, but maybe this will at least give you some ideas...<\/p>\n",
+            "answer_id": 12719389,
+            "question_id": 12719085
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e8ae7e10eb930ee81b82283fc538a474?s=256&d=identicon&r=PG",
+                "account_id": 1903350,
+                "user_type": "registered",
+                "user_id": 1718719,
+                "link": "https://stackoverflow.com/users/1718719/roelandvanbeek",
+                "reputation": 669,
+                "display_name": "roelandvanbeek",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1349342307,
+            "creation_date": 1349342307,
+            "body": "<p>Solved it. Yay. Still not sure where it actually went wrong, but moving the original rectangle (thanks @MadProgrammer) rather than creating a new one and correct rounding in the scaler may have done the trick. <\/p>\n\n<pre><code>private Point getViewportCenter() {\n    JViewport vp = (JViewport) this.getParent();\n    Point p = vp.getViewPosition();\n    return new Point(p.x+vp.getWidth()/2,p.y+vp.getHeight()/2);\n}\n\nprivate void setViewportCenter(Point p) {\n    JViewport vp = (JViewport) this.getParent();\n    Rectangle viewRect = vp.getViewRect();\n\n    viewRect.x = p.x - viewRect.width / 2;\n    viewRect.y = p.y - viewRect.height / 2;\n\n    scrollRectToVisible(viewRect);\n}\n\npublic void setZoom(double zoom) {\n    // determine unscaled center and dimensions\n    Point oCenter = scaler.inverseTransform(getViewportCenter());\n    Dimension dim = railMap.getDimension();\n\n    // zoom\n    scaler.setZoom(zoom);\n\n    // fix size and viewport\n    setPreferredSize(scaler.transform(dim));\n    setViewportCenter(scaler.transform(oCenter)); // should be a transformed point\n\n    // finish\n    invalidate();\n    repaint();\n}\n<\/code><\/pre>\n",
+            "answer_id": 12724072,
+            "question_id": 12719085
+        }
+    ],
+    "answer_comments": {"12719389": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e8ae7e10eb930ee81b82283fc538a474?s=256&d=identicon&r=PG",
+                "account_id": 1903350,
+                "user_type": "registered",
+                "user_id": 1718719,
+                "link": "https://stackoverflow.com/users/1718719/roelandvanbeek",
+                "reputation": 669,
+                "display_name": "roelandvanbeek",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 12719389,
+            "edited": false,
+            "creation_date": 1349340699,
+            "comment_id": 17183366
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e8ae7e10eb930ee81b82283fc538a474?s=256&d=identicon&r=PG",
+                "account_id": 1903350,
+                "user_type": "registered",
+                "user_id": 1718719,
+                "link": "https://stackoverflow.com/users/1718719/roelandvanbeek",
+                "reputation": 669,
+                "display_name": "roelandvanbeek",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 12719389,
+            "edited": false,
+            "creation_date": 1349337588,
+            "comment_id": 17182018
+        }
+    ]}
+}

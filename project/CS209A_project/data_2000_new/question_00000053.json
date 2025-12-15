@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2b2c8669d88a7265252b6ede2f0ec677?s=256&d=identicon&r=PG",
+            "account_id": 1029918,
+            "user_type": "registered",
+            "user_id": 1038447,
+            "link": "https://stackoverflow.com/users/1038447/%c3%81rp%c3%a1d-magos%c3%a1nyi",
+            "reputation": 1506,
+            "display_name": "&#193;rp&#225;d Magos&#225;nyi",
+            "accept_rate": 31
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20012672/unit-testing-a-tabbedpropertysection",
+        "last_activity_date": 1384710748,
+        "creation_date": 1384559442,
+        "answer_count": 1,
+        "title": "unit testing a TabbedPropertySection",
+        "body": "<p>I am trying to unit test a class which extends org.eclipse.ui.views.properties.tabbed.AbstractPropertySection\nIt is a GUI on top of a heap of legacy code. The AbstractPropertySection class have a<\/p>\n\n<pre><code>private TabbedPropertySheetPage tabbedPropertySheetPage;\n<\/code><\/pre>\n\n<p>field, which is initialized by its<\/p>\n\n<pre><code>public void createControls(Composite parent,\n        TabbedPropertySheetPage aTabbedPropertySheetPage)\n<\/code><\/pre>\n\n<p>method, and used by its<\/p>\n\n<pre><code>public TabbedPropertySheetWidgetFactory getWidgetFactory();\n<\/code><\/pre>\n\n<p>method, which in turn used by widget creation. I cannot mock it up in a way that creating a Button would actually create one. As it is both legacy and GUI, maybe it would be wiser to use the Real Thing? But how?<\/p>\n\n<p>I am doing basically this:<\/p>\n\n<pre><code>            private LineDecorationSection section;\n            private DiagramConnectionMockup data;\n            //contains both the model object and editPart\n            data = new DiagramConnectionMockup();\n            ConnectionDecorationFactory.getInstance();\n            //a descendant of the class to be tested,\n            //augmented with methods to handle what would be done and seen\n            //on the GUI\n            section = new LineDecorationSectionExerciser();\n            assertTrue(section instanceof LineDecorationSection);\n            //a selection containing theeditPart\n            ISelection selection = new SelectionMockup(data.getEditPart());\n            //an editor (Legacy)\n            IWorkbenchPart editor = new ZentaDiagramEditor(); \n            section.setInput(editor, selection);\n\n            //------------This fails-----------\n            assertNotNull(section.getWidgetFactory()); \n\n            LineDecorationSectionExerciser exerciser = (LineDecorationSectionExerciser)section;\n            Button but = ((Button)exerciser.getInternal(\"DefaultButton\"));\n\n            //----and this prints \"but=null\"------------\n            System.out.println(\"but=\"+but);\n            but.setSelection(true);\n<\/code><\/pre>\n\n<p>The actual code is here: <a href=\"https://github.com/magwas/zenta/blob/001f83c8951a4840b84cd1ff402baa5b96feb4e5/org.rulez.magwas.zenta.editor/src/org/rulez/magwas/zenta/tests/propertysections/LineDecorationSectionTest.java\" rel=\"nofollow\">https://github.com/magwas/zenta/blob/001f83c8951a4840b84cd1ff402baa5b96feb4e5/org.rulez.magwas.zenta.editor/src/org/rulez/magwas/zenta/tests/propertysections/LineDecorationSectionTest.java<\/a><\/p>\n\n<p>Question: what to add to the unit tests and mockups so that the unit tests run, and widgets get created?<\/p>\n",
+        "question_id": 20012672,
+        "tags": [
+            "java",
+            "eclipse",
+            "user-interface",
+            "tdd",
+            "legacy-code"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 29
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2b2c8669d88a7265252b6ede2f0ec677?s=256&d=identicon&r=PG",
+            "account_id": 1029918,
+            "user_type": "registered",
+            "user_id": 1038447,
+            "link": "https://stackoverflow.com/users/1038447/%c3%81rp%c3%a1d-magos%c3%a1nyi",
+            "reputation": 1506,
+            "display_name": "&#193;rp&#225;d Magos&#225;nyi",
+            "accept_rate": 31
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1384710748,
+        "creation_date": 1384710748,
+        "body": "<p>In the end I have come up with real underlying data and mockups for the Property Sheet page and the goo coming with it. Maybe not the best solution, but I have put the mockup initialisation into the exerciser class.\nThe solution for the real-world problem is here:<\/p>\n\n<p><a href=\"https://github.com/magwas/zenta/blob/51fd9f6b9e363eb5967a3d24b22d012b5bdd6492/org.rulez.magwas.zenta.editor/src/org/rulez/magwas/zenta/tests/propertysections/LineDecorationSectionTest.java\" rel=\"nofollow\">https://github.com/magwas/zenta/blob/51fd9f6b9e363eb5967a3d24b22d012b5bdd6492/org.rulez.magwas.zenta.editor/src/org/rulez/magwas/zenta/tests/propertysections/LineDecorationSectionTest.java<\/a><\/p>\n",
+        "answer_id": 20034096,
+        "question_id": 20012672
+    }],
+    "answer_comments": {}
+}

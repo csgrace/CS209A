@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4d04e3c4edc2f6c65d18d701d8f62af4?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 13966383,
+            "user_type": "registered",
+            "user_id": 10086054,
+            "link": "https://stackoverflow.com/users/10086054/tony",
+            "reputation": 137,
+            "display_name": "tony"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60985782/details-about-mark-word-of-java-object-header",
+        "last_activity_date": 1704787808,
+        "creation_date": 1585810521,
+        "answer_count": 1,
+        "title": "Details about mark word of java object header",
+        "body": "<p>I am studying the composition of java object header.<\/p>\n\n<p>Found some documents and some interesting problems.<\/p>\n\n<p>Under 64 bit vm, the default object head is as follows (Because <code>UseCompressedOops<\/code> is on by default)<\/p>\n\n<pre>\n|--------------------------------------------------------------------------------------------------------------|--------------------|\n|                                            Object Header (96 bits)                                           |        State       |\n|--------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                                  Mark Word (64 bits)                           |    Klass Word (32 bits)     |                    |\n|--------------------------------------------------------------------------------|-----------------------------|--------------------|\n| unused:25 | identity_hashcode:31 | cms_free:1 | age:4 | biased_lock:1 | lock:2 |    OOP to metadata object   |       Normal       |\n|--------------------------------------------------------------------------------|-----------------------------|--------------------|\n| thread:54 |       epoch:2        | cms_free:1 | age:4 | biased_lock:1 | lock:2 |    OOP to metadata object   |       Biased       |\n|--------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                         ptr_to_lock_record                            | lock:2 |    OOP to metadata object   | Lightweight Locked |\n|--------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                     ptr_to_heavyweight_monitor                        | lock:2 |    OOP to metadata object   | Heavyweight Locked |\n|--------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                                                                       | lock:2 |    OOP to metadata object   |    Marked for GC   |\n|--------------------------------------------------------------------------------|-----------------------------|--------------------|\n<\/pre>\n\n<p>If <code>UseCompressedOops<\/code> is turned off, the object header looks like this：<\/p>\n\n<pre>\n|------------------------------------------------------------------------------------------------------------|--------------------|\n|                                            Object Header (128 bits)                                        |        State       |\n|------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                                  Mark Word (64 bits)                         |    Klass Word (64 bits)     |                    |\n|------------------------------------------------------------------------------|-----------------------------|--------------------|\n| unused:25 | identity_hashcode:31 | unused:1 | age:4 | biased_lock:1 | lock:2 |    OOP to metadata object   |       Normal       |\n|------------------------------------------------------------------------------|-----------------------------|--------------------|\n| thread:54 |       epoch:2        | unused:1 | age:4 | biased_lock:1 | lock:2 |    OOP to metadata object   |       Biased       |\n|------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                       ptr_to_lock_record:62                         | lock:2 |    OOP to metadata object   | Lightweight Locked |\n|------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                     ptr_to_heavyweight_monitor:62                   | lock:2 |    OOP to metadata object   | Heavyweight Locked |\n|------------------------------------------------------------------------------|-----------------------------|--------------------|\n|                                                                     | lock:2 |    OOP to metadata object   |    Marked for GC   |\n|------------------------------------------------------------------------------|-----------------------------|--------------------|\n<\/pre>\n\n<p>And the C++ source code about markword is here：\n<a href=\"http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/oops/markOop.hpp\" rel=\"nofollow noreferrer\">http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/oops/markOop.hpp<\/a><\/p>\n\n<p>I have a question：<\/p>\n\n<p><strong>Why one bit has changed from unused to cms_free when pointer compression is enabled?<\/strong>  <\/p>\n\n<p>I suspect it has something to do with the CMS garbage collector, but I don't know what it does.<\/p>\n\n<p>And when I check the relevant information of the object header (including the two tables above), most of them mentioned the <code>markOop.hpp<\/code> file, but only introduced the <strong>Lock<\/strong> related. Ignore the cms_free, narrowOop, promo_bits, PromotedObjec mentioned in <code>markOop.hpp<\/code> that important information, so I am curious about this part.<\/p>\n",
+        "question_id": 60985782,
+        "tags": [
+            "java",
+            "c++",
+            "jvm",
+            "jvm-hotspot"
+        ],
+        "score": 7,
+        "accepted_answer_id": 61059982,
+        "is_answered": true,
+        "view_count": 1765,
+        "last_edit_date": 1704787808
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d04e3c4edc2f6c65d18d701d8f62af4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13966383,
+                "user_type": "registered",
+                "user_id": 10086054,
+                "link": "https://stackoverflow.com/users/10086054/tony",
+                "reputation": 137,
+                "display_name": "tony"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60985782,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/782a7b1f586dabac348b8252c1216742?s=256&d=identicon&r=PG",
+                "account_id": 1217449,
+                "user_type": "registered",
+                "user_id": 1184752,
+                "link": "https://stackoverflow.com/users/1184752/juraj-martinka",
+                "reputation": 4415,
+                "display_name": "Juraj Martinka",
+                "accept_rate": 43
+            },
+            "edited": false,
+            "creation_date": 1585815428,
+            "comment_id": 107896814
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/782a7b1f586dabac348b8252c1216742?s=256&d=identicon&r=PG",
+                "account_id": 1217449,
+                "user_type": "registered",
+                "user_id": 1184752,
+                "link": "https://stackoverflow.com/users/1184752/juraj-martinka",
+                "reputation": 4415,
+                "display_name": "Juraj Martinka",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60985782,
+            "edited": false,
+            "creation_date": 1585813362,
+            "comment_id": 107895889
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+            "account_id": 3211603,
+            "user_type": "registered",
+            "user_id": 2711488,
+            "link": "https://stackoverflow.com/users/2711488/holger",
+            "reputation": 300991,
+            "display_name": "Holger"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 8,
+        "is_accepted": true,
+        "last_activity_date": 1586176466,
+        "creation_date": 1586176466,
+        "body": "<p>When using flat pointers, the lowest bits of address pointers are always zero due to alignment and allow marking special state by writing ones into these bits. So the CMS set the lowest bit of the <code>klass<\/code> pointer to one when it wants to denote that the particular chunk of memory is not an object (anymore), but free memory.<\/p>\n\n<p>But the compressed pointer feature utilizes the same property to address more memory via a 32 bit pointer by right shifting the address and leaving no unused lower bits. Therefore, the CMS has to store this bit somewhere else, i.e. the <code>cms_free_bit<\/code> in question.<\/p>\n\n<p>Source: <a href=\"http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/gc_implementation/concurrentMarkSweep/concurrentMarkSweepGeneration.cpp#l1311\" rel=\"noreferrer\">concurrentMarkSweepGeneration.cpp<\/a>:<\/p>\n\n<blockquote>\n<pre><code>// A block of storage in the CMS generation is always in\n// one of three states. A free block (FREE), an allocated\n// object (OBJECT) whose size() method reports the correct size,\n// and an intermediate state (TRANSIENT) in which its size cannot\n// be accurately determined.\n// STATE IDENTIFICATION:   (32 bit and 64 bit w/o COOPS)\n// -----------------------------------------------------\n// FREE:      klass_word &amp; 1 == 1; mark_word holds block size\n//\n// OBJECT:    klass_word installed; klass_word != 0 &amp;&amp; klass_word &amp; 1 == 0;\n//            obj-&gt;size() computes correct size\n//\n// TRANSIENT: klass_word == 0; size is indeterminate until we become an OBJECT\n//\n// STATE IDENTIFICATION: (64 bit+COOPS)\n// ------------------------------------\n// FREE:      mark_word &amp; CMS_FREE_BIT == 1; mark_word &amp; ~CMS_FREE_BIT gives block_size\n//\n// OBJECT:    klass_word installed; klass_word != 0;\n//            obj-&gt;size() computes correct size\n//\n// TRANSIENT: klass_word == 0; size is indeterminate until we become an OBJECT\n<\/code><\/pre>\n<\/blockquote>\n",
+        "answer_id": 61059982,
+        "question_id": 60985782
+    }],
+    "answer_comments": {}
+}

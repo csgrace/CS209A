@@ -1,0 +1,401 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+            "account_id": 445596,
+            "user_type": "registered",
+            "user_id": 838151,
+            "link": "https://stackoverflow.com/users/838151/ryandlf",
+            "reputation": 28705,
+            "display_name": "ryandlf",
+            "accept_rate": 90
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19743217/session-state-using-client-ip",
+        "last_activity_date": 1383433518,
+        "creation_date": 1383404326,
+        "answer_count": 2,
+        "title": "Session State Using Client IP",
+        "body": "<p>I am attempting to determine if there is a security flaw using the proposed method of maintaining session state when the client has cookies blocked.<\/p>\n\n<p>Normally I store a UUID in the clients cookies and auto login if the UUID matches whats stored in the database. However, if the client has cookies blocked, I can't access a UUID on their machine and therefore have to resolve to using their IP address and match against the database that way.<\/p>\n\n<p>I determine the IP address using:<\/p>\n\n<pre><code>String ip = request.getHeader(\"X-FORWARDED-FOR\");\nif(ip == null) {\n    ip = request.getRemoteAddr();\n}\n<\/code><\/pre>\n\n<p>I'm a little green in this area, but I think there might be a security flaw in this approach. For instance, if the user accesses the application on a public wifi network (in a coffee shop, airport, hotel... whatever) it will store the public ip and match their account to that ip. Anyone coming in behind them on that same ip will have complete access to their account unless they specifically remember to log out. How do I prevent this? I'm not totally against using another approach when cookies are blocked besides matching to the ip. I'm just not sure what other approach their might be besides just totally disallowing user logins when cookies are not available. Is this the only truly secure method?<\/p>\n\n<p><strong>UPDATE<\/strong><\/p>\n\n<p>Based on T.J. Crowders comment, recent stats show that 2% of users actual have cookies blocked. I chose to rely on cookies for a number of reasons and show a warning when session state cannot be managed due to cookies being blocked.<\/p>\n",
+        "question_id": 19743217,
+        "tags": [
+            "java",
+            "session",
+            "ip-address"
+        ],
+        "score": 1,
+        "accepted_answer_id": 19743254,
+        "is_answered": true,
+        "view_count": 194,
+        "last_edit_date": 1383433518
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                "account_id": 52616,
+                "user_type": "registered",
+                "user_id": 157247,
+                "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                "reputation": 1081806,
+                "display_name": "T.J. Crowder",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1383404611,
+            "creation_date": 1383404611,
+            "body": "<blockquote>\n  <p>...but I think there might be a security flaw in this approach. For instance, if the user accesses the application on a public wifi network (in a coffee shop, airport, hotel... whatever)...<\/p>\n<\/blockquote>\n\n<p>Not just that. People who have wireless broadband in their home will all seem to be from the same IP, so if two people who live together both want to use your site simultaneously (maybe one recommended it to the other), they'll conflict.<\/p>\n\n<p>If you can't use cookies, you could use the old J2EE technique of putting the session ID in every URL. If you're already using J2EE, you can use its built-in support for this (<a href=\"http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletResponse.html#encodeURL%28java.lang.String%29\" rel=\"nofollow\"><code>HttpServletResponse#encodeURL<\/code><\/a> and such), which will use <code>;jsessionid=token<\/code> on the URL. If you aren't, it's simple enough to implement the technique using a query string parameter.<\/p>\n",
+            "answer_id": 19743254,
+            "question_id": 19743217
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1383404709,
+            "creation_date": 1383404709,
+            "body": "<p>The servlet API allows tracking sessions without cookies, using URL-rewriting (every URL pointing to the app in a given session will contain the session ID). This is automatic if you respect a few rules:<\/p>\n\n<ul>\n<li>always use <code>HttpServletResponse.encodeRedirectURL()<\/code> when redirecting<\/li>\n<li>always use <code>HttpServletResponse.encodeURL()<\/code> when generating a URL (for a link, image or whatever)<\/li>\n<\/ul>\n\n<p>Note that the JSTL's <code>&lt;c:url&gt;<\/code> calls <code>encodeURL()<\/code> for you.<\/p>\n",
+            "answer_id": 19743268,
+            "question_id": 19743217
+        }
+    ],
+    "answer_comments": {
+        "19743268": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                "account_id": 445596,
+                "user_type": "registered",
+                "user_id": 838151,
+                "link": "https://stackoverflow.com/users/838151/ryandlf",
+                "reputation": 28705,
+                "display_name": "ryandlf",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743268,
+            "edited": false,
+            "creation_date": 1383405409,
+            "comment_id": 29336319
+        }],
+        "19743254": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                    "account_id": 277416,
+                    "user_type": "registered",
+                    "user_id": 571407,
+                    "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                    "reputation": 694302,
+                    "display_name": "JB Nizet",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 19743254,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "edited": false,
+                "creation_date": 1383405305,
+                "comment_id": 29336293
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "edited": false,
+                "creation_date": 1383405235,
+                "comment_id": 29336267
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                    "account_id": 277416,
+                    "user_type": "registered",
+                    "user_id": 571407,
+                    "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                    "reputation": 694302,
+                    "display_name": "JB Nizet",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1383405135,
+                "comment_id": 29336238
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                    "account_id": 277416,
+                    "user_type": "registered",
+                    "user_id": 571407,
+                    "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                    "reputation": 694302,
+                    "display_name": "JB Nizet",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1383405132,
+                "comment_id": 29336232
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                    "account_id": 277416,
+                    "user_type": "registered",
+                    "user_id": 571407,
+                    "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                    "reputation": 694302,
+                    "display_name": "JB Nizet",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "edited": false,
+                "creation_date": 1383405107,
+                "comment_id": 29336226
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "edited": false,
+                "creation_date": 1383405079,
+                "comment_id": 29336218
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "edited": false,
+                "creation_date": 1383405053,
+                "comment_id": 29336208
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                    "account_id": 277416,
+                    "user_type": "registered",
+                    "user_id": 571407,
+                    "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                    "reputation": 694302,
+                    "display_name": "JB Nizet",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 19743254,
+                "edited": false,
+                "creation_date": 1383405018,
+                "comment_id": 29336195
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "edited": false,
+                "creation_date": 1383404921,
+                "comment_id": 29336167
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "edited": false,
+                "creation_date": 1383404881,
+                "comment_id": 29336154
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/lUM5Z.jpg?s=256",
+                    "account_id": 52616,
+                    "user_type": "registered",
+                    "user_id": 157247,
+                    "link": "https://stackoverflow.com/users/157247/t-j-crowder",
+                    "reputation": 1081806,
+                    "display_name": "T.J. Crowder",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 19743254,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "edited": false,
+                "creation_date": 1383404848,
+                "comment_id": 29336144
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                    "account_id": 277416,
+                    "user_type": "registered",
+                    "user_id": 571407,
+                    "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                    "reputation": 694302,
+                    "display_name": "JB Nizet",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "edited": false,
+                "creation_date": 1383404793,
+                "comment_id": 29336136
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/22133e95e4e7e53874d6c1b20686230a?s=256&d=identicon&r=PG",
+                    "account_id": 445596,
+                    "user_type": "registered",
+                    "user_id": 838151,
+                    "link": "https://stackoverflow.com/users/838151/ryandlf",
+                    "reputation": 28705,
+                    "display_name": "ryandlf",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 19743254,
+                "edited": false,
+                "creation_date": 1383404713,
+                "comment_id": 29336117
+            }
+        ]
+    }
+}

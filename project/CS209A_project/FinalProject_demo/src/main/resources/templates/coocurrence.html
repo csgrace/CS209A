@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Topic Co-occurrence — Java Analysis</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+
+        .insight-title { font-weight:600; color:#92400e; }
+        .insight-pill { background:#fff7ed; color:#92400e; padding:4px 8px; border-radius:999px; font-size:12px; display:inline-block; }
+        .pair-row { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:10px; background:#fffbeb; border-radius:8px; cursor:pointer; }
+        .pair-row:focus { outline: none; box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.18); }
+        .pair-row.active { box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.28); background:#fff7e6; }
+        .pair-label { font-weight:600; color:#92400e; }
+        .pair-meta { color:#78350f; font-weight:600; }
+        .example-snippet { color:#4b5563; margin-top:6px; white-space:pre-wrap; background:#fff; padding:8px; border-radius:6px; border:1px solid #fde68a; font-size:13px; }
+
+        .insights-under-chart { margin-top: 18px; padding: 14px; background: #fffbeb; border-radius: 10px; border: 1px solid #fde68a; color: #4b5563; }
+        .insights-under-chart h4 { color: #92400e; margin-bottom: 8px; font-weight: 700; }
+
+        .pair-details { display:none; margin-top:8px; padding:10px; background:#fffaf0; border-radius:8px; border:1px solid #fde68a; color:#374151; }
+        .pair-row.expanded + .pair-details { display:block; }
+    </style>
+</head>
+<body class="bg-slate-50">
+<div class="w-full bg-amber-100">
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Topic Co-occurrence</h1>
+                <p class="text-sm text-slate-700 mt-1">Top pairs of Java topics that frequently appear together on Stack Overflow — useful to find cross-cutting concerns.</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="/" class="inline-flex items-center gap-2 px-3 py-1 rounded bg-white border border-slate-200 text-sm shadow-sm hover:shadow transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back
+                </a>
+
+                <button id="downloadBtn" type="button"
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded bg-white border border-slate-200 text-sm shadow-sm transition opacity-50 cursor-not-allowed"
+                        aria-disabled="true" title="Generate chart first to enable download">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 5v10" />
+                    </svg>
+                    Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto p-6">
+    <div class="bg-white p-5 rounded-xl shadow mb-6">
+        <form id="controls" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="md:col-span-2 flex flex-col justify-end">
+                <label class="block text-sm text-slate-700">Optional filter (show only pairs that include this tag)</label>
+                <input id="filterTag" placeholder="e.g. spring-boot or leave empty" class="mt-1 p-2 w-full rounded border" />
+            </div>
+
+            <div class="flex flex-col justify-end">
+                <label class="block text-sm text-slate-700">Top N(1~40)</label>
+                <input id="topN" type="number" min="1" max="40" value="20" class="mt-1 p-2 w-full rounded border" />
+            </div>
+
+            <div class="flex flex-col justify-end">
+                <label class="block text-sm text-transparent">action</label>
+                <button id="loadBtn" type="button" class="w-full bg-amber-200 text-amber-800 py-2 rounded shadow-sm hover:bg-amber-300 transition">Load Co-occurrence</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h3 class="text-md font-semibold text-slate-800" id="chartTitle">Top tag pairs</h3>
+                    <p id="chartSubtitle" class="text-xs text-slate-500 mt-1">Click a bar or list item for details.</p>
+                </div>
+                <div id="rangeInfo" class="text-sm text-slate-500"></div>
+            </div>
+
+            <div class="mt-4">
+                <canvas id="barChart" height="360"></canvas>
+            </div>
+
+            <div id="chartNote" class="mt-3 text-xs text-slate-500">Pairs show two tags combined with their co-occurrence count.</div>
+
+            <div id="insights" class="insights-under-chart" aria-live="polite">
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow">
+            <h3 class="text-sm font-semibold text-slate-700">Top pairs list</h3>
+            <div id="pairList" class="mt-3 space-y-3 text-sm text-slate-600" role="list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const orangePalette = ['#D97706','#F97316','#FB923C','#FDBA74','#FDE68A','#F59E0B'];
+    function pickOrange(i){ return orangePalette[i % orangePalette.length]; }
+
+    // API
+    async function fetchPairs(n) {
+        const url = `/api/tag-cooccurrence/pair?n=${encodeURIComponent(n)}`;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error('Failed to fetch cooccurrence: ' + r.status);
+        return r.json();
+    }
+
+    // UI refs
+    const loadBtn = document.getElementById('loadBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const topNInput = document.getElementById('topN');
+    const filterTagInput = document.getElementById('filterTag');
+    const pairListEl = document.getElementById('pairList');
+    const chartSubtitle = document.getElementById('chartSubtitle');
+    const insightsEl = document.getElementById('insights');
+
+    let barChart = null;
+    let currentPairs = [];
+
+    function enableDownload(){ downloadBtn.classList.remove('opacity-50','cursor-not-allowed'); downloadBtn.setAttribute('aria-disabled','false'); }
+    function disableDownload(){ downloadBtn.classList.add('opacity-50','cursor-not-allowed'); downloadBtn.setAttribute('aria-disabled','true'); }
+    disableDownload();
+    (function(){
+        const topN = document.getElementById('topN');
+        if (topN) {
+            topN.setAttribute('min', '1');
+            topN.setAttribute('max', '40');
+            topN.setAttribute('step', '1');
+
+            topN.addEventListener('input', () => {
+                const v = parseInt(topN.value, 10);
+                if (Number.isNaN(v)) return;
+                if (v < 1) topN.value = '1';
+                else if (v > 40) topN.value = '40';
+            });
+
+            topN.addEventListener('change', () => {
+                let v = parseInt(topN.value, 10);
+                if (Number.isNaN(v) || v < 1) topN.value = '1';
+                else if (v > 40) topN.value = '40';
+            });
+        }
+    })();
+    function labelFromTags(tags){ if(!Array.isArray(tags)) return String(tags); return tags.join(' & '); }
+    function shortText(s,n=180){ if(!s) return ''; return s.length>n? s.slice(0,n-1)+'…':s; }
+    function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+    // Chart renderer
+    function renderChart(pairs){
+        const labels = pairs.map(p=>labelFromTags(p.tags));
+        const counts = pairs.map(p=>Number(p.count||0));
+        const maxVal = counts.length?Math.max(...counts):0;
+        const suggestedMax = maxVal>0?Math.ceil(maxVal*1.15):5;
+
+        const ctx = document.getElementById('barChart').getContext('2d');
+        if(barChart) barChart.destroy();
+        barChart = new Chart(ctx, {
+            type:'bar',
+            data:{ labels, datasets:[{ label:'Co-occurrence frequency', data:counts, backgroundColor:labels.map((_,i)=>pickOrange(i)), borderColor:labels.map((_,i)=>pickOrange(i)), borderWidth:1, barThickness:28, maxBarThickness:36 }] },
+            options:{
+                indexAxis:'y',
+                responsive:true,
+                animation: {
+                    duration: 900,
+                    easing: 'easeOutQuart',
+                    delay: (context) => {
+                        if (context.type === 'data' && context.mode === 'default') {
+                            return context.dataIndex * 60 + (context.datasetIndex * 30 || 0);
+                        }
+                        return 0;
+                    }
+                },
+                animations: {
+                    x: { from: 0, easing: 'easeOutQuart', duration: 700 },
+                    y: { from: 0, easing: 'easeOutBounce', duration: 900 }
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
+                },
+                plugins:{
+                    legend:{display:false},
+                    tooltip:{ callbacks:{ label: ctx=> `${ctx.dataset.label}: ${Number(ctx.parsed.x).toLocaleString()}` } }
+                },
+                scales:{
+                    x:{ title:{display:true,text:'Frequency'}, beginAtZero:true, suggestedMax: suggestedMax },
+                    y:{ ticks:{ autoSkip:false } }
+                },
+                onClick:(evt, elems)=>{
+                    if(!elems.length) return;
+                    const idx=elems[0].index;
+                    const el=pairListEl.querySelector(`[data-idx="${idx}"]`);
+                    if(el){
+                        el.click();
+                        el.scrollIntoView({behavior:'smooth',block:'center'});
+                    }
+                }
+            }
+        });
+        enableDownload();
+        downloadBtn.onclick = downloadChartWhiteBackground;
+    }
+
+    function downloadChartWhiteBackground(){
+        if(!barChart) return;
+        try{
+            const imgData = barChart.toBase64Image();
+            const img = new Image(); img.src = imgData;
+            img.onload = ()=>{
+                const tmp = document.createElement('canvas'); tmp.width=img.width; tmp.height=img.height;
+                const ctx = tmp.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,tmp.width,tmp.height); ctx.drawImage(img,0,0);
+                const dataURL = tmp.toDataURL('image/png'); const a=document.createElement('a'); a.href=dataURL; a.download=`cooccurrence-${Date.now()}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            };
+            img.onerror = ()=>{ const a=document.createElement('a'); a.href=imgData; a.download=`cooccurrence-${Date.now()}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); };
+        }catch(e){ console.error(e); alert('Download failed: '+e.message); }
+    }
+
+    function renderPairList(pairs, filterTag){
+        pairListEl.innerHTML = '';
+        currentPairs = pairs;
+
+        pairs.forEach((p, idx) => {
+            const label = labelFromTags(p.tags);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pair-row';
+            wrapper.setAttribute('data-idx', String(idx));
+            wrapper.setAttribute('role','button');
+            wrapper.setAttribute('tabindex','0');
+            wrapper.setAttribute('aria-expanded','false');
+
+            const left = document.createElement('div');
+            left.style.flex = '1';
+            left.innerHTML = `<div class="pair-label">${escapeHtml(label)}</div>`;
+
+            const right = document.createElement('div');
+            right.style.flex = '0 0 auto';
+            right.innerHTML = `<div class="pair-meta">${Number(p.count||0).toLocaleString()}</div>`
+
+            wrapper.appendChild(left);
+            wrapper.appendChild(right);
+
+            const details = document.createElement('div');
+            details.className = 'pair-details';
+
+            const tagsHtml = (p.tags || []).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(' & ');
+            const exampleHtml = p.exampleQuestion ? `<div style="margin-top:8px"><div style="font-weight:600;color:#374151">Example question</div><div class="example-snippet" style="margin-top:6px">${escapeHtml(shortText(p.exampleQuestion,1000))}</div></div>` : '';
+            const linkHtml = p.exampleQuestionId ? `<div style="margin-top:8px"><a class="detail-link" target="_blank" rel="noopener" href="https://stackoverflow.com/questions/${p.exampleQuestionId}" style="color: #f97316;">Open on StackOverflow →</a></div>` : '';
+
+            details.innerHTML = `<div class="detail-tags">${tagsHtml}</div>${exampleHtml}${linkHtml}`;
+
+            const toggle = () => {
+                const expanded = wrapper.classList.toggle('expanded');
+                wrapper.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                // if expanded, add active style, else remove
+                if (expanded) wrapper.classList.add('active');
+                else wrapper.classList.remove('active');
+            };
+
+            wrapper.addEventListener('click', (ev) => {
+                const target = ev.target;
+                if (target && (target.tagName === 'A' || target.closest('a'))) {
+                    return;
+                }
+                toggle();
+            });
+
+            wrapper.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault();
+                    toggle();
+                }
+            });
+
+            pairListEl.appendChild(wrapper);
+            pairListEl.appendChild(details);
+        });
+    }
+
+    function generateInsights(pairs, filterTag) {
+        if (!pairs || pairs.length === 0) return '<div class="text-xs text-slate-500">No co-occurrence data available to generate insights.</div>';
+
+        const total = pairs.reduce((s,p)=> s + (Number(p.count)||0), 0);
+        const top = pairs[0];
+        const second = pairs[1] || null;
+        const topShare = total > 0 ? (top.count / total) : 0;
+        const lines = [];
+
+        // 1) Lead observation: does top pair dominate?
+        if (second && top.count >= 1.5 * second.count) {
+            lines.push(`Insights: The pair "${labelFromTags(top.tags)}" clearly stands out — it appears ${top.count} times and accounts for about ${Math.round(topShare*100)}% of the co-occurrence volume among the top pairs. That suggests a common, recurring developer pattern linking these two topics.`);
+        } else {
+            lines.push(`Insights: The co-occurrence counts are fairly spread: the top pair "${labelFromTags(top.tags)}" appears ${top.count} times, but several other pairs have comparable counts. This implies multiple common workflows rather than a single dominant pairing.`);
+        }
+
+        // 2) Hub tags: which tags appear most across top pairs
+        const tagCounts = {};
+        pairs.forEach(p => {
+            (p.tags || []).forEach(t => {
+                const key = String(t).toLowerCase();
+                tagCounts[key] = (tagCounts[key] || 0) + 1;
+            });
+        });
+        const tagEntries = Object.entries(tagCounts).sort((a,b) => b[1]-a[1]);
+        if (tagEntries.length) {
+            const [topTag, topTagFreq] = tagEntries[0];
+            // compute cumulative volume for pairs that include this tag
+            const cum = pairs.reduce((s,p) => s + ((p.tags||[]).some(t => String(t).toLowerCase()===topTag) ? (Number(p.count)||0) : 0), 0);
+            const cumPct = total>0 ? Math.round((cum/total)*100) : 0;
+            if (topTagFreq >= Math.max(3, Math.ceil(pairs.length * 0.15))) {
+                lines.push(`I see "${topTag}" acting as a hub: it appears in ${topTagFreq} of the top ${pairs.length} pairs and accounts for roughly ${cumPct}% of the co-occurrence volume. In practice this means many cross-cutting questions revolve around ${topTag}.`);
+            } else {
+                lines.push(`No single tag dominates the top list as a hub — the top tag "${topTag}" appears in ${topTagFreq} pairs, so co-occurrence seems distributed across different topic pairs.`);
+            }
+        }
+
+        // 3) Pattern notes: filter tag or domain-specific reasons
+        if (filterTag) {
+            const ft = filterTag.toLowerCase();
+            const matching = pairs.filter(p => (p.tags||[]).some(t=>String(t).toLowerCase()===ft));
+            if (matching.length === 0) {
+                lines.push(`Your filter "${filterTag}" doesn't show up in the top pairs — try widening the window or removing the filter to explore more associations.`);
+            } else {
+                const volumes = matching.reduce((s,p) => s + (Number(p.count)||0), 0);
+                lines.push(`Within the top pairs, "${filterTag}" co-occurs most with "${matching[0].tags.find(t=>String(t).toLowerCase()!==ft)}" (${matching[0].count} times). This often reflects common technology pairings or dependency relationships in projects that use ${filterTag}.`);
+            }
+        }
+        // 4) Practical interpretation (concise, human)
+        lines.push('Why do these pairs co-occur? Usually because developers combine libraries/frameworks (e.g. a framework + extension), or a specific problem domain ties two topics together (e.g. web frameworks and security, concurrency utilities and executors). High co-occurrence can indicate common integration pain points or popular stacks that are worth investigating further.');
+
+        lines.push('spring|spring-boot : Spring and Spring Boot co-occur because Spring Boot is the convention-driven starter layer for Spring applications. Developers frequently ask about configuration, auto-configuration, dependency management, and migrating plain Spring apps to Spring Boot — so issues often mention both tags.');
+        lines.push('android|android-studio : Android and Android Studio co-occur because Android Studio is the primary IDE and build environment for Android apps. Questions about project setup, Gradle builds, emulators, SDK/NDK installation or IDE-specific debugging naturally reference both tags.');
+        lines.push('spring|spring-mvc : Spring and Spring MVC co-occur because Spring MVC is the web framework module within the Spring ecosystem. Common topics such as controllers, request mappings, view resolution, REST endpoints and handler configuration involve both Spring broadly and the Spring MVC component specifically.');
+
+        return `<div class="space-y-2">
+                  ${lines.map(s => `<p>${s}</p>`).join('')}
+                </div>`;
+    }
+
+    loadBtn.addEventListener('click', async ()=>{
+        const n = parseInt(topNInput.value) || 20;
+        const filterTag = (filterTagInput.value||'').trim();
+        chartSubtitle.textContent = 'Loading...';
+        pairListEl.innerHTML = ''; insightsEl.innerHTML=''; disableDownload();
+
+        try{
+            const data = await fetchPairs(n);
+            if(!Array.isArray(data)) throw new Error('Unexpected API response');
+
+            const pairs = data.map(row=>({
+                tags: Array.isArray(row.tags)? row.tags : (row.tags? String(row.tags).split(',').map(s=>s.trim()).filter(Boolean):[]),
+                count: Number(row.count ?? row.cooccurrenceCount ?? row.frequency ?? 0),
+                exampleQuestion: row.exampleQuestion ?? row.example_question ?? row.example ?? '',
+                exampleQuestionId: row.exampleQuestionId ?? row.example_question_id ?? row.exampleId ?? ''
+            })).sort((a,b)=>Number(b.count||0)-Number(a.count||0));
+
+            const ft = filterTag ? filterTag.toLowerCase() : '';
+            const displayedPairs = ft ? pairs.filter(p => (p.tags || []).some(t => String(t).toLowerCase() === ft)) : pairs;
+
+            renderChart(displayedPairs);
+            renderPairList(displayedPairs, filterTag);
+
+            chartSubtitle.textContent = `${displayedPairs.length} pair(s) · top ${n}`;
+
+            insightsEl.innerHTML = generateInsights(displayedPairs, filterTag);
+
+        }catch(e){
+            console.error(e);
+            chartSubtitle.textContent = 'Failed to load data';
+            alert('Failed to load co-occurrence data: ' + (e.message || e));
+        }
+    });
+
+    [filterTagInput, topNInput].forEach(inp=> inp.addEventListener('keydown', ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); loadBtn.click(); }}));
+
+    window.addEventListener('DOMContentLoaded', ()=> setTimeout(()=> loadBtn.click(), 200));
+</script>
+</body>
+</html>

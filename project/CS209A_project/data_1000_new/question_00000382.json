@@ -1,0 +1,189 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6d962783a030b8f571428d2b2965616a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4408847,
+            "user_type": "registered",
+            "user_id": 3592376,
+            "link": "https://stackoverflow.com/users/3592376/user3592376",
+            "reputation": 221,
+            "display_name": "user3592376"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25196179/how-to-parse-an-xml-string-into-java-object",
+        "last_activity_date": 1408049709,
+        "creation_date": 1407472939,
+        "answer_count": 1,
+        "title": "How to parse an XML String into Java Object?",
+        "body": "<p>I have an XML String that I get as response from a web service. I want to parse it and convert it to a Java object. Please help me solve it. I have tried using various libraries but failed. All giving some exception.<\/p>\n\n<p><strong>XML<\/strong> String :<\/p>\n\n<pre><code>&lt;LOGINRESPONSE xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"     \n    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" Message=\"Login Successful\"   \n    Token=\"SFTT67FGHUU\" DataFormat=\"CSV\" Header=\"true\" Suffix=\"true\"  \n    xmlns=\"http://ws.eoddata.com/Data\" /&gt;\n<\/code><\/pre>\n\n<p>The code that I used is:<\/p>\n\n<pre><code>HttpClient httpclient = new DefaultHttpClient();\nHttpGet httpget = new HttpGet(\n    \"http://&lt;webservice URL&gt;/Login?Username=&lt;username&gt;&amp;Password=&lt;password&gt;\");\nResponseHandler&lt;String&gt; responseHandler = new BasicResponseHandler();\nString response = httpclient.execute(httpget, responseHandler);\nSystem.out.println(response);\ntry (ByteArrayInputStream bais = new ByteArrayInputStream(response.getBytes())) {\n    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(bais);\n    System.out.println(doc);\n} catch (Exception exp) {\n    exp.printStackTrace();\n}\n<\/code><\/pre>\n\n<p>But doc is coming as <code>null<\/code>. I want to extract the token from the xml string<\/p>\n",
+        "question_id": 25196179,
+        "tags": [
+            "java",
+            "xml",
+            "web-services",
+            "xml-parsing"
+        ],
+        "score": -2,
+        "is_answered": true,
+        "view_count": 1715,
+        "last_edit_date": 1407480439
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d962783a030b8f571428d2b2965616a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4408847,
+                "user_type": "registered",
+                "user_id": 3592376,
+                "link": "https://stackoverflow.com/users/3592376/user3592376",
+                "reputation": 221,
+                "display_name": "user3592376"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196179,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/9a657f7990c2dafca9885dee9c647d4e?s=256&d=identicon&r=PG",
+                "account_id": 23674,
+                "user_type": "registered",
+                "user_id": 59501,
+                "link": "https://stackoverflow.com/users/59501/staxman",
+                "reputation": 117032,
+                "display_name": "StaxMan",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1407478226,
+            "comment_id": 39238637
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9a657f7990c2dafca9885dee9c647d4e?s=256&d=identicon&r=PG",
+                "account_id": 23674,
+                "user_type": "registered",
+                "user_id": 59501,
+                "link": "https://stackoverflow.com/users/59501/staxman",
+                "reputation": 117032,
+                "display_name": "StaxMan",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 25196179,
+            "edited": false,
+            "creation_date": 1407473430,
+            "comment_id": 39237263
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+            "account_id": 969721,
+            "user_type": "registered",
+            "user_id": 992484,
+            "link": "https://stackoverflow.com/users/992484/madprogrammer",
+            "reputation": 347645,
+            "display_name": "MadProgrammer",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1407479567,
+        "creation_date": 1407473649,
+        "body": "<p>You should be able to wrap the <code>String<\/code> in a <code>ByteArrayInputStream<\/code> and pass it to a <code>DocumentBuilder<\/code>, for example...<\/p>\n\n<pre><code>String text = \"&lt;LOGINRESPONSE xmlns:xsd=\\\"http://www.w3.org/2001/XMLSchema\\\" xmlns:xsi=\\\"http://www.w3.org/2001/XMLSchema-instance\\\" Message=\\\"Login Successful\\\" Token=\\\"SFTT67FGHUU\\\" DataFormat=\\\"CSV\\\" Header=\\\"true\\\" Suffix=\\\"true\\\" xmlns=\\\"http://ws.eoddata.com/Data\\\" /&gt;\";\ntry (ByteArrayInputStream bais = new ByteArrayInputStream(text.getBytes())) {\n    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(bais);\n} catch (ParserConfigurationException | SAXException | IOException exp) {\n    exp.printStackTrace();\n}\n<\/code><\/pre>\n\n<p><strong>Updated...<\/strong><\/p>\n\n<p>To extract an attribute, you might use something like...<\/p>\n\n<pre><code>NamedNodeMap atts = doc.getDocumentElement().getAttributes();\nNode node = atts.getNamedItem(\"Message\");\nSystem.out.println(\"Message = \" + node.getTextContent());\n<\/code><\/pre>\n\n<p>which prints...<\/p>\n\n<pre><code>Message = Login Successful\n<\/code><\/pre>\n",
+        "answer_id": 25196284,
+        "question_id": 25196179,
+        "last_edit_date": 1407479567
+    }],
+    "answer_comments": {"25196284": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196284,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6d962783a030b8f571428d2b2965616a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4408847,
+                "user_type": "registered",
+                "user_id": 3592376,
+                "link": "https://stackoverflow.com/users/3592376/user3592376",
+                "reputation": 221,
+                "display_name": "user3592376"
+            },
+            "edited": false,
+            "creation_date": 1407485290,
+            "comment_id": 39241852
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d962783a030b8f571428d2b2965616a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4408847,
+                "user_type": "registered",
+                "user_id": 3592376,
+                "link": "https://stackoverflow.com/users/3592376/user3592376",
+                "reputation": 221,
+                "display_name": "user3592376"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196284,
+            "edited": false,
+            "creation_date": 1407479406,
+            "comment_id": 39239103
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196284,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6d962783a030b8f571428d2b2965616a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4408847,
+                "user_type": "registered",
+                "user_id": 3592376,
+                "link": "https://stackoverflow.com/users/3592376/user3592376",
+                "reputation": 221,
+                "display_name": "user3592376"
+            },
+            "edited": false,
+            "creation_date": 1407478507,
+            "comment_id": 39238735
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d962783a030b8f571428d2b2965616a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4408847,
+                "user_type": "registered",
+                "user_id": 3592376,
+                "link": "https://stackoverflow.com/users/3592376/user3592376",
+                "reputation": 221,
+                "display_name": "user3592376"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196284,
+            "edited": false,
+            "creation_date": 1407478376,
+            "comment_id": 39238695
+        }
+    ]}
+}

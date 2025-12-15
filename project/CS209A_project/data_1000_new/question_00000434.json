@@ -1,0 +1,107 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/S83OA.jpg?s=256",
+            "account_id": 330599,
+            "user_type": "registered",
+            "user_id": 654799,
+            "link": "https://stackoverflow.com/users/654799/vach",
+            "reputation": 11515,
+            "display_name": "vach",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37433955/proto3-setting-value-equal-to-default-is-not-recognised-in-runtime",
+        "last_activity_date": 1464198255,
+        "creation_date": 1464170950,
+        "answer_count": 1,
+        "title": "Proto3 setting value equal to default is not recognised in runtime",
+        "body": "<p><code>Proto3<\/code> is not as strict as <code>Proto2<\/code>, and there are no <code>required<\/code> or <code>optional<\/code> fields, there are no custom <code>default<\/code> values.<\/p>\n\n<p>Given the following definition...<\/p>\n\n<pre><code>message Order {\n    enum Side {\n        BID = 0;\n        ASK = 1;\n    }\n\n    int64 time = 1;\n    double price = 2;\n    double volume = 3;\n    Side side = 4;\n}\n<\/code><\/pre>\n\n<p>There are default values for any of those fields, after all now there are no rules of what you must or must not provide before you <code>.build()<\/code> your object.<\/p>\n\n<p>So the default for <code>time<\/code> is <code>0<\/code>, <code>price<\/code> is <code>0.0<\/code> and <code>side<\/code> is <code>BID<\/code>, if you print an instance where you did not provide one of the fields <strong>or provided the default value<\/strong> then runtime will treat it as it was never provided in both cases, so its not possible to determine if the value was manually set to <code>BID<\/code> or it was taken as the default.<\/p>\n\n<p>For example if we execute the following code (its kotlin) <\/p>\n\n<pre><code>Order.newBuilder()\n        .setPrice(1.0)\n        .setVolume(2.0)\n        .setSide(Order.Side.BID)\n        .build()\n        .apply { println(this) }\n<\/code><\/pre>\n\n<p>we will have this output<\/p>\n\n<pre><code>price: 1.0\nvolume: 2.0\n<\/code><\/pre>\n\n<p>at the very least this is annoying as when you print your proto objects using standard <code>.toString()<\/code> or json printer you'll have this cropped output...<\/p>\n\n<pre><code>{ \"price\": 1.0, \"volume\": 2.0 }\n{ \"price\": 1.0, \"volume\": 2.0, \"side\": \"ASK\" }\n{ \"price\": 1.0, \"volume\": 2.0 }\n{ \"price\": 1.0, \"volume\": 2.0, \"side\": \"ASK\" }\n<\/code><\/pre>\n\n<p>But what if your client does not necessarily care about default values and expects all fields to be present?<\/p>\n\n<p><strong>Question : is there a way to change this behaviour? at the very least how do we ensure that if value was set it is being shown?<\/strong><\/p>\n\n<p>Maybe there is a way to tell <code>protoc<\/code> to generate different code (affecting defaults behaviour)...<\/p>\n",
+        "question_id": 37433955,
+        "tags": [
+            "java",
+            "protocol-buffers",
+            "kotlin",
+            "proto3"
+        ],
+        "score": 5,
+        "accepted_answer_id": 37444256,
+        "is_answered": true,
+        "view_count": 3686,
+        "last_edit_date": 1464171586
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ab76db4c7db78939bf0f881f45691e33?s=256&d=identicon&r=PG",
+            "account_id": 10242,
+            "user_type": "registered",
+            "user_id": 19246,
+            "link": "https://stackoverflow.com/users/19246/martin-carpella",
+            "reputation": 12703,
+            "display_name": "Martin Carpella",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "post_id": 37433955,
+        "edited": false,
+        "creation_date": 1464171769,
+        "comment_id": 62371646
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/StqEe.jpg?s=256",
+            "account_id": 3179906,
+            "user_type": "registered",
+            "user_id": 2686899,
+            "link": "https://stackoverflow.com/users/2686899/kenton-varda",
+            "reputation": 45909,
+            "display_name": "Kenton Varda"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 5,
+        "is_accepted": true,
+        "last_activity_date": 1464198255,
+        "creation_date": 1464198255,
+        "body": "<p>If you want Proto2's default value and set/unset behavior, you should switch back to Proto2. It is unlikely that Proto2 will go away any time soon as lots of code (including inside of Google) still depends on it, and it shares most of its implementation with Proto3. Think of proto2 vs. proto3 as an option (the exact option you're looking for, in fact) rather than a version change.<\/p>\n",
+        "answer_id": 37444256,
+        "question_id": 37433955
+    }],
+    "answer_comments": {"37444256": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/S83OA.jpg?s=256",
+                "account_id": 330599,
+                "user_type": "registered",
+                "user_id": 654799,
+                "link": "https://stackoverflow.com/users/654799/vach",
+                "reputation": 11515,
+                "display_name": "vach",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 37444256,
+            "edited": false,
+            "creation_date": 1677552224,
+            "comment_id": 133356416
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IKkGD.png?s=256",
+                "account_id": 2330478,
+                "user_type": "registered",
+                "user_id": 2044035,
+                "link": "https://stackoverflow.com/users/2044035/matheus-felipe",
+                "reputation": 2582,
+                "display_name": "Matheus Felipe"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 37444256,
+            "edited": false,
+            "creation_date": 1619111032,
+            "comment_id": 118812330
+        }
+    ]}
+}

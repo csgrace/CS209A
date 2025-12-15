@@ -1,0 +1,264 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Ubao3.png?s=256",
+            "account_id": 9866578,
+            "user_type": "registered",
+            "user_id": 7307846,
+            "link": "https://stackoverflow.com/users/7307846/ryder-thacker",
+            "reputation": 1492,
+            "display_name": "Ryder Thacker",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45747307/what-is-the-use-of-the-init-method-in-this-code",
+        "last_activity_date": 1503022543,
+        "creation_date": 1503021101,
+        "answer_count": 1,
+        "title": "What is the use of the init() method in this code?",
+        "body": "<p>I'm trying to learn how to use JSON and I'm going over this code from a tutorial and there is a init() method. From what I found online init() is usually used as the entry point of applets. If so then why is init() in the android apps code and not the website code? Can someone please explain its reason? Is this something that is common when using JSON in android or is this uncommon?<\/p>\n\n<pre><code>public class MainActivity extends AppCompatActivity {\n\nprivate RecyclerView mRestaurantRecyclerView;\nprivate RestaurantAdapter mAdapter;\nprivate ArrayList&lt;Restaurant&gt; mRestaurantCollection;\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main);\n\n    init();\n    new FetchDataTask().execute();\n}\n\nprivate void init() {\n    mRestaurantRecyclerView = (RecyclerView) findViewById(R.id.restaurant_recycler);\n    mRestaurantRecyclerView.setLayoutManager(new LinearLayoutManager(this));\n    mRestaurantRecyclerView.setHasFixedSize(true);\n    mRestaurantCollection = new ArrayList&lt;&gt;();\n    mAdapter = new RestaurantAdapter(mRestaurantCollection, this);\n    mRestaurantRecyclerView.setAdapter(mAdapter);\n}\n\npublic class FetchDataTask extends AsyncTask&lt;Void, Void, Void&gt; {\n    private String mZomatoString;\n\n    @Override\n    protected Void doInBackground(Void... params) {\n        HttpURLConnection urlConnection = null;\n        BufferedReader reader = null;\n        Uri builtUri = Uri.parse(getString(R.string.zomato_api));\n        URL url;\n        try {\n            url = new URL(builtUri.toString());\n            urlConnection = (HttpURLConnection) url.openConnection();\n            urlConnection.setRequestMethod(\"GET\");\n            urlConnection.setRequestProperty(\"user-key\", \"acfd3e623c5f01289bd87aaaff1926c1\");\n            urlConnection.connect();\n\n            InputStream inputStream = urlConnection.getInputStream();\n            StringBuffer buffer = new StringBuffer();\n            if (inputStream == null) {\n                //Nothing to do\n                return null;\n            }\n\n            reader = new BufferedReader(new InputStreamReader(inputStream));\n\n            String line;\n            while ((line = reader.readLine()) != null) {\n                buffer.append(line + \"\\n\");\n            }\n\n            if (buffer.length() == 0) {\n                return null;\n            }\n\n            mZomatoString = buffer.toString();\n            JSONObject jsonObject = new JSONObject(mZomatoString);\n\n            Log.v(\"Response\", jsonObject.toString());\n\n            JSONArray restaurantsArray = jsonObject.getJSONArray(\"restaurants\");\n\n            //list = new ArrayList&lt;&gt;();\n            for (int i = 0; i &lt; restaurantsArray.length(); i++) {\n\n                Log.v(\"BRAD_\", i + \"\");\n                String name;\n                String address;\n                String currency;\n                String imageUrl;\n                long lon;\n                long lat;\n                long cost;\n                float rating;\n\n\n                JSONObject jRestaurant = (JSONObject) restaurantsArray.get(i);\n                jRestaurant = jRestaurant.getJSONObject(\"restaurant\");\n                JSONObject jLocattion = jRestaurant.getJSONObject(\"location\");\n                JSONObject jRating = jRestaurant.getJSONObject(\"user_rating\");\n\n\n                name = jRestaurant.getString(\"name\");\n                address = jLocattion.getString(\"address\");\n                lat = jLocattion.getLong(\"latitude\");\n                lon = jLocattion.getLong(\"longitude\");\n                currency = jRestaurant.getString(\"currency\");\n                cost = jRestaurant.getInt(\"average_cost_for_two\");\n                imageUrl = jRestaurant.getString(\"thumb\");\n                rating = (float) jRating.getDouble(\"aggregate_rating\");\n\n\n                Restaurant restaurant = new Restaurant();\n                restaurant.setName(name);\n                restaurant.setAddress(address);\n                restaurant.setLatitiude(lat);\n                restaurant.setLongitude(lon);\n                restaurant.setCurrency(currency);\n                restaurant.setCost(String.valueOf(cost));\n                restaurant.setImageUrl(imageUrl);\n                restaurant.setRating(String.valueOf(rating));\n\n                mRestaurantCollection.add(restaurant);\n            }\n        } catch (MalformedURLException e) {\n            e.printStackTrace();\n        } catch (IOException e) {\n            e.printStackTrace();\n        } catch (JSONException e) {\n            e.printStackTrace();\n        } finally {\n            if (urlConnection != null) {\n                urlConnection.disconnect();\n            }\n            if (reader != null) {\n                try {\n                    reader.close();\n                } catch (final IOException e) {\n                    Log.e(\"MainActivity\", \"Error closing stream\", e);\n                }\n            }\n        }\n        return null;\n    }\n\n    @Override\n    protected void onPostExecute(Void aVoid) {\n        mAdapter.notifyDataSetChanged();\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 45747307,
+        "tags": [
+            "java",
+            "android",
+            "json"
+        ],
+        "score": 0,
+        "accepted_answer_id": 45747464,
+        "is_answered": true,
+        "view_count": 360
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/M5ud3.jpg?s=256",
+                "account_id": 4671468,
+                "user_type": "registered",
+                "user_id": 3783155,
+                "link": "https://stackoverflow.com/users/3783155/clabe45",
+                "reputation": 2474,
+                "display_name": "clabe45",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503022714,
+            "comment_id": 78452383
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xq83n.jpg?s=256",
+                "account_id": 6775970,
+                "user_type": "registered",
+                "user_id": 5217712,
+                "link": "https://stackoverflow.com/users/5217712/enzokie",
+                "reputation": 7415,
+                "display_name": "Enzokie"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503022019,
+            "comment_id": 78452225
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Ubao3.png?s=256",
+                "account_id": 9866578,
+                "user_type": "registered",
+                "user_id": 7307846,
+                "link": "https://stackoverflow.com/users/7307846/ryder-thacker",
+                "reputation": 1492,
+                "display_name": "Ryder Thacker",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503021936,
+            "comment_id": 78452207
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/C74LL.jpg?s=256",
+                "account_id": 11385053,
+                "user_type": "registered",
+                "user_id": 8346825,
+                "link": "https://stackoverflow.com/users/8346825/tehmina",
+                "reputation": 205,
+                "display_name": "Tehmina"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503021927,
+            "comment_id": 78452202
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xq83n.jpg?s=256",
+                "account_id": 6775970,
+                "user_type": "registered",
+                "user_id": 5217712,
+                "link": "https://stackoverflow.com/users/5217712/enzokie",
+                "reputation": 7415,
+                "display_name": "Enzokie"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503021782,
+            "comment_id": 78452168
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Ubao3.png?s=256",
+                "account_id": 9866578,
+                "user_type": "registered",
+                "user_id": 7307846,
+                "link": "https://stackoverflow.com/users/7307846/ryder-thacker",
+                "reputation": 1492,
+                "display_name": "Ryder Thacker",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45747307,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/xq83n.jpg?s=256",
+                "account_id": 6775970,
+                "user_type": "registered",
+                "user_id": 5217712,
+                "link": "https://stackoverflow.com/users/5217712/enzokie",
+                "reputation": 7415,
+                "display_name": "Enzokie"
+            },
+            "edited": false,
+            "creation_date": 1503021632,
+            "comment_id": 78452140
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xq83n.jpg?s=256",
+                "account_id": 6775970,
+                "user_type": "registered",
+                "user_id": 5217712,
+                "link": "https://stackoverflow.com/users/5217712/enzokie",
+                "reputation": 7415,
+                "display_name": "Enzokie"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503021489,
+            "comment_id": 78452118
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Ubao3.png?s=256",
+                "account_id": 9866578,
+                "user_type": "registered",
+                "user_id": 7307846,
+                "link": "https://stackoverflow.com/users/7307846/ryder-thacker",
+                "reputation": 1492,
+                "display_name": "Ryder Thacker",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45747307,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/xq83n.jpg?s=256",
+                "account_id": 6775970,
+                "user_type": "registered",
+                "user_id": 5217712,
+                "link": "https://stackoverflow.com/users/5217712/enzokie",
+                "reputation": 7415,
+                "display_name": "Enzokie"
+            },
+            "edited": false,
+            "creation_date": 1503021414,
+            "comment_id": 78452104
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ooWVw.jpg?s=256",
+                "account_id": 3397419,
+                "user_type": "registered",
+                "user_id": 2850651,
+                "link": "https://stackoverflow.com/users/2850651/mike-m",
+                "reputation": 39341,
+                "display_name": "Mike M."
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503021346,
+            "comment_id": 78452092
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xq83n.jpg?s=256",
+                "account_id": 6775970,
+                "user_type": "registered",
+                "user_id": 5217712,
+                "link": "https://stackoverflow.com/users/5217712/enzokie",
+                "reputation": 7415,
+                "display_name": "Enzokie"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 45747307,
+            "edited": false,
+            "creation_date": 1503021318,
+            "comment_id": 78452082
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/834832736654741/picture?type=large",
+            "account_id": 10428584,
+            "user_type": "registered",
+            "user_id": 7689086,
+            "link": "https://stackoverflow.com/users/7689086/achmad-naufal-syafiq",
+            "reputation": 369,
+            "display_name": "Achmad Naufal Syafiq",
+            "accept_rate": 68
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1503022543,
+        "creation_date": 1503022143,
+        "body": "<p>basically the init method setting up the recyclerview with its configuration<\/p>\n\n<pre><code>mRestaurantRecyclerView = (RecyclerView) findViewById(R.id.restaurant_recycler);\n<\/code><\/pre>\n\n<p>defining the recycler from xml and put it into variable mRestaurantRecyclerVIew<\/p>\n\n<pre><code>mRestaurantRecyclerView.setLayoutManager(new LinearLayoutManager(this));\n<\/code><\/pre>\n\n<p>setting up how the recyclerview is going to be displayed, later it should be defined in the project<\/p>\n\n<pre><code>mRestaurantRecyclerView.setHasFixedSize(true);\n<\/code><\/pre>\n\n<p>it's like the function said, the rv will have fixed size, you can also refer to this link for this particular function <a href=\"https://stackoverflow.com/questions/28709220/understanding-recyclerview-sethasfixedsize\">Understanding RecyclerView setHasFixedSize<\/a><\/p>\n\n<pre><code> mRestaurantCollection = new ArrayList&lt;&gt;(); \n<\/code><\/pre>\n\n<p>this mRestaurantCollection going to hold list of the data that is going to be dispayed in recyclerview.<\/p>\n\n<pre><code>mAdapter = new RestaurantAdapter(mRestaurantCollection, this);\nmRestaurantRecyclerView.setAdapter(mAdapter);\n<\/code><\/pre>\n\n<p>last but not list, these 2 lines of codes is going to hook the data with recyclerview via adapter. first line is initiating the adapter inserting 2 parameters which is the data and the context, the second line telling the recyclerview, \"hey i am your adapter, display this.\".<\/p>\n\n<p>PS : last but not list meant to be a joke. haha sry if its not funny.<\/p>\n",
+        "answer_id": 45747464,
+        "question_id": 45747307,
+        "last_edit_date": 1503022543
+    }],
+    "answer_comments": {"45747464": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Ubao3.png?s=256",
+            "account_id": 9866578,
+            "user_type": "registered",
+            "user_id": 7307846,
+            "link": "https://stackoverflow.com/users/7307846/ryder-thacker",
+            "reputation": 1492,
+            "display_name": "Ryder Thacker",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 45747464,
+        "edited": false,
+        "creation_date": 1503022381,
+        "comment_id": 78452325
+    }]}
+}

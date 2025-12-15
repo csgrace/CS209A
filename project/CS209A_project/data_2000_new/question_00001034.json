@@ -1,0 +1,149 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100001557831445/picture?type=large",
+            "account_id": 4488649,
+            "user_type": "registered",
+            "user_id": 3650408,
+            "link": "https://stackoverflow.com/users/3650408/user3650408",
+            "reputation": 149,
+            "display_name": "user3650408",
+            "accept_rate": 46
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/23725742/minimize-simplex-method",
+        "last_activity_date": 1666335025,
+        "creation_date": 1400439593,
+        "answer_count": 2,
+        "title": "Minimize Simplex method",
+        "body": "<p>I find topic about Simplex method here <a href=\"https://stackoverflow.com/questions/21096363/alter-simplex-algorithm-to-minimize-on-objective-function-not-maximize\">Alter Simplex Algorithm to Minimize on objective function NOT maximize<\/a>\nBut answer didn`t help. When I change from <\/p>\n\n<pre><code>double[] variables = {  13.0,  23.0 };\n<\/code><\/pre>\n\n<p>to<\/p>\n\n<pre><code>double[] variables = { -13.0, -23.0 };\n<\/code><\/pre>\n\n<p>The program dont calculate(no Exception), it print first step and that`s all.\nCould somebody help me with alter simplex method from maximize to minimize? <\/p>\n\n<p>code:<\/p>\n\n<p>import java.util.*;<\/p>\n\n<pre><code>public class Simplex\n{\nprivate static final double EPSILON = 1.0E-10;\nprivate double[][] tableaux;\nprivate int numOfConstraints;\nprivate int numOfVariables;\n\nprivate int[] basis;\n/**\n * Constructor for objects of class Simplex\n */\npublic Simplex()\n{\n\n\n    double[][] thisTableaux = {\n        {  5.0, 15.0 },\n        {  4.0,  4.0 },\n        { 35.0, 20.0 },\n    };\n\n    double[] constraints = { 480.0, 160.0, 1190.0 };\n\n    double[] variables = {  -13.0,  -23.0 };\n\n    numOfConstraints = constraints.length;\n    numOfVariables = variables.length;\n\n    tableaux = new double[numOfConstraints+1][numOfVariables+numOfConstraints+1];\n\n    //adds all elements from thisTableaux to tableaux\n    for(int i=0; i &lt; numOfConstraints; i++)\n    {\n        for(int j=0; j &lt; numOfVariables; j++)\n        {\n            tableaux[i][j] = thisTableaux[i][j];\n        }\n    } \n\n\n    //adds a slack variable for each variable there is and sets it to 1.0\n    for(int i=0; i &lt; numOfConstraints; i++)\n    {\n        tableaux[i][numOfVariables+i] = 1.0;\n    }\n\n\n    //adds variables into the second [] of tableux\n    for(int j=0; j &lt; numOfVariables; j++)\n    {\n        tableaux[numOfConstraints][j] = variables[j];\n    }\n\n\n\n    //adds constraints to first [] of tableaux\n    for(int k=0; k &lt; numOfConstraints; k++)\n    {\n        tableaux[k][numOfConstraints+numOfVariables] = constraints[k];\n    }\n\n\n\n    basis = new int[numOfConstraints];\n\n    for(int i=0; i &lt; numOfConstraints; i++)\n    {\n        basis[i] = numOfVariables + i;\n    }\n\n    show();\n\n    optimise();\n\n    assert check(thisTableaux, constraints, variables);\n\n\n}\n\npublic void optimise() {\n    while(true) {\n\n        int q = findLowestNonBasicCol();\n\n        if(q == -1) {\n            break;\n        }\n\n        int p = getPivotRow(q);\n        if(p == -1) throw new ArithmeticException(\"Linear Program Unbounded\");\n\n        pivot(p, q);\n\n        basis[p] = q;\n    }\n\n}\n\npublic int findLowestNonBasicCol() {\n\n    for(int i=0; i &lt; numOfConstraints + numOfVariables; i++)\n    {\n        if(tableaux[numOfConstraints][i] &gt; 0) {\n\n\n            return i;\n        }\n    }\n\n    return -1;\n\n\n}\n\npublic int findIndexOfLowestNonBasicCol() {\n\n    int q = 0;\n    for(int i=1; i &lt; numOfConstraints + numOfVariables; i++)\n    {\n        if(tableaux[numOfConstraints][i] &gt; tableaux[numOfConstraints][q]) {\n            q = i;\n        }\n    }\n\n    if(tableaux[numOfConstraints][q] &lt;= 0) {\n        return -1;\n    }\n\n    else {\n        return q;\n    }\n}\n\n/**\n * Finds row p which will be the pivot row using the minimum ratio rule.\n * -1 if there is no pivot row\n */\npublic int getPivotRow(int q) {\n\n    int p = -1;\n\n    for(int i=0; i &lt; numOfConstraints; i++) {\n\n        if (tableaux[i][q] &lt;=0) {\n            continue;\n        }\n\n        else if (p == -1) {\n            p = i;\n        }\n\n        else if((tableaux[i][numOfConstraints+numOfVariables] / tableaux[i][q] &lt; tableaux[p][numOfConstraints+numOfVariables] / tableaux[p][q])) {\n            p = i;\n        }\n    }\n<\/code><\/pre>\n",
+        "question_id": 23725742,
+        "tags": [
+            "java",
+            "algorithm",
+            "math",
+            "simplex-algorithm"
+        ],
+        "score": 0,
+        "accepted_answer_id": 35164108,
+        "is_answered": true,
+        "view_count": 7098,
+        "last_edit_date": 1666335025
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100001557831445/picture?type=large",
+                "account_id": 4488649,
+                "user_type": "registered",
+                "user_id": 3650408,
+                "link": "https://stackoverflow.com/users/3650408/user3650408",
+                "reputation": 149,
+                "display_name": "user3650408",
+                "accept_rate": 46
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 23725742,
+            "edited": false,
+            "creation_date": 1400442552,
+            "comment_id": 36468614
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/53ee9941b3fefef67175daf212e62d41?s=256&d=identicon&r=PG",
+                "account_id": 23121,
+                "user_type": "registered",
+                "user_id": 57695,
+                "link": "https://stackoverflow.com/users/57695/peter-lawrey",
+                "reputation": 535107,
+                "display_name": "Peter Lawrey",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "post_id": 23725742,
+            "edited": false,
+            "creation_date": 1400439784,
+            "comment_id": 36467757
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/39acb52ff074bc477f0325f4b1960c90?s=256&d=identicon&r=PG",
+                "account_id": 95910,
+                "user_type": "registered",
+                "user_id": 260990,
+                "link": "https://stackoverflow.com/users/260990/jigar-joshi",
+                "reputation": 241442,
+                "display_name": "Jigar Joshi",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 23725742,
+            "edited": false,
+            "creation_date": 1400439689,
+            "comment_id": 36467717
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/5l16S.jpg?s=256",
+                "account_id": 2465852,
+                "user_type": "registered",
+                "user_id": 2154742,
+                "link": "https://stackoverflow.com/users/2154742/jasonarg123",
+                "reputation": 318,
+                "display_name": "JasonArg123",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1454448485,
+            "creation_date": 1454448485,
+            "body": "<p>You might want to look into the <a href=\"http://homepages.rpi.edu/~mitchj/handouts/dualsimplex/\" rel=\"nofollow\">Dual Simplex Method<\/a> (or <a href=\"https://en.wikipedia.org/wiki/Linear_programming#Duality\" rel=\"nofollow\">Duality Theory<\/a>). If the standard form of the primal problem is:<\/p>\n\n<pre><code>Maximize = 13*X1 + 23*X2;\n<\/code><\/pre>\n\n<p>with constraints:<\/p>\n\n<pre><code>5*X1    +   15*X2   &lt;= 480;\n4*X1    +   4*X2    &lt;= 160;\n35*X1   +   20*X2   &lt;= 1190;\nX1 &gt;= 0;\nX2 &gt;= 0;\n<\/code><\/pre>\n\n<p>Then the <strong>dual problem<\/strong> is:<\/p>\n\n<pre><code>Minimize = 480*Y1 + 160*Y2 + 1190*Y3;\n<\/code><\/pre>\n\n<p>with constraints:<\/p>\n\n<pre><code>5*Y1    +   4*Y2    +   35*Y3   &gt;= 13;\n15*Y1 +     4*Y2    +   20*Y3   &gt;= 23;\nY1 &gt;= 0;\nY2 &gt;= 0;\nY3 &gt;= 0;\n<\/code><\/pre>\n\n<p>I tested both of these problems in <a href=\"http://www.lindo.com/index.php?option=com_content&amp;view=article&amp;id=2&amp;Itemid=10\" rel=\"nofollow\">LINGO<\/a> and get the same answer for both (Z = 800, X1 = 12, X2 = 28 -- Y1 = 1, Y2 = 2, Y3 = 0).<\/p>\n",
+            "answer_id": 35164108,
+            "question_id": 23725742
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b5daee5ebc4e63ae694a4a68c902c2e8?s=256&d=identicon&r=PG",
+                "account_id": 27505,
+                "user_type": "registered",
+                "user_id": 72673,
+                "link": "https://stackoverflow.com/users/72673/maurice-perry",
+                "reputation": 32841,
+                "display_name": "Maurice Perry",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1400440752,
+            "creation_date": 1400440752,
+            "body": "<p>I guess the program did nothing because the initial solution is the optimal solution.<\/p>\n",
+            "answer_id": 23725893,
+            "question_id": 23725742
+        }
+    ],
+    "answer_comments": {"23725893": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100001557831445/picture?type=large",
+            "account_id": 4488649,
+            "user_type": "registered",
+            "user_id": 3650408,
+            "link": "https://stackoverflow.com/users/3650408/user3650408",
+            "reputation": 149,
+            "display_name": "user3650408",
+            "accept_rate": 46
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 23725893,
+        "edited": false,
+        "creation_date": 1400440984,
+        "comment_id": 36468115
+    }]}
+}

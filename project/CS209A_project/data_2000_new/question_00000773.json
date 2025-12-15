@@ -1,0 +1,89 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2bddef3affde8ba3f2bcd0ab2342dbf7?s=256&d=identicon&r=PG",
+            "account_id": 2050056,
+            "user_type": "registered",
+            "user_id": 1829257,
+            "link": "https://stackoverflow.com/users/1829257/user1829257",
+            "reputation": 11,
+            "display_name": "user1829257"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15271328/java-apache-jena-sparql-query-returns-lexical-error-when-query-is-valid",
+        "last_activity_date": 1362762957,
+        "creation_date": 1362659523,
+        "answer_count": 2,
+        "title": "Java Apache Jena SparQL query returns Lexical error when query is valid",
+        "body": "<p>I have the following SparQL query:<\/p>\n\n<pre><code>SELECT ?b ?c WHERE {\nont:http\\:\\/\\/test.com\\/test\\#com.test.test.test.2.3.4 ?b ?c}\n<\/code><\/pre>\n\n<p>which returns the successfully returns the correct results in <strong>OpenRDF Workbench 2.6.5<\/strong>. However in my Java which is using <strong>Jena 2.6.4<\/strong> when I run the query using the following code<\/p>\n\n<pre><code>private static ResultSet getQueryResults(String stringQuery, String service) {\n    Query query = QueryFactory.create(stringQuery);\n    QueryExecution qexec = QueryExecutionFactory.sparqlService(\n            service, query);\n    ResultSet results = qexec.execSelect(); \n    //ResultSetFormatter.out(System.out, results, query);\n    return results;\n}\n\npublic static ResultSet getDetails(String ID) {\n    //we define our sparql query\n    String sanatizedID = \"ont:\" +  sanitizeString(ID);\n    String stringQuery = \" SELECT ?b ?c WHERE\" +\n            \" { \" + sanatizedID + \n            //\"{?a\"+\n            \" ?b\" +\n            \" ?c}\";\n    System.out.println(stringQuery);\n    //we define our service\n    String service = \"http://test.test.com:8181/test-sesame/repositories/test\";\n\n    //We write the results of our query into a results set\n    ResultSet results = getQueryResults(stringQuery, service);\n    return results;\n}\n\nprivate static String sanitizeString(String s) {\n    s = s.replace(\"/\", \"\\\\/\");\n    s = s.replace(\"#\", \"\\\\#\");\n    s = s.replace(\":\", \"\\\\:\");\n    s = s.replace(\"\\\"\", \"\\\\\\\"\");\n\n    return s;\n}\n<\/code><\/pre>\n\n<p>I get the following error <\/p>\n\n<pre><code>Exception in thread \"main\" com.hp.hpl.jena.query.QueryParseException: Lexical error at line 1, column 871.  Encountered: \":\" (58), after : \"\\\\\" \n<\/code><\/pre>\n\n<p>on line Query query = QueryFactory.create(stringQuery);<\/p>\n\n<p>I've tried changing Jena version and no luck, can't understand why the query is valid in OpenRDF Workbench 2.6.5 and not in my Java query (I think it may do it's own sanatization) :/<\/p>\n\n<p>Help would be really appreciated!<\/p>\n",
+        "question_id": 15271328,
+        "tags": [
+            "java",
+            "sparql",
+            "jena",
+            "lexical"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 1236
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2bddef3affde8ba3f2bcd0ab2342dbf7?s=256&d=identicon&r=PG",
+            "account_id": 2050056,
+            "user_type": "registered",
+            "user_id": 1829257,
+            "link": "https://stackoverflow.com/users/1829257/user1829257",
+            "reputation": 11,
+            "display_name": "user1829257"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 15271328,
+        "edited": false,
+        "creation_date": 1362664671,
+        "comment_id": 21545824
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/442cf0ccb33b748e24cd178f5efa0b35?s=256&d=identicon&r=PG",
+                "account_id": 394579,
+                "user_type": "registered",
+                "user_id": 757100,
+                "link": "https://stackoverflow.com/users/757100/andys",
+                "reputation": 16710,
+                "display_name": "AndyS"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1362750153,
+            "creation_date": 1362750153,
+            "body": "<p><code>\"ont:\" +  sanitizeString(ID);<\/code><\/p>\n\n<p>You need a prefix declaration for <code>ont:<\/code> in the query or use the full form and <code>&lt;...&gt;<\/code>.<\/p>\n",
+            "answer_id": 15295325,
+            "question_id": 15271328
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7f07885cd1bf5945d1a104bc1d44ae11?s=256&d=identicon&r=PG",
+                "account_id": 37614,
+                "user_type": "registered",
+                "user_id": 107591,
+                "link": "https://stackoverflow.com/users/107591/robv",
+                "reputation": 28815,
+                "display_name": "RobV",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1362762957,
+            "creation_date": 1362762957,
+            "body": "<p>You are using a version of Sesame that supports a slightly older version of the SPARQL 1.1 specification, your prefixed name is not actually valid:<\/p>\n\n<pre><code>ont:http\\:\\/\\/test.com\\/test\\#com.test.test.test.2.3.4\n<\/code><\/pre>\n\n<p>With the latest versions of the SPARQL specification it now permitted to use additional <code>:<\/code> characters directly in a prefixed name and there is no need to escape this with a <code>\\<\/code>.  So to make this query work with Jena you simply need to remove the <code>\\<\/code> before your second <code>:<\/code><\/p>\n\n<p>I'm not sure where Sesame is with its alignment with the latest SPARQL 1.1 specifications but if you try this query on a more recent version of Sesame you will likely see behaviour that aligns with Jena.<\/p>\n",
+            "answer_id": 15299644,
+            "question_id": 15271328
+        }
+    ],
+    "answer_comments": {}
+}

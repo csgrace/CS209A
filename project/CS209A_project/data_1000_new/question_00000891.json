@@ -1,0 +1,203 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user11912381"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/57445657/creating-a-hash-table-with-a-tuple-as-a-key",
+        "last_activity_date": 1565473665,
+        "creation_date": 1565470841,
+        "answer_count": 2,
+        "title": "Creating a Hash table with a tuple as a key",
+        "body": "<p>As the title says i want to create a Hash table that takes tuples of integers as keys.What i have don so far:<\/p>\n\n<pre><code>class Tuple {\n      public Tuple (int x, int y) {\n        this.x = x;\n        this.y = y;\n      }\n      public int k;\n      @Override\n      public int hashCode() {\n        int hash = 17;\n        hash = 31 * hash + this.x;\n        hash = 31 * hash + this.y;\n        return hash;\n    }\n      private int x;\n      private int y;\n    }\n\n\n\npublic class Class1{\n   public static void main(String[] args){\n       Tuple t= new Tuple (1,1);\n       HashMap&lt;Tuple, Integer&gt; seen = new HashMap&lt;Tuple, Integer&gt;();\n       seen.put(t,33);\n\n       System.out.println(seen.get(t));\n   }\n}\n<\/code><\/pre>\n\n<p>My problem is this: I would like to acquire the value 33 only by knowing the tuple (1,1) and not actually knowing the object t.\nSomething like <code>seen.get((1,1))<\/code> and have the value 33.<\/p>\n\n<p>How could this be achieved?<\/p>\n",
+        "question_id": 57445657,
+        "tags": ["java"],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 801,
+        "last_edit_date": 1565471716
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+                "account_id": 247613,
+                "user_type": "registered",
+                "user_id": 522444,
+                "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+                "reputation": 285766,
+                "display_name": "Hovercraft Full Of Eels",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1565471724,
+            "creation_date": 1565470975,
+            "body": "<p>You would do <\/p>\n\n<pre><code>System.out.println(seen.get(new Tuple(1, 1));\n<\/code><\/pre>\n\n<p>The key concept is that since you override equals and hashCode <strong>any<\/strong> Tuple object that satisfies equality and hashCode equality will work as a key, and not just the <code>t<\/code> object.<\/p>\n\n<p>Edit:<\/p>\n\n<p>Note that your Tuple class also must override the <code>public boolean equals(Object o)<\/code> method in a correct fashion for any of this to work correctly:<\/p>\n\n<pre><code>public class Tuple {\n    private int x;\n    private int y;\n\n    public Tuple(int x, int y) {\n        this.x = x;\n        this.y = y;\n    }\n\n    @Override\n    public int hashCode() {\n        int hash = 17;\n        hash = 31 * hash + this.x;\n        hash = 31 * hash + this.y;\n        return hash;\n    }\n\n    @Override\n    public boolean equals(Object obj) {\n        if (this == obj)\n            return true;\n        if (obj == null)\n            return false;\n        if (getClass() != obj.getClass())\n            return false;\n        Tuple other = (Tuple) obj;\n        if (x != other.x)\n            return false;\n        if (y != other.y)\n            return false;\n        return true;\n    }\n}\n<\/code><\/pre>\n\n<p>Then test with:<\/p>\n\n<pre><code>public static void main(String[] args) {\n    Tuple t = new Tuple(1, 1);\n    Map&lt;Tuple, Integer&gt; seen = new HashMap&lt;Tuple, Integer&gt;();\n    seen.put(t, 33);\n\n    System.out.println(seen.get(t));\n    System.out.println(seen.get(new Tuple(1, 1)));\n}\n<\/code><\/pre>\n",
+            "answer_id": 57445673,
+            "question_id": 57445657,
+            "last_edit_date": 1565471724
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/71b7ecb9151708614e90369748b1bcd0?s=256&d=identicon&r=PG",
+                "account_id": 4228398,
+                "user_type": "registered",
+                "user_id": 3461397,
+                "link": "https://stackoverflow.com/users/3461397/oleg-cherednik",
+                "reputation": 18302,
+                "display_name": "Oleg Cherednik"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1565473665,
+            "creation_date": 1565473665,
+            "body": "<p>Actually, you can use any <strong>key<\/strong> for the map if:<\/p>\n\n<ul>\n<li><strong>key<\/strong> is immutable;<\/li>\n<li><strong>key<\/strong> implements <code>equals()<\/code> and <code>hashCode()<\/code>.<\/li>\n<\/ul>\n\n<p>In your example, you have to use <code>Tuple<\/code> instance. You already could know it or create the new one with known <code>x<\/code> and <code>y<\/code> (and this new instance will be absolutely the same key because all values x and y are used in <code>equals()<\/code> and <code>hashCode()<\/code> are also the same).<\/p>\n\n<hr>\n\n<pre><code>// It's better to make class immutable\npublic final class Tuple {\n    private final int x;\n    private final int y;\n\n    public static Tuple of(int x, int y) {\n        // you can add internal cashe here\n        return new Tuple(x, y);\n    }\n\n    private Tuple(int x, int y) {\n        this.x = x;\n        this.y = y;\n    }\n\n    @Override\n    public boolean equals(Object obj) {\n        if (this == obj)\n            return true;\n        if (!(obj instanceof Tuple))\n            return false;\n        return x == ((Tuple)obj).x &amp;&amp; y == ((Tuple)obj).y;\n    }\n\n    @Override\n    public int hashCode() {\n        return Objects.hash(x, y);\n    }\n}\n<\/code><\/pre>\n\n<hr>\n\n<p><strong>Demo<\/strong><\/p>\n\n<pre><code>Map&lt;Tuple, Integer&gt; map = new HashMap&lt;&gt;();\nmap.put(Tuple.of(1, 1), 33);\nSystem.out.println(map.get(Tuple.of(1, 1))); // 33\n<\/code><\/pre>\n",
+            "answer_id": 57445921,
+            "question_id": 57445657
+        }
+    ],
+    "answer_comments": {
+        "57445921": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/71b7ecb9151708614e90369748b1bcd0?s=256&d=identicon&r=PG",
+                    "account_id": 4228398,
+                    "user_type": "registered",
+                    "user_id": 3461397,
+                    "link": "https://stackoverflow.com/users/3461397/oleg-cherednik",
+                    "reputation": 18302,
+                    "display_name": "Oleg Cherednik"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 57445921,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8e6a115f26a4d3775393e6e58dfd1456?s=256&d=identicon&r=PG",
+                    "account_id": 103025,
+                    "user_type": "registered",
+                    "user_id": 276166,
+                    "link": "https://stackoverflow.com/users/276166/uaraven",
+                    "reputation": 1107,
+                    "display_name": "uaraven"
+                },
+                "edited": false,
+                "creation_date": 1565548279,
+                "comment_id": 101379795
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8e6a115f26a4d3775393e6e58dfd1456?s=256&d=identicon&r=PG",
+                    "account_id": 103025,
+                    "user_type": "registered",
+                    "user_id": 276166,
+                    "link": "https://stackoverflow.com/users/276166/uaraven",
+                    "reputation": 1107,
+                    "display_name": "uaraven"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 57445921,
+                "edited": false,
+                "creation_date": 1565548196,
+                "comment_id": 101379778
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/71b7ecb9151708614e90369748b1bcd0?s=256&d=identicon&r=PG",
+                    "account_id": 4228398,
+                    "user_type": "registered",
+                    "user_id": 3461397,
+                    "link": "https://stackoverflow.com/users/3461397/oleg-cherednik",
+                    "reputation": 18302,
+                    "display_name": "Oleg Cherednik"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 57445921,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8e6a115f26a4d3775393e6e58dfd1456?s=256&d=identicon&r=PG",
+                    "account_id": 103025,
+                    "user_type": "registered",
+                    "user_id": 276166,
+                    "link": "https://stackoverflow.com/users/276166/uaraven",
+                    "reputation": 1107,
+                    "display_name": "uaraven"
+                },
+                "edited": false,
+                "creation_date": 1565521613,
+                "comment_id": 101374130
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8e6a115f26a4d3775393e6e58dfd1456?s=256&d=identicon&r=PG",
+                    "account_id": 103025,
+                    "user_type": "registered",
+                    "user_id": 276166,
+                    "link": "https://stackoverflow.com/users/276166/uaraven",
+                    "reputation": 1107,
+                    "display_name": "uaraven"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 57445921,
+                "edited": false,
+                "creation_date": 1565476997,
+                "comment_id": 101368426
+            }
+        ],
+        "57445673": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+                    "account_id": 247613,
+                    "user_type": "registered",
+                    "user_id": 522444,
+                    "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+                    "reputation": 285766,
+                    "display_name": "Hovercraft Full Of Eels",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 57445673,
+                "edited": false,
+                "creation_date": 1565471560,
+                "comment_id": 101367572
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/1ypfs.jpg?s=256",
+                    "account_id": 6390592,
+                    "user_type": "registered",
+                    "user_id": 4956907,
+                    "link": "https://stackoverflow.com/users/4956907/micha%c5%82-krzywa%c5%84ski",
+                    "reputation": 17100,
+                    "display_name": "Michał Krzywański"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 2,
+                "post_id": 57445673,
+                "edited": false,
+                "creation_date": 1565471558,
+                "comment_id": 101367571
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user11912381"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 57445673,
+                "edited": false,
+                "creation_date": 1565471369,
+                "comment_id": 101367537
+            }
+        ]
+    }
+}

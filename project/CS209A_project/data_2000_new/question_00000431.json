@@ -1,0 +1,67 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/23d5a07635642a0ecbbe874a863cf8da?s=256&d=identicon&r=PG",
+            "account_id": 2046369,
+            "user_type": "registered",
+            "user_id": 1861293,
+            "link": "https://stackoverflow.com/users/1861293/user145634",
+            "reputation": 125,
+            "display_name": "user145634",
+            "accept_rate": 38
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/17452399/jpa-onetoone-and-onetomany-entity-instantiation-creation",
+        "last_activity_date": 1372872066,
+        "creation_date": 1372866204,
+        "answer_count": 1,
+        "title": "JPA OneToOne and OneToMany entity instantiation/creation",
+        "body": "<p>My application uses a lot of OneToMany and OneToOne references between domain level value-objects, most of them are entities, either being a super class or a subclass of something.I would like to provide my application a consistent(yet easy) way to save those instances and the actual method save() is as such <\/p>\n\n<pre><code>@Transactional\npublic void save(Post post){\n\n   try{\n      JPA.em().persist(post);\n   }catch (EntityExistsException eee){\n      JPA.em().merge(post);\n   }catch(ConstraintViolationException cve){\n      JPA.em().refresh(post);\n   }\n} \n<\/code><\/pre>\n\n<p>The current problem is how to properly instantiate those object and which strategy choose in the cascadeType, i would like to save nested object when saving an object with references with other entities, it works now but only for the first time, after that i get a <code>Unique index or primary key violation<\/code> given that SQL <code>insert into Utente (passwd, DTYPE, username) values (?, 'Redattore', ?) [23505-168]<\/code>.Clearly my JPA provider (hibernate 3.6.9) fails to not update an existing row, instead it tries to insert a new entry in the DB.Here are some classes i am using:<\/p>\n\n<pre><code>@Entity\n@Table\npublic class Post extends Domanda {\n\n@Column(nullable = false)\nprivate String nome;\n\n@OneToMany(cascade = CascadeType.ALL)\nprivate List&lt;Commento&gt; commenti;\n\n@OneToMany(cascade = CascadeType.ALL)\nprivate List&lt;Risorsa&gt; risorse;\n\n@OneToOne(cascade = CascadeType.ALL)\nprivate NodoApprendimento nodo;\n\n@Column\nprivate int visibilità;\n\n@Column\nprivate boolean isDraft;\n<\/code><\/pre>\n\n<p>Post is referenced by a few classes among which i there is:<\/p>\n\n<pre><code>@Entity\npublic abstract class Partecipante extends Utente{\n\n\n@OneToMany(cascade = CascadeType.ALL,\n           fetch = FetchType.LAZY)\nprivate Set&lt;Post&gt; contributi;\n<\/code><\/pre>\n\n<p>Then i would like to know the proper way to initialize and persisteORupdate those referenced object in the database, thanks in advance.<\/p>\n",
+        "question_id": 17452399,
+        "tags": [
+            "java",
+            "hibernate",
+            "jpa"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 539
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/efa7510cf47d7bd79e80486246e7e39e?s=256&d=identicon&r=PG",
+            "account_id": 231721,
+            "user_type": "registered",
+            "user_id": 496099,
+            "link": "https://stackoverflow.com/users/496099/chris",
+            "reputation": 21335,
+            "display_name": "Chris"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1372872066,
+        "creation_date": 1372872066,
+        "body": "<p>This isn't a provider problem, but a usage issue.  When you call persist, JPA does not require providers to execute an insert immediately - they are usually delayed to flush or commit time.  So you will not get an EntityExistsException in most cases.  Either way, the transaction state should be marked for rollback - you should not be relying on persist to determine if merge should be called.  Either call em.find, or just call em.merge on your entity and allow the JPA provider to determine if it should do an insert or an update for you.<\/p>\n",
+        "answer_id": 17454388,
+        "question_id": 17452399
+    }],
+    "answer_comments": {"17454388": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/efa7510cf47d7bd79e80486246e7e39e?s=256&d=identicon&r=PG",
+            "account_id": 231721,
+            "user_type": "registered",
+            "user_id": 496099,
+            "link": "https://stackoverflow.com/users/496099/chris",
+            "reputation": 21335,
+            "display_name": "Chris"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 17454388,
+        "edited": false,
+        "creation_date": 1372872285,
+        "comment_id": 25359465
+    }]}
+}

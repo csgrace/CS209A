@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-H9srO0h1ca0/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rfS68lF9JkzG-2o4uWlYXKtjdoUqQ/s256-rj/photo.jpg",
+            "account_id": 17332758,
+            "user_type": "registered",
+            "user_id": 12555406,
+            "link": "https://stackoverflow.com/users/12555406/sam-jakes",
+            "reputation": 121,
+            "display_name": "Sam Jakes"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59404108/how-to-use-the-latest-mobilenet-v3-for-object-detection",
+        "last_activity_date": 1579075416,
+        "creation_date": 1576735817,
+        "answer_count": 1,
+        "title": "How To Use The Latest MobileNet (v3) for Object Detection?",
+        "body": "<p>I've been trying to use the latest MobileNet, MobileNet_v3, to run object detection. You can find Google's pre-trained models for this such as the one I'm trying to use, \"ssd_mobilenet_v3_large_coco\", from here: <a href=\"https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md\" rel=\"nofollow noreferrer\">https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md<\/a><\/p>\n\n<p>I don't know how these new models take image data input, and I can't find any in-depth documentation about this online. The following java code summarizes how I'm attempting to feed the model (specifically the .tflite model using TensorFlow Lite) image data from the limited amount I can gather online, but the model only returns prediction confidences of order 10^-20, so it never actually recognizes anything. I figure from this that I must be doing this wrong. <\/p>\n\n<pre><code>//Note that the model takes a 320 x 320 image\n\n\n//Get image data as integer values\nprivate int[] intValues;\nintValues = new int[320 * 320];\nprivate Bitmap croppedBitmap = null;\ncroppedBitmap = Bitmap.createBitmap(320, 320, Config.ARGB_8888);\ncroppedBitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());\n\n//create ByteBuffer as input for running ssd_mobilenet_v3\nprivate ByteBuffer imgData;\nimgData = ByteBuffer.allocateDirect(320 * 320 * 3);\nimgData.order(ByteOrder.nativeOrder());\n\n//fill Bytebuffer\n//Note that &amp; 0xFF is for just getting the last 8 bits, which converts to RGB values here\nimgData.rewind();\nfor (int i = 0; i &lt; inputSize; ++i) {\n  for (int j = 0; j &lt; inputSize; ++j) {\n    int pixelValue = intValues[i * inputSize + j];\n    // Quantized model\n    imgData.put((byte) ((pixelValue &gt;&gt; 16) &amp; 0xFF));\n    imgData.put((byte) ((pixelValue &gt;&gt; 8) &amp; 0xFF));\n    imgData.put((byte) (pixelValue &amp; 0xFF));\n  }\n}\n\n// Set up output buffers\nprivate float[][][] output0;\nprivate float[][][][] output1;\noutput0 = new float[1][2034][91];\noutput1 = new float[1][2034][1][4];\n\n//Create input HashMap and run the model\nObject[] inputArray = {imgData};\nMap&lt;Integer, Object&gt; outputMap = new HashMap&lt;&gt;();\noutputMap.put(0, output0);\noutputMap.put(1, output1);\ntfLite.runForMultipleInputsOutputs(inputArray, outputMap);\n\n//Examine Confidences to see if any significant detentions were made\nfor (int i = 0; i &lt; 2034; i++) {\n  for (int j = 0; j &lt; 91; j++) {\n    System.out.println(output0[0][i][j]);\n  }\n}\n<\/code><\/pre>\n",
+        "question_id": 59404108,
+        "tags": [
+            "java",
+            "tensorflow",
+            "object-detection",
+            "tensorflow-lite",
+            "mobilenet"
+        ],
+        "score": 4,
+        "is_answered": true,
+        "view_count": 10417
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-H9srO0h1ca0/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rfS68lF9JkzG-2o4uWlYXKtjdoUqQ/s256-rj/photo.jpg",
+            "account_id": 17332758,
+            "user_type": "registered",
+            "user_id": 12555406,
+            "link": "https://stackoverflow.com/users/12555406/sam-jakes",
+            "reputation": 121,
+            "display_name": "Sam Jakes"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 4,
+        "is_accepted": false,
+        "last_activity_date": 1579075416,
+        "creation_date": 1579075416,
+        "body": "<p>I've figured out how to get this to sort of work with a little extra effort.<\/p>\n\n<p>You have to download the pre-trained models and re-create the .tflite files yourself to get them to work with the provided android code. The following guide, written by the Tensorflow team, shows you how to recreate the .tflite files such that they will have the same input / output format as the android object detection code accepts:<\/p>\n\n<p><a href=\"https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md\" rel=\"nofollow noreferrer\">https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md<\/a><\/p>\n\n<p>This way you have to change almost none of the android code provided for object detection. The only thing you need to manually specify (both when creating the .tflite file and in the android code for the object detection) is the resolution of the object detection model. <\/p>\n\n<p>So, for mobilenet_v3 with a resolution of 320x320, when converting the model to a .tflite file, use the flag \"--input_shapes=1,320,320,3\". Then, in the android code set the variable \"TF_OD_API_INPUT_SIZE = 320\". Those are the only changes you should need to make.<\/p>\n\n<p>This theoretically works with any of (and only) the ssd models, but I have currently only tested it with mobilenet_v2 because it was easier to get working and the differences between v2 and v3 are negligable. <\/p>\n",
+        "answer_id": 59747192,
+        "question_id": 59404108
+    }],
+    "answer_comments": {"59747192": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/61c9afdbe227edfdd4b95170ee7c1f45?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5587701,
+            "user_type": "registered",
+            "user_id": 4427841,
+            "link": "https://stackoverflow.com/users/4427841/000000000000000000000",
+            "reputation": 1477,
+            "display_name": "000000000000000000000",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 59747192,
+        "edited": false,
+        "creation_date": 1586339588,
+        "comment_id": 108090042
+    }]}
+}

@@ -1,0 +1,139 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/afb1a8c9ba25e33e61e21df4a83009f2?s=256&d=identicon&r=PG",
+            "account_id": 319544,
+            "user_type": "registered",
+            "user_id": 637364,
+            "link": "https://stackoverflow.com/users/637364/3d-kreativ",
+            "reputation": 9361,
+            "display_name": "3D-kreativ",
+            "accept_rate": 79
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8901205/add-to-jlist-and-select-element",
+        "last_activity_date": 1326841035,
+        "creation_date": 1326831719,
+        "answer_count": 1,
+        "title": "Add to JList and select element?",
+        "body": "<p>I need some help to be able to add element to a JList and how to select element whith event.<\/p>\n\n<p>This is my JList:<\/p>\n\n<pre><code>DefaultListModel model = new DefaultListModel();\nJList list = new JList(model);\nlist.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);\nJScrollPane listScroller = new JScrollPane(list);\nlistScroller.setPreferredSize(new Dimension(430, 80));\n<\/code><\/pre>\n\n<p>This is part of my actionlistener that handle different buttons. It's here I want to use model.add(\"Name\"); bot I get a red underline in Eclipse!?<\/p>\n\n<pre><code>public void actionPerformed(ActionEvent event){\n// New customer\nif(event.getSource() == buttonNewCustomer &amp;&amp; statusButtonNewCustomer)\n{\nString name = textInputName.getText();\nString number = textInputPersonalNumber.getText();\nboolean checkCustomerExist = customHandler.findCustomer(name, number); \n\nif(!checkCustomerExist) // If not true add new customer\n{\ncustomHandler.addCustomer(name, number); // Call method to add name\nsetTitle(title + \"Kund: \" + name); // Set new title\nmodel.addElement(name);\n}\n}\n}\n<\/code><\/pre>\n\n<p>Then I would preciate some help how I should select the element inside the JList? Should I use implements ActionListener to the class or a FrameHandler object? Thanks!<\/p>\n\n<p>EDIT: My main problem that I can't solve is that the JList is inside the construcor and when I use model.add(\"name\"); inside the constructor it works, but it's not working when I want to add something outside the constructor? I have read the tutorial several times, but can't find any help for this.<\/p>\n\n<p>EDIT 2: The completet code. Probably some out of scope problem?<\/p>\n\n<pre><code>import java.awt.*;\nimport java.awt.event.*;\nimport javax.swing.*;\n\npublic class GUI4EX extends JFrame implements ActionListener{\n\nprivate JButton buttonNewCustomer, buttonTerminate, buttonAddNewName, buttonAddNewSavingsAccount, buttonAddNewCreditAccount;\nprivate JLabel textLabelName, textLabelPersonalNumber, textLabelNewName;\nprivate JTextField textInputName, textInputPersonalNumber, textInputNewName;\nprivate JPanel panelNewCustomer, panelQuit, panelNewAccount, panelChangeName, panelSelectCustomer;\n\nprivate boolean statusButtonNewCustomer = true;\nprivate boolean statusButton2 = true;\nprivate boolean statusButtonAddNewName = true;\n\nprivate String title = \"Bank \";\n\n// Create a customHandler object\nCustomHandler customHandler = new CustomHandler();\n\n// Main method to start program\npublic static void main(String[] args){\n    GUI4EX frame = new GUI4EX();\n    frame.setVisible(true);\n    frame.setDefaultCloseOperation(3);\n}\n\n// Cunstructor\npublic GUI4EX(){\n    // Create window\n    setTitle(title);\n    setSize(450,500);\n    setLocation(400,100);\n    setResizable(false);\n\n    // Set layout to boxlayout\n    Container container = getContentPane( );\n    setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));\n\n    DefaultListModel model = new DefaultListModel();\n    JList list = new JList(model);\n    list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);\n    JScrollPane listScroller = new JScrollPane(list);\n    listScroller.setPreferredSize(new Dimension(430, 80));\n\n\n    model.addElement(\"test\");\n    model.addElement(\"test\");\n    model.addElement(\"test\");\n    model.addElement(\"test\");\n    model.addElement(\"test\");\n    model.addElement(\"test\");\n\n    // Create jpanels\n    panelNewCustomer = new JPanel();\n    panelQuit = new JPanel();\n    panelNewAccount = new JPanel();\n    panelChangeName = new JPanel();\n    panelSelectCustomer = new JPanel();\n\n    // Create and add components - buttons\n    buttonNewCustomer = new JButton(\"OK\");\n    buttonTerminate = new JButton(\"Avsluta\");\n    buttonAddNewName = new JButton(\"OK\");\n    buttonAddNewSavingsAccount = new JButton(\"Sparkonto\");\n    buttonAddNewCreditAccount = new JButton(\"Kreditkonto\");\n\n    // Create and add components - labels\n    textLabelName = new JLabel(\"Namn\");\n    textLabelPersonalNumber = new JLabel(\"Personnummer\");\n    textLabelNewName = new JLabel(\"Nytt namn\");\n    //add(textLabel1);\n\n    // Create and add components - textfields\n    textInputName = new JTextField(\"\");\n    textInputPersonalNumber = new JTextField(\"\");\n    textInputName.setColumns(10);\n    textInputPersonalNumber.setColumns(10);\n    textInputNewName = new JTextField();\n    textInputNewName.setColumns(20);\n\n    // Add components to panel new customer\n    panelNewCustomer.add(textLabelName);\n    panelNewCustomer.add(textInputName);\n    panelNewCustomer.add(textLabelPersonalNumber);\n    panelNewCustomer.add(textInputPersonalNumber);\n    panelNewCustomer.add(buttonNewCustomer);\n\n    // Add components to panel to select customer\n    panelSelectCustomer.add(listScroller);\n\n    // Add components to panel new name\n    panelChangeName.add(textLabelNewName);\n    panelChangeName.add(textInputNewName);\n    panelChangeName.add(buttonAddNewName);\n\n    // Add components to panel new accounts\n    panelNewAccount.add(buttonAddNewSavingsAccount);\n    panelNewAccount.add(buttonAddNewCreditAccount);\n\n    // Add components to panel quit\n    panelQuit.add(buttonTerminate);\n\n    // Set borders to jpanels\n    panelNewCustomer.setBorder(BorderFactory.createTitledBorder(\"Skapa ny kund\"));\n    panelChangeName.setBorder(BorderFactory.createTitledBorder(\"Ändra namn\"));\n    panelNewAccount.setBorder(BorderFactory.createTitledBorder(\"Skapa nytt konto\"));\n    panelQuit.setBorder(BorderFactory.createTitledBorder(\"Avsluta programmet\"));\n    panelSelectCustomer.setBorder(BorderFactory.createTitledBorder(\"Välj kund\"));\n\n    // Add panels to window\n    add(panelNewCustomer);\n    add(panelSelectCustomer);\n    add(panelChangeName);\n    add(panelNewAccount);\n    add(panelQuit);\n\n    // Listener\n    // FrameHandler handler = new FrameHandler();\n\n    // Add listener to components\n    //button1.addActionListener(handler);\n    buttonNewCustomer.addActionListener(this);\n    buttonAddNewName.addActionListener(this);\n    buttonAddNewSavingsAccount.addActionListener(this);\n    buttonAddNewCreditAccount.addActionListener(this);\n    buttonTerminate.addActionListener(this);\n}\n\n\n//private class FrameHandler implements ActionListener{\n\n    public void actionPerformed(ActionEvent event){\n        // New customer\n        if(event.getSource() == buttonNewCustomer &amp;&amp; statusButtonNewCustomer)\n        {\n            String name = textInputName.getText();\n            String number = textInputPersonalNumber.getText();\n            boolean checkCustomerExist = customHandler.findCustomer(name, number); // Check if customer exist\n\n            if(!checkCustomerExist) // If not true add new customer\n            {\n                customHandler.addCustomer(name, number); // Call method to add name\n                setTitle(title + \"Kund: \" + name); // Set new title\n                model.addElement(\"name\");\n            }\n        }\n\n        // Change name\n        if(event.getSource() == buttonAddNewName &amp;&amp; statusButtonAddNewName)\n        {\n            String newName = textInputNewName.getText();\n            customHandler.changeName(newName); // call method to change name\n            setTitle(title + \"Kund: \" + newName);\n        }\n\n        // Create new savings account\n        if(event.getSource() == buttonAddNewSavingsAccount)\n        {\n            customHandler.CreateNewSavingsAccount();    \n        }\n\n        // Create new credit account\n        if(event.getSource() == buttonAddNewCreditAccount)\n        {\n            customHandler.CreateNewCreditAccount();\n        }\n\n        // Terminate program\n        if(event.getSource()==buttonTerminate &amp;&amp; statusButton2)\n        {\n            System.exit(3);\n        }\n\n    }\n\n//}\n<\/code><\/pre>\n\n<p>}<\/p>\n",
+        "question_id": 8901205,
+        "tags": [
+            "java",
+            "swing",
+            "jlist",
+            "actionlistener"
+        ],
+        "score": 0,
+        "accepted_answer_id": 8902498,
+        "is_answered": true,
+        "view_count": 9679,
+        "last_edit_date": 1326840631
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e6e74c64eb462477af2deaf79059d269?s=256&d=identicon&r=PG",
+            "account_id": 1078921,
+            "user_type": "registered",
+            "user_id": 1076463,
+            "link": "https://stackoverflow.com/users/1076463/robin",
+            "reputation": 36711,
+            "display_name": "Robin",
+            "accept_rate": 65
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1326841035,
+        "creation_date": 1326838546,
+        "body": "<p>You are lucky I am in a good mood. Here a very basic example, matching the code you provided. Type something in the textfield, hit the enter button and watch the list get populated.<\/p>\n\n<pre><code>import javax.swing.DefaultListModel;\nimport javax.swing.JFrame;\nimport javax.swing.JList;\nimport javax.swing.JTextField;\nimport java.awt.BorderLayout;\nimport java.awt.EventQueue;\nimport java.awt.event.ActionEvent;\nimport java.awt.event.ActionListener;\n\npublic class AddToJListDemo {\n\n  private static JFrame createGUI(){\n    JFrame frame = new JFrame(  );\n\n    final DefaultListModel model = new DefaultListModel();\n    JList list = new JList( model );\n\n    final JTextField input = new JTextField( 10 );\n    input.addActionListener( new ActionListener() {\n      public void actionPerformed( ActionEvent aActionEvent ) {\n        String text = input.getText();\n        if ( text.length() &gt; 0 ) {\n          model.addElement( text );\n          input.setText( \"\" );\n        }\n      }\n    } );\n\n    frame.add( list, BorderLayout.CENTER );\n    frame.add( input, BorderLayout.SOUTH );\n\n    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );\n    return frame;\n  }\n\n  public static void main( String[] args ) {\n    EventQueue.invokeLater( new Runnable() {\n      public void run() {\n        JFrame frame = createGUI();\n        frame.setSize( 200,200 );\n        frame.setVisible( true );\n      }\n    } );\n  }\n}\n<\/code><\/pre>\n\n<p><strong>Edit<\/strong><\/p>\n\n<p>Based on your full code, you must make the list a field in your <code>GUI4EX<\/code> class, similar to for example the <code>buttonNewCustomer<\/code> field<\/p>\n\n<pre><code>public class GUI4EX extends JFrame implements ActionListener{\n  //... all other field\n  DefaultListModel model;\n\n  //constructor\n  public GUI4EX(){\n    //all other code\n    //DefaultListModel model = new DefaultListModel(); instantiate the field instead\n    model = new DefaultListModel();\n    JList list = new JList(model);\n    //rest of your code\n  }\n}\n<\/code><\/pre>\n\n<p>This will make sure you can access the <code>model<\/code> in the <code>actionPerformed<\/code> method. But if you cannot figure out something this basic, you should not be creating GUIs but reading up on basic Java syntax and OO principles<\/p>\n",
+        "answer_id": 8902498,
+        "question_id": 8901205,
+        "last_edit_date": 1326841035
+    }],
+    "answer_comments": {"8902498": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/afb1a8c9ba25e33e61e21df4a83009f2?s=256&d=identicon&r=PG",
+                "account_id": 319544,
+                "user_type": "registered",
+                "user_id": 637364,
+                "link": "https://stackoverflow.com/users/637364/3d-kreativ",
+                "reputation": 9361,
+                "display_name": "3D-kreativ",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8902498,
+            "edited": false,
+            "creation_date": 1326842377,
+            "comment_id": 11135067
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/afb1a8c9ba25e33e61e21df4a83009f2?s=256&d=identicon&r=PG",
+                "account_id": 319544,
+                "user_type": "registered",
+                "user_id": 637364,
+                "link": "https://stackoverflow.com/users/637364/3d-kreativ",
+                "reputation": 9361,
+                "display_name": "3D-kreativ",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8902498,
+            "edited": false,
+            "creation_date": 1326840549,
+            "comment_id": 11134662
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e6e74c64eb462477af2deaf79059d269?s=256&d=identicon&r=PG",
+                "account_id": 1078921,
+                "user_type": "registered",
+                "user_id": 1076463,
+                "link": "https://stackoverflow.com/users/1076463/robin",
+                "reputation": 36711,
+                "display_name": "Robin",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8902498,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/afb1a8c9ba25e33e61e21df4a83009f2?s=256&d=identicon&r=PG",
+                "account_id": 319544,
+                "user_type": "registered",
+                "user_id": 637364,
+                "link": "https://stackoverflow.com/users/637364/3d-kreativ",
+                "reputation": 9361,
+                "display_name": "3D-kreativ",
+                "accept_rate": 79
+            },
+            "edited": false,
+            "creation_date": 1326839855,
+            "comment_id": 11134478
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/afb1a8c9ba25e33e61e21df4a83009f2?s=256&d=identicon&r=PG",
+                "account_id": 319544,
+                "user_type": "registered",
+                "user_id": 637364,
+                "link": "https://stackoverflow.com/users/637364/3d-kreativ",
+                "reputation": 9361,
+                "display_name": "3D-kreativ",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8902498,
+            "edited": false,
+            "creation_date": 1326839676,
+            "comment_id": 11134433
+        }
+    ]}
+}

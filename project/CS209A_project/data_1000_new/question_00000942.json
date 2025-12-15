@@ -1,0 +1,209 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/1tqQI.png?s=256",
+            "account_id": 18739879,
+            "user_type": "registered",
+            "user_id": 13663338,
+            "link": "https://stackoverflow.com/users/13663338/karnimani",
+            "reputation": 15,
+            "display_name": "Karnimani"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/72776893/mapping-a-field-from-each-item-in-a-list-to-fields-of-a-single-object",
+        "last_activity_date": 1717021261,
+        "creation_date": 1656354975,
+        "answer_count": 4,
+        "title": "Mapping a field from each item in a List to fields of a single Object",
+        "body": "<p>Suppose I have a List of cats like this:<\/p>\n<pre class=\"lang-none prettyprint-override\"><code>[Cat[name=&quot;Minnie&quot;, age=3], Cat[name=&quot;Pixie&quot;, age=1], Cat[name=&quot;Kazy&quot;, age=5]]\n<\/code><\/pre>\n<p>And an Object Cats with fields:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>class Cats {\n    int MinnieAge;\n    int PixieAge;\n    int KazyAge;\n}\n<\/code><\/pre>\n<p>What is the best way to map the ages to this Object? Preferably avoiding an imperative approach and keeping it nice and clean. Is this possible with MapStruct or the streams API?<\/p>\n",
+        "question_id": 72776893,
+        "tags": [
+            "java",
+            "spring",
+            "java-stream",
+            "mapping",
+            "mapstruct"
+        ],
+        "score": 0,
+        "accepted_answer_id": 72777212,
+        "is_answered": true,
+        "view_count": 656,
+        "last_edit_date": 1717019781
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fe85994d05ad7aaaa1c47d638b37bc45?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909811,
+                "user_type": "registered",
+                "user_id": 6650475,
+                "link": "https://stackoverflow.com/users/6650475/andrew-s",
+                "reputation": 2861,
+                "display_name": "Andrew S"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72776893,
+            "edited": false,
+            "creation_date": 1656355828,
+            "comment_id": 128547340
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GjMpYukQ5aYVFfZyOxY8TIuB55KTzeCeZdLaaK5Ag=k-s256",
+                "account_id": 23667337,
+                "user_type": "registered",
+                "user_id": 17694626,
+                "link": "https://stackoverflow.com/users/17694626/cheng-thao",
+                "reputation": 1493,
+                "display_name": "Cheng Thao"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 72776893,
+            "edited": false,
+            "creation_date": 1656355787,
+            "comment_id": 128547328
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-CNo1jh6oD1U/AAAAAAAAAAI/AAAAAAAAAD4/A_N62bZRoQw/s256-rj/photo.jpg",
+                "account_id": 11380920,
+                "user_type": "registered",
+                "user_id": 8343843,
+                "link": "https://stackoverflow.com/users/8343843/alexey-r",
+                "reputation": 8736,
+                "display_name": "Alexey R."
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1656356860,
+            "creation_date": 1656356860,
+            "body": "<p>If you want to use streams you can start from implementing a collector:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public class CatsCollector implements Collector&lt;Cat, Cats, Cats&gt; {\n\n    @Override\n    public Supplier&lt;Cats&gt; supplier() {\n        return () -&gt; new Cats();\n    }\n\n    @Override\n    public BiConsumer&lt;Cats, Cat&gt; accumulator() {\n        return (cats1, cat) -&gt; {\n            switch (cat.name){\n                case &quot;Minnie&quot;: cats1.minnieAge = cat.age; break;\n                case &quot;Pixie&quot;: cats1.pixieAge = cat.age; break;\n                case &quot;Kazy&quot;: cats1.kazyAge = cat.age; break;\n            }\n        };\n    }\n\n    @Override\n    public BinaryOperator&lt;Cats&gt; combiner() {\n        return (cats1, cats2) -&gt; cats1;\n    }\n\n    @Override\n    public Function&lt;Cats, Cats&gt; finisher() {\n        return cats1 -&gt; cats1;\n    }\n\n    @Override\n    public Set&lt;Characteristics&gt; characteristics() {\n        return Set.of(Characteristics.UNORDERED);\n    }\n}\n<\/code><\/pre>\n<p><strong>P.S.<\/strong> - Here a combiner is more like a stub because there are no requirements for combining logic provided.<\/p>\n<p><strong>P.P.S<\/strong> - There are also sort of assumptions to simplify access modifiers stuff.<\/p>\n<p>Then if you have the model like this:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public class Cats {\n    int minnieAge;\n    int pixieAge;\n    int kazyAge;\n\n    @Override\n    public String toString() {\n        return &quot;Cats{&quot; +\n                &quot;minnieAge=&quot; + minnieAge +\n                &quot;, pixieAge=&quot; + pixieAge +\n                &quot;, kazyAge=&quot; + kazyAge +\n                '}';\n    }\n}\n<\/code><\/pre>\n<p>You can use your custom collector:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public static void main(String[] args) {\n    List&lt;Cat&gt; cats = List.of(\n            new Cat(&quot;Minnie&quot;, 3), \n            new Cat(&quot;Pixie&quot;, 1), \n            new Cat(&quot;Kazy&quot;, 5));\n    Cats catsResult = cats.stream().collect(new CatsCollector());\n    System.out.println(catsResult);\n}\n<\/code><\/pre>\n",
+            "answer_id": 72777212,
+            "question_id": 72776893
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4c16849c5f9444a685f62cdc2a15c3ac?s=256&d=identicon&r=PG",
+                "account_id": 1119690,
+                "user_type": "registered",
+                "user_id": 1108305,
+                "link": "https://stackoverflow.com/users/1108305/m-justin",
+                "reputation": 23312,
+                "display_name": "M. Justin",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1717019323,
+            "creation_date": 1717018984,
+            "body": "<p>Here's a pure Java solution that uses the Stream API to create a map from cat names to their ages.  The various fields of the <code>Cats<\/code> object are then set individually by key.  This assumes the values are in a <code>List&lt;Cat&gt;<\/code> with a getter for each of <code>name<\/code> and <code>age<\/code>.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>Map&lt;String, Integer&gt; agesByName =\n        cats.stream().collect(Collectors.toMap(Cat::getName, Cat::getAge));\n\nCats result = new Cats();\nresult.MinnieAge = agesByName.get(&quot;Minnie&quot;);\nresult.PixieAge = agesByName.get(&quot;Pixie&quot;);\nresult.KazyAge = agesByName.get(&quot;Kazy&quot;);\n<\/code><\/pre>\n",
+            "answer_id": 78552063,
+            "question_id": 72776893,
+            "last_edit_date": 1717019323
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4c16849c5f9444a685f62cdc2a15c3ac?s=256&d=identicon&r=PG",
+                "account_id": 1119690,
+                "user_type": "registered",
+                "user_id": 1108305,
+                "link": "https://stackoverflow.com/users/1108305/m-justin",
+                "reputation": 23312,
+                "display_name": "M. Justin",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1717021261,
+            "creation_date": 1717019606,
+            "body": "<p>The following solution uses the Java Stream API to create a map from cat names to their ages.  The various fields of the <code>Cats<\/code> object are then set individually by key.<\/p>\n<p>This assumes the values are in a <code>List&lt;Cat&gt;<\/code> with a getter for each of name and age, and that the <code>Cats<\/code> object has a setter for each of its properties.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Mapper\ninterface CatsMapper {\n    default Cats map(List&lt;Cat&gt; cats) {\n        return createFromNameToAgeMap(cats.stream()\n                .collect(Collectors.toMap(Cat::getName, Cat::getAge)));\n    }\n\n    @Mapping(target = &quot;minnieAge&quot;, source = &quot;Minnie&quot;)\n    @Mapping(target = &quot;pixieAge&quot;, source = &quot;Pixie&quot;)\n    @Mapping(target = &quot;kazyAge&quot;, source = &quot;Kazy&quot;)\n    Cats createFromNameToAgeMap(Map&lt;String, Integer&gt; nameToAgeMap);\n}\n<\/code><\/pre>\n<pre class=\"lang-java prettyprint-override\"><code>CatsMapper mapper = Mappers.getMapper(CatsMapper.class);\nCats result = mapper.map(cats);\n<\/code><\/pre>\n",
+            "answer_id": 78552095,
+            "question_id": 72776893,
+            "last_edit_date": 1717021261
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GjMpYukQ5aYVFfZyOxY8TIuB55KTzeCeZdLaaK5Ag=k-s256",
+                "account_id": 23667337,
+                "user_type": "registered",
+                "user_id": 17694626,
+                "link": "https://stackoverflow.com/users/17694626/cheng-thao",
+                "reputation": 1493,
+                "display_name": "Cheng Thao"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": -2,
+            "is_accepted": false,
+            "last_activity_date": 1656363761,
+            "creation_date": 1656363761,
+            "body": "<p>I would define a Cat class with the attribute name and age.  Then simply parse the input string into cat objects and store them in a list which already supports stream.  See below example:<\/p>\n<pre><code>import java.util.*;\nclass Cat {\n    public String name;\n    public int age;\n    private Cat(String name, int age) { this.name = name; this.age = age;}\n    public String toString(){\n        return String.format(&quot;Cat[name=\\&quot;%s\\&quot;, age=%d]&quot;,name,age);\n    }\n    public static List&lt;Cat&gt; parse(String input) {\n        List cats = new ArrayList();\n        int i = 0;\n        while (true) {\n            i = input.indexOf(&quot;name=&quot;, i);\n            if (i &lt; 0) break;\n            String name = input.substring(i + 6, input.indexOf(&quot;\\&quot;&quot;, i + 7));\n            i = input.indexOf(&quot;age=&quot;, i);\n            int age = Integer.parseInt(input.substring(i + 4, input.indexOf(&quot;]&quot;, i)));\n            cats.add(new Cat(name, age));\n        }\n        return cats;\n    }\n}\npublic class Main{\n    public static void main(String[] args) {\n        String input = &quot;[Cat[name=\\&quot;Minnie\\&quot;, age=3], Cat[name=\\&quot;Pixie\\&quot;, age=1], Cat[name=\\&quot;Kazy\\&quot;, age=5]]&quot;;\n        List&lt;Cat&gt; cats = Cat.parse(input);\n        cats.forEach(System.out::println);\n        cats.stream().filter(e-&gt;e.age &gt; 4).forEach(System.out::println);\n    }\n}\n<\/code><\/pre>\n<p>Output:<\/p>\n<pre><code>run:\nCat[name=&quot;Minnie&quot;, age=3]\nCat[name=&quot;Pixie&quot;, age=1]\nCat[name=&quot;Kazy&quot;, age=5]\nCat[name=&quot;Kazy&quot;, age=5]\nBUILD SUCCESSFUL (total time: 0 seconds)\n<\/code><\/pre>\n",
+            "answer_id": 72778274,
+            "question_id": 72776893
+        }
+    ],
+    "answer_comments": {
+        "72777212": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4c16849c5f9444a685f62cdc2a15c3ac?s=256&d=identicon&r=PG",
+                    "account_id": 1119690,
+                    "user_type": "registered",
+                    "user_id": 1108305,
+                    "link": "https://stackoverflow.com/users/1108305/m-justin",
+                    "reputation": 23312,
+                    "display_name": "M. Justin",
+                    "accept_rate": 47
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 72777212,
+                "edited": false,
+                "creation_date": 1717020555,
+                "comment_id": 138484632
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4c16849c5f9444a685f62cdc2a15c3ac?s=256&d=identicon&r=PG",
+                    "account_id": 1119690,
+                    "user_type": "registered",
+                    "user_id": 1108305,
+                    "link": "https://stackoverflow.com/users/1108305/m-justin",
+                    "reputation": 23312,
+                    "display_name": "M. Justin",
+                    "accept_rate": 47
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 72777212,
+                "edited": false,
+                "creation_date": 1717020009,
+                "comment_id": 138484580
+            }
+        ],
+        "72778274": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4c16849c5f9444a685f62cdc2a15c3ac?s=256&d=identicon&r=PG",
+                "account_id": 1119690,
+                "user_type": "registered",
+                "user_id": 1108305,
+                "link": "https://stackoverflow.com/users/1108305/m-justin",
+                "reputation": 23312,
+                "display_name": "M. Justin",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72778274,
+            "edited": false,
+            "creation_date": 1717018869,
+            "comment_id": 138484498
+        }]
+    }
+}

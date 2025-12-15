@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/30e98958424d0c844934084232cc9ec8?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7360275,
+            "user_type": "registered",
+            "user_id": 5603750,
+            "link": "https://stackoverflow.com/users/5603750/mircoprogram",
+            "reputation": 289,
+            "display_name": "MircoProgram",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/35368706/how-to-correctly-calculate-an-orthographic-projection-matrix",
+        "last_activity_date": 1455298485,
+        "creation_date": 1455298030,
+        "answer_count": 1,
+        "title": "How to correctly calculate an orthographic projection matrix?",
+        "body": "<p>I've came across many different formulas how to build the projection matrix which all give different outputs, but i feel like I'm misunderstanding the concept. Currently I have this:<\/p>\n\n<pre><code>//x = 10 | y = 10 | width = 800 | height = 600\n        float left = x;\n        float top = y;\n        float right = x + width;\n        float bottom = y + height;\n\n        final Matrix4f pMatrix = new Matrix4f();\n        pMatrix.m[0][0] = 2f / (right - left);\n        pMatrix.m[1][1] = 2f / (top - bottom);\n        pMatrix.m[2][2] = -2f / (farZ - nearZ);\n        pMatrix.m[3][0] = -(right + left) / (right - left);\n        pMatrix.m[3][1] = -(top + bottom) / (top - bottom);\n        pMatrix.m[3][2] = -(farZ + nearZ) / (farZ - nearZ);\n        pMatrix.m[3][3] = 1;\n<\/code><\/pre>\n\n<p>With the given output:<\/p>\n\n<pre><code>0.0025, 0.0, 0.0, -1.025\n0.0, -0.0033333334, 0.0, 1.0333333\n0.0, 0.0, -0.0068965517, -2.724138\n0.0, 0.0, 0.0, 1.0\n<\/code><\/pre>\n\n<p>However I'm not sure whether the <code>right<\/code> and <code>bottom<\/code> constant are x + width &amp; y + height or simply width &amp; height? In some articles on the web people use different formulas using both.<\/p>\n",
+        "question_id": 35368706,
+        "tags": [
+            "java",
+            "projection",
+            "orthographic"
+        ],
+        "score": 0,
+        "accepted_answer_id": 35368846,
+        "is_answered": true,
+        "view_count": 1822
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e456a6a8bd35a0e65c22d202b48ccfa4?s=256&d=identicon&r=PG",
+            "account_id": 2742869,
+            "user_type": "registered",
+            "user_id": 2363967,
+            "link": "https://stackoverflow.com/users/2363967/andrew-williamson",
+            "reputation": 8721,
+            "display_name": "Andrew Williamson",
+            "accept_rate": 97
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 35368706,
+        "edited": false,
+        "creation_date": 1455298157,
+        "comment_id": 58443370
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e456a6a8bd35a0e65c22d202b48ccfa4?s=256&d=identicon&r=PG",
+            "account_id": 2742869,
+            "user_type": "registered",
+            "user_id": 2363967,
+            "link": "https://stackoverflow.com/users/2363967/andrew-williamson",
+            "reputation": 8721,
+            "display_name": "Andrew Williamson",
+            "accept_rate": 97
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1455298485,
+        "creation_date": 1455298485,
+        "body": "<p>Right and Bottom, in this calculation, should be absolute - that is, <code>right = x + width<\/code>. Your calculation looks correct. The main hint is lines like this one:<\/p>\n\n<pre><code>pMatrix.m[0][0] = 2f / (right - left);\n<\/code><\/pre>\n\n<p>The x component is being scaled by the width of the screen. Now, with your current setup, <code>right - left<\/code> is the same as <code>(x + width) - x<\/code>. That's definitely going to give <code>width<\/code>. If instead, you used <code>right = width<\/code>, then the calculation would become <code>width - x<\/code>, which makes very little sense.<\/p>\n",
+        "answer_id": 35368846,
+        "question_id": 35368706
+    }],
+    "answer_comments": {}
+}

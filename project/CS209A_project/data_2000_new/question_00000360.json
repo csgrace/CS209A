@@ -1,0 +1,78 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/edfb949ea0dda02a24398ddf04e7ac71?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10058450,
+            "user_type": "registered",
+            "user_id": 7435953,
+            "link": "https://stackoverflow.com/users/7435953/vixe",
+            "reputation": 39,
+            "display_name": "vixe",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47887992/how-can-i-get-the-id-of-the-item-selected-on-the-spinner",
+        "last_activity_date": 1513698854,
+        "creation_date": 1513689701,
+        "answer_count": 2,
+        "title": "How can I get the id of the item selected on the spinner?",
+        "body": "<p>I created an activity wherein the user needs to select a name from the spinner, enter a message in txtbox and click a button in order to send a message.  There are 2 strings in the spinner (First &amp; last name). There is also an unique ID for each name from the database. <strong>How do I get the ID of the name from database?<\/strong><\/p>\n\n<p>Example data: ID:265958998 , Fname:Leo , Lname:Cruz<\/p>\n\n<p>Below are my codes<\/p>\n\n<p>Send button:<\/p>\n\n<pre><code>            btnsend.setOnClickListener(new View.OnClickListener() {\n        @Override\n        public void onClick(View v) {\n                String USERID=getIntent().toString();\n\n                db.open();\n            *//    db.insertMessage(USERID,  );*\n                db.close();\n\n                et10.setText(\"\");\n                Toast.makeText(getApplicationContext(),\n                        \"Message Sent\", Toast.LENGTH_SHORT).show();}}\n            });\n<\/code><\/pre>\n\n<p>Insert message to db:<\/p>\n\n<pre><code>   void insertMessage(String sender, String recipient) {\n    SQLiteDatabase db = DBHelper.getWritableDatabase();\n\n    ContentValues initialValues = new ContentValues();\n    initialValues.put(KEY_SENDER, sender);\n    initialValues.put(KEY_RECIPIENT, recipient);\n    db.insert(TABLE_MESSAGE, null, initialValues);\n\n\n    db.close(); // Closing database connection\n}\n<\/code><\/pre>\n\n<p>Spinnerquery:<\/p>\n\n<pre><code>           public List&lt;String&gt; getAllRegisteredInfoAcc(){\n    List&lt;String&gt; labels = new ArrayList&lt;String&gt;();\n\n    // Select All Query\n    String selectQuery = \"SELECT tableinfo.*, tableacc.*\" +\n            \"FROM tableinfo JOIN tableacc ON tableinfo.userid = tableacc.userid WHERE tableacc.userstatus=? \";\n    Cursor cursor = db.rawQuery(selectQuery , new String[]{ \"REGISTERED\"});\n\n    SQLiteDatabase db = DBHelper.getReadableDatabase();\n    // looping through all rows and adding to list\n    if (cursor.moveToFirst()) {\n        do {\n            labels.add(cursor.getString(4)+\"\"+cursor.getString(3));\n        } while (cursor.moveToNext());\n    }\n\n    // closing connection\n    cursor.close();\n    db.close();\n    return labels;\n}\n<\/code><\/pre>\n\n<p>CallSpinner: <\/p>\n\n<pre><code>        spn1();\n\n}\npublic void spn1() {\n    // database handler\n    DBAdapter db = new DBAdapter(getApplicationContext());\n    List&lt;String&gt; lables = db.getAllRegisteredInfoAcc();\n    ArrayAdapter&lt;String&gt; dataAdapter = new ArrayAdapter&lt;String&gt;(this,\n            android.R.layout.simple_spinner_item, lables);\n\n     dataAdapter.setDropDownViewResource\n         (android.R.layout.simple_spinner_dropdown_item);\n    spnr1.setAdapter(dataAdapter);\n}\n<\/code><\/pre>\n",
+        "question_id": 47887992,
+        "tags": [
+            "java",
+            "android",
+            "database",
+            "android-spinner",
+            "insert-into"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 442,
+        "last_edit_date": 1513694847
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IYIG41BW.png?s=256",
+                "account_id": 3317226,
+                "user_type": "registered",
+                "user_id": 2789300,
+                "link": "https://stackoverflow.com/users/2789300/alejandro-cumpa",
+                "reputation": 2478,
+                "display_name": "Alejandro Cumpa",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1513692178,
+            "creation_date": 1513692178,
+            "body": "<p>You should make an Adapter for the spinner, load the data from sqlite into an array of Objects and then map the object in the array that is reflected into the spinner throught the toString() function.<\/p>\n\n<p>First Create a class for the objects and add the toString() function<\/p>\n\n<pre><code>public class MyUser {\n private int id = 0; \n private String name = \"\"; \n private String lastName =\"\";\n\n public MyUser(){}\n\n\n public String toString()\n {\n    return(name + \" \" + lastName);\n }\n\n}\n<\/code><\/pre>\n\n<p>Then load the data from sqlite into an array of that object. <\/p>\n\n<p>And in the spinner<\/p>\n\n<pre><code>users.addAll(myDataSource.getUsers());\n\n        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, users);\n        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);\n        spnr1.setPrompt(\"Select your User\");\n        spnr1.setAdapter(\n                new NothingSelectedSpinnerAdapter(\n                        adapter,\n                        R.layout.row_state_register_nothing_selected,\n                        // R.layout.contact_spinner_nothing_selected_dropdown, // Optional\n                        this));\n<\/code><\/pre>\n\n<p>So in the onItemClickListener() : <\/p>\n\n<pre><code>spnr1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {\n            @Override\n            public void onItemSelected(AdapterView&lt;?&gt; adapterView, View view, int position, long id) {\n                if (position &gt; 0) { //because of the prompt\n                    userID = users.get(position - 1).getUserId(); \n                    // DO WHAT YOU WANT\n                }\n            }\n\n            @Override\n            public void onNothingSelected(AdapterView&lt;?&gt; adapterView) {\n\n            }\n        });\n<\/code><\/pre>\n",
+            "answer_id": 47888664,
+            "question_id": 47887992
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/edfb949ea0dda02a24398ddf04e7ac71?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10058450,
+                "user_type": "registered",
+                "user_id": 7435953,
+                "link": "https://stackoverflow.com/users/7435953/vixe",
+                "reputation": 39,
+                "display_name": "vixe",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1513698854,
+            "creation_date": 1513698443,
+            "body": "<p>Send button listener:<\/p>\n\n<pre><code>         btnsend.setOnClickListener(new View.OnClickListener() {\n        @Override\n        public void onClick(View v) {\n             String USERID=getIntent().toString();  //userid from login activity\n               int a = spinnername.getSelectedItemPosition();\n\n                Cursor data = database.getallUsers();\n                data.moveToPosition(a);\n\n                database.open();\n                //insert sender, recipient, message...\n               database.insertMessage(USERID,data.getString(0)  ,et10.getText().toString());\n\n                database.close();\n                et10.setText(\"\");\n                Toast.makeText(getApplicationContext(),\n                        \"Message Sent\", Toast.LENGTH_SHORT).show(); \n          }});\n<\/code><\/pre>\n",
+            "answer_id": 47890535,
+            "question_id": 47887992,
+            "last_edit_date": 1513698854
+        }
+    ],
+    "answer_comments": {}
+}

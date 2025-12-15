@@ -1,0 +1,203 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ff3c109072888268e94e9fb9e62ef499?s=256&d=identicon&r=PG",
+            "account_id": 761868,
+            "user_type": "registered",
+            "user_id": 784587,
+            "link": "https://stackoverflow.com/users/784587/rougher",
+            "reputation": 868,
+            "display_name": "Rougher",
+            "accept_rate": 54
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/64257498/get-security-token-from-aws-credentials-provider",
+        "last_activity_date": 1602456343,
+        "creation_date": 1602141216,
+        "answer_count": 1,
+        "title": "Get security token from AWS Credentials Provider",
+        "body": "<p>Can somebody explain me, how do I need to implement the first step from this <a href=\"https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/\" rel=\"nofollow noreferrer\">blog<\/a>?\nI can't find it in AWS documentation.<\/p>\n<p>In other words, I need to translate a command:<\/p>\n<pre><code>curl --cert eeb81a0eb6-certificate.pem.crt --key eeb81a0eb6-private.pem.key -H &quot;x-amzn-iot-thingname: myThingName&quot; --cacert AmazonRootCA1.pem https://&lt;prefix&gt;.credentials.iot.us-west-2.amazonaws.com/role-aliases/MyAlias/credentials\n<\/code><\/pre>\n<p>to JAVA. How can I do it? I need AWS SDK for it (I prefer a solution without &quot;custom client to make an HTTPS request&quot;)<\/p>\n<p><strong>UPDATE:<\/strong><\/p>\n<p>I tried to use a custom client to make an HTTPS request, but I stuck when strated to export my keys to Java KeyStore (BUT curl command works for me fine):<\/p>\n<pre><code>$ winpty openssl pkcs12 -export -in eeb81a0eb6-certificate.pem.crt -inkey eeb81a0eb6-private.pem.key -chain -CAfile AmazonRootCA1.pem -name mycompany.com -out my.p12\n\nError unable to get local issuer certificate getting chain.\n<\/code><\/pre>\n<p><strong>ANOTHER UPDATE (WHAT I TRIED ALREADY)<\/strong><\/p>\n<ol>\n<li><p>Convert myPrivateKey and deviceCertificate to JKS:<\/p>\n<p>winpty openssl pkcs12 -export -in eeb81a0eb6-certificate.pem.crt -inkey eeb81a0eb6-private.pem.key -name mycompany.com -out my.p12<\/p>\n<p>keytool -importkeystore -destkeystore mycompany.jks -srckeystore my.p12 -srcstoretype PKCS12<\/p>\n<\/li>\n<li><p>Use this JKS from my code:<\/p>\n<pre><code> System.setProperty(&quot;deployment.security.TLSv1.2&quot;, &quot;true&quot;);\n System.setProperty(&quot;https.protocols&quot;, &quot;TLSv1.2&quot;);\n System.setProperty(&quot;javax.net.debug&quot;, &quot;ssl&quot;);\n\n HttpPost request = new HttpPost(clientEndpoint);\n request.setHeader(&quot;x-amzn-iot-thingname&quot;, &quot;0ad16050-d974-4f78-88ea-c6ee2b0a551e&quot;);\n\n KeyStore keyStore;\n try (InputStream keyStoreStream = this.getClass().getResourceAsStream(KEYSTOREPATH)) {\n     keyStore = KeyStore.getInstance(&quot;PKCS12&quot;);\n     keyStore.load(keyStoreStream, KEYSTOREPASS.toCharArray());\n }\n\n SSLContext sslContext = SSLContexts.custom()\n         .loadKeyMaterial(keyStore, KEYPASS.toCharArray()) // use null as second param if you don't have a separate key password\n         .loadTrustMaterial(null, new TrustSelfSignedStrategy())\n         .build();   \n\n SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);\n Registry&lt;ConnectionSocketFactory&gt; registry = RegistryBuilder.&lt;ConnectionSocketFactory&gt;create()\n                                                 .register(&quot;https&quot;, sslConnectionSocketFactory)\n                                                 .register(&quot;http&quot;, new PlainConnectionSocketFactory())\n                                                 .build();\n\n BasicHttpClientConnectionManager manager = new BasicHttpClientConnectionManager(registry);\n\n try (CloseableHttpClient httpClient = HttpClients\n                                         .custom()\n                                         .setSSLSocketFactory(sslConnectionSocketFactory)\n                                         .setConnectionManager(manager)\n                                         .build();\n      CloseableHttpResponse response = httpClient.execute(request)) {\n\n\n     System.out.println();\n\n\n\n } catch (IOException e) {\n     System.err.println(e);\n }\n<\/code><\/pre>\n<\/li>\n<li><p>I get exception:<\/p>\n<p>javax.net.ssl.SSLHandshakeException: Received fatal alert: bad_certificate<\/p>\n<\/li>\n<\/ol>\n",
+        "question_id": 64257498,
+        "tags": [
+            "java",
+            "amazon-web-services",
+            "primary-key",
+            "aws-iot",
+            "x509securitytokenmanager"
+        ],
+        "score": 2,
+        "accepted_answer_id": 64295637,
+        "is_answered": true,
+        "view_count": 5202,
+        "last_edit_date": 1602404649
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/k3Cu7.jpg?s=256",
+                "account_id": 2181407,
+                "user_type": "registered",
+                "user_id": 1930814,
+                "link": "https://stackoverflow.com/users/1930814/dalton-c%c3%a9zane",
+                "reputation": 3831,
+                "display_name": "Dalton C&#233;zane",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64257498,
+            "edited": false,
+            "creation_date": 1602179352,
+            "comment_id": 113646082
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ff3c109072888268e94e9fb9e62ef499?s=256&d=identicon&r=PG",
+                "account_id": 761868,
+                "user_type": "registered",
+                "user_id": 784587,
+                "link": "https://stackoverflow.com/users/784587/rougher",
+                "reputation": 868,
+                "display_name": "Rougher",
+                "accept_rate": 54
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64257498,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/k3Cu7.jpg?s=256",
+                "account_id": 2181407,
+                "user_type": "registered",
+                "user_id": 1930814,
+                "link": "https://stackoverflow.com/users/1930814/dalton-c%c3%a9zane",
+                "reputation": 3831,
+                "display_name": "Dalton C&#233;zane",
+                "accept_rate": 83
+            },
+            "edited": false,
+            "creation_date": 1602173507,
+            "comment_id": 113643343
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/k3Cu7.jpg?s=256",
+                "account_id": 2181407,
+                "user_type": "registered",
+                "user_id": 1930814,
+                "link": "https://stackoverflow.com/users/1930814/dalton-c%c3%a9zane",
+                "reputation": 3831,
+                "display_name": "Dalton C&#233;zane",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64257498,
+            "edited": false,
+            "creation_date": 1602160113,
+            "comment_id": 113636029
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/PEuWq.jpg?s=256",
+            "account_id": 19092422,
+            "user_type": "registered",
+            "user_id": 13942448,
+            "link": "https://stackoverflow.com/users/13942448/jccampanero",
+            "reputation": 53611,
+            "display_name": "jccampanero"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1602456343,
+        "creation_date": 1602346824,
+        "body": "<p>The AWS SDK provides several implementations of <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/SdkHttpClient.html\" rel=\"nofollow noreferrer\"><code>SdkHttpClient<\/code><\/a> that you can use to interact with your Amazon Services, both synchronously or asynchronously.<\/p>\n<p>For instance, you can use the <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/apache/ApacheHttpClient.html\" rel=\"nofollow noreferrer\"><code>ApacheHttpClient<\/code><\/a> class.<\/p>\n<p>All this HTTP clients are created and configured with <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/SdkHttpClient.Builder.html\" rel=\"nofollow noreferrer\"><code>Builder<\/code><\/a>s, <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/apache/ApacheHttpClient.Builder.html\" rel=\"nofollow noreferrer\"><code>ApacheHttpClient.Builder<\/code><\/a> for <code>ApacheHttpClient<\/code>.<\/p>\n<p><code>ApacheHttpClient.Builder<\/code> provides methods that allows you to configure secure HTTP connections for client side, remote peer, or mutual authentication.<\/p>\n<p>If the client must be authenticated, it is necessary to provide the certificate and private key that must be used for that purpose, corresponding to the <code>--cert<\/code> and <code>--key<\/code> arguments of your <code>curl<\/code> invocation.<\/p>\n<p>Typically, this certificate and private key are stored in one password protected <code>KeyStore<\/code>, usually in PKCS#12 format (a <code>.p12<\/code> or <code>.pfx<\/code> file).<\/p>\n<p>This information can be made accessible to <code>ApacheHttpClient.Builder<\/code> in two ways.<\/p>\n<p>First, by setting a series of <code>System<\/code> properties:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>import static software.amazon.awssdk.utils.JavaSystemSetting.SSL_KEY_STORE;\nimport static software.amazon.awssdk.utils.JavaSystemSetting.SSL_KEY_STORE_PASSWORD;\nimport static software.amazon.awssdk.utils.JavaSystemSetting.SSL_KEY_STORE_TYPE;\n\n//...\n\nPath clientKeyStore = Paths.get(...);\n\nSystem.setProperty(SSL_KEY_STORE.property(), clientKeyStore.toAbsolutePath().toString());\nSystem.setProperty(SSL_KEY_STORE_TYPE.property(), &quot;pkcs12&quot;);\nSystem.setProperty(SSL_KEY_STORE_PASSWORD.property(), &quot;password&quot;);\n<\/code><\/pre>\n<p>NOTE: The <code>static<\/code> imports are only constants for the standard <a href=\"https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html\" rel=\"nofollow noreferrer\">JSSE<\/a> properties <code>javax.net.ssl.keyStore<\/code>, <code>javax.net.ssl.keyStorePassword<\/code>, and <code>javax.net.ssl.keyStoreType<\/code>.<\/p>\n<p>Second, by providing a <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/TlsKeyManagersProvider.html\" rel=\"nofollow noreferrer\"><code>TlsKeyManagersProvider<\/code><\/a> implementation to the <code>tlsKeyManagersProvider<\/code> method of <code>ApacheHttpClient.Builder<\/code>. For instance:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>Path clientKeyStore = ...\nTlsKeyManagersProvider keyManagersProvider = FileStoreTlsKeyManagersProvider.create(clientKeyStore, &quot;pkcs12&quot;, &quot;password&quot;);\n<\/code><\/pre>\n<p>In fact, under the hood, the above mentioned <code>System<\/code> properties based configuration is used by <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/SystemPropertyTlsKeyManagersProvider.html\" rel=\"nofollow noreferrer\"><code>SystemPropertyTlsKeyManagersProvider<\/code><\/a>, another <code>TlsKeyManagersProvider<\/code> implementation.<\/p>\n<p>If you need to authenticate the server, you also have two options.<\/p>\n<p>First, again, by setting several <code>System<\/code> properties:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>Path serverKeyStore = Paths.get(...);\nSystem.setProperty(&quot;javax.net.ssl.trustStore&quot;, serverKeyStore.toAbsolutePath().toString());\nSystem.setProperty(&quot;javax.net.ssl.trustStorePassword&quot;, &quot;password&quot;);\nSystem.setProperty(&quot;javax.net.ssl.trustStoreType&quot;, &quot;jks&quot;);\n<\/code><\/pre>\n<p>As you can see, for simplicity, this time we are using a different kind of <code>KeyStore<\/code>, <code>jks<\/code>. You can build such a <code>KeyStore<\/code> from your AWS server certificate PEM file (the one associated with the <code>--cacert<\/code> in your <code>curl<\/code> command) with something like this:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>Path pemPath = ...;\ntry(final InputStream is = Files.newInputStream(pemPath) {\n  CertificateFactory certificateFactory = CertificateFactory.getInstance(&quot;X.509&quot;);\n  X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(is);\n  String alias = cert.getSubjectX500Principal().getName();\n  KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());\n  keyStore.load(null);\n  keyStore.setCertificateEntry(alias, cert);\n}\n<\/code><\/pre>\n<p>In the case of mutual authentication, although you can reuse the same <code>KeyStore<\/code>, it is a best practice maintain two, one with the client private key and certificate, and other with the server certificates you will trust (the trust store).<\/p>\n<p>Alternatively, you can also configure server side authentication by defining the <a href=\"https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/TrustManager.html\" rel=\"nofollow noreferrer\"><code>TrustManager<\/code><\/a>s that need to be used.<\/p>\n<p>For this task, the <code>ApacheHttpClient.Builder<\/code> provides the method <code>tlsTrustManagersProvider<\/code>. This method requires an implementation of the <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/TlsTrustManagersProvider.html\" rel=\"nofollow noreferrer\">TlsTrustManagersProvider<\/a> interface.<\/p>\n<p>This interface define a single method, <code>trustManagers<\/code>, that returns the array of <code>TrustManager<\/code>s that must be used to check the remote peer in the SSL communication.<\/p>\n<p>Unfortunately, the AWS SDK does not provide an implementation of this interface, you need to implement your own (let me know if you need further info).<\/p>\n<p>Once initialized and configured, you can provide this <code>SdkHttpClient<\/code> or its <code>SdkHttpClient.Builder<\/code>, to a custom service client, like <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/iot/IotClient.html\" rel=\"nofollow noreferrer\"><code>IotClient<\/code><\/a>, using the <code>httpClient<\/code> or the <code>httpClientBuilder<\/code> methods, respectively.<\/p>\n<p>If you just need to test TLS connectivity like with your <code>curl<\/code> command, you can try something like this:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>Path clientKeyStore = Paths.get(...);\nSystem.setProperty(&quot;javax.net.ssl.keyStore&quot;, clientKeyStore.toAbsolutePath().toString());\nSystem.setProperty(&quot;javax.net.ssl.keyStoreType&quot;, &quot;pkcs12&quot;);\nSystem.setProperty(&quot;javax.net.ssl.keyStorePassword&quot;, &quot;password&quot;);\n\nPath serverKeyStore = Paths.get(...);\nSystem.setProperty(&quot;javax.net.ssl.trustStore&quot;, serverKeyStore.toAbsolutePath().toString());\nSystem.setProperty(&quot;javax.net.ssl.trustStorePassword&quot;, &quot;password&quot;);\nSystem.setProperty(&quot;javax.net.ssl.trustStoreType&quot;, &quot;jks&quot;);\n\nSdkHttpClient client = ApacheHttpClient.builder().build();\n\nSdkHttpRequest httpRequest = SdkHttpFullRequest.builder()\n        .method(SdkHttpMethod.GET)\n        .uri(new URI(&quot;https://&lt;prefix&gt;.credentials.iot.us-west-2.amazonaws.com/role-aliases/MyAlias/credentials&quot;))\n        .putHeader(&quot;x-amzn-iot-thingname&quot;, &quot;myThingName&quot;)\n        .build();\n\nHttpExecuteRequest request = HttpExecuteRequest.builder()\n        .request(httpRequest)\n        .build();\n\nHttpExecuteResponse response = client.prepareRequest(request).call();\n<\/code><\/pre>\n<p>Please, review <a href=\"https://github.com/aws/aws-sdk-java-v2/blob/master/http-clients/apache-client/src/test/java/software/amazon/awssdk/http/apache/ApacheClientTlsAuthTest.java\" rel=\"nofollow noreferrer\">this test<\/a> in the AWS Java SDK, it can be also helpful.<\/p>\n<p>Finally, there is also <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/async/SdkAsyncHttpClient.html\" rel=\"nofollow noreferrer\">async HTTP clients<\/a> that you can use in your project. The way in which secure HTTP communication is configured in these clients is very similar to the one described in the above paragraphs.<\/p>\n<p>You can find all these resources in the <a href=\"https://github.com/aws/aws-sdk-java-v2\" rel=\"nofollow noreferrer\">AWS Java SDK v2 GitHub repository<\/a>.<\/p>\n<p>You can import in your project the whole SDK (I assume you are using Maven):<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;dependency&gt;\n  &lt;groupId&gt;software.amazon.awssdk&lt;/groupId&gt;\n  &lt;artifactId&gt;aws-sdk-java&lt;/artifactId&gt;\n  &lt;version&gt;2.15.7&lt;/version&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n<p>Although, for testing Apache HTTP client, I think that the following dependency will be the only necessary:<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;dependency&gt;\n  &lt;groupId&gt;software.amazon.awssdk&lt;/groupId&gt;\n  &lt;artifactId&gt;apache-client&lt;/artifactId&gt;\n  &lt;version&gt;2.15.7&lt;/version&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n<p>Although I have tried to focus the answer on code provided by the AWS SDK, as I understood it was necessary, to obtain these temporary credentials it is also possible to use any mechanism that allows a secure connection to AWS, such as Apache HttpClient, like in your example, OkHttp, etcetera.<\/p>\n<p>These temporary credentials can be used to sign any AWS Request and perform operations - according to the assumed IAM role - on AWS services. For instance, following the example in the <a href=\"https://aws.amazon.com/es/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/\" rel=\"nofollow noreferrer\">blog<\/a> that you indicated, you can insert an item in a DynamoDB table:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>AwsSessionCredentials credentials = AwsSessionCredentials.create(\n  &quot;the_returned_access_key_id&quot;,\n  &quot;the_returned_secret_key_id&quot;,\n  &quot;the_returned_session_token&quot;\n);\n\nDynamoDbClient ddb = DynamoDbClient.builder()\n  .region(Region.US_EAST_1)\n  .credentialsProvider(StaticCredentialsProvider.create(credentials))\n  .build();\n\n HashMap&lt;String,AttributeValue&gt; itemValues = new HashMap&lt;String,AttributeValue&gt;();\n\nitemValues.put(&quot;serial_number&quot;, AttributeValue.builder().s(&quot;123456789&quot;).build());\nitemValues.put(&quot;timestamp&quot;, AttributeValue.builder().s(&quot;2017-11-20T06:00:00.000Z&quot;).build());\nitemValues.put(&quot;current_temp&quot;, AttributeValue.builder().n(&quot;65&quot;).build());\nitemValues.put(&quot;target_temp&quot;, AttributeValue.builder().n(&quot;70&quot;).build());\nitemValues.put(&quot;humidity&quot;, AttributeValue.builder().n(&quot;45&quot;).build());\n\nPutItemRequest request = PutItemRequest.builder()\n  .tableName(&quot;MyHomeThermostat&quot;)\n  .item(itemValues)\n  .build();\n\ntry {\n  ddb.putItem(request);\n} catch (ResourceNotFoundException e) {\n  //...\n} catch (DynamoDbException e) {\n  //...\n} \n<\/code><\/pre>\n<p>In relation to your question in the comments above how to renew the obtained token, I must recognize that I am unable to give you an <em>answer<\/em>.<\/p>\n<p>In my opinion, I am afraid that the temporary credentials returned by the above mentioned call cannot be refreshed, at least the AWS SDK does not provide any mechanism for that: this credential provider is a very specific use case designed for IoT as indicated in the blog you cited and in the <a href=\"https://docs.aws.amazon.com/iot/latest/developerguide/authorizing-direct-aws.html\" rel=\"nofollow noreferrer\">official AWS documentation<\/a>.<\/p>\n<p>The AWS SDK provides different <code>AWSCredentialsProvider<\/code>s that supports token renewal, like <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/sts/auth/StsAssumeRoleCredentialsProvider.html\" rel=\"nofollow noreferrer\"><code>StsAssumeRoleCredentialsProvider<\/code><\/a> or <a href=\"https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/sts/auth/StsGetSessionTokenCredentialsProvider.html\" rel=\"nofollow noreferrer\"><code>StsGetSessionTokenCredentialsProvider<\/code><\/a>, among others, but there is no specific provider for this use case.<\/p>\n<p>If it is of any help, you can review the source code of the base class <a href=\"https://github.com/aws/aws-sdk-java-v2/blob/5afcbd8849a315503f3f18b4c9a2ac0e1068081b/services/sts/src/main/java/software/amazon/awssdk/services/sts/auth/StsCredentialsProvider.java\" rel=\"nofollow noreferrer\"><code>StsCredentialsProvider<\/code><\/a>, specially the code in its constructor related with the setup of <code>CachedSupplier<\/code> and related stuff.<\/p>\n",
+        "answer_id": 64295637,
+        "question_id": 64257498,
+        "last_edit_date": 1602456343
+    }],
+    "answer_comments": {"64295637": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ff3c109072888268e94e9fb9e62ef499?s=256&d=identicon&r=PG",
+                "account_id": 761868,
+                "user_type": "registered",
+                "user_id": 784587,
+                "link": "https://stackoverflow.com/users/784587/rougher",
+                "reputation": 868,
+                "display_name": "Rougher",
+                "accept_rate": 54
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64295637,
+            "edited": false,
+            "creation_date": 1602653905,
+            "comment_id": 113785126
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/PEuWq.jpg?s=256",
+                "account_id": 19092422,
+                "user_type": "registered",
+                "user_id": 13942448,
+                "link": "https://stackoverflow.com/users/13942448/jccampanero",
+                "reputation": 53611,
+                "display_name": "jccampanero"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64295637,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/ff3c109072888268e94e9fb9e62ef499?s=256&d=identicon&r=PG",
+                "account_id": 761868,
+                "user_type": "registered",
+                "user_id": 784587,
+                "link": "https://stackoverflow.com/users/784587/rougher",
+                "reputation": 868,
+                "display_name": "Rougher",
+                "accept_rate": 54
+            },
+            "edited": false,
+            "creation_date": 1602438979,
+            "comment_id": 113714243
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ff3c109072888268e94e9fb9e62ef499?s=256&d=identicon&r=PG",
+                "account_id": 761868,
+                "user_type": "registered",
+                "user_id": 784587,
+                "link": "https://stackoverflow.com/users/784587/rougher",
+                "reputation": 868,
+                "display_name": "Rougher",
+                "accept_rate": 54
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64295637,
+            "edited": false,
+            "creation_date": 1602406888,
+            "comment_id": 113705445
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ff3c109072888268e94e9fb9e62ef499?s=256&d=identicon&r=PG",
+                "account_id": 761868,
+                "user_type": "registered",
+                "user_id": 784587,
+                "link": "https://stackoverflow.com/users/784587/rougher",
+                "reputation": 868,
+                "display_name": "Rougher",
+                "accept_rate": 54
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64295637,
+            "edited": false,
+            "creation_date": 1602406729,
+            "comment_id": 113705400
+        }
+    ]}
+}

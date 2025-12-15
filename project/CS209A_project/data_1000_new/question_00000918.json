@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b96ab66a7bc3d6e51b8be7e253ae19fd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11091287,
+            "user_type": "registered",
+            "user_id": 8143061,
+            "link": "https://stackoverflow.com/users/8143061/rick-moriarty",
+            "reputation": 27,
+            "display_name": "Rick moriarty"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/44937295/is-this-correct-usage-of-builder-pattern-in-dtos",
+        "last_activity_date": 1499340244,
+        "creation_date": 1499295691,
+        "answer_count": 1,
+        "title": "Is this correct usage of builder pattern in dtos?",
+        "body": "<p>Assume i have PostDTO that has this fields:<\/p>\n\n<pre><code>private Long id;\nprivate ShortInfoUserDTO author;\nprivate CategoryDTO category;\n<\/code><\/pre>\n\n<p>And i have CategoryDTO inside of it that also has Builder, and it has fields:<\/p>\n\n<pre><code>private Long id;\nprivate String name;\n<\/code><\/pre>\n\n<p>And ShortInfoUserDTO has some fields (doesn't matter what fields, but it also has Builder)<\/p>\n\n<p>And My builder pattern looks like this ( both CategoryDTO and <\/p>\n\n<pre><code>public static Builder builder() {\n    return new PostDTO.Builder();\n}\npublic static class Builder {\n    PostDTO instance = new PostDTO();        \n\n    public Builder id(Long id) {\n        instance.id = id;\n        return this;\n    }\n\n    public Builder author(User user) {\n        ShortInfoUserDTO author = ShortInfoUserDTO.builder()\n                                                  .id(user.getId())\n                                            .username(user.getUsername())\n                                            .build();\n        instance.author = author;\n        return this;\n    }\n\n\n\n    public Builder category(Category category) {\n          CategoryDTO categoryDto = CategoryDTO\n                                      .builder()\n                                      .id(category.getId())\n                                      .name(category.getName())\n                                      .build();           \n\n          instance.category = categoryDto;            \n          return this;\n    }\n\n    public PostDTO build() {\n        return instance;\n    }\n}\n<\/code><\/pre>\n\n<p>Is generally the idea of building author() and category() this way good? like is this proper architecture? One of the reason im asking is because i'm kinda worried about nullpointerexceptions<\/p>\n",
+        "question_id": 44937295,
+        "tags": [
+            "java",
+            "spring",
+            "design-patterns"
+        ],
+        "score": 1,
+        "accepted_answer_id": 44947536,
+        "is_answered": true,
+        "view_count": 1777
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-_Nh-dfIk33Y/AAAAAAAAAAI/AAAAAAAAAOk/Z5eFybxqqDk/photo.jpg=k-s256",
+            "account_id": 5230492,
+            "user_type": "registered",
+            "user_id": 4181015,
+            "link": "https://stackoverflow.com/users/4181015/bohdan-levchenko",
+            "reputation": 3591,
+            "display_name": "Bohdan Levchenko"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1499340244,
+        "creation_date": 1499340244,
+        "body": "<p>Well yeah, it is a quite neat way for building your POJO's as long as you can live with this amount of boilerplate code.<\/p>\n\n<p><a href=\"https://projectlombok.org/features/Builder\" rel=\"nofollow noreferrer\">Lombok builder<\/a> can help you reduce the amount of boilerplate.<\/p>\n\n<p>Another approach is using a mapping tool instead of manual <code>DTO<\/code> construction. Have a look on <a href=\"http://modelmapper.org\" rel=\"nofollow noreferrer\">ModelMapper<\/a> for instance.<\/p>\n\n<p>With mapper you can do something like this:<\/p>\n\n<pre><code>public class So44937295ApplicationTests {\n    final ModelMapper modelMapper = new ModelMapper();\n\n    @Test\n    public void manual() {\n        final User user = new User();\n        user.setId(42L);\n        user.setUsername(\"John\");\n        user.setPassword(\"goof\");\n\n        final Category category = new Category();\n        category.setId(23L);\n        category.setName(\"Category 1\");\n\n        final PostDTO postDTO = new PostDTO();\n        postDTO.setAuthor(modelMapper.map(user, ShortInfoUserDTO.class));\n        postDTO.setCategory(modelMapper.map(category, CategoryDTO.class));\n\n        assertEquals(user.getId(), postDTO.getAuthor().getId());\n        assertEquals(user.getUsername(), postDTO.getAuthor().getUsername());\n\n        assertEquals(category.getId(), postDTO.getCategory().getId());\n        assertEquals(category.getName(), postDTO.getCategory().getName());\n    }\n\n    @Test\n    public void auto() {\n        final User user = new User();\n        user.setId(42L);\n        user.setUsername(\"John\");\n        user.setPassword(\"goof\");\n\n        final Category category = new Category();\n        category.setId(23L);\n        category.setName(\"Category 1\");\n\n        class Post {\n            private User author;\n            private Category category;\n            // getters and setters\n        }\n\n        final Post post = new Post();\n        post.setAuthor(user);\n        post.setCategory(category);\n        final PostDTO postDTO = modelMapper.map(post, PostDTO.class);\n\n        assertEquals(post.getAuthor().getId(), postDTO.getAuthor().getId());\n        assertEquals(post.getAuthor().getUsername(), postDTO.getAuthor().getUsername());\n\n        assertEquals(post.getCategory().getId(), postDTO.getCategory().getId());\n        assertEquals(post.getCategory().getName(), postDTO.getCategory().getName());\n    }\n\n    public static class PostDTO {\n        private Long id;\n        private ShortInfoUserDTO author;\n        private CategoryDTO category;\n        // getters and setters\n    }\n\n    public static class User {\n        private Long id;\n        private String username;\n        private String password;\n        // getters and setters\n    }\n\n    public static class ShortInfoUserDTO {\n        private Long id;\n        private String username;\n        // getters and setters\n    }\n\n    public static class Category {\n        private Long id;\n        private String name;\n        // getters and setters\n    }\n\n    public static class CategoryDTO {\n        private Long id;\n        private String name;\n        // getters and setters\n    }\n\n}\n<\/code><\/pre>\n\n<p>And all transformation logic will be done for you using reflection (based on field names). You can configure that behavior.<\/p>\n",
+        "answer_id": 44947536,
+        "question_id": 44937295
+    }],
+    "answer_comments": {}
+}

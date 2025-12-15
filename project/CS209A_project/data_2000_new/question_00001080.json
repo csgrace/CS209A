@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e3bbc5a54a376d4554fc67cd81f8b4a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11444283,
+            "user_type": "registered",
+            "user_id": 8388712,
+            "link": "https://stackoverflow.com/users/8388712/coin",
+            "reputation": 1,
+            "display_name": "Coin"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45397946/swing-class-jlabel-appearence-unusual",
+        "last_activity_date": 1501406148,
+        "creation_date": 1501403916,
+        "answer_count": 1,
+        "title": "Swing Class, JLabel appearence unusual",
+        "body": "<p>I noticed something that I considered to be strange it this following code:    <\/p>\n\n<pre><code>public class QuestionFour extends JFrame {\n    private JTextArea txta1;\n    private JTextField txt1;\n    private JButton btnSort;\n    private JButton btnShuffle;\n    private JButton btnReverse;\n    private JPanel pnl1;\n    private JLabel lbl1;\n    private LinkedList linkedList;\n\n    public QuestionFour() {\n        super();\n        this.setLocationRelativeTo(null);\n        this.setSize(500, 200);\n        this.setVisible(true);\n        this.setLayout(new FlowLayout());\n        txt1 = new JTextField(); // 1\n        lbl1 = new JLabel(\"Enter a number: \"); // 2\n        this.add(lbl1);\n    }\n\n    public static void main(String args[]) {\n        QuestionFour ob = new QuestionFour();\n    }\n}\n<\/code><\/pre>\n\n<p>The problem that was occuring was, when I run the code the JLabel does not appear but if I comment the line where typed 1 as a comment, the JLabel appears, which I consider odd since I only instantiate the TextField but don't add it to the JFrame.<\/p>\n\n<p>Can someone please explain this to me?<\/p>\n",
+        "question_id": 45397946,
+        "tags": [
+            "java",
+            "swing",
+            "user-interface"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 40,
+        "last_edit_date": 1501404139
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8cd04b814ccbc22ed99136ff56427d3c?s=256&d=identicon&r=PG",
+            "account_id": 2453179,
+            "user_type": "registered",
+            "user_id": 2138953,
+            "link": "https://stackoverflow.com/users/2138953/pax",
+            "reputation": 1186,
+            "display_name": "PAX",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1501406148,
+        "creation_date": 1501405027,
+        "body": "<p>Possibly, it's an anomaly caused by invocation of <code>setVisible(true)<\/code> outside of UI thread. Try this one:<\/p>\n\n<pre><code>public QuestionFour()\n{\n    setLocationRelativeTo(null);\n    this.setSize(500, 200);\n    setLayout(new FlowLayout());\n    this.txt1 = new JTextField(); // 1\n    this.lbl1 = new JLabel(\"Enter a number: \"); // 2\n    this.add(this.lbl1);\n\n    javax.swing.SwingUtilities.invokeLater(() -&gt; setVisible(true));\n}\n<\/code><\/pre>\n\n<p>Notice: Read/write access to any UI component (such as <code>JTextField<\/code> etc.) must be done within Event Dispatching Thread (UI thread). <code>SwingUtilities<\/code> provides you convenient methods. You should invoke <code>setVisible()<\/code> within EDT, too.<\/p>\n\n<p>One further problem was that you invoke <code>setVisible(true)<\/code> at the beginning and then add UI components, belatedly. This represents a \"write access\" to UI components (\"you're adding something into the main panel\"). Your class constructor doesn't run within EDT, so in this case you had to encapsulate <code>this.add(this.lbl1)<\/code> into the method of <code>SwingUtilities<\/code>. But it's better when you construct your entire UI first and then finally set it visible.<\/p>\n\n<p>For more information about the Swing library and thread-safety take a look at this: <a href=\"https://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html<\/a><\/p>\n",
+        "answer_id": 45398097,
+        "question_id": 45397946,
+        "last_edit_date": 1501406148
+    }],
+    "answer_comments": {}
+}

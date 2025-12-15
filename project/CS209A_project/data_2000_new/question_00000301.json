@@ -1,0 +1,359 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Qbx4c.jpg?s=256",
+            "account_id": 4922,
+            "user_type": "registered",
+            "user_id": 7641,
+            "link": "https://stackoverflow.com/users/7641/jens-bannmann",
+            "reputation": 5145,
+            "display_name": "Jens Bannmann",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/868887/how-to-keep-whitespace-before-document-element-when-parsing-with-java",
+        "last_activity_date": 1242402224,
+        "creation_date": 1242396486,
+        "answer_count": 5,
+        "title": "How to keep whitespace before document element when parsing with Java?",
+        "body": "<p>In my application, I alter some part of XML files, which begin like this:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;!-- $Id: version control yadda-yadda $ --&gt;\n\n&lt;myElement&gt;\n...\n<\/code><\/pre>\n\n<p>Note the blank line before <code>&lt;myElement&gt;<\/code>. After loading, altering and saving, the result is far from pleasing:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;!-- $Id: version control yadda-yadda $ --&gt;&lt;myElement&gt;\n...\n<\/code><\/pre>\n\n<p>I found out that the whitespace (one newline) between the comment and the document node is not represented in the DOM at all. The following self-contained code reproduces the issue reliably:<\/p>\n\n<pre><code>String source =\n    \"&lt;?xml version=\\\"1.0\\\" encoding=\\\"UTF-16\\\"?&gt;\\n&lt;!-- foo --&gt;\\n&lt;empty/&gt;\";\nbyte[] sourceBytes = source.getBytes(\"UTF-16\");\n\nDocumentBuilder builder =\n    DocumentBuilderFactory.newInstance().newDocumentBuilder();\nDocument doc =\n    builder.parse(new ByteInputStream(sourceBytes, sourceBytes.length));\n\nDOMImplementationLS domImplementation =\n    (DOMImplementationLS) doc.getImplementation();\nLSSerializer lsSerializer = domImplementation.createLSSerializer();\nSystem.out.println(lsSerializer.writeToString(doc));\n\n// output: &lt;?xml version=\"1.0\" encoding=\"UTF-16\"?&gt;\\n&lt;!-- foo --&gt;&lt;empty/&gt;\n<\/code><\/pre>\n\n<p>Does anyone have an idea how to avoid this? Essentially, I want the output to be the same as the input. (I know that the xml declaration will be regenerated because it's not part of the DOM, but that's not an issue here.)<\/p>\n",
+        "question_id": 868887,
+        "tags": [
+            "java",
+            "xml",
+            "dom",
+            "parsing",
+            "whitespace"
+        ],
+        "score": 8,
+        "accepted_answer_id": 869439,
+        "is_answered": true,
+        "view_count": 5969
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4ccabe5de995c858739d5b8cb0e10bd5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4874968,
+                "user_type": "registered",
+                "user_id": 3930361,
+                "link": "https://stackoverflow.com/users/3930361/user3930361",
+                "reputation": 181,
+                "display_name": "user3930361",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 868887,
+            "edited": false,
+            "creation_date": 1435075022,
+            "comment_id": 50042549
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Qbx4c.jpg?s=256",
+                "account_id": 4922,
+                "user_type": "registered",
+                "user_id": 7641,
+                "link": "https://stackoverflow.com/users/7641/jens-bannmann",
+                "reputation": 5145,
+                "display_name": "Jens Bannmann",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "post_id": 868887,
+            "edited": false,
+            "creation_date": 1242813352,
+            "comment_id": 693993
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                "account_id": 15903,
+                "user_type": "registered",
+                "user_id": 34088,
+                "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                "reputation": 330101,
+                "display_name": "Aaron Digulla",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1242397985,
+            "creation_date": 1242397985,
+            "body": "<p>I had the same problem. My solution was to write my own XML parser: <a href=\"http://code.google.com/p/decentxml/\" rel=\"noreferrer\">DecentXML<\/a><\/p>\n\n<p>Main feature: it can 100% preserve the original input, whitespace, entities, everything. It won't bother you with the details, but if your code needs to generate XML like this:<\/p>\n\n<pre><code> &lt;element\n     attr=\"some complex value\"\n     /&gt;\n<\/code><\/pre>\n\n<p>then you can.<\/p>\n",
+            "answer_id": 869050,
+            "question_id": 868887
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0ada184c98bf9073d15b2dc815be0170?s=256&d=identicon&r=PG",
+                "account_id": 10030,
+                "user_type": "registered",
+                "user_id": 18771,
+                "link": "https://stackoverflow.com/users/18771/tomalak",
+                "reputation": 339514,
+                "display_name": "Tomalak",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1242396915,
+            "creation_date": 1242396915,
+            "body": "<p>Why do you want to avoid this?<\/p>\n\n<p>The white-space outside of tags/elements is defined as insignificant by the spec. It simply does not exist, as far as the infoset is concerned that is represented by your DOM.<\/p>\n\n<p>Consequently, upon serializing the DOM again, it will not be there.<\/p>\n\n<p>If you are in the process of developing something that relies on this empty line... Don't.<\/p>\n",
+            "answer_id": 868934,
+            "question_id": 868887
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9061706d2661cf0fa9f2df0eee56cf9b?s=256&d=identicon&r=PG",
+                "account_id": 246,
+                "user_type": "registered",
+                "user_id": 304,
+                "link": "https://stackoverflow.com/users/304/mcdowell",
+                "reputation": 109219,
+                "display_name": "McDowell",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1242402224,
+            "creation_date": 1242402224,
+            "body": "<p>The root cause is that the standard <a href=\"http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-1590626202\" rel=\"nofollow noreferrer\">DOM Level 3<\/a> cannot represent Text nodes as children of a Document without breaking the spec. Whitespace will be dropped by any compliant parser.<\/p>\n\n<pre><code>Document -- \n    Element (maximum of one),\n    ProcessingInstruction,\n    Comment,\n    DocumentType (maximum of one)\n<\/code><\/pre>\n\n<p>If you require a standards-compliant solution and the objective is readability rather than 100% reproduction, I would look for it in your output mechanism.<\/p>\n",
+            "answer_id": 869439,
+            "question_id": 868887
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aa7f13a5b9c5f4358f80bc2ac3b757b0?s=256&d=identicon&r=PG",
+                "account_id": 27776,
+                "user_type": "registered",
+                "user_id": 73652,
+                "link": "https://stackoverflow.com/users/73652/kris",
+                "reputation": 14496,
+                "display_name": "Kris",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1242396855,
+            "creation_date": 1242396855,
+            "body": "<p>In general white spaces are considered irrelevant in XML and are thus not preserved when an XML file is parsed. Most libraries that output XML have an option for outputting it with nice formatting and correct indentations but it will always be fairly generic. No \"have an extra line right <em>here<\/em>\".<\/p>\n",
+            "answer_id": 868930,
+            "question_id": 868887
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e803d030fd7dd7e3f2a53187e8fbc47?s=256&d=identicon&r=PG",
+                "account_id": 32732,
+                "user_type": "registered",
+                "user_id": 91042,
+                "link": "https://stackoverflow.com/users/91042/daniel-h",
+                "reputation": 1842,
+                "display_name": "Daniel H."
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1242398029,
+            "creation_date": 1242398029,
+            "body": "<p>I agree with Kris and Tomalak, the blank line is not relevant from the XML point of view. If your application needs to produce a blank line in the output, I would suggest to review the need of that requirement.<\/p>\n\n<p>Anyway, if you still want that blank line to appear, I would suggest to download the source code of the XML parser you are using and modify that behaviour. But keep in mind that this is not standard XML and it will not be compatible with other applications.<\/p>\n\n<ul>\n<li><a href=\"http://www.jdom.org/downloads/source.html\" rel=\"nofollow noreferrer\">Jdom Source<\/a><\/li>\n<li><a href=\"http://www.dom4j.org/dom4j-1.6.1/download.html\" rel=\"nofollow noreferrer\">Dom4j Source<\/a> Check org.dom4j.io.DOMWriter<\/li>\n<\/ul>\n",
+            "answer_id": 869057,
+            "question_id": 868887
+        }
+    ],
+    "answer_comments": {
+        "869050": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4ccabe5de995c858739d5b8cb0e10bd5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4874968,
+                    "user_type": "registered",
+                    "user_id": 3930361,
+                    "link": "https://stackoverflow.com/users/3930361/user3930361",
+                    "reputation": 181,
+                    "display_name": "user3930361",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 869050,
+                "edited": false,
+                "creation_date": 1435075079,
+                "comment_id": 50042582
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                    "account_id": 15903,
+                    "user_type": "registered",
+                    "user_id": 34088,
+                    "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                    "reputation": 330101,
+                    "display_name": "Aaron Digulla",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869050,
+                "edited": false,
+                "creation_date": 1242631244,
+                "comment_id": 683812
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/Qbx4c.jpg?s=256",
+                    "account_id": 4922,
+                    "user_type": "registered",
+                    "user_id": 7641,
+                    "link": "https://stackoverflow.com/users/7641/jens-bannmann",
+                    "reputation": 5145,
+                    "display_name": "Jens Bannmann",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869050,
+                "edited": false,
+                "creation_date": 1242584734,
+                "comment_id": 682526
+            }
+        ],
+        "868934": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4ccabe5de995c858739d5b8cb0e10bd5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4874968,
+                    "user_type": "registered",
+                    "user_id": 3930361,
+                    "link": "https://stackoverflow.com/users/3930361/user3930361",
+                    "reputation": 181,
+                    "display_name": "user3930361",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 868934,
+                "edited": false,
+                "creation_date": 1435075141,
+                "comment_id": 50042635
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/0ada184c98bf9073d15b2dc815be0170?s=256&d=identicon&r=PG",
+                    "account_id": 10030,
+                    "user_type": "registered",
+                    "user_id": 18771,
+                    "link": "https://stackoverflow.com/users/18771/tomalak",
+                    "reputation": 339514,
+                    "display_name": "Tomalak",
+                    "accept_rate": 87
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 868934,
+                "edited": false,
+                "creation_date": 1242397846,
+                "comment_id": 676562
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/Qbx4c.jpg?s=256",
+                    "account_id": 4922,
+                    "user_type": "registered",
+                    "user_id": 7641,
+                    "link": "https://stackoverflow.com/users/7641/jens-bannmann",
+                    "reputation": 5145,
+                    "display_name": "Jens Bannmann",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 868934,
+                "edited": false,
+                "creation_date": 1242397531,
+                "comment_id": 676540
+            }
+        ],
+        "869057": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d6e6bbb30843ad0853dcc7b82d046a6d?s=256&d=identicon&r=PG",
+                "account_id": 187900,
+                "user_type": "registered",
+                "user_id": 426293,
+                "link": "https://stackoverflow.com/users/426293/mariovilas",
+                "reputation": 914,
+                "display_name": "MarioVilas"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "post_id": 869057,
+            "edited": false,
+            "creation_date": 1335797820,
+            "comment_id": 13390588
+        }],
+        "869439": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4ccabe5de995c858739d5b8cb0e10bd5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4874968,
+                    "user_type": "registered",
+                    "user_id": 3930361,
+                    "link": "https://stackoverflow.com/users/3930361/user3930361",
+                    "reputation": 181,
+                    "display_name": "user3930361",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 869439,
+                "edited": false,
+                "creation_date": 1435075044,
+                "comment_id": 50042560
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/42b855d5bc3f528308d96a7cd465e034?s=256&d=identicon&r=PG",
+                    "account_id": 97204,
+                    "user_type": "registered",
+                    "user_id": 263801,
+                    "link": "https://stackoverflow.com/users/263801/archie",
+                    "reputation": 5581,
+                    "display_name": "Archie",
+                    "accept_rate": 74
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869439,
+                "edited": false,
+                "creation_date": 1301589970,
+                "comment_id": 6246098
+            }
+        ],
+        "868930": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Qbx4c.jpg?s=256",
+                "account_id": 4922,
+                "user_type": "registered",
+                "user_id": 7641,
+                "link": "https://stackoverflow.com/users/7641/jens-bannmann",
+                "reputation": 5145,
+                "display_name": "Jens Bannmann",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "post_id": 868930,
+            "edited": false,
+            "creation_date": 1242396952,
+            "comment_id": 676492
+        }]
+    }
+}

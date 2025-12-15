@@ -1,0 +1,88 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user4695271"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/51564982/custom-validator-doesnt-work-completely-when-annotated-by-composed-constraint",
+        "last_activity_date": 1532723572,
+        "creation_date": 1532722624,
+        "answer_count": 1,
+        "title": "Custom validator doesn&#39;t work (completely) when annotated by composed constraint @NotBlank",
+        "body": "<p>I have a custom validator like this:<\/p>\n\n<pre><code>@Retention(RetentionPolicy.RUNTIME)\n@NotBlank(message = \"{state.NotBlank}\") // Err...it doesn't work\n@Constraint(validatedBy = { State.Validator.class })\npublic @interface State {\n  String message() default \"{state.invalid}\";\n\n  Class&lt;?&gt;[] groups() default { };\n\n  Class&lt;? extends Payload&gt;[] payload() default { };\n\n  @Component\n  final class Validator implements ConstraintValidator&lt;State, String&gt; {\n    @Override\n    public void initialize(final State constraintAnnotation) { }\n\n    @Override\n    public boolean isValid(String value, ConstraintValidatorContext context) {\n      // return true or false based on some rules\n    }\n  }\n}\n<\/code><\/pre>\n\n<p>But there is not way I can make it work annotating <code>State<\/code> with <code>@NotBlank<\/code> \u2014 since the later doesn't have the <code>ElementType.TYPE<\/code> in <code>@Target<\/code>), but annotating the fields themselves with <code>@NotBlank<\/code>.<\/p>\n\n<p>The reason I would like to have it in <code>State<\/code> is because I have to repeat the same constraint to several fields, so if <code>State<\/code> could be annotated with <code>@NotBlank<\/code> would be perfect.<\/p>\n\n<p>Any clues?<\/p>\n",
+        "question_id": 51564982,
+        "tags": [
+            "java",
+            "bean-validation"
+        ],
+        "score": 0,
+        "accepted_answer_id": 51565069,
+        "is_answered": true,
+        "view_count": 191,
+        "last_edit_date": 1532723572
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/66abd43930cc53bffca70260e0c2b511?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4760117,
+            "user_type": "registered",
+            "user_id": 6697516,
+            "link": "https://stackoverflow.com/users/6697516/camilo-sanchez",
+            "reputation": 117,
+            "display_name": "Camilo Sanchez"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1532723070,
+        "creation_date": 1532723070,
+        "body": "<p>You cant. You will need to define a new annotation because @NotBlank has the following targets:<\/p>\n\n<pre><code>@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })\n<\/code><\/pre>\n\n<p>AS you can see you can not apply it to your full interface.<\/p>\n",
+        "answer_id": 51565069,
+        "question_id": 51564982
+    }],
+    "answer_comments": {"51565069": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user4695271"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565069,
+            "edited": false,
+            "creation_date": 1532740233,
+            "comment_id": 90100966
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/66abd43930cc53bffca70260e0c2b511?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4760117,
+                "user_type": "registered",
+                "user_id": 6697516,
+                "link": "https://stackoverflow.com/users/6697516/camilo-sanchez",
+                "reputation": 117,
+                "display_name": "Camilo Sanchez"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565069,
+            "edited": false,
+            "creation_date": 1532736725,
+            "comment_id": 90100480
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user4695271"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565069,
+            "edited": false,
+            "creation_date": 1532723267,
+            "comment_id": 90097110
+        }
+    ]}
+}

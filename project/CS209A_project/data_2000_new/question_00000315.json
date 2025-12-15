@@ -1,0 +1,633 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4344714,
+            "user_type": "registered",
+            "user_id": 3547036,
+            "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+            "reputation": 602,
+            "display_name": "Kugelblitz",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29646885/letting-multiple-threads-operate-on-a-data-set-while-one-thread-sums-it-up",
+        "last_activity_date": 1429098384,
+        "creation_date": 1429091091,
+        "answer_count": 3,
+        "title": "Letting multiple Threads operate on a data set while one Thread sums it up",
+        "body": "<p>I am trying to implement a banking system where I have a set of accounts. There are multiple threds trying to transfer money between accounts, while one thread continuosuly (or rather, at random times) tries to sum up the total money in the bank (Sum of all accounts balance).<\/p>\n\n<p>The way to solve that sounded obvious at first; Using <code>ReentrantReadWriteLocks<\/code> with <code>readLock<\/code> for the threads doing the transactions and <code>writeLock<\/code> for the thread doing the summation. However after implementing it that way (see code below), I saw a huge drop in performance / \"transaction-throughput\" even versus doing transactions with only one thread.<\/p>\n\n<ul>\n<li><p>Code for above mentioned implementation:<\/p>\n\n<pre><code>public class Account implements Compareable&lt;Account&gt;{\n   private int id;\n   private int balance;\n\n   public Account(int id){\n      this.id = id;\n      this.balance = 0;\n   }\n\n   public synchronized int getBalance(){ return balance; }\n\n   public synchronized setBalance(int balance){\n      if(balance &lt; 0){ throw new IllegalArgumentException(\"Negative balance\"); }\n      this.balance = balance;\n   }\n\n   public int getId(){ return this.id; }\n\n   // To sort a collection of Accounts.\n   public int compareTo(Account other){\n      return (id &lt; other.getId() ? -1 : (id == other.getId() ? 0 : 1));\n   }\n}\n\npublic class BankingSystem {\n   protected List&lt;Account&gt; accounts;\n   protected ReadWriteLock lock = new ReentrantReadWriteLock(); // !!\n\n   public boolean transfer(Account from, Account to, int amount){\n      if(from.getId() != to.getId()){\n         synchronized(from){\n            if(from.getBalance() &lt; amount) return false;\n            lock.readLock().lock(); // !!\n            from.setBalance(from.getBalance() - amount);\n         }\n         synchronized(to){ \n            to.setBalance(to.getBalance() + amount);\n            lock.readLock().unlock(); // !! \n         }\n      }\n      return true;\n   }\n\n   // Rest of class..\n}\n<\/code><\/pre><\/li>\n<\/ul>\n\n<p>Note that this is without even using the summation method yet, so no <code>writeLock<\/code> is ever being aquired. If I only delet the lines marked with a <code>// !!<\/code> and also do not call the summation method, suddenly the \"transfer throughput\" using multiple threads is a lot higher than when using a single thread, as is the goal. <\/p>\n\n<p>My question now is, why does that simple introduction of a <code>readWriteLock<\/code> slow down the entire thing that much, if I never try to aquire a <code>writeLock<\/code>, and what I did wrong here, because I can't manage to find the problem.<\/p>\n\n<ul>\n<li>Sidenote:\nI had asked a question regarding this problem already <a href=\"https://stackoverflow.com/questions/29565031/reentrantreadwritelock-multiple-reading-threads\" title=\"Go to post\">here<\/a>, but managed to ask the wrong question. I did however, get an amazing answer for that question I asked. I decided to not reduce question quality immensly, and to keep that great answer alive for people in need for help regardin that matter, I would not edit the question (yet again). Instead I opened this question, in the strong belief that this is <strong>NOT<\/strong> a duplicate, but instead an entirely different matter.<\/li>\n<\/ul>\n",
+        "question_id": 29646885,
+        "tags": [
+            "java",
+            "multithreading",
+            "concurrency",
+            "thread-safety",
+            "locking"
+        ],
+        "score": 1,
+        "accepted_answer_id": 29648389,
+        "is_answered": true,
+        "view_count": 157,
+        "last_edit_date": 1495541747
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                "account_id": 15903,
+                "user_type": "registered",
+                "user_id": 34088,
+                "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                "reputation": 330101,
+                "display_name": "Aaron Digulla",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1429098384,
+            "creation_date": 1429091719,
+            "body": "<p><s>Locking is expensive but in your case, I assume there might be some kind of \"almost deadlock\" when you run the tests: If some thread is in the <code>synchronized(from){}<\/code> block of your code and another thread wants to unlock the <code>from<\/code> instance in it's <code>synchronized(to){}<\/code> block, then it won't be able to: The first <code>synchronized<\/code> will prevent thread #2 from entering the <code>synchronized(to){}<\/code> block and hence the lock won't be released very quickly.<\/p>\n\n<p>That could lead to a lot of threads hanging in the queue of the lock which makes it slow to get/release locks.<\/s><\/p>\n\n<p>Some more notes: Your code will cause problems when the second part (<code>to.setBalance(to.getBalance() + amount);<\/code>) isn't executed for some reason (exception, deadlock). You need to find out a way to create a transaction around the two operations to make sure they are either executed both or none are executed.<\/p>\n\n<p>A good way to do this is to create a <code>Balance<\/code> value object. In your code, you can create two new ones, update both balances and then just call the two setters - since setters can't fail, either both balances will be updated or the code will fail before any setters could be called.<\/p>\n",
+            "answer_id": 29647102,
+            "question_id": 29646885,
+            "last_edit_date": 1429098384
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                "account_id": 3211603,
+                "user_type": "registered",
+                "user_id": 2711488,
+                "link": "https://stackoverflow.com/users/2711488/holger",
+                "reputation": 300991,
+                "display_name": "Holger"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1429092496,
+            "creation_date": 1429092496,
+            "body": "<p>First of all, it\u2019s correct to put the update into its own <code>synchronized<\/code> block, even if the getter and setter are <code>synchronized<\/code> on its own, so you avoid the <em>check-then-act<\/em> anti-pattern.<\/p>\n\n<p>However, from a performance standpoint it\u2019s not optimal as you acquire the same lock three times (four times for the <code>from<\/code> account). The JVM, or the HotSpot optimizer, knows the synchronization primitives and is able to optimize such patterns of nested synchronization, but (now we have to guess a bit) if you acquire another lock in-between, it might prevent these optimizations.<\/p>\n\n<p>As already suggested at the other question, you may turn to a lock free update, but of course you have to fully understand it. The lock free updates are centered around one special operation, <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/AtomicInteger.html#compareAndSet(int,%20int)\" rel=\"nofollow\"><code>compareAndSet<\/code><\/a> which performs an update only if the variable has the expected old value, in other words, no concurrent update has been performed in-between, whereas checking and updating is performed as one atomic operation. And that operation is not implemented using <code>synchronized<\/code> but utilizing a dedicated CPU instruction directly.<\/p>\n\n<p>The use pattern is always like<\/p>\n\n<ol>\n<li>read the current value<\/li>\n<li>calculate the new value (or reject the update)<\/li>\n<li>attempt to perform an update which will succeed if the current value is still the same<\/li>\n<\/ol>\n\n<p>The drawback is that the update might fail which requires repeating the three steps but it\u2019s acceptable if the computation is not too heavy and since a failed update indicates that another thread must have succeed with its update in-between, there will always be a progress.<\/p>\n\n<p>This led to the example code for an account:<\/p>\n\n<pre><code>static void safeWithdraw(AtomicInteger account, int amount) {\n    for(;;) { // a loop as we might have to repeat the steps\n        int current=account.get(); // 1. read the current value\n        if(amount&gt;current) throw new IllegalStateException();// 2. possibly reject\n        int newValue=current-amount; // 2. calculate new value\n        // 3. update if current value didn\u2019t change\n        if(account.compareAndSet(current, newValue))\n            return; // exit on success\n    }\n}\n<\/code><\/pre>\n\n<p>So, for supporting lock-free access it\u2019s never sufficient to provide <code>getBalance<\/code> and <code>setBalance<\/code> operations as every attempt to compose an operation out of <code>get<\/code> and <code>set<\/code> operations without locking will fail.\nYou have three options:<\/p>\n\n<ol>\n<li>Provide every supported update operation as a dedicated method like the <code>safeWithdraw<\/code> method<\/li>\n<li>Provide a <code>compareAndSet<\/code> method to allow callers to compose their own update operations using that method<\/li>\n<li>Provide an update method that takes an update function as paramater, like the <a href=\"http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/atomic/AtomicInteger.html#updateAndGet-java.util.function.IntUnaryOperator-\" rel=\"nofollow\"><code>AtomicInteger<\/code> does in Java 8<\/a>;\nOf course, this comes especially handy when using Java 8 where you can use lambda expressions to implement the actual update function.<\/li>\n<\/ol>\n\n<p>Note that <code>AtomicInteger<\/code> itself uses all options. There are dedicated update methods for common operations like <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/AtomicInteger.html#incrementAndGet()\" rel=\"nofollow\">increment<\/a> and there\u2019s the <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/AtomicInteger.html#compareAndSet(int,%20int)\" rel=\"nofollow\"><code>compareAndSet<\/code><\/a> method allowing composing arbitrary update operations.<\/p>\n",
+            "answer_id": 29647421,
+            "question_id": 29646885
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                "account_id": 775068,
+                "user_type": "registered",
+                "user_id": 823393,
+                "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                "reputation": 66057,
+                "display_name": "OldCurmudgeon",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1429096550,
+            "creation_date": 1429095420,
+            "body": "<p>You would generally use <strong>either<\/strong> a lock or <code>synchronized<\/code>, it is unusual to use both at once.<\/p>\n\n<p>To manage your scenario you would normally use a fine-grained lock on each account rather than a coarse one as you have. You would also implement the totalling mechanism using a listener.<\/p>\n\n<pre><code>public interface Listener {\n\n    public void changed(int oldValue, int newValue);\n}\n\npublic class Account {\n\n    private int id;\n    private int balance;\n    protected ReadWriteLock lock = new ReentrantReadWriteLock();\n    List&lt;Listener&gt; accountListeners = new ArrayList&lt;&gt;();\n\n    public Account(int id) {\n        this.id = id;\n        this.balance = 0;\n    }\n\n    public int getBalance() {\n        int localBalance;\n        lock.readLock().lock();\n        try {\n            localBalance = this.balance;\n        } finally {\n            lock.readLock().unlock();\n        }\n        return localBalance;\n    }\n\n    public void setBalance(int balance) {\n        if (balance &lt; 0) {\n            throw new IllegalArgumentException(\"Negative balance\");\n        }\n        // Keep track of the old balance for the listener.\n        int oldValue = this.balance;\n        lock.writeLock().lock();\n        try {\n            this.balance = balance;\n        } finally {\n            lock.writeLock().unlock();\n        }\n        if (this.balance != oldValue) {\n            // Inform all listeners of any change.\n            accountListeners.stream().forEach((l) -&gt; {\n                l.changed(oldValue, this.balance);\n            });\n        }\n    }\n\n    public boolean lock() throws InterruptedException {\n        return lock.writeLock().tryLock(1, TimeUnit.SECONDS);\n    }\n\n    public void unlock() {\n        lock.writeLock().unlock();\n    }\n\n    public void addListener(Listener l) {\n        accountListeners.add(l);\n    }\n\n    public int getId() {\n        return this.id;\n    }\n\n}\n\npublic class BankingSystem {\n\n    protected List&lt;Account&gt; accounts;\n\n    public boolean transfer(Account from, Account to, int amount) throws InterruptedException {\n        if (from.getId() != to.getId()) {\n            if (from.lock()) {\n                try {\n                    if (from.getBalance() &lt; amount) {\n                        return false;\n                    }\n                    if (to.lock()) {\n                        try {\n                            // We have write locks on both accounts.\n                            from.setBalance(from.getBalance() - amount);\n                            to.setBalance(to.getBalance() + amount);\n                        } finally {\n                            to.unlock();\n                        }\n\n                    } else {\n                        // Not sure what to do - failed to lock the account.\n                    }\n                } finally {\n                    from.unlock();\n                }\n\n            } else {\n                // Not sure what to do - failed to lock the account.\n            }\n        }\n        return true;\n    }\n\n    // Rest of class..\n}\n<\/code><\/pre>\n\n<p>Note that you <strong>can<\/strong> take a write lock in the same thread twice - the second one is also allowed. Locks only exclude access from <strong>other<\/strong> threads.<\/p>\n",
+            "answer_id": 29648389,
+            "question_id": 29646885,
+            "last_edit_date": 1429096550
+        }
+    ],
+    "answer_comments": {
+        "29647102": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "edited": false,
+                "creation_date": 1429097426,
+                "comment_id": 47437820
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                    "account_id": 15903,
+                    "user_type": "registered",
+                    "user_id": 34088,
+                    "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                    "reputation": 330101,
+                    "display_name": "Aaron Digulla",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "edited": false,
+                "creation_date": 1429097090,
+                "comment_id": 47437617
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "edited": false,
+                "creation_date": 1429092751,
+                "comment_id": 47434913
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "edited": false,
+                "creation_date": 1429092518,
+                "comment_id": 47434763
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                    "account_id": 15903,
+                    "user_type": "registered",
+                    "user_id": 34088,
+                    "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                    "reputation": 330101,
+                    "display_name": "Aaron Digulla",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "edited": false,
+                "creation_date": 1429092392,
+                "comment_id": 47434679
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                    "account_id": 15903,
+                    "user_type": "registered",
+                    "user_id": 34088,
+                    "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                    "reputation": 330101,
+                    "display_name": "Aaron Digulla",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "edited": false,
+                "creation_date": 1429092303,
+                "comment_id": 47434617
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "edited": false,
+                "creation_date": 1429092197,
+                "comment_id": 47434546
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                    "account_id": 15903,
+                    "user_type": "registered",
+                    "user_id": 34088,
+                    "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                    "reputation": 330101,
+                    "display_name": "Aaron Digulla",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "edited": false,
+                "creation_date": 1429092148,
+                "comment_id": 47434518
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "edited": false,
+                "creation_date": 1429092076,
+                "comment_id": 47434464
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8a4d6f03a8879432d8563aefbf48e787?s=256&d=identicon&r=PG",
+                    "account_id": 15903,
+                    "user_type": "registered",
+                    "user_id": 34088,
+                    "link": "https://stackoverflow.com/users/34088/aaron-digulla",
+                    "reputation": 330101,
+                    "display_name": "Aaron Digulla",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "edited": false,
+                "creation_date": 1429092048,
+                "comment_id": 47434444
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647102,
+                "edited": false,
+                "creation_date": 1429091856,
+                "comment_id": 47434322
+            }
+        ],
+        "29647421": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "edited": false,
+                "creation_date": 1429098793,
+                "comment_id": 47438753
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "edited": false,
+                "creation_date": 1429097549,
+                "comment_id": 47437892
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "edited": false,
+                "creation_date": 1429096909,
+                "comment_id": 47437519
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "edited": false,
+                "creation_date": 1429095814,
+                "comment_id": 47436848
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "edited": false,
+                "creation_date": 1429094445,
+                "comment_id": 47436007
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "edited": false,
+                "creation_date": 1429094260,
+                "comment_id": 47435892
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "edited": false,
+                "creation_date": 1429094035,
+                "comment_id": 47435731
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29647421,
+                "edited": false,
+                "creation_date": 1429092938,
+                "comment_id": 47435042
+            }
+        ],
+        "29648389": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                    "account_id": 775068,
+                    "user_type": "registered",
+                    "user_id": 823393,
+                    "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                    "reputation": 66057,
+                    "display_name": "OldCurmudgeon",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29648389,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "edited": false,
+                "creation_date": 1429096431,
+                "comment_id": 47437243
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29648389,
+                "edited": false,
+                "creation_date": 1429096353,
+                "comment_id": 47437195
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                    "account_id": 775068,
+                    "user_type": "registered",
+                    "user_id": 823393,
+                    "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                    "reputation": 66057,
+                    "display_name": "OldCurmudgeon",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29648389,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "edited": false,
+                "creation_date": 1429096212,
+                "comment_id": 47437128
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 29648389,
+                "edited": false,
+                "creation_date": 1429096022,
+                "comment_id": 47437006
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                    "account_id": 775068,
+                    "user_type": "registered",
+                    "user_id": 823393,
+                    "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                    "reputation": 66057,
+                    "display_name": "OldCurmudgeon",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 29648389,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "edited": false,
+                "creation_date": 1429095820,
+                "comment_id": 47436851
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ef258a58fbfac39cf403faac1aa19b74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4344714,
+                    "user_type": "registered",
+                    "user_id": 3547036,
+                    "link": "https://stackoverflow.com/users/3547036/kugelblitz",
+                    "reputation": 602,
+                    "display_name": "Kugelblitz",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29648389,
+                "edited": false,
+                "creation_date": 1429095710,
+                "comment_id": 47436795
+            }
+        ]
+    }
+}

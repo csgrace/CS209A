@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/362b86b9f6009f4da2cb4cd82890a673?s=256&d=identicon&r=PG",
+            "account_id": 61441,
+            "user_type": "registered",
+            "user_id": 183123,
+            "link": "https://stackoverflow.com/users/183123/mm",
+            "reputation": 4284,
+            "display_name": "MM.",
+            "accept_rate": 70
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15621647/is-it-possible-to-extend-from-a-template-parameter",
+        "last_activity_date": 1364235453,
+        "creation_date": 1364234563,
+        "answer_count": 1,
+        "title": "Is it possible to extend from a template parameter?",
+        "body": "<p>I would like to decorate a set of classes that derive from a common class (TextView). The classes exist in a library, so I cannot simply modify the base or insert into their inheritance hierarchy.<\/p>\n\n<pre><code>class A {\n}\n\nclass B extends A {\n}\n\nclass C extends A {\n}\n\nclass D extends B {\n    void decoration(){}\n}\n<\/code><\/pre>\n\n<p>In the example above, class D is the decorating class. The decorating functionality is common to each of my decorating classes.<\/p>\n\n<p>My question is, is it possible to template the base class in Java? Something like: <\/p>\n\n<pre><code>class D&lt;T&gt; extends &lt;T ? extends A&gt; {}\n<\/code><\/pre>\n",
+        "question_id": 15621647,
+        "tags": ["java"],
+        "score": 2,
+        "accepted_answer_id": 15621807,
+        "is_answered": true,
+        "view_count": 446,
+        "last_edit_date": 1364235247
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d7d8f2d9904d869783dcff1803c6fbcb?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 41850,
+            "user_type": "registered",
+            "user_id": 121747,
+            "link": "https://stackoverflow.com/users/121747/jack",
+            "reputation": 133857,
+            "display_name": "Jack",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1364235453,
+        "creation_date": 1364235098,
+        "body": "<p>So your question is about adding a method dynamically to existing classes? Something similar to categories in Objective-C. This is not simple to be done in Java since once a class is loaded through the <strong>ClassLoader<\/strong> you can't add anything dynamically to it.<\/p>\n\n<p>The easiest thing that comes into my mind is to provide a custom mapping that will be by any chance external to the existing classes. Something like:<\/p>\n\n<pre><code>interface Method&lt;T extends A&gt; {\n  public void invoke(T ref);\n}\n\nclass MethodForA implements Method&lt;A&gt; {\n  public void invoke(A ref) { .. }\n}\n\nclass MethodMapper {\n  Map&lt;Class&lt;?&gt;, Method&lt;? extends A&gt;&gt; mapping;\n\n  MethodMapper() {\n    mapping = new HashMap&lt;Class&lt;?&gt;, Method&lt;? extends A&gt;&gt;();\n    mapping.put(A.class, new MethodForA());\n  }\n\n  void invoke(A object) {\n    Method&lt;? extends A&gt; method = mapping.get(object.getClass());\n    if (method != null) {\n      method.invoke(object);\n    }\n  }\n<\/code><\/pre>\n\n<p>I just wrote this boilerplate code right now so everything won't be surely correct but the way it would work is this one. I guess you will need to do some runtime type checks to avoid blindly casting things.<\/p>\n\n<p>If instead you were wondering if this is legal:<\/p>\n\n<pre><code>class A {    \n}\n\nclass B&lt;T&gt; extends A {   \n}\n\nclass C&lt;T, U&gt; extends B&lt;T&gt; {\n}\n<\/code><\/pre>\n\n<p>Yes, it is. You can make a child class generic by introducing a type parameter.<\/p>\n",
+        "answer_id": 15621807,
+        "question_id": 15621647,
+        "last_edit_date": 1364235453
+    }],
+    "answer_comments": {}
+}

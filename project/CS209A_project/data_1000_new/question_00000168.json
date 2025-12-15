@@ -1,0 +1,65 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/00041d48fdf8cc92539322b28e63e485?s=256&d=identicon&r=PG",
+            "account_id": 1070211,
+            "user_type": "registered",
+            "user_id": 1069689,
+            "link": "https://stackoverflow.com/users/1069689/dylan-broussard",
+            "reputation": 75,
+            "display_name": "Dylan Broussard"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8302125/binarysearch-errors-in-java",
+        "last_activity_date": 1322514043,
+        "creation_date": 1322513388,
+        "answer_count": 1,
+        "title": "binarySearch errors in Java",
+        "body": "<p>I have a BankAccount class that models bank account information and a main method that is supposed to create an array list of BankAccount objects from user input and then write that info to a text file. <\/p>\n\n<p>Here's my BankAccount class:<\/p>\n\n<pre><code>package BankAccount;\n\npublic class BankAccount implements Comparable&lt;BankAccount&gt; {\n\nString accountNumber;\nString firstName, lastName;\nchar middleInitial;\ndouble balance;\npublic static double OVERDRAFT_FEE = 26.00;\n\npublic BankAccount(String acno, String fName, char midInit, String lName, double initBal){\n    acno = accountNumber;\n    fName = firstName;\n    midInit = middleInitial;\n    lName = lastName;\n    initBal = balance;                \n}\n\npublic String getAccountNumber(){\n    return accountNumber;\n}\n\npublic String getFirstName(){\n    return firstName;\n}\n\npublic char getMiddleInitial(){\n    return middleInitial;\n}\n\npublic String getLastName(){\n    return lastName;\n}\n\npublic double getBalance(){\n    return balance;\n}\n\npublic void deposit(double amount){\n    if (amount &gt; 0)\n        balance = balance + amount;\n    else\n        throw new IllegalArgumentException(\"deposit(double amount): Amount cannot be less than 0.\");\n}\n\npublic void withdraw(double amount){\n    if (balance &gt;= amount &amp;&amp; amount &gt; 0)\n            balance = balance - amount;\n    else if(balance &lt; amount &amp;&amp; amount &gt; 0)\n        balance = balance - amount - OVERDRAFT_FEE;\n    else\n        throw new IllegalArgumentException(\"withdraw(double amount): Amount cannot be less than 0.\");\n}\n\n@Override\npublic int compareTo(BankAccount another){\n    if (Integer.parseInt(this.getAccountNumber()) &gt; Integer.parseInt(another.getAccountNumber()))\n        return 1;\n    else if(Integer.parseInt(this.getAccountNumber()) &lt; Integer.parseInt(another.getAccountNumber()))\n        return -1;\n    else\n        return 0;\n}\n}\n<\/code><\/pre>\n\n<p>My main method looks like this:<\/p>\n\n<pre><code>public class GeauxBank \n{\npublic static void main(String[] args)\n{\n    ArrayList&lt;BankAccount&gt; accounts = new ArrayList&lt;BankAccount&gt;();\n    Scanner keyb = new Scanner(System.in);\n    // write code to read data from acinfo.dbf. Be sure to handle\n    // FileNotFoundException in a try-catch statement. You don't\n    // need to do anything in the catch block.\n    int option;\n    String acno;\n    String fName;\n    char midInit;\n    String lName;\n    double initBal=0,amount;\n    int pos;\n    do \n    {\n        menu();\n        System.out.println();\n        System.out.print(\"Select an option-&gt;\");\n        option = keyb.nextInt();\n        System.out.println();\n        switch(option)\n        {\n            case 1:\n                System.out.print(\"Enter a 10-character long account number-&gt;\");\n                acno = keyb.next();\n                System.out.print(\"Customer's first name -&gt;\");\n                fName = keyb.next();\n                System.out.print(\"Customer's middle initial -&gt;\");\n                midInit = keyb.next().charAt(0);\n                System.out.print(\"Customer's last name -&gt;\");\n                lName = keyb.next();\n                System.out.print(\"Initial Deposit -&gt;\");\n                initBal = keyb.nextDouble();  \n                Collections.sort(accounts);                    \n                pos = binarySearch(accounts,acno);\n                if (pos &lt; 0)\n                {\n                   try\n                   {\n                       accounts.add(new BankAccount(acno,fName,midInit,lName,initBal));\n                       Collections.sort(accounts);\n                   }\n                   catch(IllegalArgumentException e)\n                   {\n                       System.out.println(e); \n                   }\n                }\n                else\n                    System.out.println(acno+\" has already being asssigned another customer\");                    \n                break;\n            case 2:\n                System.out.println(\"Enter the 10-character long account number of the account you wish to close-&gt;\");\n                acno = keyb.next();\n                pos = binarySearch(accounts, acno);\n                accounts.remove(pos);\n                break;\n            case 3:\n                System.out.println(\"Enter the 10-character long account number-&gt;\");\n                acno = keyb.next();\n                System.out.println(\"Enter the amount you wish to deposit-&gt;\");\n                amount = keyb.nextDouble();\n                pos = binarySearch(accounts, acno);\n                accounts.get(pos).deposit(amount);\n                break;\n            case 4:\n                System.out.println(\"Enter the 10-character long account number-&gt;\");\n                acno = keyb.next();\n                System.out.println(\"Enter the amount you wish to withdraw-&gt;\");\n                amount = keyb.nextDouble();\n                accounts.get(binarySearch(accounts, acno)).withdraw(amount);\n                break;\n            case 5:\n                System.out.println(\"Enter the 10-character long account number-&gt;\");      \n                acno = keyb.next();\n                accounts.get(binarySearch(accounts, acno)).getBalance();\n                break;\n            case 6:\n                int i;\n                int length = accounts.size();\n                for(i = 0; i &lt; length; i++) {\n                    System.out.print(accounts.get(i).getFirstName()+\" \");\n                    System.out.print(accounts.get(i).getMiddleInitial()+\" \");\n                    System.out.println(accounts.get(i).getLastName());\n                }\n                break;\n            case 0:\n                break;\n            default:\n               System.out.println(\"Invalid menu option\");                    \n        }                                                                  \n    }while (option != 0);\n\n    try{\n        PrintWriter writer = new PrintWriter(\"acinfo.dbf\");\n        int i;\n        int length = accounts.size();\n        for(i = 0; i &lt; length; i++){\n            writer.write(accounts.get(i)+\"\");\n        }\n        writer.close();\n    }\n    catch(FileNotFoundException f) {\n        System.out.println(\"The file acinfo.dbf does not exist.\");\n    }\n\n}\n\n/**\n * displays a text-based menu interface for this application\n */\npublic static void menu()\n{\n    System.out.println();\n    System.out.println(\"G E A U X    B A N K   L O U I S I A N A   L T D.\");\n    System.out.println(\"=================================================\");\n    System.out.println(\"[1]...............................open an account\");\n    System.out.println(\"[2]..............................close an account\");\n    System.out.println(\"[3].......................................deposit\");\n    System.out.println(\"[4]....................................withdrawal\");\n    System.out.println(\"[5]...............................balance inquiry\");\n    System.out.println(\"[6].............................customers listing\");\n    System.out.println(\"[0]..........................................exit\");\n    System.out.println(\"=================================================\");\n}\n\n/**\n * searches an array list of BankAccount objects for a matching\n * account number using the Binary Search algorithm.\n * @param accounts an array list of BankAccount objects\n * @param acno a string\n * @return the index of the BankAccount object in the array list or\n * with the account number that is the same as acno if such a BankAccount\n * object can be found in the accounts array list; otherwise, the negative \n * of the position the BankAccount object whose account number would \n * have matched acno had it been found.\n */\npublic static int binarySearch(ArrayList&lt;BankAccount&gt; accounts, String acno)\n{\n   int i;\n   int low,mid=0,high;\n   low = 0;\n   high = accounts.size()-1;\n   while (low &lt;= high)\n   {\n       mid = (low+high)/2;\n       if (acno.compareTo(accounts.get(mid).getAccountNumber())==0)\n           return mid;\n       else if (acno.compareTo(accounts.get(mid).getAccountNumber())&lt; 0)\n           high = mid-1;\n       else\n           low = mid+1;\n   }\n   return -1-mid;\n}   \n}\n<\/code><\/pre>\n\n<p>I'm having problems with the binarySearch method. I can create one bank account just fine but when I try to create a second one, I get this message: <\/p>\n\n<pre><code>Exception in thread \"main\" java.lang.NullPointerException\n    at java.lang.String.compareTo(String.java:1167)\n    at geauxbank.GeauxBank.binarySearch(GeauxBank.java:172)\n    at geauxbank.GeauxBank.main(GeauxBank.java:57)\nJava Result: 1\n<\/code><\/pre>\n\n<p>It also gives me a similar message any time I try to use any other case in the switch statement that uses the binarySearch method. I don't know why this is. Also, when I try to write the information to a text file, I get this in the text file: BankAccount.BankAccount@1b67f74\nor this: null null\nI really don't know what is causing these problems. Any insight and clarity would be appreciated.<\/p>\n",
+        "question_id": 8302125,
+        "tags": ["java"],
+        "score": 1,
+        "accepted_answer_id": 8302234,
+        "is_answered": true,
+        "view_count": 440,
+        "last_edit_date": 1322514043
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/53ee9941b3fefef67175daf212e62d41?s=256&d=identicon&r=PG",
+            "account_id": 23121,
+            "user_type": "registered",
+            "user_id": 57695,
+            "link": "https://stackoverflow.com/users/57695/peter-lawrey",
+            "reputation": 535107,
+            "display_name": "Peter Lawrey",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1322514008,
+        "creation_date": 1322514008,
+        "body": "<p>Your assignments are the wrong way around.<\/p>\n\n<p>This takes the parameter and overwrites it with the fields which is <code>null<\/code>. The fields is left as null and you get an NPE when you attempt to dereference it.<\/p>\n\n<pre><code>acno = accountNumber;\n<\/code><\/pre>\n\n<p>try<\/p>\n\n<pre><code>accountNumber = acno;\n<\/code><\/pre>\n\n<p>I suggest you make fields <code>final<\/code> (unless you need to be able to change them) and you won't have this problem.<\/p>\n",
+        "answer_id": 8302234,
+        "question_id": 8302125
+    }],
+    "answer_comments": {"8302234": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/00041d48fdf8cc92539322b28e63e485?s=256&d=identicon&r=PG",
+            "account_id": 1070211,
+            "user_type": "registered",
+            "user_id": 1069689,
+            "link": "https://stackoverflow.com/users/1069689/dylan-broussard",
+            "reputation": 75,
+            "display_name": "Dylan Broussard"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 8302234,
+        "edited": false,
+        "creation_date": 1322516484,
+        "comment_id": 10229545
+    }]}
+}

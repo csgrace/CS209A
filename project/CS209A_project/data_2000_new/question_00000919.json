@@ -1,0 +1,164 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/caa06bc41ee7fb9c5af0e685c8dab169?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1376657,
+            "user_type": "registered",
+            "user_id": 1310546,
+            "link": "https://stackoverflow.com/users/1310546/chris",
+            "reputation": 1515,
+            "display_name": "Chris",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19743365/unable-to-read-mp3-frame-header-bytes",
+        "last_activity_date": 1383407869,
+        "creation_date": 1383405332,
+        "answer_count": 1,
+        "title": "Unable to read MP3 frame header bytes?",
+        "body": "<p>I'm working on an audio project in java that requires me to determine audio file types based on their data (as opposed to file extension) and I've hit a wall with MP3s. As far as I understand, MP3 files are broken into frames where each frame has a 4 byte header containing 11's for a frame sync and an assortment of other data. Right now my code can accurately identify a WAVE file but when I start reading my test MP3 file's bytes I can't find a 11111111 byte (the first 8 of 11 frame sync bits) anywhere.<\/p>\n\n<pre><code>try {\n        FileInputStream fis = new FileInputStream(f);\n        ByteArrayOutputStream baos = new ByteArrayOutputStream();\n        byte[] buff = new byte[11];\n        byte[] byteData;\n        int bytes = 0;\n\n        while ((bytes = fis.read(buff)) != -1) {\n            baos.write(buff, 0, buff.length);\n        }\n\n        byteData = baos.toByteArray();\n\n        fis.close();\n        baos.close();\n\n        if ((int)byteData[0] == 255) {\n            type = \"MP3\";\n        } else if ((\"\" + (char)byteData[8] + (char)byteData[9] + \n                (char)byteData[10] + (char)byteData[11]) == \"WAVE\") {\n            type = \"WAVE\";\n        }\n\n    }\n<\/code><\/pre>\n",
+        "question_id": 19743365,
+        "tags": [
+            "java",
+            "mp3",
+            "wave"
+        ],
+        "score": 2,
+        "accepted_answer_id": 19743431,
+        "is_answered": true,
+        "view_count": 2611
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/455f776955f148ffad8174a9b69aa4ba?s=256&d=identicon&r=PG",
+            "account_id": 1369656,
+            "user_type": "registered",
+            "user_id": 1305253,
+            "link": "https://stackoverflow.com/users/1305253/rolfl",
+            "reputation": 17727,
+            "display_name": "rolfl",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1383407869,
+        "creation_date": 1383405742,
+        "body": "<p>You will probably find the first three bytes of the MP3 file are:<\/p>\n\n<pre><code>49 44 33\n<\/code><\/pre>\n\n<p>This is the 'magic number' for an MP3 with ID3v2 tags .... <a href=\"http://en.wikipedia.org/wiki/List_of_file_signatures\" rel=\"nofollow\">at least according to wikipedia<\/a><\/p>\n\n<p>EDIT<\/p>\n\n<p>OK, so I have looked at my system, and the MP3's I have contain the magic number:<\/p>\n\n<pre><code>73 68 51\n<\/code><\/pre>\n\n<p>which in ascii is 'ID3'.<\/p>\n\n<p>Note that you have some problems with your byte manipulation.... when you test byte values against int values you need to make sure you do the conversion right.... the test:<\/p>\n\n<pre><code>byte x = ....;\nif (x == 255) {...}\n<\/code><\/pre>\n\n<p>will never be true for any value of 'x' because <code>(byte)x<\/code> will have the range -128 to +127.<\/p>\n\n<p>To make this test work you need to do:<\/p>\n\n<pre><code>if ((x &amp; 0xff) == 255) { .... }\n<\/code><\/pre>\n\n<p>I have modified your method to test things on my system, and have tried a WAV file and a few MP3's. This is the code I have:<\/p>\n\n<pre><code>public static final String getValid(File f) throws IOException {\n    FileInputStream fis = new FileInputStream(f);\n    byte[] buff = new byte[12];\n    int bytes = 0, pos = 0;\n\n    while (pos &lt; buff.length &amp;&amp; (bytes = fis.read(buff, pos, buff.length - pos)) &gt; 0) {\n        pos += bytes;\n    }\n\n    fis.close();\n\n   // this is your test.... which should bitmask the value too:\n    if ((buff[0] &amp; 0x000000ff) == 255) {\n        return \"MP3 \" + f;\n    }\n    // My testing indicates this is the MP3 magic number\n    if (   'I' == (char)buff[0]\n        &amp;&amp; 'D' == (char)buff[1]\n        &amp;&amp; '3' == (char)buff[2]) {\n        return \"MP3 ID3 Magic\" + f;\n    }\n    // This is the magic number from wikipedia (spells '1,!')\n    if (49 == buff[0] &amp;&amp; 44 == buff[1] &amp;&amp; 33 == buff[2]) {\n        return \"MP3 ID3v2\" + f;\n    }\n    if (   'W' == (char)buff[8]\n        &amp;&amp; 'A' == (char)buff[9]\n        &amp;&amp; 'V' == (char)buff[10]\n        &amp;&amp; 'E' == (char)buff[11]) {\n        return \"WAVE \" + f;\n    }\n\n    return \"unknown \" + f;\n\n}\n<\/code><\/pre>\n",
+        "answer_id": 19743431,
+        "question_id": 19743365,
+        "last_edit_date": 1383407869
+    }],
+    "answer_comments": {"19743431": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/fGuXb.png?s=256",
+                "account_id": 5669733,
+                "user_type": "registered",
+                "user_id": 4512989,
+                "link": "https://stackoverflow.com/users/4512989/lumato-reinstate-monica",
+                "reputation": 71,
+                "display_name": "lumato - Reinstate Monica"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 19743431,
+            "edited": false,
+            "creation_date": 1549538227,
+            "comment_id": 95941836
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/455f776955f148ffad8174a9b69aa4ba?s=256&d=identicon&r=PG",
+                "account_id": 1369656,
+                "user_type": "registered",
+                "user_id": 1305253,
+                "link": "https://stackoverflow.com/users/1305253/rolfl",
+                "reputation": 17727,
+                "display_name": "rolfl",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743431,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/caa06bc41ee7fb9c5af0e685c8dab169?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1376657,
+                "user_type": "registered",
+                "user_id": 1310546,
+                "link": "https://stackoverflow.com/users/1310546/chris",
+                "reputation": 1515,
+                "display_name": "Chris",
+                "accept_rate": 92
+            },
+            "edited": false,
+            "creation_date": 1383407947,
+            "comment_id": 29337093
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa06bc41ee7fb9c5af0e685c8dab169?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1376657,
+                "user_type": "registered",
+                "user_id": 1310546,
+                "link": "https://stackoverflow.com/users/1310546/chris",
+                "reputation": 1515,
+                "display_name": "Chris",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743431,
+            "edited": false,
+            "creation_date": 1383406722,
+            "comment_id": 29336738
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/455f776955f148ffad8174a9b69aa4ba?s=256&d=identicon&r=PG",
+                "account_id": 1369656,
+                "user_type": "registered",
+                "user_id": 1305253,
+                "link": "https://stackoverflow.com/users/1305253/rolfl",
+                "reputation": 17727,
+                "display_name": "rolfl",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743431,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/caa06bc41ee7fb9c5af0e685c8dab169?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1376657,
+                "user_type": "registered",
+                "user_id": 1310546,
+                "link": "https://stackoverflow.com/users/1310546/chris",
+                "reputation": 1515,
+                "display_name": "Chris",
+                "accept_rate": 92
+            },
+            "edited": false,
+            "creation_date": 1383406573,
+            "comment_id": 29336686
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa06bc41ee7fb9c5af0e685c8dab169?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1376657,
+                "user_type": "registered",
+                "user_id": 1310546,
+                "link": "https://stackoverflow.com/users/1310546/chris",
+                "reputation": 1515,
+                "display_name": "Chris",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743431,
+            "edited": false,
+            "creation_date": 1383406011,
+            "comment_id": 29336510
+        }
+    ]}
+}

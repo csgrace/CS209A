@@ -1,0 +1,87 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3f50ad5705d068750271ee134aaeada6?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10757232,
+            "user_type": "registered",
+            "user_id": 7914813,
+            "link": "https://stackoverflow.com/users/7914813/sajeeb-saha",
+            "reputation": 47,
+            "display_name": "Sajeeb Saha"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/43814969/blank-string-added-in-a-integer-array-when-sending-from-a-java-socket",
+        "last_activity_date": 1494095559,
+        "creation_date": 1494026063,
+        "answer_count": 1,
+        "title": "Blank String added in a Integer array when sending from a java socket",
+        "body": "<p>I am trying to send an integer array using ObjectOutputStream and WriteObject method from a client and receiving the array from the server. Here is Client and Server code respectively:<\/p>\n\n<p>Client:<\/p>\n\n<pre><code>int numberArray [] = new int[]{3,6,1,5,8};\nObjectOutputStream os =new ObjectOutputStream(socket.getOutputStream());\nos.writeObject(numberArray);\n<\/code><\/pre>\n\n<p>Server:<\/p>\n\n<pre><code>ObjectInputStream is = new ObjectInputStream(socket.getInputStream());\nint[] Array = (int[])is.readObject();\nfor (int e : Array) {\n System.out.print(e + \" \");\n}\n<\/code><\/pre>\n\n<p>The client can send the array successfully. However, when I am trying to read the array the following error occurs and program exits:<\/p>\n\n<pre><code>3 6 1 5 8 \nException in thread \"main\" java.lang.NumberFormatException: For input string: \"\"\n    at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)\n    at java.lang.Integer.parseInt(Integer.java:592)\n    at java.lang.Integer.parseInt(Integer.java:615)\n    at testserver.TestServer.main(TestServer.java:73)\nJava Result: 1\n<\/code><\/pre>\n\n<p>Please can anybody tell me where I am doing the wrong?? <\/p>\n",
+        "question_id": 43814969,
+        "tags": [
+            "java",
+            "arrays",
+            "sockets",
+            "objectoutputstream"
+        ],
+        "score": 3,
+        "is_answered": false,
+        "view_count": 103
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521070,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43814969,
+            "edited": false,
+            "creation_date": 1494050449,
+            "comment_id": 74673347
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/97c14cb2eb8906d00cf1cee27ce97b6d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10791375,
+                "user_type": "registered",
+                "user_id": 7938769,
+                "link": "https://stackoverflow.com/users/7938769/tima",
+                "reputation": 1523,
+                "display_name": "tima"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43814969,
+            "edited": false,
+            "creation_date": 1494038179,
+            "comment_id": 74671424
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3f50ad5705d068750271ee134aaeada6?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10757232,
+            "user_type": "registered",
+            "user_id": 7914813,
+            "link": "https://stackoverflow.com/users/7914813/sajeeb-saha",
+            "reputation": 47,
+            "display_name": "Sajeeb Saha"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1494095559,
+        "creation_date": 1494095559,
+        "body": "<p>I don't know what weird happened in my android studio or Netbeans. I have written the code in a fresh new project and now it's working !!!!\nHere is my complete code. For the sack of simplicity last time I didn't post the whole code. <\/p>\n\n<p>However, in the client code if I use only print method there is no output in the console, but if I use println method then contents of the array are printled in the console. Can anybody explain why this is happening?? <\/p>\n\n<p>Server<\/p>\n\n<pre><code>package testserver;\n\nimport java.io.IOException;\nimport java.io.ObjectInputStream;\nimport java.io.ObjectOutputStream;\nimport java.net.InetAddress;\nimport java.net.ServerSocket;\nimport java.net.Socket;\n\npublic class TestServer {\n\n        public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {\n        ServerSocket listener;\n        InetAddress addr = InetAddress.getLocalHost();\n        listener = new ServerSocket(9090,50,addr);        \n        try {\n            System.out.println(\"Waiting for Client...!!!\");\n            while (true) {\n                Socket socket = listener.accept();\n                try {\n                    ObjectInputStream is = new ObjectInputStream(socket.getInputStream());\n                    int[] Array = (int[])is.readObject();\n                    for (int e : Array) {\n                        System.out.print(e + \" \");\n                    }\n\n                    ObjectOutputStream os =new ObjectOutputStream(socket.getOutputStream());\n                    os.writeObject(Array);\n                } finally {\n                    socket.close();\n                }\n            }\n        }\n        finally {\n            listener.close();\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Client<\/p>\n\n<pre><code>package com.example.asus.clientwitharray;\n\nimport android.os.AsyncTask;\nimport android.util.Log;\nimport android.widget.TextView;\nimport java.io.IOException;\nimport java.io.ObjectInputStream;\nimport java.io.ObjectOutputStream;\nimport java.net.Socket;\nimport java.net.UnknownHostException;\n\npublic class Client extends AsyncTask&lt;Void, Void, Void&gt; {\n    String dstAddress;\n    int dstPort;\n    String response =\"\";\n    TextView textResponse;\n\n    Client(String addr, int port, TextView textResponse) {\n        dstAddress = addr;\n        dstPort = port;\n        this.textResponse = textResponse;\n    }\n\n    @Override\n    protected Void doInBackground(Void... arg0) {\n\n        Socket socket = null;\n        try {\n            socket = new Socket(dstAddress, dstPort);\n            int numberArray [] = new int[]{2,4,6,1,9};\n            ObjectOutputStream os =new ObjectOutputStream(socket.getOutputStream());\n            os.writeObject(numberArray);\n\n            ObjectInputStream is = new ObjectInputStream(socket.getInputStream());\n            int[] Arr = (int[])is.readObject();\n            for (int e : Arr) {\n                System.out.println(e);\n            }\n        } catch (UnknownHostException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n            response = \"UnknownHostException: \" + e.toString();\n        } catch (IOException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n            response = \"IOException: \" + e.toString();\n        } catch (ClassNotFoundException e) {\n            e.printStackTrace();\n        } finally {\n            if (socket != null) {\n                try {\n                    socket.close();\n                } catch (IOException e) {\n                    // TODO Auto-generated catch block\n                    e.printStackTrace();\n                }\n            }\n        }\n        return null;\n    }\n\n    @Override\n    protected void onPostExecute(Void result) {\n        textResponse.setText(response);\n        super.onPostExecute(result);\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 43824030,
+        "question_id": 43814969
+    }],
+    "answer_comments": {}
+}

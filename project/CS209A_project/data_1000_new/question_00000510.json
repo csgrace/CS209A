@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/132bbc3b88263a20ace989f6c441a157?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6328358,
+            "user_type": "registered",
+            "user_id": 4914067,
+            "link": "https://stackoverflow.com/users/4914067/stevenchusm",
+            "reputation": 21,
+            "display_name": "stevenchusm"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75951854/how-to-see-the-sql-queries-hibernate-issuing-for-setting-transaction-level-and-a",
+        "last_activity_date": 1681021911,
+        "creation_date": 1680799233,
+        "answer_count": 2,
+        "title": "How to see the SQL queries Hibernate issuing for setting transaction level and autocommit",
+        "body": "<p>On my MySQL server, in the general log I see a ton of logs that look like:<\/p>\n<pre class=\"lang-bash prettyprint-override\"><code>2023-03-31T09:31:23.208-07:00   2023-03-31T16:31:23.208345Z37028 Query SET autocommit=0\n2023-03-31T09:31:23.211-07:00   2023-03-31T16:31:23.211201Z36956 Query set session transaction read write\n2023-03-31T09:31:23.211-07:00   2023-03-31T16:31:23.211807Z36957 Query /* dynamic native SQL query */ select now() /*app health check*/\n2023-03-31T09:31:23.255-07:00   2023-03-31T16:31:23.255990Z36995 Query set session transaction read write\n2023-03-31T09:31:23.273-07:00   2023-03-31T16:31:23.273013Z36957 Query set session transaction read write\n2023-03-31T09:31:23.276-07:00   2023-03-31T16:31:23.276323Z36956 Query SET autocommit=0\n2023-03-31T09:31:23.320-07:00   2023-03-31T16:31:23.320214Z36995 Query SET autocommit=0\n2023-03-31T09:31:23.334-07:00   2023-03-31T16:31:23.334801Z36957 Query SET autocommit=0\n2023-03-31T09:31:23.461-07:00   2023-03-31T16:31:23.461897Z37056 Query rollback\n<\/code><\/pre>\n<p>I would like to see them on the clientside logs, however. My Java is very rusty so please be patient. In case it's helpful, the question I'm asking looks very similar to <a href=\"https://stackoverflow.com/questions/30576385/how-to-log-the-start-and-the-completion-of-db-transactions-in-hibernate\">this one<\/a>, though the accepted answer there didn't actually end up working out for me either (this is a separate issue) :/<\/p>\n<p>I have a YAML file and have tried enabling the following:<\/p>\n<pre class=\"lang-yaml prettyprint-override\"><code>logging:\n  levels:\n  - path: org.hibernate\n    value: trace\n  - path: org.hibernate.SQL\n    value: debug\n  - path: org.jooq\n    value: trace\n  - path: com.amazonaws\n    value: debug\n  - path: com.zaxxer\n    value: debug\n  - path: com.mysql\n    value: debug\n  - path: org.hibernate.engine.transaction.internal.TransactionImpl\n    value: debug\n  - path: com.mysql.clusterj.core.TransactionImpl\n    value: debug\n  - path: org.hibernate.jpa.internal.TransactionImpl\n    value: debug\n<\/code><\/pre>\n",
+        "question_id": 75951854,
+        "tags": [
+            "java",
+            "mysql",
+            "hibernate"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 102
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/61a63fed50c84da73ec134c652cdfd27?s=256&d=identicon&r=PG",
+                "account_id": 3449881,
+                "user_type": "registered",
+                "user_id": 2889760,
+                "link": "https://stackoverflow.com/users/2889760/gavin-king",
+                "reputation": 4433,
+                "display_name": "Gavin King"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1680863995,
+            "creation_date": 1680863995,
+            "body": "<p>Hibernate does not send those queries. It is the JDBC driver which sends them. The relevant JDBC API is <code>java.sql.Connection.setAutoCommit()<\/code>, and in a container environment that method is usually called by your connection pool.<\/p>\n",
+            "answer_id": 75957681,
+            "question_id": 75951854
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2zdCg.jpg?s=256",
+                "account_id": 3171905,
+                "user_type": "registered",
+                "user_id": 2680640,
+                "link": "https://stackoverflow.com/users/2680640/sendon1982",
+                "reputation": 11474,
+                "display_name": "sendon1982"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1681021911,
+            "creation_date": 1681021911,
+            "body": "<p>Hibernate config like is like this to enable auto commit:<\/p>\n<p><code>&lt;property name=&quot;connection.autocommit&quot;&gt;true&lt;/property&gt;<\/code><\/p>\n<p>Transaction Level can be set in the code<\/p>\n<pre><code>EntityManagerFactory emFactory = Persistence.createEntityManagerFactory(&quot;sampleUnit&quot;);\nEntityManager em1 = emFactory.createEntityManager();\nEntityTransaction t1 = em1.getTransaction();\nt1.begin();\ntry {\n  Query query = em1.createQuery(&quot;SELECT p FROM Product p WHERE name = :name&quot;);\n  query.setParameter(&quot;name&quot;, &quot;cherry&quot;);\n  List&lt;Product&gt; products = query.getResultList();\n  System.out.println(&quot;Got product size: &quot;+products.size());\n} finally {\n  t1.rollback();\n}\n<\/code><\/pre>\n",
+            "answer_id": 75969096,
+            "question_id": 75951854
+        }
+    ],
+    "answer_comments": {}
+}

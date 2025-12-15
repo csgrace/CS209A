@@ -1,0 +1,211 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8ada59e064ba9638a81ce3333681ee28?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4307592,
+            "user_type": "registered",
+            "user_id": 3519587,
+            "link": "https://stackoverflow.com/users/3519587/lr89",
+            "reputation": 397,
+            "display_name": "LR89",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48226982/rxjava-multicast-completable-result",
+        "last_activity_date": 1515765461,
+        "creation_date": 1515762640,
+        "answer_count": 1,
+        "title": "RxJava - Multicast completable result",
+        "body": "<p>I have a Completable that makes two network request in sequence (something like a handshake). This operation can be triggered in many places in my code. What I want to achive is:<\/p>\n\n<ul>\n<li>When the completable is called multiple times while it's already doing it's work, it should not restart but instead make only one \"handshake\", then return the \"onComplete\" event to all subscribers<\/li>\n<li>When the completable is called for a second time, but it has already compleated its work or faced an error before, it should be restarted (it should not simply cache previous result).<\/li>\n<\/ul>\n\n<p>I was trying to apply different solutions, including <a href=\"https://stackoverflow.com/questions/46670909/rxjava-how-to-multicast-a-completable\">this one<\/a>, but for some reason I can still see multiple requests being made in parallel.<\/p>\n\n<pre><code>public Completable prepareMuticastCompletable() {\n  return networkService.makeHandshake() // Completable, makes two network requests\n      // transform it into ConnectableObservable\n      .toObservable()\n      .replay()\n      // stay connected as long as there are any subscribers\n      .refCount()\n      // transform it back to Completable\n      .ignoreElements()\n      .doOnSubscribe(disposable -&gt; Log.d(\"Test\", \"subscribe\"));\n}\n<\/code><\/pre>\n\n<p>If I try to subscribe to this Completable multiple times at once, I'd like to see multiple \"onComplete\" events but the action performed only once (two HTTP requests). <\/p>\n\n<pre><code>D/Test: subscribe\nD/Test: subscribe\nD/OkHttp: --&gt; GET https://.../startHandshake\nD/OkHttp: --&gt; GET https://.../startHandshake\nD/OkHttp: &lt;-- 200 OK https://.../startHandshake (503ms, 184-byte body)\nD/OkHttp: &lt;-- 200 OK https://.../startHandshake (508ms, 184-byte body)\nD/OkHttp: --&gt; POST https://.../finishHandshake (151-byte body)\nD/OkHttp: --&gt; POST https://.../finishHandshake (151-byte body)\nD/OkHttp: &lt;-- 200 OK https://.../finishHandshake (151ms, 196-byte body)\nD/OkHttp: &lt;-- 200 OK https://.../finishHandshake (150ms, 196-byte body)\nD/OkHttp: done 2\nD/OkHttp: done 1\n<\/code><\/pre>\n\n<p>What am I missing? Are there other RxJava methods that I should use instead?<\/p>\n\n<p><strong>Edit:<\/strong>\nThe subscription (for testing) looks like follows:<\/p>\n\n<pre><code>private Completable prepareCompletable() {\n  return prepareMuticastCompletable()\n    .andThen(someOtherNotRelevantCompletable()); \n}\n\n//...\n\nprepareCompletable()\n  .doOnComplete(() -&gt; Log.d(\"OkHttp\", \"done 1\"))\n  .subscribe();\nprepareCompletable()\n  .doOnComplete(() -&gt; Log.d(\"OkHttp\", \"done 2\"))\n  .subscribe();\n<\/code><\/pre>\n",
+        "question_id": 48226982,
+        "tags": [
+            "java",
+            "android",
+            "rx-java2",
+            "rx-android"
+        ],
+        "score": 0,
+        "accepted_answer_id": 48227762,
+        "is_answered": true,
+        "view_count": 383,
+        "last_edit_date": 1515764765
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ada59e064ba9638a81ce3333681ee28?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4307592,
+                "user_type": "registered",
+                "user_id": 3519587,
+                "link": "https://stackoverflow.com/users/3519587/lr89",
+                "reputation": 397,
+                "display_name": "LR89",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226982,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "edited": false,
+            "creation_date": 1515765578,
+            "comment_id": 83437232
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226982,
+            "edited": false,
+            "creation_date": 1515764963,
+            "comment_id": 83436901
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ada59e064ba9638a81ce3333681ee28?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4307592,
+                "user_type": "registered",
+                "user_id": 3519587,
+                "link": "https://stackoverflow.com/users/3519587/lr89",
+                "reputation": 397,
+                "display_name": "LR89",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226982,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "edited": false,
+            "creation_date": 1515764821,
+            "comment_id": 83436820
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226982,
+            "edited": false,
+            "creation_date": 1515764278,
+            "comment_id": 83436522
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ada59e064ba9638a81ce3333681ee28?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4307592,
+                "user_type": "registered",
+                "user_id": 3519587,
+                "link": "https://stackoverflow.com/users/3519587/lr89",
+                "reputation": 397,
+                "display_name": "LR89",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226982,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "edited": false,
+            "creation_date": 1515764033,
+            "comment_id": 83436387
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226982,
+            "edited": false,
+            "creation_date": 1515763360,
+            "comment_id": 83436018
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+            "account_id": 24127,
+            "user_type": "registered",
+            "user_id": 61158,
+            "link": "https://stackoverflow.com/users/61158/akarnokd",
+            "reputation": 70130,
+            "display_name": "akarnokd",
+            "accept_rate": 98
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1515765461,
+        "creation_date": 1515765461,
+        "body": "<p>You have to cache the cold sequence and reuse it somehow:<\/p>\n\n<pre><code>Completable c = prepareCompletable()\n\nc.doOnComplete(() -&gt; Log.d(\"OkHttp\", \"done 1\"))\n    .subscribe();\n\nc.doOnComplete(() -&gt; Log.d(\"OkHttp\", \"done 2\"))\n    .subscribe();\n<\/code><\/pre>\n\n<p>But note that if the first response is fast, you'd still get double calls.<\/p>\n",
+        "answer_id": 48227762,
+        "question_id": 48226982
+    }],
+    "answer_comments": {"48227762": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8ada59e064ba9638a81ce3333681ee28?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4307592,
+            "user_type": "registered",
+            "user_id": 3519587,
+            "link": "https://stackoverflow.com/users/3519587/lr89",
+            "reputation": 397,
+            "display_name": "LR89",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 48227762,
+        "edited": false,
+        "creation_date": 1515766432,
+        "comment_id": 83437738
+    }]}
+}

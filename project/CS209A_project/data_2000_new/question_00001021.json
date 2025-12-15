@@ -1,0 +1,100 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/51M3U.jpg?s=256",
+            "account_id": 1321712,
+            "user_type": "registered",
+            "user_id": 1267404,
+            "link": "https://stackoverflow.com/users/1267404/victoria-agafonova",
+            "reputation": 2218,
+            "display_name": "Victoria Agafonova",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/68822554/rabbitlistener-cant-connect-to-rabbitmq-from-the-same-docker-container",
+        "last_activity_date": 1629225801,
+        "creation_date": 1629225801,
+        "answer_count": 0,
+        "title": "@RabbitListener can&#39;t connect to rabbitMQ from the same docker container",
+        "body": "<p>I have Spring app which works with RabbitMQ. They both suppose to work as Docker container.\nWhen I start only RabbitMQ as Docker container, my app can work with it from the host (both from IDEA and being launched from Terminal as jar).\nAlso, my app can create new Queue both being launched from the host and as Docker container.\nProblems start with @RabbitListener. It works from the host, but not inside Docker container.<\/p>\n<p>Error log:<\/p>\n<pre><code>[2021-08-17 18:22:58,703] [INFO] [org.springframework.amqp.rabbit.connection.CachingConnectionFactory.connectHostPort:648] [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-7] - Attempting to connect to: rabbitnet:5672\n[2021-08-17 18:22:58,704] [ERROR] [org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer.redeclareElementsIfNecessary:1877] [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-7] - Failed to check/redeclare auto-delete queue(s).\norg.springframework.amqp.AmqpIOException: java.net.UnknownHostException: rabbitnet\n    at org.springframework.amqp.rabbit.support.RabbitExceptionTranslator.convertRabbitAccessException(RabbitExceptionTranslator.java:70)\n\n    at org.springframework.amqp.rabbit.connection.AbstractConnectionFactory.createBareConnection(AbstractConnectionFactory.java:602)\n\n    at org.springframework.amqp.rabbit.connection.CachingConnectionFactory.createConnection(CachingConnectionFactory.java:724)\n    at org.springframework.amqp.rabbit.connection.ConnectionFactoryUtils.createConnection(ConnectionFactoryUtils.java:216)\n    at org.springframework.amqp.rabbit.core.RabbitTemplate.doExecute(RabbitTemplate.java:2132)\n    at org.springframework.amqp.rabbit.core.RabbitTemplate.execute(RabbitTemplate.java:2105)\n    at org.springframework.amqp.rabbit.core.RabbitTemplate.execute(RabbitTemplate.java:2085)\n    at org.springframework.amqp.rabbit.core.RabbitAdmin.getQueueInfo(RabbitAdmin.java:407)\n    at org.springframework.amqp.rabbit.core.RabbitAdmin.getQueueProperties(RabbitAdmin.java:391)\n    at org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer.attemptDeclarations(AbstractMessageListenerContainer.java:1890)\n    at org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer.redeclareElementsIfNecessary(AbstractMessageListenerContainer.java:1871)\n    at org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer$AsyncMessageProcessingConsumer.initialize(SimpleMessageListenerContainer.java:1346)\n    at org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer$AsyncMessageProcessingConsumer.run(SimpleMessageListenerContainer.java:1192)\n    at java.base/java.lang.Thread.run(Thread.java:829)\nCaused by: java.net.UnknownHostException: rabbitnet\n    at java.base/java.net.InetAddress$CachedAddresses.get(InetAddress.java:797)\n    at java.base/java.net.InetAddress.getAllByName0(InetAddress.java:1509)\n    at java.base/java.net.InetAddress.getAllByName(InetAddress.java:1368)\n    at java.base/java.net.InetAddress.getAllByName(InetAddress.java:1302)\n    at com.rabbitmq.client.DnsRecordIpAddressResolver.resolveIpAddresses(DnsRecordIpAddressResolver.java:83)\n    at com.rabbitmq.client.DnsRecordIpAddressResolver.getAddresses(DnsRecordIpAddressResolver.java:73)\n    at com.rabbitmq.client.ConnectionFactory.newConnection(ConnectionFactory.java:1133)\n    at com.rabbitmq.client.ConnectionFactory.newConnection(ConnectionFactory.java:1087)\n    at com.rabbitmq.client.ConnectionFactory.newConnection(ConnectionFactory.java:1255)\n    at org.springframework.amqp.rabbit.connection.AbstractConnectionFactory.connectHostPort(AbstractConnectionFactory.java:651)\n    at org.springframework.amqp.rabbit.connection.AbstractConnectionFactory.connect(AbstractConnectionFactory.java:616)\n    at org.springframework.amqp.rabbit.connection.AbstractConnectionFactory.createBareConnection(AbstractConnectionFactory.java:565)\n    ... 12 common frames omitted\n<\/code><\/pre>\n<p>Here is <code>docker-compose.ym<\/code><\/p>\n<pre><code>version: &quot;3.8&quot;\nservices:\n  myapp:\n    build: .\n    hostname: myapphost\n    networks:\n      - rabbitnet\n  rabbitmq:\n    image: rabbitmq:3.8.3-management-alpine\n    hostname: rabbithost\n    environment:\n      RABBITMQ_DEFAULT_USER: guest\n      RABBITMQ_DEFAULT_PASS: guest\n    ports:\n      - 5672:5672\n      - 15672:15672\n    networks:\n      - rabbitnet\nnetworks:\n  rabbitnet:\n    driver: bridge\n<\/code><\/pre>\n<p>Here is Dockerfile<\/p>\n<pre><code>FROM openjdk:11 as jdkbase\nFROM jdkbase\n\nCOPY target/dependency-jars /run/dependency-jars\nCOPY target/resources /run/resources\nADD target/myapp-1.0.0.jar /run/myapp-1.0.0.jar\n\nCMD java -jar run/myapp-1.0.0.jar\n<\/code><\/pre>\n<p>Here is class and method, where the app listens to the RabbitMQ:<\/p>\n<pre><code>@Slf4j @Component\npublic class MsgRdr {\n   @SneakyThrows @RabbitListener(queues = Q_INPUT)\n   public void read(@Valid @Payload MyMessage message, @Headers Map&lt;String, Object&gt; headers) {\n   log.info(&quot;Received: &quot;);\n   this.MyHandler.handleAll(message);\n   }\n}\n<\/code><\/pre>\n<p>Here is Rabbit configs:<\/p>\n<pre><code>@Configuration @EnableRabbit\n@Import(BaseConfig.class)\npublic class MyRabbitConfiguration {\n\n//THIS METHOD WORKS FINE EVERYWHERE\n@Bean\npublic Queue myQueue(@Value(Q_INPUT) String name) {\nSystem.out.println(&quot;==== myQueue creation ====&quot;);\nQueue q = new Queue(name, true);\nSystem.out.println(&quot;==== myQueue creation done! ====&quot;);\nreturn q;\n}\n\n//bla-bla-bla creating factory and message template\n}\n\n@SuppressWarnings(&quot;unused&quot;)\npublic class BaseConfig implements RabbitListenerConfigurer {\n@Autowired private MessageHandlerMethodFactory messageHandlerMethodFactory;\n\n@Bean\npublic SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(/*...*/) {\nSystem.out.println(&quot;=== rabbitListenerContainerFactory ===&quot;);\n   SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();\n   factory.setConnectionFactory(connectionFactory);\n   factory.setDefaultRequeueRejected(false);\n   factory.setPrefetchCount(1);\n   factory.setContainerCustomizer(c -&gt; \n   c.setShutdownTimeout(timeout));\n   //setting other configs\n   return factory;\n   }\n   //bla-bla other methods...\n}\n<\/code><\/pre>\n<p>POM dependecy for rabbit:<\/p>\n<pre><code>&lt;dependency&gt;\n    &lt;groupId&gt;org.springframework.amqp&lt;/groupId&gt;\n    &lt;artifactId&gt;spring-rabbit&lt;/artifactId&gt;\n    &lt;version&gt;2.3.6&lt;/version&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n",
+        "question_id": 68822554,
+        "tags": [
+            "java",
+            "docker",
+            "docker-compose",
+            "rabbitmq",
+            "spring-rabbit"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 500
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kL1Bd.png?s=256",
+                "account_id": 4739993,
+                "user_type": "registered",
+                "user_id": 3833111,
+                "link": "https://stackoverflow.com/users/3833111/mr-thorynque",
+                "reputation": 2062,
+                "display_name": "Mr_Thorynque",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822554,
+            "edited": false,
+            "creation_date": 1629235220,
+            "comment_id": 121632578
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/51M3U.jpg?s=256",
+                "account_id": 1321712,
+                "user_type": "registered",
+                "user_id": 1267404,
+                "link": "https://stackoverflow.com/users/1267404/victoria-agafonova",
+                "reputation": 2218,
+                "display_name": "Victoria Agafonova",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822554,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/kL1Bd.png?s=256",
+                "account_id": 4739993,
+                "user_type": "registered",
+                "user_id": 3833111,
+                "link": "https://stackoverflow.com/users/3833111/mr-thorynque",
+                "reputation": 2062,
+                "display_name": "Mr_Thorynque",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1629234530,
+            "comment_id": 121632389
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kL1Bd.png?s=256",
+                "account_id": 4739993,
+                "user_type": "registered",
+                "user_id": 3833111,
+                "link": "https://stackoverflow.com/users/3833111/mr-thorynque",
+                "reputation": 2062,
+                "display_name": "Mr_Thorynque",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822554,
+            "edited": false,
+            "creation_date": 1629232142,
+            "comment_id": 121631682
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

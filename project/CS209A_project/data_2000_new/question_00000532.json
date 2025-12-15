@@ -1,0 +1,148 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100002987102589/picture?type=large",
+            "account_id": 3139186,
+            "user_type": "registered",
+            "user_id": 2654997,
+            "link": "https://stackoverflow.com/users/2654997/rafael-maires-rangel",
+            "reputation": 83,
+            "display_name": "Rafael Maires Rangel"
+        },
+        "closed_date": 1375808634,
+        "link": "https://stackoverflow.com/questions/18070328/draw-latitude-and-longitude-with-polygon-on-canvas",
+        "last_activity_date": 1458662684,
+        "creation_date": 1375751854,
+        "answer_count": 2,
+        "title": "Draw latitude and longitude with polygon on canvas",
+        "body": "<p>I have the following points of lat and long<\/p>\n\n<pre>\n-29.8150081639178, -55.74497604370117\n-29.8200035090558, -55.74497604370117\n-29.8200035090558, -55.74998092651367\n-29.8150081641506, -55.74998092651367\n<\/pre>\n\n<p>and would create a polygon on the screen. \nMy points are small so I'm having difficulties to transform them into coordinates. Anyone have any tips or code in Delphi, HTML5, HTML5 canvas, or JavaScript using these points?<\/p>\n",
+        "question_id": 18070328,
+        "tags": [
+            "java",
+            "javascript",
+            "jquery",
+            "delphi"
+        ],
+        "score": 1,
+        "accepted_answer_id": 18071663,
+        "closed_reason": "Needs details or clarity",
+        "is_answered": true,
+        "view_count": 2208,
+        "last_edit_date": 1458662684
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100002987102589/picture?type=large",
+                "account_id": 3139186,
+                "user_type": "registered",
+                "user_id": 2654997,
+                "link": "https://stackoverflow.com/users/2654997/rafael-maires-rangel",
+                "reputation": 83,
+                "display_name": "Rafael Maires Rangel"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18070328,
+            "edited": false,
+            "creation_date": 1375799877,
+            "comment_id": 26466677
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2fiwqGBM.jpg?s=256",
+                "account_id": 237126,
+                "user_type": "registered",
+                "user_id": 505088,
+                "link": "https://stackoverflow.com/users/505088/david-heffernan",
+                "reputation": 616347,
+                "display_name": "David Heffernan",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18070328,
+            "edited": false,
+            "creation_date": 1375792306,
+            "comment_id": 26461361
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/H7MzX.jpg?s=256",
+                "account_id": 1297739,
+                "user_type": "registered",
+                "user_id": 1248365,
+                "link": "https://stackoverflow.com/users/1248365/adi-inbar",
+                "reputation": 12378,
+                "display_name": "Adi Inbar",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 18070328,
+            "edited": false,
+            "creation_date": 1375753393,
+            "comment_id": 26444999
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DLHqU.png?s=256",
+                "account_id": 1223835,
+                "user_type": "registered",
+                "user_id": 1189885,
+                "link": "https://stackoverflow.com/users/1189885/chrylis-cautiouslyoptimistic",
+                "reputation": 77469,
+                "display_name": "chrylis -cautiouslyoptimistic-",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1375752571,
+            "creation_date": 1375752571,
+            "body": "<p>Pick a zero point, move them relative to that, and scale by a constant factor.<\/p>\n",
+            "answer_id": 18070419,
+            "question_id": 18070328
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22ed67baa24e475226ef327a818e4ffd?s=256&d=identicon&r=PG",
+                "account_id": 915836,
+                "user_type": "registered",
+                "user_id": 948652,
+                "link": "https://stackoverflow.com/users/948652/arynaq",
+                "reputation": 6870,
+                "display_name": "arynaq",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1375762479,
+            "creation_date": 1375762177,
+            "body": "<p>Here is my take at it, the code is pretty self explanatory and I haven't really optimized the scale method. What it essentially does is displace all the points by coordinates of the point with the largest square and then tries to scale the points so they fit the maximum pixelcoordinates I desire.<\/p>\n\n<pre><code> import java.awt.Color;\nimport java.awt.Dimension;\nimport java.awt.FontMetrics;\nimport java.awt.Graphics;\nimport java.awt.Graphics2D;\nimport java.awt.geom.Ellipse2D;\nimport java.beans.Transient;\n\nimport javax.swing.JFrame;\nimport javax.swing.JPanel;\n\npublic class LatLongDemo extends JPanel {\n\n    private double[][] coords;\n    private double[][] coordsScaled;\n    private final int maxLatitudeInPixels = 1200;\n    private final int maxLongitudeInPixels = 700;\n    private boolean scaled;\n\n    public LatLongDemo() {\n        Random rnd = new Random();\n    double x = -29.8150081639178;\n    double y = -55.74497604370117;\n    coords = new double[][] {\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() },\n            { x + rnd.nextDouble(), y + rnd.nextDouble() } };\n        scaleCoords();\n    }\n\n    private void scaleCoords() {\n        coordsScaled = new double[coords.length][2];\n        double maxDistance = Double.MIN_VALUE;\n        int indexOfLargestDistance = 0;\n\n        for (int i = 0; i &lt; coords.length; i++) {\n            double latitude = Math.abs(coords[i][0]);\n            double longitude = Math.abs(coords[i][1]);\n            double distanceSquared = latitude * latitude + longitude\n                    * longitude;\n\n            if (distanceSquared &gt; maxDistance) {\n                maxDistance = distanceSquared;\n                indexOfLargestDistance = i;\n            }\n        }\n\n        double displaceLatitude = -coords[indexOfLargestDistance][0];\n        double displaceLongitude = -coords[indexOfLargestDistance][1];\n        double maxLatitude = Double.MIN_VALUE, maxLongitude = Double.MIN_VALUE;\n        int indexOfMaxLatitude = 0, indexOfMaxLongitude = 0;\n\n        for (int i = 0; i &lt; coordsScaled.length; i++) {\n            double latitude = coords[i][0] + displaceLatitude;\n            double longitude = coords[i][1] + displaceLongitude;\n            coordsScaled[i][0] = latitude;\n            coordsScaled[i][1] = longitude;\n\n            if (latitude &gt; maxLatitude)\n                maxLatitude = latitude;\n            if (longitude &gt; maxLongitude)\n                maxLongitude = longitude;\n        }\n\n        double latitudeScale = maxLatitudeInPixels / maxLatitude;\n        double longitudeScale = maxLongitudeInPixels / maxLongitude;\n\n        for (int i = 0; i &lt; coordsScaled.length; i++) {\n            coordsScaled[i][0] = coordsScaled[i][0] * latitudeScale;\n            coordsScaled[i][1] = coordsScaled[i][1] * longitudeScale;\n        }\n        scaled = true;\n    }\n\n    @Override\n    @Transient\n    public Color getBackground() {\n        return Color.black;\n    }\n\n    @Override\n    @Transient\n    public Dimension getPreferredSize() {\n        return new Dimension(1280, 720);\n    }\n\n    @Override\n    protected void paintComponent(Graphics g) {\n        super.paintComponent(g);\n        if (!scaled)\n            return;\n\n        Graphics2D g2d = (Graphics2D) g.create();\n        FontMetrics fm = g2d.getFontMetrics();\n\n        for (int i = 0; i &lt; coordsScaled.length; i++) {\n            double originalLatitude = coords[i][0];\n            double originalLongitude = coords[i][1];\n            double newLatitude = coordsScaled[i][0];\n            double newLongitude = coordsScaled[i][1];\n\n            Ellipse2D.Double point = new Ellipse2D.Double(newLatitude,\n                    newLongitude, 5, 5);\n            String original = \"Original: \" + originalLatitude + \",\"\n                    + originalLongitude;\n            String scaled = \"Scaled: \" + newLatitude + \",\" + newLongitude;\n\n            float originalStringX = (float) (newLatitude - fm\n                    .stringWidth(original));\n            float originalStringY = (float) (newLongitude - fm.getHeight());\n            float scaledStringX = (float) (newLatitude - fm.stringWidth(scaled));\n            float scaledStringY = (float) (newLongitude + fm.getHeight());\n\n            g2d.setColor(Color.white);\n            g2d.drawString(original, originalStringX, originalStringY);\n            g2d.drawString(scaled, scaledStringX, scaledStringY);\n            g2d.setColor(Color.green);\n            g2d.fill(point);\n        }\n    }\n\n    public static void main(String[] args) {\n        JFrame frame = new JFrame();\n        LatLongDemo latLongDemo = new LatLongDemo();\n        frame.getContentPane().add(latLongDemo);\n        frame.setResizable(false);\n        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n        frame.pack();\n        frame.setLocationRelativeTo(null);\n        frame.setVisible(true);\n    }\n\n}\n<\/code><\/pre>\n\n<p><img src=\"https://i.sstatic.net/QCJ6g.png\" alt=\"enter image description here\"><\/p>\n",
+            "answer_id": 18071663,
+            "question_id": 18070328,
+            "last_edit_date": 1375762479
+        }
+    ],
+    "answer_comments": {"18071663": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100002987102589/picture?type=large",
+            "account_id": 3139186,
+            "user_type": "registered",
+            "user_id": 2654997,
+            "link": "https://stackoverflow.com/users/2654997/rafael-maires-rangel",
+            "reputation": 83,
+            "display_name": "Rafael Maires Rangel"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 18071663,
+        "edited": false,
+        "creation_date": 1375799947,
+        "comment_id": 26466733
+    }]}
+}

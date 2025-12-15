@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+            "account_id": 14739596,
+            "user_type": "registered",
+            "user_id": 10644550,
+            "link": "https://stackoverflow.com/users/10644550/shiva",
+            "reputation": 2032,
+            "display_name": "Shiva"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/54742870/how-does-spring-boot-autoconfigure-works-if-the-class-is-not-present-in-class-pa",
+        "last_activity_date": 1550479091,
+        "creation_date": 1550477484,
+        "answer_count": 1,
+        "title": "How does spring boot autoconfigure works if the class is not present in class path",
+        "body": "<p>I was look at the Kafka Auto configure in spring-boot.<\/p>\n\n<p>Reading the artile <a href=\"https://medium.com/empathybroker/how-spring-boot-autoconfiguration-works-6e09f911c5ce\" rel=\"nofollow noreferrer\">Spring-boot auto-configure<\/a><\/p>\n\n<p>The below is the code copied from github <a href=\"https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/kafka/KafkaAutoConfiguration.java\" rel=\"nofollow noreferrer\">Here<\/a>.<\/p>\n\n<p>My question is if the <strong>jar<\/strong> containing <code>KafkaTemplate.class<\/code> <strong>not<\/strong> present in <strong>class path<\/strong>, how does the spring is manage to execute the below code while auto configuring. Since the class is not present should not it lead to Error? or does the spring won't execute this at all while auto-configuring?<\/p>\n\n<pre><code>@Configuration\n@ConditionalOnClass(KafkaTemplate.class)\n@EnableConfigurationProperties(KafkaProperties.class)\n@Import({ KafkaAnnotationDrivenConfiguration.class,\n        KafkaStreamsAnnotationDrivenConfiguration.class })\npublic class KafkaAutoConfiguration {\n\n    private final KafkaProperties properties;\n\n    private final RecordMessageConverter messageConverter;\n\n    public KafkaAutoConfiguration(KafkaProperties properties,\n            ObjectProvider&lt;RecordMessageConverter&gt; messageConverter) {\n        this.properties = properties;\n        this.messageConverter = messageConverter.getIfUnique();\n    }\n\n    @Bean\n    @ConditionalOnMissingBean(KafkaTemplate.class)\n    public KafkaTemplate&lt;?, ?&gt; kafkaTemplate(\n            ProducerFactory&lt;Object, Object&gt; kafkaProducerFactory,\n            ProducerListener&lt;Object, Object&gt; kafkaProducerListener) {\n        KafkaTemplate&lt;Object, Object&gt; kafkaTemplate = new KafkaTemplate&lt;&gt;(\n                kafkaProducerFactory);\n        if (this.messageConverter != null) {\n            kafkaTemplate.setMessageConverter(this.messageConverter);\n        }\n        kafkaTemplate.setProducerListener(kafkaProducerListener);\n        kafkaTemplate.setDefaultTopic(this.properties.getTemplate().getDefaultTopic());\n        return kafkaTemplate;\n    }\n\n    @Bean\n    @ConditionalOnMissingBean(ProducerListener.class)\n    public ProducerListener&lt;Object, Object&gt; kafkaProducerListener() {\n        return new LoggingProducerListener&lt;&gt;();\n    }\n\n    @Bean\n    @ConditionalOnMissingBean(ConsumerFactory.class)\n    public ConsumerFactory&lt;?, ?&gt; kafkaConsumerFactory() {\n        return new DefaultKafkaConsumerFactory&lt;&gt;(\n                this.properties.buildConsumerProperties());\n    }\n\n    @Bean\n    @ConditionalOnMissingBean(ProducerFactory.class)\n    public ProducerFactory&lt;?, ?&gt; kafkaProducerFactory() {\n        DefaultKafkaProducerFactory&lt;?, ?&gt; factory = new DefaultKafkaProducerFactory&lt;&gt;(\n                this.properties.buildProducerProperties());\n        String transactionIdPrefix = this.properties.getProducer()\n                .getTransactionIdPrefix();\n        if (transactionIdPrefix != null) {\n            factory.setTransactionIdPrefix(transactionIdPrefix);\n        }\n        return factory;\n    }\n\n    @Bean\n    @ConditionalOnProperty(name = \"spring.kafka.producer.transaction-id-prefix\")\n    @ConditionalOnMissingBean\n    public KafkaTransactionManager&lt;?, ?&gt; kafkaTransactionManager(\n            ProducerFactory&lt;?, ?&gt; producerFactory) {\n        return new KafkaTransactionManager&lt;&gt;(producerFactory);\n    }\n\n    @Bean\n    @ConditionalOnProperty(name = \"spring.kafka.jaas.enabled\")\n    @ConditionalOnMissingBean\n    public KafkaJaasLoginModuleInitializer kafkaJaasInitializer() throws IOException {\n        KafkaJaasLoginModuleInitializer jaas = new KafkaJaasLoginModuleInitializer();\n        Jaas jaasProperties = this.properties.getJaas();\n        if (jaasProperties.getControlFlag() != null) {\n            jaas.setControlFlag(jaasProperties.getControlFlag());\n        }\n        if (jaasProperties.getLoginModule() != null) {\n            jaas.setLoginModule(jaasProperties.getLoginModule());\n        }\n        jaas.setOptions(jaasProperties.getOptions());\n        return jaas;\n    }\n\n    @Bean\n    @ConditionalOnMissingBean\n    public KafkaAdmin kafkaAdmin() {\n        KafkaAdmin kafkaAdmin = new KafkaAdmin(this.properties.buildAdminProperties());\n        kafkaAdmin.setFatalIfBrokerNotAvailable(this.properties.getAdmin().isFailFast());\n        return kafkaAdmin;\n    }\n\n}\n<\/code><\/pre>\n\n<p>Thanks for help<\/p>\n",
+        "question_id": 54742870,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot"
+        ],
+        "score": 1,
+        "accepted_answer_id": 54743070,
+        "is_answered": true,
+        "view_count": 1090,
+        "last_edit_date": 1550479091
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/--opzIBdENY4/AAAAAAAAAAI/AAAAAAAAAo8/cMoDkG6T-Ew/s256-rj/photo.jpg",
+            "account_id": 12836302,
+            "user_type": "registered",
+            "user_id": 9285802,
+            "link": "https://stackoverflow.com/users/9285802/sukhpal-singh",
+            "reputation": 2318,
+            "display_name": "Sukhpal Singh"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1550478348,
+        "creation_date": 1550478348,
+        "body": "<p>Referring from spring boot <a href=\"https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-developing-auto-configuration.html#boot-features-class-conditions\" rel=\"nofollow noreferrer\">documentation<\/a>:<\/p>\n<blockquote>\n<p>The @ConditionalOnClass and @ConditionalOnMissingClass annotations let @Configuration classes be included based on the presence or absence of specific classes. Due to the fact that annotation metadata is parsed by using ASM, you can use the value attribute to refer to the real class, even though that class might not actually appear on the running application classpath. You can also use the name attribute if you prefer to specify the class name by using a String value.<\/p>\n<p>This mechanism does not apply the same way to @Bean methods where typically the return type is the target of the condition: before the condition on the method applies, the JVM will have loaded the class and potentially processed method references which will fail if the class is not present<\/p>\n<\/blockquote>\n<p>To answer your question, spring doesn't even include <code>KafkaAutoConfiguration<\/code> class.<\/p>\n",
+        "answer_id": 54743070,
+        "question_id": 54742870,
+        "last_edit_date": 1592644375
+    }],
+    "answer_comments": {}
+}

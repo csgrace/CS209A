@@ -1,0 +1,169 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lUIPt.png?s=256",
+            "account_id": 10875141,
+            "user_type": "registered",
+            "user_id": 8199772,
+            "link": "https://stackoverflow.com/users/8199772/classa",
+            "reputation": 2730,
+            "display_name": "ClassA",
+            "accept_rate": 55
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/52830390/null-when-trying-to-parse-uri-from-string-path",
+        "last_activity_date": 1597000883,
+        "creation_date": 1539676016,
+        "answer_count": 1,
+        "title": "Null when trying to parse Uri from String path",
+        "body": "<p>I'm using this <code>FileUtils<\/code> class to handle the <code>Uri<\/code>:<\/p>\n<pre><code>public class FileUtils {\nprivate FileUtils() {\n}\n\nprivate static final String TAG = &quot;FileUtils&quot;;\nprivate static final boolean DEBUG = false;\n\nprivate static boolean isExternalStorageDocument(Uri uri) {\n    return &quot;com.android.externalstorage.documents&quot;.equals(uri.getAuthority());\n}\n\nprivate static boolean isDownloadsDocument(Uri uri) {\n    return &quot;com.android.providers.downloads.documents&quot;.equals(uri.getAuthority());\n}\n\nprivate static boolean isMediaDocument(Uri uri) {\n    return &quot;com.android.providers.media.documents&quot;.equals(uri.getAuthority());\n}\n\n\nprivate static boolean isGooglePhotosUri(Uri uri) {\n    return &quot;com.google.android.apps.photos.content&quot;.equals(uri.getAuthority());\n}\n\nprivate static String getDataColumn(Context context, Uri uri, String selection,\n                                    String[] selectionArgs) {\n\n    Cursor cursor = null;\n    final String column = &quot;_data&quot;;\n    final String[] projection = {\n            column\n    };\n\n    try {\n        cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,\n                null);\n        if (cursor != null &amp;&amp; cursor.moveToFirst()) {\n            if (DEBUG)\n                DatabaseUtils.dumpCursor(cursor);\n\n            final int column_index = cursor.getColumnIndexOrThrow(column);\n            return cursor.getString(column_index);\n        }\n    } finally {\n        if (cursor != null)\n            cursor.close();\n    }\n    return null;\n}\n\n@RequiresApi(api = Build.VERSION_CODES.KITKAT)\npublic static String getPath(final Context context, final Uri uri) {\n\n    if (DEBUG)\n        Log.d(TAG + &quot; File -&quot;,\n                &quot;Authority: &quot; + uri.getAuthority() +\n                        &quot;, Fragment: &quot; + uri.getFragment() +\n                        &quot;, Port: &quot; + uri.getPort() +\n                        &quot;, Query: &quot; + uri.getQuery() +\n                        &quot;, Scheme: &quot; + uri.getScheme() +\n                        &quot;, Host: &quot; + uri.getHost() +\n                        &quot;, Segments: &quot; + uri.getPathSegments().toString()\n        );\n\n    final boolean isKitKat = Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.KITKAT;\n\n    // DocumentProvider\n    if (isKitKat &amp;&amp; DocumentsContract.isDocumentUri(context, uri)) {\n        if (isExternalStorageDocument(uri)) {\n            final String docId = DocumentsContract.getDocumentId(uri);\n            final String[] split = docId.split(&quot;:&quot;);\n            final String type = split[0];\n\n            if (&quot;primary&quot;.equalsIgnoreCase(type)) {\n                return Environment.getExternalStorageDirectory() + &quot;/&quot; + split[1];\n            }\n\n        }\n        // DownloadsProvider\n        else if (isDownloadsDocument(uri)) {\n\n            final String id = DocumentsContract.getDocumentId(uri);\n            final Uri contentUri = ContentUris.withAppendedId(\n                    Uri.parse(&quot;content://downloads/public_downloads&quot;), Long.valueOf(id));\n\n            return getDataColumn(context, contentUri, null, null);\n        }\n        // MediaProvider\n        else if (isMediaDocument(uri)) {\n            final String docId = DocumentsContract.getDocumentId(uri);\n            final String[] split = docId.split(&quot;:&quot;);\n            final String type = split[0];\n\n            Uri contentUri = null;\n            if (&quot;image&quot;.equals(type)) {\n                contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;\n            } else if (&quot;video&quot;.equals(type)) {\n                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;\n            } else if (&quot;audio&quot;.equals(type)) {\n                contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;\n            }\n\n            final String selection = &quot;_id=?&quot;;\n            final String[] selectionArgs = new String[]{\n                    split[1]\n            };\n\n            return getDataColumn(context, contentUri, selection, selectionArgs);\n        }\n    }\n    // MediaStore (and general)\n    else if (&quot;content&quot;.equalsIgnoreCase(uri.getScheme())) {\n\n        // Return the remote address\n        if (isGooglePhotosUri(uri))\n            return uri.getLastPathSegment();\n\n        return getDataColumn(context, uri, null, null);\n    }\n    // File\n    else if (&quot;file&quot;.equalsIgnoreCase(uri.getScheme())) {\n        return uri.getPath();\n    }\n\n    return null;\n}\n<\/code><\/pre>\n<p>I call it in my <code>MainActivity<\/code>, inside <code>onActivityResult<\/code>, after selecting a video from the device:<\/p>\n<pre><code>@Override\nprotected void onActivityResult(int requestCode, int resultCode, Intent data) {\n    if (requestCode == SELECT_VIDEO_REQUEST &amp;&amp; resultCode == RESULT_OK) {\n\n        if (Build.VERSION.SDK_INT &gt;= 19) {\n            \n            //Calling FileUtils class\n            String sourcePath = FileUtils.getPath(getApplicationContext(), data.getData());\n          \n            Intent intent = new Intent();\n            intent.setClass(MainActivity.this, PlayerActivity.class);\n            intent.putExtra(&quot;videoUri&quot;, sourcePath);\n            startActivity(intent);\n\n        } else {\n            //Not relevant to the question\n            .......\n\n        }\n    }\n    if (requestCode == SELECT_VIDEO_REQUEST &amp;&amp; resultCode != RESULT_OK) {\n        Toast.makeText(getApplicationContext(), &quot;Failed to select video&quot;, Toast.LENGTH_LONG).show();\n    } else {\n        super.onActivityResult(requestCode, resultCode, data);\n    }\n\n\n}\n<\/code><\/pre>\n<p>In my <code>PlayerActivity<\/code> I get the <code>String<\/code> and try to parse the <code>Uri<\/code>, like this:<\/p>\n<pre><code>//Getting String from Intent\nmStringFilePath = getIntent().getStringExtra(&quot;videoUri&quot;);\n//Parse Uri from String\nmVideoUri = Uri.parse(mStringFilePath);\n<\/code><\/pre>\n<p>When testing on my device, I have no issues. I get the correct path and the <code>Uri.parse<\/code> works fine. But I see a lot of crashes on my Crashlytics saying - <code>nullpointerexception at line 59<\/code>, referring to <code>mVideoUri = Uri.parse(mStringFilePath);<\/code><\/p>\n<p>What am I doing wrong? Why is it working on my device and returning null on some other devices?<\/p>\n<h2>Edit 1<\/h2>\n<p>I forgot to add <code>&lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;<\/code> in my Manifest. I'm at a point where I atleast don't get a <code>nullpointerexception<\/code>, but I get the following -<\/p>\n<p><code>java.io.FileNotFoundException: Not found (No such file or directory)<\/code><\/p>\n<p>Somehow the <code>Uri<\/code> is incorrect when I select a file from my SD Card, any reason why?<\/p>\n",
+        "question_id": 52830390,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 2694,
+        "last_edit_date": 1597000883
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-T1wcZ1-P1aA/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DXLCd5glhazcMO0aDg0wlvqO5KpqQ/mo/s256-rj/photo.jpg",
+            "account_id": 14417768,
+            "user_type": "registered",
+            "user_id": 10414740,
+            "link": "https://stackoverflow.com/users/10414740/david-marinov",
+            "reputation": 26,
+            "display_name": "David Marinov"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1539683516,
+        "creation_date": 1539683516,
+        "body": "<p>The Crash is probably occurred due to null String  on <code>mStringFilePath = getIntent().getStringExtra(\"videoUri\");<\/code> since <code>getIntent().getStringExtras()<\/code> won't throw nullpointerexception if there isn't a value for the requested Extras but also won't give a data to the assigned variable the final result of the <code>mStringFilePath<\/code> will be null to fix this issue make sure that the given String for the uri parse is wrapped in:<\/p>\n\n<blockquote>\n  <p>if(mStringFilePath != null){ mVideoUri = Uri.parse(mStringFilePath); }<\/p>\n<\/blockquote>\n",
+        "answer_id": 52832718,
+        "question_id": 52830390
+    }],
+    "answer_comments": {"52832718": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-T1wcZ1-P1aA/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DXLCd5glhazcMO0aDg0wlvqO5KpqQ/mo/s256-rj/photo.jpg",
+                "account_id": 14417768,
+                "user_type": "registered",
+                "user_id": 10414740,
+                "link": "https://stackoverflow.com/users/10414740/david-marinov",
+                "reputation": 26,
+                "display_name": "David Marinov"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52832718,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/lUIPt.png?s=256",
+                "account_id": 10875141,
+                "user_type": "registered",
+                "user_id": 8199772,
+                "link": "https://stackoverflow.com/users/8199772/classa",
+                "reputation": 2730,
+                "display_name": "ClassA",
+                "accept_rate": 55
+            },
+            "edited": false,
+            "creation_date": 1539685215,
+            "comment_id": 92582527
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lUIPt.png?s=256",
+                "account_id": 10875141,
+                "user_type": "registered",
+                "user_id": 8199772,
+                "link": "https://stackoverflow.com/users/8199772/classa",
+                "reputation": 2730,
+                "display_name": "ClassA",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52832718,
+            "edited": false,
+            "creation_date": 1539684507,
+            "comment_id": 92582104
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-T1wcZ1-P1aA/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DXLCd5glhazcMO0aDg0wlvqO5KpqQ/mo/s256-rj/photo.jpg",
+                "account_id": 14417768,
+                "user_type": "registered",
+                "user_id": 10414740,
+                "link": "https://stackoverflow.com/users/10414740/david-marinov",
+                "reputation": 26,
+                "display_name": "David Marinov"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52832718,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/lUIPt.png?s=256",
+                "account_id": 10875141,
+                "user_type": "registered",
+                "user_id": 8199772,
+                "link": "https://stackoverflow.com/users/8199772/classa",
+                "reputation": 2730,
+                "display_name": "ClassA",
+                "accept_rate": 55
+            },
+            "edited": false,
+            "creation_date": 1539684374,
+            "comment_id": 92582032
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-T1wcZ1-P1aA/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DXLCd5glhazcMO0aDg0wlvqO5KpqQ/mo/s256-rj/photo.jpg",
+                "account_id": 14417768,
+                "user_type": "registered",
+                "user_id": 10414740,
+                "link": "https://stackoverflow.com/users/10414740/david-marinov",
+                "reputation": 26,
+                "display_name": "David Marinov"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52832718,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/lUIPt.png?s=256",
+                "account_id": 10875141,
+                "user_type": "registered",
+                "user_id": 8199772,
+                "link": "https://stackoverflow.com/users/8199772/classa",
+                "reputation": 2730,
+                "display_name": "ClassA",
+                "accept_rate": 55
+            },
+            "edited": false,
+            "creation_date": 1539684295,
+            "comment_id": 92581989
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lUIPt.png?s=256",
+                "account_id": 10875141,
+                "user_type": "registered",
+                "user_id": 8199772,
+                "link": "https://stackoverflow.com/users/8199772/classa",
+                "reputation": 2730,
+                "display_name": "ClassA",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52832718,
+            "edited": false,
+            "creation_date": 1539683723,
+            "comment_id": 92581643
+        }
+    ]}
+}

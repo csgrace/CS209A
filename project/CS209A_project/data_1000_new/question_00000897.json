@@ -1,0 +1,128 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1501001310006755/picture?type=large",
+            "account_id": 12324731,
+            "user_type": "registered",
+            "user_id": 8993026,
+            "link": "https://stackoverflow.com/users/8993026/mir-adnan-siraj",
+            "reputation": 67,
+            "display_name": "Mir Adnan Siraj"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/57445501/problems-with-javafx-canvas-setonkeypress-detecting-keys",
+        "last_activity_date": 1565469167,
+        "creation_date": 1565469167,
+        "answer_count": 0,
+        "title": "problems with javafx canvas.setOnKeyPress() detecting keys",
+        "body": "<p>I'm trying to create a snake game in javafx using canvas and set up onkeypressed on it and noticed that if i press UP arrow the RIGHT arrow cant be detected and sometimes when i press LEFT arrow the DOWN arrow doesnt get detected. The keys work in random sequences but if i press left then up the right key dont work<\/p>\n\n<p>Here is the part where i set up the keys (they dont do anything other than print on console):<\/p>\n\n<pre><code>        canvas.requestFocus();\n        canvas.setFocusTraversable(true);\n        canvas.setOnKeyPressed(new EventHandler&lt;KeyEvent&gt;() {\n            @Override\n            public void handle(KeyEvent keyEvent) {\n                switch (keyEvent.getCode())\n                {\n                    case UP:\n                    case DOWN:\n                    case LEFT:\n                    case RIGHT:\n                        System.out.println(keyEvent.getCode()); break;\n                }\n            }\n        });\n<\/code><\/pre>\n\n<p>Here is the entire class:<\/p>\n\n<pre><code>public class GUI extends Application{\n    private static Text scoreText;\n    private static Canvas canvas;\n    private int width = 600, height = 400;\n    @Override\n    public void start(Stage stage) {\n\n        BorderPane borderPane = new BorderPane();\n        // holder for canvas\n        StackPane holder = new StackPane(addCanvas());\n        holder.setStyle(\"-fx-background-color:#3d494a\");\n        //add the layouts to the borderpane\n        borderPane.setTop(addAnchorPane());\n        borderPane.setCenter(holder);\n        //the scene\n        Scene scene = new Scene(borderPane, width, height);\n        scene.getStylesheets().add(\"/res/style.css\");\n        //set the stage\n        stage.setResizable(false);\n        stage.initStyle(StageStyle.TRANSPARENT);\n        stage.setTitle(\"Snake\");\n        stage.setScene(scene);\n        //draws the initial snake at the centre\n        new Thread(new SnakeDraw()).start();\n        new Thread(new FruitDraw()).start();\n        stage.show();\n    }\n\n    public AnchorPane addAnchorPane() {\n        AnchorPane anchorpane = new AnchorPane();\n        anchorpane.setId(\"anchorpane\");\n        anchorpane.getStyleClass().add(\"anchorpane\");\n\n        //reset Button\n        Button buttonReset = new Button(\"reset\");\n        buttonReset.setStyle(\"-fx-font: 22 arial; -fx-base: #b6e7c9;\");\n        buttonReset.setOnAction(new EventHandler&lt;ActionEvent&gt;() {\n            @Override\n            public void handle(ActionEvent actionEvent) {\n                Main.setScore(0);\n                GUI.scoreText.setText(String.format(\"Score: %d\", Main.getScore()));\n                canvas.getGraphicsContext2D().clearRect(0,0,1000, 1000);\n                Main.resetSnake();\n                new Thread(new SnakeDraw()).start();\n                new Thread(new FruitDraw()).start();\n            }\n        });\n\n        //Quit Button\n        Button buttonQuit = new Button(\"Quit\");\n        buttonQuit.setStyle(\"-fx-font: 22 arial; -fx-base: #b6e7c9;\");\n        buttonQuit.setOnAction(new EventHandler&lt;ActionEvent&gt;() {\n            @Override\n            public void handle(ActionEvent actionEvent) {\n                System.exit(0);\n            }\n        });\n\n        scoreText = new Text(10, 10, String.format(\"Score: %d\", Main.getScore()));\n        scoreText.setFont(Font.font(\"arial\", 34));\n        HBox scoreBox = new HBox(scoreText);\n        HBox hb = new HBox();\n        hb.setPadding(new Insets(2, 2, 2, 2));\n        hb.setSpacing(10);\n        hb.getChildren().addAll(buttonReset, buttonQuit);\n\n        anchorpane.getChildren().addAll(scoreBox, hb);\n        AnchorPane.setBottomAnchor(hb, 8.0);\n        AnchorPane.setRightAnchor(hb, 5.0);\n\n        AnchorPane.setLeftAnchor(scoreBox, 5.0);\n        AnchorPane.setBottomAnchor(scoreBox, 8.0);\n        AnchorPane.setTopAnchor(scoreBox, 4.0);\n\n        return anchorpane;\n    }\n\n    public Canvas addCanvas() {\n        canvas = new Canvas(600,400);\n        return canvas;\n    }\n\n    public static Canvas getCanvas() {\n        //Button mapping\n        canvas.requestFocus();\n        canvas.setFocusTraversable(true);\n        canvas.setOnKeyPressed(new EventHandler&lt;KeyEvent&gt;() {\n            @Override\n            public void handle(KeyEvent keyEvent) {\n                switch (keyEvent.getCode())\n                {\n                    case UP:\n                    case DOWN:\n                    case LEFT:\n                    case RIGHT:\n                    default: System.out.println(keyEvent.getCode()); break;\n                }\n            }\n        });\n        return canvas;\n    }\n}\n<\/code><\/pre>\n\n<p>Also the GraphicsContext of the canvas get called from 2 threads to draw objects onto the canvas:<\/p>\n\n<pre><code>public class SnakeDraw implements Runnable {\n    @Override\n    public void run() {\n        GraphicsContext gc = GUI.getCanvas().getGraphicsContext2D();\n        for (int i = 0; i &lt; Main.getSnakeBlocksSize(); i++) {\n            SnakeBlock snakeBlock = Main.getSnakeBlock(i);\n            System.out.println(snakeBlock);\n            gc.setFill(Color.BLACK);\n            gc.fillRect(snakeBlock.getX(), snakeBlock.getY(), snakeBlock.getSizex(), snakeBlock.getSizey());\n            System.out.println(\"Created a snake at: \" + snakeBlock.getX() + \", \" + snakeBlock.getY());\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>I tried WASD and any other keys and they all seem fine. It's only the arrow keys that are showing this problem, could it be my keyboard thats faulty or something in my code?<\/p>\n",
+        "question_id": 57445501,
+        "tags": [
+            "java",
+            "javafx"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 379
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1501001310006755/picture?type=large",
+                "account_id": 12324731,
+                "user_type": "registered",
+                "user_id": 8993026,
+                "link": "https://stackoverflow.com/users/8993026/mir-adnan-siraj",
+                "reputation": 67,
+                "display_name": "Mir Adnan Siraj"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57445501,
+            "edited": false,
+            "creation_date": 1566080428,
+            "comment_id": 101544847
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/rkpYv.jpg?s=256",
+                "account_id": 2819940,
+                "user_type": "registered",
+                "user_id": 2423906,
+                "link": "https://stackoverflow.com/users/2423906/sedj601",
+                "reputation": 14002,
+                "display_name": "SedJ601",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57445501,
+            "edited": false,
+            "creation_date": 1565594630,
+            "comment_id": 101387910
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ayujB.jpg?s=256",
+                "account_id": 70123,
+                "user_type": "registered",
+                "user_id": 203657,
+                "link": "https://stackoverflow.com/users/203657/kleopatra",
+                "reputation": 51647,
+                "display_name": "kleopatra",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57445501,
+            "edited": false,
+            "creation_date": 1565515952,
+            "comment_id": 101373086
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1501001310006755/picture?type=large",
+                "account_id": 12324731,
+                "user_type": "registered",
+                "user_id": 8993026,
+                "link": "https://stackoverflow.com/users/8993026/mir-adnan-siraj",
+                "reputation": 67,
+                "display_name": "Mir Adnan Siraj"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57445501,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d3f3f4320c25d18603de3bb3476fa6fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3583958,
+                "user_type": "registered",
+                "user_id": 2991525,
+                "link": "https://stackoverflow.com/users/2991525/fabian",
+                "reputation": 82886,
+                "display_name": "fabian"
+            },
+            "edited": false,
+            "creation_date": 1565513226,
+            "comment_id": 101372601
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d3f3f4320c25d18603de3bb3476fa6fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3583958,
+                "user_type": "registered",
+                "user_id": 2991525,
+                "link": "https://stackoverflow.com/users/2991525/fabian",
+                "reputation": 82886,
+                "display_name": "fabian"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57445501,
+            "edited": false,
+            "creation_date": 1565482615,
+            "comment_id": 101369143
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

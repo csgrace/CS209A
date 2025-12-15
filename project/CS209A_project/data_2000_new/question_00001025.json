@@ -1,0 +1,139 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2e244b46061d041e20bd26c29ef21d5c?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10354556,
+            "user_type": "registered",
+            "user_id": 7636995,
+            "link": "https://stackoverflow.com/users/7636995/sidd",
+            "reputation": 277,
+            "display_name": "Sidd"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/68822124/integrated-authentication-error-with-connection-to-sql-server-from-pyspark",
+        "last_activity_date": 1629233111,
+        "creation_date": 1629223566,
+        "answer_count": 0,
+        "title": "Integrated Authentication Error with connection to SQL server from Pyspark",
+        "body": "<p>I am preforming below steps to connect to SQL server 2016 with integratedSecurity option &quot;true&quot; from Pyspark script on Linux machine. I've downloaded SQL JDBC driver from <a href=\"https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15\" rel=\"nofollow noreferrer\">https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15<\/a> and using the jar file for java version 8 and dll file from /auth/x64 folder under download as environment has java version &quot;1.8.0_291&quot; with Java HotSpot(TM) 64-Bit Server VM<\/p>\n<p>Script-<\/p>\n<pre><code>$ cat ReadData.py\nfrom pyspark.sql import SparkSession\nspark = SparkSession.builder.appName('Connection-Test').config('spark.driver.extraClassPath','/home/user1/mssql-jdbc-9.2.1.jre8.jar:/home/user1/mssql-jdbc_auth-9.2.1.x64.dll').getOrCreate()\nspark.read.format(&quot;jdbc&quot;).option(&quot;url&quot;,&quot;jdbc:sqlserver://prodsqlserver.domainName.com:3341;databaseName=PHOENIX_DW;integratedSecurity=true&quot;).option(&quot;dbtable&quot;,&quot;DWH.AGENT&quot;).option(&quot;driver&quot;, &quot;com.microsoft.sqlserver.jdbc.SQLServerDriver&quot;).load().show()\n<\/code><\/pre>\n<p>Command Executed-<\/p>\n<pre><code>$ spark2-submit --driver-class-path mssql-jdbc-9.2.1.jre8.jar --jars mssql-jdbc-9.2.1.jre8.jar ReadData.py\n<\/code><\/pre>\n<p>Error-<\/p>\n<pre><code>py4j.protocol.Py4JJavaError: An error occurred while calling o79.load.\n: com.microsoft.sqlserver.jdbc.SQLServerException: This driver is not configured for integrated authentication.\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.terminate(SQLServerConnection.java:3206)\n        at com.microsoft.sqlserver.jdbc.AuthenticationJNI.&lt;init&gt;(AuthenticationJNI.java:72)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.logon(SQLServerConnection.java:4015)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.access$000(SQLServerConnection.java:85)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection$LogonCommand.doExecute(SQLServerConnection.java:4004)\n        at com.microsoft.sqlserver.jdbc.TDSCommand.execute(IOBuffer.java:7418)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.executeCommand(SQLServerConnection.java:3272)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.connectHelper(SQLServerConnection.java:2768)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.login(SQLServerConnection.java:2418)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.connectInternal(SQLServerConnection.java:2265)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.connect(SQLServerConnection.java:1291)\n        at com.microsoft.sqlserver.jdbc.SQLServerDriver.connect(SQLServerDriver.java:881)\n        at org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils$$anonfun$createConnectionFactory$1.apply(JdbcUtils.scala:61)\n        at org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils$$anonfun$createConnectionFactory$1.apply(JdbcUtils.scala:52)\n        at org.apache.spark.sql.execution.datasources.jdbc.JDBCRDD$.resolveTable(JDBCRDD.scala:58)\n        at org.apache.spark.sql.execution.datasources.jdbc.JDBCRelation.&lt;init&gt;(JDBCRelation.scala:114)\n        at org.apache.spark.sql.execution.datasources.jdbc.JdbcRelationProvider.createRelation(JdbcRelationProvider.scala:52)\n        at org.apache.spark.sql.execution.datasources.DataSource.resolveRelation(DataSource.scala:307)\n        at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:178)\n        at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:146)\n        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n        at java.lang.reflect.Method.invoke(Method.java:498)\n        at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)\n        at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:357)\n        at py4j.Gateway.invoke(Gateway.java:282)\n        at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)\n        at py4j.commands.CallCommand.execute(CallCommand.java:79)\n        at py4j.GatewayConnection.run(GatewayConnection.java:238)\n        at java.lang.Thread.run(Thread.java:748)\nCaused by: java.lang.UnsatisfiedLinkError: no mssql-jdbc_auth-9.2.1.x64 in java.library.path\n        at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1867)\n        at java.lang.Runtime.loadLibrary0(Runtime.java:870)\n        at java.lang.System.loadLibrary(System.java:1122)\n        at com.microsoft.sqlserver.jdbc.AuthenticationJNI.&lt;clinit&gt;(AuthenticationJNI.java:51)\n        at com.microsoft.sqlserver.jdbc.SQLServerConnection.logon(SQLServerConnection.java:4014)\n        ... 28 more\n<\/code><\/pre>\n<p>I've been trying to connect this for hours now, but each time I end up with same error. How do I get this fixed?<\/p>\n",
+        "question_id": 68822124,
+        "tags": [
+            "java",
+            "sql-server",
+            "apache-spark",
+            "pyspark"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 1123,
+        "last_edit_date": 1629233111
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DHTbb.png?s=256",
+                "account_id": 2130119,
+                "user_type": "registered",
+                "user_id": 1891133,
+                "link": "https://stackoverflow.com/users/1891133/max",
+                "reputation": 7150,
+                "display_name": "Max",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822124,
+            "edited": false,
+            "creation_date": 1629250455,
+            "comment_id": 121635224
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e244b46061d041e20bd26c29ef21d5c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10354556,
+                "user_type": "registered",
+                "user_id": 7636995,
+                "link": "https://stackoverflow.com/users/7636995/sidd",
+                "reputation": 277,
+                "display_name": "Sidd"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822124,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/678b0edc1262e07c7462ade977e883ca?s=256&d=identicon&r=PG",
+                "account_id": 2441365,
+                "user_type": "registered",
+                "user_id": 2129801,
+                "link": "https://stackoverflow.com/users/2129801/werner",
+                "reputation": 14985,
+                "display_name": "werner"
+            },
+            "edited": false,
+            "creation_date": 1629235180,
+            "comment_id": 121632565
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/678b0edc1262e07c7462ade977e883ca?s=256&d=identicon&r=PG",
+                "account_id": 2441365,
+                "user_type": "registered",
+                "user_id": 2129801,
+                "link": "https://stackoverflow.com/users/2129801/werner",
+                "reputation": 14985,
+                "display_name": "werner"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822124,
+            "edited": false,
+            "creation_date": 1629234689,
+            "comment_id": 121632439
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e244b46061d041e20bd26c29ef21d5c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10354556,
+                "user_type": "registered",
+                "user_id": 7636995,
+                "link": "https://stackoverflow.com/users/7636995/sidd",
+                "reputation": 277,
+                "display_name": "Sidd"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822124,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/678b0edc1262e07c7462ade977e883ca?s=256&d=identicon&r=PG",
+                "account_id": 2441365,
+                "user_type": "registered",
+                "user_id": 2129801,
+                "link": "https://stackoverflow.com/users/2129801/werner",
+                "reputation": 14985,
+                "display_name": "werner"
+            },
+            "edited": false,
+            "creation_date": 1629231513,
+            "comment_id": 121631489
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/678b0edc1262e07c7462ade977e883ca?s=256&d=identicon&r=PG",
+                "account_id": 2441365,
+                "user_type": "registered",
+                "user_id": 2129801,
+                "link": "https://stackoverflow.com/users/2129801/werner",
+                "reputation": 14985,
+                "display_name": "werner"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822124,
+            "edited": false,
+            "creation_date": 1629225945,
+            "comment_id": 121629651
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

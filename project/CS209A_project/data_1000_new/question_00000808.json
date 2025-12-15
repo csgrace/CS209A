@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/DInJP.jpg?s=256",
+            "account_id": 239630,
+            "user_type": "registered",
+            "user_id": 509375,
+            "link": "https://stackoverflow.com/users/509375/seby",
+            "reputation": 262,
+            "display_name": "Seby",
+            "accept_rate": 19
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/27316302/javassist-and-named-inner-classes",
+        "last_activity_date": 1417945509,
+        "creation_date": 1417783847,
+        "answer_count": 1,
+        "title": "Javassist and named inner classes",
+        "body": "<p>i've a little problem with javassist, decorating a class with a methodhandler. The problem is that the method handler is working correctly with method1 in Abc class, but does not intercept calls to method2 in the Def inner class.<\/p>\n\n<pre><code>public class Abc {\n\n  Def def;\n\n  public Abc() {\n    this.def = new Def();\n  }\n\n  public void method1() {}\n\n  public static class Def {\n\n    public void method2() {}\n  }\n}\n<\/code><\/pre>\n\n<p>simple javassist handling<\/p>\n\n<pre><code>ProxyFactory factory = new ProxyFactory();\nfactory.setSuperclass(Abc);\nClass&lt;?&gt; clazz = factory.createClass();\nMethodHandler handler = new MethodHandler() {\n\n  @Override\n  public Object invoke(final Object self, final Method overridden, final Method forwarder, final Object[] args)\n      throws Throwable {\n    ...\n  }\n};\nProxyObject instance = (ProxyObject) clazz.newInstance();\ninstance.setHandler(handler);\nreturn (Abc) instance;\n<\/code><\/pre>\n\n<p>How can i make that my handler method catch also method2 invocations?<\/p>\n\n<p>Thanks.<\/p>\n",
+        "question_id": 27316302,
+        "tags": [
+            "java",
+            "proxy",
+            "javassist"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 1375
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bc96521f79789d75fa63cfa5c2758765?s=256&d=identicon&r=PG",
+            "account_id": 1284143,
+            "user_type": "registered",
+            "user_id": 1237575,
+            "link": "https://stackoverflow.com/users/1237575/rafael-winterhalter",
+            "reputation": 44402,
+            "display_name": "Rafael Winterhalter",
+            "accept_rate": 96
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1417945509,
+        "creation_date": 1417945509,
+        "body": "<p>An inner class is nothing but syntactic sugar for defining two classes where, in your case, one is named <code>Abc<\/code> and one is named <code>Abc$Def<\/code>. In order to proxy the <code>Def<\/code> class's <code>method2<\/code>, you need to proxy it just as like the <code>Abc<\/code> class.<\/p>\n\n<p>I assume you are creating a <code>Def<\/code> instance somewhere in the <code>Abc<\/code> class and want to proxy the creared instance's methods. In this case, create a factroy method inside of <code>Abc<\/code> and instrument the factory method to return proxies of <code>Def<\/code>.<\/p>\n",
+        "answer_id": 27341426,
+        "question_id": 27316302
+    }],
+    "answer_comments": {}
+}

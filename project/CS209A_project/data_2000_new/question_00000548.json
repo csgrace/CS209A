@@ -1,0 +1,108 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/1z5Jc.jpg?s=256",
+            "account_id": 2661132,
+            "user_type": "registered",
+            "user_id": 2300789,
+            "link": "https://stackoverflow.com/users/2300789/speedex505",
+            "reputation": 2116,
+            "display_name": "SpeedEX505",
+            "accept_rate": 66
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19066291/android-internal-files-reading",
+        "last_activity_date": 1380368434,
+        "creation_date": 1380366681,
+        "answer_count": 1,
+        "title": "android: internal files reading",
+        "body": "<p>I'm trying to write some data into internal storage. Problem is when I read it. It does not read nothing. Logcat says it writes something in it. But when I read it Log cat says its empty. This is my File manager:<\/p>\n\n<pre><code>public class FileManager {  \n    File dir;\n    File driveFile;\n    BufferedWriter writer=null;\n    BufferedReader reader=null;\n\n    public FileManager(Context context,String name){\n        dir = new File(context.getFilesDir(),\"drives\");\n        dir.mkdirs();\n        driveFile = new File(dir,name+\".txt\");\n        Log.d(\"FileManager\",driveFile.getAbsolutePath());\n    }\n\n    public void open() throws IOException{\n        writer = new BufferedWriter(new FileWriter(driveFile));\n        reader = new BufferedReader(new FileReader(driveFile));\n    }\n\n    public void close() throws IOException{\n        writer.close();\n        reader.close();\n    }\n\n    public boolean writeTrackPoints(Drive drive){\n        TrackPoint [] trackPoints=drive.getTrackPoints();\n        Log.d(\"FileManager\", \"writing....\");\n        for(int i=0;i&lt;trackPoints.length;i++){\n            try {\n                String line = trackPoints[i].getParsingString()+\"\\r\\n\";\n                writer.write(line);\n                writer.flush();\n                Log.d(\"FileManager\", \"Writing\" + line);\n            } catch (IOException e) {\n                return false;\n            }           \n        }       \n        return true;\n    }\n\n    public boolean readTrackPoints(Drive drive){\n        String line=null;\n        Log.d(\"FileManager\", \"reading....\");\n        try {\n            while((line = reader.readLine())!=null){\n                Log.d(\"FileManager\", \"Reading: \"+line);\n                drive.addTrackPoint(new TrackPoint(line));\n            }\n        } catch (IOException e) {\n            Log.d(\"FileManager\", e.getMessage());\n            return false;\n        }       \n        return true;\n    }\n}\n<\/code><\/pre>\n\n<p>I cant check if file is empty because my device is not rooted. I recognize it does not step into while cyclus in reading. Isn't problem that I open both streams at once?<\/p>\n",
+        "question_id": 19066291,
+        "tags": [
+            "java",
+            "android",
+            "file"
+        ],
+        "score": 0,
+        "accepted_answer_id": 19066534,
+        "is_answered": true,
+        "view_count": 155,
+        "last_edit_date": 1380367924
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/1z5Jc.jpg?s=256",
+                "account_id": 2661132,
+                "user_type": "registered",
+                "user_id": 2300789,
+                "link": "https://stackoverflow.com/users/2300789/speedex505",
+                "reputation": 2116,
+                "display_name": "SpeedEX505",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19066291,
+            "edited": false,
+            "creation_date": 1380367165,
+            "comment_id": 28180870
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521070,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19066291,
+            "edited": false,
+            "creation_date": 1380366956,
+            "comment_id": 28180814
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Z2KYN.jpg?s=256",
+                "account_id": 960307,
+                "user_type": "registered",
+                "user_id": 984823,
+                "link": "https://stackoverflow.com/users/984823/joop-eggen",
+                "reputation": 110397,
+                "display_name": "Joop Eggen"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19066291,
+            "edited": false,
+            "creation_date": 1380366906,
+            "comment_id": 28180800
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/1z5Jc.jpg?s=256",
+            "account_id": 2661132,
+            "user_type": "registered",
+            "user_id": 2300789,
+            "link": "https://stackoverflow.com/users/2300789/speedex505",
+            "reputation": 2116,
+            "display_name": "SpeedEX505",
+            "accept_rate": 66
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1380368434,
+        "creation_date": 1380368434,
+        "body": "<p>I've solved it. Problem was in methods open/close. Maybe it isn't possible to open both streams in one moment. This is edited FileManager:<\/p>\n\n<pre><code>public class FileManager {\n\n    File dir;\n    File driveFile;\n    BufferedWriter writer=null;\n    BufferedReader reader=null;\n    public FileManager(Context context,String name){\n        dir = new File(context.getFilesDir(),\"drives\");\n        dir.mkdirs();\n        driveFile = new File(dir,name+\".txt\");\n        Log.d(\"FileManager\",driveFile.getAbsolutePath());\n    }\n\n    public void writeTrackPoints(Drive drive) throws IOException{\n        writer = new BufferedWriter(new FileWriter(driveFile));\n        TrackPoint [] trackPoints=drive.getTrackPoints();\n        for(int i=0;i&lt;trackPoints.length;i++){\n            String line = trackPoints[i].getParsingString()+\"\\r\\n\";\n            writer.write(line);\n            writer.flush();\n        }\n        writer.close();\n    }\n\n    public void readTrackPoints(Drive drive) throws IOException{\n        reader = new BufferedReader(new FileReader(driveFile));\n        String line=null;\n        while((line = reader.readLine())!=null){\n            drive.addTrackPoint(new TrackPoint(line));\n        }\n        reader.close();\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 19066534,
+        "question_id": 19066291
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,381 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 16617127,
+            "user_type": "registered",
+            "user_id": 12008421,
+            "link": "https://stackoverflow.com/users/12008421/waynewing",
+            "reputation": 723,
+            "display_name": "waynewing"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60985423/runtimeexception-in-child-function-should-not-affect-parent-calling-function-d",
+        "last_activity_date": 1585979163,
+        "creation_date": 1585808824,
+        "answer_count": 1,
+        "title": "RuntimeException in child function should not affect parent calling function - does REQUIRES_NEW play a role?",
+        "body": "<p>I'm working with a DB2 database and tested following code:\nno matter methodB has Propagation.REQUIRES_NEW or not, if methodB has exception, methodA's result will be committed correctly regardless.<\/p>\n\n<p>This is against my assumption that Propagation.REQUIRES_NEW must be used to achieve this.<\/p>\n\n<pre><code>        ClassA\n            @Autowire\n            private ClassB classB;\n\n            @Transactional\n            methodA(){\n                ...\n                try{\n                     classB.methodB();\n                }catch(RuntimeException ex){\n                     handleException(ex);\n                }\n                ...\n            }\n\n        ClassB\n            @Transactional(propagation = Propagation.REQUIRES_NEW)\n            methodB(){...}\n<\/code><\/pre>\n\n<hr>\n\n<p>Thanks for @Kayaman I think I figured it out now.<\/p>\n\n<p>The behaviour I saw is because methodB's @Transactional annotation didn't work, so methodB is treated as a normal function without <strong>any<\/strong> transaction annotation.<\/p>\n\n<p>Where it went wrong is that in methodA, I called methodB from a subclasss of ClassB by <code>super.methodB()<\/code> and thought that it will give a transactional methodB, which isn't working:<\/p>\n\n<pre><code>    @Service\n    @Primary\n    ClassC extends ClassB{\n        @override\n        methodB(){\n            super.methodB();\n        }\n    }\n<\/code><\/pre>\n\n<p>I know that transaction annotation will not work if you call a transaction method from another non-transactional method of the same class. <\/p>\n\n<p>Didn't know that <code>super.methodB()<\/code> will also fail for the same reason (anyone can give a bit more explanation pls?)<\/p>\n\n<hr>\n\n<p>In conclusion, in the example of the first block of code, when methodB has RuntimeException,<\/p>\n\n<p>If methodB has <code>NO transaction<\/code> annotation: A &amp; B share the same transaction; methodA will NOT rollback <\/p>\n\n<p>if methodB has <code>REQUIRED<\/code> annotation: A &amp; B share the same transaction; methodA will rollback <\/p>\n\n<p>if methodB has <code>REQUIRES_NEW<\/code> annotation: A &amp; B have separate transactions; methodA will NOT rollback <\/p>\n",
+        "question_id": 60985423,
+        "tags": [
+            "java",
+            "transactions",
+            "spring-transactions"
+        ],
+        "score": 1,
+        "accepted_answer_id": 60986345,
+        "is_answered": true,
+        "view_count": 1390,
+        "last_edit_date": 1585956080
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+            "account_id": 2994830,
+            "user_type": "registered",
+            "user_id": 2541560,
+            "link": "https://stackoverflow.com/users/2541560/kayaman",
+            "reputation": 73829,
+            "display_name": "Kayaman"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1585979163,
+        "creation_date": 1585812652,
+        "body": "<p>Without <code>REQUIRES_NEW<\/code> (i.e. the default <code>REQUIRED<\/code> or one of the others that behaves in a similar way), <code>ClassB.methodB()<\/code> participates in the <strong>same<\/strong> transaction as <code>ClassA.methodA()<\/code>. An exception in in <code>methodB()<\/code> will mark <strong>that same<\/strong> transaction to be rolled back. Even if you catch the exception, the transaction will be rolled back.<\/p>\n\n<p>With <code>REQUIRES_NEW<\/code>, the transaction rolled back will be particular to <code>methodB()<\/code>, so when you catch the exception, there's still the healthy original non-rolled back transaction in existence.<\/p>\n\n<hr>\n\n<pre><code>ClassA\n@Transactional\nmethodA(){\n    try{\n         classB.methodB();\n    }catch(RuntimeException ex){\n         handleException(ex);\n    }\n}\n\nClassB\n@Transactional\nmethodB(){\n    throw new RuntimeException();\n}\n<\/code><\/pre>\n\n<p>The above code will rollback the whole transaction. With <code>propagation=TransactionPropagation.REQUIRES_NEW<\/code> for <code>methodB()<\/code> it will not.<\/p>\n\n<p>Without <strong>any<\/strong> annotation for <code>methodB()<\/code>, there will be only one tx boundary at <code>methodA()<\/code> level and Spring will not be aware that an exception is thrown, since it's caught in the middle of the method. This is similar to inlining the contents of <code>methodB()<\/code> to <code>methodA()<\/code>. If that exception is a <em>non-database exception<\/em> (e.g. <code>NullPointerException<\/code>), the transaction will commit normally. If that exception is a database exception, the <em>underlying database transaction<\/em> is set to be rolled back, but Spring isn't aware of that. Spring then tries to commit, and throws an <code>UnexpectedRollbackException<\/code>, because the database won't allow the tx to be committed.<\/p>\n\n<p>Leaving the annotation out explicitly or accidentally is wrong. If you intend to perform db operations you must be working with a <strong>well defined<\/strong> transaction context, and know your propagation.<\/p>\n\n<p>Calling <code>super.methodB()<\/code> bypasses Spring's normal proxying mechanism, so even though there is an annotation, it's ignored. Finally, calling <code>super.methodB()<\/code> seems like a design smell to me. Using inheritance to cut down on lines is often bad practice, and in this case caused a serious bug.<\/p>\n",
+        "answer_id": 60986345,
+        "question_id": 60985423,
+        "last_edit_date": 1585979163
+    }],
+    "answer_comments": {"60986345": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585977430,
+            "comment_id": 107960743
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "edited": false,
+            "creation_date": 1585954443,
+            "comment_id": 107956999
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585913037,
+            "comment_id": 107937565
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585912741,
+            "comment_id": 107937437
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "edited": false,
+            "creation_date": 1585910846,
+            "comment_id": 107936572
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585905205,
+            "comment_id": 107934033
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "edited": false,
+            "creation_date": 1585897978,
+            "comment_id": 107930819
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585819999,
+            "comment_id": 107898970
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "edited": false,
+            "creation_date": 1585819205,
+            "comment_id": 107898592
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585814563,
+            "comment_id": 107896432
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "edited": false,
+            "creation_date": 1585814450,
+            "comment_id": 107896383
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585814408,
+            "comment_id": 107896365
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "edited": false,
+            "creation_date": 1585814331,
+            "comment_id": 107896334
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "edited": false,
+            "creation_date": 1585814109,
+            "comment_id": 107896244
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4285e4459145d99e9568d2079fce3cd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16617127,
+                "user_type": "registered",
+                "user_id": 12008421,
+                "link": "https://stackoverflow.com/users/12008421/waynewing",
+                "reputation": 723,
+                "display_name": "waynewing"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60986345,
+            "edited": false,
+            "creation_date": 1585813765,
+            "comment_id": 107896079
+        }
+    ]}
+}

@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6a66b41b1b624cfe7d17141730bdd641?s=256&d=identicon&r=PG",
+            "account_id": 2564612,
+            "user_type": "registered",
+            "user_id": 2225025,
+            "link": "https://stackoverflow.com/users/2225025/olga",
+            "reputation": 31,
+            "display_name": "olga"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/16157673/why-do-i-get-null-pointer-exception-null-when-getting-value-from-view-with-form",
+        "last_activity_date": 1366675712,
+        "creation_date": 1366669019,
+        "answer_count": 1,
+        "title": "Why do I get null pointer exception: null when getting value from view with form url encoded?",
+        "body": "<p>I am coding in Java/html-scala in the Play framework. <\/p>\n\n<p>I am trying to get a value from my view using form url encoded but all I get is null pointer exception.\nIn my controller, I do:<\/p>\n\n<pre><code>String[] searchTag= request().body().asFormUrlEncoded().get(\"questionTag\"); //this is where I get my null pointer exception\n//questionTag is the name of my input field in the view\n<\/code><\/pre>\n\n<p>In my view:\nAt the top of my view, I have:<\/p>\n\n<pre><code>@helper.form(action=routes.TeacherController.ValidateQuestion(), 'enctype -&gt; \"multipart/form-data\", 'class -&gt; \"form-horizontal\") {... //rest of my code\n<\/code><\/pre>\n\n<p>my input field:<\/p>\n\n<pre><code>&lt;input name=\"questionTag\" class=\"input-xxlarge\"&gt;\n<\/code><\/pre>\n\n<p>In the same view, I allow the user to upload a file and I get that file in the same function in the controller with:<\/p>\n\n<pre><code>Http:MultipartFormData body = request().body().asMultipartFormData();\nHttp.MultipartFormData.FilePart attachment = body.getFile(\"attachment\");\n<\/code><\/pre>\n\n<p>I was wondering if that might be causing this exception, that I can not get data with both kinds of methods (multipart/form-data and <code>asFormUrlEncoded().get(\"questionTag\"))<\/code> in the same view?<\/p>\n",
+        "question_id": 16157673,
+        "tags": [
+            "java",
+            "playframework",
+            "nullpointerexception",
+            "forms"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 1358,
+        "last_edit_date": 1366671866
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/30cd6b6279f1bec58512a1b7b5fed4da?s=256&d=identicon&r=PG",
+            "account_id": 1524383,
+            "user_type": "registered",
+            "user_id": 1423178,
+            "link": "https://stackoverflow.com/users/1423178/wayan-wiprayoga",
+            "reputation": 4562,
+            "display_name": "Wayan Wiprayoga",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1366675712,
+        "creation_date": 1366675712,
+        "body": "<p>You can do that, friend! ;)<\/p>\n\n<p>You only need a little bit modification on your code. Because you define the form as <code>multipart/form-data<\/code>, you should handle in the controller like following:<\/p>\n\n<pre><code>// get all request content as MultipartFormData\nHttp.MultipartFormData formData = request().body().asMultipartFormData();\n\n// get the form data\nHttp.MultipartFormData.FilePart attachment = formData.getFile(\"attachment\");\nString[] searchTag = formData.asFormUrlEncoded().get(\"questionTag\"); // works!!\n<\/code><\/pre>\n\n<p>Notice that, on <code>formData<\/code> variable, there is such method called <code>asFormUrlEncoded()<\/code> too. It will <strong>extract the data part<\/strong> from your <code>multipart-form<\/code>. <\/p>\n\n<p>Not to be confused with method <code>RequestBody.asFormUrlEncoded()<\/code> because the API says, it is used to <strong>parsing the request content<\/strong> as URL form-encoded.<\/p>\n\n<p>I hope, the API reference below may used for your reference:<\/p>\n\n<ol>\n<li><a href=\"http://www.playframework.com/documentation/api/2.1.1/java/play/mvc/Http.RequestBody.html\" rel=\"nofollow\"><code>RequestBody<\/code> API Docs<\/a><\/li>\n<li><a href=\"http://www.playframework.com/documentation/api/2.1.1/java/play/mvc/Http.MultipartFormData.html\" rel=\"nofollow\"><code>MultipartFormData<\/code> API Docs<\/a><\/li>\n<\/ol>\n\n<p>Good luck!<\/p>\n",
+        "answer_id": 16158794,
+        "question_id": 16157673
+    }],
+    "answer_comments": {}
+}

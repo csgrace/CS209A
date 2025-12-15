@@ -1,0 +1,230 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f455535288a796badcd22794e356c1dd?s=256&d=identicon&r=PG",
+            "account_id": 288549,
+            "user_type": "registered",
+            "user_id": 589033,
+            "link": "https://stackoverflow.com/users/589033/thiesen",
+            "reputation": 216,
+            "display_name": "Thiesen"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/46778306/datetimeformat-with-daylight-saving-error-when-converting",
+        "last_activity_date": 1517688092,
+        "creation_date": 1508184589,
+        "answer_count": 5,
+        "title": "@DateTimeFormat with daylight saving error when converting",
+        "body": "<p>I am having a problem converting a date that actually does not exists using the <code>@DateTimeFormat<\/code> annotation.<\/p>\n\n<p>For example, when I set the date 15/10/2017, with annotation in my entity being as follows:<\/p>\n\n<pre><code>@Column(nullable = false)\n@NotNull\n@DateTimeFormat(pattern = \"dd/MM/yyyy\")\nprivate Date dataVisita;\n<\/code><\/pre>\n\n<p>I receive the error: <\/p>\n\n<pre><code>Failed To Convert Property Value Of Type Java.Lang.String To Required Type Java.Util.Date For Property DataVisita; \nNested Exception Is Org.Springframework.Core.Convert.ConversionFailedException: \n    Failed To Convert From Type Java.Lang.String To Type @Javax.Persistence.Column @Javax.Validation.Constraints.NotNull @Org.Springframework.Format.Annotation.DateTimeFormat Java.Util.Date For Value 15/10/2017; \nNested Exception Is Java.Lang.IllegalArgumentException: \n    Cannot Parse \"15/10/2017\": Illegal Instant Due To Time Zone Offset Transition (America/Sao_Paulo)\n<\/code><\/pre>\n\n<p>I understand that the error tells me that the date <code>15/10/2017 00:00:00<\/code> does not actually exists, but I want to convert to <code>15/10/2017 01:00:00<\/code>, ignoring this way the problem and finding the correspondent date.<\/p>\n\n<p>Is there a way for me to override the <code>@DateTimeFormat<\/code> annotation or a way to point the formatter to be lenient?<\/p>\n",
+        "question_id": 46778306,
+        "tags": [
+            "java",
+            "spring",
+            "date",
+            "formatter"
+        ],
+        "score": 7,
+        "accepted_answer_id": 48480519,
+        "is_answered": true,
+        "view_count": 2231,
+        "last_edit_date": 1517688092
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-VqecNZ1W-_Y/AAAAAAAAAAI/AAAAAAAAABI/4Eajub3ifOo/s256-rj/photo.jpg",
+                "account_id": 9608425,
+                "user_type": "registered",
+                "user_id": 7133682,
+                "link": "https://stackoverflow.com/users/7133682/bogdan-oros",
+                "reputation": 1309,
+                "display_name": "Bogdan Oros"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778306,
+            "edited": false,
+            "creation_date": 1517476417,
+            "comment_id": 84113680
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-RWjkjLuG9-A/AAAAAAAAAAI/AAAAAAAAAGY/hwTxUo6SSuI/s256-rj/photo.jpg",
+                "account_id": 6306732,
+                "user_type": "registered",
+                "user_id": 4899609,
+                "link": "https://stackoverflow.com/users/4899609/aliaksei-yatsau",
+                "reputation": 749,
+                "display_name": "Aliaksei Yatsau"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778306,
+            "edited": false,
+            "creation_date": 1517171520,
+            "comment_id": 83975001
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bc7a840257b5609850cabee995c052c3?s=256&d=identicon&r=PG",
+                "account_id": 4895787,
+                "user_type": "registered",
+                "user_id": 3945473,
+                "link": "https://stackoverflow.com/users/3945473/m-p-korstanje",
+                "reputation": 12525,
+                "display_name": "M.P. Korstanje"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 46778306,
+            "edited": false,
+            "creation_date": 1517087549,
+            "comment_id": 83954083
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/895a112c66d93cefcd06d2cf371219e6?s=256&d=identicon&r=PG",
+                "account_id": 411142,
+                "user_type": "registered",
+                "user_id": 783412,
+                "link": "https://stackoverflow.com/users/783412/hd1",
+                "reputation": 34857,
+                "display_name": "hd1",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1517163046,
+            "creation_date": 1517086809,
+            "body": "<p>Try this:<\/p>\n<blockquote>\n<p>@Column(nullable = false)<\/p>\n<p>@NotNull<\/p>\n<p>@DateTimeFormat(pattern = &quot;dd/MM/yyyy HH:mm:ss&quot;)<\/p>\n<p>private Date dataVisita;<\/p>\n<\/blockquote>\n<p>It seems to do what you want (adjust 0:00 to 1:00), you'll need to implement a <a href=\"https://docs.spring.io/spring/docs/4.1.x/spring-framework-reference/html/validation.html\" rel=\"nofollow noreferrer\">validator<\/a> as follows:<\/p>\n<pre><code>public class PersonValidator implements Validator {\n\n    /**\n     * This Validator validates *just* Person instances\n     */\n    public boolean supports(Class clazz) {\n        return Date.class.equals(clazz);\n    }\n\n    public void validate(Object obj, Errors e) {\n        String dateString = (String) obj;\n        DateTimeFormatter fmt = DateTimeFormat.forPattern(&quot;dd/MM/yyyy HH:mm:ss&quot;);\n        DateTime ourDate = null;\n        try {\n            fmt.parseDateTime(dateString);\n        } catch (IllegalArgumentException e) {\n            // massage your hour here\n        } finally {\n            ourDate = fmt.parseDateTime(dateString);\n        }\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 48480519,
+            "question_id": 46778306,
+            "last_edit_date": 1592644375
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4319b3222d9ea807b60b0bc163dfea41?s=256&d=identicon&r=PG",
+                "account_id": 272843,
+                "user_type": "registered",
+                "user_id": 564145,
+                "link": "https://stackoverflow.com/users/564145/nicolas-bousquet",
+                "reputation": 4010,
+                "display_name": "Nicolas Bousquet"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1517342479,
+            "creation_date": 1517342479,
+            "body": "<p>For me, you should not mess up directly with the locale of the system. That what your problem truely is. <\/p>\n\n<p>I mean you didn't provide a time zone, so you are using the one of the server. On this server with its config, it will be this day/date. On another server it would another day/date.<\/p>\n\n<p>Be sure that you work either in UTC (so no day light saving and all) or an explicit locale that the client provided in input, use a local date to store... Either keep it like that and when you need to compare dates, convert it to UTC. This way the issue would disapear.<\/p>\n\n<p>A quick fix is to ensure your server use UTC but in the long run you should always control what locale you work with, so either the provided date has to be UTC or it is a Local date and another field provide the timezone.<\/p>\n",
+            "answer_id": 48529587,
+            "question_id": 46778306
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jWoIa.jpg?s=256",
+                "account_id": 7655262,
+                "user_type": "registered",
+                "user_id": 5802417,
+                "link": "https://stackoverflow.com/users/5802417/michael-gantman",
+                "reputation": 7868,
+                "display_name": "Michael Gantman"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1517170997,
+            "creation_date": 1517170997,
+            "body": "<p>If you want to use <code>DateTimeFormat<\/code> which is Java 8 class and part of new (well since java 8) \"java.time\" framework you probably need to use Java 8 Date classes:<\/p>\n\n<p>DATE: <br>\njava.time.LocalDate<\/p>\n\n<p>TIME:<br>\njava.time.LocalTime, java.time.OffsetTime<\/p>\n\n<p>TIMESTAMP: <br>\njava.time.Instant, java.time.LocalDateTime, java.time.OffsetDateTime and java.time.ZonedDateTime<\/p>\n\n<p>Also, which ORM are you using with your Spring framework? Spring data, hibernate or something else? If you use Hibernate, then consult the Hibernate User's guide: <a href=\"http://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html#basic-datetime\" rel=\"nofollow noreferrer\">Mapping Date/Time Values<\/a><\/p>\n",
+            "answer_id": 48490916,
+            "question_id": 46778306
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/judcA.jpg?s=256",
+                "account_id": 2737504,
+                "user_type": "registered",
+                "user_id": 2359858,
+                "link": "https://stackoverflow.com/users/2359858/diogenesgg",
+                "reputation": 2859,
+                "display_name": "diogenesgg"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1517323165,
+            "creation_date": 1517323165,
+            "body": "<p>Depending on how you store your dates in DB, and your server timezone,\nthe solution would be to set your default timezone to UTC on Spring initialisation, using the following code:<\/p>\n\n<p><code>TimeZone.setDefault(TimeZone.getTimeZone(\"UTC\"));<\/code> <\/p>\n",
+            "answer_id": 48523998,
+            "question_id": 46778306
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7d39698a8aeb1faf12d4e6d85c82c903?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7251738,
+                "user_type": "registered",
+                "user_id": 5531763,
+                "link": "https://stackoverflow.com/users/5531763/ashwini-rao",
+                "reputation": 555,
+                "display_name": "Ashwini Rao"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1517562730,
+            "creation_date": 1517562730,
+            "body": "<p>This should be really straightforward.<\/p>\n\n<p>The issue here is , you are passing a String value for a Date Object. Here is the documentation for the annotation in question :<\/p>\n\n<p><a href=\"https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/format/annotation/DateTimeFormat.html\" rel=\"nofollow noreferrer\">https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/format/annotation/DateTimeFormat.html<\/a><\/p>\n\n<p>Simply put here are the types required: java.util.Date, java.util.Calendar, java.lang.Long, Joda-Time value types<\/p>\n\n<p>A very naive way :<\/p>\n\n<pre><code>SimpleDateFormat sdf = new SimpleDateFormat(\"dd/MM/yyyy\");\nDate destnationDateToBeSaved = sdf.parse(\"15/10/2017\");\n<\/code><\/pre>\n\n<p>Recommended way :<\/p>\n\n<p>Use :<\/p>\n\n<pre><code>@DateTimeFormat(iso = ISO.DATE_TIME)\nprivate ZonedDateTime zonedDateTime;\n<\/code><\/pre>\n\n<p>and<\/p>\n\n<pre><code>// 'yyyy-MMM-dd HH:mm:ss' pattern or if preferred ISO\nZonedDateTime  destnationDateToBeSaved= ZonedDateTime.parse(\"2017-Oct-15 23:35:05\", DateTimeFormatter.ofPattern(\"yyyy-MMM-dd HH:mm:ss\").withZone(ZoneId.of(\"UTC\"))); \n<\/code><\/pre>\n\n<p>Hope that helps !<\/p>\n",
+            "answer_id": 48579282,
+            "question_id": 46778306
+        }
+    ],
+    "answer_comments": {
+        "48480519": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/895a112c66d93cefcd06d2cf371219e6?s=256&d=identicon&r=PG",
+                "account_id": 411142,
+                "user_type": "registered",
+                "user_id": 783412,
+                "link": "https://stackoverflow.com/users/783412/hd1",
+                "reputation": 34857,
+                "display_name": "hd1",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 48480519,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8283c64511fa80afed5259d10850168f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7612423,
+                "user_type": "registered",
+                "user_id": 5772882,
+                "link": "https://stackoverflow.com/users/5772882/anonymous",
+                "reputation": 87410,
+                "display_name": "Anonymous"
+            },
+            "edited": false,
+            "creation_date": 1517163003,
+            "comment_id": 83972251
+        }],
+        "48529587": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f455535288a796badcd22794e356c1dd?s=256&d=identicon&r=PG",
+                "account_id": 288549,
+                "user_type": "registered",
+                "user_id": 589033,
+                "link": "https://stackoverflow.com/users/589033/thiesen",
+                "reputation": 216,
+                "display_name": "Thiesen"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48529587,
+            "edited": false,
+            "creation_date": 1517573661,
+            "comment_id": 84161288
+        }]
+    }
+}

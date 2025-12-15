@@ -1,0 +1,118 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cbf3266ba81e08853466f78bb92221e7?s=256&d=identicon&r=PG",
+            "account_id": 992738,
+            "user_type": "registered",
+            "user_id": 1009540,
+            "link": "https://stackoverflow.com/users/1009540/barbetnl",
+            "reputation": 497,
+            "display_name": "BarbetNL"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/72776892/encrypting-with-ec-key-whats-the-use-of-iekeyspec",
+        "last_activity_date": 1656404485,
+        "creation_date": 1656354971,
+        "answer_count": 1,
+        "title": "Encrypting with EC key: what&#39;s the use of IEKeySpec?",
+        "body": "<p>I try to encrypt/decrypt messages using a EC key. I created the key ussing openssl:<\/p>\n<pre><code>openssl ecparam -name prime256v1 -genkey -noout -out secp256r1-key.pem\nopenssl ec -in secp256r1-key.pem -pubout -out secp256r1-pub.pem\nopenssl req -new -key secp256r1-key.pem -x509 -nodes -days 99999 -out secp256r1-cert.pem\n<\/code><\/pre>\n<p>Created a java spring boot app using bouncy castle library for encryption:<\/p>\n<pre><code>   public String encrypt_1(final String msg, PublicKey publicKey) throws Exception {\n\n        final IESCipher c1 = new org.bouncycastle.jcajce.provider.asymmetric.ec.IESCipher.ECIES();\n\n        final Cipher cipher;\n        cipher = Cipher.getInstance(&quot;ECIES&quot;);\n\n        final byte[] msgBytes = msg.getBytes(&quot;UTF-8&quot;);\n\n        cipher.init(Cipher.ENCRYPT_MODE, publicKey);\n        final byte[] encryptedBytes = cipher.doFinal(msgBytes);\n\n        return Base64.getEncoder().encodeToString(encryptedBytes);\n\n    }\n\n    public String decrypt_1(final String msgEncrypted, PrivateKey privateKey) throws Exception {\n        final Cipher cipher = Cipher.getInstance(&quot;ECIES&quot;);\n\n        final byte[] msgBytes = Base64.getDecoder().decode(msgEncrypted);\n\n        cipher.init(Cipher.DECRYPT_MODE, privateKey);\n\n        final byte[] decryptedJwtBytes = cipher.doFinal(msgBytes);\n\n        return new String(decryptedJwtBytes, StandardCharsets.US_ASCII);\n    }\n<\/code><\/pre>\n<p>This works as I have output. However when I see other people implementing ECIES in java they use IESParameterSpec and IEKeySpec  with as input both public and private key of both own and foreign key (as it is asymetric). An example can be found here: <a href=\"https://gist.github.com/amrishodiq/9821413\" rel=\"nofollow noreferrer\">https://gist.github.com/amrishodiq/9821413<\/a>\nor on stackOverflow:\n<a href=\"https://stackoverflow.com/questions/29520106/ecc-algorithm-key-mismatch/29579366#29579366\">ECC algorithm key mismatch<\/a><\/p>\n<p>They do something like:<\/p>\n<pre><code>...\n        IESParameterSpec param = new IESParameterSpec(d, e, 256);\n\n        // decrypt the text using the private key\n        bcipher.init(Cipher.DECRYPT_MODE, new IEKeySpec(tpPrivateKey, ownPublicKey), param);\n        final byte[] decryptedBytes = bcipher.doFinal(cipherTextBytes);\n\n...\n<\/code><\/pre>\n<p>I can't get that code to work, but I want to know if this is more secure and why both keys are used at the same time during encryption/decryption.<\/p>\n",
+        "question_id": 72776892,
+        "tags": [
+            "java",
+            "encryption",
+            "cryptography",
+            "bouncycastle",
+            "encryption-asymmetric"
+        ],
+        "score": 1,
+        "accepted_answer_id": 72782840,
+        "is_answered": true,
+        "view_count": 1364,
+        "last_edit_date": 1656355022
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/5QrkA.png?s=256",
+            "account_id": 1989685,
+            "user_type": "registered",
+            "user_id": 1784011,
+            "link": "https://stackoverflow.com/users/1784011/woodstock",
+            "reputation": 23094,
+            "display_name": "Woodstock",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1656404485,
+        "creation_date": 1656403674,
+        "body": "<p>You're missing some fundamental understanding here.<\/p>\n<p>You cannot <code>encrypt<\/code> per se with elliptic curves (ElGamal with an elliptic curve group is an exception, but not used in practice).<\/p>\n<p>&quot;Encryption&quot; in the context of elliptic curves is really the following process:<\/p>\n<ul>\n<li>Knowing that an EC private key is a large number, and an EC public key is a (x,y) point on the curve's Cartesian plane.<\/li>\n<li>Generating a shared symmetric key via elliptic curve Diffie Hellman.<\/li>\n<li>This ECDH process requires input from two parties, where each party effectively calculates their <code>private key<\/code> * <code>public point A<\/code> * <code>public point B<\/code>.<\/li>\n<li>This calculation will yield another shared secret point on the curve, next the <code>x<\/code> co-ordinate component of this new point is used and passed through a hashing function to generate uniform key material.<\/li>\n<li>Finally, you use this key with a strong symmetric cipher, preferably something like <code>ChaCha20-Poly1305<\/code>.<\/li>\n<\/ul>\n<p>In summary, with EC crypto, first we do a little dance to agree a key, then we can use any symmetric cipher we like.<\/p>\n<p>It's that simple, don't get mired in unnecessary detail. Also move to a different library like <code>libsodium<\/code> if possible, BC is noisy.<\/p>\n<p>Finally,<\/p>\n<pre><code>        byte[]  d = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };\n        byte[]  e = new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 };\n        IESParameterSpec param = new IESParameterSpec(d, e, 256);\n<\/code><\/pre>\n<p>The above &quot;derivation and encoding vectors&quot; are worthless.<\/p>\n",
+        "answer_id": 72782840,
+        "question_id": 72776892,
+        "last_edit_date": 1656404485
+    }],
+    "answer_comments": {"72782840": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cbf3266ba81e08853466f78bb92221e7?s=256&d=identicon&r=PG",
+                "account_id": 992738,
+                "user_type": "registered",
+                "user_id": 1009540,
+                "link": "https://stackoverflow.com/users/1009540/barbetnl",
+                "reputation": 497,
+                "display_name": "BarbetNL"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72782840,
+            "edited": false,
+            "creation_date": 1657792207,
+            "comment_id": 128896611
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/5QrkA.png?s=256",
+                "account_id": 1989685,
+                "user_type": "registered",
+                "user_id": 1784011,
+                "link": "https://stackoverflow.com/users/1784011/woodstock",
+                "reputation": 23094,
+                "display_name": "Woodstock",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72782840,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/cbf3266ba81e08853466f78bb92221e7?s=256&d=identicon&r=PG",
+                "account_id": 992738,
+                "user_type": "registered",
+                "user_id": 1009540,
+                "link": "https://stackoverflow.com/users/1009540/barbetnl",
+                "reputation": 497,
+                "display_name": "BarbetNL"
+            },
+            "edited": false,
+            "creation_date": 1656662263,
+            "comment_id": 128631669
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cbf3266ba81e08853466f78bb92221e7?s=256&d=identicon&r=PG",
+                "account_id": 992738,
+                "user_type": "registered",
+                "user_id": 1009540,
+                "link": "https://stackoverflow.com/users/1009540/barbetnl",
+                "reputation": 497,
+                "display_name": "BarbetNL"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72782840,
+            "edited": false,
+            "creation_date": 1656415431,
+            "comment_id": 128561583
+        }
+    ]}
+}

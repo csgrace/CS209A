@@ -1,0 +1,65 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/94371ad208386b084f827fbfc0013ae0?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1658555,
+            "user_type": "registered",
+            "user_id": 1527377,
+            "link": "https://stackoverflow.com/users/1527377/steven",
+            "reputation": 833,
+            "display_name": "Steven",
+            "accept_rate": 65
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18478391/first-time-using-bufferstrategy-class-something-isnt-working",
+        "last_activity_date": 1377656881,
+        "creation_date": 1377656428,
+        "answer_count": 1,
+        "title": "First time using BufferStrategy class, something isn&#39;t working",
+        "body": "<p>For some reason, I get an error when I try to create a tripple buffer, this is my first time using the BufferStratrgy class so I don't necessarily know what I'm doing.<\/p>\n\n<pre><code>package com.valgriz.main;\n\n import java.awt.Canvas;\n import java.awt.Color;\n import java.awt.Graphics;\n import java.awt.image.BufferStrategy;\n\n import javax.swing.JFrame;\n import javax.swing.JPanel;\n\n public class Main extends Canvas implements Runnable {\npublic static JFrame frame = new JFrame();\npublic Thread thread = new Thread(this);\nprivate final int SCALE = 4;\n\npublic static void main(String[] args) {\n    frame.add(new Main());\n    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n    frame.setSize(360, 480);\n    frame.setTitle(\"8ddddd\");\n    frame.setLocationRelativeTo(null);\n    frame.setResizable(false);\n    frame.setVisible(true);\n}\n\npublic Main() {\n    thread.start();\n}\n\npublic void update() {\n\n}\n\npublic void render() {\n    BufferStrategy bs = getBufferStrategy();\n    if (bs == null) {\n        createBufferStrategy(3);\n        return;\n    }\n    Graphics g = bs.getDrawGraphics();\n    g.setColor(Color.black);\n    g.fillRect(0, 0, getWidth(), getHeight());\n    g.dispose();\n    bs.show();\n}\n\npublic void run() {\n    while (true) {\n        update();\n        render();\n    }\n}\n }\n<\/code><\/pre>\n\n<p>This is the error I get:<\/p>\n\n<pre><code>Exception in thread \"Thread-1\" java.lang.IllegalStateException: Component must have a valid peer\nat java.awt.Component$FlipBufferStrategy.createBuffers(Unknown Source)\nat java.awt.Component$FlipBufferStrategy.&lt;init&gt;(Unknown Source)\nat java.awt.Component$FlipSubRegionBufferStrategy.&lt;init&gt;(Unknown Source)\nat java.awt.Component.createBufferStrategy(Unknown Source)\nat java.awt.Canvas.createBufferStrategy(Unknown Source)\nat java.awt.Component.createBufferStrategy(Unknown Source)\nat java.awt.Canvas.createBufferStrategy(Unknown Source)\nat com.valgriz.main.Main.render(Main.java:37)\nat com.valgriz.main.Main.run(Main.java:50)\nat java.lang.Thread.run(Unknown Source)\n<\/code><\/pre>\n",
+        "question_id": 18478391,
+        "tags": ["java"],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 2311
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+            "account_id": 969721,
+            "user_type": "registered",
+            "user_id": 992484,
+            "link": "https://stackoverflow.com/users/992484/madprogrammer",
+            "reputation": 347645,
+            "display_name": "MadProgrammer",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 18478391,
+        "edited": false,
+        "creation_date": 1377656779,
+        "comment_id": 27161923
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+            "account_id": 969721,
+            "user_type": "registered",
+            "user_id": 992484,
+            "link": "https://stackoverflow.com/users/992484/madprogrammer",
+            "reputation": 347645,
+            "display_name": "MadProgrammer",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1377656881,
+        "creation_date": 1377656881,
+        "body": "<p>Basically, you are trying to create a buffered strategy BEFORE the component is displayed (connected to the screen). This is a race condition between you Thread and the EDT<\/p>\n\n<p>You could check the <a href=\"http://docs.oracle.com/javase/7/docs/api/java/awt/Component.html#isDisplayable%28%29\" rel=\"nofollow\"><code>isDisplayed<\/code><\/a> in you <code>run<\/code> method and wait till it is <code>true<\/code>.<\/p>\n\n<p>You could also start your thread AFTER you've made the frame visible...<\/p>\n",
+        "answer_id": 18478449,
+        "question_id": 18478391
+    }],
+    "answer_comments": {}
+}

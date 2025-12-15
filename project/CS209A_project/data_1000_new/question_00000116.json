@@ -1,0 +1,191 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/sZBFW.jpg?s=256",
+            "account_id": 2339925,
+            "user_type": "registered",
+            "user_id": 2051454,
+            "link": "https://stackoverflow.com/users/2051454/software-engineer",
+            "reputation": 16273,
+            "display_name": "Software Engineer",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/36429949/intellij-use-docker-jvm-or-docker-maven",
+        "last_activity_date": 1460462227,
+        "creation_date": 1459868153,
+        "answer_count": 2,
+        "title": "IntelliJ: use docker jvm or docker maven?",
+        "body": "<p>I have a docker/jvm instance, which I use from the command line to compile and run java code. IntelliJ's project config requires me to point at a jvm on the filesystem. <\/p>\n\n<p>So, I was wondering, can I configure intellij to use this docker container? I suppose I could configure a docker container, keep it running, and mount/share its filesystem, but I don't want that -- I want to use my ephemeral container instance.<\/p>\n\n<p>I have the same idea for using maven -- can I use a docker instance of maven without mounting the filesystem, from within intellij? Again, intellij seems to require a pointer to a filesystem location for maven, so this seems problematic.<\/p>\n\n<p>Does anyone have any clue if this is possible, or how to go about configuring such a thing?<\/p>\n",
+        "question_id": 36429949,
+        "tags": [
+            "java",
+            "maven",
+            "intellij-idea",
+            "docker",
+            "ide"
+        ],
+        "score": 4,
+        "accepted_answer_id": 36541364,
+        "is_answered": true,
+        "view_count": 2668
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/sZBFW.jpg?s=256",
+                "account_id": 2339925,
+                "user_type": "registered",
+                "user_id": 2051454,
+                "link": "https://stackoverflow.com/users/2051454/software-engineer",
+                "reputation": 16273,
+                "display_name": "Software Engineer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 36429949,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/sMhV4.jpg?s=256",
+                "account_id": 7778388,
+                "user_type": "registered",
+                "user_id": 5885697,
+                "link": "https://stackoverflow.com/users/5885697/geoff-l",
+                "reputation": 99,
+                "display_name": "Geoff L.",
+                "accept_rate": 25
+            },
+            "edited": false,
+            "creation_date": 1683114808,
+            "comment_id": 134316165
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/sMhV4.jpg?s=256",
+                "account_id": 7778388,
+                "user_type": "registered",
+                "user_id": 5885697,
+                "link": "https://stackoverflow.com/users/5885697/geoff-l",
+                "reputation": 99,
+                "display_name": "Geoff L.",
+                "accept_rate": 25
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 36429949,
+            "edited": false,
+            "creation_date": 1682349238,
+            "comment_id": 134197133
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/I4fiW.jpg?s=256",
+                "account_id": 4243,
+                "user_type": "registered",
+                "user_id": 6309,
+                "link": "https://stackoverflow.com/users/6309/vonc",
+                "reputation": 1361201,
+                "display_name": "VonC",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1460356285,
+            "creation_date": 1460356285,
+            "body": "<blockquote>\n  <p>Again, intellij seems to require a pointer to a filesystem location for maven, so this seems problematic.<\/p>\n<\/blockquote>\n\n<p>The only way for an application to use another <em>containerized<\/em> one would be for that application itself to be in the same container (or to mount a data volume from another container, which avoids mounting the local filesystem)<\/p>\n\n<p>So using something like <a href=\"https://hub.docker.com/r/dlsniper/docker-intellij/\" rel=\"nofollow\"><code>dlsniper/docker-intellij/<\/code><\/a> (used for go, but easily adapted for java) would work, and allow an IntelliJ <em>container<\/em> to<\/p>\n\n<ul>\n<li>share the X11 socket in order to see the containerized application on the host desktop,<\/li>\n<li>uses <strong>data volumes<\/strong> (again, without mounting a local filesystem directly):\n\n<ul>\n<li>data-volume for the jvm<\/li>\n<li>data-volume for the java sources<\/li>\n<\/ul><\/li>\n<\/ul>\n",
+            "answer_id": 36541364,
+            "question_id": 36429949
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8b3e0309dfd0c6bf050d079c46c3cf3f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7102876,
+                "user_type": "registered",
+                "user_id": 5433684,
+                "link": "https://stackoverflow.com/users/5433684/ateles",
+                "reputation": 422,
+                "display_name": "ateles"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1460462227,
+            "creation_date": 1460461595,
+            "body": "<p>If you're on a posix system, you can make a simple executable shell script that takes command line argument and forwards those to:<\/p>\n\n<pre><code>docker exec [OPTIONS] CONTAINER COMMAND [ARGS...]\n<\/code><\/pre>\n\n<p>This may even work on Windows with a batch file.<\/p>\n\n<p>One problem is when you have to pass in file paths. A solution could be to mount the working directory at an identical path in the container, as on the host.<\/p>\n\n<p>Don't forget the <a href=\"https://en.wikipedia.org/wiki/Shebang_(Unix)\" rel=\"nofollow\">shebang<\/a> if you go for a shell script.<\/p>\n\n<p>On Windows, a filepath may be 'unixified' in a batch file like this:<\/p>\n\n<pre><code>set FILEPATH=%FILEPATH:C:=/c%\nset FILEPATH=%FILEPATH:\\=/% \n<\/code><\/pre>\n",
+            "answer_id": 36572382,
+            "question_id": 36429949,
+            "last_edit_date": 1460462227
+        }
+    ],
+    "answer_comments": {
+        "36541364": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/I4fiW.jpg?s=256",
+                    "account_id": 4243,
+                    "user_type": "registered",
+                    "user_id": 6309,
+                    "link": "https://stackoverflow.com/users/6309/vonc",
+                    "reputation": 1361201,
+                    "display_name": "VonC",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36541364,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/sZBFW.jpg?s=256",
+                    "account_id": 2339925,
+                    "user_type": "registered",
+                    "user_id": 2051454,
+                    "link": "https://stackoverflow.com/users/2051454/software-engineer",
+                    "reputation": 16273,
+                    "display_name": "Software Engineer",
+                    "accept_rate": 60
+                },
+                "edited": false,
+                "creation_date": 1460852065,
+                "comment_id": 60933776
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/sZBFW.jpg?s=256",
+                    "account_id": 2339925,
+                    "user_type": "registered",
+                    "user_id": 2051454,
+                    "link": "https://stackoverflow.com/users/2051454/software-engineer",
+                    "reputation": 16273,
+                    "display_name": "Software Engineer",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36541364,
+                "edited": false,
+                "creation_date": 1460851854,
+                "comment_id": 60933734
+            }
+        ],
+        "36572382": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/sZBFW.jpg?s=256",
+                "account_id": 2339925,
+                "user_type": "registered",
+                "user_id": 2051454,
+                "link": "https://stackoverflow.com/users/2051454/software-engineer",
+                "reputation": 16273,
+                "display_name": "Software Engineer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36572382,
+            "edited": false,
+            "creation_date": 1460851971,
+            "comment_id": 60933762
+        }]
+    }
+}

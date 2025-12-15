@@ -1,0 +1,77 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/WCjir.jpg?s=256",
+            "account_id": 7599579,
+            "user_type": "registered",
+            "user_id": 5764665,
+            "link": "https://stackoverflow.com/users/5764665/franz-wimmer",
+            "reputation": 1497,
+            "display_name": "Franz Wimmer",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76645140/how-to-let-java-library-users-choose-between-json-parsing-frameworks",
+        "last_activity_date": 1688921792,
+        "creation_date": 1688854355,
+        "answer_count": 2,
+        "title": "How to let Java library users choose between JSON parsing frameworks?",
+        "body": "<p>I am developing a Java library that can be used to call a certain web API that is using JSON data format to pass information. Said library will only contain data classes according to the data structure defined by the API spec. Code required to call the API will be placed in a second library.<\/p>\n<p>In Java enterprise applications, there are several JSON parsing libraries available, like JSON-B or Jackson. I want to design my library to be somewhat agnostic of the underlying JSON implementation.<\/p>\n<p>Let's assume my library has a class <code>Article<\/code>:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public class Article {\n    String id;\n    String headline;\n    String content;\n}\n<\/code><\/pre>\n<p>To make that class suitable for use in <strong>JSON-B<\/strong>-enabled applications, I would have to provide the following annotations with my class, along with a project dependency to e.g. <code>jakarta.json.bind:jakarta.json.bind-api<\/code>:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public class Article {\n    @JsonbProperty(&quot;id&quot;)\n    String id;\n\n    @JsonbProperty(&quot;headline&quot;)\n    String headline;\n\n    @JsonbProperty(&quot;content&quot;)\n    String content;\n}\n<\/code><\/pre>\n<p>To make that class suitable for use in <strong>Jackson<\/strong>-enabled applications, I would have to provide the following annotations with my class, along with a project dependency to e.g. <code>com.fasterxml.jackson.core:jackson-annotations<\/code>:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public class Article {\n    @JsonProperty(&quot;id&quot;)\n    String id;\n\n    @JsonProperty(&quot;headline&quot;)\n    String headline;\n\n    @JsonProperty(&quot;content&quot;)\n    String content;\n}\n<\/code><\/pre>\n<p>I have seen libraries for Quarkus offering distinct versions for both frameworks, like <code>quarkus-resteasy-reactive-jsonb<\/code> and <code>quarkus-resteasy-reactive-jackson<\/code>, but those do not have POJO classes to serialize. I could provide three modules of my library, a base version and versions for <strong>JSON-B<\/strong> and <strong>Jackson<\/strong>, but I can't wrap my head around how to do it without duplicating / extending lots of classes and dependencies.<\/p>\n",
+        "question_id": 76645140,
+        "tags": [
+            "java",
+            "jackson",
+            "design-decisions",
+            "jsonb-api"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 671,
+        "last_edit_date": 1688860141
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ca03242df77ec2d8f70f2cea0d6209be?s=256&d=identicon&r=PG",
+                "account_id": 61566,
+                "user_type": "registered",
+                "user_id": 183406,
+                "link": "https://stackoverflow.com/users/183406/meriton",
+                "reputation": 70922,
+                "display_name": "meriton",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1688921792,
+            "creation_date": 1688921792,
+            "body": "<p>First, it's worth noting that <code>@JsonProperty<\/code> annotations are not (usually) required for Jackson. Still, depending on the classes being serialized, some annotations may be needed. In this case, I'd simply add both sets of annotations to the data class - after all, excess annotations do no harm if their corresponding framework is not asked to process that class.<\/p>\n<p>To do so, your maven module will want to declare a dependency on both annotation jars. If you're concerned about your clients receiving an unnecessary annotation jar, you can declare your dependency <code>optional<\/code>, so it's only used during compilation of your data class, but not available at runtime unless your users declare a dependency themselves. The annotation JARs being absent causes no issue because the Java runtime ignores annotations whose definition is missing.<\/p>\n",
+            "answer_id": 76648566,
+            "question_id": 76645140
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2bf3c771e7050be897454281f8e3287e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 136251,
+                "user_type": "registered",
+                "user_id": 339637,
+                "link": "https://stackoverflow.com/users/339637/ken-chan",
+                "reputation": 91430,
+                "display_name": "Ken Chan",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1688920871,
+            "creation_date": 1688890731,
+            "body": "<p>The idea is that for each of the individual JSON library modules , you have to develop some generic codes that can serialise/deserialise between a given POJO and JSON by using that JSON library 's API.<\/p>\n<p>The annotation approach provided by the JSON library is just a high level way for processing the JSON. There should be the some way to do the same thing without POJO and annotations and you should check each of the JSON library for how to do that when developing those generic codes. For example in Jackson, you can represent the JSON structure as a map instead of POJO<\/p>\n<p>To keep the POJO to be agnostic of any JSON libraries , you can also consider to define your own annotations for annotating the POJO. Those generic codes in each JSON modules can then make use of it to make the decision.<\/p>\n",
+            "answer_id": 76646507,
+            "question_id": 76645140,
+            "last_edit_date": 1688920871
+        }
+    ],
+    "answer_comments": {}
+}

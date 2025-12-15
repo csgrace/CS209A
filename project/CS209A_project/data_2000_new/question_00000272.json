@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-YDgiwwbfbEE/AAAAAAAAAAI/AAAAAAAAAQI/tZhuNZx--m8/s256-rj/photo.jpg",
+            "account_id": 10431835,
+            "user_type": "registered",
+            "user_id": 7691431,
+            "link": "https://stackoverflow.com/users/7691431/gaurav-goswami",
+            "reputation": 31,
+            "display_name": "Gaurav Goswami"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53139540/tomcat-says-http-method-post-is-not-supported-by-this-url",
+        "last_activity_date": 1541659798,
+        "creation_date": 1541325091,
+        "answer_count": 1,
+        "title": "tomcat says http method post is not supported by this url",
+        "body": "<p>i've been calling servlet by a HTML page and my servlet code goes like this:<\/p>\n\n<pre><code>import java.sql.*;\nimport javax.servlet.http.*;\nimport java.io.*;\nimport javax.servlet.RequestDispatcher;\nimport javax.servlet.ServletException;\n\npublic class validation extends HttpServlet\n{\n    static PrintWriter pw = null;\n    public void doPost(HttpServletResponse response, HttpServletRequest request) throws ClassNotFoundException, SQLException, IOException, ServletException\n    {\n        pw = response.getWriter();\n        String username = request.getParameter(\"username\");\n        String password = request.getParameter(\"password\");\n        RequestDispatcher rd = request.getRequestDispatcher(\"new.html\");\n        Class.forName(\"java.sql.Driver\");\n        Connection con = DriverManager.getConnection(\"jdbc:mysql://localhost:3306/timetabledb\", \"root\",\"`\");\n        Statement stmt = con.createStatement();\n        ResultSet rs = stmt.executeQuery(\"select password from users where username = '\"+username+\"';\");\n        if(rs.next()==false)\n        {\n            pw.println(\"No such user found!\");\n        }\n        else\n        {\n            if(password.equals(rs.getString(\"password\")))\n            {\n                rd.forward(request, response);\n            }\n            else\n            {\n                pw.println(\"Invalid credentials!\");\n            }\n        }\n        rs.close();\n    }\n}\n<\/code><\/pre>\n\n<p>and my html page is this:<\/p>\n\n<pre><code>&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n&lt;head&gt;\n  &lt;title&gt;Login Page - SGMS&lt;/title&gt;\n  &lt;link rel=\"stylesheet\" href=\"main.css\" /&gt;\n&lt;/head&gt;\n\n&lt;body&gt;\n    &lt;div id = \"container\"&gt;\n        &lt;div class = \"welcome-head\"&gt;\n            Welcome\n        &lt;/div&gt;\n        &lt;div class = \"sw-head\"&gt;\n            Semi-Automatic Schedule Generator &amp; Maintenance Software\n        &lt;/div&gt;\n        &lt;span class=\"logo\"&gt;\n            &lt;img src=\"logo.gif\" alt=\"Logo\"/&gt;\n        &lt;/span&gt;\n        &lt;div class = \"form\"&gt;\n            &lt;form method=\"POST\" action=\"validation\"&gt;\n                &lt;label for=\"inp-usr\" class=\"inp\"&gt;\n                &lt;input type=\"text\" name=\"username\" id=\"inp-usr\" placeholder=\"&amp;nbsp;\" required=\"required\"&gt;\n                  &lt;span class=\"label\"&gt;Username&lt;/span&gt;\n                  &lt;span class=\"border\"&gt;&lt;/span&gt;\n                &lt;/label&gt;\n                &lt;br&gt;\n                &lt;label for=\"inp-pwd\" class=\"inp\"&gt;\n                &lt;input type=\"password\" name=\"password\" id=\"inp-pwd\" placeholder=\"&amp;nbsp;\" required=\"required\"&gt;\n                  &lt;span class=\"label\"&gt;Password&lt;/span&gt;\n                  &lt;span class=\"border\"&gt;&lt;/span&gt;\n                &lt;/label&gt;\n                &lt;br&gt;&lt;br&gt;&lt;br&gt;\n                &lt;button class=\"validate-btn\" onclick=\"show();\"&gt;\n                    Validate\n                &lt;/button&gt;\n            &lt;/form&gt;\n        &lt;/div&gt;\n    &lt;/div&gt;\n&lt;/body&gt;\n\n&lt;/html&gt;\n<\/code><\/pre>\n\n<p>but the problem is that whenever i run all this, the application server says, that POST method isn't supported by this url.\nI've experienced this error frequently, please explain why all this happens.\nI've mapped the servlet in my web.xml<\/p>\n\n<p>Thanks in advance.<\/p>\n",
+        "question_id": 53139540,
+        "tags": [
+            "java",
+            "html",
+            "tomcat",
+            "web"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1099
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+            "account_id": 47283,
+            "user_type": "registered",
+            "user_id": 139985,
+            "link": "https://stackoverflow.com/users/139985/stephen-c",
+            "reputation": 723474,
+            "display_name": "Stephen C",
+            "accept_rate": 69
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1541659798,
+        "creation_date": 1541337075,
+        "body": "<p>You have made a mistake in your <code>doPost<\/code> method.  You have declared it as this:<\/p>\n\n<pre><code>void doPost(HttpServletResponse response, HttpServletRequest request)\n    throws ClassNotFoundException, SQLException, IOException, ServletException\n<\/code><\/pre>\n\n<p>but the correct signature is this:<\/p>\n\n<pre><code>void doPost(HttpServletRequest req, HttpServletResponse resp) \n    throws ServletException, IOException\n<\/code><\/pre>\n\n<p>Notice the different parameter order ....<\/p>\n\n<p>Since your method doesn't have the correct signature, it is not overriding the inherited version.  That means that your version never gets called.  Instead, a POST requests calls the inherited method ... and the behavior of that is to say \"POST not supported\".<\/p>\n\n<p>Solution:<\/p>\n\n<ol>\n<li>Correct your <code>doPost<\/code> method's signature.  (The exceptions will need fixing too!)<\/li>\n<li>Add an <code>@Override<\/code> annotation to this ... and any other override methods in this class.<\/li>\n<li>Get into the habit of always  using <code>@Override<\/code> wherever you intend to override a method ... so that the Java compiler can point out your mistakes to you.<\/li>\n<\/ol>\n",
+        "answer_id": 53141177,
+        "question_id": 53139540,
+        "last_edit_date": 1541659798
+    }],
+    "answer_comments": {}
+}

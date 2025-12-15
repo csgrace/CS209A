@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1264727172/picture?type=large",
+            "account_id": 3825788,
+            "user_type": "registered",
+            "user_id": 3172631,
+            "link": "https://stackoverflow.com/users/3172631/chaw359",
+            "reputation": 13,
+            "display_name": "chaw359",
+            "accept_rate": 20
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28341892/how-to-resolve-java-rmi-notboundexception-rmi-localhost-helloworld",
+        "last_activity_date": 1423170964,
+        "creation_date": 1423133124,
+        "answer_count": 1,
+        "title": "How to resolve java.rmi.NotBoundException: rmi://localhost//HelloWorld?",
+        "body": "<p>Im starting to use Java RMI. Im tried to do an Hello World example but i didn't.\nThis is my remote interface code:<\/p>\n\n<pre><code>package server;\n\nimport java.rmi.Remote;\nimport java.rmi.RemoteException;\n\npublic interface Hello extends Remote\n{\n    public String saluta(String who) throws RemoteException;\n}\n<\/code><\/pre>\n\n<p>This is my class that extends the remote interface:<\/p>\n\n<pre><code>package server;\n\nimport java.rmi.RemoteException;\nimport java.rmi.server.UnicastRemoteObject;\n\npublic class HelloWorld extends UnicastRemoteObject implements Hello\n{\n\n    private static final long serialVersionUID = 1L;\n\n    public HelloWorld() throws RemoteException\n    {\n        super();\n    }\n\n    public String saluta(String who) throws RemoteException\n    {\n        return \"Hello \" + who;\n    }\n}\n<\/code><\/pre>\n\n<p>This is my server:<\/p>\n\n<pre><code>package server;\nimport java.rmi.registry.LocateRegistry;\nimport java.rmi.registry.Registry;\nimport java.rmi.server.UnicastRemoteObject;\nimport java.util.logging.Logger;\n\npublic class Server\n{\n\n    static Logger logger = Logger.getLogger(\"global\");\n\n    public static void main(String[] args)\n    {\n        System.setProperty(\"java.security.policy\", \"policy.all\");\n        if (System.getSecurityManager() == null)\n        {\n            System.setSecurityManager(new SecurityManager());\n        }\n\n        try\n        {\n            HelloWorld hello = new HelloWorld();\n\n            Registry r = LocateRegistry.createRegistry(9000);\n\n\n            logger.info(\"Creo l'oggetto\");\n\n\n            logger.info(\"...ora ne effettuo il rebind...\");\n            r.rebind(\"HelloWorld\", hello);\n            logger.info(\"...pronto\");\n        } catch (Exception e)\n        {\n            e.printStackTrace();\n        }\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>And this is my client code:<\/p>\n\n<pre><code>package hello.client;\nimport java.rmi.registry.LocateRegistry;\nimport java.rmi.registry.Registry;\nimport java.util.logging.Logger;\n\npublic class Client\n{\n    static Logger logger = Logger.getLogger(\"global\");\n\n    public static void main(String[] args)\n    {\n        try\n        {\n            Registry r = LocateRegistry.getRegistry(9000);\n            logger.info(\"Sto cercando l'oggetto remoto...\");\n            Hello hello = (Hello) r.lookup(\"rmi://localhost//HelloWorld\");\n\n\n            System.out.println(hello.saluta(\"Graziano\"));\n\n        } catch (Exception e)\n        {\n            e.printStackTrace();\n        }\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>I created two separeted project,one for server and the other one for client as in image at following link:<a href=\"http://www.mediafire.com/view/h5pvug5r2cqlamv/Immagine.png\" rel=\"nofollow\">image<\/a>\nMy server work perfectly, but the client get me this error:\njava.rmi.NotBoundException: rmi://localhost//HelloWorld on line 18<\/p>\n\n<p>what's wrong?? If someone can, please post me an example! Thanks :D<\/p>\n\n<p>P.S: Maybe could be important! This is the external configuration tool:\n<a href=\"http://www.mediafire.com/view/qzoipupq74870cu/Immagine2.png\" rel=\"nofollow\">image2<\/a><\/p>\n",
+        "question_id": 28341892,
+        "tags": [
+            "java",
+            "rmi"
+        ],
+        "score": 0,
+        "accepted_answer_id": 28341982,
+        "is_answered": true,
+        "view_count": 8724,
+        "last_edit_date": 1423134983
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+            "account_id": 71739,
+            "user_type": "registered",
+            "user_id": 207421,
+            "link": "https://stackoverflow.com/users/207421/user207421",
+            "reputation": 311880,
+            "display_name": "user207421",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1423170964,
+        "creation_date": 1423133343,
+        "body": "<p>Get rid of the lookup URL. Lookup URLs are for the <code>Naming<\/code> class. You already have a Registry object and it was created for a speficic host and port. <em>Ergo<\/em> you only need the lookup name, same as when you bound. Just use <code>\"HelloWorld\"<\/code>.<\/p>\n",
+        "answer_id": 28341982,
+        "question_id": 28341892,
+        "last_edit_date": 1423170964
+    }],
+    "answer_comments": {"28341982": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1264727172/picture?type=large",
+            "account_id": 3825788,
+            "user_type": "registered",
+            "user_id": 3172631,
+            "link": "https://stackoverflow.com/users/3172631/chaw359",
+            "reputation": 13,
+            "display_name": "chaw359",
+            "accept_rate": 20
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 28341982,
+        "edited": false,
+        "creation_date": 1423134025,
+        "comment_id": 45028941
+    }]}
+}

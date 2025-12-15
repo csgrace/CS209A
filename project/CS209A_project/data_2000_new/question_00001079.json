@@ -1,0 +1,139 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-qB4JPB_0GBY/AAAAAAAAAAI/AAAAAAAAABo/iTXkoptqFxk/s256-rj/photo.jpg",
+            "account_id": 6166389,
+            "user_type": "registered",
+            "user_id": 4806129,
+            "link": "https://stackoverflow.com/users/4806129/venkatesh",
+            "reputation": 25,
+            "display_name": "Venkatesh"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45397968/error-passing-custom-object-between-activities-through-intent",
+        "last_activity_date": 1501405339,
+        "creation_date": 1501404138,
+        "answer_count": 1,
+        "title": "Error passing custom object between activities through intent",
+        "body": "<p>I tried passing this simple object from MainActivity to Main2Activity by implementing Serializable on the CustomObject. It results in Error. I referred the similar stack overflow questions. Nothing helped. <\/p>\n\n<pre><code>public class MainActivity extends Activity {\n    String TAG = \"MainActivity\";\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main);\n    Intent i = new Intent(this,Main2Activity.class);\n    Bundle bundle = new Bundle();\n    bundle.putSerializable(\"data\",new CustomObject());\n//I tried i.putExtra(bundle);\n    i.putExtra(\"data\",new CustomObject());\n    startActivity(i);\n    Log.d(TAG, \"onCreate: \");\n}\n\npublic class CustomObject implements Serializable{\n    public int i = 0;\n    public int j = 9;\n    CustomObject(){\n\n    }\n}\n}\n<\/code><\/pre>\n\n<p>Main2Activity<\/p>\n\n<pre><code>public class Main2Activity extends Activity {\nString TAG = \"Main2Activity\";\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main2);\n    Intent i = getIntent();\n    MainActivity.CustomObject c = (MainActivity.CustomObject)i.getSerializableExtra(\"data\");\n    Log.d(TAG, \"onCreate: \"+c.i+\" \"+c.j);\n}\n}\n<\/code><\/pre>\n\n<p>Error Message:<\/p>\n\n<blockquote>\n  <p>07-30 13:58:58.352 26489-26489/? E/AndroidRuntime: FATAL EXCEPTION:\n  main\n                                                 Process: gct.venkatesh.com.scrshtrebuilt, PID: 26489\n                                                 java.lang.RuntimeException: Unable to start activity\n  ComponentInfo{gct.venkatesh.com.scrshtrebuilt/gct.venkatesh.com.scrshtrebuilt.MainActivity}:\n  java.lang.RuntimeException: Parcelable encountered IOException writing\n  serializable object (name =\n  gct.venkatesh.com.scrshtrebuilt.MainActivity$CustomObject)\n                                                     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2684)\n                                                     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2751)\n                                                     at android.app.ActivityThread.-wrap12(ActivityThread.java)\n                                                     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1496)\n                                                     at android.os.Handler.dispatchMessage(Handler.java:102)\n                                                     at android.os.Looper.loop(Looper.java:154)\n                                                     at android.app.ActivityThread.main(ActivityThread.java:6186)\n                                                     at java.lang.reflect.Method.invoke(Native Method)\n                                                     at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:889)\n                                                     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:779)\n                                                  Caused by: java.lang.RuntimeException: Parcelable encountered IOException writing\n  serializable object (name =\n  gct.venkatesh.com.scrshtrebuilt.MainActivity$CustomObject)\n                                                     at android.os.Parcel.writeSerializable(Parcel.java:1527)\n                                                     at android.os.Parcel.writeValue(Parcel.java:1475)\n                                                     at android.os.Parcel.writeArrayMapInternal(Parcel.java:724)\n                                                     at android.os.BaseBundle.writeToParcelInner(BaseBundle.java:1417)\n                                                     at android.os.Bundle.writeToParcel(Bundle.java:1157)\n                                                     at android.os.Parcel.writeBundle(Parcel.java:764)\n                                                     at android.content.Intent.writeToParcel(Intent.java:8703)\n                                                     at android.app.ActivityManagerProxy.startActivity(ActivityManagerNative.java:3082)\n                                                     at android.app.Instrumentation.execStartActivity(Instrumentation.java:1520)\n                                                     at android.app.Activity.startActivityForResult(Activity.java:4229)\n                                                     at android.app.Activity.startActivityForResult(Activity.java:4187)\n                                                     at android.app.Activity.startActivity(Activity.java:4526)\n                                                     at android.app.Activity.startActivity(Activity.java:4494)\n                                                     at gct.venkatesh.com.scrshtrebuilt.MainActivity.onCreate(MainActivity.java:21)\n                                                     at android.app.Activity.performCreate(Activity.java:6684)\n                                                     at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1119)\n                                                     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2637)\n                                                     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2751) \n                                                     at android.app.ActivityThread.-wrap12(ActivityThread.java) \n                                                     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1496) \n                                                     at android.os.Handler.dispatchMessage(Handler.java:102) \n                                                     at android.os.Looper.loop(Looper.java:154) \n                                                     at android.app.ActivityThread.main(ActivityThread.java:6186) \n                                                     at java.lang.reflect.Method.invoke(Native Method) \n                                                     at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:889) \n                                                     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:779) \n                                                  Caused by: java.io.NotSerializableException:\n  gct.venkatesh.com.scrshtrebuilt.MainActivity\n                                                     at java.io.ObjectOutputStream.writeObject0(ObjectOutputStream.java:1224)\n                                                     at java.io.ObjectOutputStream.defaultWriteFields(ObjectOutputStream.java:1584)\n                                                     at java.io.ObjectOutputStream.writeSerialData(ObjectOutputStream.java:1549)\n                                                     at java.io.ObjectOutputStream.writeOrdinaryObject(ObjectOutputStream.java:1472)\n                                                     at java.io.ObjectOutputStream.writeObject0(ObjectOutputStream.java:1218)\n                                                     at java.io.ObjectOutputStream.writeObject(ObjectOutputStream.java:346)\n                                                     at android.os.Parcel.writeSerializable(Parcel.java:1522)\n                                                     at android.os.Parcel.writeValue(Parcel.java:1475) \n                                                     at android.os.Parcel.writeArrayMapInternal(Parcel.java:724) \n                                                     at android.os.BaseBundle.writeToParcelInner(BaseBundle.java:1417) \n                                                     at android.os.Bundle.writeToParcel(Bundle.java:1157) \n                                                     at android.os.Parcel.writeBundle(Parcel.java:764) \n                                                     at android.content.Intent.writeToParcel(Intent.java:8703) \n                                                     at android.app.ActivityManagerProxy.startActivity(ActivityManagerNative.java:3082) \n                                                     at android.app.Instrumentation.execStartActivity(Instrumentation.java:1520) \n                                                     at android.app.Activity.startActivityForResult(Activity.java:4229) \n                                                     at android.app.Activity.startActivityForResult(Activity.java:4187) \n                                                     at android.app.Activity.startActivity(Activity.java:4526) \n                                                     at android.app.Activity.startActivity(Activity.java:4494) \n                                                     at gct.venkatesh.com.scrshtrebuilt.MainActivity.onCreate(MainActivity.java:21) \n                                                     at android.app.Activity.performCreate(Activity.java:6684) \n                                                     at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1119) \n                                                     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2637) \n                                                     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2751) \n                                                     at android.app.ActivityThread.-wrap12(ActivityThread.java) \n                                                     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1496) \n                                                     at android.os.Handler.dispatchMessage(Handler.java:102) \n                                                     at android.os.Looper.loop(Looper.java:154) \n                                                     at android.app.ActivityThread.main(ActivityThread.java:6186) \n                                                     at java.lang.reflect.Method.invoke(Native Method) \n                                                     at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:889) \n                                                     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:779)<\/p>\n<\/blockquote>\n",
+        "question_id": 45397968,
+        "tags": [
+            "java",
+            "android",
+            "android-intent"
+        ],
+        "score": 0,
+        "accepted_answer_id": 45398140,
+        "is_answered": true,
+        "view_count": 177,
+        "last_edit_date": 1501405100
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/nlE82.jpg?s=256",
+            "account_id": 4425499,
+            "user_type": "registered",
+            "user_id": 3604083,
+            "link": "https://stackoverflow.com/users/3604083/yazan",
+            "reputation": 6082,
+            "display_name": "Yazan"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1501405339,
+        "creation_date": 1501405339,
+        "body": "<p>by this error in logs:<\/p>\n\n<pre><code>java.io.NotSerializableException: gct.venkatesh.com.scrshtrebuilt.MainActivity at\n<\/code><\/pre>\n\n<p><code>MainActivity<\/code> is not <em>Serializable<\/em>, i think platform wants <code>MainActivity<\/code> to be serializable because <code>CustomObject<\/code> is inner class in <code>MainActivity<\/code> ,<\/p>\n\n<p>try to define your <code>CustomObject<\/code> in a separate local class (separate file)<\/p>\n",
+        "answer_id": 45398140,
+        "question_id": 45397968
+    }],
+    "answer_comments": {"45398140": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-qB4JPB_0GBY/AAAAAAAAAAI/AAAAAAAAABo/iTXkoptqFxk/s256-rj/photo.jpg",
+                "account_id": 6166389,
+                "user_type": "registered",
+                "user_id": 4806129,
+                "link": "https://stackoverflow.com/users/4806129/venkatesh",
+                "reputation": 25,
+                "display_name": "Venkatesh"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45398140,
+            "edited": false,
+            "creation_date": 1501407536,
+            "comment_id": 77757409
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/nlE82.jpg?s=256",
+                "account_id": 4425499,
+                "user_type": "registered",
+                "user_id": 3604083,
+                "link": "https://stackoverflow.com/users/3604083/yazan",
+                "reputation": 6082,
+                "display_name": "Yazan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45398140,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-qB4JPB_0GBY/AAAAAAAAAAI/AAAAAAAAABo/iTXkoptqFxk/s256-rj/photo.jpg",
+                "account_id": 6166389,
+                "user_type": "registered",
+                "user_id": 4806129,
+                "link": "https://stackoverflow.com/users/4806129/venkatesh",
+                "reputation": 25,
+                "display_name": "Venkatesh"
+            },
+            "edited": false,
+            "creation_date": 1501407258,
+            "comment_id": 77757330
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/nlE82.jpg?s=256",
+                "account_id": 4425499,
+                "user_type": "registered",
+                "user_id": 3604083,
+                "link": "https://stackoverflow.com/users/3604083/yazan",
+                "reputation": 6082,
+                "display_name": "Yazan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45398140,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-qB4JPB_0GBY/AAAAAAAAAAI/AAAAAAAAABo/iTXkoptqFxk/s256-rj/photo.jpg",
+                "account_id": 6166389,
+                "user_type": "registered",
+                "user_id": 4806129,
+                "link": "https://stackoverflow.com/users/4806129/venkatesh",
+                "reputation": 25,
+                "display_name": "Venkatesh"
+            },
+            "edited": false,
+            "creation_date": 1501407127,
+            "comment_id": 77757297
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-qB4JPB_0GBY/AAAAAAAAAAI/AAAAAAAAABo/iTXkoptqFxk/s256-rj/photo.jpg",
+                "account_id": 6166389,
+                "user_type": "registered",
+                "user_id": 4806129,
+                "link": "https://stackoverflow.com/users/4806129/venkatesh",
+                "reputation": 25,
+                "display_name": "Venkatesh"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45398140,
+            "edited": false,
+            "creation_date": 1501406005,
+            "comment_id": 77756973
+        }
+    ]}
+}

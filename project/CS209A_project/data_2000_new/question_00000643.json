@@ -1,0 +1,161 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/27c8a58585b22a5c11dd75c26156af76?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 17089866,
+            "user_type": "registered",
+            "user_id": 12366270,
+            "link": "https://stackoverflow.com/users/12366270/vijay",
+            "reputation": 55,
+            "display_name": "Vijay"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59070187/how-to-change-the-default-header-background-color-in-pivot-table",
+        "last_activity_date": 1640268491,
+        "creation_date": 1574857472,
+        "answer_count": 2,
+        "title": "How to Change the Default Header Background color in PIVOT Table",
+        "body": "<p>How to Change the Default Header Background color in PIVOT Table, currently its coming blue. Currently i am changing the background color from Blue to Green. But facing difficulty in achieve it. <\/p>\n\n<p>I am used  below syntax by setting various pivot style in setName, but not find the exact colour of green. I need little more darker green which shown in expected output(which is lighter green). Please let me know how can i achieve it.<\/p>\n\n<p>pivotTable.getCTPivotTableDefinition().getPivotTableStyleInfo().setName(\"\");<\/p>\n\n<p>Output which i am getting:<\/p>\n\n<p><a href=\"https://i.sstatic.net/dsN1E.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/dsN1E.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>Below is the Output which i Want but green color should be little more darker than below (Please refer below Test Color Tab):<\/p>\n\n<p><a href=\"https://i.sstatic.net/YXWWd.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/YXWWd.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>Green color combination which i want.<\/p>\n\n<p><a href=\"https://i.sstatic.net/KB1oe.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/KB1oe.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>Below is the code:<\/p>\n\n<pre><code>package com.test.pivottables;\nimport org.apache.poi.xssf.usermodel.*;\nimport org.apache.poi.ss.usermodel.*;\nimport org.apache.poi.ss.util.*;\nimport org.apache.poi.ss.*;\nimport java.io.*;\nimport java.util.ArrayList;\nimport java.util.TreeSet;\nimport java.util.List;\nimport org.openxmlformats.schemas.spreadsheetml.x2006.main.*;\n\npublic class Testpivot8{\n public static void main(String[] args) throws Exception {\n  Workbook wb = new XSSFWorkbook();\n  Object[][] data = new Object[][]{\n {\"AAA\",\"BBB\",\"CCC\",\"DDD\",\"EEE\",\"FFF\",\"GGG\",\"HHH\"}, \n  {\"TOM\",\"DUMMY\",\"VAL\",\"1001683\",\"Description1\",\"27/04/2017\",\"CAT\",780936.58},\n {\"TOM\",\"DUMMY\",\"VAL\",\"1001695\",\"Description2\",\"27/04/2017\",\"CAT\",136.28},\n {\"HARRY\",\"DUMMY1\",\"VAL1\",\"1001692\",\"Description3\",\"03/05/2017\",\"CAT1\",191468.21},\n {\"HARRY\",\"DUMMY1\",\"VAL1\",\"1001698\",\"Description4\",\"04/05/2017\",\"CAT1\",10.11}\n  };\n\nXSSFSheet sheet = (XSSFSheet) wb.createSheet(\"data\");\nXSSFSheet pivot = (XSSFSheet) wb.createSheet(\"summary\");\nfor(Object[] dataRow : data){\n XSSFRow row = sheet.createRow(sheet.getPhysicalNumberOfRows());\n for(Object dataCell : dataRow){\n XSSFCell cell = row.createCell(row.getPhysicalNumberOfCells());\nif (dataCell instanceof String) {\n cell.setCellValue((String)dataCell);\n} else if (dataCell instanceof Double) {\n cell.setCellValue((Double)dataCell);\n}\n }\n}\n\n  AreaReference areaReference = new AreaReference(\"A1:H\"+ (sheet.getLastRowNum() + 1), \n    SpreadsheetVersion.EXCEL2007);\n  XSSFPivotTable pivotTable =  pivot.createPivotTable(areaReference, new CellReference(\"A1\"), \n  sheet);\n pivotTable.getCTPivotTableDefinition().setRowHeaderCaption(\"AAA\");\n\nList&lt;Integer&gt; iterList = new ArrayList&lt;Integer&gt;();\niterList.add(0);\niterList.add(1);\n iterList.add(2);\niterList.add(3);\niterList.add(4);\n iterList.add(5);\n iterList.add(6);\n\n\npivotTable.getCTPivotTableDefinition().setUpdatedVersion((short)6); \n\n for (Integer j : iterList) {\n\n\n   pivotTable.addRowLabel(j);\n   TreeSet&lt;String&gt; uniqueItems = new java.util.TreeSet&lt;String&gt;();\n   for (int r = areaReference.getFirstCell().getRow()+1; r &lt; \n   areaReference.getLastCell().getRow()+1; r++) {\n   uniqueItems.add(sheet.getRow(r).getCell(j).getStringCellValue());\n  }\n  System.out.println(uniqueItems);\n  CTPivotField ctPivotField = \n  pivotTable.getCTPivotTableDefinition().getPivotFields().getPivotFieldArray(j);\n int i = 0;\n   for (String item : uniqueItems) {\n    ctPivotField.getItems().getItemArray(i).unsetT();\n   ctPivotField.getItems().getItemArray(i).setX((long)i);\n    pivotTable.getPivotCacheDefinition().getCTPivotCacheDefinition().getCacheFields()\n  .getCacheFieldArray(j)\n   .getSharedItems().addNewS().setV(item);\n    i++;\n   }\n        ctPivotField.setDefaultSubtotal(false);\n\n\n         ctPivotField.setOutline(false);\n\n\n    if (ctPivotField.getDefaultSubtotal()) i++; \n         for (int k = ctPivotField.getItems().getItemList().size()-1; k &gt;= i; k--) {\n         ctPivotField.getItems().removeItem(k);\n        }\n       ctPivotField.getItems().setCount(i);\n\n\n           CTExtensionList extList = ctPivotField.addNewExtLst();\n        String extXML = \n       \"&lt;ext uri=\\\"{2946ED86-A175-432a-8AC1-64E0C546D7DE}\\\"\"\n       + \" xmlns:x14=\\\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/main\\\"&gt;\"\n    + \"&lt;x14:pivotField fillDownLabels=\\\"1\\\"/&gt;\"\n     + \"&lt;/ext&gt;\";\n        org.apache.xmlbeans.XmlObject xlmObject = \n     org.apache.xmlbeans.XmlObject.Factory.parse(extXML);\n          extList.set(xlmObject);\n\n     }\n\n        System.out.println(\"----end---\");\n\n       pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 7, \"SUM\");\n\n      FileOutputStream fileOut = new FileOutputStream(\"newoutputfile.xlsx\");\n         wb.write(fileOut);\n           fileOut.close();\n          wb.close();\n          }\n    }\n<\/code><\/pre>\n",
+        "question_id": 59070187,
+        "tags": [
+            "java",
+            "apache-poi",
+            "pivot",
+            "pivot-table"
+        ],
+        "score": 1,
+        "accepted_answer_id": 59085731,
+        "is_answered": true,
+        "view_count": 1413
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27c8a58585b22a5c11dd75c26156af76?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 17089866,
+                "user_type": "registered",
+                "user_id": 12366270,
+                "link": "https://stackoverflow.com/users/12366270/vijay",
+                "reputation": 55,
+                "display_name": "Vijay"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070187,
+            "edited": false,
+            "creation_date": 1574907833,
+            "comment_id": 104398556
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27fffe0285cffa43de087072abd25c95?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4853829,
+                "user_type": "registered",
+                "user_id": 3915431,
+                "link": "https://stackoverflow.com/users/3915431/axel-richter",
+                "reputation": 62539,
+                "display_name": "Axel Richter"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070187,
+            "edited": false,
+            "creation_date": 1574859959,
+            "comment_id": 104379703
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27c8a58585b22a5c11dd75c26156af76?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 17089866,
+                "user_type": "registered",
+                "user_id": 12366270,
+                "link": "https://stackoverflow.com/users/12366270/vijay",
+                "reputation": 55,
+                "display_name": "Vijay"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070187,
+            "edited": false,
+            "creation_date": 1574858780,
+            "comment_id": 104379061
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27fffe0285cffa43de087072abd25c95?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4853829,
+                "user_type": "registered",
+                "user_id": 3915431,
+                "link": "https://stackoverflow.com/users/3915431/axel-richter",
+                "reputation": 62539,
+                "display_name": "Axel Richter"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070187,
+            "edited": false,
+            "creation_date": 1574858514,
+            "comment_id": 104378924
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aef53d9fbec6c5d4c16a045de77c4e04?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9571720,
+                "user_type": "registered",
+                "user_id": 7109162,
+                "link": "https://stackoverflow.com/users/7109162/xtremebaumer",
+                "reputation": 6455,
+                "display_name": "XtremeBaumer",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 59070187,
+            "edited": false,
+            "creation_date": 1574857775,
+            "comment_id": 104378484
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27c8a58585b22a5c11dd75c26156af76?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 17089866,
+                "user_type": "registered",
+                "user_id": 12366270,
+                "link": "https://stackoverflow.com/users/12366270/vijay",
+                "reputation": 55,
+                "display_name": "Vijay"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1574908503,
+            "creation_date": 1574908503,
+            "body": "<p>To achieve the required o/p we can use <\/p>\n\n<p>pivotTable.getCTPivotTableDefinition().getPivotTableStyleInfo().setName(\"PivotStyleLight21\"); which is light green. In this case only header and grand total row will have light green background. Currently its satisfies my requirement.<\/p>\n\n<p><a href=\"https://i.sstatic.net/iCEvO.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/iCEvO.png\" alt=\"enter image description here\"><\/a><\/p>\n",
+            "answer_id": 59080987,
+            "question_id": 59070187
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27fffe0285cffa43de087072abd25c95?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4853829,
+                "user_type": "registered",
+                "user_id": 3915431,
+                "link": "https://stackoverflow.com/users/3915431/axel-richter",
+                "reputation": 62539,
+                "display_name": "Axel Richter"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1640268491,
+            "creation_date": 1574933950,
+            "body": "<p>In <code>Excel<\/code> pivot tables are styled using special named pivot table styles. The names of possible named styles can be got from <code>Excel<\/code>'s <code>GUI<\/code> in <code>PivotTable Tools<\/code> tab - <code>Design<\/code>. To set a style use:<\/p>\n<pre><code>pivotTable.getCTPivotTableDefinition().getPivotTableStyleInfo().setName(&quot;PivotStyleDark7&quot;);\n<\/code><\/pre>\n<p>where <code>PivotStyleDark7<\/code> is the name of the named style.<\/p>\n<p>If none of the default styles fulfill the requirements, then new named styles must be created. In <code>Excel<\/code>'s <code>GUI<\/code> this is possible by creating a new pivot table style and format some of the given table style types, for example: header row, totals row, ...<\/p>\n<p>If that shall be done using <code>apache poi<\/code>, then in <a href=\"https://poi.apache.org/apidocs/dev/org/apache/poi/xssf/model/StylesTable.html\" rel=\"nofollow noreferrer\">StylesTable<\/a> a new table style must be created. There for each table style type a table style element must point to a predefined <code>dxf<\/code> having the format.<\/p>\n<pre><code>...\n  // create a new custom pivot table style\n  // create dxf for each needed table style type\n  STTableStyleType.Enum headerRow = STTableStyleType.HEADER_ROW;\n  CTDxf headerRowDxf = createDxf(true, new byte[] {(byte)255, (byte)255, (byte)255}, new byte[] {(byte)0, (byte)80, (byte)0});\n  STTableStyleType.Enum totalRow = STTableStyleType.TOTAL_ROW;\n  CTDxf totalRowDxf = createDxf(true, new byte[] {(byte)255, (byte)255, (byte)255}, new byte[] {(byte)0, (byte)80, (byte)0});\n  STTableStyleType.Enum firstRowSubheading = STTableStyleType.FIRST_ROW_SUBHEADING;\n  CTDxf firstRowSubheadingDxf = createDxf(true, null, null);\n  STTableStyleType.Enum secondRowSubheading = STTableStyleType.SECOND_ROW_SUBHEADING;\n  CTDxf secondRowSubheadingDxf = createDxf(true, null, null);\n  // map table style types to dxf\n  Map&lt;STTableStyleType.Enum, CTDxf&gt; typeStyles = new HashMap&lt;STTableStyleType.Enum, CTDxf&gt;();\n  typeStyles.put(headerRow, headerRowDxf);\n  typeStyles.put(totalRow, totalRowDxf);\n  typeStyles.put(firstRowSubheading, firstRowSubheadingDxf);\n  typeStyles.put(secondRowSubheading, secondRowSubheadingDxf);\n  // \n  createPivotTableStyle(((XSSFWorkbook)wb).getStylesSource(), &quot;CustomPivotStyle1&quot;, typeStyles);\n  pivotTable.getCTPivotTableDefinition().getPivotTableStyleInfo().setName(&quot;CustomPivotStyle1&quot;);\n...\n<\/code><\/pre>\n<hr />\n<pre><code>...\n static CTDxf createDxf(boolean fontBold, byte[] fontRGB, byte[] fillRGB) {\n  CTDxf dxf = CTDxf.Factory.newInstance();\n  CTFont font = dxf.addNewFont();\n  if (fontBold) font.addNewB();\n  if (fontRGB != null) font.addNewColor().setRgb(fontRGB);\n  if (fillRGB != null) {\n   CTFill fill = dxf.addNewFill();\n   fill.addNewPatternFill().addNewBgColor().setRgb(fillRGB);\n  }\n  return dxf;\n }\n\n static void createPivotTableStyle(StylesTable stylesTable, String styleName, Map&lt;STTableStyleType.Enum, CTDxf&gt; typeStyles) {\n\n  // get or create table styles\n  CTTableStyles tableStyles = stylesTable.getCTStylesheet().getTableStyles();\n  if (tableStyles == null) tableStyles = stylesTable.getCTStylesheet().addNewTableStyles();\n\n  // add table style named as styleName\n  CTTableStyle tableStyle = tableStyles.addNewTableStyle();\n  tableStyle.setName(styleName);\n\n  // set TableStyleType styles: TableStyleType -&gt; dxf\n  for (Map.Entry&lt;STTableStyleType.Enum, CTDxf&gt; entry : typeStyles.entrySet()) {\n    STTableStyleType.Enum type = entry.getKey();\n    CTDxf typeDxf = entry.getValue();\n    int dxfId = stylesTable.putDxf(typeDxf);\n    CTTableStyleElement tableStyleElement = tableStyle.addNewTableStyleElement();\n    tableStyleElement.setDxfId(dxfId-1);\n    tableStyleElement.setType(type);\n  }\n }\n...\n<\/code><\/pre>\n<hr />\n<p>Complete Example:<\/p>\n<pre><code>import org.apache.poi.xssf.usermodel.*;\nimport org.apache.poi.xssf.model.StylesTable;\n\nimport org.apache.poi.ss.usermodel.DataConsolidateFunction;\nimport org.apache.poi.ss.usermodel.DataFormatter;\nimport org.apache.poi.ss.util.AreaReference;\nimport org.apache.poi.ss.util.CellReference;\nimport org.apache.poi.ss.SpreadsheetVersion;\n\nimport java.io.FileOutputStream;\n\nimport java.util.*;\n\nimport org.openxmlformats.schemas.spreadsheetml.x2006.main.*;\n\npublic class Testpivot8 {\n public static void main(String[] args) throws Exception {\n  DataFormatter formatter = new DataFormatter(Locale.US);\n  XSSFWorkbook wb = new XSSFWorkbook();\n  XSSFCellStyle dateStyle = wb.createCellStyle();\n  dateStyle.setDataFormat(wb.createDataFormat().getFormat(&quot;mm/dd/yyyy&quot;));\n\n  Object[][] data = new Object[][]{\n   {&quot;AAA&quot;,&quot;BBB&quot;,&quot;CCC&quot;,&quot;DDD&quot;,&quot;EEE&quot;,&quot;FFF&quot;,&quot;GGG&quot;,&quot;HHH&quot;}, \n   {&quot;TOM&quot;,&quot;DUMMY&quot;,&quot;VAL&quot;,1001683,&quot;Description1&quot;,new GregorianCalendar(2017, 3, 27),&quot;CAT&quot;,780936.58},\n   {&quot;TOM&quot;,&quot;DUMMY&quot;,&quot;VAL&quot;,1001695,&quot;Description2&quot;,new GregorianCalendar(2017, 3, 27),&quot;CAT&quot;,136.28},\n   {&quot;HARRY&quot;,&quot;DUMMY1&quot;,&quot;VAL1&quot;,1001692,&quot;Description3&quot;,new GregorianCalendar(2017, 4, 3),&quot;CAT1&quot;,191468.21},\n   {&quot;HARRY&quot;,&quot;DUMMY1&quot;,&quot;VAL1&quot;,1001698,&quot;Description4&quot;,new GregorianCalendar(2017, 4, 4),&quot;CAT1&quot;,10.11}\n  };\n\n  XSSFSheet sheet = wb.createSheet(&quot;data&quot;);\n  for(Object[] dataRow : data) {\n   XSSFRow row = sheet.createRow(sheet.getPhysicalNumberOfRows());\n   for(Object dataCell : dataRow){\n    XSSFCell cell = row.createCell(row.getPhysicalNumberOfCells());\n    if (dataCell instanceof String) {\n     cell.setCellValue((String)dataCell);\n    } else if (dataCell instanceof Double) {\n     cell.setCellValue((Double)dataCell);\n    } else if (dataCell instanceof Integer) {\n     cell.setCellValue((Integer)dataCell);\n    } else if (dataCell instanceof GregorianCalendar) {\n     cell.setCellValue((GregorianCalendar)dataCell);\n     cell.setCellStyle(dateStyle);\n    }\n   }\n  }\n\n  XSSFSheet pivot = wb.createSheet(&quot;summary&quot;);\n  int rowCount = data.length;\n  int colCount = data[0].length;\n  AreaReference areaReference = new AreaReference(new CellReference(&quot;A1&quot;), new CellReference(rowCount-1, colCount-1), SpreadsheetVersion.EXCEL2007);\n  XSSFPivotTable pivotTable =  pivot.createPivotTable(areaReference, new CellReference(&quot;A1&quot;), sheet);\n  pivotTable.getCTPivotTableDefinition().setRowHeaderCaption(&quot;AAA&quot;);\n\n  List&lt;Integer&gt; iterList = new ArrayList&lt;Integer&gt;();\n  iterList.add(0);\n  iterList.add(1);\n  iterList.add(2);\n  iterList.add(3);\n  iterList.add(4);\n  iterList.add(5);\n  iterList.add(6);\n\n  pivotTable.getCTPivotTableDefinition().setUpdatedVersion((short)6); \n\n  for (Integer j : iterList) {\n   pivotTable.addRowLabel(j);\n   TreeSet&lt;String&gt; uniqueItems = new java.util.TreeSet&lt;String&gt;(String.CASE_INSENSITIVE_ORDER);\n   for (int r = areaReference.getFirstCell().getRow()+1; r &lt; areaReference.getLastCell().getRow()+1; r++) {\n    uniqueItems.add(formatter.formatCellValue(sheet.getRow(r).getCell(j)));\n   }\n\n   System.out.println(uniqueItems);\n\n   CTPivotField ctPivotField = pivotTable.getCTPivotTableDefinition().getPivotFields().getPivotFieldArray(j);\n   int i = 0;\n   for (String item : uniqueItems) {\n    ctPivotField.getItems().getItemArray(i).unsetT();\n    ctPivotField.getItems().getItemArray(i).setX((long)i);\n    pivotTable.getPivotCacheDefinition().getCTPivotCacheDefinition().getCacheFields()\n     .getCacheFieldArray(j).getSharedItems().addNewS().setV(item);\n    i++;\n   }\n   ctPivotField.setDefaultSubtotal(false);\n   ctPivotField.setOutline(false);\n\n   if (ctPivotField.getDefaultSubtotal()) i++; \n   for (int k = ctPivotField.getItems().getItemList().size()-1; k &gt;= i; k--) {\n    ctPivotField.getItems().removeItem(k);\n   }\n   ctPivotField.getItems().setCount(i);\n\n   CTExtensionList extList = ctPivotField.addNewExtLst();\n   String extXML = \n      &quot;&lt;ext uri=\\&quot;{2946ED86-A175-432a-8AC1-64E0C546D7DE}\\&quot;&quot;\n    + &quot; xmlns:x14=\\&quot;http://schemas.microsoft.com/office/spreadsheetml/2009/9/main\\&quot;&gt;&quot;\n    + &quot;&lt;x14:pivotField fillDownLabels=\\&quot;1\\&quot;/&gt;&quot;\n    + &quot;&lt;/ext&gt;&quot;;\n   org.apache.xmlbeans.XmlObject xlmObject = \n   org.apache.xmlbeans.XmlObject.Factory.parse(extXML);\n   extList.set(xlmObject);\n  }\n\n  System.out.println(&quot;----end---&quot;);\n\n  pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 7, &quot;SUM&quot;);\n\n  // create a new custom pivot table style\n  // create dxf for each needed table style type\n  STTableStyleType.Enum headerRow = STTableStyleType.HEADER_ROW;\n  CTDxf headerRowDxf = createDxf(true, new byte[] {(byte)255, (byte)255, (byte)255}, new byte[] {(byte)4, (byte)123, (byte)91});\n  STTableStyleType.Enum totalRow = STTableStyleType.TOTAL_ROW;\n  CTDxf totalRowDxf = createDxf(true, new byte[] {(byte)255, (byte)255, (byte)255}, new byte[] {(byte)4, (byte)123, (byte)91});\n  STTableStyleType.Enum firstRowSubheading = STTableStyleType.FIRST_ROW_SUBHEADING;\n  CTDxf firstRowSubheadingDxf = createDxf(true, null, null);\n  STTableStyleType.Enum secondRowSubheading = STTableStyleType.SECOND_ROW_SUBHEADING;\n  CTDxf secondRowSubheadingDxf = createDxf(true, null, null);\n  // map table style types to dxf\n  Map&lt;STTableStyleType.Enum, CTDxf&gt; typeStyles = new HashMap&lt;STTableStyleType.Enum, CTDxf&gt;();\n  typeStyles.put(headerRow, headerRowDxf);\n  typeStyles.put(totalRow, totalRowDxf);\n  typeStyles.put(firstRowSubheading, firstRowSubheadingDxf);\n  typeStyles.put(secondRowSubheading, secondRowSubheadingDxf);\n  // \n  createPivotTableStyle(wb.getStylesSource(), &quot;CustomPivotStyle1&quot;, typeStyles);\n  pivotTable.getCTPivotTableDefinition().getPivotTableStyleInfo().setName(&quot;CustomPivotStyle1&quot;);\n\n  sheet.setSelected(false);\n  wb.setActiveSheet(wb.getSheetIndex(pivot));\n \n  FileOutputStream fileOut = new FileOutputStream(&quot;newoutputfile.xlsx&quot;);\n  wb.write(fileOut);\n  fileOut.close();\n  wb.close();\n }\n\n static CTDxf createDxf(boolean fontBold, byte[] fontRGB, byte[] fillRGB) {\n  CTDxf dxf = CTDxf.Factory.newInstance();\n  CTFont font = dxf.addNewFont();\n  if (fontBold) font.addNewB();\n  if (fontRGB != null) font.addNewColor().setRgb(fontRGB);\n  if (fillRGB != null) {\n   CTFill fill = dxf.addNewFill();\n   fill.addNewPatternFill().addNewBgColor().setRgb(fillRGB);\n  }\n  return dxf;\n }\n\n static void createPivotTableStyle(StylesTable stylesTable, String styleName, Map&lt;STTableStyleType.Enum, CTDxf&gt; typeStyles) {\n\n  // get or create table styles\n  CTTableStyles tableStyles = stylesTable.getCTStylesheet().getTableStyles();\n  if (tableStyles == null) tableStyles = stylesTable.getCTStylesheet().addNewTableStyles();\n\n  // add table style named as styleName\n  CTTableStyle tableStyle = tableStyles.addNewTableStyle();\n  tableStyle.setName(styleName);\n\n  // set TableStyleType styles: TableStyleType -&gt; dxf\n  for (Map.Entry&lt;STTableStyleType.Enum, CTDxf&gt; entry : typeStyles.entrySet()) {\n    STTableStyleType.Enum type = entry.getKey();\n    CTDxf typeDxf = entry.getValue();\n    int dxfId = stylesTable.putDxf(typeDxf);\n    CTTableStyleElement tableStyleElement = tableStyle.addNewTableStyleElement();\n    tableStyleElement.setDxfId(dxfId-1);\n    tableStyleElement.setType(type);\n  }\n }\n}\n<\/code><\/pre>\n",
+            "answer_id": 59085731,
+            "question_id": 59070187,
+            "last_edit_date": 1640268491
+        }
+    ],
+    "answer_comments": {}
+}

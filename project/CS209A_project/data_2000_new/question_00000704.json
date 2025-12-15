@@ -1,0 +1,497 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+            "account_id": 12601597,
+            "user_type": "registered",
+            "user_id": 9164141,
+            "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+            "reputation": 13277,
+            "display_name": "Gast&#243;n Saill&#233;n",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/50477629/table-not-showing-values-from-mysql-servlets-and-jsp",
+        "last_activity_date": 1528044977,
+        "creation_date": 1527030446,
+        "answer_count": 1,
+        "title": "Table not showing values from MySQL - servlets and jsp",
+        "body": "<p>I'm new at this, kind of learning new things everyday about jsp, servlets and so on, I have setup all to show all my users from my database into a table in the browser, and then just a button that will change just 1 value of that, so I managed to do this.<\/p>\n\n<p>My <code>AdminPanel.jsp<\/code> (where I set up my table in order to show all the entries from the database)<\/p>\n\n<pre><code>  &lt;form action=\"AdminPanel\" method=\"get\"&gt;\n\n  &lt;table style=\"width:100%\"&gt;\n      &lt;caption&gt;Usuarios Registrados&lt;/caption&gt;\n\n      &lt;tr&gt;\n    &lt;th&gt;Nombre&lt;/th&gt;\n    &lt;th&gt;Apellido&lt;/th&gt;\n    &lt;th&gt;Usuario&lt;/th&gt;\n    &lt;th&gt;Estado&lt;/th&gt;\n    &lt;th&gt;Habilitar&lt;/th&gt;\n  &lt;/tr&gt;\n\n   &lt;tr&gt;\n\n    &lt;c:forEach var=\"row\" items=\"${memberList}\"&gt;\n\n    &lt;tr&gt;\n        &lt;td&gt;&lt;c:out value=\"${row.firstname}\"/&gt; &lt;/td&gt;\n        &lt;td&gt;&lt;c:out value=\"${row.lastname}\"&gt;&lt;/c:out&gt; &lt;/td&gt;\n        &lt;td&gt;&lt;c:out value=\"${row.username}\"&gt;&lt;/c:out&gt; &lt;/td&gt;\n        &lt;td&gt;&lt;c:out value=\"${row.type}\"&gt;&lt;/c:out&gt; &lt;/td&gt;\n        &lt;td&gt;&lt;a href=\"AdminPanel.jsp\" name=\"Edit\"&gt;Habilitar usuario&lt;/a&gt; &lt;/td&gt;\n    &lt;/tr&gt;\n&lt;/c:forEach&gt;\n  &lt;/tr&gt;\n\n&lt;/table&gt;\n        &lt;/form&gt; \n<\/code><\/pre>\n\n<p>Now, I have a <code>userDAO<\/code> that connects to the database and setup the values for the userBean (my pojo class with all the setters and getters for firstname, lastname and so on)<\/p>\n\n<p><strong>UserDAO.java<\/strong><\/p>\n\n<pre><code>  public static UserBean adminPanel(UserBean bean) {\n\n         //preparing some objects for connection \n         Statement stmt = null;    \n\n         String firstname = bean.getFirstName();\n         String lastname = bean.getLastName();\n         String username = bean.getUsername();\n         int tipo = bean.getType();\n\n            String searchQuery =\n               \"select firstname,lastname,username,tipo from idusuario\";\n\n      // Tracing the process\n      System.out.println(\"Nombre:  \" + firstname);          \n      System.out.println(\"Apellido: \" + lastname);  \n      System.out.println(\"Usuario: \"+username);\n      System.out.println(\"Estado Usuario :\" + tipo);  \n      System.out.println(\"Query Panel Admin :\" + searchQuery);  \n\n        try {\n            Class.forName(\"com.mysql.jdbc.Driver\");\n        } catch (ClassNotFoundException ex) {\n            System.out.println(\"Error al cargar el driver\");\n            System.out.println(ex.getMessage());\n        }\n\n      try \n      {\n         //connect to DB \n         currentCon = DriverManager.getConnection(\"jdbc:mysql://localhost:3306/usuarios\", \"root\", \"admin\");\n         stmt=currentCon.createStatement();\n         rs = stmt.executeQuery(searchQuery);   \n         boolean more = rs.next();\n\n         // if user does not exist set the isValid variable to false\n         if (!more) \n         {\n            System.out.println(\"Para poder utilizar el sistema debe registrarse\");\n            bean.setValid(false);\n         } \n\n      } \n\n      catch (Exception ex) \n      {\n         System.out.println(\"Error logueandose, posible problema de conexion de base de datos \" + ex);\n      } \n   } \n\n} \n<\/code><\/pre>\n\n<p>And my <code>AdminPanel.java<\/code> servlet<\/p>\n\n<pre><code> @Override\n    protected void doGet(HttpServletRequest request, HttpServletResponse response)\n            throws ServletException, IOException {\n\n\n\n         ArrayList&lt;UserBean&gt; member= new ArrayList&lt;UserBean&gt;();\n        try {\n            while(rs.next()) {\n                UserBean user = new UserBean();\n                user = UserDAO.adminPanel(user);\n                user.setFirstName(rs.getString(\"firstname\"));\n                user.setLastName(rs.getString(\"lastname\"));\n                user.setUserName(rs.getString(\"username\"));\n                user.setType(rs.getInt(\"type\"));\n                member.add(user);\n                request.setAttribute(\"memberList\", member);\n            }       } catch (SQLException ex) {\n            Logger.getLogger(AdminPanel.class.getName()).log(Level.SEVERE, null, ex);\n        }\n\n\n    }\n<\/code><\/pre>\n\n<p>The results i want to retrieve in my database (with the query <code>SELECT firstname,lastname,username,tipo,admin  from idusuario<\/code> )<\/p>\n\n<p><a href=\"https://i.sstatic.net/yNG9A.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/yNG9A.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>Now, in my output it doesn't show anything, the query is right I have checked it out with mysqlworkbench and it displays the results that I want, I have retrieved the data and stored it, but I don't know why is not showing anything at the moment.<\/p>\n\n<p>This is my output<\/p>\n\n<p><a href=\"https://i.sstatic.net/LpJoe.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/LpJoe.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>My rs is pulled out from userDAO as well , in my import<\/p>\n\n<pre><code>import static com.login.UserDAO.rs;  (resultSet)\n<\/code><\/pre>\n",
+        "question_id": 50477629,
+        "tags": [
+            "java",
+            "mysql",
+            "jsp",
+            "servlets"
+        ],
+        "score": -1,
+        "accepted_answer_id": 50477845,
+        "is_answered": true,
+        "view_count": 1555,
+        "last_edit_date": 1528044977
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+            "account_id": 6991584,
+            "user_type": "registered",
+            "user_id": 5360672,
+            "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+            "reputation": 2735,
+            "display_name": "Jonathan Laliberte",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1527041889,
+        "creation_date": 1527031969,
+        "body": "<p>It's important to separate your database logic from the servlet, it makes it much easier to manage. It's also useful to create a seperate class for your database connection. The reason why you are not getting any results is because in your UserDao class you are not getting any results from the ResultSet. <\/p>\n\n<p>Create a class for your database connection. We can call on this anytime we want to access the database. <\/p>\n\n<pre><code>public class DBConnection {\n    private static String url = null;\n    private static Connection conn = null;\n     public static Connection getConnection(){\n     try{\n\n       Class.forName(\"com.mysql.jdbc.Driver\");\n       url = \"jdbc:mysql://localhost:3306/usuarios\";\n\n     conn = DriverManager.getConnection(url,\"root\",\"admin\");\n     }   catch (Exception e) {\n            System.out.println(e);\n        } \n     return conn;\n     }\n}\n<\/code><\/pre>\n\n<p>and our adminPanel method from the UserDao class:<\/p>\n\n<pre><code>    //Now we can use this like this, i looked at your code and saw you wanted to have a list of UserBean objects.. we can do that like this:\npublic List&lt;UserBean&gt; adminPanel(){\n    ArrayList&lt;UserBean&gt; users = new ArrayList&lt;UserBean&gt;();\n    //get connection from our DBConneciton class we created earlier\n    try(Connection conn= DBConnection.getConnection()){\n    //create our sql statement\n   PreparedStatement pst = conn.prepareStatement(\"select firstname,lastname,username,tipo from idusuario;\"); \n         //execute query\n         pst.executeQuery();   \n       //now get results\n    ResultSet rs = pst.executeQuery();\n      //while ResultSet has results\n     while (rs.next()) {\n    //create new user object to hold the info in\n    UserBean user = new UserBean();\n    //get the results from resultset     \n    String firstname = rs.getString(1);\n    String lastname = rs.getString(2);\n    String username = rs.getString(3);\n    int type = rs.getInt(4);\n    //set results to user object\n    user.setFirstName(firstname);\n    user.setLastName(lastname);\n    user.setUserName(username);\n    user.setType(type);\n\n    users.add(user); //add userobject to list of userobjects\n\n      }\n\n        } catch (SQLException e) {\n            e.printStackTrace();\n        }\n     //we don't need to close our db connection because the try statement does it for us   \nreturn users; //return list of users\n}   \n<\/code><\/pre>\n\n<p>Now to access this all we need to do in our servlet is this:<\/p>\n\n<pre><code>@Override\n    protected void doGet(HttpServletRequest request, HttpServletResponse response)\n            throws ServletException, IOException {\n\n          UserDAO u = new UserDAO(); //instantiate class\n\n       //get our list of users\n     List&lt;UserBean&gt; users = u.adminPanel();\n       //set our list to request\n     request.setAttribute(\"memberList\", users);\n\n     //forward to jsp page\n        RequestDispatcher rs = request.getRequestDispatcher(\"AdminPanel.jsp\");\n            rs.forward(request, response);\n\n\n    }\n<\/code><\/pre>\n\n<p>everything on your jsp looks fine so should work, let me know if you have any questions or problems<\/p>\n\n<p><strong>EDIT:<\/strong> some debugging ideas:<\/p>\n\n<p>In your servlet do this to see how big your users list is:<\/p>\n\n<pre><code>...\n//get our list of users\nList&lt;UserBean&gt; users = u.adminPanel();\n //check if we are actually getting something from the database\n System.out.println(users.size());\n<\/code><\/pre>\n\n<p>If size is 0 then that means there is something wrong with our query. Check to see if you are getting anything from your database if you manually query your database with the following query:<\/p>\n\n<pre><code>select firstname,lastname,username,tipo from idusuario;\n<\/code><\/pre>\n\n<p><strong>EDIT 2<\/strong><\/p>\n\n<p>Try removing the <code>&lt;c:out tags:<\/code><\/p>\n\n<pre><code>  &lt;c:forEach var=\"row\" items=\"${memberList}\"&gt;\n    &lt;tr&gt;\n        &lt;td&gt;${row.firstname}&lt;/td&gt;\n        &lt;td&gt;${row.lastname}&lt;/td&gt;\n        &lt;td&gt;${row.username}&lt;/td&gt;\n        &lt;td&gt;${row.type}&lt;/td&gt;\n        &lt;td&gt;&lt;a href=\"AdminPanel.jsp\" name=\"Edit\"&gt;Habilitar usuario&lt;/a&gt; &lt;/td&gt;\n    &lt;/tr&gt;\n&lt;/c:forEach&gt;\n<\/code><\/pre>\n",
+        "answer_id": 50477845,
+        "question_id": 50477629,
+        "last_edit_date": 1527041889
+    }],
+    "answer_comments": {"50477845": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527044597,
+            "comment_id": 87971920
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527043093,
+            "comment_id": 87971654
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527043090,
+            "comment_id": 87971653
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527043029,
+            "comment_id": 87971644
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527042981,
+            "comment_id": 87971638
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527042886,
+            "comment_id": 87971614
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527042763,
+            "comment_id": 87971591
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527042503,
+            "comment_id": 87971539
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527042380,
+            "comment_id": 87971514
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527041935,
+            "comment_id": 87971413
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527041736,
+            "comment_id": 87971371
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527041721,
+            "comment_id": 87971365
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527040708,
+            "comment_id": 87971154
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527040628,
+            "comment_id": 87971137
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527040563,
+            "comment_id": 87971126
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527040491,
+            "comment_id": 87971107
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527040318,
+            "comment_id": 87971074
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527039790,
+            "comment_id": 87970950
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UPhrY.jpg?s=256",
+                "account_id": 6991584,
+                "user_type": "registered",
+                "user_id": 5360672,
+                "link": "https://stackoverflow.com/users/5360672/jonathan-laliberte",
+                "reputation": 2735,
+                "display_name": "Jonathan Laliberte",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477845,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1527038555,
+            "comment_id": 87970614
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uiNcT.jpg?s=256",
+                "account_id": 12601597,
+                "user_type": "registered",
+                "user_id": 9164141,
+                "link": "https://stackoverflow.com/users/9164141/gast%c3%b3n-saill%c3%a9n",
+                "reputation": 13277,
+                "display_name": "Gast&#243;n Saill&#233;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 50477845,
+            "edited": false,
+            "creation_date": 1527038339,
+            "comment_id": 87970569
+        }
+    ]}
+}

@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/622c941800c9ead3d8eb6232a0c3d985?s=256&d=identicon&r=PG",
+            "account_id": 2587834,
+            "user_type": "registered",
+            "user_id": 2243102,
+            "link": "https://stackoverflow.com/users/2243102/thiyagarajan",
+            "reputation": 1411,
+            "display_name": "Thiyagarajan",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/23698478/how-to-detect-if-a-virtual-machine-disk-is-a-gpt-or-mbr-in-vmware-esxi-server",
+        "last_activity_date": 1400506611,
+        "creation_date": 1400252311,
+        "answer_count": 1,
+        "title": "How to detect if a virtual machine disk is a GPT or MBR in vmware Esx(i) server /Vcenter",
+        "body": "<p>I'm need of finding a way to programatically determine if the Guest virtual machine disk is a GPT or MBR partition .I'm not able to achieve this with vijava or Vddk api's . Is there any other c++ or java libraries that can help me to achieve this . Or parsing the MBR manually is the only solution available.<\/p>\n\n<p>Thanks in Advance,<\/p>\n\n<p>Thiyagarajan A.<\/p>\n",
+        "question_id": 23698478,
+        "tags": [
+            "java",
+            "c++",
+            "vmware",
+            "esxi",
+            "mbr"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 4193
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a72b55a41a43ea0493fc64641a1ed295?s=256&d=identicon&r=PG",
+            "account_id": 10307,
+            "user_type": "registered",
+            "user_id": 19405,
+            "link": "https://stackoverflow.com/users/19405/nobody",
+            "reputation": 20266,
+            "display_name": "nobody"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 23698478,
+        "edited": false,
+        "creation_date": 1400260669,
+        "comment_id": 36420029
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/CgWzf.png?s=256",
+            "account_id": 3799038,
+            "user_type": "registered",
+            "user_id": 3153152,
+            "link": "https://stackoverflow.com/users/3153152/raf",
+            "reputation": 10217,
+            "display_name": "Raf"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1400506611,
+        "creation_date": 1400506611,
+        "body": "<p>You need use VMWare tools installed on your guests and run commands <em>inside<\/em> the guest. This article illustrates how to do so using vijava: <a href=\"http://www.doublecloud.org/2012/02/run-program-in-guest-operating-system-on-vmware/\" rel=\"nofollow\">http://www.doublecloud.org/2012/02/run-program-in-guest-operating-system-on-vmware/<\/a><\/p>\n\n<p>If you use windows I recommend PowerCLI + <code>Invoke-VmScript<\/code> cmdlet(<a href=\"https://www.vmware.com/support/developer/PowerCLI/PowerCLI501/html/Invoke-VMScript.html\" rel=\"nofollow\">https://www.vmware.com/support/developer/PowerCLI/PowerCLI501/html/Invoke-VMScript.html<\/a>)<\/p>\n\n<p>It will allow you to run a powershell command (for a windows boxes) to determine partition layout. The following lines will return <code>$True<\/code> if GPT partition is detected.<\/p>\n\n<pre><code>$disks = gwmi -query \"Select * from Win32_DiskPartition\" \nforeach($disk in $disks) { \n    if ($disk.Type.StartsWith(\"GPT\")){ \n        return $true\n    }\n}\n<\/code><\/pre>\n\n<p>Similarly, on a linux guests something like this will achieve desired effect:<\/p>\n\n<pre><code>fdisk -l | grep -i gpt &gt; /dev/null ; echo $?\n<\/code><\/pre>\n\n<p>Above command will return 0 if GPT partitions exits because you should get a warning <em>\"WARNING: GPT (GUID Partition Table) detected on..\"<\/em> which <code>grep -i gpt<\/code> will pick up.<\/p>\n",
+        "answer_id": 23739272,
+        "question_id": 23698478
+    }],
+    "answer_comments": {}
+}

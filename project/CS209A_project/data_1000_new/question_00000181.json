@@ -1,0 +1,119 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3c8078bbf668464d40b5070699ffd4d9?s=256&d=identicon&r=PG",
+            "account_id": 66508,
+            "user_type": "registered",
+            "user_id": 195064,
+            "link": "https://stackoverflow.com/users/195064/oskar",
+            "reputation": 1057,
+            "display_name": "Oskar",
+            "accept_rate": 62
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/4141682/java-servlet-image-upload-corrupt-gray-bottom",
+        "last_activity_date": 1289372268,
+        "creation_date": 1289369086,
+        "answer_count": 1,
+        "title": "Java Servlet Image Upload Corrupt (gray bottom)",
+        "body": "<p>We have a servlet that accepts image uploads. Sometimes when the uploads originate in our iPhone client (flaky connection) the saved image can end up being partly or completely gray. I suspect this is due to the connection being prematurely terminated and the servlet ending up processing an incomplete image. <\/p>\n\n<p>Whats the best remedy for this? Is there a way to see if the whole image was uploaded before processing? Should I use HTTP Content-Length header and compare whats uploaded with this number?<\/p>\n\n<p>Thanks!<\/p>\n\n<p>Some code for context:<\/p>\n\n<pre><code>@Path(\"images/\")\n@POST\n@Consumes(\"image/*\")\n@Produces({\"application/xml\", \"application/json\"})\npublic AbstractConverter postImage(byte[] imageData) {\n\n    BufferedImage bufferedImage = null;\n    try {\n        bufferedImage = ImageIO.read(new ByteArrayInputStream(imageData));\n    } catch (Exception e) {\n    }\n    if (bufferedImage == null) {\n        throw new PlacesException(\"Image data not provided or could not be parsed\", Response.Status.BAD_REQUEST);\n    }\n\n...\n\n    BufferedImage scaledImage = ImageTool.scale(bufferedImage, imageSize);\n    BufferedImage thumbnail = ImageTool.scale(bufferedImage, thumbnailSize);\n\n    //Save image and thumbnail\n    File outputfile = new File(path);\n    ImageTool.imageToJpegFile(scaledImage, outputfile, 0.9f);\n    File tnOutputfile = new File(thumbnailPath);\n    ImageTool.imageToJpegFile(thumbnail, tnOutputfile, 0.9f);\n\n...\n\npublic static void imageToJpegFile(RenderedImage image, File outFile, float compressionQuality) throws IOException {\n\n    //Find a jpeg writer\n    ImageWriter writer = null;\n    Iterator&lt;ImageWriter&gt; iterator = ImageIO.getImageWritersByFormatName(\"jpeg\");\n    if (iterator.hasNext()) {\n        writer = iterator.next();\n    } else {\n        throw new RuntimeException(\"No jpeg writer found\");\n    }\n\n\n    //Set the compression quality\n    ImageWriteParam params = writer.getDefaultWriteParam();\n    params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);\n    params.setCompressionQuality(compressionQuality);\n\n    //Write to the out file\n    ImageOutputStream ios = null;\n    try {\n        ios = ImageIO.createImageOutputStream(outFile);\n        writer.setOutput(ios);\n        writer.write(null, new IIOImage(image, null, null), params);\n\n    } finally {\n        writer.dispose();\n        if (ios != null) {\n            try {\n                ios.flush();\n            } catch (Exception e) {\n            }\n            try {\n                ios.close();\n            } catch (Exception e) {\n            }\n        }\n\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 4141682,
+        "tags": [
+            "java",
+            "image",
+            "servlets",
+            "upload",
+            "corruption"
+        ],
+        "score": 1,
+        "accepted_answer_id": 4141959,
+        "is_answered": true,
+        "view_count": 1222
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/146f628dfd30b3b623c6444798b60e98?s=256&d=identicon&r=PG",
+            "account_id": 203002,
+            "user_type": "registered",
+            "user_id": 450398,
+            "link": "https://stackoverflow.com/users/450398/grodriguez",
+            "reputation": 22107,
+            "display_name": "Grodriguez",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1289372268,
+        "creation_date": 1289372268,
+        "body": "<p>Seems that the upload did not complete properly.<\/p>\n\n<p>As you point out yourself, your best bet is to use the HTTP <code>Content-Length<\/code> header to check that all data has been received. If not, discard the image.<\/p>\n",
+        "answer_id": 4141959,
+        "question_id": 4141682
+    }],
+    "answer_comments": {"4141959": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/146f628dfd30b3b623c6444798b60e98?s=256&d=identicon&r=PG",
+                "account_id": 203002,
+                "user_type": "registered",
+                "user_id": 450398,
+                "link": "https://stackoverflow.com/users/450398/grodriguez",
+                "reputation": 22107,
+                "display_name": "Grodriguez",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4141959,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/3c8078bbf668464d40b5070699ffd4d9?s=256&d=identicon&r=PG",
+                "account_id": 66508,
+                "user_type": "registered",
+                "user_id": 195064,
+                "link": "https://stackoverflow.com/users/195064/oskar",
+                "reputation": 1057,
+                "display_name": "Oskar",
+                "accept_rate": 62
+            },
+            "edited": false,
+            "creation_date": 1289390383,
+            "comment_id": 4470059
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6f9f942be3560546345c2200fbd8a974?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 182489,
+                "user_type": "registered",
+                "user_id": 417228,
+                "link": "https://stackoverflow.com/users/417228/jaydee",
+                "reputation": 4148,
+                "display_name": "Jaydee"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4141959,
+            "edited": false,
+            "creation_date": 1289389710,
+            "comment_id": 4469951
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3c8078bbf668464d40b5070699ffd4d9?s=256&d=identicon&r=PG",
+                "account_id": 66508,
+                "user_type": "registered",
+                "user_id": 195064,
+                "link": "https://stackoverflow.com/users/195064/oskar",
+                "reputation": 1057,
+                "display_name": "Oskar",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4141959,
+            "edited": false,
+            "creation_date": 1289377783,
+            "comment_id": 4468010
+        }
+    ]}
+}

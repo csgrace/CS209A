@@ -1,0 +1,338 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/95392b43f98b18083e66476aaca9890a?s=256&d=identicon&r=PG",
+            "account_id": 1647825,
+            "user_type": "registered",
+            "user_id": 1519004,
+            "link": "https://stackoverflow.com/users/1519004/ray-van-eperen",
+            "reputation": 89,
+            "display_name": "Ray Van Eperen",
+            "accept_rate": 25
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13033167/joda-time-how-to-find-second-thursday-of-month",
+        "last_activity_date": 1615991939,
+        "creation_date": 1351003700,
+        "answer_count": 3,
+        "title": "Joda-Time - How to find &quot;Second Thursday of Month&quot;",
+        "body": "<p>I'm not seeing a good way to set a date to a certain day of the week for a certain week of the month.  <a href=\"http://www.joda.org/joda-time/\" rel=\"nofollow\">Joda-Time<\/a>'s <a href=\"http://www.joda.org/joda-time/apidocs/org/joda/time/LocalDate.html\" rel=\"nofollow\">LocalDate<\/a> does not have a withWeekOfMonth method.  I can see a possible algorithm, but it seems way to complicated, so I'm going to assume I'm missing something.  What I need is to determine the next date someone is paid.  And if they are paid on the Second Thursday of the Month, what date is that.<\/p>\n\n<p>Anyone already solved this problem?  <\/p>\n\n<p>Ok, I was able to come up with this, which seems to work fine.<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>/**  \n * Finds a date such as 2nd Tuesday of a month.  \n */  \npublic static LocalDate calcDayOfWeekOfMonth( final DayOfWeek pDayOfWeek, final int pWeekOfMonth, final LocalDate pStartDate )  \n{  \n    LocalDate result = pStartDate;  \n    int month = result.getMonthOfYear();  \n    result = result.withDayOfMonth( 1 );  \n    result = result.withDayOfWeek( pDayOfWeek.ordinal() );  \n    if ( result.getMonthOfYear() != month )  \n    {  \n        result = result.plusWeeks( 1 );  \n    }  \n    result = result.plusWeeks( pWeekOfMonth - 1 );  \n    return result;  \n}  \n<\/code><\/pre>\n",
+        "question_id": 13033167,
+        "tags": [
+            "java",
+            "jodatime"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 5021,
+        "last_edit_date": 1384998657
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4c90624b2aa9623d5ba30db0e34b2000?s=256&d=identicon&r=PG",
+            "account_id": 103559,
+            "user_type": "registered",
+            "user_id": 277304,
+            "link": "https://stackoverflow.com/users/277304/leonbloy",
+            "reputation": 76474,
+            "display_name": "leonbloy",
+            "accept_rate": 66
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 13033167,
+        "edited": false,
+        "creation_date": 1351625002,
+        "comment_id": 17881925
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/33a693bba77151be1aa54194732f1c3f?s=256&d=identicon&r=PG",
+                "account_id": 251372,
+                "user_type": "registered",
+                "user_id": 528706,
+                "link": "https://stackoverflow.com/users/528706/daniel-arndt",
+                "reputation": 2633,
+                "display_name": "Daniel Arndt"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": false,
+            "last_activity_date": 1384998514,
+            "creation_date": 1351005587,
+            "body": "<p>I personally don't know of any super-simple way of doing it, this is what I use to get it:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>/**\n * Calculates the nth occurrence of a day of the week, for a given month and\n * year.\n * \n * @param dayOfWeek\n *            The day of the week to calculate the day for (In the range of\n *            [1,7], where 1 is Monday.\n * @param month\n *            The month to calculate the day for.\n * @param year\n *            The year to calculate the day for.\n * @param n\n *            The occurrence of the weekday to calculate. (ie. 1st, 2nd,\n *            3rd)\n * @return A {@link LocalDate} with the nth occurrence of the day of week,\n *         for the given month and year.\n */\npublic static LocalDate nthWeekdayOfMonth(int dayOfWeek, int month, int year, int n) {\n    LocalDate start = new LocalDate(year, month, 1);\n    LocalDate date = start.withDayOfWeek(dayOfWeek);\n    return (date.isBefore(start)) ? date.plusWeeks(n) : date.plusWeeks(n - 1);\n}\n<\/code><\/pre>\n\n<p>Example:<\/p>\n\n<pre><code>System.out.println(nthWeekdayOfMonth(4, 1, 2012, 2));\n<\/code><\/pre>\n\n<p>Output:<\/p>\n\n<pre><code>2012-01-12\n<\/code><\/pre>\n",
+            "answer_id": 13033804,
+            "question_id": 13033167,
+            "last_edit_date": 1384998514
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MWKel.jpg?s=256",
+                "account_id": 2179728,
+                "user_type": "registered",
+                "user_id": 10819573,
+                "link": "https://stackoverflow.com/users/10819573/arvind-kumar-avinash",
+                "reputation": 81081,
+                "display_name": "Arvind Kumar Avinash"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1609092198,
+            "creation_date": 1609016402,
+            "body": "<h2>Solution using Java-8 <code>java.time<\/code> API<\/h2>\n<p>With the <a href=\"https://www.oracle.com/technical-resources/articles/java/jf14-date-time.html\" rel=\"nofollow noreferrer\">modern date-time API<\/a> of Java, you can pass <a href=\"https://docs.oracle.com/javase/8/docs/api/java/time/temporal/TemporalAdjusters.html#dayOfWeekInMonth-int-java.time.DayOfWeek-\" rel=\"nofollow noreferrer\"><code>TemporalAdjusters#dayOfWeekInMonth<\/code><\/a> as an argument to <a href=\"https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html#with-java.time.temporal.TemporalAdjuster-\" rel=\"nofollow noreferrer\"><code>LocalDate#with<\/code><\/a> to achieve this.<\/p>\n<pre><code>import java.time.DayOfWeek;\nimport java.time.LocalDate;\nimport java.time.temporal.TemporalAdjusters;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Test with today's date, 26-Dec-2020\n        System.out.println(\n            localDateOnNthDayOfWeekOfMonth(DayOfWeek.THURSDAY, 2, LocalDate.now())\n        );\n    }\n\n    public static LocalDate localDateOnNthDayOfWeekOfMonth\n    (\n        final DayOfWeek dayOfWeek, \n        final int ordinal,\n        final LocalDate startDate\n    ) {\n        return startDate.with(\n            TemporalAdjusters.dayOfWeekInMonth(ordinal, dayOfWeek)\n        );\n    }\n}\n<\/code><\/pre>\n<p><strong>Output:<\/strong><\/p>\n<pre><code>2020-12-10\n<\/code><\/pre>\n<p>Learn about Java-8 date-time API from <strong><a href=\"https://docs.oracle.com/javase/tutorial/datetime/index.html\" rel=\"nofollow noreferrer\">Trail: Date Time<\/a><\/strong>.<\/p>\n<p><strong>Note for Java 6 or 7 users:<\/strong><\/p>\n<p>For any reason, if you have to stick to Java 6 or Java 7, you can use <a href=\"http://www.threeten.org/threetenbp/\" rel=\"nofollow noreferrer\"><em><strong>ThreeTen-Backport<\/strong><\/em><\/a> which backports most of the <em>java.time<\/em> functionality to Java 6 &amp; 7. If you are working for an Android project and your Android API level is still not compliant with Java-8, check <a href=\"https://developer.android.com/studio/write/java8-support-table\" rel=\"nofollow noreferrer\">Java 8+ APIs available through desugaring<\/a> and <a href=\"https://stackoverflow.com/questions/38922754/how-to-use-threetenabp-in-android-project\">How to use ThreeTenABP in Android Project<\/a>.<\/p>\n",
+            "answer_id": 65460669,
+            "question_id": 13033167,
+            "last_edit_date": 1609092198
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-z6DPR8xW-Q0/AAAAAAAAAAI/AAAAAAAAABI/CITkdARz1_k/s256-rj/photo.jpg",
+                "account_id": 8620969,
+                "user_type": "registered",
+                "user_id": 6455921,
+                "link": "https://stackoverflow.com/users/6455921/vitalii-movchan",
+                "reputation": 640,
+                "display_name": "Vitalii Movchan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1609015453,
+            "creation_date": 1609015453,
+            "body": "<p>Example how to detect 2nd Monday<\/p>\n<pre><code>val DateTime.is2ndMonday\n    get() = dayOfWeek == 1 &amp;&amp; dayOfMonth &gt; 7\n<\/code><\/pre>\n",
+            "answer_id": 65460557,
+            "question_id": 13033167
+        }
+    ],
+    "answer_comments": {
+        "13033804": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/ZWEI3.jpg?s=256",
+                    "account_id": 322981,
+                    "user_type": "registered",
+                    "user_id": 642706,
+                    "link": "https://stackoverflow.com/users/642706/basil-bourque",
+                    "reputation": 347059,
+                    "display_name": "Basil Bourque",
+                    "accept_rate": 58
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 13033804,
+                "edited": false,
+                "creation_date": 1609039298,
+                "comment_id": 115735500
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/33a693bba77151be1aa54194732f1c3f?s=256&d=identicon&r=PG",
+                    "account_id": 251372,
+                    "user_type": "registered",
+                    "user_id": 528706,
+                    "link": "https://stackoverflow.com/users/528706/daniel-arndt",
+                    "reputation": 2633,
+                    "display_name": "Daniel Arndt"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13033804,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/58d4899cb42d1203e8e1bab265e45d9f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5201928,
+                    "user_type": "registered",
+                    "user_id": 4161024,
+                    "link": "https://stackoverflow.com/users/4161024/dave-ranjan",
+                    "reputation": 2994,
+                    "display_name": "Dave Ranjan",
+                    "accept_rate": 86
+                },
+                "edited": false,
+                "creation_date": 1499193779,
+                "comment_id": 76801130
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/58d4899cb42d1203e8e1bab265e45d9f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5201928,
+                    "user_type": "registered",
+                    "user_id": 4161024,
+                    "link": "https://stackoverflow.com/users/4161024/dave-ranjan",
+                    "reputation": 2994,
+                    "display_name": "Dave Ranjan",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13033804,
+                "edited": false,
+                "creation_date": 1485523269,
+                "comment_id": 70971719
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/33a693bba77151be1aa54194732f1c3f?s=256&d=identicon&r=PG",
+                    "account_id": 251372,
+                    "user_type": "registered",
+                    "user_id": 528706,
+                    "link": "https://stackoverflow.com/users/528706/daniel-arndt",
+                    "reputation": 2633,
+                    "display_name": "Daniel Arndt"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13033804,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4c90624b2aa9623d5ba30db0e34b2000?s=256&d=identicon&r=PG",
+                    "account_id": 103559,
+                    "user_type": "registered",
+                    "user_id": 277304,
+                    "link": "https://stackoverflow.com/users/277304/leonbloy",
+                    "reputation": 76474,
+                    "display_name": "leonbloy",
+                    "accept_rate": 66
+                },
+                "edited": false,
+                "creation_date": 1351646140,
+                "comment_id": 17888614
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4c90624b2aa9623d5ba30db0e34b2000?s=256&d=identicon&r=PG",
+                    "account_id": 103559,
+                    "user_type": "registered",
+                    "user_id": 277304,
+                    "link": "https://stackoverflow.com/users/277304/leonbloy",
+                    "reputation": 76474,
+                    "display_name": "leonbloy",
+                    "accept_rate": 66
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13033804,
+                "edited": false,
+                "creation_date": 1351625246,
+                "comment_id": 17882046
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/95392b43f98b18083e66476aaca9890a?s=256&d=identicon&r=PG",
+                    "account_id": 1647825,
+                    "user_type": "registered",
+                    "user_id": 1519004,
+                    "link": "https://stackoverflow.com/users/1519004/ray-van-eperen",
+                    "reputation": 89,
+                    "display_name": "Ray Van Eperen",
+                    "accept_rate": 25
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13033804,
+                "edited": false,
+                "creation_date": 1351115080,
+                "comment_id": 17734520
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/33a693bba77151be1aa54194732f1c3f?s=256&d=identicon&r=PG",
+                    "account_id": 251372,
+                    "user_type": "registered",
+                    "user_id": 528706,
+                    "link": "https://stackoverflow.com/users/528706/daniel-arndt",
+                    "reputation": 2633,
+                    "display_name": "Daniel Arndt"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13033804,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/95392b43f98b18083e66476aaca9890a?s=256&d=identicon&r=PG",
+                    "account_id": 1647825,
+                    "user_type": "registered",
+                    "user_id": 1519004,
+                    "link": "https://stackoverflow.com/users/1519004/ray-van-eperen",
+                    "reputation": 89,
+                    "display_name": "Ray Van Eperen",
+                    "accept_rate": 25
+                },
+                "edited": false,
+                "creation_date": 1351101600,
+                "comment_id": 17728801
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/95392b43f98b18083e66476aaca9890a?s=256&d=identicon&r=PG",
+                    "account_id": 1647825,
+                    "user_type": "registered",
+                    "user_id": 1519004,
+                    "link": "https://stackoverflow.com/users/1519004/ray-van-eperen",
+                    "reputation": 89,
+                    "display_name": "Ray Van Eperen",
+                    "accept_rate": 25
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13033804,
+                "edited": false,
+                "creation_date": 1351013585,
+                "comment_id": 17697668
+            }
+        ],
+        "65460557": [
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-z6DPR8xW-Q0/AAAAAAAAAAI/AAAAAAAAABI/CITkdARz1_k/s256-rj/photo.jpg",
+                    "account_id": 8620969,
+                    "user_type": "registered",
+                    "user_id": 6455921,
+                    "link": "https://stackoverflow.com/users/6455921/vitalii-movchan",
+                    "reputation": 640,
+                    "display_name": "Vitalii Movchan"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 65460557,
+                "edited": false,
+                "creation_date": 1609170162,
+                "comment_id": 115766098
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/ZWEI3.jpg?s=256",
+                    "account_id": 322981,
+                    "user_type": "registered",
+                    "user_id": 642706,
+                    "link": "https://stackoverflow.com/users/642706/basil-bourque",
+                    "reputation": 347059,
+                    "display_name": "Basil Bourque",
+                    "accept_rate": 58
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 65460557,
+                "edited": false,
+                "creation_date": 1609038876,
+                "comment_id": 115735450
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/MWKel.jpg?s=256",
+                    "account_id": 2179728,
+                    "user_type": "registered",
+                    "user_id": 10819573,
+                    "link": "https://stackoverflow.com/users/10819573/arvind-kumar-avinash",
+                    "reputation": 81081,
+                    "display_name": "Arvind Kumar Avinash"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 65460557,
+                "edited": false,
+                "creation_date": 1609016722,
+                "comment_id": 115731755
+            }
+        ]
+    }
+}

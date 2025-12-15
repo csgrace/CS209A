@@ -1,0 +1,130 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0c288f60f9038f3b38335b320808878d?s=256&d=identicon&r=PG",
+            "account_id": 117020,
+            "user_type": "registered",
+            "user_id": 306631,
+            "link": "https://stackoverflow.com/users/306631/dg",
+            "reputation": 553,
+            "display_name": "DG.",
+            "accept_rate": 64
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8981739/restlet-passing-error-status-code-and-exception-trace-from-server-to-client",
+        "last_activity_date": 1327414518,
+        "creation_date": 1327376333,
+        "answer_count": 1,
+        "title": "Restlet - Passing error status code and exception trace from server to client",
+        "body": "<p>We have a <strong>restlet<\/strong> server and client. We need to pass the error status and exception traces back to the client so that the client can take appropriate actions depending on the error status code. I read about <code>StatusService<\/code> and using <code>response.setStatus()<\/code> method but I can't get the specific exceptions thrown during server side processing be displayed on client side. The <strong>DAO<\/strong> layer from the server throws specific DB related exceptions and status code such as (Unique key violation etc), which the client needs to see and take appropriate actions.<\/p>\n\n<p>Also, what is the common way of doing this to have centralized error <em>handling / processing<\/em> on server and client side ? Filters ? <\/p>\n\n<p>A brief example will really help.<\/p>\n\n<p>Thanks,\nDeep<\/p>\n",
+        "question_id": 8981739,
+        "tags": [
+            "java",
+            "web-services",
+            "restlet"
+        ],
+        "score": 0,
+        "accepted_answer_id": 8983982,
+        "is_answered": true,
+        "view_count": 5225,
+        "last_edit_date": 1327383350
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a5f3a0e5d9f5aa46650fa626592694ae?s=256&d=identicon&r=PG",
+            "account_id": 434278,
+            "user_type": "registered",
+            "user_id": 820142,
+            "link": "https://stackoverflow.com/users/820142/koma",
+            "reputation": 6566,
+            "display_name": "koma",
+            "accept_rate": 94
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1327414518,
+        "creation_date": 1327394613,
+        "body": "<p>You can only send HTTP status codes and optionally your own description message. You can also send a representation of the error by overriding the getRepresentation in the StatusService.<\/p>\n\n<pre><code>@Override\npublic Status getStatus(Throwable throwable, Resource resource) {\n    Status ret = null;\n    Throwable cause = throwable.getCause();\n    if (cause == null) {\n        Status status = super.getStatus(throwable, resource);\n        ret = new Status(status, throwable.getMessage());\n        log.log(Level.SEVERE, \"Unexpected resource exception &lt;\" + ret.toString() + \"&gt; for throwable of type &lt;\" + throwable + \"&gt; at resource &lt;\" + resource + \"&gt;\");\n    } else if (cause instanceof NotFoundException) {\n        ret = new Status(Status.CLIENT_ERROR_NOT_FOUND, cause, resource.getReference().toString());\n        log.info(\"Not found &lt;\" + ret.toString() + \"&gt; for throwable of type &lt;\" + cause + \"&gt; at resource &lt;\" + resource + \"&gt;\");\n    } else if (cause instanceof ConstraintViolationsException) {\n        ConstraintViolationsException e = (ConstraintViolationsException) cause;\n        ret = new Status(Status.CLIENT_ERROR_BAD_REQUEST, cause, e.getViolations().iterator().next().getMessage());\n        log.log(Level.SEVERE, \"Constraint violation &lt;\" + e.getViolations().iterator().next().getMessage() + \"&gt; at resource &lt;\" + resource + \"&gt;\");\n    } else if (cause instanceof BusinessRuleException) {\n        ret = new Status(Status.CLIENT_ERROR_BAD_REQUEST, cause, cause.getMessage());\n        log.log(Level.SEVERE, \"Business rule exception: &lt;\" + cause.getMessage() + \"&gt; at resource &lt;\" + resource + \"&gt;\");\n    } else {\n        Status status = super.getStatus(throwable, resource);\n        ret = new Status(status, throwable.getMessage());\n        log.log(Level.SEVERE, \"Unexpected server exception &lt;\" + ret.toString() + \"&gt; for throwable of type &lt;\" + throwable + \"&gt; at resource &lt;\" + resource + \"&gt;\");\n    }\n    return ret;\n}\n\n@Override\npublic Representation getRepresentation(Status status, Request request, Response response) {\n    String ret = \"\";\n    if (status.getDescription() != null) {\n        ret = status.getDescription();\n    } else {\n        ret = \"unknown error\";\n    }\n    return new StringRepresentation(ret, MediaType.TEXT_PLAIN);\n}\n<\/code><\/pre>\n\n<p>You can return a representation of the error in getRepresentation in whatever format (XML, JSON, HTML) you want.<\/p>\n",
+        "answer_id": 8983982,
+        "question_id": 8981739,
+        "last_edit_date": 1327414518
+    }],
+    "answer_comments": {"8983982": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a5f3a0e5d9f5aa46650fa626592694ae?s=256&d=identicon&r=PG",
+                "account_id": 434278,
+                "user_type": "registered",
+                "user_id": 820142,
+                "link": "https://stackoverflow.com/users/820142/koma",
+                "reputation": 6566,
+                "display_name": "koma",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8983982,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0c288f60f9038f3b38335b320808878d?s=256&d=identicon&r=PG",
+                "account_id": 117020,
+                "user_type": "registered",
+                "user_id": 306631,
+                "link": "https://stackoverflow.com/users/306631/dg",
+                "reputation": 553,
+                "display_name": "DG.",
+                "accept_rate": 64
+            },
+            "edited": false,
+            "creation_date": 1327414851,
+            "comment_id": 11263053
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a5f3a0e5d9f5aa46650fa626592694ae?s=256&d=identicon&r=PG",
+                "account_id": 434278,
+                "user_type": "registered",
+                "user_id": 820142,
+                "link": "https://stackoverflow.com/users/820142/koma",
+                "reputation": 6566,
+                "display_name": "koma",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8983982,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0c288f60f9038f3b38335b320808878d?s=256&d=identicon&r=PG",
+                "account_id": 117020,
+                "user_type": "registered",
+                "user_id": 306631,
+                "link": "https://stackoverflow.com/users/306631/dg",
+                "reputation": 553,
+                "display_name": "DG.",
+                "accept_rate": 64
+            },
+            "edited": false,
+            "creation_date": 1327414576,
+            "comment_id": 11262957
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0c288f60f9038f3b38335b320808878d?s=256&d=identicon&r=PG",
+                "account_id": 117020,
+                "user_type": "registered",
+                "user_id": 306631,
+                "link": "https://stackoverflow.com/users/306631/dg",
+                "reputation": 553,
+                "display_name": "DG.",
+                "accept_rate": 64
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8983982,
+            "edited": false,
+            "creation_date": 1327411300,
+            "comment_id": 11261750
+        }
+    ]}
+}

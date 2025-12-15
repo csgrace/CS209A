@@ -1,0 +1,232 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "Ken"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/868776/badpaddingexception-pad-block-corrupted",
+        "last_activity_date": 1311726496,
+        "creation_date": 1242395285,
+        "answer_count": 4,
+        "title": "BadPaddingException: pad block corrupted",
+        "body": "<p>I am trying to decrypt a file in Java which was encrypted in C# using Rijndael/CBC/PKCS7. I keep getting the following exception:<\/p>\n\n<blockquote>\n  <p>javax.crypto.BadPaddingException: pad block corrupted<br>\n      at org.bouncycastle.jce.provider.JCEBlockCipher.engineDoFinal(Unknown Source)<br>\n      at javax.crypto.Cipher.doFinal(DashoA13*..)<br>\n      at AESFileDecrypter.decrypt(AESFileDecrypter.java:57)  <\/p>\n<\/blockquote>\n\n<p>when the <code>doFinal(inpbytes)<\/code> method is called by the web server for the first byte[]. I am guessing this is a problem with the key or IV. I have the encrypted files on my file system for testing. Is there anything that anyone can see glaringly wrong with my code below?<\/p>\n\n<p>***keyStr is base64 encoded<\/p>\n\n<pre><code>public AESFileDecrypter(String keyStr){\n    try {\n            Security.addProvider(new BouncyCastleProvider());   \n            convertIvParameter();\n            key = new sun.misc.BASE64Decoder().decodeBuffer(keyStr);\n\n            //use the passed in Base64 decoded key to create a key object\n            decryptKey = new SecretKeySpec(key, \"AES\");\n\n            //specify the encryption algorithm\n            decryptCipher = Cipher.getInstance(\"AES/CBC/PKCS7Padding\", \"BC\");\n\n            //make a parameter object for the initialization vector(IV)             \n            IvParameterSpec ivs = new IvParameterSpec(_defaultIv);\n\n            //initialize the decrypter to the correct mode, key used and IV\n            decryptCipher.init(Cipher.DECRYPT_MODE, decryptKey, ivs);    \n        } \n     catch (Exception e) {\n             e.printStackTrace();\n     } \n}\n\npublic void convertIvParameter() {\n\n   int[] iv = new int[] {11, 190, 165, 33, 68, 88, 11, 200, 245, 35, 68, 23, 60, 24, 223, 67};\n\n   _defaultIv = new byte[16];\n\n   for(int x = 0; x &lt; _defaultIv.length; x++) {\n      _defaultIv[x] = (byte)iv[x];\n   }\n}\n\npublic void decryptUpdate(byte[] inpBytes) throws Exception {\n   //decrypt the byte passed in from the web server\n   decryptCipher.update(inpBytes);  \n}\n\npublic byte[] decryptFinal() throws Exception {\n   //decrypt the byte passed in from the web server\n   return decryptCipher.doFinal();\n}\n\n//sends bytes to the client for diaply\nprivate void sendBytes(FileInputStream fis, OutputStream os)throws Exception {\n    //set the buffer size to send 4k segments of data\naesFileDecrypter = new AESFileDecrypter(&lt;Insert Key string here&gt;);\n\n    byte[] buffer = new byte[4096];\n    int bytes = 0, totalBytes = fis.available();\n\n    //while there is still data to be sent keep looping and write the data\n    //to the output stream as the buffer is filled\n    try {\n       while ((bytes = fis.read(buffer)) != -1) {   \n          aesFileDecrypter.decryptUpdate(buffer);\n          //os.write(buffer, 0, bytes);\n       }\n\n       os.write(aesFileDecrypter.decryptFinal(), 0, totalBytes);\n   }\n   catch(Exception e) {\n      e.printStackTrace();\n   }\n}\n<\/code><\/pre>\n",
+        "question_id": 868776,
+        "tags": [
+            "java",
+            "exception",
+            "encryption"
+        ],
+        "score": 8,
+        "is_answered": true,
+        "view_count": 29913,
+        "last_edit_date": 1311726496
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72641170cc9abff008d21ac50894803b?s=256&d=identicon&r=PG",
+                "account_id": 20470,
+                "user_type": "registered",
+                "user_id": 48933,
+                "link": "https://stackoverflow.com/users/48933/neil-coffey",
+                "reputation": 21865,
+                "display_name": "Neil Coffey",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1242403686,
+            "creation_date": 1242401624,
+            "body": "<p>Firstly, just to be clear, from comments below, you shouldn't call doFinal() on every block, because doFinal() expects any padding at the end, which obviouslly won't be there in intermediate blocks. Either (a) call update() on intermediate data, then doFinal() at the end, or (b) just arrange to have all your data in one buffer or byte array, and call doFinal() once on the whole job lot.<\/p>\n\n<p>It's not clear from the code you posted that that's actually what you're doing, but it should be mentioned just in case.<\/p>\n\n<p>Failing that, then as a first step to debugging, I'd suggest whichever of these two is easier for you:<\/p>\n\n<ul>\n<li>Decrypting in ECB mode with no padding and seeing what you get. Look at the first block of data this brings back. If you can XOR this with your IV bytes and get the expected decrypted data, you know your key is OK.<\/li>\n<li>Dumping out the actual key bytes from C# before base 64 encoding and Java after decoding and checking they are the same.<\/li>\n<\/ul>\n\n<p>As I recall, C# has unsigned bytes (whereas Java signed) so there are a few places where there's room for things subtly going wrong with byte signedness.<\/p>\n",
+            "answer_id": 869376,
+            "question_id": 868776,
+            "last_edit_date": 1242403686
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b0702de2bb17431003a2431e50120d76?s=256&d=identicon&r=PG",
+                "account_id": 780473,
+                "user_type": "unregistered",
+                "user_id": 827633,
+                "link": "https://stackoverflow.com/users/827633/sodarfish",
+                "reputation": 31,
+                "display_name": "sodarfish"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1311726342,
+            "creation_date": 1311646020,
+            "body": "<p>I have encountered this problem before. <\/p>\n\n<p>When I wrote some code to do encryption and decryption like this:<\/p>\n\n<pre><code>    Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");\n    cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sec, \"AES\"),new IvParameterSpec(new byte[cipher.getBlockSize()]));\n    byte[] encode = cipher.doFinal(data);\n\n    cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(sec, \"AES\"), new IvParameterSpec(new byte[cipher.getBlockSize()]));\n    byte[] decode = cipher.doFinal(encode);\n<\/code><\/pre>\n\n<p>I forgot the first <code>IvParameterSpec(new byte[cipher.getBlockSize()])<\/code> when encrypting data, then I got an exception \"pad block corrupted\", so maybe you should check you encryption code.<\/p>\n",
+            "answer_id": 6824475,
+            "question_id": 868776,
+            "last_edit_date": 1311726342
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e803d030fd7dd7e3f2a53187e8fbc47?s=256&d=identicon&r=PG",
+                "account_id": 32732,
+                "user_type": "registered",
+                "user_id": 91042,
+                "link": "https://stackoverflow.com/users/91042/daniel-h",
+                "reputation": 1842,
+                "display_name": "Daniel H."
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1242399218,
+            "creation_date": 1242399218,
+            "body": "<p>As far as I know AES is based on Rijndael, but the specification is not exactly the same. I would suggest to check the key and block size you are using to cipher in C#  and the sizes being use in Java. (<a href=\"http://blogs.msdn.com/shawnfa/archive/2006/10/09/The-Differences-Between-Rijndael-and-AES.aspx\" rel=\"nofollow noreferrer\">.Net differences between Rijndael and AES<\/a>).<\/p>\n",
+            "answer_id": 869167,
+            "question_id": 868776
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "Ken"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1242658151,
+            "creation_date": 1242658151,
+            "body": "<p>The doFinal() was the undoing of the code above, and I ended up just using cipher streams instead of the update/doFinal approach. This way I could use the FileInputStream and my cipher as parameters for the CipherInputStream, and then pass the output to the web browser through an OutputStream. Breaking the update and doFinal out into their own method calls made the task much more difficult and both methods were deleted from the decrypter class (leaving a single while loop that read in chunks of data and output it to the browser). The Bouncy Castle Provider was also not needed in this case and PKCS5Padding was enough, which was given by the SunJCE.<\/p>\n",
+            "answer_id": 878127,
+            "question_id": 868776
+        }
+    ],
+    "answer_comments": {
+        "869376": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c3fac4fcf2b4ae7f3f5a96164b34958e?s=256&d=identicon&r=PG",
+                    "account_id": 3568486,
+                    "user_type": "registered",
+                    "user_id": 2979435,
+                    "link": "https://stackoverflow.com/users/2979435/defreitas",
+                    "reputation": 4498,
+                    "display_name": "deFreitas",
+                    "accept_rate": 42
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 869376,
+                "edited": false,
+                "creation_date": 1504223223,
+                "comment_id": 78943303
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d15d4523aca6f12a191848482448297?s=256&d=identicon&r=PG",
+                    "account_id": 1704728,
+                    "user_type": "registered",
+                    "user_id": 1564036,
+                    "link": "https://stackoverflow.com/users/1564036/mpellegr",
+                    "reputation": 3202,
+                    "display_name": "mpellegr",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 869376,
+                "edited": false,
+                "creation_date": 1392144803,
+                "comment_id": 32827803
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/72641170cc9abff008d21ac50894803b?s=256&d=identicon&r=PG",
+                    "account_id": 20470,
+                    "user_type": "registered",
+                    "user_id": 48933,
+                    "link": "https://stackoverflow.com/users/48933/neil-coffey",
+                    "reputation": 21865,
+                    "display_name": "Neil Coffey",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869376,
+                "edited": false,
+                "creation_date": 1242421567,
+                "comment_id": 678312
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/72641170cc9abff008d21ac50894803b?s=256&d=identicon&r=PG",
+                    "account_id": 20470,
+                    "user_type": "registered",
+                    "user_id": 48933,
+                    "link": "https://stackoverflow.com/users/48933/neil-coffey",
+                    "reputation": 21865,
+                    "display_name": "Neil Coffey",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869376,
+                "edited": false,
+                "creation_date": 1242421472,
+                "comment_id": 678303
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "Ken"
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869376,
+                "edited": false,
+                "creation_date": 1242406900,
+                "comment_id": 677311
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/72641170cc9abff008d21ac50894803b?s=256&d=identicon&r=PG",
+                    "account_id": 20470,
+                    "user_type": "registered",
+                    "user_id": 48933,
+                    "link": "https://stackoverflow.com/users/48933/neil-coffey",
+                    "reputation": 21865,
+                    "display_name": "Neil Coffey",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869376,
+                "edited": false,
+                "creation_date": 1242403481,
+                "comment_id": 677059
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "Ken"
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 869376,
+                "edited": false,
+                "creation_date": 1242402956,
+                "comment_id": 677019
+            }
+        ],
+        "869167": [{
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "Ken"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "post_id": 869167,
+            "edited": false,
+            "creation_date": 1242399510,
+            "comment_id": 676723
+        }]
+    }
+}

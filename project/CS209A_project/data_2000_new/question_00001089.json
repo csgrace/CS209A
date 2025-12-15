@@ -1,0 +1,128 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2ad192fe2eaf3099370e4671cfaad066?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12671739,
+            "user_type": "registered",
+            "user_id": 9209048,
+            "link": "https://stackoverflow.com/users/9209048/pinq",
+            "reputation": 13,
+            "display_name": "pinq"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48226969/inject-private-field-to-tested-method",
+        "last_activity_date": 1515763870,
+        "creation_date": 1515762569,
+        "answer_count": 3,
+        "title": "Inject private field to tested method",
+        "body": "<p>Simple question, I have a class with have a List field with Items, I have a method operating on that List, checking if there is a Item with a name given in parameter and returning true or false. I would like to test that method, creating an ArrayList in test class, mocking JdbcItemDao class, and calling a method. Method in test cannot reach an array, how to fix it? Code:<\/p>\n\n<pre><code>     public class JdbcItemDao {\n     private List&lt;Item&gt; tempStockList;\n\n    public JdbcItemDao() {\n\n    this.tempStockList = getAllStockItems();\n\n   //getting items from my sql, returning them as ArrayList\n\n}\n\n  public boolean checkStockItems(String itemName) {\n    for (Item item : tempStockList) {\n        if (item.getItemName().equalsIgnoreCase(itemName)) {\n            return true;\n        }\n    }\n    return false;\n}}\n<\/code><\/pre>\n\n<p>Test class:<\/p>\n\n<pre><code>public class JdbcTest {\n\n\nJdbcItemDao jdbcItemDao;\nList&lt;Item&gt; tempStockList;\n\n@Before\npublic void setup() {\n\n    jdbcItemDao = mock(JdbcItemDao.class);\n    tempStockList = new ArrayList&lt;&gt;();\n    tempStockList.add(new Item(1, \"LEDTv\", new BigInteger(\"40\"),\n            new Integer(\"3\"), new BigInteger(\"70\")));\n\n}\n\n\n@Test\npublic void checkStockItemsName() throws Exception {\n\n   assertTrue(jdbcItemDao.checkStockItems(\"LEDTv\"));\n\n}}\n<\/code><\/pre>\n",
+        "question_id": 48226969,
+        "tags": [
+            "java",
+            "unit-testing",
+            "testing",
+            "mockito"
+        ],
+        "score": 0,
+        "accepted_answer_id": 48227313,
+        "is_answered": true,
+        "view_count": 51
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/88774f833a5c2ef59935aa8a885600b2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11530374,
+                "user_type": "registered",
+                "user_id": 8449478,
+                "link": "https://stackoverflow.com/users/8449478/cecunami",
+                "reputation": 1047,
+                "display_name": "cecunami"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 48226969,
+            "edited": false,
+            "creation_date": 1515763229,
+            "comment_id": 83435945
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2hHKw.jpg?s=256",
+                "account_id": 2535057,
+                "user_type": "registered",
+                "user_id": 2202415,
+                "link": "https://stackoverflow.com/users/2202415/maciej-kowalski",
+                "reputation": 26710,
+                "display_name": "Maciej Kowalski"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226969,
+            "edited": false,
+            "creation_date": 1515762823,
+            "comment_id": 83435703
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Q7X4B.png?s=256",
+                "account_id": 9443335,
+                "user_type": "registered",
+                "user_id": 7023245,
+                "link": "https://stackoverflow.com/users/7023245/timothy-truckle",
+                "reputation": 15700,
+                "display_name": "Timothy Truckle",
+                "accept_rate": 25
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1515763127,
+            "creation_date": 1515763127,
+            "body": "<p>You use the wrong kind of <em>test double<\/em>. You need a <em>spy<\/em> (which is a wrapper around the real implementation) instead of a <em>mock<\/em> (which is a subclass overriding all methods of the mocked class):<\/p>\n\n<pre><code>jdbcItemDao = spy(new JdbcItemDao());\n\ntempStockList = new ArrayList&lt;&gt;();\ntempStockList.add(new Item(1, \"LEDTv\", new BigInteger(\"40\"),\n        new Integer(\"3\"), new BigInteger(\"70\")));\ndoReturn(tempStockList).when(jdbcItemDao).getAllStockItems();\n<\/code><\/pre>\n\n<p>Off cause this only works if you move <\/p>\n\n<pre><code>this.tempStockList = getAllStockItems();\n<\/code><\/pre>\n\n<p>out of the constructor... <\/p>\n",
+            "answer_id": 48227118,
+            "question_id": 48226969
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2ad192fe2eaf3099370e4671cfaad066?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12671739,
+                "user_type": "registered",
+                "user_id": 9209048,
+                "link": "https://stackoverflow.com/users/9209048/pinq",
+                "reputation": 13,
+                "display_name": "pinq"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1515763280,
+            "creation_date": 1515763280,
+            "body": "<p>There is a method 'getAllStockItems', it is in JdbcItemDao.java class<\/p>\n\n<pre><code>public List&lt;Item&gt; getAllStockItems() {\n    return jdbcTemplate.query(SELECT_ALL_STOCK_ITEMS, itemRowMapper);\n}\n<\/code><\/pre>\n\n<p>It is getting a data from MySQL database, so that's why i would like to use fake Array in tests.<\/p>\n",
+            "answer_id": 48227156,
+            "question_id": 48226969
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2hHKw.jpg?s=256",
+                "account_id": 2535057,
+                "user_type": "registered",
+                "user_id": 2202415,
+                "link": "https://stackoverflow.com/users/2202415/maciej-kowalski",
+                "reputation": 26710,
+                "display_name": "Maciej Kowalski"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1515763870,
+            "creation_date": 1515763870,
+            "body": "<p>If you cannot refactor i guess your left with creating a private class, overriding the method and using that class for testing:<\/p>\n\n<pre><code>public class JdbcTest {\n\n   List&lt;Item&gt; tempStockList = new ArrayList&lt;&gt;();\n\n   @Before\n   public void setup() {\n\n    tempStockList = new ArrayList&lt;&gt;();\n    tempStockList.add(new Item(1, \"LEDTv\", new BigInteger(\"40\"),\n            new Integer(\"3\"), new BigInteger(\"70\")));\n\n   }\n\n\n   @Test\n   public void checkStockItemsName() throws Exception {\n     JdbcItemDao jdbcItemDao = new CustomJdbcItemDao();\n     assertTrue(jdbcItemDao.checkStockItems(\"LEDTv\"));\n\n   }\n\n   private class CustomJdbcItemDao extends JdbcItemDao{\n\n      @Override\n      public List&lt;Item&gt; getAllStockItems(){\n        return tempStockList;\n      }\n   }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 48227313,
+            "question_id": 48226969
+        }
+    ],
+    "answer_comments": {}
+}

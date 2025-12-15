@@ -1,0 +1,91 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/318e718ec9296ec9ffab5824c5c4f668?s=256&d=identicon&r=PG",
+            "account_id": 61446,
+            "user_type": "registered",
+            "user_id": 183133,
+            "link": "https://stackoverflow.com/users/183133/rohan-prabhu",
+            "reputation": 7312,
+            "display_name": "Rohan Prabhu",
+            "accept_rate": 64
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/32602010/how-to-directly-use-a-function-as-a-functional-type-in-java-8",
+        "last_activity_date": 1442396450,
+        "creation_date": 1442387664,
+        "answer_count": 2,
+        "title": "How to directly use a function as a Functional Type in Java 8",
+        "body": "<p>If I create a Functional interface:<\/p>\n\n<pre><code>@FunctionalInterface\npublic class Consumer2&lt;T1, T2&gt; {\n    void accept(T1 t1, T2 t2);\n\n    default Consumer1&lt;T2&gt; curry(T1 t1) {\n        return (t2) -&gt; accept(t1, t2);\n    }\n}\n<\/code><\/pre>\n\n<p>Now, if I have a class:<\/p>\n\n<pre><code>public class MyClass {\n    public void printStrings(String a, String b) {\n        System.out.println(a + \": \" + b);\n    }\n}\n\nMyClass myClass = new MyClass();\n<\/code><\/pre>\n\n<p>Now, if I want to use my functional interface, I can:<\/p>\n\n<pre><code>Consumer2&lt;String, String&gt; printString = myClass::printStrings;\nprintString.curry(\"hello\").accept(\"world\");\n<\/code><\/pre>\n\n<p>But I can't do something like:<\/p>\n\n<pre><code>myClass::printStrings.curry(\"hello\").accept(\"world\");\n<\/code><\/pre>\n\n<p>which makes sense, because Java has no way of knowing that <code>myClass::printStrings<\/code> can be applied to the functional interface <code>Consumer2<\/code>. To do this, I have created a utility class:<\/p>\n\n<pre><code>public class F {\n    public static &lt;T1, T2&gt; Consumer2&lt;T1, T2&gt; c2(Consumer2&lt;T1, T2&gt; fn) {\n        return fn;\n    }\n}\n<\/code><\/pre>\n\n<p>Then I can:<\/p>\n\n<pre><code>F.c2(myClass::printStrings).curry(\"hello\").accept(\"world\");\n<\/code><\/pre>\n\n<p>Even, this will work:<\/p>\n\n<pre><code>((Consumer2&lt;String, String&gt;)myClass::printStrings).curry(\"hello\").accept(\"world\");\n<\/code><\/pre>\n\n<p>As long as there is some way for Java 8 to understand that functional type in this case. So, the question is, what is the best way to do it, while possibly avoiding the boilerplate?<\/p>\n",
+        "question_id": 32602010,
+        "tags": [
+            "java",
+            "functional-programming",
+            "java-8",
+            "method-reference"
+        ],
+        "score": 5,
+        "is_answered": true,
+        "view_count": 175,
+        "last_edit_date": 1442388848
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+            "account_id": 3211603,
+            "user_type": "registered",
+            "user_id": 2711488,
+            "link": "https://stackoverflow.com/users/2711488/holger",
+            "reputation": 300991,
+            "display_name": "Holger"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 32602010,
+        "edited": false,
+        "creation_date": 1442396678,
+        "comment_id": 53061570
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                "account_id": 3211603,
+                "user_type": "registered",
+                "user_id": 2711488,
+                "link": "https://stackoverflow.com/users/2711488/holger",
+                "reputation": 300991,
+                "display_name": "Holger"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1442396450,
+            "creation_date": 1442396450,
+            "body": "<p>You are not currying but performing partial function application. These operations are related, but not identical. Currying means to transform your <code>Consumer2&lt;T1, T2&gt;<\/code> to a <code>Function&lt;T1,Consumer1&lt;T2&gt;&gt;<\/code>. When applying that curried function to a <code>T1<\/code> value you get what your method is effectively doing.<\/p>\n\n<p>It\u2019s easier to use the established name <code>bind<\/code> as binding a value to a function\u2019s parameter is something, every developer understands without needing to dive deeply into the world of functional programming.<\/p>\n\n<p>That said, it\u2019s best to remember that now <code>interface<\/code>s can have <code>static<\/code> methods, so there is no need for such utility classes. Further, a <code>static<\/code> method just returning its argument is of little use on its own, so you may fuse it with the follow-up method that it is supposed to serve. Then, it\u2019s fulfilling the same purpose as the instance method and can be offered as a simple overload:<\/p>\n\n<pre><code>@FunctionalInterface\npublic interface Consumer2&lt;T1, T2&gt; {\n    void accept(T1 t1, T2 t2);\n\n    default Consumer1&lt;T2&gt; bind(T1 t1) {\n        return bind(this, t1);\n    }\n    static &lt;T,U&gt; Consumer1&lt;U&gt; bind(Consumer2&lt;? super T, ? super U&gt; c, T t) {\n        return u -&gt; c.accept(t, u);\n    }\n}\npublic interface Consumer1&lt;T1&gt; extends Consumer&lt;T1&gt; {}\n\npublic class MyClass {\n    public static void printStrings(String a, String b) {\n        System.out.println(a + \": \" + b);\n    }\n\n    public static void main(String[] args) {\n        Consumer2.bind(MyClass::printStrings, \"hello\").accept(\"world\");\n    }\n}\n<\/code><\/pre>\n\n<p>On the other hand, when you use the existing standard <code>interface<\/code>s <a href=\"http://docs.oracle.com/javase/8/docs/api/?java/util/function/Consumer.html\" rel=\"nofollow\"><code>Consumer<\/code><\/a> and <a href=\"http://docs.oracle.com/javase/8/docs/api/?java/util/function/BiConsumer.html\" rel=\"nofollow\"><code>BiConsumer<\/code><\/a> you have no choice but to offer a utility method in a class different to these <code>interface<\/code>s. But the good news is that it\u2019s easy to make the solution consistent then, as you can\u2019t provide anything else but a <code>static<\/code> method:<\/p>\n\n<pre><code>class FunctionUtil {\n    static &lt;T,U&gt; Consumer&lt;U&gt; bind(BiConsumer&lt;? super T, ? super U&gt; c, T t) {\n        return u -&gt; c.accept(t, u);\n    }\n}\npublic class MyClass {\n    public static void printStrings(String a, String b) {\n        System.out.println(a + \": \" + b);\n    }\n\n    public static void main(String[] args) {\n        FunctionUtil.bind(MyClass::printStrings, \"hello\").accept(\"world\");\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 32604971,
+            "question_id": 32602010
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b7730699b8b690670dc78109644a9b1f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6243460,
+                "user_type": "registered",
+                "user_id": 4856258,
+                "link": "https://stackoverflow.com/users/4856258/tagir-valeev",
+                "reputation": 100934,
+                "display_name": "Tagir Valeev",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1442388833,
+            "creation_date": 1442388833,
+            "body": "<p>Your solution involving <code>F.c2<\/code> method is interesting, but your example is too artificial. If you ask, how to write better this code<\/p>\n\n<pre><code>F.c2(myClass::printStrings).curry(\"hello\").accept(\"world\");\n<\/code><\/pre>\n\n<p>Then I would definitely advise you to write like this:<\/p>\n\n<pre><code>myClass.printStrings(\"hello\", \"world\");\n<\/code><\/pre>\n\n<p>If you want to ask how to bind the predefined parameters to the method reference, I would advise you to use lambda function instead:<\/p>\n\n<pre><code>Consumer1&lt;String&gt; fn = str -&gt; myClass.printStrings(\"hello\", str);\nfn.accept(\"world\");\n<\/code><\/pre>\n\n<p>Probably you want to consider the case when your function is not known at the compile time. In this case it's either returned from another method or passed to current method as method parameter or stored in the variable/field. In all of these cases it's already the functional interface and you can use the <code>curry<\/code> directly:<\/p>\n\n<pre><code>Consumer2&lt;String, String&gt; getConsumer2() { return myClass::printStrings; }\n\ngetConsumer2().curry(\"hello\").accept(\"world\");\n<\/code><\/pre>\n\n<p>Thus in general I don't see the problem here. If you still think that applying currying to the method reference is useful, I would create a static <code>curry<\/code> method (though I guess, it's actually a \"bind\", not \"curry\") in the <code>Consumer1<\/code> interface:<\/p>\n\n<pre><code>static &lt;T1, T2&gt; Consumer1&lt;T2&gt; curry(Consumer2&lt;T1, T2&gt; c2, T1 t1) {\n    return c2.curry(t1);\n}\n<\/code><\/pre>\n\n<p>And use it like this:<\/p>\n\n<pre><code>Consumer1.curry(myClass::printStrings, \"hello\").accept(\"world\");\n<\/code><\/pre>\n",
+            "answer_id": 32602378,
+            "question_id": 32602010
+        }
+    ],
+    "answer_comments": {}
+}

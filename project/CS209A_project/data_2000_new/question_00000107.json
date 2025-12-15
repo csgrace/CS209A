@@ -1,0 +1,157 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d89ca96e627adf1f2a93d1040173ecb5?s=256&d=identicon&r=PG",
+            "account_id": 789010,
+            "user_type": "unregistered",
+            "user_id": 864009,
+            "link": "https://stackoverflow.com/users/864009/thomas",
+            "reputation": 13,
+            "display_name": "Thomas"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/6834338/strange-error-in-java-me",
+        "last_activity_date": 1311736843,
+        "creation_date": 1311702915,
+        "answer_count": 2,
+        "title": "Strange Error in Java ME",
+        "body": "<p>I've just starting delving into the wonders of Java ME but have become frustrated when trying to create a thread...<\/p>\n\n<p>Below is the code which compiles absolutely fine. However, as soon as I install it on my G600 and run it, 'Java Game Error' pops up.<\/p>\n\n<p>My method of putting it in a jar file and installing it works, as I have created a game with no threads and that works fine.<\/p>\n\n<pre><code>import java.util.Random;\nimport javax.microedition.lcdui.*;\nimport javax.microedition.lcdui.game.*;\nimport javax.microedition.midlet.*;\n\npublic class CanvasTest extends MIDlet {\nDisplay display;\n\npublic CanvasTest() {\n\n}\n\npublic void startApp() {\n  TestCanvas thecanvas = new TestCanvas();\n  display = Display.getDisplay(this);\n  display.setCurrent(thecanvas);\n}\n\npublic void pauseApp() {}\n\npublic void destroyApp(boolean unconditional) {}\n}\nclass TestCanvas extends GameCanvas implements Runnable {\nFont font;\n\nint width;\nint height;\n\nboolean running = true;\n\npublic TestCanvas() {\n    super(false);\n    setFullScreenMode(true);\n    width = getWidth();\n    height = getHeight();\n    Thread thisThread = new Thread(this);\n    thisThread.start();\n\n}\npublic void paint(Graphics g) {\n    Random rand = new Random();\n    g.setColor(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255));\n    g.fillRect(0, 0, width, height);\n\n}\npublic void run() {\n  while(running) {\n    paint(getGraphics());\n\n    flushGraphics();\n\n    try {\n        Thread.sleep(50);\n    } \n    catch(InterruptedException ex) {}\n  }\n}\n};\n<\/code><\/pre>\n\n<p>Note: yes, this is not the game, it merely demonstrates the problem I am facing.<\/p>\n\n<p>Thanks in advance!<\/p>\n",
+        "question_id": 6834338,
+        "tags": [
+            "java",
+            "multithreading",
+            "mobile",
+            "java-me",
+            "midlet"
+        ],
+        "score": 1,
+        "accepted_answer_id": 6834809,
+        "is_answered": true,
+        "view_count": 113,
+        "last_edit_date": 1311705289
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/F4pyu.jpg?s=256",
+                "account_id": 214123,
+                "user_type": "registered",
+                "user_id": 467900,
+                "link": "https://stackoverflow.com/users/467900/mdelolmo",
+                "reputation": 6457,
+                "display_name": "mdelolmo",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1311705184,
+            "creation_date": 1311705184,
+            "body": "<p>Just a wild guess, but a general rule in Java is that you can't \"touch\" the UI out of the main thread. Well, this a little bit roughly explained, but there are many articles about the topic.<\/p>\n\n<p>I suggest you to avoid calling UI methods like <code>paint()<\/code> or <code>flushGraphics()<\/code> from a separate Thread.<\/p>\n\n<p>I hope it helps.<\/p>\n",
+            "answer_id": 6834775,
+            "question_id": 6834338
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d6db99aa846a8217f7e2aba6fa198e7c?s=256&d=identicon&r=PG",
+                "account_id": 446514,
+                "user_type": "registered",
+                "user_id": 839601,
+                "link": "https://stackoverflow.com/users/839601/gnat",
+                "reputation": 6248,
+                "display_name": "gnat"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1311736843,
+            "creation_date": 1311705346,
+            "body": "<p>did you test it at emulator prior to phone? if not - why? if yes - how did it go?<\/p>\n\n<p>regarding the code it looks OK to me except for the <em>slippery<\/em> two lines where you create and start thread from constructor. I'd rather move these two lines at the end of <code>startApp<\/code><\/p>\n\n<pre><code>public void startApp() {\n    TestCanvas theCanvas= new TestCanvas();\n    display = Display.getDisplay(this);\n    display.setCurrent(theCanvas);\n    new Thread(theCanvas).start(); // add here and...\n}\n//...\npublic TestCanvas() {\n    super(false);\n    setFullScreenMode(true);\n    width = getWidth();\n    height = getHeight();\n    // ...and remove here\n    // Thread thisThread = new Thread(this);\n    // thisThread.start();\n}\n<\/code><\/pre>\n",
+            "answer_id": 6834809,
+            "question_id": 6834338,
+            "last_edit_date": 1311736843
+        }
+    ],
+    "answer_comments": {
+        "6834775": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d89ca96e627adf1f2a93d1040173ecb5?s=256&d=identicon&r=PG",
+                "account_id": 789010,
+                "user_type": "unregistered",
+                "user_id": 864009,
+                "link": "https://stackoverflow.com/users/864009/thomas",
+                "reputation": 13,
+                "display_name": "Thomas"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 6834775,
+            "edited": false,
+            "creation_date": 1311722218,
+            "comment_id": 8127018
+        }],
+        "6834809": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d89ca96e627adf1f2a93d1040173ecb5?s=256&d=identicon&r=PG",
+                    "account_id": 789010,
+                    "user_type": "unregistered",
+                    "user_id": 864009,
+                    "link": "https://stackoverflow.com/users/864009/thomas",
+                    "reputation": 13,
+                    "display_name": "Thomas"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 6834809,
+                "edited": false,
+                "creation_date": 1311727196,
+                "comment_id": 8127741
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d6db99aa846a8217f7e2aba6fa198e7c?s=256&d=identicon&r=PG",
+                    "account_id": 446514,
+                    "user_type": "registered",
+                    "user_id": 839601,
+                    "link": "https://stackoverflow.com/users/839601/gnat",
+                    "reputation": 6248,
+                    "display_name": "gnat"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 6834809,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/d89ca96e627adf1f2a93d1040173ecb5?s=256&d=identicon&r=PG",
+                    "account_id": 789010,
+                    "user_type": "unregistered",
+                    "user_id": 864009,
+                    "link": "https://stackoverflow.com/users/864009/thomas",
+                    "reputation": 13,
+                    "display_name": "Thomas"
+                },
+                "edited": false,
+                "creation_date": 1311724029,
+                "comment_id": 8127318
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d89ca96e627adf1f2a93d1040173ecb5?s=256&d=identicon&r=PG",
+                    "account_id": 789010,
+                    "user_type": "unregistered",
+                    "user_id": 864009,
+                    "link": "https://stackoverflow.com/users/864009/thomas",
+                    "reputation": 13,
+                    "display_name": "Thomas"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 6834809,
+                "edited": false,
+                "creation_date": 1311722420,
+                "comment_id": 8127055
+            }
+        ]
+    }
+}

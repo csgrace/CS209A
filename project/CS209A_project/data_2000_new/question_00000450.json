@@ -1,0 +1,150 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bed6a41c417632907c04270ca57704f4?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 2068418,
+            "user_type": "registered",
+            "user_id": 1843452,
+            "link": "https://stackoverflow.com/users/1843452/conor",
+            "reputation": 405,
+            "display_name": "Conor",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/19233342/retrieving-text-formatting-in-a-text-file-created-from-a-string-with-fileoutputs",
+        "last_activity_date": 1594825589,
+        "creation_date": 1381175268,
+        "answer_count": 1,
+        "title": "Retrieving text formatting in a text file created from a string with FileOutputStream",
+        "body": "<p>i'm generating a text paragraph like this:<\/p>\n\n<pre><code>&gt;1.    this is the first line \n&gt;1.    this is the second line\n&gt;1.    this is the third line\n&gt;1.    this is the fourth line\n<\/code><\/pre>\n\n<p>and then storing that in a string<\/p>\n\n<p>Then I want to output this string to a zipped text document, it all works but the formatting isn't there when I open the text file created with FileOutputStream, Do you know how I can retrieve the formatting?<\/p>\n\n<p>code:<\/p>\n\n<pre><code>try\n{\n        String toZip = file.toString();\n\nDataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(\"test.zip\")));   \nZipOutputStream zos = new ZipOutputStream(dos);\n\n\n        byte[] b = toZip.getBytes(\"UTF8\");\n        ZipEntry entry = new ZipEntry(\"TheFirstFile.txt\");\n        System.out.println(\"Zipping..\" + entry.getName());                      \n        zos.putNextEntry(entry);        \n        zos.write(b, 0, b.length);\n\n        dos.close();\n        zos.close();\n    }\n    catch (IOException e) \n    {\n        e.printStackTrace();\n    } catch (MyException e) \n    {\n        // TODO Auto-generated catch block\n        e.printStackTrace();\n    }\n<\/code><\/pre>\n\n<p>had problems posting code here..\nTest Program:<\/p>\n\n<pre><code>import java.io.BufferedOutputStream;\nimport java.io.BufferedReader;\nimport java.io.FileInputStream;\nimport java.io.FileOutputStream;\nimport java.io.IOException;\nimport java.io.InputStreamReader;\nimport java.util.zip.ZipEntry;\nimport java.util.zip.ZipOutputStream;\n\npublic class TestZip {\n\n\n    public static void main(String[] args) throws IOException\n    {\n\n        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(\"c:\\\\TEMP\\\\tests.txt\"),\"UTF-8\"));\n        StringBuffer buffer = new StringBuffer();\n\n        String line = br.readLine();\n\n        try\n        {\n            while(line != null)\n            {  \n                if(line != null)\n                {\n                    buffer.append(line + \"\\n\");\n                }\n\n                line=br.readLine();\n            }\n\n            String data = buffer.toString();\n            br.close();\n\n            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(\"c:\\\\TEMP\\\\ZippedFile.zip\"));\n            ZipOutputStream zos = new ZipOutputStream(bos);\n\n\n            System.out.println(data);\n\n            byte[] b = data.getBytes();\n            ZipEntry entry = new ZipEntry(\"TheData.txt\");\n            System.out.println(\"Zipping..\" + entry.getName());                      \n            zos.putNextEntry(entry);        \n            zos.write(b, 0, b.length);\n\n            zos.closeEntry();\n            zos.close();\n        }\n        catch (IOException e) \n        {\n            e.printStackTrace();\n        } \n    }\n}\n<\/code><\/pre>\n\n<p>The text is margined to how I want it when I print it out on the console, when I check the zipped text file, the text is all on one line.<\/p>\n\n<p>console output:\n<img src=\"https://i.sstatic.net/kafwz.png\" alt=\"console print result\"><\/p>\n\n<p>text file result:\n<img src=\"https://i.sstatic.net/PjKmw.jpg\" alt=\"result\"><\/p>\n\n<p>I wanted it to appear in the text file exactly how it prints in the console.<\/p>\n\n<p>I've never coded a program before which can read a zipped text file, but I tried..<\/p>\n\n<pre><code>import java.io.FileInputStream;\nimport java.util.zip.ZipEntry;\nimport java.util.zip.ZipInputStream;\n\n\npublic class TestUnzip {\n\n\n    public static void main (String[] args) { \n\n        String unzip = \"\"; \n\n        try  \n        { \n            FileInputStream fin = new FileInputStream(\"C:\\\\TEMP\\\\ZippedFile.zip\"); \n            ZipInputStream zin = new ZipInputStream(fin); \n            ZipEntry ze; \n\n            byte[] bytes = new byte[1024];\n\n\n            ze = zin.getNextEntry();\n\n            while ((ze = zin.getNextEntry()) != null) \n            { \n                    if (zin.read(bytes, 0, bytes.length) != -1) \n                    {\n                        unzip = new String(bytes, \"UTF-8\");\n                    }\n                    else \n                    {\n                        System.out.println(\"error\");\n                    }\n\n                    ze = zin.getNextEntry();\n            } \n\n\n            System.out.println(unzip.toString());\n\n            zin.closeEntry();\n            zin.close();\n        } \n        catch(Exception e) \n        { \n            e.printStackTrace();\n        }\n\n      } \n}\n<\/code><\/pre>\n",
+        "question_id": 19233342,
+        "tags": ["java"],
+        "score": -2,
+        "accepted_answer_id": 19236419,
+        "is_answered": true,
+        "view_count": 512,
+        "last_edit_date": 1594825589
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233342,
+            "edited": false,
+            "creation_date": 1381178524,
+            "comment_id": 28469263
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233342,
+            "edited": false,
+            "creation_date": 1381177346,
+            "comment_id": 28468668
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233342,
+            "edited": false,
+            "creation_date": 1381176457,
+            "comment_id": 28468182
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bed6a41c417632907c04270ca57704f4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2068418,
+                "user_type": "registered",
+                "user_id": 1843452,
+                "link": "https://stackoverflow.com/users/1843452/conor",
+                "reputation": 405,
+                "display_name": "Conor",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19233342,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1381176386,
+            "comment_id": 28468140
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 19233342,
+            "edited": false,
+            "creation_date": 1381175629,
+            "comment_id": 28467678
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/itKvD.jpg?s=256",
+            "account_id": 299330,
+            "user_type": "registered",
+            "user_id": 605869,
+            "link": "https://stackoverflow.com/users/605869/tom",
+            "reputation": 1221,
+            "display_name": "Tom"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1381187775,
+        "creation_date": 1381187775,
+        "body": "<p>I believe Notepad is expecting windows line termination.\n<code>\\r\\n<\/code>, not just <code>\\n<\/code><\/p>\n\n<p>Try opening it in another editor, like Notepad++;<\/p>\n\n<p><a href=\"http://en.wikipedia.org/wiki/Newline\" rel=\"nofollow\">http://en.wikipedia.org/wiki/Newline<\/a><\/p>\n",
+        "answer_id": 19236419,
+        "question_id": 19233342
+    }],
+    "answer_comments": {}
+}

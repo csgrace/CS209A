@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AAuE7mCr6vVVEvlzxFOT63AR2KhlN3XOHDKbbwO0gjkhcg=k-s256",
+            "account_id": 16636762,
+            "user_type": "registered",
+            "user_id": 12023261,
+            "link": "https://stackoverflow.com/users/12023261/arpan-banerjee",
+            "reputation": 1036,
+            "display_name": "Arpan Banerjee"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/61595873/how-does-the-while-loop-inside-writer-and-reader-class-works-here-how-does-the",
+        "last_activity_date": 1588607465,
+        "creation_date": 1588606257,
+        "answer_count": 1,
+        "title": "How does the while loop inside writer and reader class works here ? How does the thread change the `empty` variable?",
+        "body": "<p>I was learning Multithreading in java and came across this example--<\/p>\n\n<pre><code>package com.practice.multithreading;\n\nimport java.util.Random;\n\npublic class DeadlockMain {\n    public static void main(String[] args) {\n        Message message = new Message();\n          (new Thread(new Writer(message))).start();\n          (new Thread(new Reader(message))).start();\n    }\n    }\n\n\nclass Message {\n    private String message;\n    private boolean empty = true;\n\n    public synchronized String read() {\n        while(empty) {\n            try {\n                wait();\n            } catch(InterruptedException e) {\n            }\n        }\n        empty = true;\n        notifyAll();\n        return message;\n    }\n\n    public synchronized void write(String message) {\n        while(!empty) {\n            try {\n                wait();\n            } catch(InterruptedException e) {\n            }\n        }\n        empty = false;\n        this.message = message;\n        notifyAll();\n    }\n}\n\nclass Writer implements Runnable {\n    private Message message;\n\n    public Writer(Message message) {\n        this.message = message;\n    }\n\n    public void run() {\n        String messages[] = {\n                \"Humpty Dumpty sat on a wall\",\n                \"Humpty Dumpty had a great fall\",\n                \"All the king's horses and all the king's men\",\n                \"Couldn't put Humpty together again\"\n        };\n\n        Random random = new Random();\n\n        for(int i=0; i&lt;messages.length; i++) {\n            message.write(messages[i]);\n            try {\n                Thread.sleep(random.nextInt(2000));\n            } catch(InterruptedException e) {\n\n            }\n        }\n        message.write(\"Finished\");\n    }\n}\n\nclass Reader implements Runnable {\n    private Message message;\n\n    public Reader(Message message) {\n        this.message = message;\n    }\n\n    public void run() {\n        Random random = new Random();\n        for(String latestMessage = message.read(); !latestMessage.equals(\"Finished\");\n            latestMessage = message.read()) {\n            System.out.println(latestMessage);\n            try {\n                Thread.sleep(random.nextInt(2000));\n            } catch(InterruptedException e) {\n\n            }\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>My understanding is--<\/p>\n\n<ul>\n<li>When a <code>thread<\/code> is calling the <code>write<\/code> method,<\/li>\n<li>the <code>empty<\/code> variable is <code>true<\/code> so <code>while(!true) =&gt; false<\/code> ,<\/li>\n<li>skips while loop sets <code>empty=false<\/code>,<\/li>\n<li>then <code>this.message=message<\/code>,<\/li>\n<li>next iteration of <code>for loop<\/code>,<code>while(!false)=&gt; true<\/code><\/li>\n<li><p>No the control is inside the <code>while loop<\/code>,<\/p>\n\n<p>Now i cannot find anywhere inside this loop/or in the thread calling method <code>empty<\/code> variable being <code>set<\/code> to <code>true<\/code> so that control comes out of <code>while loop<\/code>.\nSo how does the <code>threads<\/code> change the <code>empty<\/code> variable and write and read the messages??<\/p><\/li>\n<\/ul>\n\n<p>Can anyone pls explain me a few iterations of this code?<\/p>\n\n<p>It would be of a great help to me.\nThanks in advance!<\/p>\n",
+        "question_id": 61595873,
+        "tags": [
+            "java",
+            "multithreading",
+            "while-loop"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 47,
+        "last_edit_date": 1588607368
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/M84sB.png?s=256",
+            "account_id": 16503230,
+            "user_type": "registered",
+            "user_id": 11923999,
+            "link": "https://stackoverflow.com/users/11923999/burak-serdar",
+            "reputation": 52511,
+            "display_name": "Burak Serdar"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1588607465,
+        "creation_date": 1588607465,
+        "body": "<p>You can think of the message class as a single-message buffer. When you write a message to it, it becomes full and cannot accept new messages until the message is read. Similarly, if you read the message when it is empty, it waits until someone writes to it.<\/p>\n\n<p>Message instances start empty, so when you write to it, it skips the while loop, sets the message, and notifies any waiting readers.<\/p>\n\n<p>Another write before the read now waits at the while loop, because <code>empty<\/code> is false.<\/p>\n\n<p>If you read the message from a thread and if the message is nonempty, then read skips the while loop, sets <code>empty<\/code> to true, and notifies any waiting writers.<\/p>\n\n<p>When the writer wakes up, it sees that <code>empty<\/code> is true, writes the message, and sets <code>empty<\/code> to false again.<\/p>\n",
+        "answer_id": 61596276,
+        "question_id": 61595873
+    }],
+    "answer_comments": {}
+}

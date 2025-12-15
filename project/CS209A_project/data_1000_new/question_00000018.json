@@ -1,0 +1,115 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/75d8c27a035d190381eed2eb3bf139f8?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 2841958,
+            "user_type": "registered",
+            "user_id": 4030393,
+            "link": "https://stackoverflow.com/users/4030393/fad-qm",
+            "reputation": 3,
+            "display_name": "fad qm"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28303845/android-get-image-from-server-to-sqlite-database",
+        "last_activity_date": 1422981764,
+        "creation_date": 1422980736,
+        "answer_count": 1,
+        "title": "Android get image from server to SQLite database",
+        "body": "<p>Android get image from server to SQLite database<\/p>\n\n<p>I need to display images in the news section and when there is no internet connection i want to read them offline. I did it with the title and the body text but for the news image it is too slow how can I improve that?<\/p>\n\n<p>I tried to get the string url and store it as byte array:<\/p>\n\n<pre><code>         public byte[] downloadImage(String urlImg) throws Exception{\n\n            URL url = new URL(urlImg);\n            HttpURLConnection con = (HttpURLConnection) url.openConnection();\n            con.setRequestMethod(\"GET\");\n            con.setReadTimeout(10000);\n            con.setConnectTimeout(10000);\n\n            ByteArrayOutputStream bos = new ByteArrayOutputStream();\n\n            try {\n                Bitmap b = BitmapFactory.decodeStream(con.getInputStream());\n                b.compress(Bitmap.CompressFormat.WEBP, 0, bos);\n            } finally {\n                con.disconnect();\n            }\n\n            return bos.toByteArray();\n        }\n<\/code><\/pre>\n\n<p>then I call it inside the doInBackground like this:<\/p>\n\n<pre><code>@Override\n        protected Boolean doInBackground(String... urls) {\n\n            try {\n                HttpGet httppost = new HttpGet(\"http://www.77-webdev.com/clients/thebeautyworkshop/news.json\");\n                HttpClient httpclient = new DefaultHttpClient();\n                HttpResponse response = httpclient.execute(httppost);\n\n                int status = response.getStatusLine().getStatusCode();\n                if (status == 200){\n                    DataSource.deleteAll();\n                    HttpEntity entity = response.getEntity();\n                    String data = EntityUtils.toString(entity);\n\n                    JSONObject jsonObject = new JSONObject(data);\n                    JSONArray jsonArray = jsonObject.getJSONArray(\"News\");\n                    News news = new News();\n                    for (int i=0; i &lt; jsonArray.length();i++){\n                        JSONObject JObject = jsonArray.getJSONObject(i);\n\n                        String Title =  JObject.getString(\"title\");\n                        String body =  JObject.getString(\"mobile_body\");\n                        String Image =  JObject.getString(\"image\");\n                        String lang =  JObject.getString(\"lang\");\n                        byte[]  IMG = downloadImage(Image);\n\n\n                        news.setTitle(Title);\n                        news.setMobile_body(body);\n                        news.setImageB(IMG);\n                        news.setLang(lang);\n                        DataSource.create(news);\n                        newsList.add(news);\n\n                    }\n\n                    return true;\n                }\n\n\n            } catch (ParseException e1) {\n                e1.printStackTrace();\n            } catch (IOException e) {\n                e.printStackTrace();\n            } catch (JSONException e) {\n                e.printStackTrace();\n            } catch (Exception e) {\n                e.printStackTrace();\n            }\n            return false;\n        }\n<\/code><\/pre>\n\n<p>but it's too because I'm connecting for each image<\/p>\n",
+        "question_id": 28303845,
+        "tags": [
+            "java",
+            "android",
+            "sqlite",
+            "mobile",
+            "bitmap"
+        ],
+        "score": 0,
+        "accepted_answer_id": 28304177,
+        "is_answered": true,
+        "view_count": 982,
+        "last_edit_date": 1422981465
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/169c977d7c71e35679d4b1e1a5cf8bfc?s=256&d=identicon&r=PG",
+            "account_id": 1989328,
+            "user_type": "registered",
+            "user_id": 1783734,
+            "link": "https://stackoverflow.com/users/1783734/mfazio23",
+            "reputation": 1324,
+            "display_name": "MFazio23"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1422981764,
+        "creation_date": 1422981764,
+        "body": "<p>If you know into which view you want to put the image, you can use <a href=\"http://square.github.io/picasso/\" rel=\"nofollow\">Square's Picasso<\/a> to simplify the image process:<\/p>\n\n<pre><code>Picasso\n        .with(context)\n        .load(Image)\n        .into(imageView);\n<\/code><\/pre>\n",
+        "answer_id": 28304177,
+        "question_id": 28303845
+    }],
+    "answer_comments": {"28304177": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/75d8c27a035d190381eed2eb3bf139f8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2841958,
+                "user_type": "registered",
+                "user_id": 4030393,
+                "link": "https://stackoverflow.com/users/4030393/fad-qm",
+                "reputation": 3,
+                "display_name": "fad qm"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28304177,
+            "edited": false,
+            "creation_date": 1423272834,
+            "comment_id": 45095185
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/169c977d7c71e35679d4b1e1a5cf8bfc?s=256&d=identicon&r=PG",
+                "account_id": 1989328,
+                "user_type": "registered",
+                "user_id": 1783734,
+                "link": "https://stackoverflow.com/users/1783734/mfazio23",
+                "reputation": 1324,
+                "display_name": "MFazio23"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28304177,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/75d8c27a035d190381eed2eb3bf139f8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2841958,
+                "user_type": "registered",
+                "user_id": 4030393,
+                "link": "https://stackoverflow.com/users/4030393/fad-qm",
+                "reputation": 3,
+                "display_name": "fad qm"
+            },
+            "edited": false,
+            "creation_date": 1422983342,
+            "comment_id": 44960512
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/75d8c27a035d190381eed2eb3bf139f8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2841958,
+                "user_type": "registered",
+                "user_id": 4030393,
+                "link": "https://stackoverflow.com/users/4030393/fad-qm",
+                "reputation": 3,
+                "display_name": "fad qm"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28304177,
+            "edited": false,
+            "creation_date": 1422982462,
+            "comment_id": 44959932
+        }
+    ]}
+}

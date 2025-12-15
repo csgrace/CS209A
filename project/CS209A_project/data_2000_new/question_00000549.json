@@ -1,0 +1,123 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8a2735ca14ef15707e35bad5305f909a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3218155,
+            "user_type": "registered",
+            "user_id": 2716239,
+            "link": "https://stackoverflow.com/users/2716239/kabe",
+            "reputation": 223,
+            "display_name": "Kabe",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19066248/parse-json-using-gson-for-login-system-application-force-closes",
+        "last_activity_date": 1380480534,
+        "creation_date": 1380366334,
+        "answer_count": 2,
+        "title": "Parse json using Gson for login system - Application force closes",
+        "body": "<p>I'm trying to create a login system for my project. I want to create process something like when the register button clicked after filling the form, It's send the data with URL to the API and returns following json string:<\/p>\n\n<pre><code>{\n  \"result\": \"OK\",\n  \"message\": [\n      \"Congratulations! You will shortly receive email .\"\n  ],\n  \"values\": {\n      \"id\": 178964,\n      \"fname\": \"\", \n      \"gender\": \"female\"\n  }\n}\n<\/code><\/pre>\n\n<p>The result string return OK or No only. Now I want to display 'message' in <strong>loginErrorMsg<\/strong>   when the result return 'OK'. And if the result return Ok then LoginActivity Should be started. But I lost somewhere in parsing the json/gson.<\/p>\n\n<p>This is the file I created for Register:<\/p>\n\n<pre><code>    public class RegisterActivity  extends Activity{\n        private static String URL = \"http://api.eample.com/\";\n        @Override\n        public void onCreate(Bundle savedInstanceState) {\n            super.onCreate(savedInstanceState);\n            setContentView(R.layout.register);\n\n            final EditText inputFname = (EditText) findViewById(R.id.registerFname);\n            final EditText inputLname = (EditText) findViewById(R.id.registerLname);\n            final EditText inputEmail = (EditText) findViewById(R.id.registerEmail);\n            Button btnRegister = (Button) findViewById(R.id.btnRegister);\n            Button btnLinkToLogin = (Button) findViewById(R.id.btnLinkToLogin);\n            final TextView loginErrorMsg = (TextView) findViewById(R.id.register_error);\n\n            // Register Button Click event\n            btnRegister.setOnClickListener(new View.OnClickListener() {  \n                Login login2;\n                RadioGroup radioSexGroup = (RadioGroup) findViewById(R.id.sex);\n                public void onClick(View view) {\n                    String fname = inputFname.getText().toString();\n                    String lname = inputLname.getText().toString();\n                    String email = inputEmail.getText().toString();\n\n                    // get selected radio button from radioGroup\n                    int selectedId = radioSexGroup.getCheckedRadioButtonId();\n                    RadioButton radioSexButton = (RadioButton) findViewById(selectedId);\n                    String gender = radioSexButton.getText().toString();\n                    System.out.println(fname);\n                    //Toast.makeText(RegisterActivity.this, radioSexButton.getText(), Toast.LENGTH_SHORT).show();\n\n                    String registerURL = URL +\"&amp;user_email=\"+ email +\"&amp;first_name=\"+ fname +\"&amp;last_name=\"+ lname +\"&amp;gender=\"+ gender;\n                    System.out.println(registerURL);\n\n                    if( email.length() == 0) {\n                        loginErrorMsg.setText(R.string.empty);\n                        //Toast.makeText(view.getContext(), R.string.empty, Toast.LENGTH_SHORT).show();\n                        return;\n                    }else{\n\n                        try {\n                            //Create an HTTP client\n                            HttpClient client = new DefaultHttpClient();\n                            HttpPost post = new HttpPost(registerURL);\n\n                            //Perform the request and check the status code\n                            HttpResponse response = client.execute(post);\n                            StatusLine statusLine = response.getStatusLine();\n                            if(statusLine.getStatusCode() == 200) {\n                                HttpEntity entity = response.getEntity();\n                                InputStream content = entity.getContent();\n\n                                try {\n                                    //Read the server response and attempt to parse it as JSON\n                                    Reader reader = new InputStreamReader(content);\n\n                                    Gson gson = new Gson();\n                                    this.login2 = gson.fromJson(reader, Login.class);\n\n                                    //handlePostsList(posts);\n                                } catch (Exception ex) {\n                                    //Log.e(TAG, \"Failed to parse JSON due to: \" + ex);\n                                    failedLoading();\n                                }\n                            } else {\n                                //Log.e(TAG, \"Server responded with status code: \" + statusLine.getStatusCode());\n                                failedLoading();\n                            }\n                        } catch(Exception ex) {\n                            //Log.e(TAG, \"Failed to send HTTP POST request due to: \" + ex);\n                            failedLoading();\n                        }\n//To set register message\n                    if(login2.getResult().equals(\"OK\")){\n                        loginErrorMsg.setText(login2.getMessage().toString());\n                    }\n                    }\n\n\n                }\n            });\n\n        }\n<\/code><\/pre>\n\n<p>Can someone help me to solve the register process? I just want to know how to parse it to get 'message' string data.<\/p>\n\n<p>Edited:\nChanged the login object as following and create values class.<\/p>\n\n<p>LogCat:<\/p>\n\n<pre><code>09-29 13:05:13.145: E/AndroidRuntime(9428): FATAL EXCEPTION: main\n09-29 13:05:13.145: E/AndroidRuntime(9428): java.lang.NullPointerException\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at com.kabelash.sk.RegisterActivity$1.onClick(RegisterActivity.java:105)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at android.view.View.performClick(View.java:4211)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at android.view.View$PerformClick.run(View.java:17267)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at android.os.Handler.handleCallback(Handler.java:615)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at android.os.Handler.dispatchMessage(Handler.java:92)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at android.os.Looper.loop(Looper.java:137)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at android.app.ActivityThread.main(ActivityThread.java:4898)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at java.lang.reflect.Method.invokeNative(Native Method)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at java.lang.reflect.Method.invoke(Method.java:511)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:1006)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:773)\n09-29 13:05:13.145: E/AndroidRuntime(9428):     at dalvik.system.NativeStart.main(Native Method)\n09-29 13:10:21.380: I/Process(9428): Sending signal. PID: 9428 SIG: 9\n<\/code><\/pre>\n",
+        "question_id": 19066248,
+        "tags": [
+            "java",
+            "android",
+            "json",
+            "gson"
+        ],
+        "score": 0,
+        "accepted_answer_id": 19069186,
+        "is_answered": true,
+        "view_count": 866,
+        "last_edit_date": 1380480534
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/pZtWh.png?s=256",
+                "account_id": 2029500,
+                "user_type": "registered",
+                "user_id": 1813625,
+                "link": "https://stackoverflow.com/users/1813625/miko",
+                "reputation": 18809,
+                "display_name": "MikO",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1380386189,
+            "creation_date": 1380386189,
+            "body": "<p>Your Java class <code>Login<\/code> does not represent the structure of the JSON response!<\/p>\n\n<p>Firstly the field <code>message<\/code> in your JSON is an array (<code>\"message\": [...]<\/code>), and not a <code>String<\/code>, like in your class <code>Login<\/code>.<\/p>\n\n<p>Besides, the field <code>values<\/code> in your JSON is an object (<code>values: {...}<\/code>), and not a <code>ArrayList<\/code>, like in your class <code>Login<\/code>.<\/p>\n\n<p>So, try replacing the attributes in your Login class by:<\/p>\n\n<pre><code>String result;\nList&lt;String&gt; message;\nValues values;\n<\/code><\/pre>\n\n<p>And you'll also need to create a class <code>Values<\/code> with these attributes:<\/p>\n\n<pre><code>long id;\nString fname;\nString gender;\n<\/code><\/pre>\n",
+            "answer_id": 19069186,
+            "question_id": 19066248
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/609386530/picture?type=large",
+                "account_id": 3368598,
+                "user_type": "registered",
+                "user_id": 2828481,
+                "link": "https://stackoverflow.com/users/2828481/gill-windall",
+                "reputation": 1,
+                "display_name": "Gill Windall"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1380462404,
+            "creation_date": 1380462404,
+            "body": "<p>When you get the force close message there should be some diagnostic output in LogCat.  For instance it could still be a NullPointerException.  If so you need to look at the line number that is mentioned in logcat and see which line that is in your code.   You can also use the Eclipse debugger to step through the code and see where the problem is occurring.\nGill<\/p>\n",
+            "answer_id": 19078766,
+            "question_id": 19066248
+        }
+    ],
+    "answer_comments": {"19069186": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/pZtWh.png?s=256",
+                "account_id": 2029500,
+                "user_type": "registered",
+                "user_id": 1813625,
+                "link": "https://stackoverflow.com/users/1813625/miko",
+                "reputation": 18809,
+                "display_name": "MikO",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19069186,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8a2735ca14ef15707e35bad5305f909a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3218155,
+                "user_type": "registered",
+                "user_id": 2716239,
+                "link": "https://stackoverflow.com/users/2716239/kabe",
+                "reputation": 223,
+                "display_name": "Kabe",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1380457684,
+            "comment_id": 28201175
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a2735ca14ef15707e35bad5305f909a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3218155,
+                "user_type": "registered",
+                "user_id": 2716239,
+                "link": "https://stackoverflow.com/users/2716239/kabe",
+                "reputation": 223,
+                "display_name": "Kabe",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19069186,
+            "edited": false,
+            "creation_date": 1380456578,
+            "comment_id": 28200897
+        }
+    ]}
+}

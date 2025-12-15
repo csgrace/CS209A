@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/108efe43546b3d2dd8e128b0e1a65c4a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5283587,
+            "user_type": "registered",
+            "user_id": 4218216,
+            "link": "https://stackoverflow.com/users/4218216/arnav-bose",
+            "reputation": 1001,
+            "display_name": "Arnav Bose"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75881298/s3-client-creation-with-aws-sdk-for-java-2-x",
+        "last_activity_date": 1680582107,
+        "creation_date": 1680117338,
+        "answer_count": 1,
+        "title": "S3 Client Creation with AWS SDK for Java 2.X",
+        "body": "<p>I have an existing functionality where I create S3 client object from encrypted credentials and region in AWS SDK version 1.12.435. Now, I have to upgrade the entire code base to AWS SDK for Java 2 version(2.20.32). I am not seeing an equivalent class for the client credential or transfer manager. Following is my S3 client object creation function in version 1.X<\/p>\n<pre><code>public AmazonS3 getS3Client(final String s3AK, final String s3SK, final String s3Url, String region) throws Exception {         \n        AWSStaticCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(EncryptDecryptUtils.decrypt(s3AK), EncryptDecryptUtils.decrypt(s3SK))); \n        AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withPathStyleAccessEnabled(true).withCredentials(credentialsProvider).withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s3Url, region)).build();        \n        return s3Client;\n}\n<\/code><\/pre>\n<p>Let me know how I could replace this way of S3 client creation to an equivalent way in AWS SDK for java 2.X<\/p>\n",
+        "question_id": 75881298,
+        "tags": [
+            "java",
+            "amazon-s3",
+            "java-8",
+            "aws-sdk",
+            "aws-sdk-java-2.0"
+        ],
+        "score": 2,
+        "accepted_answer_id": 75925497,
+        "is_answered": true,
+        "view_count": 11043,
+        "last_edit_date": 1680119953
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/563e405903bcfeebf1aea3d1b403348c?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7501162,
+            "user_type": "registered",
+            "user_id": 5699459,
+            "link": "https://stackoverflow.com/users/5699459/michael",
+            "reputation": 938,
+            "display_name": "Michael",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 7,
+        "is_accepted": true,
+        "last_activity_date": 1680582107,
+        "creation_date": 1680582107,
+        "body": "<p>The equivalent is something like below.<\/p>\n<p>The transfer manager is in a separate maven package <code>software.amazon.awssdk.transfer.s3.S3TransferManager<\/code>.<\/p>\n<p>In the 1.x SDK a lot of classes were <code>AWS*<\/code>, in 2.x it's now <code>Aws*<\/code> which is sometimes annoyingly subtle.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public S3AsyncClient getS3Client(final String s3AK, final String s3SK, final String s3Url, String region) throws Exception {\n    AwsCredentials creds = AwsBasicCredentials.create(EncryptDecryptUtils.decrypt(s3AK), EncryptDecryptUtils.decrypt(s3SK));\n    AwsCredentialsProvider provider = StaticCredentialsProvider.create(creds);\n\n    S3EndpointParams endpointParams = S3EndpointParams.builder()\n        .endpoint(s3Url)\n        .region(Region.of(region))\n        // path style access is done by default if the url is not a\n        // virtual host IIRC, if not you can force path style with\n        // .forcePathStyle(true) // I think you only need this once here or in the client\n        .build();\n\n    Endpoint endpoint = S3EndpointProvider\n        .defaultProvider()\n        .resolveEndpoint(endpointParams.build()).join();\n\n    S3AsyncClient s3Client = S3AsyncClient\n        .builder()\n        .credentialsProvider(awsCreds)\n        .endpointOverride(endpoint.url())\n        // path style access is done by default if the url is not a\n        // virtual host IIRC, if not you can force path style with\n        // .forcePathStyle(true) // I think you only need this once here or in the params\n        .build();\n    return s3Client;\n}\n<\/code><\/pre>\n",
+        "answer_id": 75925497,
+        "question_id": 75881298
+    }],
+    "answer_comments": {"75925497": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/108efe43546b3d2dd8e128b0e1a65c4a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5283587,
+            "user_type": "registered",
+            "user_id": 4218216,
+            "link": "https://stackoverflow.com/users/4218216/arnav-bose",
+            "reputation": 1001,
+            "display_name": "Arnav Bose"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 75925497,
+        "edited": false,
+        "creation_date": 1680709261,
+        "comment_id": 133945067
+    }]}
+}

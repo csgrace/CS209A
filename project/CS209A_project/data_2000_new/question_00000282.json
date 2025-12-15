@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/18868fc9be677c8614bac77c75a2b274?s=256&d=identicon&r=PG",
+            "account_id": 19662,
+            "user_type": "registered",
+            "user_id": 46255,
+            "link": "https://stackoverflow.com/users/46255/wopr",
+            "reputation": 5393,
+            "display_name": "WOPR",
+            "accept_rate": 97
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/43584201/google-bigquery-socket-timeout",
+        "last_activity_date": 1497509803,
+        "creation_date": 1493025568,
+        "answer_count": 1,
+        "title": "Google BigQuery Socket Timeout",
+        "body": "<p>I'm downloading, via the Java API, a large query result set from BigQuery.<\/p>\n\n<p>After about 1 hour, the underlying socket is closed, causing a SocketException error and the query fails.<\/p>\n\n<p>How can I extend the socket timeout, or preferably, disable it?\nHere's how I'm building a connection.<\/p>\n\n<pre><code>  InputStream credentialsJSON = new FileInputStream(\"path.json\");\n\n\n  NetHttpTransport transport = new NetHttpTransport();\n  JsonFactory jsonFactory = new JacksonFactory();\n  GoogleCredential credential = GoogleCredential.fromStream(credentialsJSON, transport, jsonFactory);\n  credential.setExpiresInSeconds(null);\n\n  // Inject the BigQuery scope if required.\n  if (credential.createScopedRequired()) {\n      Collection&lt;String&gt; bigqueryScopes = BigqueryScopes.all();\n      credential = credential.createScoped(bigqueryScopes);\n  }\n\n  return new Bigquery.Builder(transport, jsonFactory, credential)\n          .setApplicationName(\"ETL\")\n          .build();\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>Stack trace<\/p>\n\n<pre><code>java.net.SocketTimeoutException: Read timed out\n    at java.net.SocketInputStream.socketRead0(Native Method)\n    at java.net.SocketInputStream.socketRead(SocketInputStream.java:116)\n    at java.net.SocketInputStream.read(SocketInputStream.java:170)\n    at java.net.SocketInputStream.read(SocketInputStream.java:141)\n    at sun.security.ssl.InputRecord.readFully(InputRecord.java:465)\n    at sun.security.ssl.InputRecord.read(InputRecord.java:503)\n    at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:961)\n    at sun.security.ssl.SSLSocketImpl.readDataRecord(SSLSocketImpl.java:918)\n    at sun.security.ssl.AppInputStream.read(AppInputStream.java:105)\n    at java.io.BufferedInputStream.fill(BufferedInputStream.java:246)\n    at java.io.BufferedInputStream.read1(BufferedInputStream.java:286)\n    at java.io.BufferedInputStream.read(BufferedInputStream.java:345)\n    at sun.net.www.http.HttpClient.parseHTTPHeader(HttpClient.java:704)\n    at sun.net.www.http.HttpClient.parseHTTP(HttpClient.java:647)\n    at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1535)\n    at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1440)\n    at java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:480)\n    at sun.net.www.protocol.https.HttpsURLConnectionImpl.getResponseCode(HttpsURLConnectionImpl.java:338)\n    at com.google.api.client.http.javanet.NetHttpResponse.&lt;init&gt;(NetHttpResponse.java:37)\n    at com.google.api.client.http.javanet.NetHttpRequest.execute(NetHttpRequest.java:94)\n    at com.google.api.client.http.HttpRequest.execute(HttpRequest.java:972)\n    at com.google.api.client.googleapis.services.AbstractGoogleClientRequest.executeUnparsed(AbstractGoogleClientRequest.java:419)\n    at com.google.api.client.googleapis.services.AbstractGoogleClientRequest.executeUnparsed(AbstractGoogleClientRequest.java:352)\n    at com.google.api.client.googleapis.services.AbstractGoogleClientRequest.execute(AbstractGoogleClientRequest.java:469)\n    at Common.BigQueryUtils$1PageIterator.next(BigQueryUtils.java:204)\n    at Common.BigQueryUtils$1PageIterator.next(BigQueryUtils.java:173)\n    at ATTRWarehouse.BigQueryPuller.retrieve(BigQueryPuller.java:270)\n    at ATTRWarehouse.BigQueryPuller.pullData(BigQueryPuller.java:121)\n    at Common.BaseDataPuller.call(BaseDataPuller.java:123)\n<\/code><\/pre>\n",
+        "question_id": 43584201,
+        "tags": [
+            "java",
+            "google-bigquery"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1864,
+        "last_edit_date": 1493026411
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/18868fc9be677c8614bac77c75a2b274?s=256&d=identicon&r=PG",
+            "account_id": 19662,
+            "user_type": "registered",
+            "user_id": 46255,
+            "link": "https://stackoverflow.com/users/46255/wopr",
+            "reputation": 5393,
+            "display_name": "WOPR",
+            "accept_rate": 97
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1497509803,
+        "creation_date": 1497509803,
+        "body": "<p>OK I solved this by extending the HTTP timeout by overriding its initialiser.<\/p>\n\n<pre><code>  private static HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer) {\n    return new HttpRequestInitializer() {\n        @Override\n        public void initialize(HttpRequest httpRequest) throws IOException {\n           requestInitializer.initialize(httpRequest);\n           httpRequest.setConnectTimeout(5 * 60000);  // 5 minutes connect timeout\n           httpRequest.setReadTimeout(360 * 60000);  // 120 minutes read timeout\n        }\n        };\n   }\n\n\n\n\n\n    private static Bigquery createAuthorizedClient() throws IOException {\n\n        InputStream credentialsJSON = new FileInputStream(\"src/main/java/Warehouse/Common/GoogleCredential.json\");\n\n\n        NetHttpTransport transport = new NetHttpTransport();\n        JsonFactory jsonFactory = new JacksonFactory();\n        GoogleCredential credential = GoogleCredential.fromStream(credentialsJSON, transport, jsonFactory);\n\n        // Inject the BigQuery scope if required.\n        if (credential.createScopedRequired()) {\n            Collection&lt;String&gt; bigqueryScopes = BigqueryScopes.all();\n            credential = credential.createScoped(bigqueryScopes);\n        }\n\n        return new Bigquery.Builder(transport, jsonFactory, setHttpTimeout(credential))\n                .setApplicationName(\"ETL\")\n                .build();\n    }\n<\/code><\/pre>\n",
+        "answer_id": 44560665,
+        "question_id": 43584201
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,135 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/05766da42bea2cb7c9e185fa66be4725?s=256&d=identicon&r=PG",
+            "account_id": 871926,
+            "user_type": "registered",
+            "user_id": 922584,
+            "link": "https://stackoverflow.com/users/922584/vojt%c4%9bch",
+            "reputation": 12544,
+            "display_name": "Vojtěch",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/9268872/inheritance-in-annotation-parameters",
+        "last_activity_date": 1329381956,
+        "creation_date": 1329171401,
+        "answer_count": 3,
+        "title": "Inheritance in annotation parameters",
+        "body": "<p>I am trying to inherit following parameter in a java interface (an example from Spring Data JPA, but the question is generally about parameters to annotations):<\/p>\n\n<pre><code>public interface ItemRepository&lt;T extends Item&gt; extends BaseRepository&lt;T&gt; {\n\n    public final String type = null;\n\n\n\n    @Query(\"select distinct i from \" + type + \" i \" +\n            \"join i.tags t \" +\n            \"join fetch i.locale where t = ?1\")\n    public List&lt;T&gt; findByTag(Tag t);\n}\n<\/code><\/pre>\n\n<p>so that in inherited interfaces I could have just:<\/p>\n\n<pre><code>public interface EventRepository extends ItemRepository&lt;Event&gt; {\n\n    public final static String type = \"Event\";\n}\n<\/code><\/pre>\n\n<p>But unfortunately the string value of variable \"type\" is associated to the variable too late, so when the annotation is created, the value is still null. Can I force the compiler to associate the variable from the child interface?<\/p>\n\n<p>Thanks<\/p>\n",
+        "question_id": 9268872,
+        "tags": [
+            "java",
+            "inheritance",
+            "annotations",
+            "spring-data"
+        ],
+        "score": 2,
+        "accepted_answer_id": 9269386,
+        "is_answered": true,
+        "view_count": 2007
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EhSlm.jpg?s=256",
+                "account_id": 483434,
+                "user_type": "registered",
+                "user_id": 898478,
+                "link": "https://stackoverflow.com/users/898478/m0skit0",
+                "reputation": 26023,
+                "display_name": "m0skit0",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 9268872,
+            "edited": false,
+            "creation_date": 1329172032,
+            "comment_id": 11683564
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b6242b58eadb9496f67ef57398d1c506?s=256&d=identicon&r=PG",
+                "account_id": 756787,
+                "user_type": "registered",
+                "user_id": 768323,
+                "link": "https://stackoverflow.com/users/768323/paul-nikonowicz",
+                "reputation": 3913,
+                "display_name": "Paul Nikonowicz",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9268872,
+            "edited": false,
+            "creation_date": 1329171712,
+            "comment_id": 11683452
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EhSlm.jpg?s=256",
+                "account_id": 483434,
+                "user_type": "registered",
+                "user_id": 898478,
+                "link": "https://stackoverflow.com/users/898478/m0skit0",
+                "reputation": 26023,
+                "display_name": "m0skit0",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1329205747,
+            "creation_date": 1329171924,
+            "body": "<p>I'm no Java expert, but I don't think you can do so. Parent classes have no knowledge about children. However you can do something like:<\/p>\n\n<pre><code>public interface ItemRepository&lt;T extends Item&gt; extends BaseRepository&lt;T&gt; {\n\n    public final String type = null;\n\n    public static final String QUERY_PART1 = \"select distinct i from \";\n    public static final String QUERY_PART2 = \" i \" + \n            \"join i.tags t \" +\n            \"join fetch i.locale where t = ?1\";\n    public List&lt;T&gt; findByTag(Tag t);\n}  \n\npublic interface EventRepository extends ItemRepository&lt;Event&gt; {\n\n    public final static String type = \"Event\";\n\n     @Query(QUERY_PART1 + type + QUERY_PART2)\n}\n<\/code><\/pre>\n",
+            "answer_id": 9268955,
+            "question_id": 9268872,
+            "last_edit_date": 1329205747
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/672f798341250dd228b286738e8d6309?s=256&d=identicon&r=PG",
+                "account_id": 20338,
+                "user_type": "registered",
+                "user_id": 48503,
+                "link": "https://stackoverflow.com/users/48503/luke-woodward",
+                "reputation": 65367,
+                "display_name": "Luke Woodward",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1329174372,
+            "creation_date": 1329174372,
+            "body": "<p>In short, no.  You can't force the compiler to 'associate the variable from the child interface'.<\/p>\n\n<p>The Java compiler needs to be able to determine all annotation values at compile time.  It needs to write out into the class file for <code>ItemRepository<\/code> a constant value to put in the <code>@Query<\/code> annotation.  What constant value would you imagine this would be for your code?<\/p>\n\n<p>As it happens, the compiler can determine from your code a value for this annotation at compile time.  However, it's not exactly the value you want.  (I am assuming that you've accidentally omitted the <code>static<\/code> modifier from the field <code>type<\/code> in <code>ItemRepository<\/code> - I believe your code wouldn't compile otherwise.  It also wouldn't compile if you replaced your <code>type<\/code> field with a <code>getType()<\/code> method.)<\/p>\n\n<p>Your code looks like it can determine at compile time the annotation values for the subinterfaces.  The problem is that it's <em>not<\/em> possible to determine at compile time the annotation value for the superinterface <code>ItemRepository<\/code>.<\/p>\n",
+            "answer_id": 9269386,
+            "question_id": 9268872
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/05766da42bea2cb7c9e185fa66be4725?s=256&d=identicon&r=PG",
+                "account_id": 871926,
+                "user_type": "registered",
+                "user_id": 922584,
+                "link": "https://stackoverflow.com/users/922584/vojt%c4%9bch",
+                "reputation": 12544,
+                "display_name": "Vojtěch",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1329381956,
+            "creation_date": 1329346340,
+            "body": "<p>In the end, I was so unhappy about the behaviour and inflexibility, so that I wrote myself a small tool. An example of using is here:<\/p>\n\n<p><a href=\"https://github.com/knyttl/Maite/wiki/Maite-Persistence\" rel=\"nofollow\">https://github.com/knyttl/Maite/wiki/Maite-Persistence<\/a><\/p>\n\n<p>There are two children classes and the parent class which define the functionality. But the trick is in a fluent interface of building the query. What do you think?<\/p>\n",
+            "answer_id": 9302748,
+            "question_id": 9268872,
+            "last_edit_date": 1329381956
+        }
+    ],
+    "answer_comments": {}
+}

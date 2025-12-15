@@ -1,0 +1,226 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+            "account_id": 1754514,
+            "user_type": "registered",
+            "user_id": 1602853,
+            "link": "https://stackoverflow.com/users/1602853/coder",
+            "reputation": 3302,
+            "display_name": "Coder",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47772465/timestamp-in-cassandra",
+        "last_activity_date": 1513087781,
+        "creation_date": 1513081108,
+        "answer_count": 1,
+        "title": "Timestamp in Cassandra",
+        "body": "<p>I prefer to use the <strong>timestamp<\/strong> as one of the column in Cassandra (which I decided to use as Clustering Key). which is the right way to store the column as timestamp in Cassandra?<\/p>\n\n<p>(<strong>i.e<\/strong>) Is it fine to use the 'milliseconds' (Example : 1513078338560) directly like below?<\/p>\n\n<pre><code>INSERT INTO testdata (nodeIp, totalCapacity, physicalUsage, readIOPS, readBW, writeIOPS, writeBW, writeLatency, flashMode, timestamp) VALUES('172.30.56.60',1, 1,1,1,1,1,1,'yes',1513078338560); \n<\/code><\/pre>\n\n<p>or to use the dateof(now());<\/p>\n\n<pre><code>INSERT INTO testdata (nodeIp, totalCapacity, physicalUsage, readIOPS, readBW, writeIOPS, writeBW, writeLatency, flashMode, timestamp) VALUES('172.30.56.60',1, 1,1,1,1,1,1,'yes',dateof(now()));\n<\/code><\/pre>\n\n<p>which is faster and recommended way to use for timestamp based queries in Cassandra? <\/p>\n\n<p>NOTE : I know internally it stores as milliseconds, I used the <code>'SELECT timestamp, blobAsBigint(timestampAsBlob(timestamp)) FROM'<\/code><\/p>\n\n<p>Thanks,\nHarry<\/p>\n",
+        "question_id": 47772465,
+        "tags": [
+            "java",
+            "cassandra",
+            "cassandra-3.0"
+        ],
+        "score": 4,
+        "accepted_answer_id": 47774133,
+        "is_answered": true,
+        "view_count": 2862,
+        "last_edit_date": 1513083739
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9b31b9d123bff80f00317a1df0dd00e2?s=256&d=identicon&r=PG",
+            "account_id": 9963,
+            "user_type": "registered",
+            "user_id": 18627,
+            "link": "https://stackoverflow.com/users/18627/alex-ott",
+            "reputation": 88119,
+            "display_name": "Alex Ott"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1513087781,
+        "creation_date": 1513086155,
+        "body": "<p>The <code>dateof<\/code> is deprecated in Cassandra >= 2.2... Instead it's better to use function <code>toTimestamp<\/code>, like this: <code>toTimestamp(now())<\/code>.  When you selecting, you can also use the <code>toUnixTimestamp<\/code> function if you want to get the timestamp as long:<\/p>\n\n<pre><code>cqlsh:test&gt; CREATE TABLE test_times (a int, b timestamp, PRIMARY KEY (a,b));\ncqlsh:test&gt; INSERT INTO test_times (a,b) VALUES (1, toTimestamp(now()));\ncqlsh:test&gt; SELECT toUnixTimestamp(b) FROM test_times;\n\n system.tounixtimestamp(b)\n---------------------------\n         1513086032267\n\n(1 rows)\n\ncqlsh:test&gt; SELECT b FROM test_times;\n\n b\n---------------------------------\n 2017-12-12 13:40:32.267000+0000\n\n(1 rows)\n<\/code><\/pre>\n\n<p>Regarding the performance - there are different considerations:<\/p>\n\n<ol>\n<li>If you already have the timestamp as number, then you can use it instead of calling function<\/li>\n<li>It's better to use prepared statements instead of \"raw inserts\" - in this case Cassandra won't need to transfer full query, but only data, and also don't need to parse statement every time.  <\/li>\n<\/ol>\n\n<p>The pseudo code will look as following (Java-like).<\/p>\n\n<pre><code>PreparedStatement prepared = session.prepare(\n    \"insert into your_table (field1, field2) values (?, ?)\");\nwhile(true) {\n    session.execute(prepared.bind(value1, value2));\n}\n<\/code><\/pre>\n",
+        "answer_id": 47774133,
+        "question_id": 47772465,
+        "last_edit_date": 1513087781
+    }],
+    "answer_comments": {"47774133": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47774133,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/9b31b9d123bff80f00317a1df0dd00e2?s=256&d=identicon&r=PG",
+                "account_id": 9963,
+                "user_type": "registered",
+                "user_id": 18627,
+                "link": "https://stackoverflow.com/users/18627/alex-ott",
+                "reputation": 88119,
+                "display_name": "Alex Ott"
+            },
+            "edited": false,
+            "creation_date": 1513089966,
+            "comment_id": 82511630
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b31b9d123bff80f00317a1df0dd00e2?s=256&d=identicon&r=PG",
+                "account_id": 9963,
+                "user_type": "registered",
+                "user_id": 18627,
+                "link": "https://stackoverflow.com/users/18627/alex-ott",
+                "reputation": 88119,
+                "display_name": "Alex Ott"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 47774133,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "edited": false,
+            "creation_date": 1513088777,
+            "comment_id": 82510798
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47774133,
+            "edited": false,
+            "creation_date": 1513088470,
+            "comment_id": 82510602
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47774133,
+            "edited": false,
+            "creation_date": 1513088433,
+            "comment_id": 82510579
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47774133,
+            "edited": false,
+            "creation_date": 1513088367,
+            "comment_id": 82510536
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b31b9d123bff80f00317a1df0dd00e2?s=256&d=identicon&r=PG",
+                "account_id": 9963,
+                "user_type": "registered",
+                "user_id": 18627,
+                "link": "https://stackoverflow.com/users/18627/alex-ott",
+                "reputation": 88119,
+                "display_name": "Alex Ott"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47774133,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "edited": false,
+            "creation_date": 1513087865,
+            "comment_id": 82510185
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47774133,
+            "edited": false,
+            "creation_date": 1513087610,
+            "comment_id": 82510018
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SUTHV.jpg?s=256",
+                "account_id": 1754514,
+                "user_type": "registered",
+                "user_id": 1602853,
+                "link": "https://stackoverflow.com/users/1602853/coder",
+                "reputation": 3302,
+                "display_name": "Coder",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47774133,
+            "edited": false,
+            "creation_date": 1513087422,
+            "comment_id": 82509881
+        }
+    ]}
+}

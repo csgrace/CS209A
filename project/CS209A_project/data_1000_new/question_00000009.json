@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/3741541835942560/picture?type=large",
+            "account_id": 21063805,
+            "user_type": "registered",
+            "user_id": 15481621,
+            "link": "https://stackoverflow.com/users/15481621/alex-petr%c3%b3",
+            "reputation": 1,
+            "display_name": "Alex Petr&#243;"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/66806884/how-to-display-column-headers-from-a-mysql-database-in-javafx-tableview",
+        "last_activity_date": 1616823494,
+        "creation_date": 1616703093,
+        "answer_count": 1,
+        "title": "How to display Column Headers from a Mysql database in JavaFX TableView?",
+        "body": "<p>Let me clarify the question. So I decided to create a TreeView just like in PhpMyAdmin (xampp) that shows all Databases. I successfully managed to get the Databases and Tables in the Treeview, but not the content of the Tables in the TableView. So basically the first thing I want to do is, that if I click on a Table, the column headers should show up in the Table next to the Treeview. I managed to write some code, but it does not do what it is supposed to do. Please help me I am trying to learn this programming language (JavaFX).<\/p>\n<p>This is the Controller class<\/p>\n<pre><code>package sample;\n\nimport javafx.fxml.FXML;\nimport javafx.fxml.Initializable;\nimport javafx.scene.control.TableColumn;\nimport javafx.scene.control.TableView;\nimport javafx.scene.control.TreeItem;\nimport javafx.scene.control.TreeView;\nimport javafx.scene.control.cell.PropertyValueFactory;\nimport java.net.URL;\nimport java.sql.ResultSet;\nimport java.sql.SQLException;\nimport java.sql.Statement;\nimport java.util.ResourceBundle;\n\npublic class Controller implements Initializable {\n\n    Statement statement;\n    Statement statementDatabase;\n    Statement stmntTables;\n    Statement stmntUse;\n    Statement stmntCols;\n    ResultSet resultDatabase;\n    ResultSet resultTables;\n    ResultSet resultUse;\n    ResultSet resultCols;\n    \n    @FXML\n    TreeView &lt;String&gt; treeView;\n    @FXML\n    TableView&lt;String&gt; tableView;\n\n    @Override\n    public void initialize(URL url, ResourceBundle resourceBundle) {\n\n        try {\n            statement = DatabaseConnection.getInstance().getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);\n            ResultSet result = statement.executeQuery(&quot;SHOW DATABASES&quot;);\n\n            TreeItem&lt;String&gt; root = new TreeItem&lt;&gt;(&quot;Datenbanken&quot;);\n\n            while(result.next()) {\n                TreeItem&lt;String&gt; node = new TreeItem&lt;&gt;(result.getString(1));\n                root.getChildren().add(node);\n\n                Statement statement2 = DatabaseConnection.getInstance().getConnection().createStatement();\n                ResultSet subResult = statement2.executeQuery(&quot;SHOW TABLES FROM &quot; + result.getString(1));\n                while(subResult.next())\n                {\n                    TreeItem&lt;String&gt; node2 = new TreeItem&lt;&gt;(subResult.getString(1));\n                    node.getChildren().add(node2);\n                }\n            }\n            result.beforeFirst();\n            treeView.setRoot(root);\n            root.setExpanded(true);\n            \n            ShowDatabase();\n            UseDatabase();\n\n        } catch (Exception e){\n            e.printStackTrace();\n        }\n    }\n    \n    \n    public void ShowDatabase() {\n        try {\n            statementDatabase = DatabaseConnection.getInstance().getConnection().createStatement();\n            resultDatabase = statementDatabase.executeQuery(&quot;SHOW DATABASES&quot;);\n            System.out.println(&quot;All Databases displayed!&quot;);\n        } catch (SQLException e) {\n            System.out.println(&quot;Databases could not be displayed!&quot;);\n            e.printStackTrace();\n        }\n    }\n\n    public void UseDatabase() {\n        try {\n            while (resultDatabase.next()) {\n                stmntUse = DatabaseConnection.getInstance().getConnection().createStatement();\n                resultUse = stmntUse.executeQuery(&quot;USE &quot; + resultDatabase.getString(1));\n                //System.out.println(resultDatabase.getString(1));\n                ShowTables();\n                //System.out.println(resultTables.getString(1));\n                ShowColumns();\n            }\n            System.out.println(&quot;Database injected!&quot;);\n            System.out.println(&quot;All Tables displayed!&quot;);\n            System.out.println(&quot;All Columns displayed!&quot;);\n        } catch (SQLException e) {\n            System.out.println(&quot;Database ejected!&quot;);\n            e.printStackTrace();\n        }\n    }\n\n    public void ShowTables() {\n        try {\n            while (resultDatabase.next()) {\n                stmntTables =  DatabaseConnection.getInstance().getConnection().createStatement();\n                // System.out.println(resultDatabase);\n                resultTables = stmntTables.executeQuery(&quot;SHOW TABLES FROM &quot; + resultDatabase.getString(1));\n                // System.out.println(resultTables.getString(1));\n            }\n        } catch (SQLException e) {\n            System.out.println(&quot;Tables could not be displayed!&quot;);\n            e.printStackTrace();\n        }\n    }\n    \n    public void ShowColumns() {\n        try {\n            while (resultTables.next()) {\n                stmntCols =  DatabaseConnection.getInstance().getConnection().createStatement();\n                resultCols = stmntCols.executeQuery(&quot;SHOW COLUMNS FROM &quot; + resultTables.getString(1));\n                System.out.println(resultCols);\n                FillTable(resultCols);\n    \n            }\n        } catch (SQLException e) {\n            System.out.println(&quot;Columns could not be displayed!&quot;);\n            e.printStackTrace();\n        }\n    }\n    \n    public void FillTable(ResultSet res) {\n        TableColumn&lt;String, String&gt;col = new TableColumn&lt;String, String&gt;();\n        try {\n            col.setCellValueFactory(new PropertyValueFactory&lt;&gt;(res.getString(1)));\n        } catch (SQLException e) {\n            e.printStackTrace();\n        }\n        tableView.getColumns().add(col);\n    }\n}\n<\/code><\/pre>\n<p>and this is the Database Connection<\/p>\n<pre><code>package sample;\n\nimport java.sql.Connection;\nimport java.sql.DriverManager;\nimport java.sql.SQLException;\n\n\npublic class DatabaseConnection {\n\n    private static DatabaseConnection instance;\n    private Connection connection;\n    private static String ip = &quot;localhost&quot;;\n\n    public static void setIp(String ip) {\n        DatabaseConnection.ip = ip;\n    }\n\n    private DatabaseConnection() throws SQLException\n    {\n        try {\n            Class.forName(&quot;com.mysql.cj.jdbc.Driver&quot;);\n\n            connection = DriverManager.getConnection(&quot;jdbc:mysql://&quot; + ip + &quot;:&quot; + 3306, &quot;root&quot;, &quot;&quot;);\n            System.out.println(&quot;Successfully connected to &quot; + ip + &quot;!&quot;);\n\n        } catch (Exception exc) {\n            //exc.printStackTrace();\n            System.out.println(&quot;Connection failed to &quot; + ip + &quot;!&quot;);\n            getConnection().close();\n        }\n    }\n\n    public Connection getConnection() {\n        return connection;\n    }\n\n    public static DatabaseConnection getInstance() throws SQLException {\n        if (instance == null) {\n            instance = new DatabaseConnection();\n        } else if (instance.getConnection().isClosed()) {\n            instance = new DatabaseConnection();\n        }\n        return instance;\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 66806884,
+        "tags": [
+            "java",
+            "mysql",
+            "javafx",
+            "tableview"
+        ],
+        "score": -1,
+        "is_answered": true,
+        "view_count": 413,
+        "last_edit_date": 1616707165
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ayujB.jpg?s=256",
+            "account_id": 70123,
+            "user_type": "registered",
+            "user_id": 203657,
+            "link": "https://stackoverflow.com/users/203657/kleopatra",
+            "reputation": 51647,
+            "display_name": "kleopatra",
+            "accept_rate": 53
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 66806884,
+        "edited": false,
+        "creation_date": 1616713241,
+        "comment_id": 118096938
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rkpYv.jpg?s=256",
+            "account_id": 2819940,
+            "user_type": "registered",
+            "user_id": 2423906,
+            "link": "https://stackoverflow.com/users/2423906/sedj601",
+            "reputation": 14002,
+            "display_name": "SedJ601",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1616823494,
+        "creation_date": 1616823181,
+        "body": "<p>Here is some code that should get you going. You will probably need a listener on the <code>TreeView<\/code> to change the table data and headers as you click on different items in the <code>TreeView<\/code>. This code simulates getting the headers from the database as <code>List&lt;String&gt;<\/code> and get the data from the database as <code>List&lt;List&lt;String&gt;&gt;<\/code>.<\/p>\n<pre><code>import java.util.ArrayList;\nimport java.util.List;\nimport javafx.application.Application;\nimport javafx.beans.property.ReadOnlyObjectWrapper;\nimport javafx.collections.FXCollections;\nimport javafx.collections.ObservableList;\nimport javafx.scene.Scene;\nimport javafx.scene.control.TableColumn;\nimport javafx.scene.control.TableView;\nimport javafx.scene.layout.StackPane;\nimport javafx.stage.Stage;\n\n\n/**\n * JavaFX App\n */\npublic class App extends Application {\n\n    \n    \n    @Override\n    public void start(Stage primaryStage) {\n        ObservableList&lt;ObservableList&lt;String&gt;&gt; data = FXCollections.observableArrayList();        \n        final List&lt;List&lt;String&gt;&gt; databaseData = getTableDataFromDBAsListOfList();//Get data from excel file\n        //Add database data to an observable list\n        for(int i = 0; i &lt; databaseData.size(); i++)\n        {\n            data.add(FXCollections.observableArrayList(databaseData.get(i)));\n        }\n\n        TableView&lt;ObservableList&lt;String&gt;&gt; tableView = new TableView();\n        tableView.setItems(data);\n        \n        //Create the table columns, set the cell value factory and add the column to the tableview.\n        List&lt;String&gt; tableHeaders = getTableHeadersFromDBAsList();\n        for (int i = 0; i &lt; tableHeaders.size(); i++) {\n            final int curCol = i;\n            final TableColumn&lt;ObservableList&lt;String&gt;, String&gt; column = new TableColumn&lt;&gt;(tableHeaders.get(i));\n            column.setCellValueFactory(param -&gt; new ReadOnlyObjectWrapper&lt;&gt;(param.getValue().get(curCol)));\n            tableView.getColumns().add(column);\n        }\n        \n        \n\n        StackPane root = new StackPane(tableView);\n        Scene scene = new Scene(root);\n        primaryStage.setScene(scene);\n        primaryStage.show();\n    }\n\n    public static void main(String[] args) {\n        launch();\n    }\n\n    public List&lt;String&gt; getTableHeadersFromDBAsList()\n    {\n        List&lt;String&gt; returnList = new ArrayList();\n        returnList.add(&quot;Header1&quot;);\n        returnList.add(&quot;Header2&quot;);\n        returnList.add(&quot;Header3&quot;);\n        returnList.add(&quot;Header4&quot;);\n        \n        return returnList;\n    }\n    \n    public List&lt;List&lt;String&gt;&gt; getTableDataFromDBAsListOfList()\n    {\n        List&lt;List&lt;String&gt;&gt; returnList = new ArrayList();\n        List&lt;String&gt; dataRow1 = new ArrayList();\n        dataRow1.add(&quot;Data 1 1&quot;);\n        dataRow1.add(&quot;Data 1 2&quot;);\n        dataRow1.add(&quot;Data 1 3&quot;);\n        dataRow1.add(&quot;Data 1 4&quot;);\n        \n        List&lt;String&gt; dataRow2 = new ArrayList();\n        dataRow2.add(&quot;Data 2 1&quot;);\n        dataRow2.add(&quot;Data 2 2&quot;);\n        dataRow2.add(&quot;Data 2 3&quot;);\n        dataRow2.add(&quot;Data 2 4&quot;);\n        \n        returnList.add(dataRow1);\n        returnList.add(dataRow2);\n        \n        return returnList;\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 66828313,
+        "question_id": 66806884,
+        "last_edit_date": 1616823494
+    }],
+    "answer_comments": {}
+}

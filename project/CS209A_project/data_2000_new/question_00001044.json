@@ -1,0 +1,121 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/28634edc8f49be86506be2fa39248c66?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3432431,
+            "user_type": "registered",
+            "user_id": 2876456,
+            "link": "https://stackoverflow.com/users/2876456/juju",
+            "reputation": 554,
+            "display_name": "juju",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49263005/bad-request-from-jersey-server-endpoint",
+        "last_activity_date": 1521016887,
+        "creation_date": 1520964434,
+        "answer_count": 1,
+        "title": "Bad Request from Jersey server endpoint",
+        "body": "<p>I've been looking at a problem which happens when I submit a request;<\/p>\n\n<pre><code>X-Forwarded-For: so.me.ip.ad\nAuthorization: Bearer blahblahblahstuff\nAccept: application/json\nContent-Type: application/json; charset=UTF-8\nCache-Control: no-cache\nPragma: no-cache\nUser-Agent: Java/1.8.0_60\nHost: the.endpoint.io\nConnection: keep-alive\nContent-Length: 395 \n<\/code><\/pre>\n\n<p>with a syntactically correct Gson json body. It's exactly the same length, and well formed. I used wireshark to capture the exact response and the numbers add up. ie, I don't think there's bloat on the end of the request body. Please tell me if wireshark wouldn't be able to pick this up. Considering this, I don't think the fix <a href=\"https://stackoverflow.com/questions/11484353/gson-throws-malformedjsonexception\">here<\/a> would be applicable to this issue.<\/p>\n\n<p>I've been testing it locally running payara, and the production server is also payara (exact same version). Locally, the request is fine, works as expected, using exactly the same params live, the endpoint isn't reached, as we handle our own api error codes, and this one is given in html, not json, and can be seen below;<\/p>\n\n<blockquote>\n  <p>Payara Server \n  4.1.2.173 #badassfish - Error report <h1>HTTP\n  Status 400 - Bad Request<\/h1><hr/><p><b>type: <\/b> Status\n  report<\/p><p><b>message: <\/b>Bad Request<\/p><p><b>description: <\/b>The\n  request sent by the client was syntactically\n  incorrect.<\/p><hr/><h3>Payara Server  4.1.2.173\n  #badassfish<\/h3><\/p>\n<\/blockquote>\n\n<p>We are using the HttpUrlConnection library execute the post;<\/p>\n\n<pre><code>        URL url = new URL(uri);\n        HttpURLConnection connection = (HttpURLConnection) url.openConnection();\n        if (this.clientip != null &amp;&amp; !this.clientip.isEmpty())\n        {\n            connection.addRequestProperty(\"X-Forwarded-For\", this.clientip);\n        }\n        if (this.vauthtoken != null &amp;&amp; !this.vauthtoken.isEmpty())\n        {\n            connection.addRequestProperty(\"Authorization\", \"Bearer \" + this.vauthtoken);\n        }\n        connection.setRequestProperty(\"Accept\", \"application/json\");\n        connection.setRequestProperty(\"Content-Type\", \"application/json; charset=UTF-8\");\n        connection.setRequestMethod(this.method);\n        connection.setUseCaches(false);\n        connection.setDoInput(true);\n        connection.setDoOutput(true);\n\n        if(this.body != null)\n        {\n            try (OutputStream os = connection.getOutputStream()) {\n                os.write(this.body.toString().getBytes(\"UTF-8\"));\n            }\n        }\n\n        if(connection.getResponseCode() == HttpURLConnection.HTTP_OK)\n        {\n            response = this.getJsonBody(connection.getInputStream());\n        }\n        else\n        {\n            response = this.getJsonBody(connection.getErrorStream());\n        }\n<\/code><\/pre>\n\n<p>And our endpoint looks like;<\/p>\n\n<pre><code>@Path(\"/some/path\")\npublic class SomeClass extends SomeThingelse {\n\n    final static Logger LOGGER = Logger.getLogger(SomeClass.class.getName());\n\n    @POST\n    @Audit\n    @Secured(roles = {Role.SOMEROLE}, crud = Crud.CREATE)\n    @Produces(MediaType.APPLICATION_JSON)\n    @Consumes(MediaType.APPLICATION_JSON)\n    public Response someMethodRelating(@Context SecurityContext securityContext, @Valid SomeValidatedClass svClass)\n    {\n<\/code><\/pre>\n\n<p>Have I missed something? Or is this more of a server issue? Any help would be greatly appreciated thank you.<\/p>\n",
+        "question_id": 49263005,
+        "tags": [
+            "java",
+            "json",
+            "jersey",
+            "gson",
+            "payara"
+        ],
+        "score": 0,
+        "accepted_answer_id": 49263289,
+        "is_answered": true,
+        "view_count": 668,
+        "last_edit_date": 1521016887
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9dc2733562eddb8a13a655e37b6d3b65?s=256&d=identicon&r=PG",
+            "account_id": 514697,
+            "user_type": "registered",
+            "user_id": 1574215,
+            "link": "https://stackoverflow.com/users/1574215/nyamiou-the-galeanthrope",
+            "reputation": 1234,
+            "display_name": "Nyamiou The Galeanthrope",
+            "accept_rate": 55
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1520965392,
+        "creation_date": 1520965392,
+        "body": "<p>Either you are not using the correct method (using GET instead of POST), or the body you are sending is not JSON or does not validate the rules that are in <code>SomeValidatedClass<\/code>. <\/p>\n",
+        "answer_id": 49263289,
+        "question_id": 49263005
+    }],
+    "answer_comments": {"49263289": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/28634edc8f49be86506be2fa39248c66?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3432431,
+                "user_type": "registered",
+                "user_id": 2876456,
+                "link": "https://stackoverflow.com/users/2876456/juju",
+                "reputation": 554,
+                "display_name": "juju",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49263289,
+            "edited": false,
+            "creation_date": 1521024947,
+            "comment_id": 85554050
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9dc2733562eddb8a13a655e37b6d3b65?s=256&d=identicon&r=PG",
+                "account_id": 514697,
+                "user_type": "registered",
+                "user_id": 1574215,
+                "link": "https://stackoverflow.com/users/1574215/nyamiou-the-galeanthrope",
+                "reputation": 1234,
+                "display_name": "Nyamiou The Galeanthrope",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 49263289,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/28634edc8f49be86506be2fa39248c66?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3432431,
+                "user_type": "registered",
+                "user_id": 2876456,
+                "link": "https://stackoverflow.com/users/2876456/juju",
+                "reputation": 554,
+                "display_name": "juju",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1520966816,
+            "comment_id": 85530851
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/28634edc8f49be86506be2fa39248c66?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3432431,
+                "user_type": "registered",
+                "user_id": 2876456,
+                "link": "https://stackoverflow.com/users/2876456/juju",
+                "reputation": 554,
+                "display_name": "juju",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49263289,
+            "edited": false,
+            "creation_date": 1520965497,
+            "comment_id": 85530139
+        }
+    ]}
+}

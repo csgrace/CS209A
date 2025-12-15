@@ -1,0 +1,302 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/11da982408c8bac84aa1e3b06605cf25?s=256&d=identicon&r=PG",
+            "account_id": 2259727,
+            "user_type": "registered",
+            "user_id": 1990110,
+            "link": "https://stackoverflow.com/users/1990110/shrey",
+            "reputation": 863,
+            "display_name": "shrey"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20093813/merge-and-align-center-cell-using-apache-poi",
+        "last_activity_date": 1576952939,
+        "creation_date": 1384944511,
+        "answer_count": 9,
+        "title": "Merge and align center cell using apache poi",
+        "body": "<p>I want to export data to excel using <b>Apache poi<\/b>.<br/> Now the problem that I am facing is that I am unable to merge rows and align them in the center.<\/p>\n\n<p>Code for export data is:<\/p>\n\n<pre><code>List&lt;LinkedHashMap&lt;String,Object&gt;&gt; lstReportHeader = null;\nHSSFWorkbook wb = new HSSFWorkbook();\nHSSFSheet sheet = wb.createSheet();\n\n//Set Header Font\nHSSFFont headerFont = wb.createFont();\nheaderFont.setBoldweight(headerFont.BOLDWEIGHT_BOLD);\nheaderFont.setFontHeightInPoints((short) 12);\n\n//Set Header Style\nCellStyle headerStyle = wb.createCellStyle();\nheaderStyle.setFillBackgroundColor(IndexedColors.BLACK.getIndex());\nheaderStyle.setAlignment(headerStyle.ALIGN_CENTER);\nheaderStyle.setFont(headerFont);\nheaderStyle.setBorderBottom(HSSFCellStyle.BORDER_MEDIUM);\nint rowCount= 0;\nRow header;\nheader = sheet.createRow(0);//its for header \nCell cell ;//= header.createCell(0);\nfor(int j = 0;j &lt; 4; j++) {\n    cell = header.createCell(j);\n    if(j == 0) {\n        cell.setCellValue(\"ItemWise List\");\n    }\n    cell.setCellStyle(headerStyle);\n}\nsheet.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 0, lstReportFormHeader.size()-1));\nheader = sheet.createRow(0);\n        cell = header.createCell(0);\ncell.setCellValue(\"Sr. No\");\n        cell = header.createCell(1);\ncell.setCellValue(\"Item Name\");\n        cell = header.createCell(2);\ncell.setCellValue(\"Qty\");\n        cell = header.createCell(3);\ncell.setCellValue(\"Rate\");\n<\/code><\/pre>\n\n<p>Now I want to <strong>ItemWise List<\/strong> merge and make it align center.<\/p>\n",
+        "question_id": 20093813,
+        "tags": [
+            "java",
+            "excel",
+            "apache-poi"
+        ],
+        "score": 31,
+        "is_answered": true,
+        "view_count": 119580,
+        "last_edit_date": 1517716602
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/58lwc.png?s=256",
+                "account_id": 3651010,
+                "user_type": "registered",
+                "user_id": 3043207,
+                "link": "https://stackoverflow.com/users/3043207/pedromendessk",
+                "reputation": 3706,
+                "display_name": "pedromendessk"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 19,
+            "is_accepted": false,
+            "last_activity_date": 1387812639,
+            "creation_date": 1387812639,
+            "body": "<p>My solution was to merge the cells by their positions, then created a cell (reference to the first block of the merged cells) to assign a value and then set the alignment throught the <a href=\"http://poi.apache.org/apidocs/org/apache/poi/ss/util/CellUtil.html\" rel=\"noreferrer\">CellUtil<\/a><\/p>\n\n<pre><code>// Merges the cells\nCellRangeAddress cellRangeAddress = new CellRangeAddress(start, start, j, j + 1);\nsheet.addMergedRegion(cellRangeAddress);\n\n// Creates the cell\nCell cell = CellUtil.createCell(row, j, entry.getKey());\n\n// Sets the allignment to the created cell\nCellUtil.setAlignment(cell, workbook, CellStyle.ALIGN_CENTER);\n<\/code><\/pre>\n",
+            "answer_id": 20746524,
+            "question_id": 20093813
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ed426eb23b86cd94e0eebcd44cfcfc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3578815,
+                "user_type": "registered",
+                "user_id": 2987484,
+                "link": "https://stackoverflow.com/users/2987484/dev",
+                "reputation": 715,
+                "display_name": "dev"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 16,
+            "is_accepted": false,
+            "last_activity_date": 1384950723,
+            "creation_date": 1384950723,
+            "body": "<p>Merge like:::<\/p>\n\n<pre><code> Workbook wb = new HSSFWorkbook();\nSheet sheet = wb.createSheet(\"new sheet\");\n\nRow row = sheet.createRow((short) 1);\nCell cell = row.createCell((short) 1);\ncell.setCellValue(\"This is a test of merging\");\n\nsheet.addMergedRegion(new CellRangeAddress(\n        1, //first row (0-based)\n        1, //last row  (0-based)\n        1, //first column (0-based)\n        2  //last column  (0-based)\n));\n\n// Write the output to a file\nFileOutputStream fileOut = new FileOutputStream(\"workbook.xls\");\nwb.write(fileOut);\nfileOut.close();\n<\/code><\/pre>\n\n<p>For aligning also check the below official link of Apache poi:::<\/p>\n\n<p><a href=\"http://poi.apache.org/spreadsheet/quick-guide.html#Alignment\">http://poi.apache.org/spreadsheet/quick-guide.html#Alignment<\/a><\/p>\n",
+            "answer_id": 20096081,
+            "question_id": 20093813
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/11da982408c8bac84aa1e3b06605cf25?s=256&d=identicon&r=PG",
+                "account_id": 2259727,
+                "user_type": "registered",
+                "user_id": 1990110,
+                "link": "https://stackoverflow.com/users/1990110/shrey",
+                "reputation": 863,
+                "display_name": "shrey"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 13,
+            "is_accepted": false,
+            "last_activity_date": 1494853045,
+            "creation_date": 1385015082,
+            "body": "<p>After study I found that after merging 7 cells, merged cell id will be 0 so I applied following style to cell id 0 using following style.<\/p>\n\n<pre><code>headerStyle.setAlignment(headerStyle.ALIGN_CENTER);\n<\/code><\/pre>\n",
+            "answer_id": 20113925,
+            "question_id": 20093813,
+            "last_edit_date": 1494853045
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/09a2c12a0c9d02162a09c8a94920b269?s=256&d=identicon&r=PG",
+                "account_id": 4773526,
+                "user_type": "registered",
+                "user_id": 4357087,
+                "link": "https://stackoverflow.com/users/4357087/joseph-huang",
+                "reputation": 894,
+                "display_name": "Joseph Huang",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": false,
+            "last_activity_date": 1488504919,
+            "creation_date": 1488504919,
+            "body": "<p>This worked for me and I think it's cleaner:<\/p>\n\n<pre><code>/**\n * Merge and center the cells specified by range\n * @param startCell the first cell in the cells to be merged\n * @param range the range of the cells to be merged\n */\nprivate static void mergeAndCenter(Cell startCell, CellRangeAddress range) {\n    startCell.getSheet().addMergedRegion(range);\n    CellStyle style = startCell.getSheet().getWorkbook().createCellStyle();\n    style.setAlignment(CellStyle.ALIGN_CENTER);\n    style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);\n    startCell.setCellStyle(style);\n}\n<\/code><\/pre>\n",
+            "answer_id": 42569096,
+            "question_id": 20093813
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1695331387/picture?type=large",
+                "account_id": 3237341,
+                "user_type": "registered",
+                "user_id": 2731186,
+                "link": "https://stackoverflow.com/users/2731186/fritz",
+                "reputation": 1174,
+                "display_name": "Fritz"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1429156429,
+            "creation_date": 1429156429,
+            "body": "<p>Well what worked for me is to set all the merged cells' Cellstyle to CENTER ALIGN. Whether you put the XSSFSheet.addMergedRegion() method before or after setting the cellstyle values to center don't matter.<\/p>\n\n<pre><code>    private void insertXlsHeader(XSSFSheet sheet){\n    ....\n    //first cell for row1       \n    cell = row1.createCell(colstart);\n    cell.setCellType(org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING);\n    cell.setCellValue(\"COURSES\");\n    setHeaderCellStyle(sheet,cell);\n\n    //first cell for row2\n    cell = row2.createCell(colstart);\n    setHeaderCellStyle(sheet,cell);\n\n    //first cell for row3\n    cell = row3.createCell(colstart);\n    setHeaderCellStyle(sheet,cell);\n\n    //merged the first cells of rows 1 to 3\n    sheet.addMergedRegion(new CellRangeAddress(ROW1, ROW3, colstart, colstart));\n    ...\n    }\n\nprivate void setHeaderCellStyle(XSSFSheet sheet,org.apache.poi.ss.usermodel.Cell cell) {\n    CellStyle s = null;\n\n        s = sheet.getWorkbook().createCellStyle();\n        cell.setCellStyle(s);\n\n    Font f = sheet.getWorkbook().createFont();\n\n    f.setBoldweight(Font.BOLDWEIGHT_BOLD);\n\n\n    s.setBorderBottom(CellStyle.BORDER_THIN);\n    s.setBorderLeft(CellStyle.BORDER_THIN);\n    s.setBorderRight(CellStyle.BORDER_THIN);\n    s.setBorderTop(CellStyle.BORDER_THIN);\n    s.setVerticalAlignment(CellStyle.VERTICAL_CENTER);\n    s.setAlignment(CellStyle.ALIGN_CENTER);\n    s.setFont(f);\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 29665044,
+            "question_id": 20093813
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Vdpse.jpg?s=256",
+                "account_id": 310816,
+                "user_type": "registered",
+                "user_id": 624003,
+                "link": "https://stackoverflow.com/users/624003/sankumarsingh",
+                "reputation": 10135,
+                "display_name": "Sankumarsingh"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1384963031,
+            "creation_date": 1384963031,
+            "body": "<p>As per my understanding, you have start and end cells for merging and you want to merge the cell ranges and align the cell content. If I am right, you can use the following method:<\/p>\n\n<pre><code>/**\n * @param startCell: first cell of merging area\n * @param endCell: last cell of merging area\n */\n\npublic static void mergeAndAlignCenter(HSSFCell startCell, HSSFCell endCell){\n    //finding reference of start and end cell; will result like $A$1\n    CellReference startCellRef= new CellReference(startCell.getRowIndex(),startCell.getColumnIndex());\n    CellReference endCellRef = new CellReference(endCell.getRowIndex(),endCell.getColumnIndex());\n    // forming string of references; will result like $A$1:$B$5 \n    String cellRefernce = startCellRef.formatAsString()+\":\"+endCellRef.formatAsString();\n    //removing $ to make cellRefernce like A1:B5\n    cellRefernce = cellRefernce.replace(\"$\",\"\");\n    //passing cellRefernce to make a region \n    CellRangeAddress region = CellRangeAddress.valueOf(cellRefernce);\n    //use region to merge; though other method like sheet.addMergedRegion(new CellRangeAddress(1,1,4,1));\n    // is also available, but facing some problem right now.\n    startCell.getRow().getSheet().addMergedRegion( region );\n    //setting alignment to center\n    CellUtil.setAlignment(startCell, wb, CellStyle.ALIGN_CENTER);\n}\n<\/code><\/pre>\n",
+            "answer_id": 20100685,
+            "question_id": 20093813
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/n2jZs.jpg?s=256",
+                "account_id": 4313918,
+                "user_type": "registered",
+                "user_id": 3524336,
+                "link": "https://stackoverflow.com/users/3524336/nikhil-ganage",
+                "reputation": 91,
+                "display_name": "Nikhil Ganage"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1464698492,
+            "creation_date": 1464698492,
+            "body": "<p>As answered above, merging cells can be achieved using <\/p>\n\n<pre><code>sheet.addMergedRegion(new CellRangeAddress(frstRow, lastRow, firstColumnIndex, lastColumnIndex));\n<\/code><\/pre>\n\n<p>But for aligning cells vertically,recently I faced similar issue and I tried above answer, but using<\/p>\n\n<pre><code>CellUtil.setAlignment(dataCell, workbook, CellStyle.VERTICAL_CENTER);\n<\/code><\/pre>\n\n<p>aligned Date formatted cells to Horizontal Left aligned. So I used following method to set only Vertical Alignment of Cell content.<\/p>\n\n<pre><code>CellUtil.setCellStyleProperty(dataCell, workbook,CellUtil.VERTICAL_ALIGNMENT,CellStyle.VERTICAL_CENTER);\n<\/code><\/pre>\n\n<p>I hope this helps!!<\/p>\n\n<p><strong><em>Happy Coding<\/em><\/strong><\/p>\n",
+            "answer_id": 37546064,
+            "question_id": 20093813
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/58139e75d3b75d43f05e4b768721df16?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10138353,
+                "user_type": "registered",
+                "user_id": 7488940,
+                "link": "https://stackoverflow.com/users/7488940/mahaveer-jangir",
+                "reputation": 605,
+                "display_name": "Mahaveer Jangir",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1546942401,
+            "creation_date": 1496987704,
+            "body": "<p>Use <\/p>\n\n<pre><code>style.setVerticalAlignment()\n<\/code><\/pre>\n\n<p>to set the vertical alignments instead of <\/p>\n\n<pre><code>style.setAlignment().                             \n<\/code><\/pre>\n",
+            "answer_id": 44450233,
+            "question_id": 20093813,
+            "last_edit_date": 1546942401
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qcLDZ.jpg?s=256",
+                "account_id": 4023216,
+                "user_type": "registered",
+                "user_id": 3312636,
+                "link": "https://stackoverflow.com/users/3312636/sarath-subramanian",
+                "reputation": 21609,
+                "display_name": "Sarath Subramanian",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1576952939,
+            "creation_date": 1576952939,
+            "body": "<p>We can merge the column along with we can vertically and horizontally align too.<\/p>\n\n<p>I had the rows 2 to 10 of column A having the same values.<\/p>\n\n<p><a href=\"https://i.sstatic.net/BFefG.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/BFefG.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>I used the below code to merge the data where the variable <code>sheet<\/code> is <code>XSSFSheet<\/code>. The parameters of <code>CellRangeAddress<\/code> have the parameters are start row, last row, start column and last column. In my example, the value <code>USA<\/code> starts from 2nd row (index is 1) and the last value of <code>USA<\/code> is in 10th row and column is the 1st column.<\/p>\n\n<pre><code>CellRangeAddress ca = new CellRangeAddress(1,9,0,0);\nsheet.addMergedRegion(ca);\n<\/code><\/pre>\n\n<p>When I executed the above code, the cell was merged but the text was not aligned to center.<\/p>\n\n<p><a href=\"https://i.sstatic.net/J7d8A.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/J7d8A.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>To overcome this issue, I utilized the class <code>CellStyle<\/code> and <code>Cell<\/code>. Get the 2nd row of 1st column text to <code>cell<\/code> variable. Now set the vertical and horizontal alignment to the <code>cellStyle<\/code> and set this style to the <code>cell<\/code> which will align the text to the center.<\/p>\n\n<pre><code>Cell cell = sheet.getRow(1).getCell(0);\nCellStyle cellStyle = workbook.createCellStyle();\ncellStyle.setVerticalAlignment(VerticalAlignment.CENTER);\ncellStyle.setAlignment(HorizontalAlignment.CENTER);\ncell.setCellStyle(cellStyle);\n<\/code><\/pre>\n\n<p>Below is the final result<\/p>\n\n<p><a href=\"https://i.sstatic.net/eyb6G.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/eyb6G.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p><br><br>\n<strong>Additional references<\/strong> : <\/p>\n\n<ol>\n<li>Jar files used<\/li>\n<\/ol>\n\n<p><a href=\"https://i.sstatic.net/61CWD.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/61CWD.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<ol start=\"2\">\n<li><p>Import statements<\/p>\n\n<p><a href=\"https://i.sstatic.net/WEhtR.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/WEhtR.png\" alt=\"enter image description here\"><\/a>    <\/p><\/li>\n<\/ol>\n",
+            "answer_id": 59438803,
+            "question_id": 20093813
+        }
+    ],
+    "answer_comments": {
+        "20096081": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/11da982408c8bac84aa1e3b06605cf25?s=256&d=identicon&r=PG",
+                "account_id": 2259727,
+                "user_type": "registered",
+                "user_id": 1990110,
+                "link": "https://stackoverflow.com/users/1990110/shrey",
+                "reputation": 863,
+                "display_name": "shrey"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20096081,
+            "edited": false,
+            "creation_date": 1385009687,
+            "comment_id": 29970525
+        }],
+        "20746524": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/A3Css.png?s=256",
+                "account_id": 4256604,
+                "user_type": "registered",
+                "user_id": 3482140,
+                "link": "https://stackoverflow.com/users/3482140/am-i-helpful",
+                "reputation": 19215,
+                "display_name": "Am_I_Helpful",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "post_id": 20746524,
+            "edited": false,
+            "creation_date": 1486209506,
+            "comment_id": 71253614
+        }],
+        "42569096": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d9c8148de29c87d5054105afa2d2a4f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3641890,
+                    "user_type": "registered",
+                    "user_id": 3035786,
+                    "link": "https://stackoverflow.com/users/3035786/mugeesh-husain",
+                    "reputation": 426,
+                    "display_name": "Mugeesh Husain",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 42569096,
+                "edited": false,
+                "creation_date": 1664430765,
+                "comment_id": 130470626
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/130aaa7f4f642531708ab577ea8e2389?s=256&d=identicon&r=PG",
+                    "account_id": 2661588,
+                    "user_type": "registered",
+                    "user_id": 2301128,
+                    "link": "https://stackoverflow.com/users/2301128/buttahnbred",
+                    "reputation": 470,
+                    "display_name": "ButtahNBred",
+                    "accept_rate": 58
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 42569096,
+                "edited": false,
+                "creation_date": 1553004148,
+                "comment_id": 97218623
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/0ca2169aa7f182a77789880051763d56?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4856222,
+                    "user_type": "registered",
+                    "user_id": 3917091,
+                    "link": "https://stackoverflow.com/users/3917091/regular-jo",
+                    "reputation": 5548,
+                    "display_name": "Regular Jo",
+                    "accept_rate": 65
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 42569096,
+                "edited": false,
+                "creation_date": 1488506022,
+                "comment_id": 72272504
+            }
+        ]
+    }
+}

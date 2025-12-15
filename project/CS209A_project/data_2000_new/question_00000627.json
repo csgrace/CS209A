@@ -1,0 +1,507 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+            "account_id": 63162,
+            "user_type": "registered",
+            "user_id": 187141,
+            "link": "https://stackoverflow.com/users/187141/yegor256",
+            "reputation": 105862,
+            "display_name": "yegor256",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/4183585/exceptions-as-public-classes-vs-public-static-inner-classes",
+        "last_activity_date": 1411491839,
+        "creation_date": 1289818216,
+        "answer_count": 5,
+        "title": "Exceptions as public classes vs. public static inner classes",
+        "body": "<p>I have two options (which technically are the same, as I understand) to declare a custom exception class thrown only from a particular class <code>com.XXX.Foo<\/code>:<\/p>\n\n<ul>\n<li>as a public class in the package: <code>com.XXX.CustomException<\/code><\/li>\n<li>as a public static inner class: <code>com.XXX.Foo.CustomException<\/code><\/li>\n<\/ul>\n\n<p>Which option is better?<\/p>\n",
+        "question_id": 4183585,
+        "tags": [
+            "java",
+            "design-patterns",
+            "exception"
+        ],
+        "score": 40,
+        "accepted_answer_id": 4183614,
+        "is_answered": true,
+        "view_count": 11275,
+        "last_edit_date": 1411491839
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/oqbUC.png?s=256",
+            "account_id": 1455702,
+            "user_type": "registered",
+            "user_id": 1371329,
+            "link": "https://stackoverflow.com/users/1371329/jaco0646",
+            "reputation": 17394,
+            "display_name": "jaco0646",
+            "accept_rate": 64
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 4183585,
+        "edited": false,
+        "creation_date": 1470754239,
+        "comment_id": 65072109
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                "account_id": 18600,
+                "user_type": "registered",
+                "user_id": 42769,
+                "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                "reputation": 39948,
+                "display_name": "Adeel Ansari",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 19,
+            "is_accepted": true,
+            "last_activity_date": 1289819412,
+            "creation_date": 1289818517,
+            "body": "<p>In case the exception is very specific to <code>Foo<\/code> class, I don't mind keeping it as a <code>public<\/code> Nested class. And whenever it seems like a time to extract that out, simply extract that out. <\/p>\n\n<p>In general practice, I have never seen any nested class defined for Exception, though. I also don't know if one exist in Java API.<\/p>\n",
+            "answer_id": 4183614,
+            "question_id": 4183585,
+            "last_edit_date": 1289819412
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                "account_id": 47283,
+                "user_type": "registered",
+                "user_id": 139985,
+                "link": "https://stackoverflow.com/users/139985/stephen-c",
+                "reputation": 723474,
+                "display_name": "Stephen C",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 12,
+            "is_accepted": false,
+            "last_activity_date": 1289820743,
+            "creation_date": 1289820743,
+            "body": "<p>In my 10+ years experience with Java, I cannot recall coming across an API where a public exception class was defined as a static inner class.  I cannot give you a specific reason why it would be a bad idea to do this, but it would certainly make your code <em>unusual<\/em>.<\/p>\n\n<p>Why do you feel that it is necessary to do this, given that (apparently) nobody else does?  I hope you are not just doing it to be \"innovative\".<\/p>\n\n<p>(BTW, I know that some well-known Java APIs use public static inner classes and interfaces for other things.  I'm specifically talking about the case of exception classes here.)<\/p>\n",
+            "answer_id": 4183919,
+            "question_id": 4183585
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f72b3fdc99fe9fd1bbeb2f9da1d2c0a?s=256&d=identicon&r=PG",
+                "account_id": 202835,
+                "user_type": "registered",
+                "user_id": 450128,
+                "link": "https://stackoverflow.com/users/450128/ben",
+                "reputation": 72093,
+                "display_name": "Ben",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 9,
+            "is_accepted": false,
+            "last_activity_date": 1395010615,
+            "creation_date": 1395010615,
+            "body": "<p>I can definitely think of situations where I'd <em>prefer<\/em> the exception to be a static inner class than merely a class in the same package.<\/p>\n\n<p>The reasons not to do so seem to be:<\/p>\n\n<ul>\n<li>Coupling the exception to the class that throws it makes it inappropriate to reuse in other contexts<\/li>\n<li>Nobody else does it<\/li>\n<\/ul>\n\n<p>I do not find either of those arguments at all convincing.<\/p>\n\n<p>For the first point, why should this hypothetical future opportunity for re-use arise in the same package? This argument leads to the conclusion that we should put all exception classes as high as possible in the package hierarchy so that when we discover a future opportunity to reuse the same exception we don't have to introduce a dependency on where it was originally defined.<\/p>\n\n<p>But even without the \"taken to extremes\" point, consider an exception intended to convey that class <code>Foo<\/code> was given wrong input. If I call it <code>Foo.InvalidInput<\/code>, the name is short and the association with <code>Foo<\/code> is impossible to miss. If I put it outside the <code>Foo<\/code> class and call it <code>FooInvalidCriteria<\/code>, then I can't reuse it from class <code>Bar<\/code> anyway, without changing its name (equivalent to changing its location).<\/p>\n\n<p>But worst is if I leave it outside <code>Foo<\/code> and keep its name general like <code>InvalidInput<\/code>. Then when I later realise that <code>Bar<\/code> might have invalid input too and make it start throwing this exception. Everything compiles and runs fine, only now all the places that were catching <code>InvalidInput<\/code> and assuming they were handling errors from <code>Foo<\/code> could now also be handling errors from <code>Bar<\/code> if <code>Foo<\/code> happens to use <code>Bar<\/code> internally in a way that could cause this exception to be thrown. This could easily cause code breakage.<\/p>\n\n<p>The reality is that taking an exception that was previously conceived as specifically indicating a situation that arises in one class and re-using it as a general error class is an <em>interface<\/em> change, not just an internal implementation change. To do so correctly in general you <em>must<\/em> revisit all the sites where the exception is caught and make sure they're still correct, so having the compiler tell you about all the use sites (because you have to change the name and/or import path) is a good thing. Any exception that you <em>might<\/em> make a static inner class is inappropriate for reuse in other contexts no matter whether you actually make it an inner class or not.<\/p>\n\n<p>And as for the second dot point... \"nobody else does it\" never bears on anything. Either it really is the wrong thing to do, so there will be other reasons not to do it, so the \"nobody else does it\" argument is unnecessary. Or it isn't. And it's not like this particular example would even be terribly complicated and hard to understand, so not even the \"it's unexpected so people will have trouble following it even if it's a good idea in theory\" argument is very strong.<\/p>\n",
+            "answer_id": 22444227,
+            "question_id": 4183585
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4769e878a86883f2241932b4ed5b1efb?s=256&d=identicon&r=PG",
+                "account_id": 140025,
+                "user_type": "registered",
+                "user_id": 346031,
+                "link": "https://stackoverflow.com/users/346031/falcon",
+                "reputation": 3180,
+                "display_name": "Falcon",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1289819919,
+            "creation_date": 1289818517,
+            "body": "<p>I'd prefer the (not necessarily public) class within the same package, as a package is a logical group of classes depicting a business model, which the exception belongs to as a technical part.<\/p>\n\n<p>A user will see immediatelly that there's an exception when he looks at the package and does not need to read the file of class foo, which is better for maintenance and clarity/readability/comprehensional reasons. It's very good to define custom exceptions and to tell the API-user about it!<\/p>\n\n<p>I'd only use an inner class when it's clearly a private thing of the class in question.<\/p>\n\n<p>Nevertheless, we're talking here about a mainly conventional issue! <\/p>\n",
+            "answer_id": 4183615,
+            "question_id": 4183585,
+            "last_edit_date": 1289819919
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cf83d2aaebaeeed8b0ed620ca91daf23?s=256&d=identicon&r=PG",
+                "account_id": 2998788,
+                "user_type": "registered",
+                "user_id": 2544706,
+                "link": "https://stackoverflow.com/users/2544706/user2544706",
+                "reputation": 1,
+                "display_name": "user2544706"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -3,
+            "is_accepted": false,
+            "last_activity_date": 1372815069,
+            "creation_date": 1372815069,
+            "body": "<p>Exceptions as inner classes is a bad idea in general because by nature they may be raised through various levels, even in simple architectures.  The exception class being raised must be referenced from its containing class, and if that class is unknown to the classpath something bad would probably happen like a ClassCastException.<\/p>\n",
+            "answer_id": 17438371,
+            "question_id": 4183585
+        }
+    ],
+    "answer_comments": {
+        "4183919": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                    "account_id": 47283,
+                    "user_type": "registered",
+                    "user_id": 139985,
+                    "link": "https://stackoverflow.com/users/139985/stephen-c",
+                    "reputation": 723474,
+                    "display_name": "Stephen C",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 4183919,
+                "edited": false,
+                "creation_date": 1474896630,
+                "comment_id": 66706530
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a233fdbd816804224acb3aba55c6bf69?s=256&d=identicon&r=PG",
+                    "account_id": 237493,
+                    "user_type": "registered",
+                    "user_id": 505714,
+                    "link": "https://stackoverflow.com/users/505714/alexis-dufrenoy",
+                    "reputation": 11998,
+                    "display_name": "Alexis Dufrenoy",
+                    "accept_rate": 87
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 5,
+                "post_id": 4183919,
+                "edited": false,
+                "creation_date": 1416480538,
+                "comment_id": 42595147
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                    "account_id": 47283,
+                    "user_type": "registered",
+                    "user_id": 139985,
+                    "link": "https://stackoverflow.com/users/139985/stephen-c",
+                    "reputation": 723474,
+                    "display_name": "Stephen C",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 4183919,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+                    "account_id": 63162,
+                    "user_type": "registered",
+                    "user_id": 187141,
+                    "link": "https://stackoverflow.com/users/187141/yegor256",
+                    "reputation": 105862,
+                    "display_name": "yegor256",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1335913362,
+                "comment_id": 13423082
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+                    "account_id": 63162,
+                    "user_type": "registered",
+                    "user_id": 187141,
+                    "link": "https://stackoverflow.com/users/187141/yegor256",
+                    "reputation": 105862,
+                    "display_name": "yegor256",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 4183919,
+                "edited": false,
+                "creation_date": 1335887426,
+                "comment_id": 13414109
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                    "account_id": 47283,
+                    "user_type": "registered",
+                    "user_id": 139985,
+                    "link": "https://stackoverflow.com/users/139985/stephen-c",
+                    "reputation": 723474,
+                    "display_name": "Stephen C",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 4183919,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+                    "account_id": 63162,
+                    "user_type": "registered",
+                    "user_id": 187141,
+                    "link": "https://stackoverflow.com/users/187141/yegor256",
+                    "reputation": 105862,
+                    "display_name": "yegor256",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1335885772,
+                "comment_id": 13413432
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+                    "account_id": 63162,
+                    "user_type": "registered",
+                    "user_id": 187141,
+                    "link": "https://stackoverflow.com/users/187141/yegor256",
+                    "reputation": 105862,
+                    "display_name": "yegor256",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 4183919,
+                "edited": false,
+                "creation_date": 1335885063,
+                "comment_id": 13413103
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                    "account_id": 47283,
+                    "user_type": "registered",
+                    "user_id": 139985,
+                    "link": "https://stackoverflow.com/users/139985/stephen-c",
+                    "reputation": 723474,
+                    "display_name": "Stephen C",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 4183919,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+                    "account_id": 63162,
+                    "user_type": "registered",
+                    "user_id": 187141,
+                    "link": "https://stackoverflow.com/users/187141/yegor256",
+                    "reputation": 105862,
+                    "display_name": "yegor256",
+                    "accept_rate": 82
+                },
+                "edited": false,
+                "creation_date": 1335881127,
+                "comment_id": 13411599
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+                    "account_id": 63162,
+                    "user_type": "registered",
+                    "user_id": 187141,
+                    "link": "https://stackoverflow.com/users/187141/yegor256",
+                    "reputation": 105862,
+                    "display_name": "yegor256",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 4183919,
+                "edited": false,
+                "creation_date": 1335863911,
+                "comment_id": 13406403
+            }
+        ],
+        "4183615": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                    "account_id": 18600,
+                    "user_type": "registered",
+                    "user_id": 42769,
+                    "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                    "reputation": 39948,
+                    "display_name": "Adeel Ansari",
+                    "accept_rate": 95
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4183615,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4769e878a86883f2241932b4ed5b1efb?s=256&d=identicon&r=PG",
+                    "account_id": 140025,
+                    "user_type": "registered",
+                    "user_id": 346031,
+                    "link": "https://stackoverflow.com/users/346031/falcon",
+                    "reputation": 3180,
+                    "display_name": "Falcon",
+                    "accept_rate": 80
+                },
+                "edited": false,
+                "creation_date": 1289819972,
+                "comment_id": 4520512
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4769e878a86883f2241932b4ed5b1efb?s=256&d=identicon&r=PG",
+                    "account_id": 140025,
+                    "user_type": "registered",
+                    "user_id": 346031,
+                    "link": "https://stackoverflow.com/users/346031/falcon",
+                    "reputation": 3180,
+                    "display_name": "Falcon",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4183615,
+                "edited": false,
+                "creation_date": 1289819907,
+                "comment_id": 4520499
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                    "account_id": 18600,
+                    "user_type": "registered",
+                    "user_id": 42769,
+                    "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                    "reputation": 39948,
+                    "display_name": "Adeel Ansari",
+                    "accept_rate": 95
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4183615,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4769e878a86883f2241932b4ed5b1efb?s=256&d=identicon&r=PG",
+                    "account_id": 140025,
+                    "user_type": "registered",
+                    "user_id": 346031,
+                    "link": "https://stackoverflow.com/users/346031/falcon",
+                    "reputation": 3180,
+                    "display_name": "Falcon",
+                    "accept_rate": 80
+                },
+                "edited": false,
+                "creation_date": 1289819509,
+                "comment_id": 4520449
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4769e878a86883f2241932b4ed5b1efb?s=256&d=identicon&r=PG",
+                    "account_id": 140025,
+                    "user_type": "registered",
+                    "user_id": 346031,
+                    "link": "https://stackoverflow.com/users/346031/falcon",
+                    "reputation": 3180,
+                    "display_name": "Falcon",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4183615,
+                "edited": false,
+                "creation_date": 1289819395,
+                "comment_id": 4520436
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                    "account_id": 18600,
+                    "user_type": "registered",
+                    "user_id": 42769,
+                    "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                    "reputation": 39948,
+                    "display_name": "Adeel Ansari",
+                    "accept_rate": 95
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 1,
+                "post_id": 4183615,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4769e878a86883f2241932b4ed5b1efb?s=256&d=identicon&r=PG",
+                    "account_id": 140025,
+                    "user_type": "registered",
+                    "user_id": 346031,
+                    "link": "https://stackoverflow.com/users/346031/falcon",
+                    "reputation": 3180,
+                    "display_name": "Falcon",
+                    "accept_rate": 80
+                },
+                "edited": false,
+                "creation_date": 1289819204,
+                "comment_id": 4520406
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/317cb70ce91fe45e9fd3a7a448ba8099?s=256&d=identicon&r=PG",
+                    "account_id": 140076,
+                    "user_type": "registered",
+                    "user_id": 346112,
+                    "link": "https://stackoverflow.com/users/346112/jim-tough",
+                    "reputation": 15278,
+                    "display_name": "Jim Tough",
+                    "accept_rate": 97
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 2,
+                "post_id": 4183615,
+                "edited": false,
+                "creation_date": 1289819127,
+                "comment_id": 4520399
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4769e878a86883f2241932b4ed5b1efb?s=256&d=identicon&r=PG",
+                    "account_id": 140025,
+                    "user_type": "registered",
+                    "user_id": 346031,
+                    "link": "https://stackoverflow.com/users/346031/falcon",
+                    "reputation": 3180,
+                    "display_name": "Falcon",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 2,
+                "post_id": 4183615,
+                "edited": false,
+                "creation_date": 1289819044,
+                "comment_id": 4520388
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                    "account_id": 18600,
+                    "user_type": "registered",
+                    "user_id": 42769,
+                    "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                    "reputation": 39948,
+                    "display_name": "Adeel Ansari",
+                    "accept_rate": 95
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4183615,
+                "edited": false,
+                "creation_date": 1289818716,
+                "comment_id": 4520328
+            }
+        ]
+    }
+}

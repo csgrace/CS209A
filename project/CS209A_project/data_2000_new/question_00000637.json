@@ -1,0 +1,97 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2d48cf8605b612e7f0e0475419fb1d3e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15313191,
+            "user_type": "registered",
+            "user_id": 11047866,
+            "link": "https://stackoverflow.com/users/11047866/khris-davis",
+            "reputation": 33,
+            "display_name": "Khris Davis"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58280711/how-do-you-modify-an-abstract-data-typeadt-stack",
+        "last_activity_date": 1570515818,
+        "creation_date": 1570513132,
+        "answer_count": 1,
+        "title": "How do you modify an Abstract Data Type(ADT) stack?",
+        "body": "<p>Using the stack interface definition, what string is at the top of the stack and what string is at the bottom? <\/p>\n\n<p>I know the .push method just adds the selected item to the top of the stack, but what I'm having trouble with is when there is a pop method within a push method or when there is a peek method within a push method.  <\/p>\n\n<p>I also need help on the line that says String name = stringStack.pop();<\/p>\n\n<pre><code>StackInterface&lt;String&gt; stringStack = new MyStack&lt;&gt;(); \n\nstringStack.push( \u201cJane\u201d ); \nstringStack.push( \u201cJess\u201d ); \nstringStack.push( \u201cJill\u201d ); \nstringStack.push( stringStack.pop()); \nstringStack.push( stringStack.peek()); \nstringStack.push( \u201cJim\u201d ); \nString name = stringStack.pop(); \nstringStack.push( stringStack.peek());\n<\/code><\/pre>\n\n<p>I expect the order to be: <\/p>\n\n<p>TOP Jim Jim Jill Jill Jess Jane BOTTOM<\/p>\n",
+        "question_id": 58280711,
+        "tags": [
+            "java",
+            "stack",
+            "abstract-data-type"
+        ],
+        "score": 0,
+        "accepted_answer_id": 58280813,
+        "is_answered": true,
+        "view_count": 77,
+        "last_edit_date": 1570515818
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2d48cf8605b612e7f0e0475419fb1d3e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 15313191,
+                "user_type": "registered",
+                "user_id": 11047866,
+                "link": "https://stackoverflow.com/users/11047866/khris-davis",
+                "reputation": 33,
+                "display_name": "Khris Davis"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58280711,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/66e3c04567f6d68a874c3007327c1373?s=256&d=identicon&r=PG",
+                "account_id": 9463219,
+                "user_type": "registered",
+                "user_id": 7036419,
+                "link": "https://stackoverflow.com/users/7036419/maurice-perry",
+                "reputation": 9678,
+                "display_name": "Maurice Perry"
+            },
+            "edited": false,
+            "creation_date": 1570515853,
+            "comment_id": 102927802
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/66e3c04567f6d68a874c3007327c1373?s=256&d=identicon&r=PG",
+                "account_id": 9463219,
+                "user_type": "registered",
+                "user_id": 7036419,
+                "link": "https://stackoverflow.com/users/7036419/maurice-perry",
+                "reputation": 9678,
+                "display_name": "Maurice Perry"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58280711,
+            "edited": false,
+            "creation_date": 1570514224,
+            "comment_id": 102927336
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/dfqcw.png?s=256",
+            "account_id": 6651855,
+            "user_type": "registered",
+            "user_id": 5133585,
+            "link": "https://stackoverflow.com/users/5133585/sweeper",
+            "reputation": 292190,
+            "display_name": "Sweeper",
+            "accept_rate": 96
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1570513821,
+        "creation_date": 1570513821,
+        "body": "<p>In a situation like this:<\/p>\n\n<pre><code>stringStack.push( stringStack.pop()); \n<\/code><\/pre>\n\n<p>You just have to keep in mind that <code>push<\/code> has to know what value to push, before the value is pushed. How does it know what value to push? Evaluating <code>pop()<\/code>, of course! So an item is popped first, then <code>push<\/code> knows what item to push, and pushes to back. In other words, A <code>pop<\/code> inside a <code>push<\/code> overall does nothing to the stack.<\/p>\n\n<p>What about:<\/p>\n\n<pre><code>stringStack.push( stringStack.peek());\n<\/code><\/pre>\n\n<p>Instead of popping the top item off and then pushing it, this will only <em>look at<\/em> the top item, and then pushes it onto the stack. So overall this is just \"copying\" the top item.<\/p>\n\n<p>Here is what the stack looks like after each line (left is the top):<\/p>\n\n<pre><code>stringStack.push( \u201cJane\u201d ); \n// Jane\nstringStack.push( \u201cJess\u201d ); \n// Jess Jane\nstringStack.push( \u201cJill\u201d ); \n// Jill Jess Jane\nstringStack.push( stringStack.pop()); \n// Jill Jess Jane\nstringStack.push( stringStack.peek()); \n// Jill Jill Jess Jane\nstringStack.push( \u201cJim\u201d ); \n// Jim Jill Jill Jess Jane\nString name = stringStack.pop(); \n// Jill Jill Jess Jane\nstringStack.push( stringStack.peek());\n// Jill Jill Jill Jess Jane\n<\/code><\/pre>\n",
+        "answer_id": 58280813,
+        "question_id": 58280711
+    }],
+    "answer_comments": {}
+}

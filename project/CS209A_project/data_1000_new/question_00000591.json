@@ -1,0 +1,68 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user7917402"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45778003/how-do-i-stop-a-functional-interface-from-being-a-target-for-lambda-expressions",
+        "last_activity_date": 1503200646,
+        "creation_date": 1503197361,
+        "answer_count": 2,
+        "title": "How do I stop a functional interface from being a target for lambda expressions?",
+        "body": "<p>I have an API with an interface with two (overloaded) methods of the same name that take different argument types. These different types are both technically functional interfaces, but the user should not be allowed to create instances of one of them. Here is a simplified example:<\/p>\n\n<pre><code>public class Example\n{\n    @FunctionalInterface\n    public interface Computation\n    {\n        int compute();\n    }\n\n    public interface WrappedComputation\n    {\n        Computation unwrap();\n    }\n\n    public static class Solver\n    {\n        public static int solve(Computation a)\n        {\n            return a.compute();\n        }\n\n        public static int solve(WrappedComputation b)\n        {\n            return solve(b.unwrap());\n        }\n    }\n\n    public static void main(String... args)\n    {\n        // 'Computation' interface should be a lambda target\n        // so coder can make their own 'A' computation\n        Solver.solve( () -&gt; { return 5 + 5; } );\n\n        // 'WrappedComputation' interface SHOULD NOT be a lambda target\n        // or else coder can cause runtime exceptions etc., like passing a null 'Computation' reference that will be computed\n        Solver.solve( () -&gt; { Computation a = null; return a; } );\n    }\n}\n<\/code><\/pre>\n\n<p>The only idea I have so far is to add a dummy/unused method to the interface that I don't want to be a lambda target, and implement it in all of the implementing classes. That seems a little sloppy/unneeded though... any other suggestions?<\/p>\n",
+        "question_id": 45778003,
+        "tags": [
+            "java",
+            "lambda",
+            "functional-interface"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 302
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/20c0f42cfd92cb56a020ef5bce95621d?s=256&d=identicon&r=PG",
+                "account_id": 20061,
+                "user_type": "registered",
+                "user_id": 47552,
+                "link": "https://stackoverflow.com/users/47552/matt-mchenry",
+                "reputation": 21189,
+                "display_name": "Matt McHenry",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1503200646,
+            "creation_date": 1503199327,
+            "body": "<p>There is no way to prevent the usage of lambda expressions by API clients when your interface satisfies <a href=\"https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html\" rel=\"nofollow noreferrer\">the criteria<\/a> for it.<\/p>\n\n<p>Your supposition that API clients can <strong>only<\/strong> cause trouble via lambdas is incorrect -- any bad thing you can do with a lambda, you can also do with an anonymous inner class or a named class.  Consider:<\/p>\n\n<pre><code>Solver.solve( new WrappedComputation(){\n    public Computation unwrap(){\n        Computation a = null; return a;\n    }\n});\n<\/code><\/pre>\n\n<p>This has exactly the same semantics and end result (a runtime exception) as your lambda.<\/p>\n\n<p>Perhaps what you want instead is to prevent <em>any<\/em> uncontrolled creation of <code>WrappedComputation<\/code>?  In that case, consider making it a <code>final class<\/code> whose constructor checks for error cases:<\/p>\n\n<pre><code>public final class WrappedComputation{\n    private final Computation _wrapped;\n    public WrappedComputation(@NonNull wrapped){\n        _wrapped = Objects.requireNonNull(wrapped);\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 45778155,
+            "question_id": 45778003,
+            "last_edit_date": 1503200646
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                "account_id": 6780825,
+                "user_type": "registered",
+                "user_id": 5221149,
+                "link": "https://stackoverflow.com/users/5221149/andreas",
+                "reputation": 160084,
+                "display_name": "Andreas"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1503197599,
+            "creation_date": 1503197599,
+            "body": "<p>Coder can always cause runtime exception, so that's a bad excuse.<\/p>\n\n<p>If you don't want ambiguity, don't overload the method.<br>\nName it something else, e.g. <code>solveWrapped<\/code>.<\/p>\n",
+            "answer_id": 45778024,
+            "question_id": 45778003
+        }
+    ],
+    "answer_comments": {}
+}

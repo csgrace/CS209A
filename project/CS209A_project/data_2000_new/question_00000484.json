@@ -1,0 +1,134 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/49113bed8fddc22816b4ff4b008b41b9?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4812819,
+            "user_type": "registered",
+            "user_id": 3885794,
+            "link": "https://stackoverflow.com/users/3885794/fhcat",
+            "reputation": 1313,
+            "display_name": "fhcat",
+            "accept_rate": 46
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25005057/is-cucumber-jvm-thread-safe",
+        "last_activity_date": 1555131389,
+        "creation_date": 1406584813,
+        "answer_count": 4,
+        "title": "Is Cucumber-jvm thread safe?",
+        "body": "<p>I want to run the same Cucumber tests in multiple threads. More specifically, I have a set of features, and running these features in one thread works fine. I use the JSON formatter to record running time of each step. Now I want to do load test. I care more about the running time of each feature/step in a multi-thread environment. So I create multiple threads, and each thread runs on the same feature set. Each thread has its own JSON report. Is this possible in theory? <\/p>\n\n<p>For some project setup reason I cannot use the JUnit runner. So I have to resort to the CLI-way: <\/p>\n\n<pre><code>        long threadId = Thread.currentThread().getId();\n        String jsonFilename = String.format(\"json:run/cucumber%d.json\", threadId);\n\n            String argv[] = new String[]{\n                \"--glue\",\n                \"com.some.package\",\n                \"--format\",\n                jsonFilename,\n                \"d:\\\\features\"};\n\n        // Do not call Main.run() directly. It has a System.exit() call at the end.             \n        // Main.run(argv, Thread.currentThread().getContextClassLoader());\n\n        // Copied the same code from Main.run(). \n        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();\n        RuntimeOptions runtimeOptions = new RuntimeOptions(new Env(\"cucumber-jvm\"), argv);\n        ResourceLoader resourceLoader = new MultiLoader(classLoader);\n        ClassFinder classFinder = new ResourceLoaderClassFinder(resourceLoader, classLoader);\n        Runtime runtime = new Runtime(resourceLoader, classFinder, classLoader, runtimeOptions);\n        runtime.writeStepdefsJson();\n        runtime.run();      \n<\/code><\/pre>\n\n<p>I tried to create a seperate thread for each Cucumber run. The problem is, only one of the thread has a valid JSON report. All the other threads just create empty JSON files. Is this by design in Cucumber or is there something I missed?<\/p>\n",
+        "question_id": 25005057,
+        "tags": [
+            "java",
+            "multithreading",
+            "gradle",
+            "cucumber-jvm",
+            "gpars"
+        ],
+        "score": 7,
+        "is_answered": true,
+        "view_count": 5553,
+        "last_edit_date": 1460528695
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ae2b0b34cefdc3cbc21bba47521d8d36?s=256&d=identicon&r=PG",
+            "account_id": 2050353,
+            "user_type": "registered",
+            "user_id": 1829500,
+            "link": "https://stackoverflow.com/users/1829500/mrunal-gosar",
+            "reputation": 4691,
+            "display_name": "Mrunal Gosar",
+            "accept_rate": 57
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 25005057,
+        "edited": false,
+        "creation_date": 1460518945,
+        "comment_id": 60774561
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/azl3o.png?s=256",
+                "account_id": 1713785,
+                "user_type": "registered",
+                "user_id": 2480947,
+                "link": "https://stackoverflow.com/users/2480947/kim",
+                "reputation": 1744,
+                "display_name": "Kim",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1461027419,
+            "creation_date": 1460515861,
+            "body": "<p>We have looked into multi-threading cucumber tests under Gradle and Groovy using the excellent <a href=\"http://www.gpars.org/\" rel=\"nofollow\">GPars library<\/a>. We have 650 UI tests and counting.<\/p>\n\n<p>We didn't encounter any obvious problems running cucumber-JVM in multiple threads but the multi-threading also didn't improve performance as much as we hoped.<\/p>\n\n<p>We ran each feature file in a separate thread. There are a few details to take care of, like splicing together the cucumber reports from different threads and making sure our step code was thread-safe. We sometimes need to store values between steps, so we used a concurrentHashMap keyed to the thread id to store this kind of data:<\/p>\n\n<pre><code>class ThreadedStorage {\n    static private ConcurrentHashMap multiThreadedStorage = [:]\n\n    static private String threadSafeKey(unThreadSafeKey) {\n        def threadId = Thread.currentThread().toString()\n        \"$threadId:$unThreadSafeKey\"\n    }\n\n    static private void threadSafeStore(key, value) {\n        multiThreadedStorage[threadSafeKey(key)] = value\n    }\n\n    def static private threadSafeRetrieve(key) {\n        multiThreadedStorage[threadSafeKey(key)]\n    }\n\n\n}\n<\/code><\/pre>\n\n<p>And here's the gist of the Gradle task code that runs the tests multi-threaded using GPars:<\/p>\n\n<pre><code>def group = new DefaultPGroup(maxSimultaneousThreads())\ndef workUnits = features.collect { File featureFile -&gt;\n    group.task {\n        try {\n            javaexec {\n                main = \"cucumber.api.cli.Main\"\n                ...\n                args = [\n                     ...\n                     '--plugin', \"json:$unitReportDir/${featureFile.name}.json\",\n                             ...\n                             '--glue', 'src/test/groovy/steps',\n                             \"path/to/$featureFile\"\n                    ]\n            }\n        } catch (ExecException e) {\n                ++noOfErrors\n                stackTraces &lt;&lt; [featureFile, e.getStackTrace()]\n        }\n    }\n}\n// ensure all tests have run before reporting and finishing gradle task\nworkUnits*.join()\n<\/code><\/pre>\n\n<p>We found we needed to present the feature files in reverse order of execution time for best results.<\/p>\n\n<p>The results were a 30% improvement on an i5 CPU, degrading above 4 simultaneous threads, which was a little disappointing.<\/p>\n\n<p>I think the threads were too heavy for multi-threading on our hardware. Above a certain number of threads there were too many CPU cache misses.<\/p>\n\n<p>Running concurrently on different instances using a thread-safe work queue like Amazon SQS now seems a good way forward, especially since it is not going to suffer from thread-safety issues (at least not on the test framework side).<\/p>\n\n<p>It is non-trivial for us to test this multi-threading method on i7 hardware due to security constraints in our workplace, but I would be very interested to hear how an i7 with a larger CPU cache and more physical cores compares.<\/p>\n",
+            "answer_id": 36587681,
+            "question_id": 25005057,
+            "last_edit_date": 1461027419
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b4cd4115beaedb7135d6b9d761f9c88c?s=256&d=identicon&r=PG",
+                "account_id": 227595,
+                "user_type": "registered",
+                "user_id": 489363,
+                "link": "https://stackoverflow.com/users/489363/peter-davis",
+                "reputation": 781,
+                "display_name": "Peter Davis"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1429076530,
+            "creation_date": 1429076530,
+            "body": "<p>Not currently -- here is <a href=\"https://github.com/cucumber/gherkin/issues/230\" rel=\"nofollow\">the issue<\/a> you observe.  I haven't found any way to parallelize by scenario. <\/p>\n\n<p>Here's a nice <a href=\"http://www.drobsonconsulting.co.uk/cucumber-and-concurrency/\" rel=\"nofollow\">write up<\/a> on poor-man's concurrency.  Just run multiple commands each selecting a different subset of your tests -- by feature or tag.  I would fork a new JVM (as a JUnit driver would) rather than trying to thread it since cucumber was not designed for that.  You have to balance them yourself, then figure out how to combine the reports.  (But at least the problem is combining reports not corrupt reports.)<\/p>\n",
+            "answer_id": 29642377,
+            "question_id": 25005057
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7069459e5a4adfbf0fcb089d25c651c3?s=256&d=identicon&r=PG",
+                "account_id": 1874708,
+                "user_type": "registered",
+                "user_id": 1696153,
+                "link": "https://stackoverflow.com/users/1696153/katie",
+                "reputation": 48788,
+                "display_name": "Katie",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1478722600,
+            "creation_date": 1478722600,
+            "body": "<p>Supposedly you can run your Cucumber-JVM tests in parallel by using this Maven POM configuration from here: <a href=\"https://opencredo.com/running-cucumber-jvm-tests-in-parallel/\" rel=\"nofollow noreferrer\">https://opencredo.com/running-cucumber-jvm-tests-in-parallel/<\/a><\/p>\n\n<pre><code>&lt;plugin&gt;\n    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;\n    &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;\n    &lt;version&gt;2.14&lt;/version&gt;\n    &lt;executions&gt;\n        &lt;execution&gt;\n            &lt;id&gt;acceptance-test&lt;/id&gt;\n            &lt;phase&gt;integration-test&lt;/phase&gt;\n            &lt;goals&gt;\n                &lt;goal&gt;test&lt;/goal&gt;\n            &lt;/goals&gt;\n            &lt;configuration&gt;\n                &lt;forkCount&gt;${surefire.fork.count}&lt;/forkCount&gt;\n                &lt;refuseForks&gt;false&lt;/reuseForks&gt;\n                &lt;argLine&gt;-Duser.language=en&lt;/argLine&gt;\n                &lt;argLine&gt;-Xmx1024m&lt;/argLine&gt;\n                &lt;argLine&gt;-XX:MaxPermSize=256m&lt;/argLine&gt;\n                &lt;argLine&gt;-Dfile.encoding=UTF-8&lt;/argLine&gt;\n                &lt;useFile&gt;false&lt;/useFile&gt;\n                &lt;includes&gt;\n                    &lt;include&gt;**/*AT.class&lt;/include&gt;\n                &lt;/includes&gt;\n                &lt;testFailureIgnore&gt;true&lt;/testFailureIgnore&gt;\n            &lt;/configuration&gt;\n        &lt;/execution&gt;\n    &lt;/executions&gt;\n&lt;/plugin&gt;\n<\/code><\/pre>\n\n<p>In the above snippet, you can see that the maven-surefire-plugin is used to run our acceptance tests \u2013 any classes that end in *AT will be run as a JUnit test class. Thanks to JUnit, making the tests run in parallel is now a simple case of setting the forkCount configuration option. In the example project, this is set to 5, meaning that we can run up to 5 threads (ie, 5 runner classes) at a time.<\/p>\n",
+            "answer_id": 40515273,
+            "question_id": 25005057
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/919a05f50e45c99c154bf89da3a16d76?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11604265,
+                "user_type": "registered",
+                "user_id": 8500497,
+                "link": "https://stackoverflow.com/users/8500497/ishan007",
+                "reputation": 11,
+                "display_name": "Ishan007"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1555131389,
+            "creation_date": 1555130025,
+            "body": "<p>Well if you can find a way for cucumber to output scenario location ( I.e. feature_file_path:line_nunber_in_feature_file) for all the scenarios you want run based on given tag, then you can use gpars and gradle to run scenarios in parallel.\n Step 1:  In the first gradle task, we\u2019ll use above solution to generate a text file (say scenarios.txt) containing locations for all the scenarios that we want to execute\n Step 2:  Next, extract contents of scenarios.txt generated in   step 1 into a groovy list say scenariosList\n Step 3: create one more task (javaExec), here we\u2019ll use gpars withPool in combination with scenariosList.eachParallel, and use cucumber main class and other cucumberOptions to run these scenarios in parallel. PS: here we will provide a scenario location as the value of the option \u201cfeatures\u201d so that cucumber will run only this scenario. Also no need to provide any tag name as we already have a list of scenarios that we need to execute.<\/p>\n\n<p>Note: You need to use a machine with high configuration like a Linux sever because a new jvm instance is created per scenario, and probably use a cloud service like Saucelabs to execute scenarios. This way you don\u2019t have to worry about the infrastructure.<\/p>\n\n<p>Step4: This is the last step. Every scenario bran in step 3 will generate an json output file. You have to collate the output based on the feature names so as to generate one json file per feature file.<\/p>\n\n<p>This solution sounds a bit complex, but with right efforts can yield significant results.<\/p>\n",
+            "answer_id": 55662045,
+            "question_id": 25005057,
+            "last_edit_date": 1555131389
+        }
+    ],
+    "answer_comments": {}
+}

@@ -1,0 +1,87 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/40690e8e76fcc4af11b19b4a2f4a3072?s=256&d=identicon&r=PG",
+            "account_id": 3142733,
+            "user_type": "registered",
+            "user_id": 2657875,
+            "link": "https://stackoverflow.com/users/2657875/menteith",
+            "reputation": 690,
+            "display_name": "menteith",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76644954/combine-single-column-mode-with-two-column-mode-in-swing",
+        "last_activity_date": 1689151181,
+        "creation_date": 1688850371,
+        "answer_count": 0,
+        "title": "Combine single column mode with two column mode in Swing",
+        "body": "<p>I've written two Swing GUI: one with single column and one with two columns. Let me show you screen of the first app.<\/p>\n<p><a href=\"https://i.sstatic.net/5WTd1.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/5WTd1.png\" alt=\"enter image description here\" /><\/a><\/p>\n<p>I also wrote an app with two columns mode. Here's screenshot:<\/p>\n<p><a href=\"https://i.sstatic.net/9jIRM.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/9jIRM.png\" alt=\"enter image description here\" /><\/a><\/p>\n<p><strong>Problem<\/strong><\/p>\n<p><strong>I'd like to combine these two GUI into one applications.<\/strong> The second application is based on <code>GroupLayout<\/code>; I find the code clean as there is virtually no hand-made positioning of components. However, many tutorials suggest that <code>GroupLayout<\/code> is not the right layout without pointing which layout would be better, thought.<\/p>\n<p>Here's the code of my first app:<\/p>\n<pre><code>public static void main(final String[] args) {\n       SwingUtilities.invokeLater(Mvp::createGui);\n    }\n\n    private static void createGui() {\n        final JFrame frame = new JFrame(&quot;Page labels app&quot;);\n        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n        final JPanel panel = new JPanel(new GridLayout(2, 1));\n        final JPanel tablePanel = createTablePanel();\n        panel.add(tablePanel);\n\n        frame.add(panel, BorderLayout.CENTER);\n\n        frame.pack();\n        frame.setLocationRelativeTo(null);\n        frame.setVisible(true);\n    }\n\n    private static JPanel createTablePanel() {\n        final PageLabelsTable table = new PageLabelsTable();\n        final JScrollPane scrollPane = new JScrollPane(table);\n        scrollPane.setPreferredSize(new Dimension(400, 120));\n        final JPanel tablePanel = new JPanel();\n        tablePanel.add(scrollPane);\n        tablePanel.setBorder(BorderFactory.createTitledBorder(&quot;Page styles&quot;));\n        return tablePanel;\n    }\n\npublic class PageLabelsTable extends JTable {\n\n    private final DefaultTableModel tableModel;\n\n    public PageLabelsTable() {\n\n        tableModel = new DefaultTableModel();\n\n        tableModel.addColumn(&quot;Style&quot;);\n        tableModel.addColumn(&quot;Prefix&quot;);\n        tableModel.addColumn(&quot;From&quot;);\n        tableModel.addColumn(&quot;To&quot;);\n\n        tableModel.addRow(\n                new String[]{&quot;Table A 00&quot;, &quot;Table A 01&quot;, &quot;Table A 02&quot;, &quot;Table A 03&quot;});\n\n        tableModel.addRow(\n                new String[]{&quot;Table A 10&quot;, &quot;Table A 11&quot;, &quot;Table A 12&quot;, &quot;Table A 13&quot;});\n\n        setModel(tableModel);\n\n        Toolkit.getDefaultToolkit().addAWTEventListener(event -&gt; {\n            if (event.getID() == MouseEvent.MOUSE_CLICKED) {\n                final MouseEvent mouseEvent = (MouseEvent) event;\n                final int row = rowAtPoint(mouseEvent.getPoint());\n                if (row == -1) {\n                    clearSelection();\n                }\n            }\n        }, AWTEvent.MOUSE_EVENT_MASK);\n\n        getTableHeader().setReorderingAllowed(false);\n        setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);\n        setDragEnabled(true);\n    }\n}\n<\/code><\/pre>\n<p>And here's the code for the second app (heavily based on the <a href=\"https://stackoverflow.com/questions/26796339/jpanel-component-placement\">code found here at SO<\/a>):<\/p>\n<pre><code>public void createUI() {\n\n      initUI();\n\n      final JFrame frame = new JFrame(APP_NAME);\n      frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);\n      frame.setResizable(false);\n\n      closeOnEscape(frame);\n      frame.getRootPane().setDefaultButton(fixButton);\n\n      frame.setContentPane(ui);\n      frame.pack();\n      frame.setLocationRelativeTo(null);\n      frame.setMinimumSize(frame.getSize());\n\n      frame.setVisible(true);\n   }\n\n   private void closeOnEscape(final JFrame frame) {\n      // close on ESCAPE\n      frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)\n          .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), &quot;Cancel&quot;);\n\n      frame.getRootPane().getActionMap().put(&quot;Cancel&quot;, disposeFrame(frame));\n   }\n\n   private AbstractAction disposeFrame(final JFrame frame) {\n      return new AbstractAction() {\n         @Override\n         public void actionPerformed(final ActionEvent e) {\n            frame.dispose();\n         }\n      };\n   }\n\n   private JComponent getTwoColumnLayout(final JLabel[] labels, final JComponent[] fields) {\n\n      if ( labels.length != fields.length ) {\n         throw new IllegalArgumentException(\n             &quot;%d labels supplied for %d fields!&quot;.formatted(labels.length, fields.length));\n      }\n      final JComponent panel = new JPanel();\n      final GroupLayout layout = new GroupLayout(panel);\n      panel.setLayout(layout);\n      // Turn on automatically adding gaps between components\n      layout.setAutoCreateGaps(true);\n      // Create a sequential group for the horizontal axis.\n      final GroupLayout.SequentialGroup hGroup = layout.createSequentialGroup();\n      final GroupLayout.Group yLabelGroup = layout.createParallelGroup(\n          GroupLayout.Alignment.TRAILING);\n      hGroup.addGroup(yLabelGroup);\n      final GroupLayout.Group yFieldGroup = layout.createParallelGroup();\n      hGroup.addGroup(yFieldGroup);\n      layout.setHorizontalGroup(hGroup);\n      // Create a sequential group for the vertical axis.\n      final GroupLayout.SequentialGroup vGroup = layout.createSequentialGroup();\n      layout.setVerticalGroup(vGroup);\n\n      // add the components to the groups\n      for (JLabel label : labels) {\n         yLabelGroup.addComponent(label);\n      }\n      for (Component field : fields) {\n         yFieldGroup.addComponent(field, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);\n      }\n      for (int i = 0; i &lt; labels.length; i++) {\n         vGroup.addGroup(layout.createParallelGroup().addComponent(labels[i])\n             .addComponent(fields[i], GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE));\n      }\n\n      addMnemonics(labels, fields);\n\n      return panel;\n   }\n\n   private void addMnemonics(final JLabel[] labels, final JComponent[] fields) {\n      final Map&lt;Character, Character&gt; map = new HashMap&lt;&gt;();\n      for (int i = 0; i &lt; labels.length; i++) {\n         labels[i].setLabelFor(fields[i]);\n         final String lowerCase = labels[i].getText().toLowerCase();\n         for (int j = 0; j &lt; lowerCase.length(); j++) {\n            final char ch = lowerCase.charAt(j);\n            if ( Character.isLetterOrDigit(ch) &amp;&amp; map.get(ch) == null ) {\n               map.put(ch, ch);\n               labels[i].setDisplayedMnemonic(ch);\n               break;\n            }\n         }\n      }\n   }\n\n   /**\n    * Provides a JPanel with two columns (labels &amp; fields) laid out using GroupLayout. The arrays\n    * must be of equal size.\n    *\n    * @param labelStrings Strings that will be used for labels.\n    * @param fields       The corresponding fields.\n    * @return JComponent A JPanel with two columns of the components provided.\n    */\n   private JComponent getTwoColumnLayout(final String[] labelStrings, final JComponent[] fields) {\n      final JLabel[] labels = new JLabel[labelStrings.length];\n      for (int i = 0; i &lt; labels.length; i++) {\n         labels[i] = new JLabel(labelStrings[i]);\n      }\n      return getTwoColumnLayout(labels, fields);\n   }\n\n\n   private void initUI() {\n      if ( ui != null ) {\n         return;\n      }\n      ui = new JPanel(new BorderLayout(4, 4));\n      ui.setBorder(new EmptyBorder(4, 4, 4, 4));\n\n      // Here is our control.  This puts a titled border around it,\n      // instead of using a label in the PAGE_START\n      final JPanel jPanel = new JPanel(new BorderLayout());\n      ui.add(jPanel);\n\n      final JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));\n      jPanel.add(actionPanel, BorderLayout.PAGE_END);\n\n      this.fixButton = new JButton(&quot;Fix&quot;);\n      this.resetButton = new JButton(&quot;Reset&quot;);\n      this.cancelButton = new JButton(&quot;Cancel&quot;);\n\n      Stream.of(fixButton, resetButton, cancelButton).forEach(actionPanel::add);\n\n      // Use GroupLayout for the label/cotrnl combos.\n      // make the arrays for the factory method\n      final String[] labels = { &quot;Page label style&quot;, &quot;Start page&quot;, &quot;Remove bookmarks&quot; };\n      final String[] ccString = LabelStyle.getAllStyles();\n\n      final JPanel checkBoxPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));\n      checkBoxPanel.add(new JCheckBox(&quot;&quot;, false));\n\n      final JComponent[] controls = { new JComboBox&lt;&gt;(ccString), new JTextFieldNumeric(5),\n          checkBoxPanel };\n\n      jPanel.add(getTwoColumnLayout(labels, controls));\n\n      // throw in a few borders for white space\n      final Border insideBorder = new CompoundBorder(new EmptyBorder(10, 10, 5, 10),\n          new TitledBorder(APP_NAME));\n      final Border border = new CompoundBorder(insideBorder, new EmptyBorder(10, 10, 5, 10));\n      jPanel.setBorder(border);\n   }\n<\/code><\/pre>\n",
+        "question_id": 76644954,
+        "tags": [
+            "java",
+            "swing"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 122
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/480e6081772d352217d5641872f35db6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4343067,
+                "user_type": "registered",
+                "user_id": 3545835,
+                "link": "https://stackoverflow.com/users/3545835/samgi",
+                "reputation": 225,
+                "display_name": "samgi",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 76644954,
+            "edited": false,
+            "creation_date": 1688906991,
+            "comment_id": 135134447
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/632732029bf05854c17d0dea6c82dcb4?s=256&d=identicon&r=PG",
+                "account_id": 81822,
+                "user_type": "registered",
+                "user_id": 230513,
+                "link": "https://stackoverflow.com/users/230513/trashgod",
+                "reputation": 206045,
+                "display_name": "trashgod",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 76644954,
+            "edited": false,
+            "creation_date": 1688859266,
+            "comment_id": 135130822
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gWeJr.jpg?s=256",
+                "account_id": 114128,
+                "user_type": "registered",
+                "user_id": 300257,
+                "link": "https://stackoverflow.com/users/300257/gilbert-le-blanc",
+                "reputation": 51685,
+                "display_name": "Gilbert Le Blanc",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 76644954,
+            "edited": false,
+            "creation_date": 1688851318,
+            "comment_id": 135130257
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

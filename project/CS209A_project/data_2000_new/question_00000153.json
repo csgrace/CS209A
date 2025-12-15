@@ -1,0 +1,342 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7273699,
+            "user_type": "registered",
+            "user_id": 5990688,
+            "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+            "reputation": 487,
+            "display_name": "IngeniousTom",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/38038600/how-to-package-and-deploy-web-app-with-embedded-jetty",
+        "last_activity_date": 1467816457,
+        "creation_date": 1466944887,
+        "answer_count": 2,
+        "title": "How to package and deploy web app with embedded Jetty",
+        "body": "<p>I am developing web application that must be running on <strong>embedded Jetty<\/strong> (without external web app container). All the logic and content are ready. I only want to understand how do I package and deploy web app with embedded Jetty using Maven. Here are detailed questions:<\/p>\n\n<ol>\n<li><p>At the moment I run my web app on <strong>Jetty 9.x<\/strong> in <strong>Intellij IDEA<\/strong> but I guess it is external Jetty anyway. So what is a jetty embedded server. How can I make it considering the structure of my web App (see below)?<\/p><\/li>\n<li><p>I think the package-file must be not war-file beacuase it must be running on embedded jetty server. I think it must be <strong>executable jar<\/strong>. But how can I get it using Maven?<\/p><\/li>\n<li><p>How can I deploy it on target machine (it's going to be just local PC - not server)?<\/p><\/li>\n<\/ol>\n\n<p>Here is my <strong>project structure<\/strong> for you to understand the situation and refer in your answer:<\/p>\n\n<p><a href=\"https://i.sstatic.net/5oPP7.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/5oPP7.png\" alt=\"Project folder structure\"><\/a><\/p>\n\n<p>I really need your help guys.<\/p>\n\n<p><strong>UPDATE from 04.07.2016<\/strong><\/p>\n\n<p>I created spring boot demo application and I have done all that is wrote in the spring boot docs that @techtabu gave me, but all I got is the next error:<\/p>\n\n<p><a href=\"https://i.sstatic.net/UST6c.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/UST6c.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>I have not packacge and deployed my demo app yet. Just pressed \"run 'MySpringBootDemoApp'\" button.<\/p>\n\n<p><a href=\"https://i.sstatic.net/FqAT2.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/FqAT2.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>More than that my spring boot app does not open browser tiself as it was with usual external jetty.<\/p>\n\n<p>What is the reason. Help me please!<\/p>\n\n<p><strong>UPDATE from 06.07.2016<\/strong><\/p>\n\n<pre><code>package com.dvdexchange.controller;\n\n\nimport com.dvdexchange.model.Disk;\nimport com.dvdexchange.model.MyDisk;\nimport com.dvdexchange.model.Takenitem;\nimport com.dvdexchange.service.impl.DiskServiceImpl;\nimport com.dvdexchange.service.impl.TakenItemServiceImpl;\nimport com.dvdexchange.service.impl.UserServiceImpl;\nimport org.springframework.security.authentication.BadCredentialsException;\nimport org.springframework.security.authentication.LockedException;\nimport org.springframework.security.core.context.SecurityContextHolder;\nimport org.springframework.stereotype.Controller;\nimport org.springframework.web.bind.annotation.RequestMapping;\nimport org.springframework.web.bind.annotation.RequestMethod;\nimport org.springframework.web.bind.annotation.RequestParam;\nimport org.springframework.web.servlet.ModelAndView;\n\nimport javax.servlet.http.HttpServletRequest;\nimport java.util.*;\n\n/**Главный контроллер, отвечающий за обработку запросов пользователя по доступу\n **на разные адреса веб-сервиса**/\n\n@Controller\npublic class MainController {\n    private UserServiceImpl userService = new UserServiceImpl();\n    private DiskServiceImpl diskService = new DiskServiceImpl();\n    private TakenItemServiceImpl takenItemService = new TakenItemServiceImpl();\n\n    @RequestMapping(value = \"/\", method = RequestMethod.GET)\n    public String home() {\n        return \"login\";                                 /*Первая страница, которую должен видеть пользователь - это страница авторизации и она же страница приветствия*/\n    }\n\n    @RequestMapping(value = \"/login\", method = RequestMethod.GET)\n    public ModelAndView login(@RequestParam(value = \"error\", required = false) String error,               /*данные о предыдущей неудачной авторизации из предыдущей попытки*/\n                              @RequestParam(value = \"logout\", required = false) String logout, HttpServletRequest request) {   /*или об успешном выходе из аккаунта с данными о запросе на сервер*/\n\n        ModelAndView model = new ModelAndView();\n        if (error != null) {\n            model.addObject(\"error\", getErrorMessage(request, \"SPRING_SECURITY_LAST_EXCEPTION\"));         /*Получение сообщения об ошибке и запись в модель для отображения пользователю*/\n        }\n\n        if (logout != null) {\n            model.addObject(\"msg\", \"Вы успешно вышли из учетной записи.\");                                /*Запись данных об успешном выходе из аккаунта в модель для отображения пользователю*/\n        }\n        model.setViewName(\"login\");\n\n        return model;\n    }\n\n    @RequestMapping(value = \"/diskLib\")\n    public ModelAndView diskLib() {\n        String loggedUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();\n        List&lt;MyDisk&gt; diskList = new ArrayList&lt;MyDisk&gt;();\n        List&lt;MyDisk&gt; testDiskList;                     /*Для предварительной проверки множества на валидность*/\n        int givenDisksCount = 0;                       /*Количество взятых у пользователя дисков нужно для того, чтобы корректно блокировать кнопку \"удалить диск\",\n                                                       **если все диски пользователя отданы*/\n\n        testDiskList = userService.getUserDisksWithStatus(loggedUserEmail);\n\n\n        if (testDiskList != null) {             //Множество может быть пустым и нужно позаботиться о валидности результата при таком исходе,\n            diskList = testDiskList;            //поэтому используется testDiskList. Валидное пустое множество это не null, а множество( или список), в котором 0 элементов\n\n            //Сортировка дисков по id по возрастанию\n            Collections.sort(diskList, new Comparator&lt;MyDisk&gt;() {\n                public int compare(MyDisk o1, MyDisk o2) {\n                    return o1.getId() - o2.getId();\n                }\n            });\n        }\n\n        for (MyDisk disk : diskList) {\n            if (disk.isGiven()) {\n                givenDisksCount++;\n            }\n        }\n\n        ModelAndView modelAndView = new ModelAndView();\n        modelAndView.addObject(\"CurrentUserEmail\", loggedUserEmail);\n        modelAndView.addObject(\"AllDisksOfTheUser\", diskList);\n        modelAndView.addObject(\"GivenDisksCount\", givenDisksCount);\n        modelAndView.setViewName(\"diskLib\");             /*Указываем для какой страницы предназначены данные (модель). Аналогично в остальных методах*/\n        return modelAndView;\n    }\n\n    @RequestMapping(value = \"/borrowDisk\")\n    public ModelAndView borrowDisk() {\n        String loggedUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();\n        List&lt;Disk&gt; allFreeDisks = new ArrayList&lt;Disk&gt;();\n        List&lt;Disk&gt; testDisks;\n\n        testDisks = diskService.getAllFreeDisksForCurrentUser(loggedUserEmail);\n\n        if (testDisks != null) {             //Множество может быть пустым и нужно позаботиться о валидности результата при таком исходе,\n            allFreeDisks = testDisks;        //поэтому используется testDisks. Валидное пустое множество это не null, а множество( или список), в котором 0 элементов\n\n            //Сортировка дисков по id по возрастанию\n            Collections.sort(allFreeDisks, new Comparator&lt;Disk&gt;() {\n                public int compare(Disk o1, Disk o2) {\n                    return o1.getId() - o2.getId();\n                }\n            });\n        }\n\n        int borrowCount = 0;                                                      /*Количество взятых пользователем дисков*/\n        testDisks = diskService.getAllDisksTakenByLoggedUser(loggedUserEmail);\n\n        if (testDisks != null) {\n            borrowCount = testDisks.size();\n        }\n\n        ModelAndView modelAndView = new ModelAndView();\n        modelAndView.addObject(\"CurrentUserEmail\", loggedUserEmail);\n        modelAndView.addObject(\"AllFreeDisks\", allFreeDisks);                            /*Множество всех свободных для аренды дисков для текущего пользователя*/\n        modelAndView.addObject(\"BorrowCount\", borrowCount);\n        modelAndView.addObject(\"BorrowLimit\", TakenItemServiceImpl.maxBorrowedDiskCount);         /*Существует лимит на количество дисков, которые может взять каждый пользователь в аренду*/\n        modelAndView.setViewName(\"borrowDisk\");\n\n        return modelAndView;\n    }\n\n    @RequestMapping(value = \"/takenDisks\")\n    public ModelAndView takenDisks() {\n        String loggedUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();\n        List&lt;Disk&gt; takenDisks = new ArrayList&lt;Disk&gt;();\n        List&lt;Disk&gt; testTakenDisks;\n\n        testTakenDisks = diskService.getAllDisksTakenByLoggedUser(loggedUserEmail);\n\n        if (testTakenDisks != null) {             //Множество может быть пустым и нужно позаботиться о валидности результата при таком исходе,\n            takenDisks = testTakenDisks;          //поэтому используется testFreeDisks. Валидное пустое множество это не null, а множество( или список), в котором 0 элементов\n\n            //Сортировка дисков по id по возрастанию\n            Collections.sort(takenDisks, new Comparator&lt;Disk&gt;() {\n                public int compare(Disk o1, Disk o2) {\n                    return o1.getId() - o2.getId();\n                }\n            });\n        }\n\n        ModelAndView modelAndView = new ModelAndView();\n        modelAndView.addObject(\"CurrentUserEmail\", loggedUserEmail);\n        modelAndView.addObject(\"TakenDisks\", takenDisks);                        /*Кол-во дисков, отданных пользователем в аренду*/\n        modelAndView.addObject(\"BorrowCount\", takenDisks.size());\n        modelAndView.addObject(\"BorrowLimit\", TakenItemServiceImpl.maxBorrowedDiskCount);          /*Существует лимит на количество дисков, которые может взять каждый пользователь в аренду*/\n\n        modelAndView.setViewName(\"takenDisks\");\n        return modelAndView;\n    }\n\n    @RequestMapping(value = \"/givenDisks\")\n    public ModelAndView givenDisks() {\n        String loggedUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();\n        List&lt;Takenitem&gt; givenDisks = new ArrayList&lt;Takenitem&gt;();\n        List&lt;Takenitem&gt; testGivenDisks;\n        testGivenDisks = takenItemService.getAllDisksGivenByLoggedUser(loggedUserEmail);\n\n        if (testGivenDisks != null) {             //Множество может быть пустым и нужно позаботиться о валидности результата при таком исходе,\n            givenDisks = testGivenDisks;          //поэтому используется testFreeDisks. Валидное пустое множество это не null, а множество( или список), в котором 0 элементов\n\n            //Сортировка дисков по id по возрастанию\n            Collections.sort(givenDisks, new Comparator&lt;Takenitem&gt;() {\n                public int compare(Takenitem o1, Takenitem o2) {\n                    return o1.getIddisk() - o2.getIddisk();\n                }\n            });\n        }\n\n        ModelAndView modelAndView = new ModelAndView();\n        modelAndView.addObject(\"CurrentUserEmail\", loggedUserEmail);\n        modelAndView.addObject(\"GivenDisks\", givenDisks);                    /*Множество отданных дисков*/\n        modelAndView.addObject(\"GivenCount\", givenDisks.size());             /*Кол-во отданных дисков*/\n        modelAndView.addObject(\"TotalCount\", userService.getUserDisksWithStatus(loggedUserEmail).size());         /*Общее кол-во дисков собственных пользователя*/\n\n        modelAndView.setViewName(\"givenDisks\");\n        return modelAndView;\n    }\n\n    /*Получаем исключение с необходимым текстом*/\n    private String getErrorMessage(HttpServletRequest request, String key) {\n\n        Exception exception = (Exception) request.getSession().getAttribute(key);\n\n        String error = \"\";\n        /*Получение понятного для пользователя текста ошибки в зависимостит от причин отказа в доступе*/\n        if (exception instanceof BadCredentialsException) {           /*Если неверно введен пароль, а логин верный и аккаунт исправен и не заблокирован*/\n            error = \"Неверные \\\"Логин\\\" и/или \\\"Пароль\\\"!\";         /*Но для безопасности все-равно нельзя указывать, что именно введено неправильно*/\n        } else if (exception instanceof LockedException) {            /*Если аккаунт заблокирован*/\n            error = exception.getMessage();\n        } else {\n            error =  \"Неверные \\\"Логин\\\" и/или \\\"Пароль\\\"!\";          /*если неверны логин и пароль или только логин*/\n        }\n\n        return error;\n    }\n\n}\n<\/code><\/pre>\n\n<p>Don't pay attention on comments - they are in russian.<\/p>\n",
+        "question_id": 38038600,
+        "tags": [
+            "java",
+            "maven",
+            "intellij-idea",
+            "web-applications",
+            "embedded-jetty"
+        ],
+        "score": 1,
+        "accepted_answer_id": 38039783,
+        "is_answered": true,
+        "view_count": 1371,
+        "last_edit_date": 1467816457
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                "account_id": 16878,
+                "user_type": "registered",
+                "user_id": 37213,
+                "link": "https://stackoverflow.com/users/37213/duffymo",
+                "reputation": 309604,
+                "display_name": "duffymo",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38038600,
+            "edited": false,
+            "creation_date": 1468512738,
+            "comment_id": 64168414
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38038600,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                "account_id": 16878,
+                "user_type": "registered",
+                "user_id": 37213,
+                "link": "https://stackoverflow.com/users/37213/duffymo",
+                "reputation": 309604,
+                "display_name": "duffymo",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1468512706,
+            "comment_id": 64168394
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                "account_id": 16878,
+                "user_type": "registered",
+                "user_id": 37213,
+                "link": "https://stackoverflow.com/users/37213/duffymo",
+                "reputation": 309604,
+                "display_name": "duffymo",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38038600,
+            "edited": false,
+            "creation_date": 1468511471,
+            "comment_id": 64167638
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38038600,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                "account_id": 16878,
+                "user_type": "registered",
+                "user_id": 37213,
+                "link": "https://stackoverflow.com/users/37213/duffymo",
+                "reputation": 309604,
+                "display_name": "duffymo",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1468510116,
+            "comment_id": 64166642
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                "account_id": 16878,
+                "user_type": "registered",
+                "user_id": 37213,
+                "link": "https://stackoverflow.com/users/37213/duffymo",
+                "reputation": 309604,
+                "display_name": "duffymo",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38038600,
+            "edited": false,
+            "creation_date": 1466947639,
+            "comment_id": 63517646
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gHxSN.jpg?s=256",
+                "account_id": 1309411,
+                "user_type": "registered",
+                "user_id": 1257729,
+                "link": "https://stackoverflow.com/users/1257729/techtabu",
+                "reputation": 27881,
+                "display_name": "techtabu"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1466953162,
+            "creation_date": 1466953162,
+            "body": "<p>I agree with deffymo's comment. Use Spring-boot. It's a lot easier to use embedded server. If you are using IntelliJ, on create New Project window, select Spring Initializr to create a Spring boot project. Also refer to spring-boot <a href=\"http://projects.spring.io/spring-boot/\" rel=\"nofollow noreferrer\">documentation<\/a>.<\/p>\n\n<p><a href=\"https://i.sstatic.net/a80XD.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/a80XD.png\" alt=\"Spring Boot Initializr\"><\/a><\/p>\n\n<p>However, remember that spring-boot uses Tomcat as default embedded server. You should exclude Tomcat and add jetty in dependencies. Look at the <a href=\"http://docs.spring.io/spring-boot/docs/current/reference/html/howto-embedded-servlet-containers.html#howto-use-jetty-instead-of-tomcat\" rel=\"nofollow noreferrer\">docs<\/a> on how to do it.<\/p>\n\n<blockquote>\n  <p>But how can I get it using Maven?<\/p>\n<\/blockquote>\n\n<p>Define packaging as jar in your pom file. <\/p>\n\n<pre><code>&lt;groupId&gt;your-group&lt;/groupId&gt;\n&lt;artifactId&gt;your-project-name&lt;/artifactId&gt;\n&lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;\n&lt;packaging&gt;jar&lt;/packaging&gt;\n<\/code><\/pre>\n\n<blockquote>\n  <p>How can I deploy it on target machine (it's going to be just local PC - not server)?<\/p>\n<\/blockquote>\n\n<p>Run the jar file as java jar.<\/p>\n\n<pre><code>java -jar your-project-name.jar\n<\/code><\/pre>\n",
+            "answer_id": 38039783,
+            "question_id": 38038600
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uobgC.jpg?s=256",
+                "account_id": 4602467,
+                "user_type": "registered",
+                "user_id": 3732793,
+                "link": "https://stackoverflow.com/users/3732793/user3732793",
+                "reputation": 1986,
+                "display_name": "user3732793",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1467208417,
+            "creation_date": 1467208417,
+            "body": "<p>you may want to look also at the <a href=\"https://maven.apache.org/plugins/maven-shade-plugin/\" rel=\"nofollow\">maven shade plugin<\/a><\/p>\n\n<p>from the description<\/p>\n\n<p>\"this plugin provides the capability to package the artifact in an uber-jar,\"<\/p>\n\n<p>you can than start your app with java -jar yourapp.jar<\/p>\n",
+            "answer_id": 38101717,
+            "question_id": 38038600
+        }
+    ],
+    "answer_comments": {"38039783": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38039783,
+            "edited": false,
+            "creation_date": 1468409105,
+            "comment_id": 64113080
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38039783,
+            "edited": false,
+            "creation_date": 1467816496,
+            "comment_id": 63875881
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gHxSN.jpg?s=256",
+                "account_id": 1309411,
+                "user_type": "registered",
+                "user_id": 1257729,
+                "link": "https://stackoverflow.com/users/1257729/techtabu",
+                "reputation": 27881,
+                "display_name": "techtabu"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38039783,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1467814388,
+            "comment_id": 63874232
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gHxSN.jpg?s=256",
+                "account_id": 1309411,
+                "user_type": "registered",
+                "user_id": 1257729,
+                "link": "https://stackoverflow.com/users/1257729/techtabu",
+                "reputation": 27881,
+                "display_name": "techtabu"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 38039783,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1466964120,
+            "comment_id": 63523010
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38039783,
+            "edited": false,
+            "creation_date": 1466962898,
+            "comment_id": 63522590
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gHxSN.jpg?s=256",
+                "account_id": 1309411,
+                "user_type": "registered",
+                "user_id": 1257729,
+                "link": "https://stackoverflow.com/users/1257729/techtabu",
+                "reputation": 27881,
+                "display_name": "techtabu"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 38039783,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1466957925,
+            "comment_id": 63520963
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e9b0808f218fa48ee1806ba51ca173dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7273699,
+                "user_type": "registered",
+                "user_id": 5990688,
+                "link": "https://stackoverflow.com/users/5990688/ingenioustom",
+                "reputation": 487,
+                "display_name": "IngeniousTom",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38039783,
+            "edited": false,
+            "creation_date": 1466956034,
+            "comment_id": 63520322
+        }
+    ]}
+}

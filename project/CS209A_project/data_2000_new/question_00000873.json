@@ -1,0 +1,131 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/32e1f0bd692eff5597d2c0f2a6163aab?s=256&d=identicon&r=PG",
+            "account_id": 335137,
+            "user_type": "registered",
+            "user_id": 662056,
+            "link": "https://stackoverflow.com/users/662056/bobercoder",
+            "reputation": 91,
+            "display_name": "BoberCoder"
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/5322492/java-jni-leak-in-c-process",
+        "last_activity_date": 1300271898,
+        "creation_date": 1300262871,
+        "answer_count": 1,
+        "title": "Java JNI leak in c++ process",
+        "body": "<p>I am beginner in Java. My problem is: I am calling a Java class's method from c++. For this i am using JNI. Everythings works correct, but i have some memory LEAKS in the process of c++ program...<\/p>\n\n<p>So.. i did simple example.. <\/p>\n\n<p>1) I create a java machine (jint res = JNI_CreateJavaVM(&amp;jvm, (void**)&amp;env, &amp;vm_args);)<\/p>\n\n<p>2) then i take a pointer on java class (jclass cls = env->FindClass(\"test_jni\"));<\/p>\n\n<p>3) after that i create a java class object object, by calling the constructor (testJavaObject = env->NewObject(cls, testConstruct);)<\/p>\n\n<p>AT THIS very moment in the process of c++ program is allocated 10 MB of memory<\/p>\n\n<p>4) Next i delete the class , the object, and the Java Machine .. <\/p>\n\n<p>AT THIS very moment the 10 MB of memory are not free \n.................\nSo below i have a few lines of code<\/p>\n\n<p>c++ program<\/p>\n\n<pre><code>void main()\n{\n    {\n        //Env\n        JNIEnv *env;\n        // java virtual machine\n        JavaVM *jvm;\n        JavaVMOption* options = new JavaVMOption[1];\n        //class paths\n        options[0].optionString = \"-Djava.class.path=C:/Sun/SDK/jdk/lib;D:/jms_test/java_jni_leak;\"; \n        // other options\n        JavaVMInitArgs vm_args;\n        vm_args.version = JNI_VERSION_1_6;\n        vm_args.options = options;\n        vm_args.nOptions = 1;\n        vm_args.ignoreUnrecognized = false;\n        // alloc part of memory (for test) before CreateJavaVM\n        char* testMem0 = new char[1000];\n        for(int i = 0; i &lt; 1000; ++i)\n            testMem0[i] = 'a';\n        // create java VM\n        jint res = JNI_CreateJavaVM(&amp;jvm, (void**)&amp;env, &amp;vm_args);\n        // alloc part of memory (for test) after CreateJavaVM\n        char* testMem1 = new char[1000];\n        for(int i = 0; i &lt; 1000; ++i)\n            testMem1[i] = 'b';\n        //Creating java virtual machine\n        jclass cls = env-&gt;FindClass(\"test_jni\");\n        // Id of a class constructor\n        jmethodID testConstruct = env-&gt;GetMethodID(cls, \"&lt;init&gt;\", \"()V\");\n        // The Java Object\n        // Calling the constructor, is allocated 10 MB of memory in c++ process\n        jobject testJavaObject = env-&gt;NewObject(cls, testConstruct);\n        // function DeleteLocalRef,\n        // In this very moment memory not free\n        env-&gt;DeleteLocalRef(testJavaObject);\n        env-&gt;DeleteLocalRef(cls);\n        // 1!!!!!!!!!!!!!\n        res = jvm-&gt;DestroyJavaVM();\n        delete[] testMem0;\n        delete[] testMem1;\n        // In this very moment memory not free. TO ///\n    }\n    int gg = 0;\n}\n<\/code><\/pre>\n\n<p>java class (it just allocs some memory)<\/p>\n\n<pre><code>import java.util.*;\n\npublic class test_jni\n{\n  ArrayList&lt;String&gt; testStringList;\n  test_jni()\n  {\n    System.out.println(\"start constructor\");\n    testStringList = new ArrayList&lt;String&gt;();\n    for(int i = 0; i &lt; 1000000; ++i)\n    {\n      // засераю память\n      testStringList.add(\"TEEEEEEEEEEEEEEEEST\");\n    }\n  }\n}\n<\/code><\/pre>\n\n<p>process memory view, after crating javaVM and java object:\ntestMem0 and testMem1 - test memory, that's allocated by c++.<\/p>\n\n<pre><code>**************\ntestMem0\n**************\n\n\n\n\nJNI_CreateJavaVM\n\n\n\n\n**************\ntestMem1\n**************\n\n// create java object\njobject testJavaObject = env-&gt;NewObject(cls, testConstruct);\n\n**************\n<\/code><\/pre>\n\n<p>process memory view, after destroy javaVM and delete ref on java object:\ntestMem0 and testMem1 are deleted to;<\/p>\n\n<pre><code>**************\n\n\n\n\nJNI_CreateJavaVM\n\n\n\n\n**************\n\n// create java object\n    jobject testJavaObject = env-&gt;NewObject(cls, testConstruct);\n\n**************\n<\/code><\/pre>\n\n<p>So testMem0 and testMem1 is deleted, But JavaVM and\nJava object not....<\/p>\n\n<p>Sow what i do wrong... and how i can free memory in the c++ process program.<\/p>\n\n<p>SOME EDIT.... <\/p>\n\n<p>if i alloc new memory (char* test3 = new char[1000]), after destroying JVM, heap of c++ process looks likes so:<\/p>\n\n<p>And memory of process is growing up !...<\/p>\n\n<pre><code>**************\n\n\n\n\nJNI_CreateJavaVM (memory after JVM)\n\n\n\n\n**************\n\njobject testJavaObject = env-&gt;NewObject(cls, testConstruct);\nmemory after Java object\n\n\n**************\n\nchar* test3 (memory is allocated by char* test3 = new char[1000])\n\n**************\n<\/code><\/pre>\n",
+        "question_id": 5322492,
+        "tags": [
+            "java",
+            "c++",
+            "c",
+            "memory",
+            "java-native-interface"
+        ],
+        "score": 5,
+        "is_answered": true,
+        "view_count": 2619,
+        "last_edit_date": 1300271898
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7df9b99b5d8ac9eda9330768ca1acf09?s=256&d=identicon&r=PG",
+                "account_id": 266709,
+                "user_type": "registered",
+                "user_id": 554431,
+                "link": "https://stackoverflow.com/users/554431/bestsss",
+                "reputation": 12126,
+                "display_name": "bestsss"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5322492,
+            "edited": false,
+            "creation_date": 1300279558,
+            "comment_id": 6010005
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/32e1f0bd692eff5597d2c0f2a6163aab?s=256&d=identicon&r=PG",
+                "account_id": 335137,
+                "user_type": "registered",
+                "user_id": 662056,
+                "link": "https://stackoverflow.com/users/662056/bobercoder",
+                "reputation": 91,
+                "display_name": "BoberCoder"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5322492,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7df9b99b5d8ac9eda9330768ca1acf09?s=256&d=identicon&r=PG",
+                "account_id": 266709,
+                "user_type": "registered",
+                "user_id": 554431,
+                "link": "https://stackoverflow.com/users/554431/bestsss",
+                "reputation": 12126,
+                "display_name": "bestsss"
+            },
+            "edited": false,
+            "creation_date": 1300278672,
+            "comment_id": 6009722
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7df9b99b5d8ac9eda9330768ca1acf09?s=256&d=identicon&r=PG",
+                "account_id": 266709,
+                "user_type": "registered",
+                "user_id": 554431,
+                "link": "https://stackoverflow.com/users/554431/bestsss",
+                "reputation": 12126,
+                "display_name": "bestsss"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5322492,
+            "edited": false,
+            "creation_date": 1300263244,
+            "comment_id": 6006191
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/525c848c196975f7ab455b480faec009?s=256&d=identicon&r=PG",
+            "account_id": 213535,
+            "user_type": "registered",
+            "user_id": 466979,
+            "link": "https://stackoverflow.com/users/466979/benoit-thiery",
+            "reputation": 6417,
+            "display_name": "Benoit Thiery",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 4,
+        "is_accepted": false,
+        "last_activity_date": 1300265611,
+        "creation_date": 1300265611,
+        "body": "<p>This is normal behaviour. The memory will be reused if you do some other allocations in your process, but it is not returned as free memory to the OS for performance reasons.\nYou don't have a memory leak as this memory is not lost, but it can only be reused by your process (until it exits of course).<\/p>\n",
+        "answer_id": 5322889,
+        "question_id": 5322492
+    }],
+    "answer_comments": {"5322889": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/32e1f0bd692eff5597d2c0f2a6163aab?s=256&d=identicon&r=PG",
+            "account_id": 335137,
+            "user_type": "registered",
+            "user_id": 662056,
+            "link": "https://stackoverflow.com/users/662056/bobercoder",
+            "reputation": 91,
+            "display_name": "BoberCoder"
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "post_id": 5322889,
+        "edited": false,
+        "creation_date": 1300271990,
+        "comment_id": 6008057
+    }]}
+}

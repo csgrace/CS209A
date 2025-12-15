@@ -1,0 +1,88 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5c13918c5092508f5c57ac0bf9897bcf?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 20627676,
+            "user_type": "registered",
+            "user_id": 15143147,
+            "link": "https://stackoverflow.com/users/15143147/androiddeveloper",
+            "reputation": 3,
+            "display_name": "AndroidDeveloper"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/67047918/output-the-result-after-processing-in-a-thread",
+        "last_activity_date": 1618162007,
+        "creation_date": 1618160896,
+        "answer_count": 2,
+        "title": "Output the result after processing in a Thread",
+        "body": "<p>My program has a thr () function that returns a string value, but before returning, the value is overridden in Thread, but when called in main (), this function will return the string that was before being processed in Thread. If you add Sleep, everything will be fine before, but I think this is not a good solution to the problem. If there are suggestions on how to solve this problem, then it would be bad.<\/p>\n<p>Code:<\/p>\n<pre><code>fun main() {\n    println(thr())\n}\n\nfun thr(): String {\n    var x = &quot;Before thread&quot;\n    Thread {\n        x = &quot;After thread&quot;\n    }.start()\n//     Thread.sleep(100)\n    \n    return x\n}\n<\/code><\/pre>\n<p>The desired result is - &quot;After thread&quot;<br />\nThe current result - &quot;Before thread&quot;<\/p>\n",
+        "question_id": 67047918,
+        "tags": [
+            "java",
+            "kotlin",
+            "concurrency"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 100
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0dccaa5d3ea08288f417a9db9f8cd73f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 18463410,
+                "user_type": "registered",
+                "user_id": 13598222,
+                "link": "https://stackoverflow.com/users/13598222/cactustictacs",
+                "reputation": 19910,
+                "display_name": "cactustictacs"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1618162007,
+            "creation_date": 1618162007,
+            "body": "<p>You have a race condition, because the value of <code>x<\/code> at the return statement depends on whether your created thread has run and executed that line yet - <code>Thread.sleep<\/code> just makes the current thread (the one that's executing <code>thr()<\/code>, not the one you're creating) wait so the new one has a chance to finish.<\/p>\n<p>There's also the issue that the value of <code>x<\/code> that Thread 1 sees might not be what Thread 2 sees, so it won't see the updated value at the point where it's returning it. This is down to some under-the-hood memory trickery that improves performance, and it's why you need to handle synchronization.<\/p>\n<p>Basically you need to read up on concurrency and the different ways it can be handled. This is for Java but it's the basics of what's going on with threading in Kotlin too:<\/p>\n<p><a href=\"https://docs.oracle.com/javase/tutorial/essential/concurrency/\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/tutorial/essential/concurrency/<\/a><\/p>\n<p>You need to be aware of this stuff in general, so it's worth getting your head around it!<\/p>\n",
+            "answer_id": 67048130,
+            "question_id": 67047918
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uy1t4.jpg?s=256",
+                "account_id": 21217431,
+                "user_type": "registered",
+                "user_id": 15604786,
+                "link": "https://stackoverflow.com/users/15604786/hannes-braun",
+                "reputation": 162,
+                "display_name": "Hannes Braun"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1618161633,
+            "creation_date": 1618161633,
+            "body": "<p>I guess what you want to do is to wait for the thread to finish and then return x. In this case, you can use the <code>join<\/code> method:<\/p>\n<pre class=\"lang-kt prettyprint-override\"><code>fun thr(): String {\n    var x = &quot;Before thread&quot;\n    val t = Thread {\n        x = &quot;After thread&quot;\n    }\n\n    t.start()\n    t.join()\n\n    return x\n}\n<\/code><\/pre>\n",
+            "answer_id": 67048057,
+            "question_id": 67047918
+        }
+    ],
+    "answer_comments": {"67048130": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Klcqr.gif?s=256",
+            "account_id": 292208,
+            "user_type": "registered",
+            "user_id": 2245707,
+            "link": "https://stackoverflow.com/users/2245707/pveentjer",
+            "reputation": 11569,
+            "display_name": "pveentjer",
+            "accept_rate": 17
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 67048130,
+        "edited": false,
+        "creation_date": 1618218425,
+        "comment_id": 118526379
+    }]}
+}

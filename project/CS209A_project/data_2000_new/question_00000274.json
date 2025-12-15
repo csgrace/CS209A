@@ -1,0 +1,215 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a76170c1f4d8c89c010a526d966e3137?s=256&d=identicon&r=PG",
+            "account_id": 2534429,
+            "user_type": "registered",
+            "user_id": 2201935,
+            "link": "https://stackoverflow.com/users/2201935/user2201935",
+            "reputation": 396,
+            "display_name": "user2201935",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53139458/how-to-fix-bitmap-resizing-the-captured-image-in-android",
+        "last_activity_date": 1541330896,
+        "creation_date": 1541324528,
+        "answer_count": 1,
+        "title": "How to fix bitmap resizing the captured image in android",
+        "body": "<p>My Photo Editor Android application has some issue. After capturing the image from the 20MegaPixel (5184x3880) camera through the app, I am resizing the image through Bitmap to 15MegaPixel (4477 x 3351) and then saving the image in the Gallery/Photos folder in the phone<\/p>\n\n<p>Following is the HomeActivity code:<\/p>\n\n<pre><code>package com.saashtechs.photoeditor;\n\nimport android.content.Context;\nimport android.content.Intent;\nimport android.net.Uri;\nimport android.os.Bundle;\nimport android.os.Environment;\nimport android.provider.MediaStore;\nimport android.provider.MediaStore.Images.Media;\nimport android.support.annotation.NonNull;\nimport android.support.v4.app.ActivityCompat;\nimport android.support.v4.content.ContextCompat;\nimport android.support.v4.content.FileProvider;\nimport android.support.v7.app.AppCompatActivity;\nimport android.util.Log;\nimport android.view.View;\nimport android.widget.Toast;\n\nimport java.io.ByteArrayOutputStream;\nimport java.io.File;\nimport java.io.FileOutputStream;\nimport java.io.IOException;\nimport java.text.DateFormat;\nimport java.util.Date;\nimport java.util.Objects;\nimport java.io.InputStream;\n\nimport android.graphics.Bitmap;\nimport android.graphics.BitmapFactory;\nimport android.widget.ImageView;\n\nimport static android.Manifest.permission.CAMERA;\nimport static android.Manifest.permission.READ_EXTERNAL_STORAGE;\nimport static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;\nimport static android.content.pm.PackageManager.PERMISSION_GRANTED;\n\npublic class HomeActivity extends AppCompatActivity {\n\n    private static final String TAG = \"HomeActivity\";\n    private static final int GALLERY_RESULT = 1;\n    private static final int CAMERA_RESULT = 2;\n    private static final String FILE_PROVIDER_AUTHORITY = \"com.saashtechs.photoeditor\";\n    private static final int CAMERA_PERMISSION_REQ_CODE = 1001;\n    private static final int STORAGE_PERMISSION_REQ_CODE = 1002;\n    private Uri imageToUploadUri;\n    private String mCapturedImagePath;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_home);\n    }\n\n    public void openCamera(View view) {\n        // check for camera permission if not granted before\n        if (ContextCompat.checkSelfPermission(this, CAMERA) != PERMISSION_GRANTED) {\n            String[] cameraPermission = {CAMERA};\n            ActivityCompat.requestPermissions(this, cameraPermission, CAMERA_PERMISSION_REQ_CODE);\n        } else {\n            dispatchImageCaptureIntent();\n        }\n    }\n\n    public void openGallery(View view) {\n        // check for storage permission if not granted before\n        if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED ||\n                ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {\n            String[] storagePermissions = {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE};\n            ActivityCompat.requestPermissions(this, storagePermissions, STORAGE_PERMISSION_REQ_CODE);\n        } else {\n            dispatchGalleryIntent();\n        }\n    }\n\n    private void dispatchGalleryIntent() {\n        Intent galleryIntent = new Intent(Intent.ACTION_PICK, Media.EXTERNAL_CONTENT_URI);\n        startActivityForResult(galleryIntent, GALLERY_RESULT);\n    }\n\n    private void dispatchImageCaptureIntent() {\n        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);\n        if (cameraIntent.resolveActivity(getPackageManager()) != null) {\n            File photoFile = null;\n            try {\n                photoFile = createImageFile();\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n\n            if (photoFile != null) {\n                Uri photoFileUri = FileProvider.getUriForFile(this, FILE_PROVIDER_AUTHORITY, photoFile);\n                Log.d(TAG, \"dispatchImageCaptureIntent:photoFileUri: \" + photoFile.toString());\n                //Add URI to imageToUploadUri. You forgot to add it.\n                imageToUploadUri = photoFileUri;\n                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoFileUri);\n                startActivityForResult(cameraIntent, CAMERA_RESULT);\n            }\n        }\n    }\n\n    @Override\n    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,\n                                           @NonNull int[] grantResults) {\n        super.onRequestPermissionsResult(requestCode, permissions, grantResults);\n        switch (requestCode) {\n            case CAMERA_PERMISSION_REQ_CODE:\n                if (grantResults[0] == PERMISSION_GRANTED) {\n                    dispatchImageCaptureIntent();\n                } else {\n                    Toast.makeText(this, \"Required camera permission not granted\", Toast.LENGTH_SHORT).show();\n                }\n                break;\n\n            case STORAGE_PERMISSION_REQ_CODE:\n                if (grantResults[0] == PERMISSION_GRANTED) {\n                    dispatchGalleryIntent();\n                } else {\n                    Toast.makeText(this, \"Required storage permission not granted\", Toast.LENGTH_SHORT)\n                            .show();\n                }\n                break;\n\n            default:\n                throw new IllegalArgumentException(\"Unexpected request code\");\n        }\n    }\n\n    private File createImageFile() throws IOException {\n        String timeStamp = DateFormat.getDateTimeInstance().format(new Date());\n        String imageFileName = \"JPEG_\" + timeStamp + \"_\";\n        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);\n        File image = File.createTempFile(imageFileName, \".jpg\", storageDir);\n        mCapturedImagePath = image.getAbsolutePath();\n        Log.d(TAG, \"createImageFile: \" + mCapturedImagePath);\n        return image;\n    }\n\n    private Bundle uriToBundle(Uri imageUri) {\n        Bundle bundle = new Bundle();\n        bundle.putString(MainActivity.IMAGE_URI, imageUri.toString());\n        return bundle;\n    }\n\n    public Bitmap resizeBitmap(Bitmap getBitmap, int maxSize) {\n        int width = getBitmap.getWidth();//5184\n        int height = getBitmap.getHeight();//3880\n        double resized_image;\n\n        if (width &gt;= height &amp;&amp; width &gt; maxSize) {\n            resized_image = width / height;\n            width = maxSize;\n            height = (int) (maxSize / resized_image);\n        } else if (height &gt;= width &amp;&amp; height &gt; maxSize) {\n            resized_image = height / width;\n            height = maxSize;\n            width = (int) (maxSize / resized_image);\n        }\n        return Bitmap.createScaledBitmap(getBitmap, width, height, false);\n    }\n\n    @Override\n    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\n        super.onActivityResult(requestCode, resultCode, data);\n        if (resultCode == RESULT_OK) {\n            if (requestCode == GALLERY_RESULT) {\n                Uri imageUri = data.getData();\n                startActivity(MainActivity.getIntent(this, uriToBundle(Objects.requireNonNull(imageUri))));\n            } else if (requestCode == CAMERA_RESULT) {\n                File imageFile = new File(mCapturedImagePath);\n                Bitmap image = BitmapFactory.decodeFile(mCapturedImagePath);\n                image = Bitmap.createScaledBitmap(image, 4477, 3351, false);\n                image = resizeBitmap(image, 4477);\n                ByteArrayOutputStream bytes = new ByteArrayOutputStream();\n                image.compress(Bitmap.CompressFormat.JPEG, 100, bytes);\n\n                try {\n                    File file = new File(Environment.getExternalStorageDirectory() + File.separator + \"filename.jpg\");\n                    boolean result;\n                    result = file.createNewFile();\n                    if (result) {\n                        FileOutputStream fo = new FileOutputStream(imageFile);\n                        fo.write(bytes.toByteArray());\n                        fo.close();\n                    }\n                } catch(IOException ie) {\n                    ie.printStackTrace();\n                }\n\n                startActivity(MainActivity.getIntent(this, uriToBundle(Objects.requireNonNull(imageToUploadUri))));\n            }\n        } else {\n            Toast.makeText(this, \"Image not loaded.\", Toast.LENGTH_SHORT).show();\n        }\n    }\n\n    public static Intent getIntent(Context context) {\n        return new Intent(context, HomeActivity.class);\n    }\n}\n<\/code><\/pre>\n\n<p>Following is the MainActivity code:<\/p>\n\n<pre><code>package com.saashtechs.photoeditor;\n\nimport android.content.Context;\nimport android.content.Intent;\nimport android.net.Uri;\nimport android.os.Bundle;\nimport android.support.v7.app.AppCompatActivity;\nimport android.util.Log;\nimport android.widget.ImageView;\nimport com.adobe.creativesdk.aviary.AdobeImageIntent;\n\npublic class MainActivity extends AppCompatActivity {\n\n  public static final String IMAGE_URI = \"IMAGE_URI_KEY\";\n\n  private static final String TAG = \"MainActivity\";\n  private static final int IMAGE_EDITOR_RESULT = 1;\n\n  private ImageView mEditedImageView;\n\n  @Override protected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main);\n\n    mEditedImageView = (ImageView) findViewById(R.id.edited_image_view);\n\n    Bundle extras = getIntent().getExtras();\n    if (extras != null) {\n      Uri imageUri = Uri.parse(getIntent().getExtras().getString(IMAGE_URI));\n      Intent imageEditorIntent = new AdobeImageIntent.Builder(this).setData(imageUri).build();\n      startActivityForResult(imageEditorIntent, IMAGE_EDITOR_RESULT);\n      finish(); \n    }\n  }\n\n  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {\n    super.onActivityResult(requestCode, resultCode, data);\n    if (resultCode == RESULT_OK) {\n      switch (requestCode) {\n        case IMAGE_EDITOR_RESULT:\n          Uri editedImageUri = data.getParcelableExtra(AdobeImageIntent.EXTRA_OUTPUT_URI);\n          Log.d(TAG, \"editedImageUri: \" + editedImageUri.toString());\n          Bundle extra = data.getExtras();\n          if (extra != null) {\n            boolean changed = extra.getBoolean(AdobeImageIntent.EXTRA_OUT_BITMAP_CHANGED);\n            Log.d(TAG, \"Image edited: \" + changed);\n            if (changed) {\n              mEditedImageView.setImageURI(editedImageUri);\n            }\n          }\n          break;\n\n        default:\n          throw new IllegalArgumentException(\"Unexpected request code\");\n      }\n    }\n  }\n\n  public static Intent getIntent(Context context, Bundle bundle) {\n    Intent intent = new Intent(context, MainActivity.class);\n    if (bundle != null) {\n      intent.putExtras(bundle);\n    }\n    return intent;\n  }\n}\n<\/code><\/pre>\n\n<p>So when I capture the image and then when the user is taken to edit the application, it doesn't, it takes me back to Home page again after capturing the image<\/p>\n\n<p>Error log is:<\/p>\n\n<pre><code>2018-11-04 14:56:40.629 20408-21385/com.saashtechs.photoeditor  bitmap.size: 5184x3880\n2018-11-04 14:56:40.629 20408-21385/com.saashtechs.photoeditor  resize(15)\n2018-11-04 14:56:40.629 20408-21385/com.saashtechs.photoeditor  bitmap MP: 20, max MP: 15\n2018-11-04 14:56:40.629 20408-21385/com.saashtechs.photoeditor  Image must be resized! 20MP -&gt; 15MP\n2018-11-04 14:56:40.629 20408-21385/com.saashtechs.photoeditor  target: 15MP = (4477x3351), max size: 4477\n2018-11-04 14:56:40.629 20408-21385/com.saashtechs.photoeditor  original: 20MP = (5184x3880)\n2018-11-04 14:56:40.629 20408-21385/com.saashtechs.photoeditor  maxWidth: 4477, maxHeight: 3351\n<\/code><\/pre>\n\n<p>Can you please tell me where am I going wrong ?<\/p>\n\n<p>Thanks in advance<\/p>\n",
+        "question_id": 53139458,
+        "tags": [
+            "java",
+            "android",
+            "android-bitmap",
+            "adobecreativesdk",
+            "photoeditorsdk"
+        ],
+        "score": 0,
+        "accepted_answer_id": 53140045,
+        "is_answered": true,
+        "view_count": 453,
+        "last_edit_date": 1541328551
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a76170c1f4d8c89c010a526d966e3137?s=256&d=identicon&r=PG",
+                "account_id": 2534429,
+                "user_type": "registered",
+                "user_id": 2201935,
+                "link": "https://stackoverflow.com/users/2201935/user2201935",
+                "reputation": 396,
+                "display_name": "user2201935",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53139458,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/CGDi4.png?s=256",
+                "account_id": 417765,
+                "user_type": "registered",
+                "user_id": 793943,
+                "link": "https://stackoverflow.com/users/793943/sush",
+                "reputation": 3876,
+                "display_name": "Sush",
+                "accept_rate": 78
+            },
+            "edited": false,
+            "creation_date": 1541328604,
+            "comment_id": 93171968
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/CGDi4.png?s=256",
+                "account_id": 417765,
+                "user_type": "registered",
+                "user_id": 793943,
+                "link": "https://stackoverflow.com/users/793943/sush",
+                "reputation": 3876,
+                "display_name": "Sush",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53139458,
+            "edited": false,
+            "creation_date": 1541328428,
+            "comment_id": 93171935
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/CGDi4.png?s=256",
+            "account_id": 417765,
+            "user_type": "registered",
+            "user_id": 793943,
+            "link": "https://stackoverflow.com/users/793943/sush",
+            "reputation": 3876,
+            "display_name": "Sush",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": -2,
+        "is_accepted": true,
+        "last_activity_date": 1541330896,
+        "creation_date": 1541328918,
+        "body": "<pre><code>if (extras != null) {\n  Uri imageUri = Uri.parse(getIntent().getExtras().getString(IMAGE_URI));\n  Intent imageEditorIntent = new AdobeImageIntent.Builder(this).setData(imageUri).build();\n  startActivityForResult(imageEditorIntent, IMAGE_EDITOR_RESULT);\n // below line of code is not possible. your trying to receive result over \n  //here.  \n // . but your finishing it before it receives result\nfinish(); \n}\n<\/code><\/pre>\n\n<blockquote>\n  <p>use below method close activity once data received. Pass data with set result method and then close. so your activity will have edited data.<br>\n  better solution - you dont need this intermediate activity.<\/p>\n<\/blockquote>\n\n<pre><code>@Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {\nsuper.onActivityResult(requestCode, resultCode, data);\nif (resultCode == RESULT_OK) {\n  switch (requestCode) {\n    case IMAGE_EDITOR_RESULT:\n      Uri editedImageUri = data.getParcelableExtra(AdobeImageIntent.EXTRA_OUTPUT_URI);\n      Log.d(TAG, \"editedImageUri: \" + editedImageUri.toString());\n      Bundle extra = data.getExtras();\n      if (extra != null) {\n        boolean changed = extra.getBoolean(AdobeImageIntent.EXTRA_OUT_BITMAP_CHANGED);\n        Log.d(TAG, \"Image edited: \" + changed);\n        if (changed) {\n          mEditedImageView.setImageURI(editedImageUri);\n        }\n      }\n      break;\n\n    default:\n      throw new IllegalArgumentException(\"Unexpected request code\");\n  }\n}\n}\n<\/code><\/pre>\n\n<blockquote>\n  <p>As guidance -- below code is very bad practise in android <\/p>\n<\/blockquote>\n\n<pre><code>public static Intent getIntent(Context context, Bundle bundle) {\nIntent intent = new Intent(context, MainActivity.class);\nif (bundle != null) {\n  intent.putExtras(bundle);\n}\nreturn intent;\n}\n<\/code><\/pre>\n\n<blockquote>\n  <p>Good practise. <\/p>\n<\/blockquote>\n\n<pre><code>private void navigateToPhotoEditActivity(Context context, Bundle bundle) \n       {\n    Intent intent = new Intent(context, MainActivity.class);\n    if (bundle != null) {\n      intent.putExtras(bundle);\n    }\n     startActivity(intent);\n    }\n<\/code><\/pre>\n",
+        "answer_id": 53140045,
+        "question_id": 53139458,
+        "last_edit_date": 1541330896
+    }],
+    "answer_comments": {"53140045": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/CGDi4.png?s=256",
+                "account_id": 417765,
+                "user_type": "registered",
+                "user_id": 793943,
+                "link": "https://stackoverflow.com/users/793943/sush",
+                "reputation": 3876,
+                "display_name": "Sush",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53140045,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/a76170c1f4d8c89c010a526d966e3137?s=256&d=identicon&r=PG",
+                "account_id": 2534429,
+                "user_type": "registered",
+                "user_id": 2201935,
+                "link": "https://stackoverflow.com/users/2201935/user2201935",
+                "reputation": 396,
+                "display_name": "user2201935",
+                "accept_rate": 92
+            },
+            "edited": false,
+            "creation_date": 1542546341,
+            "comment_id": 93598946
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/CGDi4.png?s=256",
+                "account_id": 417765,
+                "user_type": "registered",
+                "user_id": 793943,
+                "link": "https://stackoverflow.com/users/793943/sush",
+                "reputation": 3876,
+                "display_name": "Sush",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53140045,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/a76170c1f4d8c89c010a526d966e3137?s=256&d=identicon&r=PG",
+                "account_id": 2534429,
+                "user_type": "registered",
+                "user_id": 2201935,
+                "link": "https://stackoverflow.com/users/2201935/user2201935",
+                "reputation": 396,
+                "display_name": "user2201935",
+                "accept_rate": 92
+            },
+            "edited": false,
+            "creation_date": 1542440802,
+            "comment_id": 93576619
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a76170c1f4d8c89c010a526d966e3137?s=256&d=identicon&r=PG",
+                "account_id": 2534429,
+                "user_type": "registered",
+                "user_id": 2201935,
+                "link": "https://stackoverflow.com/users/2201935/user2201935",
+                "reputation": 396,
+                "display_name": "user2201935",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53140045,
+            "edited": false,
+            "creation_date": 1541331228,
+            "comment_id": 93172617
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a76170c1f4d8c89c010a526d966e3137?s=256&d=identicon&r=PG",
+                "account_id": 2534429,
+                "user_type": "registered",
+                "user_id": 2201935,
+                "link": "https://stackoverflow.com/users/2201935/user2201935",
+                "reputation": 396,
+                "display_name": "user2201935",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53140045,
+            "edited": false,
+            "creation_date": 1541331208,
+            "comment_id": 93172608
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a76170c1f4d8c89c010a526d966e3137?s=256&d=identicon&r=PG",
+                "account_id": 2534429,
+                "user_type": "registered",
+                "user_id": 2201935,
+                "link": "https://stackoverflow.com/users/2201935/user2201935",
+                "reputation": 396,
+                "display_name": "user2201935",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53140045,
+            "edited": false,
+            "creation_date": 1541330572,
+            "comment_id": 93172450
+        }
+    ]}
+}

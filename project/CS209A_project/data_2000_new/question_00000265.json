@@ -1,0 +1,56 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b3759fa3ad04a0fd20729382956f24a3?s=256&d=identicon&r=PG",
+            "account_id": 57639,
+            "user_type": "registered",
+            "user_id": 172690,
+            "link": "https://stackoverflow.com/users/172690/grzegorz-adam-hankiewicz",
+            "reputation": 7756,
+            "display_name": "Grzegorz Adam Hankiewicz",
+            "accept_rate": 87
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/38699825/why-does-extractmpegframestest-not-work-with-rotated-input-files",
+        "last_activity_date": 1470136550,
+        "creation_date": 1470057067,
+        "answer_count": 1,
+        "title": "Why does ExtractMpegFramesTest not work with rotated input files?",
+        "body": "<p>I'm starting to decode/encode videos for an app and it seems that <a href=\"http://bigflake.com/mediacodec/\" rel=\"nofollow noreferrer\">BigFlake's site<\/a> is the authoritative reference for working video code. I've copied the <a href=\"http://bigflake.com/mediacodec/ExtractMpegFramesTest_egl14.java.txt\" rel=\"nofollow noreferrer\">ExtractMpegFramesTest_egl14.java<\/a> into my project and modified it to use different file paths, but nothing else. It extracts properly frames from pre recorded videos I copy into the device. However, when trying to use it with a video recorded from the device's camera I get frames which are just horizontal lines:<\/p>\n\n<p><a href=\"https://i.sstatic.net/sw55P.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/sw55P.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>After testing different recorded videos I realised the problem comes from rotated videos. The device's camera encodes frames as they come from the framebuffer and then slaps a rotation tag on the video. This can be extracted from the <code>MediaFormat<\/code> object:<\/p>\n\n<pre><code>int rotation = format.getInteger(\"rotation-degrees\");\n<\/code><\/pre>\n\n<p>Unfortunately swapping the width/height of the saved image doesn't alter anything, the images still get corrupted. What has to be done to the save code to handle rotated frames correctly?<\/p>\n",
+        "question_id": 38699825,
+        "tags": [
+            "java",
+            "android",
+            "video",
+            "android-mediacodec"
+        ],
+        "score": 4,
+        "accepted_answer_id": 38708801,
+        "is_answered": true,
+        "view_count": 185,
+        "last_edit_date": 1470136550
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b3759fa3ad04a0fd20729382956f24a3?s=256&d=identicon&r=PG",
+            "account_id": 57639,
+            "user_type": "registered",
+            "user_id": 172690,
+            "link": "https://stackoverflow.com/users/172690/grzegorz-adam-hankiewicz",
+            "reputation": 7756,
+            "display_name": "Grzegorz Adam Hankiewicz",
+            "accept_rate": 87
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 6,
+        "is_accepted": true,
+        "last_activity_date": 1470088799,
+        "creation_date": 1470088799,
+        "body": "<p>As hinted by the <a href=\"https://stackoverflow.com/a/29862043/172690\">source code comment pointed out by another answer<\/a>, OpenGL requires transforming the image. The original <code>invert<\/code> boolean helps with sources which have not been rotated or have a rotation of 180 degrees. But the other orientations (90 and 270) will display a flipped image, so they have to be flipped too.<\/p>\n\n<p>Here are the changes I did to handle rotation correctly:<\/p>\n\n<ol>\n<li>Read the <code>rotation-degrees<\/code> attribute (when available) from the source media.<\/li>\n<li>Modify the <code>CodecOutputSurface<\/code> constructor to accept a numerical rotation parameter, which is stored in the <code>mRotation<\/code> instance variable.<\/li>\n<li>Modify the original <code>invert<\/code> code to be used when the rotation is 0 or 180.<\/li>\n<li>Use a different matrix transformation when the rotation is 90 or 270.<\/li>\n<\/ol>\n\n<p>You can get the full modified version from <a href=\"https://gist.github.com/gradha/081b9c479a1539bda8ad8173ef593a04\" rel=\"noreferrer\">the following gist<\/a> as well as take a look at the <a href=\"https://gist.github.com/gradha/081b9c479a1539bda8ad8173ef593a04/revisions?diff=split\" rel=\"noreferrer\">individual changes<\/a> mentioned above.<\/p>\n",
+        "answer_id": 38708801,
+        "question_id": 38699825,
+        "last_edit_date": 1495535430
+    }],
+    "answer_comments": {}
+}

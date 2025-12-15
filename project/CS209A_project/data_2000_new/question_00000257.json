@@ -1,0 +1,303 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+            "account_id": 2997527,
+            "user_type": "registered",
+            "user_id": 2543758,
+            "link": "https://stackoverflow.com/users/2543758/lion789",
+            "reputation": 4500,
+            "display_name": "Lion789",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/21192778/trying-to-use-async-with-image-upload-to-webserver-android",
+        "last_activity_date": 1389986918,
+        "creation_date": 1389981754,
+        "answer_count": 1,
+        "title": "Trying to use Async with image upload to webserver android?",
+        "body": "<p>I am trying to use Async to be more efficient and to allow for image uploads to my webserver I have tried various methods but there is always something not working...<\/p>\n\n<p>Here is my latest code but having problems with the return being an Int and if I change the<br>\n AsyncTask Int then it errors because the imagePath being passed to it is a String...<\/p>\n\n<p>This is the error<\/p>\n\n<pre><code>Type mismatch: cannot convert from int to String \n<\/code><\/pre>\n\n<p>For return 0 and return serverResponseCode;<\/p>\n\n<pre><code>public class wardrobe extends Activity implements OnClickListener {\n\n    // set variable for the fields\n    private EditText nameField, sizeField, colorField, quantityField;\n    private Spinner typeField, seasonField;\n    private ImageView imageview;\n    private ProgressBar progressBarField;\n    private TextView imageTextSelect, resImage;\n    private ProgressDialog progressDialog = null;\n    private int serverResponseCode = 0;\n    private Button uploadImageButton, postWardrobe;\n    private String upLoadServerUri = null;\n    private String imagepath = null;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.wardrobe);\n\n        // image upload stuff\n        imageview = (ImageView) findViewById(R.id.user_photo);\n        imageTextSelect = (TextView) findViewById(R.id.imageTextSelect);\n\n        // button for upload image\n        uploadImageButton = (Button) findViewById(R.id.uploadImageButton);\n\n        // button for posting details\n        postWardrobe = (Button) findViewById(R.id.postButton);\n\n        uploadImageButton.setOnClickListener(this);\n        postWardrobe.setOnClickListener(this);\n\n\n    @Override\n    public void onClick(View v) {\n        if (v == uploadImageButton) {\n            // below allows you to open the phones gallery\n            Intent intent = new Intent();\n            intent.setType(\"image/*\");\n            intent.setAction(Intent.ACTION_GET_CONTENT);\n            startActivityForResult(\n                    Intent.createChooser(intent, \"Complete action using\"), 1);\n        }\n        if (v == postWardrobe) {\n            // validate input and that something was entered\n            if (nameField.getText().toString().length() &lt; 1\n                    || colorField.getText().toString().length() &lt; 1\n                    || sizeField.getText().toString().length() &lt; 1\n                    || quantityField.getText().toString().length() &lt; 1) {\n\n                // missing required info (null was this but lets see)\n                Toast.makeText(getApplicationContext(),\n                        \"Please complete all sections!\", Toast.LENGTH_LONG)\n                        .show();\n            } else {\n                JSONObject dataWardrobe = new JSONObject();\n\n                try {\n                    dataWardrobe.put(\"type\", typeField.getSelectedItem()\n                            .toString());\n                    dataWardrobe.put(\"color\", colorField.getText().toString());\n                    dataWardrobe.put(\"season\", seasonField.getSelectedItem()\n                            .toString());\n                    dataWardrobe.put(\"size\", sizeField.getText().toString());\n                    dataWardrobe.put(\"quantity\", quantityField.getText()\n                            .toString());\n\n                } catch (JSONException e) {\n                    // TODO Auto-generated catch block\n                    e.printStackTrace();\n                }\n\n                // make progress bar visible\n                progressBarField.setVisibility(View.VISIBLE);\n\n                // execute the post request\n                new dataSend().execute(dataWardrobe);\n\n                // image below\n                progressDialog = ProgressDialog.show(wardrobe.this, \"\",\n                        \"Uploading file...\", true);\n                imageTextSelect.setText(\"uploading started.....\");\n                new Thread(new Runnable() {\n                    public void run() {\n\n                        doFileUpload(imagepath);\n\n                    }\n                }).start();\n            }\n        }\n\n    }\n\n    public void onActivityResult(int requestCode, int resultCode, Intent data) {\n        if (resultCode == RESULT_OK &amp;&amp; requestCode == 1) {\n            // Bitmap photo = (Bitmap) data.getData().getPath();\n\n            Uri selectedImageUri = data.getData();\n            imagepath = getPath(selectedImageUri);\n            Bitmap bitmap = BitmapFactory.decodeFile(imagepath);\n            imageview.setImageBitmap(bitmap);\n\n            // add to text view what was added\n            imageTextSelect.setText(\"Uploading file path: \" + imagepath);\n        }\n    }\n\n    public String getPath(Uri uri) {\n        String[] projection = { MediaStore.Images.Media.DATA };\n        Cursor cursor = getContentResolver().query(uri, projection, null, null,\n                null);\n        int column_index = cursor\n                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);\n        cursor.moveToFirst();\n        return cursor.getString(column_index);\n    }\n<\/code><\/pre>\n\n<p>Here is the part I am struggling with: <\/p>\n\n<pre><code>public int doFileUpload(String sourceFileUri) {\n        String upLoadServerUri = \"http://10.0.2.2/wardrobe\";\n        String fileName = imagepath;\n\n        HttpURLConnection conn = null;\n        DataOutputStream dos = null;\n        String lineEnd = \"\\r\\n\";\n        String twoHyphens = \"--\";\n        String boundary = \"*****\";\n        int bytesRead, bytesAvailable, bufferSize;\n        byte[] buffer;\n        int maxBufferSize = 1 * 1024 * 1024;\n        File sourceFile = new File(imagepath);\n\n        if (!sourceFile.isFile()) {\n\n            progressDialog.dismiss();\n\n            Log.e(\"uploadFile\", \"Source File not exist :\" + imagepath);\n\n            runOnUiThread(new Runnable() {\n                public void run() {\n                    imageTextSelect.setText(\"Source File not exist :\"\n                            + imagepath);\n                }\n            });\n\n            return 0;\n\n        } else {\n            try {\n\n                // open a URL connection to the Servlet\n                FileInputStream fileInputStream = new FileInputStream(\n                        sourceFile);\n                URL url = new URL(upLoadServerUri);\n\n                // Open a HTTP connection to the URL\n                conn = (HttpURLConnection) url.openConnection();\n                conn.setDoInput(true); // Allow Inputs\n                conn.setDoOutput(true); // Allow Outputs\n                conn.setUseCaches(false); // Don't use a Cached Copy\n                conn.setRequestMethod(\"POST\");\n                conn.setRequestProperty(\"Connection\", \"Keep-Alive\");\n                conn.setRequestProperty(\"ENCTYPE\", \"multipart/form-data\");\n                conn.setRequestProperty(\"Content-Type\",\n                        \"multipart/form-data;boundary=\" + boundary);\n                conn.setRequestProperty(\"uploaded_file\", fileName);\n\n                dos = new DataOutputStream(conn.getOutputStream());\n\n                dos.writeBytes(twoHyphens + boundary + lineEnd);\n                dos.writeBytes(\"Content-Disposition: form-data; name=\\\"uploaded_file\\\";filename=\\\"\"\n                        + fileName + \"\\\"\" + lineEnd);\n\n                dos.writeBytes(lineEnd);\n\n                // create a buffer of maximum size\n                bytesAvailable = fileInputStream.available();\n\n                bufferSize = Math.min(bytesAvailable, maxBufferSize);\n                buffer = new byte[bufferSize];\n\n                // read file and write it into form...\n                bytesRead = fileInputStream.read(buffer, 0, bufferSize);\n\n                while (bytesRead &gt; 0) {\n\n                    dos.write(buffer, 0, bufferSize);\n                    bytesAvailable = fileInputStream.available();\n                    bufferSize = Math.min(bytesAvailable, maxBufferSize);\n                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);\n\n                }\n\n                // send multipart form data necesssary after file data...\n                dos.writeBytes(lineEnd);\n                dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);\n\n                // Responses from the server (code and message)\n                serverResponseCode = conn.getResponseCode();\n                String serverResponseMessage = conn.getResponseMessage();\n\n                Log.i(\"uploadFile\", \"HTTP Response is : \"\n                        + serverResponseMessage + \": \" + serverResponseCode);\n\n                if (serverResponseCode == 200) {\n\n                    runOnUiThread(new Runnable() {\n                        public void run() {\n                            String msg = \"File Upload Completed.\\n\\n See uploaded file here : \\n\\n\"\n                                    + \" F:/wamp/wamp/www/uploads\";\n                            imageTextSelect.setText(msg);\n                            Toast.makeText(wardrobe.this,\n                                    \"File Upload Complete.\", Toast.LENGTH_SHORT)\n                                    .show();\n                        }\n                    });\n                }\n\n                // close the streams //\n                fileInputStream.close();\n                dos.flush();\n                dos.close();\n\n            } catch (MalformedURLException ex) {\n\n                progressDialog.dismiss();\n                ex.printStackTrace();\n\n                runOnUiThread(new Runnable() {\n                    public void run() {\n                        imageTextSelect\n                                .setText(\"MalformedURLException Exception : check script url.\");\n                        Toast.makeText(wardrobe.this, \"MalformedURLException\",\n                                Toast.LENGTH_SHORT).show();\n                    }\n                });\n\n                Log.e(\"Upload file to server\", \"error: \" + ex.getMessage(), ex);\n            } catch (Exception e) {\n\n                progressDialog.dismiss();\n                e.printStackTrace();\n\n                runOnUiThread(new Runnable() {\n                    public void run() {\n                        imageTextSelect.setText(\"Got Exception : see logcat \");\n                        Toast.makeText(wardrobe.this,\n                                \"Got Exception : see logcat \",\n                                Toast.LENGTH_SHORT).show();\n                    }\n                });\n                Log.e(\"Upload file to server Exception\",\n                        \"Exception : \" + e.getMessage(), e);\n            }\n            progressDialog.dismiss();\n            return serverResponseCode;\n\n        } // End else block\n\n    }\n<\/code><\/pre>\n",
+        "question_id": 21192778,
+        "tags": [
+            "java",
+            "android",
+            "image"
+        ],
+        "score": 0,
+        "accepted_answer_id": 21193927,
+        "is_answered": true,
+        "view_count": 1066,
+        "last_edit_date": 1389986918
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+                "account_id": 2997527,
+                "user_type": "registered",
+                "user_id": 2543758,
+                "link": "https://stackoverflow.com/users/2543758/lion789",
+                "reputation": 4500,
+                "display_name": "Lion789",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192778,
+            "edited": false,
+            "creation_date": 1389984693,
+            "comment_id": 31912198
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fbbf4ab24b72dcfa96a06a9b47ad7287?s=256&d=identicon&r=PG",
+                "account_id": 22950,
+                "user_type": "registered",
+                "user_id": 57114,
+                "link": "https://stackoverflow.com/users/57114/graywolf58",
+                "reputation": 8140,
+                "display_name": "GrayWolf58",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192778,
+            "edited": false,
+            "creation_date": 1389984605,
+            "comment_id": 31912143
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+                "account_id": 2997527,
+                "user_type": "registered",
+                "user_id": 2543758,
+                "link": "https://stackoverflow.com/users/2543758/lion789",
+                "reputation": 4500,
+                "display_name": "Lion789",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192778,
+            "edited": false,
+            "creation_date": 1389984348,
+            "comment_id": 31912014
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lvXft.jpg?s=256",
+                "account_id": 1468586,
+                "user_type": "registered",
+                "user_id": 1380752,
+                "link": "https://stackoverflow.com/users/1380752/codemagic",
+                "reputation": 44562,
+                "display_name": "codeMagic",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192778,
+            "edited": false,
+            "creation_date": 1389983817,
+            "comment_id": 31911759
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+                "account_id": 2997527,
+                "user_type": "registered",
+                "user_id": 2543758,
+                "link": "https://stackoverflow.com/users/2543758/lion789",
+                "reputation": 4500,
+                "display_name": "Lion789",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192778,
+            "edited": false,
+            "creation_date": 1389983383,
+            "comment_id": 31911528
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lvXft.jpg?s=256",
+                "account_id": 1468586,
+                "user_type": "registered",
+                "user_id": 1380752,
+                "link": "https://stackoverflow.com/users/1380752/codemagic",
+                "reputation": 44562,
+                "display_name": "codeMagic",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192778,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/667ceb2bde7548ff392b8c4f1c7c72a4?s=256&d=identicon&r=PG",
+                "account_id": 442800,
+                "user_type": "registered",
+                "user_id": 833622,
+                "link": "https://stackoverflow.com/users/833622/sherif-elkhatib",
+                "reputation": 45962,
+                "display_name": "Sherif elKhatib",
+                "accept_rate": 58
+            },
+            "edited": false,
+            "creation_date": 1389983099,
+            "comment_id": 31911376
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/667ceb2bde7548ff392b8c4f1c7c72a4?s=256&d=identicon&r=PG",
+                "account_id": 442800,
+                "user_type": "registered",
+                "user_id": 833622,
+                "link": "https://stackoverflow.com/users/833622/sherif-elkhatib",
+                "reputation": 45962,
+                "display_name": "Sherif elKhatib",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192778,
+            "edited": false,
+            "creation_date": 1389982300,
+            "comment_id": 31910970
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lvXft.jpg?s=256",
+                "account_id": 1468586,
+                "user_type": "registered",
+                "user_id": 1380752,
+                "link": "https://stackoverflow.com/users/1380752/codemagic",
+                "reputation": 44562,
+                "display_name": "codeMagic",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "post_id": 21192778,
+            "edited": false,
+            "creation_date": 1389982077,
+            "comment_id": 31910869
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lvXft.jpg?s=256",
+            "account_id": 1468586,
+            "user_type": "registered",
+            "user_id": 1380752,
+            "link": "https://stackoverflow.com/users/1380752/codemagic",
+            "reputation": 44562,
+            "display_name": "codeMagic",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 4,
+        "is_accepted": true,
+        "last_activity_date": 1389986367,
+        "creation_date": 1389985822,
+        "body": "<p>I see many several problems here. First, you almost never (if ever) want to call <code>runOnUiThread()<\/code> from <code>AsyncTask<\/code>. Every method of <code>AsyncTask<\/code> runs on the <code>UI<\/code> except for <code>doInBackground()<\/code> so this usually isn't needed and often causes problems. Update the <code>UI<\/code> with the correct methods depending on what you are doing.<\/p>\n\n<p>Second, I think you misunderstand what <code>doInBackground()<\/code> is returning. Its result is returned to <code>onPostExecute()<\/code> which is the 3rd <code>param<\/code> in your class declaration<\/p>\n\n<pre><code>private class doFileUpload extends AsyncTask &lt;String, Void, String&gt; {\n<\/code><\/pre>\n\n<p>So this means that <code>onPostExecute()<\/code> (which I don't see you overriding) should expect a <code>String<\/code> and that is what <code>doInBackground()<\/code> should <code>return<\/code>. So you should convert your <code>return<\/code> variables to <code>String<\/code> if you want to pass a <code>String<\/code> to <code>onPostExecute()<\/code><\/p>\n\n<p><a href=\"http://developer.android.com/reference/android/os/AsyncTask.html\" rel=\"nofollow\">AsyncTask Docs<\/a><\/p>\n\n<p>Typically<\/p>\n\n<pre><code>progressDialog.dismiss();\n<\/code><\/pre>\n\n<p>is called in <code>onPostExecute()<\/code> and <\/p>\n\n<pre><code>progressDialog.show();\n<\/code><\/pre>\n\n<p>would be called in <code>onPreExecute()<\/code> when using an <code>AsyncTask<\/code>. Then you don't have to create a new <code>Thread<\/code> in your <code>onClick()<\/code>.<\/p>\n",
+        "answer_id": 21193927,
+        "question_id": 21192778,
+        "last_edit_date": 1389986367
+    }],
+    "answer_comments": {"21193927": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lvXft.jpg?s=256",
+                "account_id": 1468586,
+                "user_type": "registered",
+                "user_id": 1380752,
+                "link": "https://stackoverflow.com/users/1380752/codemagic",
+                "reputation": 44562,
+                "display_name": "codeMagic",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193927,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+                "account_id": 2997527,
+                "user_type": "registered",
+                "user_id": 2543758,
+                "link": "https://stackoverflow.com/users/2543758/lion789",
+                "reputation": 4500,
+                "display_name": "Lion789",
+                "accept_rate": 61
+            },
+            "edited": false,
+            "creation_date": 1389987556,
+            "comment_id": 31913817
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+                "account_id": 2997527,
+                "user_type": "registered",
+                "user_id": 2543758,
+                "link": "https://stackoverflow.com/users/2543758/lion789",
+                "reputation": 4500,
+                "display_name": "Lion789",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193927,
+            "edited": false,
+            "creation_date": 1389987023,
+            "comment_id": 31913495
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lvXft.jpg?s=256",
+                "account_id": 1468586,
+                "user_type": "registered",
+                "user_id": 1380752,
+                "link": "https://stackoverflow.com/users/1380752/codemagic",
+                "reputation": 44562,
+                "display_name": "codeMagic",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 21193927,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+                "account_id": 2997527,
+                "user_type": "registered",
+                "user_id": 2543758,
+                "link": "https://stackoverflow.com/users/2543758/lion789",
+                "reputation": 4500,
+                "display_name": "Lion789",
+                "accept_rate": 61
+            },
+            "edited": false,
+            "creation_date": 1389986838,
+            "comment_id": 31913398
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/919f74bd5f7f709961f23176f1b1212c?s=256&d=identicon&r=PG",
+                "account_id": 2997527,
+                "user_type": "registered",
+                "user_id": 2543758,
+                "link": "https://stackoverflow.com/users/2543758/lion789",
+                "reputation": 4500,
+                "display_name": "Lion789",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193927,
+            "edited": false,
+            "creation_date": 1389986780,
+            "comment_id": 31913355
+        }
+    ]}
+}

@@ -1,0 +1,168 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/625885ddb9d9bec3d5da6a606a5642d0?s=256&d=identicon&r=PG",
+            "account_id": 2080105,
+            "user_type": "registered",
+            "user_id": 1855273,
+            "link": "https://stackoverflow.com/users/1855273/kalima",
+            "reputation": 2070,
+            "display_name": "KaliMa",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/44937279/how-to-take-r-string-value-instead-of-hardcoded-value-if-its-a-class-field",
+        "last_activity_date": 1499308756,
+        "creation_date": 1499295569,
+        "answer_count": 3,
+        "title": "How to take R.string value instead of hardcoded value, if it&#39;s a class field?",
+        "body": "<p>For instance I want to take this<\/p>\n\n<pre><code>public class SomeClass {\n    public static final String GREET_STRING = \"Hello!\";\n    //...\n<\/code><\/pre>\n\n<p>and change it to something like:<\/p>\n\n<pre><code>public class SomeClass {\n    public static final String GREET_STRING = getString(R.string.greet_string);\n    //...\n<\/code><\/pre>\n\n<p>Can this be done or do I need some kind of Context instantiation to get the resources for the string loading?<\/p>\n",
+        "question_id": 44937279,
+        "tags": [
+            "java",
+            "android",
+            "xml",
+            "string",
+            "resources"
+        ],
+        "score": 0,
+        "accepted_answer_id": 44937351,
+        "is_answered": true,
+        "view_count": 72
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f5c00b0a93b577f833c03082c33244e2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9468528,
+                "user_type": "registered",
+                "user_id": 7040018,
+                "link": "https://stackoverflow.com/users/7040018/maclean-sochor",
+                "reputation": 445,
+                "display_name": "MacLean Sochor"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1499296065,
+            "creation_date": 1499296065,
+            "body": "<p>To use <code>getString()<\/code> you will need a context. A Resource string cannot be <code>static final<\/code> because it is possible for String resources to change as you change Locales (if you have multiple String files such as <code>strings.xml (us)<\/code> and <code>strings.xml (uk)<\/code>)<\/p>\n",
+            "answer_id": 44937351,
+            "question_id": 44937279
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f041ddc4da64e6044d7cf3c1ffa6599e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9777748,
+                "user_type": "registered",
+                "user_id": 7247051,
+                "link": "https://stackoverflow.com/users/7247051/ihdina",
+                "reputation": 2025,
+                "display_name": "Ihdina",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1499300244,
+            "creation_date": 1499300244,
+            "body": "<p>Try this:<\/p>\n\n<pre><code>public abstract class SomeClass extends AppCompatActivity {\n\n    public static String GREET_STRING(Context context) {\n        if (context == null) {\n            return null;\n        }\n        return context.getResources().getString(R.string.greet_string);\n    }\n}\n<\/code><\/pre>\n\n<p>Res/Value/String:<\/p>\n\n<pre><code>&lt;resources&gt;\n    &lt;string name=\"greet_string\"&gt;Hello!&lt;/string&gt;\n&lt;/resources&gt;\n<\/code><\/pre>\n\n<p>Call SomeClass from MainClass<\/p>\n\n<pre><code>public class MainClass extends SomeClass {\n    private final static String TAG = MainClass.class.getName();\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n\n        // call SomeClass from MainClass\n        Log.i(TAG, SomeClass.GREET_STRING(this));\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 44937901,
+            "question_id": 44937279
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/79f9d3f6e687d11752b37d8de7998c09?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8183079,
+                "user_type": "registered",
+                "user_id": 6159609,
+                "link": "https://stackoverflow.com/users/6159609/kirk-hehe",
+                "reputation": 488,
+                "display_name": "Kirk_hehe"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1499308756,
+            "creation_date": 1499308756,
+            "body": "<p>There are two ways access the string inside the class which is not extending Activity or Fragment.<\/p>\n\n<ol>\n<li><p>Pass <code>Context<\/code> or <code>Activity<\/code> to class constructor<\/p>\n\n<pre><code>public class SomeClass {\n    private Context context;\n    public SomeClass(Context context) {\n        this.context = context;\n    }\n    public static final String GREET_STRING = context.getString(R.string.greet_string);\n}\n<\/code><\/pre><\/li>\n<li><p>The second way is if you don`t want to pass context to class. You need to create an instance of the Application and static function get instance.<\/p>\n\n<pre><code>public class App extends Application {\n        private static App instance = null;\n        @Override\n        public void onCreate() {\n            super.onCreate();\n            instance = this;\n        }\n        public static App getInstance() {\n            // Return the instance\n            return instance;\n        }\n}       \n\npublic class SomeClass {\n        public static final String GREET_STRING = App.getInstance().getString(R.string.greet_string);\n    }\n<\/code><\/pre><\/li>\n<\/ol>\n",
+            "answer_id": 44938920,
+            "question_id": 44937279
+        }
+    ],
+    "answer_comments": {"44937351": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f5c00b0a93b577f833c03082c33244e2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9468528,
+                "user_type": "registered",
+                "user_id": 7040018,
+                "link": "https://stackoverflow.com/users/7040018/maclean-sochor",
+                "reputation": 445,
+                "display_name": "MacLean Sochor"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937351,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/625885ddb9d9bec3d5da6a606a5642d0?s=256&d=identicon&r=PG",
+                "account_id": 2080105,
+                "user_type": "registered",
+                "user_id": 1855273,
+                "link": "https://stackoverflow.com/users/1855273/kalima",
+                "reputation": 2070,
+                "display_name": "KaliMa",
+                "accept_rate": 85
+            },
+            "edited": false,
+            "creation_date": 1499296463,
+            "comment_id": 76851173
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f5c00b0a93b577f833c03082c33244e2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9468528,
+                "user_type": "registered",
+                "user_id": 7040018,
+                "link": "https://stackoverflow.com/users/7040018/maclean-sochor",
+                "reputation": 445,
+                "display_name": "MacLean Sochor"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937351,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/625885ddb9d9bec3d5da6a606a5642d0?s=256&d=identicon&r=PG",
+                "account_id": 2080105,
+                "user_type": "registered",
+                "user_id": 1855273,
+                "link": "https://stackoverflow.com/users/1855273/kalima",
+                "reputation": 2070,
+                "display_name": "KaliMa",
+                "accept_rate": 85
+            },
+            "edited": false,
+            "creation_date": 1499296201,
+            "comment_id": 76851102
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/625885ddb9d9bec3d5da6a606a5642d0?s=256&d=identicon&r=PG",
+                "account_id": 2080105,
+                "user_type": "registered",
+                "user_id": 1855273,
+                "link": "https://stackoverflow.com/users/1855273/kalima",
+                "reputation": 2070,
+                "display_name": "KaliMa",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937351,
+            "edited": false,
+            "creation_date": 1499296108,
+            "comment_id": 76851079
+        }
+    ]}
+}

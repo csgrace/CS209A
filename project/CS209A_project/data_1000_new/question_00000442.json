@@ -1,0 +1,93 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/127af7074429a3240644f7ac7485cf3d?s=256&d=identicon&r=PG",
+            "account_id": 1493664,
+            "user_type": "registered",
+            "user_id": 1400108,
+            "link": "https://stackoverflow.com/users/1400108/sidsethupathi",
+            "reputation": 81,
+            "display_name": "SidSethupathi"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75166788/java-net-urlconnection-fails-to-connect-via-http-or-https",
+        "last_activity_date": 1674089422,
+        "creation_date": 1674089422,
+        "answer_count": 0,
+        "title": "java.net.URLConnection fails to connect via http or https",
+        "body": "<p>I am debugging an issue with my local Fiji/ImageJ installation failing to update through the Help -&gt; Update UI. The ImageJ code that triggers the issue is this updater code: <a href=\"https://github.com/imagej/imagej-ui-swing/blob/78a3180b6bc830166d15c73a01443c7a642c3908/src/main/java/net/imagej/ui/swing/updater/ImageJUpdater.java#L360-L370\" rel=\"nofollow noreferrer\">https://github.com/imagej/imagej-ui-swing/blob/78a3180b6bc830166d15c73a01443c7a642c3908/src/main/java/net/imagej/ui/swing/updater/ImageJUpdater.java#L360-L370<\/a><\/p>\n<p>I wrote minimal test case to reproduce this pointing JAVA_HOME at the Fiji/ImageJ application (<code>/Applications/Fiji.app/java/macosx/zulu8.60.0.21-ca-fx-jdk8.0.322-macosx_x64/jre/Contents/Home<\/code>).<\/p>\n<pre><code>import java.net.URL;\nimport java.net.URLClassLoader;\nimport java.net.URLConnection;\nimport java.io.IOException;\nimport java.net.HttpURLConnection;\n\nclass HelloWorld {\n    public static void main(String[] args) {\n        try {\n            final URL url = new URL(&quot;http://neverssl.com&quot;);\n            final URLConnection urlConn = url.openConnection();\n            final HttpURLConnection httpConn = (HttpURLConnection) urlConn;\n\n            final int code = httpConn.getResponseCode();\n        } catch (IOException ioe) {\n            ioe.printStackTrace();\n        }\n    }\n}\n\n<\/code><\/pre>\n<p>This code results in the following error:<\/p>\n<pre><code>java.io.IOException: Error writing to server\n    at sun.net.www.protocol.http.HttpURLConnection.writeRequests(HttpURLConnection.java:705)\n    at sun.net.www.protocol.http.HttpURLConnection.writeRequests(HttpURLConnection.java:717)\n    at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1598)\n    at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1505)\n    at java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:480)\n    at HelloWorld.main(HelloWorld.java:14)\n<\/code><\/pre>\n<p>If I change the URL to an https URL, the error changes to<\/p>\n<pre><code>javax.net.ssl.SSLException: Couldn't kickstart handshaking\n    at sun.security.ssl.Alert.createSSLException(Alert.java:127)\n    at sun.security.ssl.TransportContext.fatal(TransportContext.java:348)\n    at sun.security.ssl.TransportContext.fatal(TransportContext.java:291)\n    at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:449)\n    at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:410)\n    at sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:559)\n    at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:197)\n    at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1577)\n    at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1505)\n    at java.net.HttpURLConnection.getResponseCode(HttpURLConnection.java:480)\n    at sun.net.www.protocol.https.HttpsURLConnectionImpl.getResponseCode(HttpsURLConnectionImpl.java:352)\n    at HelloWorld.main(HelloWorld.java:14)\n    Suppressed: java.net.SocketException: Broken pipe (Write failed)\n        at java.net.SocketOutputStream.socketWrite0(Native Method)\n        at java.net.SocketOutputStream.socketWrite(SocketOutputStream.java:111)\n        at java.net.SocketOutputStream.write(SocketOutputStream.java:155)\n        at sun.security.ssl.SSLSocketOutputRecord.encodeAlert(SSLSocketOutputRecord.java:81)\n        at sun.security.ssl.TransportContext.fatal(TransportContext.java:379)\n        ... 10 more\nCaused by: java.net.SocketException: Broken pipe (Write failed)\n    at java.net.SocketOutputStream.socketWrite0(Native Method)\n    at java.net.SocketOutputStream.socketWrite(SocketOutputStream.java:111)\n    at java.net.SocketOutputStream.write(SocketOutputStream.java:155)\n    at sun.security.ssl.SSLSocketOutputRecord.flush(SSLSocketOutputRecord.java:251)\n    at sun.security.ssl.HandshakeOutStream.flush(HandshakeOutStream.java:89)\n    at sun.security.ssl.ClientHello$ClientHelloKickstartProducer.produce(ClientHello.java:580)\n    at sun.security.ssl.SSLHandshake.kickstart(SSLHandshake.java:510)\n    at sun.security.ssl.ClientHandshakeContext.kickstart(ClientHandshakeContext.java:112)\n    at sun.security.ssl.TransportContext.kickstart(TransportContext.java:231)\n    at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:432)\n    ... 8 more\n<\/code><\/pre>\n<p>Comparing a <code>tcpdump<\/code> filtered on the attempted host on this machine compared to a working one, I see early FIN packets being sent before any PSH packets are sent, so I think that is related to connections closing early.<\/p>\n<p>On another machine running the same OS X version, I ran the same snippet pointing JAVA_HOME at the same directory, and had no issues.<\/p>\n",
+        "question_id": 75166788,
+        "tags": [
+            "java",
+            "imagej",
+            "fiji"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 259
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/60eb1bb1addddd9e4796b0da2bc0b70c?s=256&d=identicon&r=PG",
+                "account_id": 23489713,
+                "user_type": "registered",
+                "user_id": 17540894,
+                "link": "https://stackoverflow.com/users/17540894/herbie",
+                "reputation": 346,
+                "display_name": "Herbie"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75166788,
+            "edited": false,
+            "creation_date": 1674139159,
+            "comment_id": 132654552
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/127af7074429a3240644f7ac7485cf3d?s=256&d=identicon&r=PG",
+                "account_id": 1493664,
+                "user_type": "registered",
+                "user_id": 1400108,
+                "link": "https://stackoverflow.com/users/1400108/sidsethupathi",
+                "reputation": 81,
+                "display_name": "SidSethupathi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75166788,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/60eb1bb1addddd9e4796b0da2bc0b70c?s=256&d=identicon&r=PG",
+                "account_id": 23489713,
+                "user_type": "registered",
+                "user_id": 17540894,
+                "link": "https://stackoverflow.com/users/17540894/herbie",
+                "reputation": 346,
+                "display_name": "Herbie"
+            },
+            "edited": false,
+            "creation_date": 1674138917,
+            "comment_id": 132654468
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/60eb1bb1addddd9e4796b0da2bc0b70c?s=256&d=identicon&r=PG",
+                "account_id": 23489713,
+                "user_type": "registered",
+                "user_id": 17540894,
+                "link": "https://stackoverflow.com/users/17540894/herbie",
+                "reputation": 346,
+                "display_name": "Herbie"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75166788,
+            "edited": false,
+            "creation_date": 1674124160,
+            "comment_id": 132649480
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

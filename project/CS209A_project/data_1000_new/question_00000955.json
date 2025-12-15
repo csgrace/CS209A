@@ -1,0 +1,92 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1122009917843212/picture?type=large",
+            "account_id": 8259880,
+            "user_type": "registered",
+            "user_id": 6211735,
+            "link": "https://stackoverflow.com/users/6211735/anton-ivanov",
+            "reputation": 359,
+            "display_name": "Anton Ivanov"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60025859/how-to-avoid-joining-table-when-querying-by-a-foreign-key",
+        "last_activity_date": 1720199466,
+        "creation_date": 1580644787,
+        "answer_count": 2,
+        "title": "How to avoid joining table when querying by a foreign key?",
+        "body": "<p>I have a <code>Comment<\/code> class with a <code>user<\/code> property defined as:<\/p>\n\n<pre><code>    @ManyToOne(fetch = FetchType.LAZY)\n    @JoinColumn(name = \"user_id\")\n    @NonNull\n    private User user;\n<\/code><\/pre>\n\n<p>I have a <code>CommentRepository<\/code>:<\/p>\n\n<pre><code>public interface CommentRepository extends CrudRepository&lt;Comment, Integer&gt; {\n    List&lt;Comment&gt; findByUserId(Integer userId);\n}\n<\/code><\/pre>\n\n<p>I want to query a particular user's comments by his id.<\/p>\n\n<p>I'm doing this:<\/p>\n\n<p><code>commentRepository.findByUserId(userId);<\/code><\/p>\n\n<p>everything works fine except the query looks like:<\/p>\n\n<pre><code>select\n    comment0_.\"id\" as id1_1_,\n    comment0_.\"text\" as url2_1_,\n    comment0_.\"user_id\" as user_id3_1_\n    from\n        \"comments\" comment0_\n    left outer join\n        \"users\" user1_\n    on comment0_.\"user_id\"=user1_.\"id\"\n    where\n    user1_.\"id\"=?\n<\/code><\/pre>\n\n<p>I want to avoid this join as I can query directly by the <code>user_id<\/code> column in a <code>comments<\/code> table.<\/p>\n\n<p>I don't want to use a <code>@Query<\/code> annotation, I think there should be a smarter way.<\/p>\n",
+        "question_id": 60025859,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "jpa"
+        ],
+        "score": 4,
+        "accepted_answer_id": 60026198,
+        "is_answered": true,
+        "view_count": 1121,
+        "last_edit_date": 1580644888
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ca3ff8271a76eee7826c1bc7c838a6dc?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9056087,
+                "user_type": "registered",
+                "user_id": 6744399,
+                "link": "https://stackoverflow.com/users/6744399/pavelety",
+                "reputation": 884,
+                "display_name": "pavelety"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1720199466,
+            "creation_date": 1720199466,
+            "body": "<p>I tried a few approaches and the only one that removes the <code>inner join<\/code> is:<\/p>\n<pre><code>@Column(name = &quot;`user_id`&quot;, insertable = false, updatable = false)\nprivate Long userId;\n\n@ManyToOne(optional = false, fetch = FetchType.LAZY)\nprivate User user;\n<\/code><\/pre>\n<p>Add an extra field <code>userId<\/code> (even getter/setter are not required). You do not require to set this field on create/update entity.<\/p>\n<p>As a bonus it comes handy to add getter to fast access <code>userId<\/code> without fetching the User from the database: <code>entity.getUserId()<\/code> instead of <code>entity.getUser().getId()<\/code>.<\/p>\n<p>Note that it's not necessary to add <code>@JoinColumn<\/code> if you use conventional naming.<\/p>\n",
+            "answer_id": 78712644,
+            "question_id": 60025859
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/d2X8r.jpg?s=256",
+                "account_id": 4783850,
+                "user_type": "registered",
+                "user_id": 3864917,
+                "link": "https://stackoverflow.com/users/3864917/vikas",
+                "reputation": 7231,
+                "display_name": "Vikas",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1580647430,
+            "creation_date": 1580647430,
+            "body": "<p>The default value for @ManyToOne(optional = true) and @JoinColumn(nullable = true) causes this extra join. You may try,<\/p>\n\n<pre><code>@ManyToOne(fetch=FetchType.LAZY, optional = false)\n@JoinColumn(name=\"`user_id `\", nullable = false)\n<\/code><\/pre>\n",
+            "answer_id": 60026198,
+            "question_id": 60025859
+        }
+    ],
+    "answer_comments": {"78712644": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/5fMdJ.jpg?s=256",
+            "account_id": 1862192,
+            "user_type": "registered",
+            "user_id": 1686575,
+            "link": "https://stackoverflow.com/users/1686575/john-manko",
+            "reputation": 1972,
+            "display_name": "John Manko",
+            "accept_rate": 65
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 78712644,
+        "edited": false,
+        "creation_date": 1720209222,
+        "comment_id": 138777919
+    }]}
+}

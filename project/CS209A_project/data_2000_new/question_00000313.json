@@ -1,0 +1,155 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-rP4vJ0VJOt4/AAAAAAAAAAI/AAAAAAAAANU/HbNICQjHImo/s256-rj/photo.jpg",
+            "account_id": 6139816,
+            "user_type": "registered",
+            "user_id": 4787556,
+            "link": "https://stackoverflow.com/users/4787556/aleksandr-korotkov",
+            "reputation": 92,
+            "display_name": "Aleksandr Korotkov",
+            "accept_rate": 62
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29646917/failed-to-create-the-parts-control-treeviewer-classcastexception",
+        "last_activity_date": 1429097763,
+        "creation_date": 1429091180,
+        "answer_count": 1,
+        "title": "Failed to create the part&#39;s control treeviewer. ClassCastException",
+        "body": "<p>I want to create a project tree explorer in my RCP application.\n<br>This is my viewpart for tree:<\/p>\n\n<pre><code>public class ProjectExplorer extends ViewPart{  \n    public static final String ID = \"rcp.projectexplorer\";\n    public ProjectExplorer() {\n    }\n    private TreeViewer viewer;\n    public void createPartControl(Composite parent) {\n        viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);\n        viewer.setContentProvider(new ViewContentProvider());\n        viewer.setLabelProvider(new ViewLabelProvider());\n        viewer.setInput(ProjectManager.getInstance().getProjects().toArray());\n    }\n\n    @Override\n    public void setFocus() {\n        viewer.getControl().setFocus();\n    }\n\n}\n<\/code><\/pre>\n\n<p><code>ProjectManager.getInstance().getProjects().toArray()<\/code> - returns array with current projects.\nEach project implements the interface <code>IProjectNode<\/code>.\n<br>In ContentProvider the method <code>Object[] getElements(Object inputElement)<\/code> I try to cast projects (<code>inputElement<\/code>) from <code>Object[]<\/code> to <code>IProjectNode[]<\/code>.<\/p>\n\n<pre><code>public class ViewContentProvider implements ITreeContentProvider {\n\n    @Override\n    public void dispose() {\n        // TODO Auto-generated method stub\n\n    }\n\n    @Override\n    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {\n        // TODO Auto-generated method stub\n\n    }\n\n    @Override\n    public Object[] getElements(Object inputElement) {\n        return (IProjectNode[])inputElement;\n    }\n\n    @Override\n    public Object[] getChildren(Object parentElement) {\n        return ((IProjectNode)parentElement).getChildren();\n    }\n\n    @Override\n    public Object getParent(Object element) {\n        // TODO Auto-generated method stub\n        return ((IProjectNode)element).getParent();\n    }\n\n    @Override\n    public boolean hasChildren(Object element) {\n        if (((IProjectNode)element).getChildren() == null)\n            return true;\n        return false;\n    }\n\n}\n<\/code><\/pre>\n\n<p>But I have following error:\"Failed to create the part's controls\".\n<br><\/p>\n\n<pre class=\"lang-none prettyprint-override\"><code>java.lang.ClassCastException: [Ljava.lang.Object; cannot be cast to [Lrcp.projects.source.IProjectNode;\nat rcp.projects.ViewContentProvider.getElements(ViewContentProvider.java:24)\nat org.eclipse.jface.viewers.StructuredViewer.getRawChildren(StructuredViewer.java:999)\nat org.eclipse.jface.viewers.ColumnViewer.getRawChildren(ColumnViewer.java:699)\n<\/code><\/pre>\n\n<p>Each child in projects also implements <code>IProjectNode<\/code>.<\/p>\n\n<p>How I can fix this exception? What I doing wrong?\n<br>\nInfo about children methods:\n<br><\/p>\n\n<pre><code>public boolean hasChildren(Object element) {'\n        if (((IProjectNode)element).getChildren() == null)\n            return false;\n        return true;\n    }\n<\/code><\/pre>\n\n<p><br>\nImplements for 'getChildren()' in Project class:  <br/><\/p>\n\n<pre><code>public IProjectNode[] getChildren() {\n        IProjectNode[] projectNodes = {\n                settingsFile,\n                ldlFile,\n                pythonFolder,\n                outFolder\n                };\n        return projectNodes;\n    }\n<\/code><\/pre>\n\n<p><br>\n<code>settingsFile, ldlFile, pythonFolder, outFolder<\/code> also implements <code>IProjectNode<\/code>.<\/p>\n",
+        "question_id": 29646917,
+        "tags": [
+            "java",
+            "eclipse",
+            "treeview",
+            "rcp",
+            "classcastexception"
+        ],
+        "score": 0,
+        "accepted_answer_id": 29647226,
+        "is_answered": true,
+        "view_count": 136,
+        "last_edit_date": 1429097763
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e9811b4e913bb88e51da931471ad5aa7?s=256&d=identicon&r=PG",
+            "account_id": 1418844,
+            "user_type": "registered",
+            "user_id": 1343904,
+            "link": "https://stackoverflow.com/users/1343904/ben-win",
+            "reputation": 840,
+            "display_name": "Ben Win",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 29646917,
+        "edited": false,
+        "creation_date": 1429091855,
+        "comment_id": 47434321
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/4iPV5.png?s=256",
+            "account_id": 3159259,
+            "user_type": "registered",
+            "user_id": 2670892,
+            "link": "https://stackoverflow.com/users/2670892/greg-449",
+            "reputation": 111562,
+            "display_name": "greg-449"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1429095143,
+        "creation_date": 1429092039,
+        "body": "<p>In<\/p>\n\n<pre><code>ProjectManager.getInstance().getProjects().toArray();\n<\/code><\/pre>\n\n<p>the <code>toArray()<\/code> method returns an array of <code>Object<\/code> which you cannot cast to an array of <code>IProjectNode<\/code> (even though the actual contents is an array of those nodes).<\/p>\n\n<p>Instead use:<\/p>\n\n<pre><code>ProjectManager.getInstance().getProjects().toArray(new IProjectNode[0]);\n<\/code><\/pre>\n\n<p>This form of <code>toArray<\/code> does return an array of <code>IProjectNode<\/code><\/p>\n\n<p>Also your <code>hasChildren<\/code> method is returning 'true' when the project node 'getChildren' returns null and 'false' when there are actually children. You need something like:<\/p>\n\n<pre><code>@Override\npublic boolean hasChildren(Object element) {\n    return ((IProjectNode)element).getChildren() != null;\n}\n<\/code><\/pre>\n",
+        "answer_id": 29647226,
+        "question_id": 29646917,
+        "last_edit_date": 1429095143
+    }],
+    "answer_comments": {"29647226": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-rP4vJ0VJOt4/AAAAAAAAAAI/AAAAAAAAANU/HbNICQjHImo/s256-rj/photo.jpg",
+                "account_id": 6139816,
+                "user_type": "registered",
+                "user_id": 4787556,
+                "link": "https://stackoverflow.com/users/4787556/aleksandr-korotkov",
+                "reputation": 92,
+                "display_name": "Aleksandr Korotkov",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647226,
+            "edited": false,
+            "creation_date": 1429100213,
+            "comment_id": 47439690
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/4iPV5.png?s=256",
+                "account_id": 3159259,
+                "user_type": "registered",
+                "user_id": 2670892,
+                "link": "https://stackoverflow.com/users/2670892/greg-449",
+                "reputation": 111562,
+                "display_name": "greg-449"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647226,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-rP4vJ0VJOt4/AAAAAAAAAAI/AAAAAAAAANU/HbNICQjHImo/s256-rj/photo.jpg",
+                "account_id": 6139816,
+                "user_type": "registered",
+                "user_id": 4787556,
+                "link": "https://stackoverflow.com/users/4787556/aleksandr-korotkov",
+                "reputation": 92,
+                "display_name": "Aleksandr Korotkov",
+                "accept_rate": 62
+            },
+            "edited": false,
+            "creation_date": 1429098055,
+            "comment_id": 47438254
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-rP4vJ0VJOt4/AAAAAAAAAAI/AAAAAAAAANU/HbNICQjHImo/s256-rj/photo.jpg",
+                "account_id": 6139816,
+                "user_type": "registered",
+                "user_id": 4787556,
+                "link": "https://stackoverflow.com/users/4787556/aleksandr-korotkov",
+                "reputation": 92,
+                "display_name": "Aleksandr Korotkov",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647226,
+            "edited": false,
+            "creation_date": 1429097839,
+            "comment_id": 47438081
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-rP4vJ0VJOt4/AAAAAAAAAAI/AAAAAAAAANU/HbNICQjHImo/s256-rj/photo.jpg",
+                "account_id": 6139816,
+                "user_type": "registered",
+                "user_id": 4787556,
+                "link": "https://stackoverflow.com/users/4787556/aleksandr-korotkov",
+                "reputation": 92,
+                "display_name": "Aleksandr Korotkov",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647226,
+            "edited": false,
+            "creation_date": 1429093293,
+            "comment_id": 47435287
+        }
+    ]}
+}

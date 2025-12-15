@@ -1,0 +1,707 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/TyhhC.jpg?s=256",
+            "account_id": 6929813,
+            "user_type": "registered",
+            "user_id": 5319625,
+            "link": "https://stackoverflow.com/users/5319625/oleg-gritsak",
+            "reputation": 592,
+            "display_name": "Oleg Gritsak",
+            "accept_rate": 69
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/32602055/improving-speed-and-memory-consumption-when-handling-arraylist-with-100-million",
+        "last_activity_date": 1442484192,
+        "creation_date": 1442387812,
+        "answer_count": 8,
+        "title": "Improving speed and memory consumption when handling ArrayList with 100 million elements",
+        "body": "<p>I work with text files with short strings in it (10 digits). The size of file is approx 1.5Gb, so the number of rows is reaching 100 millions.<\/p>\n\n<p>Every day I get another file and need to extract new elements (tens of thousands a day).<\/p>\n\n<p>What's the best approach to solve my problem? <\/p>\n\n<p>I tried to load data in ArrayList - it takes around 20 seconds for each file, but substraction of arrays takes forever.<\/p>\n\n<p>I use this code:<\/p>\n\n<pre><code>dataNew.removeAll(dataOld);\n<\/code><\/pre>\n\n<p>Tried to load data in HashSets - creation of HashSets is endless.\nThe same with LinkedHashset.<\/p>\n\n<p>Tried to load into ArrayLists and to sort only one of them <\/p>\n\n<pre><code>Collections.sort(dataNew);\n<\/code><\/pre>\n\n<p>but it didn't speed up the process of<\/p>\n\n<pre><code>dataNew.removeAll(dataOld);\n<\/code><\/pre>\n\n<p>Also memory consumption is rather high - sort() finishes only with heap of 15Gb (13Gb is not enough).<\/p>\n\n<p>I've tried to use old good linux util diff and it finished the task in 76 minutes (while eating 8Gb of RAM).<\/p>\n\n<p>So, my goal is to solve the problem in Java within 1 hour of processing time (or less, of course) and with consumption of 15Gb (or better 8-10Gb).<\/p>\n\n<p>Any suggestions, please?\nMaybe I need not alphabetic sorting of ArrayList, but something else?<\/p>\n\n<p><strong>UPDATE:<\/strong>\nThis is a country-wide list of invalid passports. It is published as a global list, so I need to extract delta by myself. <\/p>\n\n<p>Data is unsorted and each row is unique. So I must compare 100M elements with 100M elements. Dataline is for example, \"2404,107263\". Converting to integer is not possible.<\/p>\n\n<p>Interesting, when I increased maximum heap size to 16Gb<\/p>\n\n<pre><code>java -Xms5G -Xmx16G -jar utils.jar\n<\/code><\/pre>\n\n<p>loading to HashSet became fast (50 seconds for first file), but program gets killed by system Out-Of-Memory killer, as it eats enormous amounts of RAM while loading second file to second HashSet or ArrayList<\/p>\n\n<p>My code is very simple:<\/p>\n\n<pre><code>List&lt;String&gt; setL = Files.readAllLines(Paths.get(\"filename\"));\nHashSet&lt;String&gt; dataNew = new HashSet&lt;&gt;(setL);\n<\/code><\/pre>\n\n<p>on second file the program gets<\/p>\n\n<p>Killed<\/p>\n\n<p>[1408341.392872] Out of memory: Kill process 20538 (java) score 489 or sacrifice child\n[1408341.392874] Killed process 20531 (java) total-vm:20177160kB, anon-rss:16074268kB, file-rss:0kB<\/p>\n\n<p><strong>UPDATE2:<\/strong><\/p>\n\n<p>Thanks for all your ideas!<\/p>\n\n<p>Final solution is: converting lines to Long + using fastutil library (LongOpenHashSet)<\/p>\n\n<p>RAM consumption became 3.6Gb and processing time only 40 seconds!<\/p>\n\n<p>Interesting observation. While starting java with default settings made loading 100 million Strings to JDK's native HashSet endless (I interrupted after 1 hour), starting with -Xmx16G speedup the process to 1 minute. But memory consumption was ridiculous (around 20Gb), processing speed was rather fine - 2 minutes.<\/p>\n\n<p>If someone is not limited to by RAM, native JDK HashSet is not so bad in terms of speed.<\/p>\n\n<p>p.s. Maybe the task is not clearly explained, but I do not see any opportunity not to load at least one file entirely. So, I doubt memory consumption can be further lowered by much.<\/p>\n",
+        "question_id": 32602055,
+        "tags": [
+            "java",
+            "performance",
+            "arraylist",
+            "hashset"
+        ],
+        "score": 4,
+        "accepted_answer_id": 32604454,
+        "is_answered": true,
+        "view_count": 3592,
+        "last_edit_date": 1442462955
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                "account_id": 8546,
+                "user_type": "registered",
+                "user_id": 15472,
+                "link": "https://stackoverflow.com/users/15472/tucuxi",
+                "reputation": 18030,
+                "display_name": "tucuxi",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442399608,
+            "comment_id": 53063466
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Ek3za.png?s=256",
+                "account_id": 668476,
+                "user_type": "registered",
+                "user_id": 504956,
+                "link": "https://stackoverflow.com/users/504956/v-g",
+                "reputation": 19022,
+                "display_name": "V G",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442395662,
+            "comment_id": 53060888
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TyhhC.jpg?s=256",
+                "account_id": 6929813,
+                "user_type": "registered",
+                "user_id": 5319625,
+                "link": "https://stackoverflow.com/users/5319625/oleg-gritsak",
+                "reputation": 592,
+                "display_name": "Oleg Gritsak",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442394005,
+            "comment_id": 53059845
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4cf74649b70fc946650115e0d5067ebe?s=256&d=identicon&r=PG",
+                "account_id": 1328773,
+                "user_type": "registered",
+                "user_id": 1273080,
+                "link": "https://stackoverflow.com/users/1273080/petr-jane%c4%8dek",
+                "reputation": 38522,
+                "display_name": "Petr Janeček",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442393879,
+            "comment_id": 53059773
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TyhhC.jpg?s=256",
+                "account_id": 6929813,
+                "user_type": "registered",
+                "user_id": 5319625,
+                "link": "https://stackoverflow.com/users/5319625/oleg-gritsak",
+                "reputation": 592,
+                "display_name": "Oleg Gritsak",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442393875,
+            "comment_id": 53059767
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9f9ec9fe3627c4f29b4ece07e184ed41?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5800032,
+                "user_type": "registered",
+                "user_id": 4574487,
+                "link": "https://stackoverflow.com/users/4574487/avis",
+                "reputation": 2235,
+                "display_name": "Avis"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442389437,
+            "comment_id": 53057134
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/98e74e03b5b1cd2dad5f5dc5c245bb0f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3415784,
+                "user_type": "registered",
+                "user_id": 2864740,
+                "link": "https://stackoverflow.com/users/2864740/user2864740",
+                "reputation": 62481,
+                "display_name": "user2864740",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442388704,
+            "comment_id": 53056753
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6af606149e832996a335d459cdafb88e?s=256&d=identicon&r=PG",
+                "account_id": 1269357,
+                "user_type": "registered",
+                "user_id": 1226020,
+                "link": "https://stackoverflow.com/users/1226020/jhh",
+                "reputation": 9405,
+                "display_name": "JHH",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442388343,
+            "comment_id": 53056530
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5ddfd9fbd9f21ef824a8425a649ff5a2?s=256&d=identicon&r=PG",
+                "account_id": 1940767,
+                "user_type": "registered",
+                "user_id": 1747018,
+                "link": "https://stackoverflow.com/users/1747018/yogesh-d",
+                "reputation": 19009,
+                "display_name": "Yogesh_D",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442388334,
+            "comment_id": 53056525
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442387895,
+            "comment_id": 53056260
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xlyJP.jpg?s=256",
+                "account_id": 2849686,
+                "user_type": "registered",
+                "user_id": 2447152,
+                "link": "https://stackoverflow.com/users/2447152/rustam",
+                "reputation": 6515,
+                "display_name": "Rustam"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602055,
+            "edited": false,
+            "creation_date": 1442387893,
+            "comment_id": 53056259
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4cf74649b70fc946650115e0d5067ebe?s=256&d=identicon&r=PG",
+                "account_id": 1328773,
+                "user_type": "registered",
+                "user_id": 1273080,
+                "link": "https://stackoverflow.com/users/1273080/petr-jane%c4%8dek",
+                "reputation": 38522,
+                "display_name": "Petr Janeček",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1442397886,
+            "creation_date": 1442395163,
+            "body": "<p>First of all, don't do <code>Files.readAllLines(Paths.get(\"filename\"))<\/code> and then pass everything to a <code>Set<\/code>, that holds unnecesserily huge amounts of data. Try to hold as few lines as possible at all times.<\/p>\n\n<p>Read the files line-by-line and process as you go. This immediately cuts your memory usage by a lot.<\/p>\n\n<pre><code>Set&lt;String&gt; oldData = new HashSet&lt;&gt;();\ntry (BufferedReader reader = Files.newBufferedReader(Paths.get(\"oldData\"))) {\n    for (String line = reader.readLine(); line != null; line = reader.readLine()) {\n        // process your line, maybe add to the Set for the old data?\n        oldData.add(line);\n    }\n}\n\nSet&lt;String&gt; newData = new HashSet&lt;&gt;();\ntry (BufferedReader reader = Files.newBufferedReader(Paths.get(\"newData\"))) {\n    for (String line = reader.readLine(); line != null; line = reader.readLine()) {\n        // Is it enough just to remove from old data so that you'll end up with only the difference between old and new?\n        boolean oldRemoved = oldData.remove(line);\n        if (!oldRemoved) {\n            newData.add(line);\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>You'll end up with two sets containing only the data that is present in the old, or the new dataset, respectively.<\/p>\n\n<p>Second of all, try to presize your containers if at all possible. Their size (usually) doubles when they reach their capacity, and that could potentially create a lot of overhead when dealing with big collections.<\/p>\n\n<p>Also, if your data are numbers, you could just use a <code>long<\/code> and hold that instead of trying to hold instances of <code>String<\/code>? There's a lot of collection libraries that enable you to do this, e.g. Koloboke, HPPC, HPPC-RT, GS Collections, fastutil, Trove. Even their collections for <code>Objects<\/code> might serve you very well as a standard <code>HashSet<\/code> has a lot of unnecessary object allocation.<\/p>\n",
+            "answer_id": 32604454,
+            "question_id": 32602055,
+            "last_edit_date": 1442397886
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TyhhC.jpg?s=256",
+                "account_id": 6929813,
+                "user_type": "registered",
+                "user_id": 5319625,
+                "link": "https://stackoverflow.com/users/5319625/oleg-gritsak",
+                "reputation": 592,
+                "display_name": "Oleg Gritsak",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1442462806,
+            "creation_date": 1442462806,
+            "body": "<p>Thank's for all your ideas! <\/p>\n\n<p>Final solution is:\nconverting lines to Long + using fastutil library (LongOpenHashSet)<\/p>\n\n<p>RAM consumption became 3.6Gb and processing time only <strong>40 seconds<\/strong>!<\/p>\n\n<p>Interesting observation. While starting java with default settings made loading 100 million Strings to JDK's native HashSet endless (I interrupted after 1 hour), starting with -Xmx16G speedup the process to 1 minute. But memory consumption was ridiculous (around 20Gb), processing speed was rather fine - 2 minutes. <\/p>\n\n<p>If someone is not limited to by RAM, native JDK HashSet is not so bad in terms of speed.<\/p>\n\n<p>p.s. Maybe the task is not clearly explained, but I do not see any opportunity not to load at least one file entirely. So, I doubt memory consumption can be further lowered by much.<\/p>\n",
+            "answer_id": 32622418,
+            "question_id": 32602055
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54af3ad01b032767b05a7e98fede6d6e?s=256&d=identicon&r=PG",
+                "account_id": 2360785,
+                "user_type": "registered",
+                "user_id": 2067492,
+                "link": "https://stackoverflow.com/users/2067492/matt",
+                "reputation": 12395,
+                "display_name": "matt"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1442400693,
+            "creation_date": 1442395794,
+            "body": "<p>I made a very simple spell checker, just checking if a word was in the dictionary was too slow for whole documents. I created a map structure, and it works great. <\/p>\n\n<pre><code>Map&lt;String, List&lt;String&gt;&gt; dictionary;\n<\/code><\/pre>\n\n<p>For the key, I use the first 2 letters of the word. The list has all the words that start with the key. To speed it up a bit more you can sort the list, then use a binary search to check for existence. I'm not sure the optimum length of key, and if your key gets too long you could nest the maps. Eventually it becomes a tree. A trie structure is possibly the best actually.<\/p>\n",
+            "answer_id": 32604703,
+            "question_id": 32602055,
+            "last_edit_date": 1442400693
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9f9ec9fe3627c4f29b4ece07e184ed41?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5800032,
+                "user_type": "registered",
+                "user_id": 4574487,
+                "link": "https://stackoverflow.com/users/4574487/avis",
+                "reputation": 2235,
+                "display_name": "Avis"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1442397824,
+            "creation_date": 1442397824,
+            "body": "<p>Pls split the strings into two and whatever part (str1 or str2) is repeated most use the intern() on it so to save duplication os same String again in Heap. Here i used intern() on both part just to show the sample but dont use it unless they are repeating most.<\/p>\n\n<pre><code>Set&lt;MyObj&gt; lineData = new HashSet&lt;MyObj&gt;();\nString line = null;\nBufferedReader bufferedReader = new BufferedReader(new FileReader(file.getAbsoluteFile()));\nwhile((line = bufferedReader.readLine()) != null){\n    String[] data = line.split(\",\");\n    MyObj myObj = new MyObj();\n    myObj.setStr1(data[0].intern());\n    myObj.setStr1(data[1].intern());\n    lineData.add(myObj);\n}\n\npublic class MyObj {\n\n    private String str1;\n    private String str2;\n\n    public String getStr1() {\n        return str1;\n    }\n\n    public void setStr1(String str1) {\n        this.str1 = str1;\n    }\n\n    @Override\n    public int hashCode() {\n        final int prime = 31;\n        int result = 1;\n        result = prime * result + ((str1 == null) ? 0 : str1.hashCode());\n        result = prime * result + ((str2 == null) ? 0 : str2.hashCode());\n        return result;\n    }\n\n    @Override\n    public boolean equals(Object obj) {\n        if (this == obj)\n            return true;\n        if (obj == null)\n            return false;\n        if (getClass() != obj.getClass())\n            return false;\n        Test1 other = (Test1) obj;\n        if (str1 == null) {\n            if (other.str1 != null)\n                return false;\n        } else if (!str1.equals(other.str1))\n            return false;\n        if (str2 == null) {\n            if (other.str2 != null)\n                return false;\n        } else if (!str2.equals(other.str2))\n            return false;\n        return true;\n    }\n\n    public String getStr2() {\n        return str2;\n    }\n\n    public void setStr2(String str2) {\n        this.str2 = str2;\n    }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 32605490,
+            "question_id": 32602055
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                "account_id": 8546,
+                "user_type": "registered",
+                "user_id": 15472,
+                "link": "https://stackoverflow.com/users/15472/tucuxi",
+                "reputation": 18030,
+                "display_name": "tucuxi",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1442398558,
+            "creation_date": 1442398558,
+            "body": "<p><strong>Use a database<\/strong>; to keep things simple, use a Java-embedded database (Derby, HSQL, H2, ...). With that much information, you can really benefit from standard DB caching, time-efficient storage, and querying. Your pseudo-code would be:<\/p>\n\n<pre><code>if first use,\n   define new one-column table, setting column as primary-key\n   iterate through input records, for each:\n       insert record into table\notherwise\n   open database with previous records\n   iterate through input records, for each:\n       lookup record in DB, update/report as required \n<\/code><\/pre>\n\n<p>Alternatively, you can do even less work if you use existing \"table-diff\" libraries, such as <a href=\"http://www.diffkit.org\" rel=\"nofollow\">DiffKit<\/a> - from their tutorial:<\/p>\n\n<blockquote>\n<pre><code>java -jar ../diffkit-app.jar -demoDB\n<\/code><\/pre>\n  \n  <p>Then configure a connection to this demo database within your favorite\n  JDBC enabled database browser\n  [...]\n  Your DB browser will show you the tables TEST10_LHS_TABLE and\n  TEST10_RHS_TABLE (amongst others) populated with the data values from\n  the corresponding CSV files.<\/p>\n<\/blockquote>\n\n<p>That is: DiffKit does essentially what I proposed above, loading files into database tables (they use embedded H2) and then comparing these tables through DB queries.<\/p>\n\n<p>They accept input as CSV files; but conversion from your textual input to their CSV can be done in a streaming fashion in less than 10 lines of code. And then you just need to call their jar to do the diff, and you would get the results as tables in their embedded DB.<\/p>\n",
+            "answer_id": 32605789,
+            "question_id": 32602055
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gIC27.jpg?s=256",
+                "account_id": 1208031,
+                "user_type": "registered",
+                "user_id": 1915854,
+                "link": "https://stackoverflow.com/users/1915854/serge-rogatch",
+                "reputation": 15306,
+                "display_name": "Serge Rogatch",
+                "accept_rate": 63
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1442414727,
+            "creation_date": 1442414727,
+            "body": "<p>You can use a trie data structure for such cases: <a href=\"http://www.toptal.com/java/the-trie-a-neglected-data-structure\" rel=\"nofollow noreferrer\">http://www.toptal.com/java/the-trie-a-neglected-data-structure<\/a>\nThe algorithm would be as follows:<\/p>\n\n<ol>\n<li>Read the old file line by line and store each line in the trie.<\/li>\n<li>Read the new file line by line and test each line whether it is\nin the trie: if it is not, then it is a newly added line.<\/li>\n<\/ol>\n\n<p>A further memory optimization can take advantage that there are only 10 digits, so 4 bits is enough to store a digit (instead of 2 bytes per character in Java). You may need to adapt the trie data structure from one of the following links:<\/p>\n\n<ol>\n<li><a href=\"https://stackoverflow.com/questions/3806788/trie-data-structures-java\">Trie data structures - Java<\/a><\/li>\n<li><a href=\"http://algs4.cs.princeton.edu/52trie/TrieST.java.html\" rel=\"nofollow noreferrer\">http://algs4.cs.princeton.edu/52trie/TrieST.java.html<\/a><\/li>\n<\/ol>\n",
+            "answer_id": 32611889,
+            "question_id": 32602055,
+            "last_edit_date": 1495540689
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5bb5dd5d57ee2789eb58907b69ba7f97?s=256&d=identicon&r=PG",
+                "account_id": 368606,
+                "user_type": "registered",
+                "user_id": 715518,
+                "link": "https://stackoverflow.com/users/715518/ivan-senic",
+                "reputation": 649,
+                "display_name": "Ivan Senic",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1442417310,
+            "creation_date": 1442416799,
+            "body": "<p>The String object holding 11 characters (up to 12 in-fact) will have a size of 64 bytes (on 64bits Java with compressed oops). The only structure that can hold so much elements and be of a reasonable size is an array:<\/p>\n\n<pre><code>100,000,000 * (64b per String object + 4b per reference) = 6,800,000,000b ~ 6.3Gb\n<\/code><\/pre>\n\n<p>So you can immediately forget about Maps, Sets, etc as they introduce too much memory overhead.. But array is actually all you need. My approach would be:<\/p>\n\n<ol>\n<li>Load the \"old\" data into an array, sort it (this should be fast enough)<\/li>\n<li>Create a back-up array of primitive booleans with same size as the loaded array (you can use the BitSet here as well)<\/li>\n<li>Read line by line from the new data file. Use binary search to check if the password data exists in the old data array. If the item exist mark it's index in the boolean array/bitset as true (you get back the index from the binary search). If the item does not exists just save it somewhere (array list can serve).<\/li>\n<li>When all lines are processed remove from old array all the items that have <code>false<\/code> in boolean array/bitset (check by index of course). And finally add to the array all the new data you saved somewhere.   <\/li>\n<li>Optionally sort the array again and save to disk, so next time you load it you can skip the initial sorting.<\/li>\n<\/ol>\n\n<p>This should be fast enough imo. Initial sort is O(n log(n)), while the binary search is O(log(n)) thus you should end up with (excluding final removal + adding which can be max 2n):<\/p>\n\n<pre><code>n log(n) (sort) + n log(n) (binary check for n elements) = 2 n log(n)\n<\/code><\/pre>\n\n<p>There would be other optimizations possible if you would explain more on the structure of that String you have (if there is some pattern or not).<\/p>\n",
+            "answer_id": 32612681,
+            "question_id": 32602055,
+            "last_edit_date": 1442417310
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-FJ9LfBP1xxQ/AAAAAAAAAAI/AAAAAAAAABA/4A447ALDQFo/s256-rj/photo.jpg",
+                "account_id": 6390719,
+                "user_type": "registered",
+                "user_id": 4956989,
+                "link": "https://stackoverflow.com/users/4956989/alex-karasev",
+                "reputation": 1148,
+                "display_name": "Alex Karasev",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1442484192,
+            "creation_date": 1442396886,
+            "body": "<p>The main problem in numerous resizing <code>ArrayList<\/code> when <code>readAllLines()<\/code> occurs. Better choice is <code>LinkedList<\/code> to insert data <\/p>\n\n<pre><code>try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {\n        List&lt;String&gt; result = new LinkedList&lt;&gt;();\n        for (;;) {\n            String line = reader.readLine();\n            if (line == null)\n                break;\n            result.add(line);\n        }\n        return result;\n    }\n<\/code><\/pre>\n",
+            "answer_id": 32605137,
+            "question_id": 32602055,
+            "last_edit_date": 1442484192
+        }
+    ],
+    "answer_comments": {
+        "32612681": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TyhhC.jpg?s=256",
+                "account_id": 6929813,
+                "user_type": "registered",
+                "user_id": 5319625,
+                "link": "https://stackoverflow.com/users/5319625/oleg-gritsak",
+                "reputation": 592,
+                "display_name": "Oleg Gritsak",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32612681,
+            "edited": false,
+            "creation_date": 1442542072,
+            "comment_id": 53133726
+        }],
+        "32604703": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/Ek3za.png?s=256",
+                    "account_id": 668476,
+                    "user_type": "registered",
+                    "user_id": 504956,
+                    "link": "https://stackoverflow.com/users/504956/v-g",
+                    "reputation": 19022,
+                    "display_name": "V G",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32604703,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "edited": false,
+                "creation_date": 1442411372,
+                "comment_id": 53071855
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32604703,
+                "edited": false,
+                "creation_date": 1442403262,
+                "comment_id": 53065759
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/Ek3za.png?s=256",
+                    "account_id": 668476,
+                    "user_type": "registered",
+                    "user_id": 504956,
+                    "link": "https://stackoverflow.com/users/504956/v-g",
+                    "reputation": 19022,
+                    "display_name": "V G",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32604703,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "edited": false,
+                "creation_date": 1442400719,
+                "comment_id": 53064171
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/54af3ad01b032767b05a7e98fede6d6e?s=256&d=identicon&r=PG",
+                    "account_id": 2360785,
+                    "user_type": "registered",
+                    "user_id": 2067492,
+                    "link": "https://stackoverflow.com/users/2067492/matt",
+                    "reputation": 12395,
+                    "display_name": "matt"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32604703,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "edited": false,
+                "creation_date": 1442400501,
+                "comment_id": 53064021
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32604703,
+                "edited": false,
+                "creation_date": 1442398795,
+                "comment_id": 53062947
+            }
+        ],
+        "32604454": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/Ek3za.png?s=256",
+                    "account_id": 668476,
+                    "user_type": "registered",
+                    "user_id": 504956,
+                    "link": "https://stackoverflow.com/users/504956/v-g",
+                    "reputation": 19022,
+                    "display_name": "V G",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32604454,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/gIC27.jpg?s=256",
+                    "account_id": 1208031,
+                    "user_type": "registered",
+                    "user_id": 1915854,
+                    "link": "https://stackoverflow.com/users/1915854/serge-rogatch",
+                    "reputation": 15306,
+                    "display_name": "Serge Rogatch",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1442400618,
+                "comment_id": 53064094
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/gIC27.jpg?s=256",
+                    "account_id": 1208031,
+                    "user_type": "registered",
+                    "user_id": 1915854,
+                    "link": "https://stackoverflow.com/users/1915854/serge-rogatch",
+                    "reputation": 15306,
+                    "display_name": "Serge Rogatch",
+                    "accept_rate": 63
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 32604454,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/Ek3za.png?s=256",
+                    "account_id": 668476,
+                    "user_type": "registered",
+                    "user_id": 504956,
+                    "link": "https://stackoverflow.com/users/504956/v-g",
+                    "reputation": 19022,
+                    "display_name": "V G",
+                    "accept_rate": 69
+                },
+                "edited": false,
+                "creation_date": 1442400091,
+                "comment_id": 53063767
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/Ek3za.png?s=256",
+                    "account_id": 668476,
+                    "user_type": "registered",
+                    "user_id": 504956,
+                    "link": "https://stackoverflow.com/users/504956/v-g",
+                    "reputation": 19022,
+                    "display_name": "V G",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 32604454,
+                "edited": false,
+                "creation_date": 1442395617,
+                "comment_id": 53060863
+            }
+        ],
+        "32605137": [
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-FJ9LfBP1xxQ/AAAAAAAAAAI/AAAAAAAAABA/4A447ALDQFo/s256-rj/photo.jpg",
+                    "account_id": 6390719,
+                    "user_type": "registered",
+                    "user_id": 4956989,
+                    "link": "https://stackoverflow.com/users/4956989/alex-karasev",
+                    "reputation": 1148,
+                    "display_name": "Alex Karasev",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 32605137,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "edited": false,
+                "creation_date": 1442486019,
+                "comment_id": 53105742
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32605137,
+                "edited": false,
+                "creation_date": 1442397910,
+                "comment_id": 53062360
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-FJ9LfBP1xxQ/AAAAAAAAAAI/AAAAAAAAABA/4A447ALDQFo/s256-rj/photo.jpg",
+                    "account_id": 6390719,
+                    "user_type": "registered",
+                    "user_id": 4956989,
+                    "link": "https://stackoverflow.com/users/4956989/alex-karasev",
+                    "reputation": 1148,
+                    "display_name": "Alex Karasev",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32605137,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "edited": false,
+                "creation_date": 1442397668,
+                "comment_id": 53062221
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b4128da626e5b0049cd4fb88033e3b3?s=256&d=identicon&r=PG",
+                    "account_id": 8546,
+                    "user_type": "registered",
+                    "user_id": 15472,
+                    "link": "https://stackoverflow.com/users/15472/tucuxi",
+                    "reputation": 18030,
+                    "display_name": "tucuxi",
+                    "accept_rate": 87
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 32605137,
+                "edited": false,
+                "creation_date": 1442397414,
+                "comment_id": 53062052
+            }
+        ]
+    }
+}

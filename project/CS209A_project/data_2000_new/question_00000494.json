@@ -1,0 +1,308 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/27e4419b2045981036d6a26797988ff7?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3435303,
+            "user_type": "registered",
+            "user_id": 2878556,
+            "link": "https://stackoverflow.com/users/2878556/markus-l",
+            "reputation": 1036,
+            "display_name": "Markus L",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/39996178/when-using-a-custom-x509keymanager-java-is-not-able-to-determine-a-matching-ciph",
+        "last_activity_date": 1500021639,
+        "creation_date": 1476267599,
+        "answer_count": 2,
+        "title": "When using a custom X509KeyManager Java is not able to determine a matching cipher suite for the SSL handshake",
+        "body": "<p>I'm working with Java7 and JAX-WS 2.2.<\/p>\n\n<p>For a SOAP web service I need to create a custom <code>X509KeyManager<\/code> in order to find the correct certificate for each connecting client in a JKS keystore.<\/p>\n\n<p>However, I'm already struggling to get the my custom key manager running. So far I'm using the default one (retrieved from the initialized <code>KeyManagerFactory<\/code>) and it basically works - but of course it doesn't select the correct certificate. So the first idea was to create a custom <code>X509KeyManager<\/code> which holds the original key manager, only writes out some log messages but generally uses the default behaviour. <\/p>\n\n<p>For some reason that doesn't work at all. The SSL handshake cannot be established. After the <em>ClientHello<\/em> the log shows the following error:<\/p>\n\n<pre><code>Allow unsafe renegotiation: false\nAllow legacy hello messages: true\nIs initial handshake: true\nIs secure renegotiation: false\nThread-3, READ: TLSv1 Handshake, length = 149\n*** ClientHello, TLSv1\nRandomCookie:  GMT: 1476877930 bytes = { 207, 226, 8, 128, 40, 207, 47, 180, 146, 211, 157, 64, 239, 13, 201, 92, 158, 111, 108, 44, 223, 136, 193, 251, 33, 202, 7, 90 }\nSession ID:  {}\nCipher Suites: [TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA]\nCompression Methods:  { 0 }\nExtension elliptic_curves, curve names: {secp256r1, sect163k1, sect163r2, secp192r1, secp224r1, sect233k1, sect233r1, sect283k1, sect283r1, secp384r1, sect409k1, sect409r1, secp521r1, sect571k1, sect571r1, secp160k1, secp160r1, secp160r2, sect163r1, secp192k1, sect193r1, sect193r2, secp224k1, sect239k1, secp256k1}\nExtension ec_point_formats, formats: [uncompressed]\n***\n%% Initialized:  [Session-3, SSL_NULL_WITH_NULL_NULL]\nThread-3, fatal error: 40: no cipher suites in common\njavax.net.ssl.SSLHandshakeException: no cipher suites in common\n%% Invalidated:  [Session-3, SSL_NULL_WITH_NULL_NULL]\nThread-3, SEND TLSv1 ALERT:  fatal, description = handshake_failure\nThread-3, WRITE: TLSv1 Alert, length = 2\nThread-3, fatal: engine already closed.  Rethrowing javax.net.ssl.SSLHandshakeException: no cipher suites in common\n<\/code><\/pre>\n\n<p>I didn't remove any cipher suites at all to my knowledge! And the SSL handshake <em>can<\/em> be made with the same certificates.<\/p>\n\n<p>This is my key manager:<\/p>\n\n<pre><code>public class CustomX509KeyManager extends X509ExtendedKeyManager\n{\n   private static final Logger LOG = Logger.getLogger( CustomX509KeyManager.class );\n   private final X509KeyManager originalKeyManager;\n\n   public CustomX509KeyManager(final X509KeyManager keyManager)\n   {\n      super();\n      this.originalKeyManager = keyManager;\n   }\n\n   @Override\n   public String chooseServerAlias(final String keyType, final Principal[] issuers,\n     final Socket socket)\n   {\n      final String serverAliases=\n            this.originalKeyManager.chooseServerAlias( keyType, issuers, socket );\n      CustomX509KeyManager.LOG.info( \"chooseServerAlias() \" + serverAliases );\n      return serverAliases;\n   }\n\n   ...\n}\n<\/code><\/pre>\n\n<p>The other methods (not shown here) are just calling the corresponding methods in the <code>originalKeyManager<\/code> as well. During testing I never see the log message from the <code>chooseServerAlias()<\/code> method.<\/p>\n\n<p>And it's initialized from another class in the <code>getSslContext()<\/code>method:<\/p>\n\n<pre><code>private KeyManager[] getKeyManagers(final KeyManagerFactory keyManagerFactory)\n{\n   final KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();\n\n   // replace any X509KeyManager with our own implementation\n   for ( int i = 0; i &lt; keyManagers.length; i++ )\n   {\n      if ( keyManagers[i] instanceof X509KeyManager )\n      {\n         keyManagers[i] =\n               new CustomX509KeyManager( ( X509KeyManager ) keyManagers[i] );\n      }\n   }\n\n   return keyManagers;\n}\n\npublic SSLContext getSslContext()\n{\n  // create the KeyStore and load the JKS file\n  final KeyStore keyStore = createKeyStore();\n\n  // initialize key and trust manager factory\n  final KeyManagerFactory keyManagerFactory =\n        KeyManagerFactory.getInstance( KeyManagerFactory.getDefaultAlgorithm() );\n  keyManagerFactory.init( keyStore, \"changeit\".toCharArray() );\n  final TrustManagerFactory trustManagerFactory =\n        TrustManagerFactory.getInstance( TrustManagerFactory.getDefaultAlgorithm() );\n  trustManagerFactory.init( keyStore );\n\n  // initialize the SSL context\n  final SSLContext sslContext = SSLContext.getInstance( \"TLS\" );\n  // sslContext.init( keyManagerFactory.getKeyManagers(),\n  //      trustManagerFactory.getTrustManagers(), new SecureRandom() );\n  sslContext.init( getKeyManagers( keyManagerFactory ),\n        trustManagerFactory.getTrustManagers(), new SecureRandom() );\n  return sslContext;\n}\n<\/code><\/pre>\n\n<p>The commented lines show the original usage of the default key manager.<\/p>\n\n<p>Any idea what's wrong? Why is the behaviour of using my <code>CustomX509KeyManager<\/code> so different than the default key manager that the handshake cannot be done? With the default key manager the encryption is negotiated for the TLS_DHE_RSA_WITH_AES_128_CBC_SHA algorithm which is available with the custom key manager as well but for some reason not chosen.<\/p>\n\n<h3>Update 1<\/h3>\n\n<p>I'm trying to connect with openssl in client mode to the server now but the server encounters the same problem using SSL. When I use the TLS protocol then the additional error message<\/p>\n\n<blockquote>\n  <p>Unsupported extension type_35, data:<\/p>\n<\/blockquote>\n\n<p>appears.<\/p>\n\n<h3>Update 2<\/h3>\n\n<p>I can confirm that the above notice about unsupported extensions also appears upon successful handshakes so this is a false trace.<\/p>\n",
+        "question_id": 39996178,
+        "tags": [
+            "java",
+            "ssl",
+            "soap",
+            "jax-ws"
+        ],
+        "score": 1,
+        "accepted_answer_id": 40150450,
+        "is_answered": true,
+        "view_count": 8178,
+        "last_edit_date": 1500021639
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27e4419b2045981036d6a26797988ff7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3435303,
+                "user_type": "registered",
+                "user_id": 2878556,
+                "link": "https://stackoverflow.com/users/2878556/markus-l",
+                "reputation": 1036,
+                "display_name": "Markus L",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996178,
+            "edited": false,
+            "creation_date": 1476949948,
+            "comment_id": 67566276
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3f265dbe3edef5d671947a604f7171bf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3421244,
+                "user_type": "registered",
+                "user_id": 2868801,
+                "link": "https://stackoverflow.com/users/2868801/dave-thompson-085",
+                "reputation": 39535,
+                "display_name": "dave_thompson_085"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 39996178,
+            "edited": false,
+            "creation_date": 1476928761,
+            "comment_id": 67558248
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3f265dbe3edef5d671947a604f7171bf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3421244,
+                "user_type": "registered",
+                "user_id": 2868801,
+                "link": "https://stackoverflow.com/users/2868801/dave-thompson-085",
+                "reputation": 39535,
+                "display_name": "dave_thompson_085"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 39996178,
+            "edited": false,
+            "creation_date": 1476928153,
+            "comment_id": 67558145
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27e4419b2045981036d6a26797988ff7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3435303,
+                "user_type": "registered",
+                "user_id": 2878556,
+                "link": "https://stackoverflow.com/users/2878556/markus-l",
+                "reputation": 1036,
+                "display_name": "Markus L",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996178,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/63edcce213b4c96b8b4a660e1df2da08?s=256&d=identicon&r=PG",
+                "account_id": 155770,
+                "user_type": "registered",
+                "user_id": 372643,
+                "link": "https://stackoverflow.com/users/372643/bruno",
+                "reputation": 123335,
+                "display_name": "Bruno",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1476909167,
+            "comment_id": 67552004
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/63edcce213b4c96b8b4a660e1df2da08?s=256&d=identicon&r=PG",
+                "account_id": 155770,
+                "user_type": "registered",
+                "user_id": 372643,
+                "link": "https://stackoverflow.com/users/372643/bruno",
+                "reputation": 123335,
+                "display_name": "Bruno",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996178,
+            "edited": false,
+            "creation_date": 1476885744,
+            "comment_id": 67537056
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27e4419b2045981036d6a26797988ff7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3435303,
+                "user_type": "registered",
+                "user_id": 2878556,
+                "link": "https://stackoverflow.com/users/2878556/markus-l",
+                "reputation": 1036,
+                "display_name": "Markus L",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996178,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/63edcce213b4c96b8b4a660e1df2da08?s=256&d=identicon&r=PG",
+                "account_id": 155770,
+                "user_type": "registered",
+                "user_id": 372643,
+                "link": "https://stackoverflow.com/users/372643/bruno",
+                "reputation": 123335,
+                "display_name": "Bruno",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1476881568,
+            "comment_id": 67533784
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/63edcce213b4c96b8b4a660e1df2da08?s=256&d=identicon&r=PG",
+                "account_id": 155770,
+                "user_type": "registered",
+                "user_id": 372643,
+                "link": "https://stackoverflow.com/users/372643/bruno",
+                "reputation": 123335,
+                "display_name": "Bruno",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996178,
+            "edited": false,
+            "creation_date": 1476880996,
+            "comment_id": 67533327
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/27e4419b2045981036d6a26797988ff7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3435303,
+                "user_type": "registered",
+                "user_id": 2878556,
+                "link": "https://stackoverflow.com/users/2878556/markus-l",
+                "reputation": 1036,
+                "display_name": "Markus L",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "is_accepted": true,
+            "last_activity_date": 1476955503,
+            "creation_date": 1476955503,
+            "body": "<p>After a few days of trial &amp; error I finally found my mistake! <\/p>\n\n<p>In Java 7 a custom key manager should extend the <a href=\"https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/X509ExtendedKeyManager.html\" rel=\"noreferrer\">X509ExtendedKeyManager<\/a> which forces you to implement five methods of the interface <code>X509KeyManager<\/code>. However, there are two additional methods in the class <code>X509ExtendedKeyManager<\/code> which are not declared as abstract but <strong>must<\/strong> be overwritten for proper usage:<\/p>\n\n<ul>\n<li><code>chooseEngineClientAlias(String[], Principal[], SSLEngine)<\/code><\/li>\n<li><code>chooseEngineServerAlias(String, Principal[], SSLEngine)<\/code><\/li>\n<\/ul>\n\n<p>After overwriting and implementing the methods by delegating the call to my <code>originalKeyManager<\/code> (which became of type <code>X509ExtendedKeyManager<\/code> as well) the SSL handshake finally succeeded.<\/p>\n",
+            "answer_id": 40150450,
+            "question_id": 39996178
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ysddf.jpg?s=256",
+                "account_id": 3088921,
+                "user_type": "registered",
+                "user_id": 2615510,
+                "link": "https://stackoverflow.com/users/2615510/andrey-lebedenko",
+                "reputation": 1988,
+                "display_name": "Andrey Lebedenko"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1476912155,
+            "creation_date": 1476912155,
+            "body": "<p>It appears that you don't read keyfile anywhere in the code snippet. This is the reason of SSL_NULL_WITH_NULL_NULL. I suggest you implement <code>X509KeyManager<\/code> and read the file in constructor, so it can be used letter to select appropriate key. Something down this line (not all required methods depicted for the sake of short answer):<\/p>\n\n<pre><code>public class CustomX509KeyManager implements X509KeyManager\n{\n   private final KeyStore keyStore;\n   private final String alias;\n   private final char[] password;\n\n   public CustomX509KeyManager(final String keyStoreFile, final char[] password, final String alias)\n    throws IOException, GeneralSecurityException\n   {\n       this.alias = alias;\n       this.password = password;\n       synchronized(keyStoreFile)\n       {\n          InputStream stream = new FileInputStream(keyStoreFile);\n          keyStore = KeyStore.getInstance(KeyStore.getDefaultType());\n          keyStore.load(stream, password);\n          stream.close();\n       }\n   }\n\n   @Override\n   public PrivateKey getPrivateKey(String alias)\n   {\n       try {\n           return (PrivateKey) keyStore.getKey(alias, password);\n       } catch (Exception e) {\n            e.printStackTrace();\n            return null;\n       }\n    }\n\n    @Override\n    public X509Certificate[] getCertificateChain(String alias)\n    {\n        try {\n            java.security.cert.Certificate[] certs = keyStore.getCertificateChain(alias);\n            if (certs == null || certs.length == 0)\n                return null;\n            X509Certificate[] x509 = new X509Certificate[certs.length];\n            for (int i = 0; i &lt; certs.length; i++)\n                x509[i] = (X509Certificate)certs[i];\n            return x509;\n        } catch (Exception e) {\n            e.printStackTrace();\n            return null;\n        }          \n    }\n\n}\n<\/code><\/pre>\n\n<p>and then use it like<\/p>\n\n<pre><code>sslContext.init(new X509KeyManager[] { \n                    new CustomX509KeyManager(keyStoreFile, \n                        keyStorePass.toCharArray(), alias) }, null, null);\n<\/code><\/pre>\n",
+            "answer_id": 40141737,
+            "question_id": 39996178
+        }
+    ],
+    "answer_comments": {
+        "40141737": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/27e4419b2045981036d6a26797988ff7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3435303,
+                    "user_type": "registered",
+                    "user_id": 2878556,
+                    "link": "https://stackoverflow.com/users/2878556/markus-l",
+                    "reputation": 1036,
+                    "display_name": "Markus L",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40141737,
+                "edited": false,
+                "creation_date": 1476951176,
+                "comment_id": 67566989
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/27e4419b2045981036d6a26797988ff7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3435303,
+                    "user_type": "registered",
+                    "user_id": 2878556,
+                    "link": "https://stackoverflow.com/users/2878556/markus-l",
+                    "reputation": 1036,
+                    "display_name": "Markus L",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40141737,
+                "edited": false,
+                "creation_date": 1476950415,
+                "comment_id": 67566543
+            }
+        ],
+        "40150450": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7715fc24d6d16472072c784b8183949a?s=256&d=identicon&r=PG",
+                    "account_id": 926457,
+                    "user_type": "registered",
+                    "user_id": 957167,
+                    "link": "https://stackoverflow.com/users/957167/ankit",
+                    "reputation": 338,
+                    "display_name": "Ankit",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 40150450,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/ddfsX.png?s=256",
+                    "account_id": 1258178,
+                    "user_type": "registered",
+                    "user_id": 1217178,
+                    "link": "https://stackoverflow.com/users/1217178/markus-a",
+                    "reputation": 12862,
+                    "display_name": "Markus A.",
+                    "accept_rate": 72
+                },
+                "edited": false,
+                "creation_date": 1600287616,
+                "comment_id": 113043777
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/ddfsX.png?s=256",
+                    "account_id": 1258178,
+                    "user_type": "registered",
+                    "user_id": 1217178,
+                    "link": "https://stackoverflow.com/users/1217178/markus-a",
+                    "reputation": 12862,
+                    "display_name": "Markus A.",
+                    "accept_rate": 72
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 40150450,
+                "edited": false,
+                "creation_date": 1532404494,
+                "comment_id": 89948879
+            }
+        ]
+    }
+}

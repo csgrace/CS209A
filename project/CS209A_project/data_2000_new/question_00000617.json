@@ -1,0 +1,186 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a8906fe90200b147ef3a418a2a4d0032?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15603154,
+            "user_type": "registered",
+            "user_id": 12132486,
+            "link": "https://stackoverflow.com/users/12132486/jose",
+            "reputation": 19,
+            "display_name": "Jose"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73197939/remaining-days-taking-one-date-as-a-reference-in-java",
+        "last_activity_date": 1659501426,
+        "creation_date": 1659377709,
+        "answer_count": 3,
+        "title": "Remaining days taking one date as a reference in Java",
+        "body": "<p>I have a variable of type <code>LocalDateTime<\/code> which has a date stored, for example 14/03/2020. I would like to know how I can get the days remaining to be again the 14th day of the month 3; in this case (from August 1, 2022), there are 225 days. I really have no idea how to get that value.<\/p>\n",
+        "question_id": 73197939,
+        "tags": [
+            "java",
+            "date",
+            "datetime"
+        ],
+        "score": -2,
+        "accepted_answer_id": 73198527,
+        "is_answered": true,
+        "view_count": 115,
+        "last_edit_date": 1659380476
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ffbf4e85b8ffbae4e9039b9c0cf07bc8?s=256&d=identicon&r=PG",
+                "account_id": 2496,
+                "user_type": "registered",
+                "user_id": 3474,
+                "link": "https://stackoverflow.com/users/3474/erickson",
+                "reputation": 270535,
+                "display_name": "erickson",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 73197939,
+            "edited": false,
+            "creation_date": 1659501275,
+            "comment_id": 129306997
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8283c64511fa80afed5259d10850168f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7612423,
+                "user_type": "registered",
+                "user_id": 5772882,
+                "link": "https://stackoverflow.com/users/5772882/anonymous",
+                "reputation": 87410,
+                "display_name": "Anonymous"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73197939,
+            "edited": false,
+            "creation_date": 1659380556,
+            "comment_id": 129276459
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d99204bcce923f40f5c72b7f80121644?s=256&d=identicon&r=PG",
+                "account_id": 2139538,
+                "user_type": "registered",
+                "user_id": 1898563,
+                "link": "https://stackoverflow.com/users/1898563/michael",
+                "reputation": 44485,
+                "display_name": "Michael",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 73197939,
+            "edited": false,
+            "creation_date": 1659378186,
+            "comment_id": 129275738
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ffbf4e85b8ffbae4e9039b9c0cf07bc8?s=256&d=identicon&r=PG",
+                "account_id": 2496,
+                "user_type": "registered",
+                "user_id": 3474,
+                "link": "https://stackoverflow.com/users/3474/erickson",
+                "reputation": 270535,
+                "display_name": "erickson",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1659501426,
+            "creation_date": 1659381274,
+            "body": "<p>Determine a <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html#getYear()\" rel=\"nofollow noreferrer\">year<\/a> by comparing the <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/MonthDay.html#from(java.time.temporal.TemporalAccessor)\" rel=\"nofollow noreferrer\">date portion<\/a> of the current and reference <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html\" rel=\"nofollow noreferrer\">dates.<\/a> If the date has passed already, use next year; otherwise, use the current year. Then <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/MonthDay.html#atYear(int)\" rel=\"nofollow noreferrer\">combine<\/a> this year with the month and day of month from the reference date to yield the anniversary. Finally, <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html#until(java.time.temporal.Temporal,java.time.temporal.TemporalUnit)\" rel=\"nofollow noreferrer\">compute the difference<\/a> in days between the reference date and the anniversary.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>static LocalDate nextAnniversary(LocalDate date, LocalDate today) {\n    MonthDay anniversary = MonthDay.from(date);\n    int year = today.getYear();\n    if (anniversary.isBefore(MonthDay.from(today))) year += 1;\n    return anniversary.atYear(year);\n}\n<\/code><\/pre>\n<p>An example of this function in use:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>LocalDateTime stored = LocalDateTime.of(LocalDate.of(2020, 3, 14), LocalTime.NOON);\nLocalDate today = LocalDate.now(); /* Or, better: LocalDate.now(clock) */\nLocalDate anniversary = nextAnniversary(stored, today);\nlong daysUntil = today.until(stored, ChronoUnit.DAYS);\n<\/code><\/pre>\n<hr />\n<p>Update: This took a few tries to get right. Leap day complicates things; it is best to determine the year first, then to combine it with the original month and day, rather than to increment a past date by one year. (h/t <a href=\"https://stackoverflow.com/a/73199163/3474\">Basil Bourque<\/a> and Ole V.V.)<\/p>\n",
+            "answer_id": 73198527,
+            "question_id": 73197939,
+            "last_edit_date": 1659501426
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ZWEI3.jpg?s=256",
+                "account_id": 322981,
+                "user_type": "registered",
+                "user_id": 642706,
+                "link": "https://stackoverflow.com/users/642706/basil-bourque",
+                "reputation": 347059,
+                "display_name": "Basil Bourque",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1659389316,
+            "creation_date": 1659385093,
+            "body": "<p>The <a href=\"https://stackoverflow.com/a/73198527/642706\">Answer by erickson<\/a> is good and proper.  For fun, here are a couple of different solutions. One uses <code>Period#isNegative<\/code> to detect future or past. The other wraps this code as a convenient <code>TemporalAdjuster<\/code>.<\/p>\n<h1><code>Period#isNegative<\/code><\/h1>\n<p>This code uses <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Period.html#isNegative()\" rel=\"nofollow noreferrer\"><code>Period#isNegative<\/code><\/a> to figure out if the proposed March 14 is past or future.<\/p>\n<p><a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/MonthDay.html\" rel=\"nofollow noreferrer\"><code>MonthDay<\/code><\/a> is a way to represent, well, a month and a day-of-month, without any particular year.<\/p>\n<p>Be aware that determining today\u2019s date requires a time zone. Each day starts earlier in the east than in the west. So while it may be \u201ctomorrow\u201d in Tokyo Japan, it can simultaneously be \u201cyesterday\u201d in Edmonton Canada. If you omit an explicit time zone, the <a href=\"https://en.wikipedia.org/wiki/Java_virtual_machine\" rel=\"nofollow noreferrer\">JVM<\/a>\u2019s current default time zone is applied implicitly.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public static long daysUntilMarch14 ( ZoneId zoneId )\n{\n    LocalDate today = LocalDate.now( zoneId );\n\n    MonthDay march14 = MonthDay.of( 3 , 14 );\n    LocalDate then = today.with( march14 );\n\n    if ( Period.between( today , then ).isNegative() ) { then = then.plusYears( 1 ); }\n    return ChronoUnit.DAYS.between( today , then );\n}\n<\/code><\/pre>\n<p>Example usage.<\/p>\n<pre><code>long days = daysUntilMarch14( ZoneId.of( &quot;Africa/Tunis&quot; ) );\n<\/code><\/pre>\n<p>See this <a href=\"https://ideone.com/GTUb5d\" rel=\"nofollow noreferrer\">code run live at Ideone.com<\/a>.<\/p>\n<blockquote>\n<p>225<\/p>\n<\/blockquote>\n<p>You could also write a test for past or future as:<\/p>\n<pre><code>if( today.with( MonthDay.of( 3 , 14 ) ).isBefore( today ) ) { \u2026 add one year \u2026 }\n<\/code><\/pre>\n<h1><code>TemporalAdjuster<\/code><\/h1>\n<p>If you want to get fancy, you could implement this code as a <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/temporal/TemporalAdjuster.html\" rel=\"nofollow noreferrer\"><code>TemporalAdjuster<\/code><\/a>. For similarity, see <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/temporal/TemporalAdjusters.html#next(java.time.DayOfWeek)\" rel=\"nofollow noreferrer\"><code>TemporalAdjusters.next(DayOfWeek dayOfWeek)<\/code><\/a> API, and <a href=\"https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/time/temporal/TemporalAdjusters.java\" rel=\"nofollow noreferrer\">its source code<\/a>.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public static TemporalAdjuster nextMarch14 ( )\n{\n    return ( Temporal temporal ) -&gt; {\n        MonthDay march14 = MonthDay.of( 3 , 14 );\n        Temporal then = temporal.with( march14 );\n        if ( ChronoUnit.DAYS.between( temporal , then ) &lt; 0 )\n        {\n            then = then.plus( Period.ofYears( 1 ) );\n        }\n        return then;\n    };\n}\n<\/code><\/pre>\n<p>Usage:<\/p>\n<pre><code>LocalDate\n.now( ZoneId.of( &quot;Africa/Tunis&quot; ) )\n.with( UntilMarch14.nextMarch14() )\n<\/code><\/pre>\n<p>See this <a href=\"https://ideone.com/HyJa7H\" rel=\"nofollow noreferrer\">code run live at Ideone.com<\/a>.<\/p>\n<blockquote>\n<p>2023-03-14<\/p>\n<\/blockquote>\n<p>Be aware that in <em>java.time<\/em>, in day-to-day work we do <em>not<\/em> make use of the more general interfaces, abstract classes, and superclasses. Those are intended for internal use only, generally. The Javadoc advises the use of the more concrete classes for regular work. But here, in creating a <code>TemporalAdjuster<\/code>, we are acting as if doing internal <em>java.time<\/em> work, so we make use of <a href=\"https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/temporal/Temporal.html\" rel=\"nofollow noreferrer\"><code>Temporal<\/code><\/a>.<\/p>\n",
+            "answer_id": 73199163,
+            "question_id": 73197939,
+            "last_edit_date": 1659389316
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GjWmCHS-h0U-S_WumibDadLFmnUHVSGqWTJSFqV=k-s256",
+                "account_id": 19038874,
+                "user_type": "registered",
+                "user_id": 13899433,
+                "link": "https://stackoverflow.com/users/13899433/meenal-garg",
+                "reputation": 66,
+                "display_name": "Meenal Garg"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1659379857,
+            "creation_date": 1659379857,
+            "body": "<pre><code>    LocalDateTime localDatetime = LocalDateTime.of(2020, 03, 14, 0, 0);\n    LocalDate date1 = localDatetime.toLocalDate(); //convert localDateTime to localDate \n    LocalDate date2 = date1.plusMonths(3); //add n months\n    long days = ChronoUnit.DAYS.between(date1, date2); //get days in between\n<\/code><\/pre>\n<p>You can use ChronoUnit (<a href=\"https://docs.oracle.com/javase/8/docs/api/java/time/temporal/ChronoUnit.html\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/8/docs/api/java/time/temporal/ChronoUnit.html<\/a>) to get the number of days in between.<\/p>\n",
+            "answer_id": 73198291,
+            "question_id": 73197939
+        }
+    ],
+    "answer_comments": {
+        "73199163": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ffbf4e85b8ffbae4e9039b9c0cf07bc8?s=256&d=identicon&r=PG",
+                "account_id": 2496,
+                "user_type": "registered",
+                "user_id": 3474,
+                "link": "https://stackoverflow.com/users/3474/erickson",
+                "reputation": 270535,
+                "display_name": "erickson",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73199163,
+            "edited": false,
+            "creation_date": 1659388463,
+            "comment_id": 129278605
+        }],
+        "73198291": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8283c64511fa80afed5259d10850168f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7612423,
+                "user_type": "registered",
+                "user_id": 5772882,
+                "link": "https://stackoverflow.com/users/5772882/anonymous",
+                "reputation": 87410,
+                "display_name": "Anonymous"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198291,
+            "edited": false,
+            "creation_date": 1659380759,
+            "comment_id": 129276550
+        }]
+    }
+}

@@ -1,0 +1,75 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/SwmT0.jpg?s=256",
+            "account_id": 2436376,
+            "user_type": "registered",
+            "user_id": 2126176,
+            "link": "https://stackoverflow.com/users/2126176/maheshjavoc",
+            "reputation": 11,
+            "display_name": "maheshJavoc"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/62976703/bytearrayoutputstream-exception-handling-in-java8",
+        "last_activity_date": 1709054188,
+        "creation_date": 1595137245,
+        "answer_count": 2,
+        "title": "ByteArrayOutputStream exception handling in java8",
+        "body": "<pre><code>private void logSoapMessage(SOAPMessage soapMessage, String type) {\n        ByteArrayOutputStream bout = null;\n        try {\n            bout = new ByteArrayOutputStream();\n            soapMessage.writeTo(bout);\n            logger.info(&quot;The &quot; + type + &quot; is &quot; + bout.toString(&quot;UTF-8&quot;));\n        } catch (IOException e) {\n            logger.debug(&quot;Exception while logging soap message &quot; + e);\n        }\n    }\n<\/code><\/pre>\n<p><strong>Is above code can give resource leak  error?<\/strong><\/p>\n",
+        "question_id": 62976703,
+        "tags": [
+            "java",
+            "exception",
+            "io",
+            "bytearrayoutputstream",
+            "resource-leak"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 2771
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                "account_id": 47283,
+                "user_type": "registered",
+                "user_id": 139985,
+                "link": "https://stackoverflow.com/users/139985/stephen-c",
+                "reputation": 723464,
+                "display_name": "Stephen C",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1709054188,
+            "creation_date": 1595138651,
+            "body": "<blockquote>\n<p>Is above code can give resource leak error?<\/p>\n<\/blockquote>\n<p>It isn't a resource leak.  Not in Java 8, or (AFAIK) in any other version.  (And it isn't a memory leak either.)<\/p>\n<p>A <code>ByteArrayOutputStream<\/code> doesn't have any resources<sup>1<\/sup> that can leak.   Indeed, the <a href=\"https://docs.oracle.com/javase/7/docs/api/java/io/ByteArrayOutputStream.html#close()\" rel=\"nofollow noreferrer\">documentation<\/a> for <code>close()<\/code> on a <code>ByteArrayOutputStream<\/code> states that it has no effect.<\/p>\n<p><strong>However<\/strong>, an unsophisticated static checker <em>might<\/em> mistakenly flag your code as a <em>potential<\/em> resource leak.  You could either mark this as a &quot;false positive&quot; in the appropriate way, or just close the stream anyway.  The following is the best way to do the latter for Java 7 and later:<\/p>\n<pre><code>    try (ByteArrayOutputStream bout = new ByteArrayOutputStream()) {\n        soapMessage.writeTo(bout);\n        logger.info(&quot;The &quot; + type + &quot; is &quot; + bout.toString(&quot;UTF-8&quot;));\n    } catch (IOException e) {\n        logger.debug(&quot;Exception while logging soap message &quot; + e);\n    }\n<\/code><\/pre>\n<p>Note that the &quot;leak&quot; protection is not strictly necessary.  We are only doing this to stop the checker from giving us a false report.<\/p>\n<hr />\n<p><sup>1 - Resources refers to things such as <em>file descriptors<\/em> that are obtained from the operating system, and are often available in limited numbers.  If these resources are not managed properly by a Java application, there is a risk that the application will run out of them.  It is conventional for an object that holds a resource to implement <code>AutoClosable<\/code> and to provide a <code>close()<\/code> method to release the resource.  These objects often will use a finaliser or cleaner or similar to clean up leaked resources.  However, this may not be sufficient to prevent problems; e.g. depending on whether the GC identifies the objects as unreachable soon enough to trigger the clean up.<\/sup><\/p>\n",
+            "answer_id": 62976849,
+            "question_id": 62976703,
+            "last_edit_date": 1709054188
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4f26c1ce0f25cba43f90254822dc6721?s=256&d=identicon&r=PG",
+                "account_id": 2052160,
+                "user_type": "registered",
+                "user_id": 1830916,
+                "link": "https://stackoverflow.com/users/1830916/locus2k",
+                "reputation": 2965,
+                "display_name": "locus2k"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1595138417,
+            "creation_date": 1595138417,
+            "body": "<p>Its because you're not closing the resource when you're done with it.<\/p>\n<p>Java 7 introduced the try-with-resource function:<\/p>\n<pre><code>private void logSoapMessage(SOAPMessage soapMessage, String type) {\n  try (ByteArrayOutputStream bout = new ByteArrayOutputStream()){\n    soapMessage.writeTo(bout);\n    logger.info(&quot;The &quot; + type + &quot; is &quot; + bout.toString(&quot;UTF-8&quot;));\n  } catch (IOException e) {\n    logger.debug(&quot;Exception while logging soap message &quot; + e);\n  }\n}\n<\/code><\/pre>\n<p>Which will automatically close the <code>ByteArrayOutputStream<\/code> even if it throws an exception.<\/p>\n<p>The old way prior to java 7 you'd have to write it this way:<\/p>\n<pre><code>private void logSoapMessage(SOAPMessage soapMessage, String type) {\n  ByteArrayOutputStream bout = null;\n  try {\n    bout = new ByteArrayOutputStream();\n    soapMessage.writeTo(bout);\n    logger.info(&quot;The &quot; + type + &quot; is &quot; + bout.toString(&quot;UTF-8&quot;));\n  } catch (IOException e) {\n    logger.debug(&quot;Exception while logging soap message &quot; + e);\n  } finally {\n    if (bout != null) bout.close();\n  }\n}\n<\/code><\/pre>\n<p>To make sure the resource was closed prior to exiting the method and not get a resource leak.<\/p>\n<p>Here is some info about the try-with-resource:\n<a href=\"https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html<\/a><\/p>\n",
+            "answer_id": 62976829,
+            "question_id": 62976703
+        }
+    ],
+    "answer_comments": {}
+}

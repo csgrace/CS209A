@@ -1,0 +1,181 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/10157641553917732/picture?type=large",
+            "account_id": 18255625,
+            "user_type": "registered",
+            "user_id": 13289639,
+            "link": "https://stackoverflow.com/users/13289639/jorge-leonardo",
+            "reputation": 177,
+            "display_name": "Jorge Leonardo"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/63315566/i-cant-switch-from-one-activity-to-another-and-i-have-a-problem-at-the-manisfes",
+        "last_activity_date": 1596957303,
+        "creation_date": 1596890664,
+        "answer_count": 1,
+        "title": "I can&#39;t switch from one activity to another and I have a problem at the manisfest",
+        "body": "<p>Hello friend I have a problem with my intent, I am trying to go to another activity but my application is destroyed, in the logcat I see that mesaage (android.content.ActivityNotFoundException: Unable to find explicit activity class {com.example.project35cardview / com. example.proyecto35ca.MainActivitycardView}; have you declared this activity in your AndroidManifest.xml?)\nI go to the manifest and I try to call it from the manifest and only two activities appear.<\/p>\n<p>logcat<\/p>\n<pre><code>2020-08-08 07:15:11.600 28853-28853/? E/yecto35cardvie: Unknown bits set in runtime_flags: 0x8000\n2020-08-08 07:15:11.663 28853-28853/? E/libc: Access denied finding property &quot;runtime.mmitest.isrunning&quot;\n2020-08-08 07:15:12.117 28853-28888/com.example.proyecto35cardview E/AwareLog: AtomicFileUtils: readFileLines file not exist: android.util.AtomicFile@1108279\n2020-08-08 07:15:12.119 28853-28888/com.example.proyecto35cardview E/AwareLog: AtomicFileUtils: readFileLines file not exist: android.util.AtomicFile@e5e9bbe\n2020-08-08 07:15:15.146 28853-28853/com.example.proyecto35cardview E/AndroidRuntime: FATAL EXCEPTION: main\n    Process: com.example.proyecto35cardview, PID: 28853\n    android.content.ActivityNotFoundException: Unable to find explicit activity class {com.example.proyecto35cardview/com.example.proyecto35ca.MainActivitycardView}; have you declared this activity in your AndroidManifest.xml?\n        at android.app.Instrumentation.checkStartActivityResult(Instrumentation.java:2111)\n        at android.app.Instrumentation.execStartActivity(Instrumentation.java:1739)\n        at android.app.Activity.startActivityForResult(Activity.java:5363)\n        at androidx.fragment.app.FragmentActivity.startActivityForResult(FragmentActivity.java:676)\n        at android.app.Activity.startActivityForResult(Activity.java:5304)\n        at androidx.fragment.app.FragmentActivity.startActivityForResult(FragmentActivity.java:663)\n        at android.app.Activity.startActivity(Activity.java:5734)\n        at android.app.Activity.startActivity(Activity.java:5702)\n        at com.example.proyecto35cardview.MainActivity$onCreate$2.onClick(MainActivity.kt:22)\n        at android.view.View.performClick(View.java:7192)\n        at android.view.View.performClickInternal(View.java:7166)\n        at android.view.View.access$3500(View.java:824)\n        at android.view.View$PerformClick.run(View.java:27592)\n        at android.os.Handler.handleCallback(Handler.java:888)\n        at android.os.Handler.dispatchMessage(Handler.java:100)\n        at android.os.Looper.loop(Looper.java:213)\n        at android.app.ActivityThread.main(ActivityThread.java:8178)\n        at java.lang.reflect.Method.invoke(Native Method)\n        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:513)\n        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1101)\n<\/code><\/pre>\n<p>My code<\/p>\n<pre><code> card_view.setOnClickListener {\n          val intent = Intent (this,MainActivitycardView::class.java\n            startActivity(intent)//line 22\n            }\n<\/code><\/pre>\n<p>Manifest<\/p>\n<p><a href=\"https://i.sstatic.net/t2nSq.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/t2nSq.png\" alt=\"enter image description here\" /><\/a><\/p>\n<p>The problem (I try to call MainActivity cardView and it only shows two activities)\n<a href=\"https://i.sstatic.net/FJDqi.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/FJDqi.png\" alt=\"enter image description here\" /><\/a><\/p>\n<p>MainActivitycardView<\/p>\n<pre><code> override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        setContentView(R.layout.activity_main_activitycard_view)\n\n        //Se debe crear un vector de tipo MediaPlayer de 3 posiciones porque tengo 3 canciones\n        val vectoMp3 = arrayOfNulls&lt;MediaPlayer&gt;(3)\n        var repetir = 2\n        var position = 0\n        vectoMp3[0]= MediaPlayer.create(this,R.raw.race)\n        vectoMp3[1] = MediaPlayer.create(this,R.raw.sound)\n        vectoMp3[2]=MediaPlayer.create(this,R.raw.tea)\n\n        //Metodo para pausar la canción\n        buttonPlay.setOnClickListener {\n            if (vectoMp3[position]?.isPlaying!!){\n                vectoMp3[position]?.pause()\n                //Metodo para cambiar imagen del boton\n                buttonPlay.setBackgroundResource(R.drawable.reproducir)\n                Toast.makeText(this ,&quot;Pausa&quot;, Toast.LENGTH_SHORT).show()\n            } else {\n                vectoMp3[position]?.start()\n                buttonPlay.setBackgroundResource(R.drawable.pausa)\n                Toast.makeText(this ,&quot;Play&quot;, Toast.LENGTH_SHORT).show()\n            }\n        }\n\n        //Metodo para detener una canción\n        buttonStop.setOnClickListener {\n            if (vectoMp3[position] !=null){\n                vectoMp3[position]?.stop()\n                //Se debe colocar los vectores para que el boton  sepa que va a pausar\n                vectoMp3[0]= MediaPlayer.create(this,R.raw.race)\n                vectoMp3[1] = MediaPlayer.create(this,R.raw.sound)\n                vectoMp3[2]=MediaPlayer.create(this,R.raw.tea)\n                position = 0\n                buttonPlay.setBackgroundResource(R.drawable.reproducir)\n                //Metodo para volver a la portada 1\n                imageView.setBackgroundResource(R.drawable.portada1)\n                Toast.makeText(this, &quot;Stop&quot;, Toast.LENGTH_SHORT).show()\n            }\n        }\n        //Metodo para repetir una pista\n        button4.setOnClickListener {\n            if (repetir==1){\n                button4.setBackgroundResource(R.drawable.no_repetir)\n                Toast.makeText(this, &quot;No repetor&quot;, Toast.LENGTH_SHORT).show()\n                vectoMp3[position]?.isLooping  = false\n                repetir = 2\n            } else {\n                button4.setBackgroundResource(R.drawable.repetir)\n                Toast.makeText(this, &quot;Repetir&quot;, Toast.LENGTH_SHORT).show()\n                vectoMp3[position]?.isLooping  = true\n                repetir = 1\n            }\n        }\n\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 63315566,
+        "tags": [
+            "java",
+            "android",
+            "kotlin",
+            "android-manifest"
+        ],
+        "score": 0,
+        "accepted_answer_id": 63315893,
+        "is_answered": true,
+        "view_count": 1379,
+        "last_edit_date": 1596891420
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fb8f5877d244f223b4b6d29e0afb3a4e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2671330,
+                "user_type": "registered",
+                "user_id": 2308683,
+                "link": "https://stackoverflow.com/users/2308683/onecricketeer",
+                "reputation": 193048,
+                "display_name": "OneCricketeer",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 63315566,
+            "edited": false,
+            "creation_date": 1596892078,
+            "comment_id": 111959694
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fb8f5877d244f223b4b6d29e0afb3a4e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2671330,
+                "user_type": "registered",
+                "user_id": 2308683,
+                "link": "https://stackoverflow.com/users/2308683/onecricketeer",
+                "reputation": 193048,
+                "display_name": "OneCricketeer",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 63315566,
+            "edited": false,
+            "creation_date": 1596891970,
+            "comment_id": 111959655
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/10157641553917732/picture?type=large",
+                "account_id": 18255625,
+                "user_type": "registered",
+                "user_id": 13289639,
+                "link": "https://stackoverflow.com/users/13289639/jorge-leonardo",
+                "reputation": 177,
+                "display_name": "Jorge Leonardo"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 63315566,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fb8f5877d244f223b4b6d29e0afb3a4e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2671330,
+                "user_type": "registered",
+                "user_id": 2308683,
+                "link": "https://stackoverflow.com/users/2308683/onecricketeer",
+                "reputation": 193048,
+                "display_name": "OneCricketeer",
+                "accept_rate": 90
+            },
+            "edited": false,
+            "creation_date": 1596891810,
+            "comment_id": 111959605
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fb8f5877d244f223b4b6d29e0afb3a4e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2671330,
+                "user_type": "registered",
+                "user_id": 2308683,
+                "link": "https://stackoverflow.com/users/2308683/onecricketeer",
+                "reputation": 193048,
+                "display_name": "OneCricketeer",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 63315566,
+            "edited": false,
+            "creation_date": 1596891578,
+            "comment_id": 111959548
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/10157641553917732/picture?type=large",
+                "account_id": 18255625,
+                "user_type": "registered",
+                "user_id": 13289639,
+                "link": "https://stackoverflow.com/users/13289639/jorge-leonardo",
+                "reputation": 177,
+                "display_name": "Jorge Leonardo"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 63315566,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fb8f5877d244f223b4b6d29e0afb3a4e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2671330,
+                "user_type": "registered",
+                "user_id": 2308683,
+                "link": "https://stackoverflow.com/users/2308683/onecricketeer",
+                "reputation": 193048,
+                "display_name": "OneCricketeer",
+                "accept_rate": 90
+            },
+            "edited": false,
+            "creation_date": 1596891453,
+            "comment_id": 111959522
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fb8f5877d244f223b4b6d29e0afb3a4e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2671330,
+                "user_type": "registered",
+                "user_id": 2308683,
+                "link": "https://stackoverflow.com/users/2308683/onecricketeer",
+                "reputation": 193048,
+                "display_name": "OneCricketeer",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 63315566,
+            "edited": false,
+            "creation_date": 1596890894,
+            "comment_id": 111959387
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/aGnpd.jpg?s=256",
+            "account_id": 12220141,
+            "user_type": "registered",
+            "user_id": 8919425,
+            "link": "https://stackoverflow.com/users/8919425/paule-mandengue",
+            "reputation": 64,
+            "display_name": "paule mandengue"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1596908778,
+        "creation_date": 1596893041,
+        "body": "<p>Please show the definition of your class MainActivitycardView.java.\nHope you extended it like this :<\/p>\n<pre><code>public class MainActivitycardView extends AppCompatActivity { \n    //body of the class \n}\n<\/code><\/pre>\n",
+        "answer_id": 63315893,
+        "question_id": 63315566,
+        "last_edit_date": 1596908778
+    }],
+    "answer_comments": {}
+}

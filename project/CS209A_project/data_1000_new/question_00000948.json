@@ -1,0 +1,103 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-KxEL4DGSM1k/AAAAAAAAAAI/AAAAAAAAABA/_gEcdXYUWhg/s256-rj/photo.jpg",
+            "account_id": 12269835,
+            "user_type": "registered",
+            "user_id": 8955286,
+            "link": "https://stackoverflow.com/users/8955286/asiuf%e7%88%b1%e6%96%bd%e5%be%b7",
+            "reputation": 11,
+            "display_name": "asiuf爱施德"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/72776545/why-dont-use-volatile-access-methods-for-a-volatile-array-countercell-counter",
+        "last_activity_date": 1656352967,
+        "creation_date": 1656352967,
+        "answer_count": 0,
+        "title": "Why dont use volatile access methods for a volatile array `CounterCell[] counterCells` in Java ConcurrentHashMap?",
+        "body": "<p>In JDK8 ConcurrentHashMap using a variable named <code>volatile Node&lt;K,V&gt;[] table<\/code> for The HashMap, and supply three Volatile access methods for the table elements;\nBecause The volatile array dont means The element of the volatile array is volatile also, So We have to use <code>Unsafe<\/code> class to access elements with volatile semantics.<\/p>\n<pre><code>    static final &lt;K,V&gt; Node&lt;K,V&gt; tabAt(Node&lt;K,V&gt;[] tab, int i) {\n        return (Node&lt;K,V&gt;)U.getObjectVolatile(tab, ((long)i &lt;&lt; ASHIFT) + ABASE);\n    }\n\n    static final &lt;K,V&gt; boolean casTabAt(Node&lt;K,V&gt;[] tab, int i,\n                                        Node&lt;K,V&gt; c, Node&lt;K,V&gt; v) {\n        return U.compareAndSwapObject(tab, ((long)i &lt;&lt; ASHIFT) + ABASE, c, v);\n    }\n\n    static final &lt;K,V&gt; void setTabAt(Node&lt;K,V&gt;[] tab, int i, Node&lt;K,V&gt; v) {\n        U.putObjectVolatile(tab, ((long)i &lt;&lt; ASHIFT) + ABASE, v);\n    }\n<\/code><\/pre>\n<p><a href=\"https://hg.openjdk.java.net/jdk8/jdk8/jdk/file/687fd7c7986d/src/share/classes/java/util/concurrent/ConcurrentHashMap.java#l754\" rel=\"nofollow noreferrer\">Volatile access methods In ConcurrentHashMap JDK8<\/a><\/p>\n<p>But there also have a volatile variable named <code>volatile CounterCell[] counterCells<\/code>, But I dont see any volatile semantics access in counterCells array elements ,<\/p>\n<pre><code>            if ((as = counterCells) != null &amp;&amp; (n = as.length) &gt; 0) {\n                if ((a = as[(n - 1) &amp; h]) == null) { // here as[(n - 1) &amp; h] not volatile access\n                    if (cellsBusy == 0) {            // Try to attach new Cell\n                        CounterCell r = new CounterCell(x); // Optimistic create\n                        if (cellsBusy == 0 &amp;&amp;\n                            U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {\n                            boolean created = false;\n                            try {               // Recheck under lock\n                                CounterCell[] rs; int m, j;\n                                if ((rs = counterCells) != null &amp;&amp;\n                                    (m = rs.length) &gt; 0 &amp;&amp;\n                                    rs[j = (m - 1) &amp; h] == null) { //here rs[j = (m - 1) &amp; h] not volatile\n                                    rs[j] = r; // here not volatile\n                                    created = true;\n                                }\n                            } finally {\n                                cellsBusy = 0;\n                            }\n                            if (created)\n                                break;\n                            continue;           // Slot is now non-empty\n                        }\n                    }\n                    collide = false;\n                }\n                ......\n            }\n<\/code><\/pre>\n<p><a href=\"https://hg.openjdk.java.net/jdk8/jdk8/jdk/file/687fd7c7986d/src/share/classes/java/util/concurrent/ConcurrentHashMap.java#l2524\" rel=\"nofollow noreferrer\">access volatile array counterCells element is not volatile semantics<\/a><\/p>\n<p>I wonder why just use volatile accsess method for <code>table<\/code> array, but not <code>counterCells<\/code> both, And When is it appropriate to use volatile accsess method visit a volatile array element? Thankyou.<\/p>\n",
+        "question_id": 72776545,
+        "tags": [
+            "java",
+            "concurrency",
+            "concurrenthashmap"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 61
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/40d9bb2e8df635f2f598b7577c5b3eb9?s=256&d=identicon&r=PG",
+                "account_id": 10326,
+                "user_type": "registered",
+                "user_id": 19450,
+                "link": "https://stackoverflow.com/users/19450/ben-manes",
+                "reputation": 9711,
+                "display_name": "Ben Manes"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72776545,
+            "edited": false,
+            "creation_date": 1656469495,
+            "comment_id": 128577898
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/67f2ccd17aa6fd622152ad88fc2ae784?s=256&d=identicon&r=PG",
+                "account_id": 422870,
+                "user_type": "registered",
+                "user_id": 801894,
+                "link": "https://stackoverflow.com/users/801894/solomon-slow",
+                "reputation": 27582,
+                "display_name": "Solomon Slow"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72776545,
+            "edited": false,
+            "creation_date": 1656364944,
+            "comment_id": 128549880
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/udTpS.png?s=256",
+                "account_id": 1992310,
+                "user_type": "registered",
+                "user_id": 1786065,
+                "link": "https://stackoverflow.com/users/1786065/rogue",
+                "reputation": 11519,
+                "display_name": "Rogue",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72776545,
+            "edited": false,
+            "creation_date": 1656353451,
+            "comment_id": 128546550
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72776545,
+            "edited": false,
+            "creation_date": 1656353272,
+            "comment_id": 128546484
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

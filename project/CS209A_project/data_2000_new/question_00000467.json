@@ -1,0 +1,101 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/04eb6e9ba7097cc34b79b88541a46db1?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7212783,
+            "user_type": "registered",
+            "user_id": 5506264,
+            "link": "https://stackoverflow.com/users/5506264/wanghao-qin",
+            "reputation": 145,
+            "display_name": "wanghao qin",
+            "accept_rate": 54
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34387972/how-does-springmvc-asynchronous-improve-performance",
+        "last_activity_date": 1450669851,
+        "creation_date": 1450663117,
+        "answer_count": 1,
+        "title": "How does springMVC asynchronous improve performance",
+        "body": "<p>all.It is said that, using asynchronous can improve performance when concurrency level is high.\nSo I do the test in my server, but it seems that when I use asynchronous the performance becomes even worse, I hope someone can help me.\nI write two methods as follows:<\/p>\n\n<p>first one:<\/p>\n\n<pre><code>    @RequestMapping(value = \"/presuretest\", method = RequestMethod.GET)\n    @ResponseBody\n    public JSONObject presureTest() throws Exception {\n        User user = new User();\n        user.setEmail(\"XXXX@XXX.com\");\n        return userService.getUser(user);//the getUser method now is just Thread.sleep(500);\n    }\n<\/code><\/pre>\n\n<p>the other:<\/p>\n\n<pre><code>    @RequestMapping(value = \"/asyncpresuretest\", method = RequestMethod.GET)\n    @ResponseBody\n     public Callable&lt;JSONObject&gt; asyncpresureTest() throws Exception {\n            return new Callable&lt;JSONObject&gt;() {\n\n                @Override\n                public JSONObject call() throws Exception {\n                    User user = new User();\n                    user.setEmail(\"xxxx@xxxxx.com\");\n                    return userService.getUser(user);//The same as presureTest() method;\n                }\n\n            };\n        }\n<\/code><\/pre>\n\n<p>What the methods do now are both sleep 500ms,the different is one using asynchronous,while the other don't.<\/p>\n\n<p>Then I use ab test to test them,here is the result:\n1. normal method<\/p>\n\n<pre><code>./ab -c 600 -n 600 http://52.193.80.222/presuretest\n\nConcurrency Level:      600\nTime taken for tests:   2.227 seconds\nComplete requests:      600\nFailed requests:        0\nWrite errors:           0\nTotal transferred:      112200 bytes\nHTML transferred:       0 bytes\nRequests per second:    269.44 [#/sec] (mean)\nTime per request:       2226.826 [ms] (mean)\nTime per request:       3.711 [ms] (mean, across all concurrent requests)\nTransfer rate:          49.20 [Kbytes/sec] received\n\n\n./ab -c 600 -n 600 http://52.193.80.222/asyncpresuretest\n\nConcurrency Level:      600\nTime taken for tests:   3.445 seconds\nComplete requests:      600\nFailed requests:        0\nWrite errors:           0\nTotal transferred:      112200 bytes\nHTML transferred:       0 bytes\nRequests per second:    174.15 [#/sec] (mean)\nTime per request:       3445.252 [ms] (mean)\nTime per request:       5.742 [ms] (mean, across all concurrent requests)\nTransfer rate:          31.80 [Kbytes/sec] received\n\n\n./ab -c 700 -n 700 http://52.193.80.222/asyncpresuretest\n\nConcurrency Level:      700\nTime taken for tests:   2.682 seconds\nComplete requests:      700\nFailed requests:        0\nWrite errors:           0\nTotal transferred:      130900 bytes\nHTML transferred:       0 bytes\nRequests per second:    261.04 [#/sec] (mean)\nTime per request:       2681.588 [ms] (mean)\nTime per request:       3.831 [ms] (mean, across all concurrent requests)\nTransfer rate:          47.67 [Kbytes/sec] received\n\n\n./ab -c 700 -n 700 http://52.193.80.222/presuretest\n\nConcurrency Level:      700\nTime taken for tests:   2.325 seconds\nComplete requests:      700\nFailed requests:        0\nWrite errors:           0\nTotal transferred:      130900 bytes\nHTML transferred:       0 bytes\nRequests per second:    301.09 [#/sec] (mean)\nTime per request:       2324.909 [ms] (mean)\nTime per request:       3.321 [ms] (mean, across all concurrent requests)\nTransfer rate:          54.98 [Kbytes/sec] received\n<\/code><\/pre>\n\n<p>I added the level to 900<\/p>\n\n<pre><code>./ab -c 900 -n 900 http://52.193.80.222/presuretest\n\nConcurrency Level:      900\nTime taken for tests:   3.761 seconds\nComplete requests:      900\nFailed requests:        94\n   (Connect: 0, Receive: 47, Length: 0, Exceptions: 47)\nWrite errors:           0\nTotal transferred:      159511 bytes\nHTML transferred:       0 bytes\nRequests per second:    239.31 [#/sec] (mean)\nTime per request:       3760.847 [ms] (mean)\nTime per request:       4.179 [ms] (mean, across all concurrent requests)\nTransfer rate:          41.42 [Kbytes/sec] received\n\n./ab -c 900 -n 900 http://52.193.80.222/asyncpresuretest\n\n    Concurrency Level:      900\nTime taken for tests:   3.769 seconds\nComplete requests:      900\nFailed requests:        164\n   (Connect: 0, Receive: 82, Length: 0, Exceptions: 82)\nWrite errors:           0\nHTML transferred:       0 bytes\nRequests per second:    238.80 [#/sec] (mean)\nTime per request:       3768.787 [ms] (mean)\nTime per request:       4.188 [ms] (mean, across all concurrent requests)\nTransfer rate:          39.64 [Kbytes/sec] received\n<\/code><\/pre>\n\n<p>So, I doubt does it really work?<\/p>\n\n<pre><code>Now, I move the callback to service.In my UserServiceImpl.java,I add method:\n\n\n\n public Callable&lt;JSONObject&gt; getUserAsync(final User user) throws Exception {\n        //System.out.println(\"service in thread name is :\" + Thread.currentThread().getName());\n        return new Callable&lt;JSONObject&gt;() {\n\n            @Override\n            public JSONObject call() throws Exception {\n                //System.out.println(\"callback in thread name is :\" + Thread.currentThread().getName());\n                Thread.sleep(1000);\n                return null;\n            }\n\n        };\n    }\n<\/code><\/pre>\n\n<p>and no midifycation for getUser method.<\/p>\n\n<p>And I modify the controller methods like this:<\/p>\n\n<pre><code>@RequestMapping(value = \"/presuretest_v1.0\", method = RequestMethod.GET)\n@ResponseBody\npublic JSONObject presureTest() throws Exception {\n    User user = new User();\n    user.setEmail(\"670271826@qq.com\");\n    // Thread.sleep(2000);\n    //System.out.println(\"controller in thread name is :\" + Thread.currentThread().getName());\n    return userService.getUser(user);\n}\n\n@RequestMapping(value = \"/asyncpresuretest_v1.0\", method = RequestMethod.GET)\n@ResponseBody\npublic Callable&lt;JSONObject&gt; asyncpresureTest() throws Exception {\n    //System.out.println(\"controller in thread name is :\" + Thread.currentThread().getName());\n    User user = new User();\n    user.setEmail(\"670271826@qq.com\");\n    return userService.getUserAsync(user);\n<\/code><\/pre>\n\n<p>}<\/p>\n",
+        "question_id": 34387972,
+        "tags": [
+            "java",
+            "spring-mvc",
+            "asynchronous"
+        ],
+        "score": 1,
+        "accepted_answer_id": 34388119,
+        "is_answered": true,
+        "view_count": 519,
+        "last_edit_date": 1450669851
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/eAW7gmAv.jpg?s=256",
+            "account_id": 279913,
+            "user_type": "registered",
+            "user_id": 575338,
+            "link": "https://stackoverflow.com/users/575338/mavarazy",
+            "reputation": 7735,
+            "display_name": "mavarazy",
+            "accept_rate": 59
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1450664254,
+        "creation_date": 1450664254,
+        "body": "<p>Asynchronous is little more complicated, than just wrapping your call in Callable, and expecting a performance boost. <\/p>\n\n<p>In your case the part that should be asynchronous is <\/p>\n\n<pre><code>    userService.getUser(user)\n<\/code><\/pre>\n\n<p>Here you are <strong>waiting<\/strong> for DB response, which is a main bottle neck. What you did has just increased processing complexity of the request on a server, without giving any performance benefits.<\/p>\n\n<p>If you want to have advantages of asynchronous processing, it should be embodied in your application and you need to change your code, and style of writing.<\/p>\n",
+        "answer_id": 34388119,
+        "question_id": 34387972
+    }],
+    "answer_comments": {"34388119": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/eAW7gmAv.jpg?s=256",
+                "account_id": 279913,
+                "user_type": "registered",
+                "user_id": 575338,
+                "link": "https://stackoverflow.com/users/575338/mavarazy",
+                "reputation": 7735,
+                "display_name": "mavarazy",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 34388119,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/04eb6e9ba7097cc34b79b88541a46db1?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7212783,
+                "user_type": "registered",
+                "user_id": 5506264,
+                "link": "https://stackoverflow.com/users/5506264/wanghao-qin",
+                "reputation": 145,
+                "display_name": "wanghao qin",
+                "accept_rate": 54
+            },
+            "edited": false,
+            "creation_date": 1450684340,
+            "comment_id": 56523297
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/04eb6e9ba7097cc34b79b88541a46db1?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7212783,
+                "user_type": "registered",
+                "user_id": 5506264,
+                "link": "https://stackoverflow.com/users/5506264/wanghao-qin",
+                "reputation": 145,
+                "display_name": "wanghao qin",
+                "accept_rate": 54
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 34388119,
+            "edited": false,
+            "creation_date": 1450669910,
+            "comment_id": 56518618
+        }
+    ]}
+}

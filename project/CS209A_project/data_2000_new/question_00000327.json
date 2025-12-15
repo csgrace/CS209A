@@ -1,0 +1,118 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/882192545167735/picture?type=large",
+            "account_id": 7214455,
+            "user_type": "registered",
+            "user_id": 5507446,
+            "link": "https://stackoverflow.com/users/5507446/marc-zaharescu",
+            "reputation": 639,
+            "display_name": "Marc Zaharescu",
+            "accept_rate": 56
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49114170/java-gradle-build-noclassdeffounderror",
+        "last_activity_date": 1521744989,
+        "creation_date": 1520264621,
+        "answer_count": 1,
+        "title": "Java Gradle Build: NoClassDefFoundError",
+        "body": "<p>My <code>build.gradle<\/code> file is as following<\/p>\n\n<pre><code>apply plugin: 'java' sourceCompatibility = 1.8\n\nrepositories {\n    mavenCentral() }\n\n\ndependencies {\n    testCompile group: 'junit', name: 'junit', version: '4.12'\n    compile 'io.javalin:javalin:1.3.0'\n    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'\n    compile 'org.slf4j:slf4j-simple:1.7.25' }\n\njar {\n    manifest {\n        attributes(\n                'Class-Path': configurations.runtime.files.collect {\"$it.name\"}.join(' '),\n                'Main-Class': 'products.ProductAPI'\n        )\n    } }\n\ntask stage {\n    dependsOn 'build'\n    dependsOn 'clean'\n    build.mustRunAfter clean }\n<\/code><\/pre>\n\n<p>Trying to build a java application with gradle and deploy it to a heroku server. I have some issues on <code>java -jar build/libs/MyApp-0.0.1.jar<\/code> as it returns the following: <\/p>\n\n<blockquote>\n  <p>Exception in thread \"main\" java.lang.NoClassDefFoundError:\n  io/javalin/Javalin    at products.ProductAPI.main(ProductAPI.java:7)\n  Caused by: java.lang.ClassNotFoundException: io.javalin.Javalin   at\n  java.net.URLClassLoader.findClass(URLClassLoader.java:381)    at\n  java.lang.ClassLoader.loadClass(ClassLoader.java:424)     at\n  sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)     at\n  java.lang.ClassLoader.loadClass(ClassLoader.java:357)<\/p>\n<\/blockquote>\n",
+        "question_id": 49114170,
+        "tags": [
+            "java",
+            "heroku",
+            "gradle",
+            "build",
+            "dependencies"
+        ],
+        "score": 3,
+        "accepted_answer_id": 49115758,
+        "is_answered": true,
+        "view_count": 9690
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/882192545167735/picture?type=large",
+                "account_id": 7214455,
+                "user_type": "registered",
+                "user_id": 5507446,
+                "link": "https://stackoverflow.com/users/5507446/marc-zaharescu",
+                "reputation": 639,
+                "display_name": "Marc Zaharescu",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49114170,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/11942746bc8cb865f8f1a86a4e46a5ba?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2434951,
+                "user_type": "registered",
+                "user_id": 2125090,
+                "link": "https://stackoverflow.com/users/2125090/the-guest",
+                "reputation": 742,
+                "display_name": "The Guest",
+                "accept_rate": 56
+            },
+            "edited": false,
+            "creation_date": 1520265750,
+            "comment_id": 85234115
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/11942746bc8cb865f8f1a86a4e46a5ba?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2434951,
+                "user_type": "registered",
+                "user_id": 2125090,
+                "link": "https://stackoverflow.com/users/2125090/the-guest",
+                "reputation": 742,
+                "display_name": "The Guest",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49114170,
+            "edited": false,
+            "creation_date": 1520264962,
+            "comment_id": 85233542
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dc1cb51cfc94e91a85dbc0d02962656d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6764799,
+            "user_type": "registered",
+            "user_id": 5210117,
+            "link": "https://stackoverflow.com/users/5210117/miskender",
+            "reputation": 7998,
+            "display_name": "miskender"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 6,
+        "is_accepted": true,
+        "last_activity_date": 1521744989,
+        "creation_date": 1520269363,
+        "body": "<p>To run your app without any <code>NoClassDefFoundError<\/code>, you should have your dependencies in the runtime class path. Creating a fat jar is the simplest solution. Change your jar section like below;<\/p>\n\n<pre><code>jar {\n    manifest {\n       attributes(\n          'Class-Path': configurations.compile.files.collect {\"$it.name\"}.join(' '),\n          'Main-Class': 'products.ProductAPI')}\n    from {\n        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }\n    }\n}\n<\/code><\/pre>\n\n<p>run <code>gradle build<\/code> command and jar with dependencies will be created.\nOther way is to add jars to runtime class path are; with <code>java -cp<\/code> flag. (Also If your application has already a classpath folder configured, copying dependencies in this folder will add them to the classpath)<\/p>\n",
+        "answer_id": 49115758,
+        "question_id": 49114170,
+        "last_edit_date": 1521744989
+    }],
+    "answer_comments": {"49115758": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dc1cb51cfc94e91a85dbc0d02962656d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6764799,
+            "user_type": "registered",
+            "user_id": 5210117,
+            "link": "https://stackoverflow.com/users/5210117/miskender",
+            "reputation": 7998,
+            "display_name": "miskender"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 49115758,
+        "edited": false,
+        "creation_date": 1542458354,
+        "comment_id": 93580402
+    }]}
+}

@@ -1,0 +1,208 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+            "account_id": 1005397,
+            "user_type": "registered",
+            "user_id": 1019307,
+            "link": "https://stackoverflow.com/users/1019307/hankca",
+            "reputation": 9727,
+            "display_name": "HankCa",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/30960273/spring-resttemplate-execute-post-large-files-and-obtain-a-response",
+        "last_activity_date": 1434868256,
+        "creation_date": 1434847893,
+        "answer_count": 2,
+        "title": "Spring restTemplate execute( ) POST large files and obtain a response",
+        "body": "<p>This took me quite a while to work out so I wanted to share it.  Most information came from SO and I wanted to consolidate into this one place.<\/p>\n\n<p>My requirements are to upload files using a RESTFul POST.  Due to possibly large files I wanted to stream the files. I obviously want to be able to read the response.<\/p>\n\n<p>I planned to use Jersey as the REST Server and Spring's RestTemplate as the client (and for testing).<\/p>\n\n<p>The problem I faced was streaming POSTs and receiving a response.  How can I do that?  (Rhetorical question - I answer this!)<\/p>\n",
+        "question_id": 30960273,
+        "tags": [
+            "java",
+            "spring",
+            "rest",
+            "stream",
+            "resttemplate"
+        ],
+        "score": 6,
+        "accepted_answer_id": 30960274,
+        "is_answered": true,
+        "view_count": 20038
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": false,
+            "last_activity_date": 1434868256,
+            "creation_date": 1434849948,
+            "body": "<p>It's unnecessary to go through all these hoops with a <code>RequestCallback<\/code>. Simply use a <a href=\"http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/io/PathResource.html\" rel=\"noreferrer\"><code>PathResource<\/code><\/a>.<\/p>\n\n<pre><code>PathResource pathResource = new PathResource(theTestFilePath);\nResponseEntity&lt;String&gt; response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity&lt;&gt;(pathResource), String.class);\n<\/code><\/pre>\n\n<p>Spring will use a <a href=\"http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/resource/ResourceHttpRequestHandler.html\" rel=\"noreferrer\"><code>ResourceHttpMessageConverter<\/code><\/a> to serialize the file identified by the given <code>Path<\/code> to the request body. Internally, the Spring 4.x implementation uses a buffer size of 4096 bytes (which is also what <code>IOUtils#copy(..)<\/code> uses). <\/p>\n\n<p>Obviously, you can provide the response type you want. The example above expects the response body as a <code>String<\/code>. With a <code>ResponseEntity<\/code>, you can access all the response headers with<\/p>\n\n<pre><code>HttpHeaders responseHeaders = response.getHeaders();\n<\/code><\/pre>\n",
+            "answer_id": 30960443,
+            "question_id": 30960273,
+            "last_edit_date": 1434868256
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+                "account_id": 1005397,
+                "user_type": "registered",
+                "user_id": 1019307,
+                "link": "https://stackoverflow.com/users/1019307/hankca",
+                "reputation": 9727,
+                "display_name": "HankCa",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1434860152,
+            "creation_date": 1434847893,
+            "body": "<p>I am using SpringBoot <code>1.2.4.RELEASE<\/code> with Jersey being pulled in by:<\/p>\n\n<pre><code>compile(\"org.springframework.boot:spring-boot-starter-jersey\")\n<\/code><\/pre>\n\n<p>I created the project with the brilliant Spring Starter Project (<code>Spring Tool Suite &gt; New<\/code> or you can do through a website I believe and no doubt IntelliJ has this capability also).  And chose 'Jersey (JAX-RS)' option.  In the gradle <code>build.gradle<\/code> I also added the dependency:<\/p>\n\n<pre><code>compile('commons-io:commons-io:2.4')\n<\/code><\/pre>\n\n<p>I wrote this server side code.<\/p>\n\n<pre><code>import java.io.IOException;\nimport java.io.InputStream;\nimport java.io.InputStreamReader;\nimport java.net.URI;\nimport java.net.URISyntaxException;\n\nimport javax.ws.rs.Consumes;\nimport javax.ws.rs.GET;\nimport javax.ws.rs.POST;\nimport javax.ws.rs.Path;\nimport javax.ws.rs.Produces;\nimport javax.ws.rs.QueryParam;\nimport javax.ws.rs.core.MediaType;\nimport javax.ws.rs.core.Response;\n\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.web.bind.annotation.RestController;\n\nimport org.me.fileStore.service.FileStoreService;\n\n@RestController\n@Path(\"/filestore\")\npublic class FileStoreRestService {\n    private static Logger logger = LoggerFactory.getLogger(FileStoreRestService.class);\n\n    @Autowired\n    private FileStoreService fileStoreService;\n\n\n    @POST\n    @Path(\"upload\")\n    @Consumes(MediaType.APPLICATION_OCTET_STREAM)\n    @Produces(MediaType.APPLICATION_JSON)\n    public Response Upload(InputStream stream) throws IOException, URISyntaxException { //\n        String location = fileStoreService.upload(stream);  // relative path\n        URI loc = new URI(location);\n        Response response = Response.created(loc).build();\n        System.out.println(\"POST - response: \" + response + \", :\" + response.getHeaders());\n        return response;\n    }\n<\/code><\/pre>\n\n<p>Where i had most troubles was in getting a Response with a location.<\/p>\n\n<p>Firstly I had to handle streaming large files.  I followed <a href=\"https://stackoverflow.com/a/15785322/1019307\">https://stackoverflow.com/a/15785322/1019307<\/a> as you can see in the test below.  I was NOT obtaining a Response no matter what I tried with the <code>HttpMessageConverterExtractor<\/code> as per that post:<\/p>\n\n<pre><code>final HttpMessageConverterExtractor&lt;String&gt; responseExtractor =\nnew HttpMessageConverterExtractor&lt;String&gt;(String.class, restTemplate.getMessageConverters());\n<\/code><\/pre>\n\n<p>After finding <a href=\"https://stackoverflow.com/a/6006147/1019307\">https://stackoverflow.com/a/6006147/1019307<\/a> I wrote:<\/p>\n\n<pre><code>private static class ResponseFromHeadersExtractor implements ResponseExtractor&lt;ClientHttpResponse&gt; {\n\n    @Override\n    public ClientHttpResponse extractData(ClientHttpResponse response) {\n        System.out.println(\"StringFromHeadersExtractor - response headers: \" + response.getHeaders());\n        return response;\n    }\n}\n<\/code><\/pre>\n\n<p>This gave me this test:<\/p>\n\n<pre><code>import java.io.BufferedReader;\nimport java.io.File;\nimport java.io.FileReader;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.net.URI;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.nio.file.Paths;\nimport java.util.HashMap;\nimport java.util.Map;\n\nimport org.apache.commons.io.IOUtils;\nimport org.apache.commons.logging.Log;\nimport org.apache.commons.logging.LogFactory;\nimport org.hamcrest.MatcherAssert;\nimport org.hamcrest.Matchers;\nimport org.junit.Assert;\nimport org.junit.Test;\nimport org.junit.runner.RunWith;\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;\nimport org.springframework.boot.test.IntegrationTest;\nimport org.springframework.boot.test.SpringApplicationConfiguration;\nimport org.springframework.boot.test.TestRestTemplate;\nimport org.springframework.http.HttpMethod;\nimport org.springframework.http.MediaType;\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.http.client.ClientHttpRequest;\nimport org.springframework.http.client.ClientHttpResponse;\nimport org.springframework.http.client.SimpleClientHttpRequestFactory;\nimport org.springframework.test.context.junit4.SpringJUnit4ClassRunner;\nimport org.springframework.test.context.web.WebAppConfiguration;\nimport org.springframework.web.client.RequestCallback;\nimport org.springframework.web.client.ResponseExtractor;\nimport org.springframework.web.client.RestTemplate;\n\n\n@RunWith(SpringJUnit4ClassRunner.class)\n@SpringApplicationConfiguration(classes = FileStoreApplication.class)\n@WebAppConfiguration\n@IntegrationTest(\"server.port:9000\")\npublic class FileStoreRestServiceTest {\n    private static Logger logger = LoggerFactory.getLogger(FileStoreRestServiceTest.class);\n    protected final Log logger2 = LogFactory.getLog(getClass());\n\n    String base = \"http://localhost:9000/filestore\";\n    private RestTemplate restTemplate = new TestRestTemplate();\n\n@Test\npublic void testMyMethodExecute() throws IOException {\n    String content = \"This is file contents\\nWith another line.\\n\";\n    Path theTestFilePath = TestingUtils.getTempPath(content);\n    InputStream inputStream = Files.newInputStream(theTestFilePath);\n\n    String url = base + \"/upload\";\n    final RequestCallback requestCallback = new RequestCallback() {\n        @Override\n        public void doWithRequest(final ClientHttpRequest request) throws IOException {\n            request.getHeaders().setContentType(MediaType.APPLICATION_OCTET_STREAM);\n            IOUtils.copy(inputStream, request.getBody());\n        }\n    };\n    final RestTemplate restTemplate = new RestTemplate();\n    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();\n    requestFactory.setBufferRequestBody(false);\n    restTemplate.setRequestFactory(requestFactory);\n    ClientHttpResponse response = restTemplate.execute(url, HttpMethod.POST, requestCallback,\n            new ResponseFromHeadersExtractor());\n    URI location = response.getHeaders().getLocation();\n    System.out.println(\"Location: \" + location);\n    Assert.assertNotNull(location);\n    Assert.assertNotEquals(0, location.getPath().length());\n\n}\n\nprivate static class ResponseFromHeadersExtractor implements ResponseExtractor&lt;ClientHttpResponse&gt; {\n\n    @Override\n    public ClientHttpResponse extractData(ClientHttpResponse response) {\n        System.out.println(\"StringFromHeadersExtractor - response headers: \" + response.getHeaders());\n        return response;\n    }\n}\n<\/code><\/pre>\n\n<p>I need to refactor much in that test out into some services.<\/p>\n",
+            "answer_id": 30960274,
+            "question_id": 30960273,
+            "last_edit_date": 1495541236
+        }
+    ],
+    "answer_comments": {"30960443": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+                "account_id": 1005397,
+                "user_type": "registered",
+                "user_id": 1019307,
+                "link": "https://stackoverflow.com/users/1019307/hankca",
+                "reputation": 9727,
+                "display_name": "HankCa",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960443,
+            "edited": false,
+            "creation_date": 1434978822,
+            "comment_id": 49992117
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960443,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+                "account_id": 1005397,
+                "user_type": "registered",
+                "user_id": 1019307,
+                "link": "https://stackoverflow.com/users/1019307/hankca",
+                "reputation": 9727,
+                "display_name": "HankCa",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1434951164,
+            "comment_id": 49976651
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+                "account_id": 1005397,
+                "user_type": "registered",
+                "user_id": 1019307,
+                "link": "https://stackoverflow.com/users/1019307/hankca",
+                "reputation": 9727,
+                "display_name": "HankCa",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960443,
+            "edited": false,
+            "creation_date": 1434947037,
+            "comment_id": 49975544
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960443,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+                "account_id": 1005397,
+                "user_type": "registered",
+                "user_id": 1019307,
+                "link": "https://stackoverflow.com/users/1019307/hankca",
+                "reputation": 9727,
+                "display_name": "HankCa",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1434869459,
+            "comment_id": 49956175
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+                "account_id": 1005397,
+                "user_type": "registered",
+                "user_id": 1019307,
+                "link": "https://stackoverflow.com/users/1019307/hankca",
+                "reputation": 9727,
+                "display_name": "HankCa",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960443,
+            "edited": false,
+            "creation_date": 1434868798,
+            "comment_id": 49956048
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0dbc9574f3382f14a5f4c38a0aec4286?s=256&d=identicon&r=PG",
+                "account_id": 1005397,
+                "user_type": "registered",
+                "user_id": 1019307,
+                "link": "https://stackoverflow.com/users/1019307/hankca",
+                "reputation": 9727,
+                "display_name": "HankCa",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960443,
+            "edited": false,
+            "creation_date": 1434860055,
+            "comment_id": 49954660
+        }
+    ]}
+}

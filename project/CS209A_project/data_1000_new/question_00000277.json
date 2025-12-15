@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3c76c653b051fc5594b5eeb66624d3ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1009321,
+            "user_type": "registered",
+            "user_id": 1022260,
+            "link": "https://stackoverflow.com/users/1022260/mikeb",
+            "reputation": 11523,
+            "display_name": "mikeb",
+            "accept_rate": 53
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/39671619/httpclient-4-generate-url-with-params",
+        "last_activity_date": 1474731086,
+        "creation_date": 1474680284,
+        "answer_count": 2,
+        "title": "HTTPClient 4 - generate url with params",
+        "body": "<p>How do I get the full URL for this request?  All I need is the <code>http://whatever?client_id=xyz...<\/code>.  How do I just build a URL?<\/p>\n\n<p>None of print statements print what I want, getURI() does not add the parameters...<\/p>\n\n<pre><code>    HttpGet get = new HttpGet(authUrlTemplate);\n    BasicHttpParams bhp = new BasicHttpParams();\n\n    bhp.setParameter(\"client_id\", getClientId());\n    bhp.setParameter(\"client_secret\", getClientSecret());\n    bhp.setParameter(\"redirect_uri\", redirectURL.toString());\n    bhp.setParameter(\"grant_type\", \"authorization_code\");\n\n    get.setParams(bhp);\n    System.err.println(get.getURI());\n    System.err.println(get.getRequestLine());\n    System.err.println(get.getParams());\n<\/code><\/pre>\n\n<p>Output:<\/p>\n\n<pre><code>21:18:49,967 ERROR [stderr] (default task-7) https://accounts.google.com/o/oauth2/v2/auth\n21:18:49,970 ERROR [stderr] (default task-7) GET https://accounts.google.com/o/oauth2/v2/auth HTTP/1.1\n21:18:49,971 ERROR [stderr] (default task-7) org.apache.http.params.BasicHttpParams@28310ff2\n<\/code><\/pre>\n\n<p>I know there is a library to do this, but want to do it this way.<\/p>\n",
+        "question_id": 39671619,
+        "tags": [
+            "java",
+            "apache-httpclient-4.x"
+        ],
+        "score": 2,
+        "accepted_answer_id": 39678022,
+        "is_answered": true,
+        "view_count": 533
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/F6yVZ.png?s=256",
+                "account_id": 8860912,
+                "user_type": "registered",
+                "user_id": 6617152,
+                "link": "https://stackoverflow.com/users/6617152/ramachandran-a-g",
+                "reputation": 4948,
+                "display_name": "Ramachandran.A.G"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1474682981,
+            "creation_date": 1474682981,
+            "body": "<p>Here is a generic working example. the code is verbose and can be shortened , but this gives you an overall idea.<\/p>\n\n<pre><code>import org.apache.http.NameValuePair;\nimport org.apache.http.client.methods.HttpGet;\nimport org.apache.http.client.utils.URLEncodedUtils;\nimport org.apache.http.message.BasicNameValuePair;\nimport org.apache.http.params.BasicHttpParams;\nimport sun.management.resources.agent;\n\nimport java.util.*;\n\n/**\n * Created by aditya on 9/24/2016.\n */\npublic class SOMain {\n    static public void main(String[] args){\n        String baseUrl=\"http://google.co.in\";\n        HashMap&lt;String,String&gt; parameters = new HashMap&lt;String,String&gt;();\n        parameters.put(\"key1\",\"value1\");\n        parameters.put(\"key3\",\"value3\");\n        parameters.put(\"key2\",\"value2\");\n        System.out.println(addParameters(baseUrl,parameters));\n    }\n\n    static protected String addParameters(String url, HashMap&lt;String,String&gt; parameters){\n        if(!url.endsWith(\"?\"))\n            url += \"?\";\n\n        List&lt;NameValuePair&gt; params = new LinkedList&lt;NameValuePair&gt;();\n        if(parameters!=null){\n            Iterator entries = parameters.entrySet().iterator();\n\n            while (entries.hasNext()) {\n                Map.Entry entry = (Map.Entry) entries.next();\n                String key = (String)entry.getKey();\n                String value = (String)entry.getValue();\n                params.add(new BasicNameValuePair(key, value));            }\n        }\n\n        String paramString = URLEncodedUtils.format(params, \"utf-8\");\n\n        url += paramString;\n        return url;\n    }\n}\n<\/code><\/pre>\n\n<p>This prints<\/p>\n\n<pre><code>http://google.co.in?key1=value1&amp;key2=value2&amp;key3=value3\n<\/code><\/pre>\n",
+            "answer_id": 39671827,
+            "question_id": 39671619
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3c76c653b051fc5594b5eeb66624d3ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1009321,
+                "user_type": "registered",
+                "user_id": 1022260,
+                "link": "https://stackoverflow.com/users/1022260/mikeb",
+                "reputation": 11523,
+                "display_name": "mikeb",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1474731086,
+            "creation_date": 1474731086,
+            "body": "<p>Here is a simple version of how I did it:<\/p>\n\n<pre><code>public String getAuthUrl() {\n    URIBuilder b = null;\n    // Removed exception handling...\n    b = new URIBuilder(AUTH_URL); // http://whatever.com\n\n    List&lt;NameValuePair&gt; nvps = new ArrayList&lt;NameValuePair&gt;();\n    nvps.add(new BasicNameValuePair(\"client_id\", getClientId()));\n    nvps.add(new BasicNameValuePair(\"redirect_uri\", redirectURL.toString()));\n    nvps.add(new BasicNameValuePair(\"state\", STATE));\n    nvps.add(new BasicNameValuePair(\"response_type\", \"code\"));\n    nvps.add(new BasicNameValuePair(\"scope\", \"email\"));\n    b.setParameters(nvps);\n    return b.toString();\n  }\n<\/code><\/pre>\n",
+            "answer_id": 39678022,
+            "question_id": 39671619
+        }
+    ],
+    "answer_comments": {"39671827": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/F6yVZ.png?s=256",
+            "account_id": 8860912,
+            "user_type": "registered",
+            "user_id": 6617152,
+            "link": "https://stackoverflow.com/users/6617152/ramachandran-a-g",
+            "reputation": 4948,
+            "display_name": "Ramachandran.A.G"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 39671827,
+        "reply_to_user": {
+            "profile_image": "https://www.gravatar.com/avatar/3c76c653b051fc5594b5eeb66624d3ec?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1009321,
+            "user_type": "registered",
+            "user_id": 1022260,
+            "link": "https://stackoverflow.com/users/1022260/mikeb",
+            "reputation": 11523,
+            "display_name": "mikeb",
+            "accept_rate": 53
+        },
+        "edited": false,
+        "creation_date": 1474731912,
+        "comment_id": 66656502
+    }]}
+}

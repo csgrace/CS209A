@@ -1,0 +1,142 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cdca60eb050e800e9229d95b5d3a3e78?s=256&d=identicon&r=PG",
+            "account_id": 2740110,
+            "user_type": "registered",
+            "user_id": 2361836,
+            "link": "https://stackoverflow.com/users/2361836/corvax",
+            "reputation": 1145,
+            "display_name": "corvax",
+            "accept_rate": 68
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/40562521/best-implementation-of-real-backpressure-in-rxjava",
+        "last_activity_date": 1506187179,
+        "creation_date": 1478951061,
+        "answer_count": 2,
+        "title": "Best implementation of REAL backpressure in RxJava",
+        "body": "<p>Well, backpressure in RxJava is not real backpressure, but only ignoring some sets of elements.<\/p>\n\n<p>But what if I cannot loose any elements and I need to slow emition somehow?<\/p>\n\n<p>RxJava cannot affect element emition, so developer needs to implement it by himself. But how?<\/p>\n\n<p>The simpliest way comes to mind is to use some counter with incrementing on emition and decrementing on finishing.<\/p>\n\n<p>Like that:<\/p>\n\n<pre><code>public static void sleep(int ms) {\n    try {\n        Thread.sleep(ms);\n    } catch (InterruptedException e) {\n        e.printStackTrace();\n    }\n}\n\npublic static void main(String[] args) throws InterruptedException {\n\n    AtomicInteger counter = new AtomicInteger();\n\n    Scheduler sA = Schedulers.from(Executors.newFixedThreadPool(1));\n    Scheduler sB = Schedulers.from(Executors.newFixedThreadPool(5));\n\n    Observable.create(s -&gt; {\n        while (!s.isUnsubscribed()) {\n            if (counter.get() &lt; 100) {\n                s.onNext(Math.random());\n                counter.incrementAndGet();\n            } else {\n                sleep(100);\n            }\n        }\n    }).subscribeOn(sA)\n            .flatMap(r -&gt;\n                    Observable.just(r)\n                            .subscribeOn(sB)\n                            .doOnNext(x -&gt; sleep(1000))\n                            .doOnNext(x -&gt; counter.decrementAndGet())\n            )\n            .subscribe();\n}\n<\/code><\/pre>\n\n<p>But I think this way is very poor. Is there any better solutions?<\/p>\n",
+        "question_id": 40562521,
+        "tags": [
+            "java",
+            "multithreading",
+            "rx-java",
+            "reactive-programming"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 1202
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1506187179,
+            "creation_date": 1478957145,
+            "body": "<blockquote>\n  <p>Well, backpressure in RxJava is not real backpressure<\/p>\n<\/blockquote>\n\n<p>RxJava's backpressure implementation is a non-blocking cooperation between subsequent producers and consumers through a request channel. The consumer asks for some amount of elements via <code>request()<\/code> and the producers creates/generates/emits at most that amount of items via <code>onNext<\/code>, sometimes with delays between <code>onNext<\/code>s.<\/p>\n\n<blockquote>\n  <p>but only ignoring some sets of elements.<\/p>\n<\/blockquote>\n\n<p>This happens only when you explicitly tell RxJava to drop any overflow.<\/p>\n\n<blockquote>\n  <p>RxJava cannot affect element emition, so developer needs to implement it by himself. But how?<\/p>\n<\/blockquote>\n\n<p>Using <code>Observable.create<\/code> requires advanced knowledge of how non-blocking backpressure can be implemented and practically it is not recommended to library users. RxJava has plenty of ways to give you backpressure-enabled flows without complications:<\/p>\n\n<pre><code>Observable.range(1, 100)\n.map(v -&gt; Math.random())\n.subscribeOn(sA)\n.flatMap(v -&gt;\n    Observable.just(v).subscribeOn(sB)\n    .doOnNext(x -&gt; sleep(1000))\n)\n.subscribe();\n<\/code><\/pre>\n\n<p>or<\/p>\n\n<pre><code>Observable.create(SyncOnSubscribe.createStateless(\n    o -&gt; o.onNext(Math.random())\n)\n.subscribeOn(sA)\n...\n<\/code><\/pre>\n",
+            "answer_id": 40563318,
+            "question_id": 40562521,
+            "last_edit_date": 1506187179
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/49VtI.jpg?s=256",
+                "account_id": 7926575,
+                "user_type": "registered",
+                "user_id": 5985853,
+                "link": "https://stackoverflow.com/users/5985853/alexey-soshin",
+                "reputation": 17861,
+                "display_name": "Alexey Soshin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1478955717,
+            "creation_date": 1478955717,
+            "body": "<p>As you noted yourself, this actually has nothing to do with RxJava.<br>\nIf you must process all events eventually, but you want to do that at your own pace, use queues:<\/p>\n\n<pre><code>    ExecutorService emiter = Executors.newSingleThreadExecutor();\n    ScheduledExecutorService workers = Executors.newScheduledThreadPool(4);\n    BlockingQueue&lt;String&gt; events = new LinkedBlockingQueue&lt;&gt;();\n\n\n    emiter.submit(() -&gt; {\n       System.out.println(\"I'll send 100 events as fast as I can\");\n\n        for (int i = 0; i &lt; 100; i++) {\n            try {\n                events.put(UUID.randomUUID().toString());\n            } catch (InterruptedException e) {\n                e.printStackTrace();\n            }\n        }\n    });\n\n    workers.scheduleWithFixedDelay(\n            () -&gt; {\n                String result = null;\n                try {\n                    result = events.take();\n                } catch (InterruptedException e) {\n                    e.printStackTrace();\n                }\n\n                System.out.println(String.format(\"I don't care, got %s only now\", result));\n            }, 0, 1, TimeUnit.SECONDS\n    );\n<\/code><\/pre>\n",
+            "answer_id": 40563089,
+            "question_id": 40562521
+        }
+    ],
+    "answer_comments": {
+        "40563089": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c858688cffaffffb2dfabae6bc89ba7e?s=256&d=identicon&r=PG",
+                "account_id": 111563,
+                "user_type": "registered",
+                "user_id": 294657,
+                "link": "https://stackoverflow.com/users/294657/kaqqao",
+                "reputation": 16134,
+                "display_name": "kaqqao",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 40563089,
+            "edited": false,
+            "creation_date": 1478955850,
+            "comment_id": 68363108
+        }],
+        "40563318": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                    "account_id": 24127,
+                    "user_type": "registered",
+                    "user_id": 61158,
+                    "link": "https://stackoverflow.com/users/61158/akarnokd",
+                    "reputation": 70130,
+                    "display_name": "akarnokd",
+                    "accept_rate": 98
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40563318,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/cdca60eb050e800e9229d95b5d3a3e78?s=256&d=identicon&r=PG",
+                    "account_id": 2740110,
+                    "user_type": "registered",
+                    "user_id": 2361836,
+                    "link": "https://stackoverflow.com/users/2361836/corvax",
+                    "reputation": 1145,
+                    "display_name": "corvax",
+                    "accept_rate": 68
+                },
+                "edited": false,
+                "creation_date": 1479030017,
+                "comment_id": 68380501
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/cdca60eb050e800e9229d95b5d3a3e78?s=256&d=identicon&r=PG",
+                    "account_id": 2740110,
+                    "user_type": "registered",
+                    "user_id": 2361836,
+                    "link": "https://stackoverflow.com/users/2361836/corvax",
+                    "reputation": 1145,
+                    "display_name": "corvax",
+                    "accept_rate": 68
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40563318,
+                "edited": false,
+                "creation_date": 1478964887,
+                "comment_id": 68365748
+            }
+        ]
+    }
+}

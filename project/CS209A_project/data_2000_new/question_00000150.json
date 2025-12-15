@@ -1,0 +1,738 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7127146,
+            "user_type": "registered",
+            "user_id": 5449709,
+            "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+            "reputation": 3484,
+            "display_name": "Daniel Stradowski",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/38038692/why-is-my-spring-autowired-field-returns-null",
+        "last_activity_date": 1467034329,
+        "creation_date": 1466945770,
+        "answer_count": 5,
+        "title": "Why is my Spring @Autowired field returns null?",
+        "body": "<p>This is not a duplicate of <a href=\"https://stackoverflow.com/questions/19896870/why-is-my-spring-autowired-field-null\">this<\/a> question. So please don't close it for \"is duplicate of\" reasons..<\/p>\n\n<hr>\n\n<p>I'm trying to autowire a bean into the java class. My problem is that playerDAO remains null and does not get initialized.<\/p>\n\n<p><strong>mvc-dispatcher-service.xml<\/strong><\/p>\n\n<pre><code>&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\n       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n       xmlns:context=\"http://www.springframework.org/schema/context\"\n       xmlns:mvc=\"http://www.springframework.org/schema/mvc\" xmlns:tx=\"http://www.springframework.org/schema/tx\"\n       xsi:schemaLocation=\"http://www.springframework.org/schema/beans\n        http://www.springframework.org/schema/beans/spring-beans.xsd\n        http://www.springframework.org/schema/context\n        http://www.springframework.org/schema/context/spring-context.xsd\n        http://www.springframework.org/schema/mvc\n        http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd\"&gt;\n\n    &lt;context:component-scan base-package=\"ngdemo\"/&gt;\n\n    &lt;mvc:annotation-driven/&gt;\n\n    &lt;bean id=\"transactionManager\" class=\"org.springframework.orm.hibernate4.HibernateTransactionManager\"&gt;\n        &lt;property name=\"sessionFactory\" ref=\"mySessionFactory\"/&gt;\n    &lt;/bean&gt;\n\n    &lt;tx:annotation-driven transaction-manager=\"transactionManager\"/&gt;    \n&lt;/beans&gt;\n<\/code><\/pre>\n\n<p><strong>PlayerDAO.java<\/strong><\/p>\n\n<pre><code>@Repository\n@SuppressWarnings({\"unchecked\", \"rawtypes\"})\npublic class PlayerDAO {\n    @Autowired\n    private SessionFactory sessionFactory;\n\n    @Transactional\n    public Player getPlayerByUsername(String username) {\n      //some code\n    }\n}\n<\/code><\/pre>\n\n<p><strong>LoginRestService.java<\/strong><\/p>\n\n<pre><code>@Path(\"/v1\")\n@Controller\npublic class LoginRestService {\n\n    @Autowired\n    private PlayerDAO playerDAO;\n\n    @Path(\"/login\")\n    @POST\n    @Produces(MediaType.APPLICATION_JSON)\n    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)\n    public Response authenticateUser(@FormParam(\"username\") String username,\n                                     @FormParam(\"password\") String password, @Context UriInfo request) {\n     playerDAO.getPlayerByUsername(username);\n     //NPE, playerDAO here is null when I'm trying to access it\n    }    \n}\n<\/code><\/pre>\n\n<p>What am I missing?<\/p>\n\n<p>Full code available here: <a href=\"https://github.com/Ferenus/hestalis\" rel=\"nofollow noreferrer\">https://github.com/Ferenus/hestalis<\/a><\/p>\n",
+        "question_id": 38038692,
+        "tags": [
+            "java",
+            "spring",
+            "spring-mvc"
+        ],
+        "score": 1,
+        "accepted_answer_id": 38055331,
+        "is_answered": true,
+        "view_count": 1218,
+        "last_edit_date": 1495541203
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4002956,
+            "user_type": "registered",
+            "user_id": 4110066,
+            "link": "https://stackoverflow.com/users/4110066/duardito",
+            "reputation": 107,
+            "display_name": "duardito"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 38038692,
+        "edited": false,
+        "creation_date": 1466961385,
+        "comment_id": 63522092
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/364fb05953d4436eefac92fb1b9e2eed?s=256&d=identicon&r=PG",
+                "account_id": 2364746,
+                "user_type": "registered",
+                "user_id": 2070656,
+                "link": "https://stackoverflow.com/users/2070656/nikesh-adhikari",
+                "reputation": 113,
+                "display_name": "nikesh adhikari"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1466950316,
+            "creation_date": 1466948586,
+            "body": "<p>Are you sure that your Controller package name is \"ngdemo\" not \"com.pack.ngdemo\" ? Are you using database or not ? may be you are getting null value from your query can you please show me what query you are using inside getplayerbyusername() method. <\/p>\n\n<blockquote>\n  <p>try this<\/p>\n<\/blockquote>\n\n<pre><code>public TypedQuery&lt;User&gt; findUsersByNameEquals(String name) {\n    if (name == null || name.length() == 0) { \n        throw new IllegalArgumentException(\"The name argument is required\"); \n    }\n\n    TypedQuery&lt;User&gt; q = entityManager.createQuery(\"SELECT o FROM User AS o WHERE o.username = :name\", User.class);\n    q.setParameter(\"name\", name);\n\n    return q;\n}\n<\/code><\/pre>\n\n<blockquote>\n  <p>or<\/p>\n<\/blockquote>\n\n<pre><code>public boolean loginWithUserPass(String username, String password){\n\n    TypedQuery&lt;User&gt; q = entityManager.createQuery(\"SELECT o FROM User AS o WHERE o.username = :name and o.password = :pass\", User.class);\n    q.setParameter(\"name\", username);\n    q.setParameter(\"pass\", password);\n\n    List&lt;User&gt; results = q.getResultList();\n    if (!results.isEmpty()) return true;\n\n    else return false;\n}\n<\/code><\/pre>\n\n<p>do not try exact same code cause i have used entity manager. try something similar. may be this would help.<\/p>\n",
+            "answer_id": 38039083,
+            "question_id": 38038692,
+            "last_edit_date": 1466950316
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/901aec1835f17f8923541561c115249b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8710941,
+                "user_type": "registered",
+                "user_id": 6517120,
+                "link": "https://stackoverflow.com/users/6517120/snr",
+                "reputation": 141,
+                "display_name": "Snr"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1467034329,
+            "creation_date": 1467034329,
+            "body": "<p>I've checked your code and i got answer for your problem.<\/p>\n\n<p>There is nothing wrong with your code.<\/p>\n\n<p>But when you want to use both spring mvc and jersey restfull webservices you have to do something more than that you are doing here. Bcoz jersey is not aware of spring container and it's implementation. So, whenever you are requesting for a webservice jersey fullfills your request processing instead of the spring framework.<\/p>\n\n<p>So, here the playerDao is not injected into the LoginRestService.java and hence it (playerDao) resolve to null.<\/p>\n\n<p>So do the following steps,<\/p>\n\n<p><strong>Step-1:<\/strong>-- Add the below maven dependency to your pom.xml<\/p>\n\n<pre><code>    &lt;dependency&gt;\n        &lt;groupId&gt;com.sun.jersey.contribs&lt;/groupId&gt;\n       &lt;artifactId&gt;jersey-spring&lt;/artifactId&gt;\n        &lt;version&gt;1.19.1&lt;/version&gt;\n   &lt;dependency&gt;\n<\/code><\/pre>\n\n<p>This dependency is used to integrate Spring and Jersey<\/p>\n\n<p><strong>Step-2<\/strong>:-  Now create a WebApplicationContext to read all the configuration information from   your <strong>mvc-dispatcher-servlet.xml<\/strong>. For this copy the following code to your web.xml<\/p>\n\n<pre><code>&lt;context-param&gt;\n   &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;\n   &lt;param-value&gt;/WEB-INF/mvc-dispatcher-servlet.xml&lt;/param-value&gt;\n&lt;/context-param&gt;\n&lt;listener&gt;\n  &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;\n&lt;/listener&gt;\n<\/code><\/pre>\n\n<p><strong>Step-3:<\/strong>-- Now integrate spring and jersey by using jersey framework provided class  <em>com.sun.jersey.spi.spring.container.servlet.SpringServlet<\/em> (This class is available in jersey-spring.jar ). For this copy the below code to your web.xml<\/p>\n\n<pre><code>&lt;servlet&gt;\n        &lt;servlet-name&gt;jersey-serlvet&lt;/servlet-name&gt;\n\n        &lt;servlet-class&gt;\n            com.sun.jersey.spi.spring.container.servlet.SpringServlet\n        &lt;/servlet-class&gt;\n\n        &lt;init-param&gt;\n            &lt;param-name&gt;com.sun.jersey.config.property.packages&lt;/param-name&gt;\n            &lt;param-value&gt;ngdemo.rest&lt;/param-value&gt;\n        &lt;/init-param&gt;\n\n        &lt;init-param&gt;\n            &lt;param-name&gt;com.sun.jersey.api.json.POJOMappingFeature&lt;/param-name&gt;\n            &lt;param-value&gt;true&lt;/param-value&gt;\n        &lt;/init-param&gt;\n\n        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;\n    &lt;/servlet&gt;\n\n    &lt;servlet-mapping&gt;\n        &lt;servlet-name&gt;jersey-serlvet&lt;/servlet-name&gt;\n        &lt;url-pattern&gt;/rest/*&lt;/url-pattern&gt;\n    &lt;/servlet-mapping&gt;\n<\/code><\/pre>\n\n<p>Thats it. Everything is completed. <\/p>\n\n<p>Just update your maven project and run again in the server.<\/p>\n\n<p><strong>Suggestion<\/strong>\n One more thing when you are adding dependency ( jersey-spring-1.19.1.jar ) some spring related jar files (like spring-aop.3.0.0CR.jar, spring-bean.jar etc.. ) are included into your maven dependencies and the included jars are old version. So sometime you may get <strong>ClassNotFoundException<\/strong>.So you have to exclude those spring dependencies.\nIf you get such kind of Exception copy this below code to <strong><\/strong> element of your jersey-spring.jar<\/p>\n\n<pre><code>&lt;dependency&gt;\n    &lt;groupId&gt;com.sun.jersey.contribs&lt;/groupId&gt;\n    &lt;artifactId&gt;jersey-spring&lt;/artifactId&gt;\n    &lt;version&gt;1.19.1&lt;/version&gt;\n    &lt;exclusions&gt;\n        &lt;exclusion&gt;\n            &lt;artifactId&gt;spring-context&lt;/artifactId&gt;\n            &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;/exclusion&gt;\n        &lt;exclusion&gt;\n            &lt;artifactId&gt;spring-core&lt;/artifactId&gt;\n            &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;/exclusion&gt;\n        &lt;exclusion&gt;\n            &lt;artifactId&gt;spring-beans&lt;/artifactId&gt;\n            &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;/exclusion&gt;\n        &lt;exclusion&gt;\n            &lt;artifactId&gt;spring-web&lt;/artifactId&gt;\n            &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;/exclusion&gt;\n        &lt;exclusion&gt;\n            &lt;artifactId&gt;spring-aop&lt;/artifactId&gt;\n            &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;/exclusion&gt;\n    &lt;/exclusions&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n\n<p>I hope this helps you. Let me know whether you got correct solution or not.<\/p>\n",
+            "answer_id": 38055331,
+            "question_id": 38038692
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4002956,
+                "user_type": "registered",
+                "user_id": 4110066,
+                "link": "https://stackoverflow.com/users/4110066/duardito",
+                "reputation": 107,
+                "display_name": "duardito"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1466949301,
+            "creation_date": 1466949301,
+            "body": "<p>I should suggest you to use interfaces instead implementations, in your controller you are injecting DAO implementation, while you should inject service interface.<\/p>\n\n<p>If you do not want to use service class, I should suggest you to inject an interface:<\/p>\n\n<pre class=\"lang-html prettyprint-override\"><code>public class PlayerDAO implements IPlayerDAO\n<\/code><\/pre>\n\n\n\n<p>and in your controller inject interface.<\/p>\n\n<pre class=\"lang-html prettyprint-override\"><code>public class LoginRestService {\n\n    @Autowired\n    private IPlayerDAO IPlayer;\n<\/code><\/pre>\n\n\n\n<p>This is a good practice.<\/p>\n\n<p>In other hand, you are setting transactional in DAOS, it is not a good idea, you should specify it in a service class.<\/p>\n\n<p>Finally talking about your problem, null in a spring component, normally, it is because it is not properly specified component scan.<\/p>\n\n<p>regards.<\/p>\n",
+            "answer_id": 38039192,
+            "question_id": 38038692
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9e6460f7fb542f8a8fc5af4bfeb20cfb?s=256&d=identicon&r=PG",
+                "account_id": 517074,
+                "user_type": "registered",
+                "user_id": 1050787,
+                "link": "https://stackoverflow.com/users/1050787/michal-m",
+                "reputation": 1558,
+                "display_name": "Michal M",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1466955604,
+            "creation_date": 1466955604,
+            "body": "<p>I tried the github version of your application, added a test and it worked fine: <a href=\"https://github.com/michalmela/hestalis\" rel=\"nofollow\">https://github.com/michalmela/hestalis<\/a> .<\/p>\n\n<p>Check your test configuration. Also, please don't follow the advice from the other response to add interfaces for services for no good reason.<\/p>\n",
+            "answer_id": 38040191,
+            "question_id": 38038692
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/s8bBz.jpg?s=256",
+                "account_id": 5248284,
+                "user_type": "registered",
+                "user_id": 4193280,
+                "link": "https://stackoverflow.com/users/4193280/saurabh-chaturvedi",
+                "reputation": 2196,
+                "display_name": "Saurabh Chaturvedi",
+                "accept_rate": 31
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1466956951,
+            "creation_date": 1466956951,
+            "body": "<p>Try giving @Component annotation at the top of your PlayerDAO class . May be that way your bean will be scanned properly by Spring .This will register the bean in Spring Container for sure . Let me know if that helps :)<\/p>\n",
+            "answer_id": 38040393,
+            "question_id": 38038692
+        }
+    ],
+    "answer_comments": {
+        "38039083": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/364fb05953d4436eefac92fb1b9e2eed?s=256&d=identicon&r=PG",
+                    "account_id": 2364746,
+                    "user_type": "registered",
+                    "user_id": 2070656,
+                    "link": "https://stackoverflow.com/users/2070656/nikesh-adhikari",
+                    "reputation": 113,
+                    "display_name": "nikesh adhikari"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039083,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466950439,
+                "comment_id": 63518466
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039083,
+                "edited": false,
+                "creation_date": 1466949852,
+                "comment_id": 63518270
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/364fb05953d4436eefac92fb1b9e2eed?s=256&d=identicon&r=PG",
+                    "account_id": 2364746,
+                    "user_type": "registered",
+                    "user_id": 2070656,
+                    "link": "https://stackoverflow.com/users/2070656/nikesh-adhikari",
+                    "reputation": 113,
+                    "display_name": "nikesh adhikari"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039083,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466949666,
+                "comment_id": 63518223
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/364fb05953d4436eefac92fb1b9e2eed?s=256&d=identicon&r=PG",
+                    "account_id": 2364746,
+                    "user_type": "registered",
+                    "user_id": 2070656,
+                    "link": "https://stackoverflow.com/users/2070656/nikesh-adhikari",
+                    "reputation": 113,
+                    "display_name": "nikesh adhikari"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039083,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466949518,
+                "comment_id": 63518184
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039083,
+                "edited": false,
+                "creation_date": 1466948776,
+                "comment_id": 63517958
+            }
+        ],
+        "38040393": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/s8bBz.jpg?s=256",
+                    "account_id": 5248284,
+                    "user_type": "registered",
+                    "user_id": 4193280,
+                    "link": "https://stackoverflow.com/users/4193280/saurabh-chaturvedi",
+                    "reputation": 2196,
+                    "display_name": "Saurabh Chaturvedi",
+                    "accept_rate": 31
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040393,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466965853,
+                "comment_id": 63523526
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040393,
+                "edited": false,
+                "creation_date": 1466963232,
+                "comment_id": 63522721
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040393,
+                "edited": false,
+                "creation_date": 1466963080,
+                "comment_id": 63522665
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/s8bBz.jpg?s=256",
+                    "account_id": 5248284,
+                    "user_type": "registered",
+                    "user_id": 4193280,
+                    "link": "https://stackoverflow.com/users/4193280/saurabh-chaturvedi",
+                    "reputation": 2196,
+                    "display_name": "Saurabh Chaturvedi",
+                    "accept_rate": 31
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040393,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466962839,
+                "comment_id": 63522569
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040393,
+                "edited": false,
+                "creation_date": 1466962264,
+                "comment_id": 63522372
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/s8bBz.jpg?s=256",
+                    "account_id": 5248284,
+                    "user_type": "registered",
+                    "user_id": 4193280,
+                    "link": "https://stackoverflow.com/users/4193280/saurabh-chaturvedi",
+                    "reputation": 2196,
+                    "display_name": "Saurabh Chaturvedi",
+                    "accept_rate": 31
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040393,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466961300,
+                "comment_id": 63522066
+            }
+        ],
+        "38039192": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4002956,
+                    "user_type": "registered",
+                    "user_id": 4110066,
+                    "link": "https://stackoverflow.com/users/4110066/duardito",
+                    "reputation": 107,
+                    "display_name": "duardito"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "edited": false,
+                "creation_date": 1466961444,
+                "comment_id": 63522116
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9e6460f7fb542f8a8fc5af4bfeb20cfb?s=256&d=identicon&r=PG",
+                    "account_id": 517074,
+                    "user_type": "registered",
+                    "user_id": 1050787,
+                    "link": "https://stackoverflow.com/users/1050787/michal-m",
+                    "reputation": 1558,
+                    "display_name": "Michal M",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "edited": false,
+                "creation_date": 1466954179,
+                "comment_id": 63519688
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4002956,
+                    "user_type": "registered",
+                    "user_id": 4110066,
+                    "link": "https://stackoverflow.com/users/4110066/duardito",
+                    "reputation": 107,
+                    "display_name": "duardito"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466952110,
+                "comment_id": 63518986
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "edited": false,
+                "creation_date": 1466951311,
+                "comment_id": 63518727
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4002956,
+                    "user_type": "registered",
+                    "user_id": 4110066,
+                    "link": "https://stackoverflow.com/users/4110066/duardito",
+                    "reputation": 107,
+                    "display_name": "duardito"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466951029,
+                "comment_id": 63518642
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "edited": false,
+                "creation_date": 1466950838,
+                "comment_id": 63518584
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4002956,
+                    "user_type": "registered",
+                    "user_id": 4110066,
+                    "link": "https://stackoverflow.com/users/4110066/duardito",
+                    "reputation": 107,
+                    "display_name": "duardito"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466950405,
+                "comment_id": 63518456
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "edited": false,
+                "creation_date": 1466950343,
+                "comment_id": 63518419
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4002956,
+                    "user_type": "registered",
+                    "user_id": 4110066,
+                    "link": "https://stackoverflow.com/users/4110066/duardito",
+                    "reputation": 107,
+                    "display_name": "duardito"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466950341,
+                "comment_id": 63518418
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "edited": false,
+                "creation_date": 1466950169,
+                "comment_id": 63518356
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fa7e5fc889c444c718f711219695e15c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4002956,
+                    "user_type": "registered",
+                    "user_id": 4110066,
+                    "link": "https://stackoverflow.com/users/4110066/duardito",
+                    "reputation": 107,
+                    "display_name": "duardito"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1466950094,
+                "comment_id": 63518337
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38039192,
+                "edited": false,
+                "creation_date": 1466950008,
+                "comment_id": 63518320
+            }
+        ],
+        "38040191": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040191,
+                "edited": false,
+                "creation_date": 1467016348,
+                "comment_id": 63537613
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9e6460f7fb542f8a8fc5af4bfeb20cfb?s=256&d=identicon&r=PG",
+                    "account_id": 517074,
+                    "user_type": "registered",
+                    "user_id": 1050787,
+                    "link": "https://stackoverflow.com/users/1050787/michal-m",
+                    "reputation": 1558,
+                    "display_name": "Michal M",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040191,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "edited": false,
+                "creation_date": 1467011920,
+                "comment_id": 63535205
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/1d570e3c28e6189b8f2dde9696b5cc48?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7127146,
+                    "user_type": "registered",
+                    "user_id": 5449709,
+                    "link": "https://stackoverflow.com/users/5449709/daniel-stradowski",
+                    "reputation": 3484,
+                    "display_name": "Daniel Stradowski",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38040191,
+                "edited": false,
+                "creation_date": 1466962636,
+                "comment_id": 63522491
+            }
+        ]
+    }
+}

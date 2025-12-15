@@ -1,0 +1,530 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+            "account_id": 12989157,
+            "user_type": "registered",
+            "user_id": 9388912,
+            "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+            "reputation": 1,
+            "display_name": "Jeff Weber"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/50477601/httpurlconnection-wont-work-after-pausing-on-activity",
+        "last_activity_date": 1527099480,
+        "creation_date": 1527030257,
+        "answer_count": 3,
+        "title": "HttpURLConnection won&#39;t work after pausing on activity",
+        "body": "<p>I have an Activity that uses a ListView to display an array of data fetched from a JSON response. Clicking on one of the items will present the user with a business card activity, displaying the data associated with the item clicked. When the application first loads, it works fine. I can close the business card and reopen it multiple times. However, if i pause on the ListView activity, the page will no longer load the data. I have placed Log.d commands before and after the connection to try debugging the issue. The activity is receiving the information necessary to perform the connection. However, the closest I have gotten to a solution is knowing that when it doesn't work, I cannot Log.d the response code immediately after opening the connection.<\/p>\n\n<p>To be clear, I am including the entirety of the code I am using, just in case the issue lies somewhere else. First is the code for the ListView Activity, then is the Business Card Activity code.<\/p>\n\n<p>This is the Directory Activity.<\/p>\n\n<pre><code>    public class DirectoryActivity extends AppCompatActivity {\n\n    ListView lvContacts;\n    Button goMenu;\n    Button goFilter;\n    TextView tempText;\n\n    static ArrayList&lt;String&gt; arrlst = new ArrayList&lt;&gt;();\n    static ArrayAdapter&lt;String&gt; adapter;\n\n    private FetchList process;\n\n    @Override\n\n    protected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_directory);\n\n    lvContacts = findViewById(R.id.lvContacts);\n    goMenu = findViewById(R.id.btn_goMenu);\n    goFilter = findViewById(R.id.btn_goSearch);\n    tempText = findViewById(R.id.temptext);\n\n    // Set adapter for listview: used in FetchList\n    adapter = new ArrayAdapter&lt;&gt;(this, R.layout.layout_org_list, R.id.listViewItem, arrlst );\n    lvContacts.setAdapter(adapter);\n\n    // Get list from DB\n    process = new FetchList();\n    process.setListener(new FetchList.FetchListTaskListener() {\n        @Override\n        public void onFetchListTaskFinished(String[] result) {\n            // update UI in Activity here\n            arrlst.clear();\n            for (String OrgName:result) {\n                addItemsToList(OrgName);\n            }\n            adapter.notifyDataSetChanged();\n        }\n    });\n    process.execute();\n\n    // Set onclick listener for listview\n    lvContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {\n        @Override\n        public void onItemClick(AdapterView&lt;?&gt; adapterView, View view, int position, long l) {\n            String selectedOrg = lvContacts.getItemAtPosition(position).toString(); // Get org name from list view\n            goBusinessCard(selectedOrg); // Go to business card\n        }\n    });\n}\n\n@Override\nprotected void onDestroy() {\n    process.setListener(null); // PREVENT LEAK AFTER ACTIVITY DESTROYED\n    super.onDestroy();\n}\n\npublic static void addItemsToList(String item) {\n    arrlst.add(item);\n}\n\n// Set Methods for Buttons\npublic void goMenu(View v) {\n    startActivity(new Intent(this, HomeActivity.class));\n}\n\npublic void goFilter(View v) {\n    startActivity(new Intent(this, FilterActivity.class));\n    Log.d(\"FILTER DEBUG\", \"checking if extras are filled \" + this.getIntent().getExtras());\n}\n\n// Method for opening BusinessCardActivity and passes orgID\npublic void goBusinessCard(String selectedOrg) {\n    Bundle extras = new Bundle();\n    extras.clear();\n    extras.putString(\"selectedOrg\", selectedOrg);\n    Intent BusinessCard = new Intent(this, BusinessCardActivity.class);\n    BusinessCard.putExtras(extras);\n    startActivity(BusinessCard);\n}\n\n    // ASYNC TASK\nstatic class FetchList extends AsyncTask&lt;Void, Void, String[]&gt; {\n    private FetchListTaskListener listener;\n\n    @Override\n    protected String[] doInBackground(Void... voids) {\n\n        try {\n\n            URL url = new URL(URL_READ_ORG ); // Set url to API Call location\n            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection(); // Open connection to html\n            InputStream inputStream = httpURLConnection.getInputStream(); // create input stream from html location\n            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, \"utf-8\")); // create reader for inputStream\n\n            StringBuilder data = new StringBuilder();\n            String line;\n            while ((line = bufferedReader.readLine()) != null ) {\n                data.append(line); // creates string from all lines in response\n            }\n\n            bufferedReader.close();\n            inputStream.close();\n            httpURLConnection.disconnect();\n\n            JSONObject JO = new JSONObject(data.toString()); // creates object from json response in data string\n            JSONArray JA = JO.getJSONArray(\"orgs\");\n\n            // Create array list to store items from json response\n            List&lt;String&gt; al_orgList = new ArrayList&lt;&gt;();\n\n            // Iterate through JSON array to get json object org_name\n            for (int i = 0; i &lt; JA.length(); i++) {\n                JSONObject Orgs = JA.getJSONObject(i);\n                String org_name = Orgs.getString(\"org_name\");\n                al_orgList.add(org_name);\n            }\n\n            // convert array list to array\n            return al_orgList.toArray(new String[al_orgList.size()]);\n\n        } catch (JSONException | IOException e) {\n            e.printStackTrace();\n        }\n\n        return null;\n    }\n\n    // UI Process - allows manipulation of UI\n    @Override\n    protected void onPostExecute(String[] result) {\n        super.onPostExecute(result);\n        if (listener != null) {\n            listener.onFetchListTaskFinished(result);\n        }\n    }\n\n    private void setListener(FetchListTaskListener listener) {\n        this.listener = listener;\n    }\n\n    public interface FetchListTaskListener {\n        void onFetchListTaskFinished(String[] result);\n    }\n\n}\n<\/code><\/pre>\n\n<p>This is the Business Card Activity that runs the data fetch for individual items<\/p>\n\n<pre><code>    public class BusinessCardActivity extends AppCompatActivity {\n\n    TextView tv_org, tv_name, tv_email, tv_phone, tv_website, tv_servicetype,\n        tv_servicesprovided, tv_address;\n    String Favorite, Latitude, Longitude, selectedOrg, FavoriteChanged, dbPhone, phoneNum, dbWeb, orgWeb;\n    CheckBox cbFavorite;\n\n    List&lt;String&gt; arrlstID = new ArrayList&lt;&gt;();\n    String[] arrID;\n\n    @Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_business_card);\n\n    // Assign fields to variables\n    tv_org = findViewById(R.id.tv_org);\n    tv_name = findViewById(R.id.tv_name);\n    tv_email = findViewById(R.id.tv_email);\n    tv_phone = findViewById(R.id.tv_phone);\n    tv_website = findViewById(R.id.tv_website);\n    tv_servicetype = findViewById(R.id.tv_servicetype);\n    tv_servicesprovided = findViewById(R.id.tv_servicesprovided);\n    tv_address = findViewById(R.id.tv_address);\n    cbFavorite = findViewById(R.id.cbFavorite);\n\n    // Set variable for selectedOrg from DirectoryActivity\n    selectedOrg = Objects.requireNonNull(this.getIntent().getExtras()).getString(\"selectedOrg\");\n\n    // Get Org data from DB using async\n    process = new FetchOrg();\n    process.setListener(new FetchOrg.FetchOrgTaskListener() {\n        @Override\n        public void onFetchOrgTaskFinished(String[] result) {\n            setTextView(result);\n\n            // onClick for Email\n            tv_email.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v)\n                {\n                    showEmailDialog();\n                }\n            });\n\n            // onClick for Call\n            tv_phone.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v) {\n                    // TODO Get phone number from DB\n                    // Replace any non-digit in phone number to make call\n                    phoneNum = dbPhone.replaceAll(\"\\\\D\", \"\");\n\n                    // make call\n                    goCall(phoneNum);\n                }\n            });\n\n            // onClick for Web\n            tv_website.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v) {\n                    // TODO Fix URL logic\n                    orgWeb = \"http://\" + dbWeb;\n                    goWeb(orgWeb);\n                }\n            });\n\n            // onClick for Address\n            tv_address.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v) {\n                    goMap();\n                }\n            });\n\n            // TODO add favorite functionality\n            // When checkbox status changes, change value of Favorite\n            cbFavorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {\n                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {\n\n                }\n            });\n        }\n    });\n    process.execute(selectedOrg);\n\n\n    /*\n    // if favorite = 1 then check box\n    if (Favorite.equals(\"1\")) {\n        cbFavorite.setChecked(true);\n    } else {\n        cbFavorite.setChecked(false);\n    }\n    */\n}\n\n@Override\nprotected void onDestroy() {\n    process.setListener(null); // PREVENT LEAK AFTER ACTIVITY DESTROYED\n    super.onDestroy();\n}\n\n\n// Method to assign text view items from async task\npublic void setTextView(String[] org_data) {\n\n    String name = org_data[1] + \" \" + org_data[2];\n    String address = org_data[8] + \" \" + org_data[9] + \" \" + org_data[10] + \" \" + org_data[11];\n\n    tv_org.setText(org_data[0]);\n    tv_name.setText(name);\n    tv_email.setText(org_data[3]);\n    tv_phone.setText(org_data[4]);\n    tv_website.setText(org_data[5]);\n    tv_servicetype.setText(org_data[6]);\n    tv_servicesprovided.setText(org_data[7]);\n    tv_address.setText(address);\n}\n\npublic void showEmailDialog() {\n    // Get dialog_box_goals.xml view\n    LayoutInflater layoutInflater = LayoutInflater.from(BusinessCardActivity.this);\n    View promptView = layoutInflater.inflate(R.layout.dialog_box_send_email, null);\n\n    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(BusinessCardActivity.this);\n    alertDialogBuilder.setView(promptView);\n\n    final EditText etEmailMessage = (EditText) promptView.findViewById(R.id.etMailMessage);\n\n    // setup a dialog window\n    alertDialogBuilder.setCancelable(false)\n\n            .setPositiveButton(\"Submit\", new DialogInterface.OnClickListener() {\n                public void onClick(DialogInterface dialog, int id) {\n                    // my code\n\n                /* WONT USE THIS UNTIL EMAILS ARE FINAL\n                   USING MY EMAIL FOR TESTING PURPOSES\n                    // Get email\n                    niagaraDB.open();\n                    c2 = niagaraDB.getEmailByID(passedID);\n                    if (c2.moveToFirst())\n                    {\n                        public String emailTo = c2.getString(0);\n                    }\n                    niagaraDB.close();\n                */\n\n                    // This is for final code\n                    // String to = \"mailto:\" + emailTo;\n                    String to = \"snownwakendirt@yahoo.com\";\n                    String subject = \"Mail From Connect &amp; Protect Niagara App\";\n                    String message = etEmailMessage.getText().toString();\n\n                    if (message.isEmpty()) {\n                        Toast.makeText(BusinessCardActivity.this,\n                                \"Message must contain something\",\n                                Toast.LENGTH_LONG).show();\n                    } else {\n                        Intent email = new Intent(Intent.ACTION_SEND);\n                        email.putExtra(Intent.EXTRA_EMAIL, new String[] { to });\n                        // email.putExtra(Intent.EXTRA_CC, new String[]{ to});\n                        // email.putExtra(Intent.EXTRA_BCC, new String[]{to});\n                        email.putExtra(Intent.EXTRA_SUBJECT, subject);\n                        email.putExtra(Intent.EXTRA_TEXT, message);\n\n                        // need this to prompt email client only\n                        email.setType(\"message/rfc822\");\n\n                        try {\n                            startActivity(Intent.createChooser(email, \"Choose an Email client :\"));\n                            finish();\n                            Log.i(\"Email Sent...\", \"\");\n                        } catch (android.content.ActivityNotFoundException ex) {\n                            Toast.makeText(BusinessCardActivity.this,\n                                    \"There is no email client installed.\",\n                                    Toast.LENGTH_SHORT).show();\n                        }\n                    }\n\n                }\n            })\n\n            .setNegativeButton(\"Cancel\", new DialogInterface.OnClickListener() {\n                public void onClick(DialogInterface dialog, int id) {\n                    dialog.cancel();\n                }\n            });\n\n    // create an alert dialog\n    AlertDialog alert = alertDialogBuilder.create();\n    alert.show();\n}\n\npublic void goCall(final String phoneNum) {\n    startActivity(new Intent(Intent.ACTION_DIAL, Uri.fromParts(\"tel\", phoneNum, null)));\n}\n\npublic void goWeb(String orgWeb) {\n    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(orgWeb)));\n}\n\npublic void goCloseBusinessCard(View v) {\n    finish();\n    startActivity(new Intent(this, DirectoryActivity.class));\n}\n\npublic void goMap() {\n    /*\n      int locationAddressLatInt = Integer.parseInt(locationAddressLat);\n      int locationAddressLongInt = Integer.parseInt(locationAddressLong);\n     */\n\n    // pass id to map view. only one item in array for ease of use in MapActivity\n    arrlstID.add(selectedOrg);\n    arrID = new String[arrlstID.size()];\n    arrlstID.toArray(arrID);\n\n    Bundle extras = new Bundle();\n    extras.putStringArray(\"arrID\", arrID);\n    Intent Map = new Intent(BusinessCardActivity.this, MapActivity.class);\n    Map.putExtras(extras);\n    startActivity(Map);\n}\n\n\n// ASYNC TASK\nstatic class FetchOrg extends AsyncTask&lt;String, Void, String[]&gt; {\n    private FetchOrgTaskListener listener;\n\n    @Override\n    protected String[] doInBackground(String... params) {\n        try {\n\n            // assign passed string from main thread\n            String org_name = params[0];\n            String orgbyname = URL_GET_ORG_BY_NAME + \"?org_name=\" + org_name;\n            String line = \"\";\n\n            URL url = new URL(orgbyname);\n            HttpURLConnection conn = (HttpURLConnection) url.openConnection();\n\n                InputStream is = conn.getInputStream();\n                BufferedReader br = new BufferedReader(new InputStreamReader(is, \"utf-8\"));\n\n                line = br.readLine();\n\n                br.close();\n                is.close();\n                conn.disconnect();\n\n\n        /*\n            This JSON section contains a JSON Object that holds a JSON Array. The Array is created to\n            individualize each object within the JSON Array. Then, each JSON object is fetched and\n            assigned to a string variable.\n         */\n            JSONObject JO = new JSONObject(line); // creates object from json response in data string\n            JSONObject Orgs = JO.getJSONObject(\"orgs\"); // creates array for parsing of json data\n\n            // get items from JSONArray and assign for passing to onProgressUpdate\n            String Org = Orgs.getString(\"org_name\");\n            String FirstName = Orgs.getString(\"contact_first_name\");\n            String LastName = Orgs.getString(\"contact_last_name\");\n            String Email = Orgs.getString(\"contact_email\");\n            String Phone = Orgs.getString(\"contact_phone\");\n            String Website = Orgs.getString(\"org_website\");\n            String ServiceType = Orgs.getString(\"org_type\");\n            String ServicesProvided = Orgs.getString(\"org_services\");\n            String Address = Orgs.getString(\"org_street_address\");\n            String City = Orgs.getString(\"org_city\");\n            String State = Orgs.getString(\"org_state\");\n            String Zip = Orgs.getString(\"org_zip\");\n            String Lat = Orgs.getString(\"latitude\");\n            String Long = Orgs.getString(\"longitude\");\n\n            // Add items to string array\n            String[] org_data = new String[14]; // 14 is length of array, not the count\n            org_data[0] = Org;\n            org_data[1] = FirstName;\n            org_data[2] = LastName;\n            org_data[3] = Email;\n            org_data[4] = Phone;\n            org_data[5] = Website;\n            org_data[6] = ServiceType;\n            org_data[7] = ServicesProvided;\n            org_data[8] = Address;\n            org_data[9] = City;\n            org_data[10] = State;\n            org_data[11] = Zip;\n            org_data[12] = Lat;\n            org_data[13] = Long;\n\n            return org_data;\n\n        } catch (IOException | JSONException e) {\n            e.printStackTrace();\n        }\n\n        return null;\n    }\n\n    @Override\n    protected void onPostExecute(String[] result) {\n        super.onPostExecute(result);\n        if (listener != null) {\n            listener.onFetchOrgTaskFinished(result);\n        }\n    }\n\n    private void setListener(FetchOrgTaskListener listener) {\n        this.listener = listener;\n    }\n\n    public interface FetchOrgTaskListener {\n        void onFetchOrgTaskFinished(String[] result);\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 50477601,
+        "tags": [
+            "java",
+            "android",
+            "android-studio",
+            "httpurlconnection"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 64,
+        "last_edit_date": 1527037948
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                "account_id": 12989157,
+                "user_type": "registered",
+                "user_id": 9388912,
+                "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                "reputation": 1,
+                "display_name": "Jeff Weber"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 50477601,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10938609,
+                "user_type": "registered",
+                "user_id": 8039298,
+                "link": "https://stackoverflow.com/users/8039298/barns",
+                "reputation": 4839,
+                "display_name": "Barns"
+            },
+            "edited": false,
+            "creation_date": 1527031973,
+            "comment_id": 87969210
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10938609,
+                "user_type": "registered",
+                "user_id": 8039298,
+                "link": "https://stackoverflow.com/users/8039298/barns",
+                "reputation": 4839,
+                "display_name": "Barns"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477601,
+            "edited": false,
+            "creation_date": 1527031848,
+            "comment_id": 87969174
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Vlgmz.jpg?s=256",
+                "account_id": 11414448,
+                "user_type": "registered",
+                "user_id": 8367626,
+                "link": "https://stackoverflow.com/users/8367626/mary",
+                "reputation": 15096,
+                "display_name": "Mary"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50477601,
+            "edited": false,
+            "creation_date": 1527031830,
+            "comment_id": 87969169
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2Y3So.png?s=256",
+                "account_id": 1308572,
+                "user_type": "registered",
+                "user_id": 1257062,
+                "link": "https://stackoverflow.com/users/1257062/rizwan",
+                "reputation": 2447,
+                "display_name": "Rizwan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1527031359,
+            "creation_date": 1527031359,
+            "body": "<p>Activity lifecycle would go back from paused to resume state. \nYou need to provide the expected behaviour inside onResume something like below<\/p>\n\n<pre><code>public void onResume(){ \n    super.onResume(); \n      new XXXAsyncTask( new XXXAsyncListener(){ \n      public void postTaskMethod(){ \n     //do stuff here \n     } \n    }).execute(); \n    }\n<\/code><\/pre>\n",
+            "answer_id": 50477759,
+            "question_id": 50477601
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10938609,
+                "user_type": "registered",
+                "user_id": 8039298,
+                "link": "https://stackoverflow.com/users/8039298/barns",
+                "reputation": 4839,
+                "display_name": "Barns"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1527035161,
+            "creation_date": 1527034400,
+            "body": "<p>I made a few changes in your <code>onCreate()<\/code>method of your <code>BusinessCardActivity<\/code>. I check for <code>hasExtra<\/code> instead--a little more flexibility. I got rid of the <code>Listener<\/code> and packed all <code>onClick<\/code> listener below. I felt it was a bit too complicated using the <code>Listener<\/code> approach (So you can remove this <code>process.setListener(null);<\/code> from the <code>onDestroy()<\/code>method). I also added a few <code>Log.e();<\/code> so you can see what is going on in the logcat. <\/p>\n\n<p>(BTW \"TAG\"  would be:<\/p>\n\n<p><code>private static final Strting TAG = BusinessCardActivity.class.getSimpleName();<\/code>)<\/p>\n\n<p>With \"BusinessCardActivity.class.getSimpleName();\"  written out just in case you refactor sometime.<\/p>\n\n<p>This is part of your <code>BusinessCardActivity<\/code> <code>onCreate()<\/code> method:<\/p>\n\n<pre><code>// Set variable for selectedOrg from DirectoryActivity\nIntent intent = this.getIntent();\nif(intent.hasExtra(selectedOrg)){\n    String selectedOrg = intent.getStringExtra(\"selectedOrg\")\n    Log.e(TAG, \"selectedOrg : \" + selectedOrg);\n    FetchOrg process = new FetchOrg();\n    process.execute(selectedOrg);\n}\nelse{\n    Log.e(TAG, \"No Extras!\")\n    //You might what to call finish() here\n    return;\n}\n\n//Move all your onClick Listeners below...\n<\/code><\/pre>\n\n<p>I don't think this is the best case to use a <code>Listener<\/code> so lets use the <code>AsyncTask<\/code> like this (I also removed the <code>static<\/code>):<\/p>\n\n<pre><code>class FetchOrg extends AsyncTask&lt;String, Void, String[]&gt; {\n\n    @Override\n    protected String[] doInBackground(String... params) {\n        try {\n\n            Log.e(TAG, \"doInBackground ... Started\");\n            // assign passed string from main thread\n            String org_name = params[0];\n            String orgbyname = URL_GET_ORG_BY_NAME + \"?org_name=\" + org_name;\n            String line = \"\";\n\n            URL url = new URL(orgbyname);\n            HttpURLConnection conn = (HttpURLConnection) url.openConnection();\n\n                InputStream is = conn.getInputStream();\n                BufferedReader br = new BufferedReader(new InputStreamReader(is, \"utf-8\"));\n\n                line = br.readLine();\n\n                br.close();\n                is.close();\n                conn.disconnect();\n\n            Log.e(TAG, \"Data Returned : \" + line);\n\n        /*\n            This JSON section contains a JSON Object that holds a JSON Array. The Array is created to\n            individualize each object within the JSON Array. Then, each JSON object is fetched and\n            assigned to a string variable.\n         */\n            JSONObject JO = new JSONObject(line); // creates object from json response in data string\n            JSONObject Orgs = JO.getJSONObject(\"orgs\"); // creates array for parsing of json data\n\n            // get items from JSONArray and assign for passing to onProgressUpdate\n            String Org = Orgs.getString(\"org_name\");\n            String FirstName = Orgs.getString(\"contact_first_name\");\n            String LastName = Orgs.getString(\"contact_last_name\");\n            String Email = Orgs.getString(\"contact_email\");\n            String Phone = Orgs.getString(\"contact_phone\");\n            String Website = Orgs.getString(\"org_website\");\n            String ServiceType = Orgs.getString(\"org_type\");\n            String ServicesProvided = Orgs.getString(\"org_services\");\n            String Address = Orgs.getString(\"org_street_address\");\n            String City = Orgs.getString(\"org_city\");\n            String State = Orgs.getString(\"org_state\");\n            String Zip = Orgs.getString(\"org_zip\");\n            String Lat = Orgs.getString(\"latitude\");\n            String Long = Orgs.getString(\"longitude\");\n\n            // Add items to string array\n            String[] org_data = new String[14]; // 14 is length of array, not the count\n            org_data[0] = Org;\n            org_data[1] = FirstName;\n            org_data[2] = LastName;\n            org_data[3] = Email;\n            org_data[4] = Phone;\n            org_data[5] = Website;\n            org_data[6] = ServiceType;\n            org_data[7] = ServicesProvided;\n            org_data[8] = Address;\n            org_data[9] = City;\n            org_data[10] = State;\n            org_data[11] = Zip;\n            org_data[12] = Lat;\n            org_data[13] = Long;\n\n            return org_data;\n\n        } catch (IOException | JSONException e) {\n            e.printStackTrace();\n        }\n\n        return null;\n    }\n\n    @Override\n    protected void onPostExecute(String[] result) {\n        setTextView(result);\n    }\n}\n<\/code><\/pre>\n\n<p>Also I would change your method <code>goBusinessCard()<\/code> a bit (and no need to be public):<\/p>\n\n<pre><code>private void goBusinessCard(String selectedOrg) {\n    //Java variables should written in lower case and Classes Capitalized\n    Intent businessCard = new Intent(this, BusinessCardActivity.class);\n    businessCard.putExtra(\"selectedOrg\", selectedOrg);\n    startActivity(businessCard);\n}\n<\/code><\/pre>\n\n<p><strong>Please let me know if you have any issues! I typed this out in a standard Text Editor..so there might be a few typos.<\/strong> <\/p>\n",
+            "answer_id": 50478124,
+            "question_id": 50477601,
+            "last_edit_date": 1527035161
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10938609,
+                "user_type": "registered",
+                "user_id": 8039298,
+                "link": "https://stackoverflow.com/users/8039298/barns",
+                "reputation": 4839,
+                "display_name": "Barns"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1527099480,
+            "creation_date": 1527099480,
+            "body": "<p>Posting a new answer so I can add all the code for the <code>BusinessCardActivity<\/code> class. <\/p>\n\n<p>I added some additional logging and changed <code>getString()<\/code> to <code>optString()<\/code> in order to be able to offer an alternative value. For example if the value or \"key\"  is invalid or missing you would get an error.<\/p>\n\n<p>public class BusinessCardActivity extends AppCompatActivity {<\/p>\n\n<pre><code>    TextView tv_org, tv_name, tv_email, tv_phone, tv_website, tv_servicetype,\n        tv_servicesprovided, tv_address;\n    String Favorite, Latitude, Longitude, FavoriteChanged, dbPhone, phoneNum, dbWeb, orgWeb;\n    CheckBox cbFavorite;\n\n    List&lt;String&gt; arrlstID = new ArrayList&lt;&gt;();\n    String[] arrID;\n\n    @Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_business_card);\n\n    // Assign fields to variables\n    tv_org = findViewById(R.id.tv_org);\n    tv_name = findViewById(R.id.tv_name);\n    tv_email = findViewById(R.id.tv_email);\n    tv_phone = findViewById(R.id.tv_phone);\n    tv_website = findViewById(R.id.tv_website);\n    tv_servicetype = findViewById(R.id.tv_servicetype);\n    tv_servicesprovided = findViewById(R.id.tv_servicesprovided);\n    tv_address = findViewById(R.id.tv_address);\n    cbFavorite = findViewById(R.id.cbFavorite);\n\n\n    Intent intent = this.getIntent();\n    if(!intent.hasExtra(\"selectedOrg\")){\n        Log.e(TAG, \"No Extras!\")\n        //You might what to call finish() here\n        return;\n    }\n\n        String selectedOrg = intent.getStringExtra(\"selectedOrg\")\n        Log.e(TAG, \"selectedOrg : \" + selectedOrg);\n        FetchOrg process = new FetchOrg();\n        process.execute(selectedOrg);\n\n        // onClick for Email\n        tv_email.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v)\n                {\n                    showEmailDialog();\n                }\n            });\n\n            // onClick for Call\n            tv_phone.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v) {\n                    // TODO Get phone number from DB\n                    // Replace any non-digit in phone number to make call\n                    phoneNum = dbPhone.replaceAll(\"\\\\D\", \"\");\n\n                    // make call\n                    goCall(phoneNum);\n                }\n            });\n\n            // onClick for Web\n            tv_website.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v) {\n                    // TODO Fix URL logic\n                    orgWeb = \"http://\" + dbWeb;\n                    goWeb(orgWeb);\n                }\n            });\n\n            // onClick for Address\n            tv_address.setOnClickListener(new View.OnClickListener() {\n                @Override\n                public void onClick(View v) {\n                    goMap();\n                }\n            });\n\n            // TODO add favorite functionality\n            // When checkbox status changes, change value of Favorite\n            cbFavorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {\n                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {\n\n                }\n            });\n\n\n    /*\n    // if favorite = 1 then check box\n    if (Favorite.equals(\"1\")) {\n        cbFavorite.setChecked(true);\n    } else {\n        cbFavorite.setChecked(false);\n    }\n    */\n}\n\n@Override\nprotected void onDestroy() {\n    process.setListener(null); // PREVENT LEAK AFTER ACTIVITY DESTROYED\n    super.onDestroy();\n}\n\n\n// Method to assign text view items from async task\npublic void setTextView(String[] org_data) {\n\n    String name = org_data[1] + \" \" + org_data[2];\n    String address = org_data[8] + \" \" + org_data[9] + \" \" + org_data[10] + \" \" + org_data[11];\n\n    tv_org.setText(org_data[0]);\n    tv_name.setText(name);\n    tv_email.setText(org_data[3]);\n    tv_phone.setText(org_data[4]);\n    tv_website.setText(org_data[5]);\n    tv_servicetype.setText(org_data[6]);\n    tv_servicesprovided.setText(org_data[7]);\n    tv_address.setText(address);\n}\n\npublic void showEmailDialog() {\n    // Get dialog_box_goals.xml view\n    LayoutInflater layoutInflater = LayoutInflater.from(BusinessCardActivity.this);\n    View promptView = layoutInflater.inflate(R.layout.dialog_box_send_email, null);\n\n    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(BusinessCardActivity.this);\n    alertDialogBuilder.setView(promptView);\n\n    final EditText etEmailMessage = (EditText) promptView.findViewById(R.id.etMailMessage);\n\n    // setup a dialog window\n    alertDialogBuilder.setCancelable(false)\n\n            .setPositiveButton(\"Submit\", new DialogInterface.OnClickListener() {\n                public void onClick(DialogInterface dialog, int id) {\n                    // my code\n\n                /* WONT USE THIS UNTIL EMAILS ARE FINAL\n                   USING MY EMAIL FOR TESTING PURPOSES\n                    // Get email\n                    niagaraDB.open();\n                    c2 = niagaraDB.getEmailByID(passedID);\n                    if (c2.moveToFirst())\n                    {\n                        public String emailTo = c2.getString(0);\n                    }\n                    niagaraDB.close();\n                */\n\n                    // This is for final code\n                    // String to = \"mailto:\" + emailTo;\n                    String to = \"snownwakendirt@yahoo.com\";\n                    String subject = \"Mail From Connect &amp; Protect Niagara App\";\n                    String message = etEmailMessage.getText().toString();\n\n                    if (message.isEmpty()) {\n                        Toast.makeText(BusinessCardActivity.this,\n                                \"Message must contain something\",\n                                Toast.LENGTH_LONG).show();\n                    } else {\n                        Intent email = new Intent(Intent.ACTION_SEND);\n                        email.putExtra(Intent.EXTRA_EMAIL, new String[] { to });\n                        // email.putExtra(Intent.EXTRA_CC, new String[]{ to});\n                        // email.putExtra(Intent.EXTRA_BCC, new String[]{to});\n                        email.putExtra(Intent.EXTRA_SUBJECT, subject);\n                        email.putExtra(Intent.EXTRA_TEXT, message);\n\n                        // need this to prompt email client only\n                        email.setType(\"message/rfc822\");\n\n                        try {\n                            startActivity(Intent.createChooser(email, \"Choose an Email client :\"));\n                            finish();\n                            Log.i(\"Email Sent...\", \"\");\n                        } catch (android.content.ActivityNotFoundException ex) {\n                            Toast.makeText(BusinessCardActivity.this,\n                                    \"There is no email client installed.\",\n                                    Toast.LENGTH_SHORT).show();\n                        }\n                    }\n\n                }\n            })\n\n            .setNegativeButton(\"Cancel\", new DialogInterface.OnClickListener() {\n                public void onClick(DialogInterface dialog, int id) {\n                    dialog.cancel();\n                }\n            });\n\n    // create an alert dialog\n    AlertDialog alert = alertDialogBuilder.create();\n    alert.show();\n}\n\npublic void goCall(final String phoneNum) {\n    startActivity(new Intent(Intent.ACTION_DIAL, Uri.fromParts(\"tel\", phoneNum, null)));\n}\n\npublic void goWeb(String orgWeb) {\n    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(orgWeb)));\n}\n\npublic void goCloseBusinessCard(View v) {\n    finish();\n    startActivity(new Intent(this, DirectoryActivity.class));\n}\n\npublic void goMap() {\n    /*\n      int locationAddressLatInt = Integer.parseInt(locationAddressLat);\n      int locationAddressLongInt = Integer.parseInt(locationAddressLong);\n     */\n\n    // pass id to map view. only one item in array for ease of use in MapActivity\n    arrlstID.add(selectedOrg);\n    arrID = new String[arrlstID.size()];\n    arrlstID.toArray(arrID);\n\n    Bundle extras = new Bundle();\n    extras.putStringArray(\"arrID\", arrID);\n    Intent Map = new Intent(BusinessCardActivity.this, MapActivity.class);\n    Map.putExtras(extras);\n    startActivity(Map);\n}\n\n\n// ASYNC TASK\nclass FetchOrg extends AsyncTask&lt;String, Void, String[]&gt; {\n\n    @Override\n    protected String[] doInBackground(String... params) {\n        HttpURLConnection con = null;\n        String[] org_data = null;\n        try {\n            Log.e(TAG, \"FetchOrg doInBackground started\");\n\n            // assign passed string from main thread\n            String org_name = params[0];\n            String orgbyname = URL_GET_ORG_BY_NAME + \"?org_name=\" + org_name;\n\n            URL url = new URL(orgbyname);\n            con = (HttpURLConnection) url.openConnection();\n            Log.e(TAG, \"FetchOrg doInBackground Connected!\");\n\n\n            //Check the response code of the server -\n            Integer replyCode = con.getResponseCode();\n            logMess += \"   Reply Code:  \" + replyCode.toString();\n\n            responseStream = new BufferedInputStream(con.getInputStream());\n            BufferedReader responseStreamReader = new BufferedReader(new InputStreamReader(responseStream));\n\n            stopTime = System.currentTimeMillis();\n            elapsedTime = stopTime - startTime;\n            logMess += \"   elapsed Time :  \" + elapsedTime + \" ms\";\n\n            Log.e(TAG, \"FetchOrg logMess:  --- \" + logMess);\n            String line = \"\";\n            StringBuilder stringBuilder = new StringBuilder();\n\n            //Make sure you get everything!\n            while ((line = responseStreamReader.readLine()) != null) {\n                stringBuilder.append(line).append(\"\\n\");\n            }\n\n            //this will close underlying streams\n            responseStreamReader.close();\n\n            String data = stringBuilder.toString();\n            Log.e(TAG, \"FetchOrg Data:  --- \" + data);\n\n        /*\n            This JSON section contains a JSON Object that holds a JSON Array. The Array is created to\n            individualize each object within the JSON Array. Then, each JSON object is fetched and\n            assigned to a string variable.\n         */\n            JSONObject obj = new JSONObject(data); // creates object from json response in data string\n            JSONObject orgs = obj.getJSONObject(\"orgs\"); // creates array for parsing of json data\n\n            String nA = \"not available\";\n\n            // get items from JSONArray and assign for passing to onProgressUpdate\n            String Org = orgs.optString(\"org_name\", nA);\n            String FirstName = orgs.optString(\"contact_first_name\", nA);\n            String LastName = orgs.optString(\"contact_last_name\", nA);\n            String Email = orgs.optString(\"contact_email\", nA);\n            String Phone = orgs.optString(\"contact_phone\", nA);\n            String Website = orgs.optString(\"org_website\", nA);\n            String ServiceType = orgs.optString(\"org_type\", nA);\n            String ServicesProvided = orgs.optString(\"org_services\", nA);\n            String Address = orgs.optString(\"org_street_address\", nA);\n            String City = orgs.optString(\"org_city\", nA);\n            String State = orgs.optString(\"org_state\", nA);\n            String Zip = orgs.optString(\"org_zip\", nA);\n            String Lat = orgs.optString(\"latitude\", nA);\n            String Long = orgs.optString(\"longitude\", nA);\n\n            // Add items to string array\n            org_data = new String[14]; // 14 is length of array, not the count\n            org_data[0] = Org;\n            org_data[1] = FirstName;\n            org_data[2] = LastName;\n            org_data[3] = Email;\n            org_data[4] = Phone;\n            org_data[5] = Website;\n            org_data[6] = ServiceType;\n            org_data[7] = ServicesProvided;\n            org_data[8] = Address;\n            org_data[9] = City;\n            org_data[10] = State;\n            org_data[11] = Zip;\n            org_data[12] = Lat;\n            org_data[13] = Long;\n\n        } catch (Exception ex) {\n            Log.e(TAG, \"FetchOrg doInBackground: \" + ex.getMessage());\n        }\n        finally{\n            //just in case you get an error above\n            if(con != null){\n                con.disconnect();\n            }\n        }\n\n        return org_data;\n    }\n\n    @Override\n    protected void onPostExecute(String[] result) {\n        if(result != null){\n            setTextView(result);\n        }\n        else{\n            Log.e(TAG, \"FetchOrg onPostExecute: result is null\");\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Be aware that I did not clean up things like maintaining minimal scope: For example :<code>public void showEmailDialog()<\/code> and <code>public void goMap()<\/code> which do not need to be public methods! Any method that does not need to be accessed outside the class (and that is rare!) should not be made <code>public<\/code>.  <\/p>\n\n<p>You have also defined many class variables at the beginning of the class like \"Favorite, Latitude, Longitude, FavoriteChanged\" do they need to have class wide scope?? And they are variables! So in java naming convention, variables and methods are written in lower case, while classes are capitalized--this helps reading code easier (for the SO community!)<\/p>\n\n<p>When working with <code>Indent<\/code> extras often mistakes are made when entering the \"key\" like \"selectedOrg\". Therefore it is some times an advantage to create a global class to help keep things straight. Example <code>public class GlobalExtras<\/code> and just keep <code>public static final String SELECTED_ORG = \"selectedOrg\";<\/code> Then just use <code>intent.getString(SELECTED_ORG);<\/code><\/p>\n\n<p>Another thing: I am not a big fan of <code>String[]<\/code> as you have used to store your \"org\" strings. They can be tricky with size and indexes. You might want to consider using another object.<\/p>\n\n<p>I do not have access to your API and your data, so I was only able to make requests on my server trying to duplicate your user scenario, but I was unable to reproduce your issue. I hope this helps, let me know what the logcat spits out!<\/p>\n",
+            "answer_id": 50494960,
+            "question_id": 50477601
+        }
+    ],
+    "answer_comments": {
+        "50477759": [
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50477759,
+                "edited": false,
+                "creation_date": 1527132064,
+                "comment_id": 88013451
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/2Y3So.png?s=256",
+                    "account_id": 1308572,
+                    "user_type": "registered",
+                    "user_id": 1257062,
+                    "link": "https://stackoverflow.com/users/1257062/rizwan",
+                    "reputation": 2447,
+                    "display_name": "Rizwan"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50477759,
+                "reply_to_user": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "edited": false,
+                "creation_date": 1527049898,
+                "comment_id": 87973038
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50477759,
+                "edited": false,
+                "creation_date": 1527032328,
+                "comment_id": 87969286
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50477759,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "edited": false,
+                "creation_date": 1527032223,
+                "comment_id": 87969265
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50477759,
+                "edited": false,
+                "creation_date": 1527031772,
+                "comment_id": 87969155
+            }
+        ],
+        "50494960": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50494960,
+                "reply_to_user": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "edited": false,
+                "creation_date": 1527185818,
+                "comment_id": 88043996
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50494960,
+                "edited": false,
+                "creation_date": 1527131847,
+                "comment_id": 88013410
+            }
+        ],
+        "50478124": [
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "edited": false,
+                "creation_date": 1527039101,
+                "comment_id": 87970773
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "reply_to_user": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "edited": false,
+                "creation_date": 1527038913,
+                "comment_id": 87970717
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "edited": false,
+                "creation_date": 1527038732,
+                "comment_id": 87970671
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "edited": false,
+                "creation_date": 1527038594,
+                "comment_id": 87970623
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "reply_to_user": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "edited": false,
+                "creation_date": 1527038399,
+                "comment_id": 87970585
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "edited": false,
+                "creation_date": 1527038182,
+                "comment_id": 87970538
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "reply_to_user": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "edited": false,
+                "creation_date": 1527038066,
+                "comment_id": 87970513
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "edited": false,
+                "creation_date": 1527038028,
+                "comment_id": 87970500
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "edited": false,
+                "creation_date": 1527037243,
+                "comment_id": 87970346
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "reply_to_user": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "edited": false,
+                "creation_date": 1527037013,
+                "comment_id": 87970301
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-ddRSlrvbT_U/AAAAAAAAAAI/AAAAAAAAAXE/vwYEnhSgRuI/s256-rj/photo.jpg",
+                    "account_id": 12989157,
+                    "user_type": "registered",
+                    "user_id": 9388912,
+                    "link": "https://stackoverflow.com/users/9388912/jeff-weber",
+                    "reputation": 1,
+                    "display_name": "Jeff Weber"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 50478124,
+                "edited": false,
+                "creation_date": 1527036223,
+                "comment_id": 87970132
+            }
+        ]
+    }
+}

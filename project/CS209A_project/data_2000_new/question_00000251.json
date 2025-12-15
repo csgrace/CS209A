@@ -1,0 +1,412 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+            "account_id": 2126404,
+            "user_type": "registered",
+            "user_id": 1888440,
+            "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+            "reputation": 4994,
+            "display_name": "robert_difalco",
+            "accept_rate": 67
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/21192978/non-blocking-way-to-offer-drainto-for-a-blockingqueue-or-something-else",
+        "last_activity_date": 1389987164,
+        "creation_date": 1389982485,
+        "answer_count": 1,
+        "title": "Non-blocking way to offer + drainTo for a BlockingQueue (or something else)",
+        "body": "<p>I am looking for something seemingly simple, a collection with a non-blocking version of \"add\" and \"drain\". Something like this:<\/p>\n\n<pre><code>List itemsToProcess = queue.addOrDrainAndAdd( item );\nif ( itemsToProcess != null )\n    process( items );\n<\/code><\/pre>\n\n<p>It seems to me that if I do these as separate \"offer\" and \"drainTo\" calls that I could have offer called twice before I get to the first call to drain to. I would also need a loop on something like \"while ( !queue.offer( item ) )\" so that after it is drained the offer would work, which I think would require me to also check if drain returned an empty collection (because two might call drain). My naive implementation was like this but it doesn't seem optimal:<\/p>\n\n<pre><code>void addBatchItem( T item ) {\n   while ( !batch.offer( item ) ) {\n       List&lt;T&gt; batched = new ArrayList&lt;&gt;( batchSize );\n       batch.drainTo( batched );\n       process( batched );\n   }\n}\n<\/code><\/pre>\n\n<p>Then I thought maybe there is a better way and I just don't know it. Thanks!<\/p>\n\n<p>EDIT:<\/p>\n\n<p>Okay, so here's a solution (that is blocking based on ArrayBlockingQueue):<\/p>\n\n<pre><code>public void add( T batchItem ) {\n    while ( !batch.offer( batchItem ) ) {\n        flush();\n    }\n}\n\npublic void flush() {\n    List&lt;T&gt; batched = new ArrayList&lt;&gt;( batchSize );\n    batch.drainTo( batched, batchSize );\n    if ( !batched.isEmpty() )\n        executor.execute( new PhasedRunnable( batched ) );\n}\n<\/code><\/pre>\n\n<p>I guess my question is, would the above be more optimal for this purpose than a solution based on ConcurrentLinkedQueue since the latter requires an object allocation for each node?<\/p>\n\n<p>EXAMPLE CLASS WITH USAGE:<\/p>\n\n<pre><code>public abstract class Batcher&lt;T&gt; {\n\n    private final int batchSize;\n    private ArrayBlockingQueue&lt;T&gt; batch;\n    private ExecutorService executor;\n    private final Phaser phaser = new Phaser( 1 );\n\n    public Batcher( int batchSize, ExecutorService executor ) {\n        this.batchSize = batchSize;\n        this.executor = executor;\n        this.batch = new ArrayBlockingQueue&lt;&gt;( batchSize );\n    }\n\n    public void add( T batchItem ) {\n        while ( !batch.offer( batchItem ) ) {\n            flush();\n        }\n    }\n\n    public void flush() {\n        List&lt;T&gt; batched = new ArrayList&lt;&gt;( batchSize );\n        batch.drainTo( batched, batchSize );\n        if ( !batched.isEmpty() )\n            executor.execute( new PhasedRunnable( batched ) );\n    }\n\n    public abstract void onFlush( List&lt;T&gt; batch );\n\n    public void awaitDone() {\n        phaser.arriveAndAwaitAdvance();\n    }\n\n    public void awaitDone( long duration, TimeUnit unit ) throws TimeoutException {\n        try {\n            phaser.awaitAdvanceInterruptibly( phaser.arrive(), duration, unit );\n        }\n        catch ( InterruptedException e ) {\n            Thread.currentThread().interrupt();\n        }\n    }\n\n    private class PhasedRunnable implements Runnable {\n\n        private final List&lt;T&gt; batch;\n\n        private PhasedRunnable( List&lt;T&gt; batch ) {\n            this.batch = batch;\n\n            phaser.register();\n        }\n\n        @Override\n        public void run() {\n            try {\n                onFlush( batch );\n            }\n            finally {\n                phaser.arrive();\n            }\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>This is a simple example, a more complete example may be JPA entity updates or inserts. Also, I would like it to be possible for #add to be called concurrently.<\/p>\n\n<pre><code>@Test\npublic void testOddNumber() {\n    Batcher&lt;Integer&gt; batcher = new Batcher&lt;Integer&gt;( 10, executor ) {\n        @Override\n        public void onFlush( List&lt;Integer&gt; batch ) {\n            count.addAndGet( batch.size() );\n        }\n    };\n\n    for ( int at = 0; at != 21; ++at ) {\n        batcher.add( at );\n    }\n\n    batcher.flush();\n    batcher.awaitDone();\n\n    assertEquals( count.get(), 21 );\n}\n<\/code><\/pre>\n",
+        "question_id": 21192978,
+        "tags": [
+            "java",
+            "concurrency"
+        ],
+        "score": 5,
+        "accepted_answer_id": 21193139,
+        "is_answered": true,
+        "view_count": 2379,
+        "last_edit_date": 1389984444
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+                "account_id": 526244,
+                "user_type": "registered",
+                "user_id": 3117035,
+                "link": "https://stackoverflow.com/users/3117035/jvmatl",
+                "reputation": 2132,
+                "display_name": "JVMATL",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192978,
+            "edited": false,
+            "creation_date": 1389983483,
+            "comment_id": 31911567
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/zflGZ.png?s=256",
+                "account_id": 440158,
+                "user_type": "registered",
+                "user_id": 829571,
+                "link": "https://stackoverflow.com/users/829571/assylias",
+                "reputation": 330070,
+                "display_name": "assylias",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192978,
+            "edited": false,
+            "creation_date": 1389983137,
+            "comment_id": 31911403
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+            "account_id": 65386,
+            "user_type": "registered",
+            "user_id": 192444,
+            "link": "https://stackoverflow.com/users/192444/john-vint",
+            "reputation": 40326,
+            "display_name": "John Vint",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 5,
+        "is_accepted": true,
+        "last_activity_date": 1389987164,
+        "creation_date": 1389983131,
+        "body": "<blockquote>\n<p>seemingly simple, a collection with a non-blocking but atomic version of &quot;add&quot; and &quot;drain&quot;<\/p>\n<\/blockquote>\n<p>That is actually impossible.  Non blocking algorithms (on 1-CAS archs) work on a single memory address for atomicity.  So draining an entire queue without blocking and atomically is impossible.<\/p>\n<h3>Edit:<\/h3>\n<p>Based on your edit, I would think that is probably the most efficient way to achieve what you are looking for.<\/p>\n",
+        "answer_id": 21193139,
+        "question_id": 21192978,
+        "last_edit_date": 1592644375
+    }],
+    "answer_comments": {"21193139": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+                "account_id": 65386,
+                "user_type": "registered",
+                "user_id": 192444,
+                "link": "https://stackoverflow.com/users/192444/john-vint",
+                "reputation": 40326,
+                "display_name": "John Vint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389987157,
+            "comment_id": 31913585
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+                "account_id": 2126404,
+                "user_type": "registered",
+                "user_id": 1888440,
+                "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+                "reputation": 4994,
+                "display_name": "robert_difalco",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389986932,
+            "comment_id": 31913446
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+                "account_id": 65386,
+                "user_type": "registered",
+                "user_id": 192444,
+                "link": "https://stackoverflow.com/users/192444/john-vint",
+                "reputation": 40326,
+                "display_name": "John Vint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 21193139,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+                "account_id": 526244,
+                "user_type": "registered",
+                "user_id": 3117035,
+                "link": "https://stackoverflow.com/users/3117035/jvmatl",
+                "reputation": 2132,
+                "display_name": "JVMATL",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1389986247,
+            "comment_id": 31913081
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+                "account_id": 65386,
+                "user_type": "registered",
+                "user_id": 192444,
+                "link": "https://stackoverflow.com/users/192444/john-vint",
+                "reputation": 40326,
+                "display_name": "John Vint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389985604,
+            "comment_id": 31912725
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+                "account_id": 526244,
+                "user_type": "registered",
+                "user_id": 3117035,
+                "link": "https://stackoverflow.com/users/3117035/jvmatl",
+                "reputation": 2132,
+                "display_name": "JVMATL",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389984757,
+            "comment_id": 31912235
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+                "account_id": 526244,
+                "user_type": "registered",
+                "user_id": 3117035,
+                "link": "https://stackoverflow.com/users/3117035/jvmatl",
+                "reputation": 2132,
+                "display_name": "JVMATL",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389984664,
+            "comment_id": 31912177
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+                "account_id": 526244,
+                "user_type": "registered",
+                "user_id": 3117035,
+                "link": "https://stackoverflow.com/users/3117035/jvmatl",
+                "reputation": 2132,
+                "display_name": "JVMATL",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389984320,
+            "comment_id": 31912002
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+                "account_id": 2126404,
+                "user_type": "registered",
+                "user_id": 1888440,
+                "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+                "reputation": 4994,
+                "display_name": "robert_difalco",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389984257,
+            "comment_id": 31911973
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+                "account_id": 65386,
+                "user_type": "registered",
+                "user_id": 192444,
+                "link": "https://stackoverflow.com/users/192444/john-vint",
+                "reputation": 40326,
+                "display_name": "John Vint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+                "account_id": 2126404,
+                "user_type": "registered",
+                "user_id": 1888440,
+                "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+                "reputation": 4994,
+                "display_name": "robert_difalco",
+                "accept_rate": 67
+            },
+            "edited": false,
+            "creation_date": 1389984091,
+            "comment_id": 31911895
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+                "account_id": 65386,
+                "user_type": "registered",
+                "user_id": 192444,
+                "link": "https://stackoverflow.com/users/192444/john-vint",
+                "reputation": 40326,
+                "display_name": "John Vint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+                "account_id": 2126404,
+                "user_type": "registered",
+                "user_id": 1888440,
+                "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+                "reputation": 4994,
+                "display_name": "robert_difalco",
+                "accept_rate": 67
+            },
+            "edited": false,
+            "creation_date": 1389983744,
+            "comment_id": 31911716
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+                "account_id": 2126404,
+                "user_type": "registered",
+                "user_id": 1888440,
+                "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+                "reputation": 4994,
+                "display_name": "robert_difalco",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389983692,
+            "comment_id": 31911680
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+                "account_id": 65386,
+                "user_type": "registered",
+                "user_id": 192444,
+                "link": "https://stackoverflow.com/users/192444/john-vint",
+                "reputation": 40326,
+                "display_name": "John Vint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+                "account_id": 526244,
+                "user_type": "registered",
+                "user_id": 3117035,
+                "link": "https://stackoverflow.com/users/3117035/jvmatl",
+                "reputation": 2132,
+                "display_name": "JVMATL",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1389983605,
+            "comment_id": 31911628
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/caa09b52f2616de4fd1a6ffcc65a5859?s=256&d=identicon&r=PG",
+                "account_id": 65386,
+                "user_type": "registered",
+                "user_id": 192444,
+                "link": "https://stackoverflow.com/users/192444/john-vint",
+                "reputation": 40326,
+                "display_name": "John Vint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+                "account_id": 2126404,
+                "user_type": "registered",
+                "user_id": 1888440,
+                "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+                "reputation": 4994,
+                "display_name": "robert_difalco",
+                "accept_rate": 67
+            },
+            "edited": false,
+            "creation_date": 1389983487,
+            "comment_id": 31911569
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+                "account_id": 526244,
+                "user_type": "registered",
+                "user_id": 3117035,
+                "link": "https://stackoverflow.com/users/3117035/jvmatl",
+                "reputation": 2132,
+                "display_name": "JVMATL",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389983337,
+            "comment_id": 31911498
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/125edaeb93ed639010b71693593f47f4?s=256&d=identicon&r=PG",
+                "account_id": 2126404,
+                "user_type": "registered",
+                "user_id": 1888440,
+                "link": "https://stackoverflow.com/users/1888440/robert-difalco",
+                "reputation": 4994,
+                "display_name": "robert_difalco",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21193139,
+            "edited": false,
+            "creation_date": 1389983324,
+            "comment_id": 31911493
+        }
+    ]}
+}

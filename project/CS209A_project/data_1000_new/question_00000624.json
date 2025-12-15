@@ -1,0 +1,120 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user5062381"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/31122376/java-incorrect-type-returned-from-method-cant-assign-void-value-to-java-lang-s",
+        "last_activity_date": 1466767317,
+        "creation_date": 1435600444,
+        "answer_count": 2,
+        "title": "Java Incorrect type returned from method: Can&#39;t assign void value to java.lang.String",
+        "body": "<p>I am importing records to my Solr database, and am using a .bsh script to pre-process the URL field. The script works fine except for the cases where the record does not have a URL field, and then it throws the following error: <\/p>\n\n<pre><code>Error while trying to evaluate script: getURLs.bsh\njava.lang.IllegalArgumentException: Error while trying to evaluate script: getURLs.bsh\n        at org.solrmarc.index.SolrIndexer.handleScript(SolrIndexer.java:1170)\n        at org.solrmarc.index.SolrIndexer.addFieldValueToMap(SolrIndexer.java:914)\n        at org.solrmarc.index.SolrIndexer.map(SolrIndexer.java:821)\n        at org.solrmarc.marc.MarcImporter.addToIndex(MarcImporter.java:398)\n        at org.solrmarc.marc.MarcImporter.importRecords(MarcImporter.java:312)\n        at org.solrmarc.marc.MarcImporter.handleAll(MarcImporter.java:605)\n        at org.solrmarc.marc.MarcImporter.main(MarcImporter.java:865)\n        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)\n        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n        at java.lang.reflect.Method.invoke(Method.java:606)\n        at com.simontuffs.onejar.Boot.run(Boot.java:334)\n        at com.simontuffs.onejar.Boot.main(Boot.java:170)\nCaused by: Incorrect type returned from method: getURLDOICan't assign void value to java.lang.String: Can't assign void value to java.lang.String: &lt;at unknown location&gt;\n\nat bsh.UtilEvalError.toEvalError(Unknown Source)\nat bsh.BshMethod.invokeImpl(Unknown Source)\nat bsh.BshMethod.invoke(Unknown Source)\nat bsh.BshMethod.invoke(Unknown Source)\nat org.solrmarc.index.SolrIndexer.handleScript(SolrIndexer.java:1162)\n... 12 more\n<\/code><\/pre>\n\n<p>My script is as follows: <\/p>\n\n<pre><code>import org.marc4j.marc.Record;\n\npublic String getURLDOI(Record record) {\n    String url = indexer.getFirstFieldVal(record,\"856u\");\n    if (url != null) {\n        if (url.substring(0,7).equals(\"urn:doi\")) {\n            String result = \"http://hdl.handle.net/\"+url.substring(9);\n            return result;\n        } else {\n            String result = url;\n            return result;\n        }\n        return null;\n    }\n}\n<\/code><\/pre>\n\n<p>How would I handle those records that don't have the URL field (<code>\"856u\"<\/code>)? I've tried setting <code>result = null<\/code> at the start of the method, and then returning the result (rather than <code>return null<\/code>) at the end, but I still get the same error. Thank you for any tips or pointers you can provide. <\/p>\n",
+        "question_id": 31122376,
+        "tags": [
+            "java",
+            "solr"
+        ],
+        "score": 0,
+        "accepted_answer_id": 31122434,
+        "is_answered": true,
+        "view_count": 1722,
+        "last_edit_date": 1466767317
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user5062381"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31122376,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0f75e7fb28ed0de5f8f3a3d40fa285a0?s=256&d=identicon&r=PG",
+                "account_id": 1079377,
+                "user_type": "registered",
+                "user_id": 1076789,
+                "link": "https://stackoverflow.com/users/1076789/johnson-abraham",
+                "reputation": 781,
+                "display_name": "Johnson Abraham"
+            },
+            "edited": false,
+            "creation_date": 1435603354,
+            "comment_id": 50258778
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0f75e7fb28ed0de5f8f3a3d40fa285a0?s=256&d=identicon&r=PG",
+                "account_id": 1079377,
+                "user_type": "registered",
+                "user_id": 1076789,
+                "link": "https://stackoverflow.com/users/1076789/johnson-abraham",
+                "reputation": 781,
+                "display_name": "Johnson Abraham"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31122376,
+            "edited": false,
+            "creation_date": 1435600618,
+            "comment_id": 50257350
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/c6jtG.jpg?s=256",
+                "account_id": 406060,
+                "user_type": "registered",
+                "user_id": 775345,
+                "link": "https://stackoverflow.com/users/775345/robert-moskal",
+                "reputation": 22663,
+                "display_name": "Robert Moskal",
+                "accept_rate": 96
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1466767075,
+            "creation_date": 1435600639,
+            "body": "<p>If the function has a string as the return type, you must return one or throw an exception.  As the other post says, you can return an empty string or some other special value and then have the calling code deal with it.<\/p>\n\n<p>Your other problem is that the function you provided won't compile. I rewrote it to get rid of the dependency and I get:<\/p>\n\n<pre><code>public static String getURLDOI(String record) {\n    String url = record;\n    if (url != null) {\n        if (url.substring(0,7).equals(\"urn:doi\")) {\n            String result = \"http://hdl.handle.net/\"+url.substring(9);\n            return result;\n        } else {\n            String result = url;\n            return result;\n        }\n        return \"\";\n    }\n}\n<\/code><\/pre>\n\n<p>And these errors when I try to compile: <\/p>\n\n<pre><code>Main.java:18: error: unreachable statement\n  return \"\";\n  ^\nMain.java:20: error: missing return statement\n}\n^\n<\/code><\/pre>\n\n<p>Following what I think is your intention, I would rewrite your function like this:<\/p>\n\n<pre><code>public static String getURLDOI(Record record) {\n\n    String url = indexer.getFirstFieldVal(record,\"856u\");\n\n    if (url == null)\n        return \"\";\n\n    if (url.substring(0,7).equals(\"urn:doi\")) \n        return \"http://hdl.handle.net/\"+url.substring(9);\n\n    return url;\n\n}\n<\/code><\/pre>\n\n<p>It reads much nicer than with the nested if statements, which you made a mistake with! It's easy to do, that's why you shouldn't nest them.<\/p>\n",
+            "answer_id": 31122434,
+            "question_id": 31122376,
+            "last_edit_date": 1466767075
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e08150590a35bacb3fc573d17e268f5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4734694,
+                "user_type": "registered",
+                "user_id": 3829417,
+                "link": "https://stackoverflow.com/users/3829417/gregh",
+                "reputation": 5531,
+                "display_name": "GregH",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1435600546,
+            "creation_date": 1435600546,
+            "body": "<p>you can return an empty string \"\"<\/p>\n",
+            "answer_id": 31122412,
+            "question_id": 31122376
+        }
+    ],
+    "answer_comments": {"31122434": [{
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user5062381"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 31122434,
+        "edited": false,
+        "creation_date": 1435603192,
+        "comment_id": 50258698
+    }]}
+}

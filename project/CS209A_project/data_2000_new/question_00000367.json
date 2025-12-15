@@ -1,0 +1,252 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1ab7f76cd789133ce416817a7c6cc509?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12421470,
+            "user_type": "registered",
+            "user_id": 9048225,
+            "link": "https://stackoverflow.com/users/9048225/dave-higgins",
+            "reputation": 25,
+            "display_name": "Dave Higgins"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47887823/fragment-not-completely-inflating",
+        "last_activity_date": 1513711991,
+        "creation_date": 1513689118,
+        "answer_count": 1,
+        "title": "Fragment not completely inflating",
+        "body": "<p>I've created an Activity that has three tabs. On clicking Tab 1 it opens up a fragment (TaskFragment) containing two buttons, each with an associated text. <\/p>\n\n<p>When I click on the \"Create Appraisal Report\" button it properly inflates another Fragment's (AppraisalReportFragment) two text lines (that now supercede the previous two), and a page title (Appraisal Reports), but the two initial buttons remain in place. <\/p>\n\n<p>I'm trying to get everything on the initial Fragment to be changed over to an entirely new Fragment, with it's own buttons and text), but right now only some of these changes take place.<\/p>\n\n<p><strong>TaskFragment<\/strong><\/p>\n\n<pre><code>package usjersey.com.jerseyscore.fragments;\n\nimport android.content.Intent;\nimport android.support.v4.app.Fragment;\nimport android.os.Bundle;\nimport android.support.v4.app.FragmentManager;\nimport android.support.v4.app.FragmentTransaction;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.Button;\nimport android.widget.RelativeLayout;\n\nimport usjersey.com.jerseyscore.R;\n\n/**\n * Created by dhiggins on 11/20/2017.\n */\n\npublic class TasksFragment extends Fragment {\n    private static final String TAG = \"TasksFragment\";\n\n    Intent intent;\n    private RelativeLayout layoutToAdd;\n\n\n//    public void onCreate (Bundle savedInstanceState) {\n    // super.onCreate(savedInstanceState);\n    //}\n\n    @Override\n    public View onCreateView(LayoutInflater inflater, ViewGroup container,\n                             Bundle savedInstanceState) {\n\n        View rootView = inflater.inflate(R.layout.fragment_tasks, container, false);\n        //View rootView = inflater.inflate(R.layout.fragment_tasks, null);\n        //layoutToAdd = (RelativeLayout) findViewById(R.id.TaskFragment);\n\n        Button ID = (Button) rootView.findViewById(R.id.btn_create_appraisal_rpt);\n        ID.setOnClickListener(new View.OnClickListener() {\n\n            @Override\n            public void onClick(View view) {\n                AppraisalReportFragment appraisalRptAct = new AppraisalReportFragment();\n\n                FragmentManager fragmentManager = getFragmentManager();\n                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();\n\n\n                //fragmentTransaction.setTransition(fragmentTransaction.TRANSIT_FRAGMENT_OPEN);\n                fragmentTransaction.addToBackStack(null);\n\n                //Fragment newFragment = new AppCompatDialogFragment();\n                //FragmentTransaction transaction = getFragmentManager().beginTransaction();\n                fragmentTransaction.replace(R.id.tasks_page_fragment, appraisalRptAct);\n\n                //transaction.replace(R.id.child_fragment, newFragment);\n                fragmentTransaction.commit();\n            }\n        });\n\n        Button ID2 = (Button) rootView.findViewById(R.id.btn_check_in_for_today);\n        ID2.setOnClickListener(new View.OnClickListener() {\n\n            @Override\n            public void onClick(View view) {\n                TasksFragment checkInForToday = new TasksFragment();\n\n                FragmentManager fragmentManager = getFragmentManager();\n                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();\n                fragmentTransaction.replace(R.id.herds_check_in_for_today_fragment4, checkInForToday);\n\n                //fragmentTransaction.setTransition(fragmentTransaction.TRANSIT_FRAGMENT_OPEN);\n                //fragmentTransaction.addToBackStack(null);\n\n                //Fragment newFragment = new AppCompatDialogFragment();\n                //FragmentTransaction transaction = getFragmentManager().beginTransaction();\n\n                //transaction.replace(R.id.child_fragment, newFragment);\n                fragmentTransaction.commit();\n            }\n        });\n\n        /*rootView.setOnClickListener(new View.OnClickListener() {\n            @Override\n            public void onClick(View view) {\n                intent = new Intent(getActivity(), AppraisalReportActivity.class);\n                final Button button = (Button) rootView.findViewById(R.id.button_create_appraisal_rpt);\n            }\n        });*/\n\n        return rootView;\n    }\n\n    /*public void buttonOnClick(View v){\n\n    }*/\n}\n<\/code><\/pre>\n\n<p><strong>fragment_tasks.xml<\/strong><\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    android:id=\"@+id/tasks_page_fragment\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    android:background=\"@android:color/black\"\n    android:orientation=\"vertical\"&gt;\n\n    &lt;!-- First A --&gt;\n    &lt;Button\n        android:id=\"@+id/btn_check_in_for_today\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_alignParentStart=\"true\"\n        android:layout_alignParentTop=\"true\"\n        android:layout_marginStart=\"27dp\"\n        android:layout_marginTop=\"44dp\"\n        android:background=\"@android:color/black\"\n        android:elevation=\"0dp\"\n        android:onClick=\"onCreateView\"\n        android:text=\"@string/btn_check_in_for_today\"\n        android:textAlignment=\"viewStart\"\n        android:textColor=\"@android:color/white\"\n        android:textSize=\"18sp\" /&gt;\n\n    &lt;!-- First B --&gt;\n    &lt;Button\n        android:id=\"@+id/btn_create_appraisal_rpt\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_alignStart=\"@+id/btn_check_in_for_today\"\n        android:layout_below=\"@+id/btn_check_in_for_today\"\n        android:layout_marginTop=\"40dp\"\n        android:background=\"@android:color/black\"\n        android:onClick=\"onCreateView\"\n        android:text=\"@string/btn_create_appraisal_report\"\n        android:textColor=\"@android:color/white\"\n        android:textSize=\"18sp\" /&gt;\n\n    &lt;!-- First B--&gt;\n    &lt;TextView\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_alignStart=\"@+id/textView3\"\n        android:layout_below=\"@+id/btn_check_in_for_today\"\n        android:text=\"@string/tasks_check_day_score\"\n        android:textColor=\"@android:color/white\"\n        android:id=\"@+id/textView2\" /&gt;\n\n    &lt;!-- First B--&gt;\n    &lt;TextView\n        android:id=\"@+id/textView3\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_below=\"@+id/btn_create_appraisal_rpt\"\n        android:layout_centerHorizontal=\"true\"\n        android:text=\"@string/tasks_print_email_regmail\"\n        android:textColor=\"@android:color/white\" /&gt;\n\n\n&lt;/RelativeLayout&gt;\n\n\n**AppraisalReportFragment**\n\npackage usjersey.com.jerseyscore.fragments;\n\nimport android.app.Activity;\n//import android.app.Fragment;\nimport android.support.annotation.Nullable;\nimport android.support.v4.app.Fragment;\nimport android.os.Bundle;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.Button;\nimport android.widget.TextView;\n\nimport usjersey.com.jerseyscore.R;\n\n/**\n * Created by dhiggins on 11/29/2017.\n */\n\npublic class AppraisalReportFragment extends Fragment {\n        private static final String TAG = \"Appraisal Report\";\n        TextView textView;\n\n        @Nullable\n        @Override\n        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {\n                //return inflater.inflate(R.layout.fragment_information, container, false);\n                View view = inflater.inflate(R.layout.fragment_appraisal_report, container, false);\n                TextView output = (TextView)view.findViewById(R.id.textView3);\n                //output.setText(\"Frag 2\");\n                return view;\n        }\n}\n<\/code><\/pre>\n\n<p><strong>fragment_appraisal.xml<\/strong><\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    android:id=\"@+id/tasks_page_fragment\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    android:background=\"@android:color/black\"\n    android:orientation=\"vertical\"&gt;\n\n    &lt;Button\n        android:id=\"@+id/btn_check_in_for_today\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_alignParentStart=\"true\"\n        android:layout_below=\"@+id/appraisal_report\"\n        android:layout_marginStart=\"27dp\"\n        android:layout_marginTop=\"19dp\"\n        android:background=\"@android:color/black\"\n        android:text=\"@string/btn_all_cows_in_herd\"\n        android:textColor=\"@android:color/white\"\n        android:textSize=\"18sp\" /&gt;\n\n    &lt;Button\n        android:id=\"@+id/btn_cows_scored\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_alignStart=\"@+id/btn_check_in_for_today\"\n        android:layout_below=\"@+id/textView5\"\n        android:layout_marginTop=\"23dp\"\n        android:background=\"@android:color/black\"\n        android:onClick=\"onCreateView\"\n        android:text=\"@string/btn_cows_scored\"\n        android:textColor=\"@android:color/white\"\n        android:textSize=\"18sp\" /&gt;\n\n    &lt;TextView\n        android:id=\"@+id/textView5\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_alignStart=\"@+id/textView3\"\n        android:layout_below=\"@+id/btn_check_in_for_today\"\n        android:text=\"@string/label_all_cows_in_herd_report\"\n        android:textColor=\"@android:color/white\" /&gt;\n\n    &lt;TextView\n        android:id=\"@+id/textView3\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_below=\"@+id/btn_cows_scored\"\n        android:layout_centerHorizontal=\"true\"\n        android:text=\"@string/label_checked_scored_cows\"\n        android:textColor=\"@android:color/white\" /&gt;\n\n    &lt;TextView\n        android:id=\"@+id/appraisal_report\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_alignParentTop=\"true\"\n        android:layout_centerHorizontal=\"true\"\n        android:fontFamily=\"serif\"\n        android:text=\"@string/title_appraisal_reports\"\n        android:textAlignment=\"viewStart\"\n        android:textColor=\"@android:color/white\"\n        android:textSize=\"18sp\"\n        android:textStyle=\"bold\" /&gt;\n\n&lt;/RelativeLayout&gt;\n<\/code><\/pre>\n",
+        "question_id": 47887823,
+        "tags": [
+            "java",
+            "android",
+            "layout-inflater"
+        ],
+        "score": 1,
+        "accepted_answer_id": 47893872,
+        "is_answered": true,
+        "view_count": 71,
+        "last_edit_date": 1513704450
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qj33e.png?s=256",
+                "account_id": 281857,
+                "user_type": "registered",
+                "user_id": 578411,
+                "link": "https://stackoverflow.com/users/578411/rene",
+                "reputation": 42614,
+                "display_name": "rene",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47887823,
+            "edited": false,
+            "creation_date": 1513704450,
+            "comment_id": 82750980
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1ab7f76cd789133ce416817a7c6cc509?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12421470,
+                "user_type": "registered",
+                "user_id": 9048225,
+                "link": "https://stackoverflow.com/users/9048225/dave-higgins",
+                "reputation": 25,
+                "display_name": "Dave Higgins"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47887823,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/TCSB4.jpg?s=256",
+                "account_id": 11132302,
+                "user_type": "registered",
+                "user_id": 8171929,
+                "link": "https://stackoverflow.com/users/8171929/dheeraj-joshi",
+                "reputation": 1578,
+                "display_name": "Dheeraj Joshi",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1513692994,
+            "comment_id": 82743743
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1ab7f76cd789133ce416817a7c6cc509?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12421470,
+                "user_type": "registered",
+                "user_id": 9048225,
+                "link": "https://stackoverflow.com/users/9048225/dave-higgins",
+                "reputation": 25,
+                "display_name": "Dave Higgins"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47887823,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/TCSB4.jpg?s=256",
+                "account_id": 11132302,
+                "user_type": "registered",
+                "user_id": 8171929,
+                "link": "https://stackoverflow.com/users/8171929/dheeraj-joshi",
+                "reputation": 1578,
+                "display_name": "Dheeraj Joshi",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1513692707,
+            "comment_id": 82743570
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TCSB4.jpg?s=256",
+                "account_id": 11132302,
+                "user_type": "registered",
+                "user_id": 8171929,
+                "link": "https://stackoverflow.com/users/8171929/dheeraj-joshi",
+                "reputation": 1578,
+                "display_name": "Dheeraj Joshi",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47887823,
+            "edited": false,
+            "creation_date": 1513692292,
+            "comment_id": 82743332
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TCSB4.jpg?s=256",
+                "account_id": 11132302,
+                "user_type": "registered",
+                "user_id": 8171929,
+                "link": "https://stackoverflow.com/users/8171929/dheeraj-joshi",
+                "reputation": 1578,
+                "display_name": "Dheeraj Joshi",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47887823,
+            "edited": false,
+            "creation_date": 1513690050,
+            "comment_id": 82741942
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/K0wMk.jpg?s=256",
+            "account_id": 2710929,
+            "user_type": "registered",
+            "user_id": 2339405,
+            "link": "https://stackoverflow.com/users/2339405/rainmaker",
+            "reputation": 11246,
+            "display_name": "Rainmaker",
+            "accept_rate": 98
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1513711991,
+        "creation_date": 1513711439,
+        "body": "<p>When you inflate your fragment you should setVisibility to <code>gone<\/code> to your buttons from the previous layout after committing the FragmentManager's transaction in your activity<\/p>\n\n<p>You can do it like this and then change them to <code>visible<\/code> again when returning<\/p>\n\n<pre><code>b1.setVisibility(View.GONE);\nb2.setVisibility(View.GONE);\n<\/code><\/pre>\n\n<p>Change the names of the buttons according to your code<\/p>\n",
+        "answer_id": 47893872,
+        "question_id": 47887823,
+        "last_edit_date": 1513711991
+    }],
+    "answer_comments": {"47893872": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1ab7f76cd789133ce416817a7c6cc509?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12421470,
+                "user_type": "registered",
+                "user_id": 9048225,
+                "link": "https://stackoverflow.com/users/9048225/dave-higgins",
+                "reputation": 25,
+                "display_name": "Dave Higgins"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47893872,
+            "edited": false,
+            "creation_date": 1516369613,
+            "comment_id": 83670293
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K0wMk.jpg?s=256",
+                "account_id": 2710929,
+                "user_type": "registered",
+                "user_id": 2339405,
+                "link": "https://stackoverflow.com/users/2339405/rainmaker",
+                "reputation": 11246,
+                "display_name": "Rainmaker",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47893872,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1ab7f76cd789133ce416817a7c6cc509?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12421470,
+                "user_type": "registered",
+                "user_id": 9048225,
+                "link": "https://stackoverflow.com/users/9048225/dave-higgins",
+                "reputation": 25,
+                "display_name": "Dave Higgins"
+            },
+            "edited": false,
+            "creation_date": 1515082083,
+            "comment_id": 83173266
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K0wMk.jpg?s=256",
+                "account_id": 2710929,
+                "user_type": "registered",
+                "user_id": 2339405,
+                "link": "https://stackoverflow.com/users/2339405/rainmaker",
+                "reputation": 11246,
+                "display_name": "Rainmaker",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47893872,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1ab7f76cd789133ce416817a7c6cc509?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12421470,
+                "user_type": "registered",
+                "user_id": 9048225,
+                "link": "https://stackoverflow.com/users/9048225/dave-higgins",
+                "reputation": 25,
+                "display_name": "Dave Higgins"
+            },
+            "edited": false,
+            "creation_date": 1514995525,
+            "comment_id": 83136039
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1ab7f76cd789133ce416817a7c6cc509?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12421470,
+                "user_type": "registered",
+                "user_id": 9048225,
+                "link": "https://stackoverflow.com/users/9048225/dave-higgins",
+                "reputation": 25,
+                "display_name": "Dave Higgins"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47893872,
+            "edited": false,
+            "creation_date": 1514993458,
+            "comment_id": 83134839
+        }
+    ]}
+}

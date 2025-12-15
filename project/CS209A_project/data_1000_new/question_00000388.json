@@ -1,0 +1,199 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/m7AIA.png?s=256",
+            "account_id": 3824336,
+            "user_type": "registered",
+            "user_id": 3171509,
+            "link": "https://stackoverflow.com/users/3171509/im-with-stupid",
+            "reputation": 1112,
+            "display_name": "I&#39;m_With_Stupid",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25195991/nullpointerexceptionno-application-instance-given-getinstance-or-even-this",
+        "last_activity_date": 1407519553,
+        "creation_date": 1407471589,
+        "answer_count": 2,
+        "title": "NullPointerException:No application instance given, getinstance() or even this(!?) seems to return null",
+        "body": "<p>Why is the variable application returning null, throwing a null pointer exception? I am attempting to mod the KP Android application, and can't get past the login screen because it throws this error.<\/p>\n\n<pre><code>08-07 23:55:51.229: E/AndroidRuntime(14870): FATAL EXCEPTION: main\n08-07 23:55:51.229: E/AndroidRuntime(14870): Process: com.bernard.beaconportal.activities, PID: 14870\n08-07 23:55:51.229: E/AndroidRuntime(14870): java.lang.NullPointerException: No application instance given\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.bernard.beaconportal.activities.mail.store.StorageManager.&lt;init&gt;(StorageManager.java:525)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.bernard.beaconportal.activities.mail.store.StorageManager.getInstance(StorageManager.java:497)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.bernard.beaconportal.activities.Account.&lt;init&gt;(Account.java:272)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.bernard.beaconportal.activities.Preferences.newAccount(Preferences.java:113)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.bernard.beaconportal.activities.activity.setup.AccountSetupBasics.onManualSetup(AccountSetupBasics.java:309)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.bernard.beaconportal.activities.activity.setup.AccountSetupBasics.onNext(AccountSetupBasics.java:272)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.bernard.beaconportal.activities.activity.setup.AccountSetupBasics.onClick(AccountSetupBasics.java:349)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at android.view.View.performClick(View.java:4466)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at android.view.View$PerformClick.run(View.java:18827)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at android.os.Handler.handleCallback(Handler.java:808)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at android.os.Handler.dispatchMessage(Handler.java:103)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at android.os.Looper.loop(Looper.java:193)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at android.app.ActivityThread.main(ActivityThread.java:5299)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at java.lang.reflect.Method.invokeNative(Native Method)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at java.lang.reflect.Method.invoke(Method.java:515)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:836)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:652)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at de.robv.android.xposed.XposedBridge.main(XposedBridge.java:132)\n08-07 23:55:51.229: E/AndroidRuntime(14870):    at dalvik.system.NativeStart.main(Native Method)\n<\/code><\/pre>\n\n<p>Now here are the lines referenced in the logcat:<\/p>\n\n<p>Where K9.app is initialized, sorry for not posting this before<\/p>\n\n<pre><code>/**\n     * Register a component to be notified when the {@link K9} instance is ready.\n     *\n     * @param component\n     *            Never &lt;code&gt;null&lt;/code&gt;.\n     */\n    public static void registerApplicationAware(final ApplicationAware component) {\n        synchronized (observers) {\n            if (sInitialized) {\n                component.initializeComponent(K9.app);\n            } else if (!observers.contains(component)) {\n                observers.add(component);\n            }\n        }\n    }\n<\/code><\/pre>\n\n<p>Lines 517-526 in Storage Manager<\/p>\n\n<pre><code>/**\n     * @param application\n     *            Never &lt;code&gt;null&lt;/code&gt;.\n     * @throws NullPointerException\n     *             If &lt;tt&gt;application&lt;/tt&gt; is &lt;code&gt;null&lt;/code&gt;.\n     */\n    protected StorageManager(final Application application) throws NullPointerException {\n        if (application == null) {\n            throw new NullPointerException(\"No application instance given\");\n        }\n<\/code><\/pre>\n\n<p>Lines 495-500 in Storage Manager<\/p>\n\n<pre><code>public static synchronized StorageManager getInstance(final Application application) {\n        if (instance == null) {\n            instance = new StorageManager(application);\n        }\n        return instance;\n    }\n<\/code><\/pre>\n\n<p>Line 272 in Account<\/p>\n\n<pre><code>mLocalStorageProviderId = StorageManager.getInstance(K9.app).getDefaultProviderId();\n<\/code><\/pre>\n\n<p>Lines 112-118 in Preferences<\/p>\n\n<pre><code>public synchronized Account newAccount() {\n        newAccount = new Account(K9.app);\n        accounts.put(newAccount.getUuid(), newAccount);\n        accountsInOrder.add(newAccount);\n\n        return newAccount;\n    }\n<\/code><\/pre>\n\n<p>Lines 308-310 in AccountSetupBasics<\/p>\n\n<pre><code>if (mAccount == null) {\n            mAccount = Preferences.getPreferences(this).newAccount();\n        }\n<\/code><\/pre>\n\n<p>Lines 262-274 in AccountSetupBasics<\/p>\n\n<pre><code>protected void onNext() {\n        String email = mEmailView.getText().toString();\n        String[] emailParts = splitEmail(email);\n        String domain = emailParts[1];\n        mProvider = findProviderForDomain(domain);\n        if (mProvider == null) {\n            /*\n             * We don't have default settings for this account, start the manual\n             * setup process.\n             */\n            onManualSetup();\n            return;\n        }\n<\/code><\/pre>\n\n<p>Lines 346-355 in AccountSetupBasics<\/p>\n\n<pre><code>public void onClick(View v) {\n        switch (v.getId()) {\n        case R.id.next:\n            onNext();\n            break;\n        case R.id.manual_setup:\n            onManualSetup();\n            break;\n        }\n    }\n<\/code><\/pre>\n\n<p>And here's the android manifest because I'm pretty sure thats the source of my problems, since it seems to be that the app can't get the name or the package, or the current activity running\u2026 Something like that<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n\n\n    package=\"com.bernard.beaconportal.activities\"\n    android:versionCode=\"1\"\n    android:versionName=\"1.0\"\n    &gt;\n\n    &lt;uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\"/&gt;\n    &lt;uses-permission android:name=\"android.permission.READ_CONTACTS\"/&gt;\n    &lt;uses-permission android:name=\"android.permission.READ_SYNC_SETTINGS\"/&gt;\n\n    &lt;!-- Needed to mark a contact as contacted --&gt;\n    &lt;uses-permission android:name=\"android.permission.WRITE_CONTACTS\"/&gt;\n\n    &lt;uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/&gt;\n    &lt;uses-permission android:name=\"android.permission.INTERNET\"/&gt;\n    &lt;uses-permission android:name=\"android.permission.VIBRATE\"/&gt;\n    &lt;uses-permission android:name=\"android.permission.WAKE_LOCK\"/&gt;\n    &lt;uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" /&gt;\n\n    &lt;uses-permission android:name=\"org.thialfihar.android.apg.permission.READ_KEY_DETAILS\" /&gt;\n\n    &lt;permission android:name=\"com.bernard.beaconportal.activities.permission.READ_ATTACHMENT\"\n                android:permissionGroup=\"android.permission-group.MESSAGES\"\n                android:protectionLevel=\"dangerous\"\n                android:label=\"@string/read_attachment_label\"\n                android:description=\"@string/read_attachment_desc\"/&gt;\n    &lt;uses-permission android:name=\"com.bernard.beaconportal.activities.permission.READ_ATTACHMENT\"/&gt;\n    &lt;permission android:name=\"com.bernard.beaconportal.activities.permission.REMOTE_CONTROL\"\n                 android:permissionGroup=\"android.permission-group.MESSAGES\"\n                 android:protectionLevel=\"dangerous\"\n                 android:label=\"@string/remote_control_label\"\n                 android:description=\"@string/remote_control_desc\"/&gt;\n    &lt;uses-permission android:name=\"com.bernard.beaconportal.activities.permission.REMOTE_CONTROL\"/&gt;\n    &lt;permission android:name=\"com.bernard.beaconportal.activities.permission.READ_MESSAGES\"\n                android:permissionGroup=\"android.permission-group.MESSAGES\"\n                android:protectionLevel=\"dangerous\"\n                android:label=\"@string/read_messages_label\"\n                android:description=\"@string/read_messages_desc\"/&gt;\n    &lt;uses-permission android:name=\"com.bernard.beaconportal.activities.permission.READ_MESSAGES\"/&gt;\n    &lt;permission android:name=\"com.bernard.beaconportal.activities.permission.DELETE_MESSAGES\"\n                android:permissionGroup=\"android.permission-group.MESSAGES\"\n                android:protectionLevel=\"dangerous\"\n                android:label=\"@string/delete_messages_label\"\n                android:description=\"@string/delete_messages_desc\"/&gt;\n    &lt;uses-permission android:name=\"com.bernard.beaconportal.activities.permission.DELETE_MESSAGES\"/&gt;\n    &lt;uses-feature android:name=\"android.hardware.touchscreen\" android:required=\"false\"/&gt;\n\n     &lt;supports-screens\n        android:largeScreens=\"true\"\n        android:normalScreens=\"true\"\n        android:smallScreens=\"true\"\n        android:anyDensity=\"true\"\n    /&gt;\n\n    &lt;uses-sdk\n        android:minSdkVersion=\"14\"\n        android:targetSdkVersion=\"19\" /&gt;\n\n    &lt;application\n        android:icon=\"@drawable/ic_launcher\"\n        android:label=\"@string/app_name\"\n        android:theme=\"@style/Theme.Sherlock.Light.DarkActionBar\" \n        android:allowTaskReparenting=\"false\"\n\n\n        &gt;\n        &lt;meta-data android:name=\"android.app.default_searchable\"\n                   android:value=\".activity.Search\" /&gt;\n\n\n        &lt;activity android:name=\".MainActivity\" \n            android:theme=\"@style/CustomActionBarTheme\"\n            android:windowSoftInputMode=\"adjustPan\"\n            &gt;\n\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.MAIN\" /&gt;\n\n                &lt;category android:name=\"android.intent.category.LAUNCHER\" /&gt;\n            &lt;/intent-filter&gt;\n\n        &lt;/activity&gt;\n\n\n        &lt;activity\n        android:name=\".FragmentsLinked\"\n        android:theme=\"@style/CustomActionBarTheme\"\n        android:windowSoftInputMode=\"adjustResize\"\n        &gt;\n\n           &lt;/activity&gt;\n\n\n          &lt;activity\n\n        android:name=\".FragmentsEdit\"\n        android:theme=\"@style/CustomActionBarTheme\"\n        android:windowSoftInputMode=\"adjustResize\" &gt;\n\n        &lt;/activity&gt;\n\n        &lt;activity  \n         android:name=\".homeworkdueDetailsActivity\"\n         android:theme=\"@style/CustomActionBarTheme\"\n         android:parentActivityName=\"com.bernard.beaconportal.activities.MainActivity\"\n        &gt;\n\n\n        &lt;!-- Parent activity meta-data to support 4.0 and lower --&gt;\n        &lt;meta-data\n            android:name=\"android.support.PARENT_ACTIVITY\"\n            android:value=\"com.bernard.beaconportal.activities.MainActivity\" /&gt;\n\n        &lt;/activity&gt;\n\n\n\n        &lt;activity\n            android:name=\".activity.Accounts\"\n            android:configChanges=\"locale\"\n            android:launchMode=\"singleTop\"\n            android:uiOptions=\"splitActionBarWhenNarrow\"\n            android:label=\"@string/app_name\"&gt;\n            &lt;intent-filter&gt;\n\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n                &lt;category android:name=\"android.intent.category.LAUNCHER\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.VIEW\" /&gt;\n                &lt;data android:mimeType=\"application/x-k9settings\" /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n                &lt;category android:name=\"android.intent.category.BROWSABLE\" /&gt;\n            &lt;/intent-filter&gt;\n        &lt;/activity&gt;\n\n        &lt;activity\n            android:name=\".activity.setup.Prefs\"\n            android:label=\"@string/prefs_title\"\n            android:configChanges=\"locale\"\n            android:taskAffinity=\"com.bernard.beaconportal.activities.activity.setup.Prefs\"\n            android:excludeFromRecents=\"true\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.WelcomeMessage\"\n            android:label=\"@string/welcome_message_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.FontSizeSettings\"\n            android:label=\"@string/font_size_settings_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupBasics\"\n            android:label=\"@string/account_setup_basics_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupAccountType\"\n            android:label=\"@string/account_setup_account_type_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupIncoming\"\n            android:label=\"@string/account_setup_incoming_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupComposition\"\n            android:label=\"@string/account_settings_composition_title\"\n            android:configChanges=\"locale\"\n        &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupOutgoing\"\n            android:label=\"@string/account_setup_outgoing_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupOptions\"\n            android:label=\"@string/account_setup_options_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupNames\"\n            android:label=\"@string/account_setup_names_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.ChooseFolder\"\n            android:theme=\"@style/Theme.K9Dialog\"\n            android:label=\"@string/choose_folder_title\"\n            android:configChanges=\"locale\"\n            android:noHistory=\"true\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.ChooseIdentity\"\n            android:theme=\"@style/Theme.K9Dialog\"\n            android:label=\"@string/choose_identity_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.ManageIdentities\"\n            android:label=\"@string/manage_identities_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.EditIdentity\"\n            android:label=\"@string/edit_identity_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.NotificationDeleteConfirmation\"\n            android:theme=\"@android:style/Theme.Translucent.NoTitleBar\"\n            android:launchMode=\"singleTop\"\n            android:taskAffinity=\"\"\n            android:excludeFromRecents=\"true\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;!-- XXX Note: this activity is hacked to ignore config changes,\n             since it doesn't currently handle them correctly in code. --&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSetupCheckSettings\"\n            android:label=\"@string/account_setup_check_settings_title\"\n            android:configChanges=\"keyboardHidden|orientation|locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.setup.AccountSettings\"\n            android:label=\"@string/account_settings_title_fmt\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n\n        &lt;activity\n            android:name=\".activity.setup.FolderSettings\"\n            android:theme=\"@android:style/Theme.Dialog\"\n            android:label=\"@string/folder_settings_title\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.FolderList\"\n            android:configChanges=\"locale\"\n            android:uiOptions=\"splitActionBarWhenNarrow\"\n            &gt;\n            &lt;intent-filter&gt;\n                &lt;!-- This action is only to allow an entry point for launcher shortcuts --&gt;\n\n            &lt;/intent-filter&gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.MessageList\"\n            android:configChanges=\"locale\"\n            android:launchMode=\"singleTop\"\n            android:uiOptions=\"splitActionBarWhenNarrow\"\n            &gt;\n            &lt;intent-filter&gt;\n                &lt;!-- This action is only to allow an entry point for launcher shortcuts --&gt;\n\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.VIEW\" /&gt;\n                &lt;data\n                    android:scheme=\"email\"\n                    android:host=\"messages\"\n                /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n            &lt;/intent-filter&gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.MessageCompose\"\n            android:label=\"@string/app_name\"\n            android:enabled=\"false\"\n            android:configChanges=\"locale\"\n            &gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.SENDTO\" /&gt;\n                &lt;data android:scheme=\"mailto\" /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.SEND\" /&gt;\n                &lt;data android:mimeType=\"*/*\" /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.SEND_MULTIPLE\" /&gt;\n                &lt;data android:mimeType=\"*/*\" /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.VIEW\" /&gt;\n                &lt;data android:scheme=\"mailto\" /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n                &lt;category android:name=\"android.intent.category.BROWSABLE\" /&gt;\n            &lt;/intent-filter&gt;\n        &lt;/activity&gt;\n        &lt;!-- Search Activity - searchable --&gt;\n        &lt;activity android:name=\".activity.Search\"\n                  android:label=\"@string/search_action\"\n                  android:configChanges=\"locale\"\n                  android:uiOptions=\"splitActionBarWhenNarrow\"\n                  &gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.SEARCH\" /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;meta-data android:name=\"android.app.searchable\"\n                       android:resource=\"@xml/searchable\" /&gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.LauncherShortcuts\"\n            android:label=\"@string/shortcuts_title\"\n            android:configChanges=\"locale\"\n            &gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.CREATE_SHORTCUT\" /&gt;\n                &lt;category android:name=\"android.intent.category.DEFAULT\" /&gt;\n            &lt;/intent-filter&gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.AccessibleEmailContentActivity\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;activity android:name=\".activity.EmailAddressList\"\n            android:configChanges=\"locale\"\n            &gt;\n        &lt;/activity&gt;\n        &lt;receiver android:name=\".service.BootReceiver\"\n              android:enabled=\"true\"\n              &gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.BOOT_COMPLETED\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.DEVICE_STORAGE_LOW\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.intent.action.DEVICE_STORAGE_OK\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.net.conn.CONNECTIVITY_CHANGE\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.net.conn.BACKGROUND_DATA_SETTING_CHANGED\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"com.android.sync.SYNC_CONN_STATUS_CHANGED\" /&gt;\n            &lt;/intent-filter&gt;\n              &lt;intent-filter&gt;\n                &lt;action android:name=\"com.bernard.beaconportal.activities.service.BroadcastReceiver.scheduleIntent\"/&gt;\n            &lt;/intent-filter&gt;\n        &lt;/receiver&gt;\n        &lt;receiver android:name=\".service.RemoteControlReceiver\"\n               android:enabled=\"true\"\n               android:permission=\"com.bernard.beaconportal.activities.permission.REMOTE_CONTROL\"\n               &gt;\n               &lt;intent-filter&gt;\n                 &lt;action android:name=\"com.bernard.beaconportal.activities.K9RemoteControl.set\"/&gt;\n\n             &lt;/intent-filter&gt;\n             &lt;intent-filter&gt;\n                &lt;action android:name=\"com.bernard.beaconportal.activities.K9RemoteControl.requestAccounts\"/&gt;\n\n             &lt;/intent-filter&gt;\n         &lt;/receiver&gt;\n        &lt;receiver android:name=\".service.CoreReceiver\"\n              android:enabled=\"true\"\n              &gt;\n              &lt;intent-filter&gt;\n                &lt;action android:name=\"com.bernard.beaconportal.activities.service.CoreReceiver.wakeLockRelease\"/&gt;\n            &lt;/intent-filter&gt;\n        &lt;/receiver&gt;\n        &lt;receiver android:name=\".service.StorageReceiver\"\n              android:enabled=\"true\"\n              &gt;\n            &lt;intent-filter&gt;\n&lt;!--\nandroid.intent.action.MEDIA_MOUNTED\n\n     * Broadcast Action:  External media is present and mounted at its mount point.\n     * The path to the mount point for the removed media is contained in the Intent.mData field.\n     * The Intent contains an extra with name \"read-only\" and Boolean value to indicate if the\n     * media was mounted read only.\n\n --&gt;\n                &lt;action android:name=\"android.intent.action.MEDIA_MOUNTED\"/&gt;\n&lt;!--\n\nMEDIA_EJECT and MEDIA_UNMOUNTED are not defined here: they have to be dynamically registered\notherwise it would make K-9 start at the wrong time\n\n --&gt;\n                &lt;data android:scheme=\"file\"/&gt;\n            &lt;/intent-filter&gt;\n        &lt;/receiver&gt;\n        &lt;service\n            android:name=\".service.MailService\"\n            android:enabled=\"true\"\n            &gt;\n        &lt;/service&gt;\n        &lt;service\n            android:name=\".service.NotificationActionService\"\n            android:enabled=\"true\"\n            &gt;\n        &lt;/service&gt;\n        &lt;service\n             android:name=\".service.PushService\"\n             android:enabled=\"true\"\n             &gt;\n         &lt;/service&gt;\n         &lt;service\n             android:name=\".service.PollService\"\n             android:enabled=\"true\"\n            &gt;\n         &lt;/service&gt;\n         &lt;service\n              android:name=\".service.RemoteControlService\"\n              android:enabled=\"true\"\n              android:permission=\"com.bernard.beaconportal.activities.permission.REMOTE_CONTROL\"\n             &gt;\n          &lt;/service&gt;\n         &lt;service\n             android:name=\".service.SleepService\"\n             android:enabled=\"true\"\n             &gt;\n         &lt;/service&gt;\n        &lt;provider\n            android:name=\".provider.AttachmentProvider\"\n            android:authorities=\"com.bernard.beaconportal.activities.attachmentprovider\"\n            android:multiprocess=\"true\"\n            android:grantUriPermissions=\"true\"\n            android:readPermission=\"com.bernard.beaconportal.activities.permission.READ_ATTACHMENT\"\n            android:exported=\"true\"\n            /&gt;\n        &lt;provider\n            android:name=\".provider.MessageProvider\"\n            android:authorities=\"com.bernard.beaconportal.activities.messageprovider\"\n            android:multiprocess=\"true\"\n            android:grantUriPermissions=\"true\"\n            android:readPermission=\"com.bernard.beaconportal.activities.permission.READ_MESSAGES\"\n            android:writePermission=\"com.bernard.beaconportal.activities.permission.DELETE_MESSAGES\"\n            android:exported=\"true\"\n            /&gt;\n        &lt;provider\n            android:name=\".provider.EmailProvider\"\n            android:authorities=\"com.bernard.beaconportal.activities.provider.email\"\n            android:exported=\"false\"\n            /&gt;\n\n        &lt;receiver\n            android:name=\".provider.UnreadWidgetProvider\"\n            android:label=\"@string/unread_widget_label\"\n            android:icon=\"@drawable/icon\"&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.appwidget.action.APPWIDGET_UPDATE\" /&gt;\n            &lt;/intent-filter&gt;\n            &lt;meta-data\n                android:name=\"android.appwidget.provider\"\n                android:resource=\"@xml/unread_widget_info\" /&gt;\n        &lt;/receiver&gt;\n        &lt;activity android:name=\".activity.UnreadWidgetConfiguration\"&gt;\n            &lt;intent-filter&gt;\n                &lt;action android:name=\"android.appwidget.action.APPWIDGET_CONFIGURE\" /&gt;\n            &lt;/intent-filter&gt;\n        &lt;/activity&gt;\n        &lt;activity\n            android:name=\".activity.UpgradeDatabases\"\n            android:label=\"@string/upgrade_databases_title\"&gt;\n        &lt;/activity&gt;\n        &lt;service\n            android:name=\".service.DatabaseUpgradeService\"\n            android:exported=\"false\"&gt;\n        &lt;/service&gt;\n       &lt;/application&gt;\n\n\n&lt;/manifest&gt;\n<\/code><\/pre>\n\n<p>If you need anymore code, or need to ask a question about this code just ask.<\/p>\n",
+        "question_id": 25195991,
+        "tags": [
+            "java",
+            "android",
+            "static",
+            "nullpointerexception",
+            "instance"
+        ],
+        "score": 1,
+        "accepted_answer_id": 25196102,
+        "is_answered": true,
+        "view_count": 734,
+        "last_edit_date": 1407473241
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1932079"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 25195991,
+            "edited": false,
+            "creation_date": 1407473788,
+            "comment_id": 39237341
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m7AIA.png?s=256",
+                "account_id": 3824336,
+                "user_type": "registered",
+                "user_id": 3171509,
+                "link": "https://stackoverflow.com/users/3171509/im-with-stupid",
+                "reputation": 1112,
+                "display_name": "I&#39;m_With_Stupid",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25195991,
+            "edited": false,
+            "creation_date": 1407473126,
+            "comment_id": 39237177
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1932079"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 25195991,
+            "edited": false,
+            "creation_date": 1407472942,
+            "comment_id": 39237130
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m7AIA.png?s=256",
+                "account_id": 3824336,
+                "user_type": "registered",
+                "user_id": 3171509,
+                "link": "https://stackoverflow.com/users/3171509/im-with-stupid",
+                "reputation": 1112,
+                "display_name": "I&#39;m_With_Stupid",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25195991,
+            "edited": false,
+            "creation_date": 1407472712,
+            "comment_id": 39237081
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1932079"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 25195991,
+            "edited": false,
+            "creation_date": 1407472082,
+            "comment_id": 39236934
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/BMtCI.png?s=256",
+                "account_id": 2711498,
+                "user_type": "registered",
+                "user_id": 2339855,
+                "link": "https://stackoverflow.com/users/2339855/marcus-karpoff",
+                "reputation": 451,
+                "display_name": "Marcus Karpoff",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1407472380,
+            "creation_date": 1407472380,
+            "body": "<p>It appears that K9.app is access to a singleton. This appears to be only set when you authenticate. You need to look more into how K9.app is instanciated.<\/p>\n",
+            "answer_id": 25196102,
+            "question_id": 25195991
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m7AIA.png?s=256",
+                "account_id": 3824336,
+                "user_type": "registered",
+                "user_id": 3171509,
+                "link": "https://stackoverflow.com/users/3171509/im-with-stupid",
+                "reputation": 1112,
+                "display_name": "I&#39;m_With_Stupid",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1407519553,
+            "creation_date": 1407519054,
+            "body": "<p>Turns out my earlier suspicions were correct, and it was indeed a problem in the AndroidManifest that was screwing me up. So I added \" android:name=\"com.bernard.beaconportal.activities.K9\" \" to the manifest, which fixed it. I added it to the application section of the manifest, so it now looks like this. Thanks for all the help from the previous answer, which pointed me in the right direction. And also Jeremy Miller initially did spot the error, but I guess I didn't know you had to actually add the class that extends Application in the manifest.<\/p>\n\n<pre><code>&lt;application\n        android:icon=\"@drawable/ic_launcher\"\n         android:name=\"com.bernard.beaconportal.activities.K9\"\n    android:label=\"@string/app_name\"\n        android:theme=\"@style/Theme.Sherlock.Light.DarkActionBar\" \n        android:allowTaskReparenting=\"false\"\n\n\n        &gt;\n        &lt;meta-data android:name=\"android.app.default_searchable\"\n                   android:value=\".activity.Search\" /&gt;\n<\/code><\/pre>\n\n<p>Source: <a href=\"http://www.devahead.com/blog/2011/06/extending-the-android-application-class-and-dealing-with-singleton/\" rel=\"nofollow\">http://www.devahead.com/blog/2011/06/extending-the-android-application-class-and-dealing-with-singleton/<\/a><\/p>\n",
+            "answer_id": 25209049,
+            "question_id": 25195991,
+            "last_edit_date": 1407519553
+        }
+    ],
+    "answer_comments": {"25196102": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/BMtCI.png?s=256",
+                "account_id": 2711498,
+                "user_type": "registered",
+                "user_id": 2339855,
+                "link": "https://stackoverflow.com/users/2339855/marcus-karpoff",
+                "reputation": 451,
+                "display_name": "Marcus Karpoff",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 25196102,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/m7AIA.png?s=256",
+                "account_id": 3824336,
+                "user_type": "registered",
+                "user_id": 3171509,
+                "link": "https://stackoverflow.com/users/3171509/im-with-stupid",
+                "reputation": 1112,
+                "display_name": "I&#39;m_With_Stupid",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1407474304,
+            "comment_id": 39237473
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m7AIA.png?s=256",
+                "account_id": 3824336,
+                "user_type": "registered",
+                "user_id": 3171509,
+                "link": "https://stackoverflow.com/users/3171509/im-with-stupid",
+                "reputation": 1112,
+                "display_name": "I&#39;m_With_Stupid",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196102,
+            "edited": false,
+            "creation_date": 1407473397,
+            "comment_id": 39237248
+        }
+    ]}
+}

@@ -1,0 +1,90 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/06eb3f58e6776847212d9d98b4b475d0?s=256&d=identicon&r=PG",
+            "account_id": 2701350,
+            "user_type": "registered",
+            "user_id": 2332007,
+            "link": "https://stackoverflow.com/users/2332007/rzhomx",
+            "reputation": 95,
+            "display_name": "rzhomx",
+            "accept_rate": 22
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18202256/proguard-with-maven",
+        "last_activity_date": 1392739946,
+        "creation_date": 1376375922,
+        "answer_count": 2,
+        "title": "Proguard with Maven",
+        "body": "<p>I am trying to use Proguard to shrink the jar size.<\/p>\n\n<p>I configured Proguard in Maven pom.xml. It failed to find all the embedded dependency jars.\nIt can read and parse out all dependency jars which is referenced in the current module, but for dependencies which are embedded in the other modules, it failed to find it.<\/p>\n\n<p>For example, My current module is moduleA and it depends another module moduleB. And module B has a dependency moduleC.  It can find all classes which are directly inside moduleB, but it failed to parse out all classes which are inside moduleC. My configuration for proguard is as following:<\/p>\n\n<pre><code>&lt;plugin&gt;\n            &lt;!--groupId&gt;com.pyx4me&lt;/groupId--&gt;\n            &lt;groupId&gt;com.github.wvengen&lt;/groupId&gt;\n            &lt;artifactId&gt;proguard-maven-plugin&lt;/artifactId&gt;\n            &lt;executions&gt;\n              &lt;execution&gt;\n                &lt;id&gt;proguard&lt;/id&gt;\n                &lt;phase&gt;package&lt;/phase&gt;\n                &lt;goals&gt;\n                  &lt;goal&gt;proguard&lt;/goal&gt;\n                &lt;/goals&gt;\n              &lt;/execution&gt;\n            &lt;/executions&gt;\n            &lt;configuration&gt;\n              &lt;injar&gt;MyInput-${project.version}.jar&lt;/injar&gt;\n              &lt;outjar&gt;MyInput-Processed-${project.version}.jar&lt;/outjar&gt;\n              &lt;options&gt;\n                &lt;option&gt;-keep public class * { *; }&lt;/option&gt;\n                &lt;option&gt;-ignorewarnings&lt;/option&gt;\n              &lt;/options&gt;\n              &lt;libs&gt;\n                &lt;!--lib&gt;${java.bootstrap.classes}&lt;/lib&gt;\n                &lt;lib&gt;${java.cryptographic.extension.classes}&lt;/lib&gt;\n                &lt;lib&gt;${java.secure.socket.extension.classes}&lt;/lib--&gt;\n              &lt;/libs&gt;\n            &lt;/configuration&gt;\n            &lt;dependencies&gt;\n              &lt;dependency&gt;\n                &lt;groupId&gt;net.sf.proguard&lt;/groupId&gt;\n                &lt;artifactId&gt;proguard-base&lt;/artifactId&gt;\n                &lt;version&gt;4.10&lt;/version&gt;\n                &lt;scope&gt;runtime&lt;/scope&gt;\n              &lt;/dependency&gt;\n            &lt;/dependencies&gt;\n        &lt;/plugin&gt;\n<\/code><\/pre>\n",
+        "question_id": 18202256,
+        "tags": [
+            "java",
+            "maven",
+            "proguard"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 4922
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2d128be9e2e492517499a7dc00af1a42?s=256&d=identicon&r=PG",
+            "account_id": 21466,
+            "user_type": "registered",
+            "user_id": 52176,
+            "link": "https://stackoverflow.com/users/52176/leif-gruenwoldt",
+            "reputation": 14117,
+            "display_name": "leif.gruenwoldt",
+            "accept_rate": 71
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 18202256,
+        "edited": false,
+        "creation_date": 1378327254,
+        "comment_id": 27415563
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/535408ee78edefe583e502edcefd67f4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3533189,
+                "user_type": "registered",
+                "user_id": 2952146,
+                "link": "https://stackoverflow.com/users/2952146/witold",
+                "reputation": 11,
+                "display_name": "witold"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1383562405,
+            "creation_date": 1383560489,
+            "body": "<p>I had similar problem, however it could find the references mentioned in the plugin's configuration dependencies section. <\/p>\n\n<p>However, if I tried to use the proguard-base-4.10 the proguard-maven-plugin (with com.pyx4me groupId) still used the proguard-4.3.jar (you can see it in the maven output in the console); looks like the plugin is only working with a \"proguard\" artifact, not a \"proguard-base\". <\/p>\n\n<p>So I configured the dependencies section to look like:<\/p>\n\n<pre><code>&lt;dependency&gt;\n  &lt;groupId&gt;net.sf.proguard&lt;/groupId&gt;\n  &lt;artifactId&gt;proguard&lt;/artifactId&gt;\n  &lt;version&gt;4.10&lt;/version&gt;\n  &lt;scope&gt;runtime&lt;/scope&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n\n<p>but this one is not available in the <a href=\"http://mvnrepository.com/artifact/net.sf.proguard/proguard\" rel=\"nofollow\">central maven repo<\/a> (the latest version is 4.4).<\/p>\n\n<p>What I did was to download the proguard-4.10 manually from <a href=\"http://sourceforge.net/projects/proguard/files/proguard/4.10/\" rel=\"nofollow\">proguard download section<\/a> and install the proguard.jar in the local maven repository under the version 4.10 - and now everything works fine.<\/p>\n",
+            "answer_id": 19765659,
+            "question_id": 18202256,
+            "last_edit_date": 1383562405
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fdb64d89a4b59bd145b3c10392ece1b7?s=256&d=identicon&r=PG",
+                "account_id": 501004,
+                "user_type": "registered",
+                "user_id": 1012586,
+                "link": "https://stackoverflow.com/users/1012586/morty",
+                "reputation": 3278,
+                "display_name": "Morty"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1392739946,
+            "creation_date": 1392739946,
+            "body": "<p>There is a newer version of that plugin at: <a href=\"https://github.com/wvengen/proguard-maven-plugin\" rel=\"nofollow\">https://github.com/wvengen/proguard-maven-plugin<\/a><\/p>\n",
+            "answer_id": 21859263,
+            "question_id": 18202256
+        }
+    ],
+    "answer_comments": {}
+}

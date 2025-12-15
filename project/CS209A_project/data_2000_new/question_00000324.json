@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/DbnEJ.jpg?s=256",
+            "account_id": 4317809,
+            "user_type": "registered",
+            "user_id": 3527103,
+            "link": "https://stackoverflow.com/users/3527103/burst-of-ice",
+            "reputation": 384,
+            "display_name": "Burst of Ice",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49114308/adapter-pattern-with-buttons-adaptor-class-has-to-know-which-button-was-pressed",
+        "last_activity_date": 1520325565,
+        "creation_date": 1520265018,
+        "answer_count": 1,
+        "title": "Adapter pattern with Buttons, adaptor class has to know which button was pressed",
+        "body": "<p>This is an actionPerformed in a Swing panel with custom buttons from a framework which scrambles their classes so all methods are a():String or b():void and there is no way to make out what it actually is.<\/p>\n\n<p>I got a compiler error becaus when I inherit this button class the compiler find a():void an a():String which is not allowed in Java. My solution was to use the adapter pattern like this:<\/p>\n\n<pre><code>public abstract class FactoryButton {\n    private CustomButton button;\n\n    public FactoryButton(int width, int height) {\n        button = new DynButton();\n        button.setSize(width, height);\n    }\n    public DynButton getButton() {\n        return button;\n    }\n}\n<\/code><\/pre>\n\n<p>So my FactoryButton has the CustomButton class as a private member. The FactoryButton is the parent of another Button class named FactorySelectionButton \nwhich has an action performed where I used to be able to get the source of the event:<\/p>\n\n<pre><code>@Override\npublic void actionPerformed(ActionEvent arg0) {\n    if (arg0.getSource() instanceof FactorySelectionButton) {\n        // User selected a factory\n        selectedItem = ((FactorySelectionButton) arg0.getSource()).getFactory();\n        // Close the screen, so control returns back to the parent window\n        cancel();\n    } else {\n        // other buttons implementation\n    }\n}\n<\/code><\/pre>\n\n<p>But now since I solved one problem with the adapter pattern I have another the arg0.getSource() no longer gives me the FactorySelectionButton but it now gives a CustomButton which gives me no way to know which custom button is pressed.<\/p>\n\n<p>The reason for not throwing away the custom button is that I am bound to the framework, I have to use it and the amount of factories can grow so I don't want hardcoded buttons.<\/p>\n\n<p>So anyone have an idea on how I can fix this?<\/p>\n",
+        "question_id": 49114308,
+        "tags": [
+            "java",
+            "adapter",
+            "java-6"
+        ],
+        "score": 0,
+        "accepted_answer_id": 49126517,
+        "is_answered": true,
+        "view_count": 189,
+        "last_edit_date": 1520270582
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DbnEJ.jpg?s=256",
+                "account_id": 4317809,
+                "user_type": "registered",
+                "user_id": 3527103,
+                "link": "https://stackoverflow.com/users/3527103/burst-of-ice",
+                "reputation": 384,
+                "display_name": "Burst of Ice",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49114308,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fe85994d05ad7aaaa1c47d638b37bc45?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909811,
+                "user_type": "registered",
+                "user_id": 6650475,
+                "link": "https://stackoverflow.com/users/6650475/andrew-s",
+                "reputation": 2861,
+                "display_name": "Andrew S"
+            },
+            "edited": false,
+            "creation_date": 1520325347,
+            "comment_id": 85257539
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fe85994d05ad7aaaa1c47d638b37bc45?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909811,
+                "user_type": "registered",
+                "user_id": 6650475,
+                "link": "https://stackoverflow.com/users/6650475/andrew-s",
+                "reputation": 2861,
+                "display_name": "Andrew S"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49114308,
+            "edited": false,
+            "creation_date": 1520266042,
+            "comment_id": 85234331
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/DbnEJ.jpg?s=256",
+            "account_id": 4317809,
+            "user_type": "registered",
+            "user_id": 3527103,
+            "link": "https://stackoverflow.com/users/3527103/burst-of-ice",
+            "reputation": 384,
+            "display_name": "Burst of Ice",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1520325565,
+        "creation_date": 1520325565,
+        "body": "<p>I found a way around it by looping over all my components and checking whether they have the button I need and they double checking whether it's really an instance of the class I want.<\/p>\n\n<pre><code>@Override\npublic void actionPerformed(ActionEvent arg0) {\n    for (FactoryButton component : components) {\n        if(component.getButton().equals(arg0.getSource()) &amp;&amp; component instanceof FactorySelectionButton)\n             selectedItem = ((FactorySelectionButton) component).getFactory();\n        return;\n    }\n    //other buttons implementation\n}\n<\/code><\/pre>\n",
+        "answer_id": 49126517,
+        "question_id": 49114308
+    }],
+    "answer_comments": {}
+}

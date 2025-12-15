@@ -1,0 +1,83 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8e8fb64494ac5cdc0c71d1b4d2de31c8?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 14723969,
+            "user_type": "registered",
+            "user_id": 10633634,
+            "link": "https://stackoverflow.com/users/10633634/mezja",
+            "reputation": 55,
+            "display_name": "Mezja"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/55461948/how-to-replace-line-without-loosing-other-lines-in-text-file-when-equals-conditi",
+        "last_activity_date": 1554187403,
+        "creation_date": 1554145642,
+        "answer_count": 1,
+        "title": "How to replace line without loosing other lines in text file when equals condition is met?",
+        "body": "<p>I have a text file containing client data, ID, Name and Surname, Balance and Date,4 lines for one client in text file, then there is a space and another client data begins and so on. <\/p>\n\n<pre><code>ID:33\nClient: Michael Reedus\nBalance: 30000 Eur\nDate: 32.03.2019\n\nID:34\nClient: Michael Snow\nBalance: 31900 Eur\nDate: 32.03.2019\n<\/code><\/pre>\n\n<p>I need to create line replacement for specific client ID block, to avoid replacing same line for other person without using ID.<\/p>\n\n<p>I tried realizing an idea, where when code finds ID which I need, it stops there, jumps, for example, a line lower and edits that line, but instead, I lose all other lines except line I am replacing.<\/p>\n\n<pre><code>private static void updateLine(String fails, String ID, String toUpdate, String updated) throws IOException {\n        BufferedReader file = new BufferedReader(new FileReader(fails));\n        String line;\n        String input = \"\";\n\n        while ((line = file.readLine()) != null) {\n\n            if (line.equals(ID)) {\n\n                line = file.readLine();\n                input += line + System.lineSeparator();\n\n                input = input.replace(toUpdate, updated);\n            }\n\n        }\n\n        FileOutputStream os = new FileOutputStream(fails);\n        os.write(input.getBytes());\n\n        file.close();\n        os.close();\n    }\n<\/code><\/pre>\n\n<p>I expect getting<\/p>\n\n<pre><code>ID:33\nClient: Michael Jordan\nBalance: 30000 Eur\nDate: 32.03.2019\n<\/code><\/pre>\n\n<p>not<\/p>\n\n<pre><code>\nClient: Michael Jordan\n\n\n<\/code><\/pre>\n",
+        "question_id": 55461948,
+        "tags": [
+            "java",
+            "bufferedreader",
+            "readline"
+        ],
+        "score": 0,
+        "accepted_answer_id": 55468444,
+        "is_answered": true,
+        "view_count": 257
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/DFvyV.png?s=256",
+            "account_id": 13389989,
+            "user_type": "registered",
+            "user_id": 9662601,
+            "link": "https://stackoverflow.com/users/9662601/samuel-philipp",
+            "reputation": 11143,
+            "display_name": "Samuel Philipp"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 55461948,
+        "edited": false,
+        "creation_date": 1554146390,
+        "comment_id": 97636712
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/djTVv.jpg?s=256",
+            "account_id": 6017640,
+            "user_type": "registered",
+            "user_id": 4725875,
+            "link": "https://stackoverflow.com/users/4725875/devilshnd-%e9%80%80%e3%81%97%e3%81%9f",
+            "reputation": 9182,
+            "display_name": "DevilsHnd - 退した"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1554187403,
+        "creation_date": 1554187403,
+        "body": "<p>There are a number of reasons why you were having difficulties, here are some:<\/p>\n\n<pre><code>if (line.equals(ID)) {\n    line = file.readLine();\n    input += line + System.lineSeparator();\n<\/code><\/pre>\n\n<p>As you can see in the above wee bit of code you are effectively taking the line you just read in and then applying directly to your String which will be written to file. There is no change in the data here. It should be:<\/p>\n\n<pre><code>if (line.equals(ID)) {\n    line = file.readLine();\n    input += updated + System.lineSeparator();\n<\/code><\/pre>\n\n<p>Which opens another can of worms. What if the Original Name supplied doesn't match the ID number supplied. Maybe an entry mistake was made. Before updating the particular item in file compare it to what is contained within the <strong>toUpdate<\/strong> parameter:<\/p>\n\n<pre><code>if (line.equals(ID)) {\n    line = file.readLine();\n    if (line.equals(toUpdate)) {\n        input += updated + System.lineSeparator();\n    }\n<\/code><\/pre>\n\n<p>This next line really puzzles me:<\/p>\n\n<pre><code>input = input.replace(toUpdate, updated);\n<\/code><\/pre>\n\n<p>You do realize that the <strong>input<\/strong> String variable will eventually hold ALL the data contained within your file. What if the item you want to update is in several locations under many different ID numbers? The line above will change all of them. Get rid of this scary line of code. If anything it should only be applied to the <strong>line<\/strong> variable (the file line currently read in).<\/p>\n\n<p>Below I have posted a modified version of your <strong>updateLine()<\/strong> method. This version allows you to change any client field <strong>except<\/strong> the ID field, for example:<\/p>\n\n<pre><code>updateLine(\"clients.txt\", \"ID:33\", \"Date: 32.03.2019\", \"Date: 31.03.2019\");\n\nupdateLine(\"clients.txt\", \"ID:34\", \"Client: Michael Snow\", \"Client: John Smith\");\n\nupdateLine(\"clients.txt\", \"ID:34\", \"Balance: 31900\", \"Balance: 1253672\");\n<\/code><\/pre>\n\n<p>Here is the code (most of it is comments):<\/p>\n\n<pre><code>private static void updateLine(String fails, String ID, String toUpdate, String updated) {\n    // Try With Resources is used to autoclose the BufferedReader\n    try (BufferedReader file = new BufferedReader(new FileReader(fails))) {\n        String line;\n        String input = \"\";\n        while ((line = file.readLine()) != null) {\n            if (line.equals(ID)) {\n                // Append the ID to String\n                input+= ID + System.lineSeparator(); \n                /* Loop through this client's data and make \n                   changes where necessary...   */\n                while ((line = file.readLine()) != null) {\n                    /* If we get to this point where we read an ID again\n                       then we've gone too far. The item to update could\n                       not be found under the supplied ID Number.  */\n                    if (line.startsWith(\"ID:\")) {\n                        // Append the original ID to String.\n                        System.out.println(\"The item to update (\" + toUpdate + \n                                \") could not be found under the ID of: \" + ID);\n                        // Add this line to string anyways.\n                        input+= line + System.lineSeparator();\n                        break; // Break out of this inner lop\n                    }\n                    // Does file line match the supplied toUpdate?\n                    if (line.equals(toUpdate)) {\n                        // Yes - Append the new item to String\n                        input+= updated + System.lineSeparator();\n                        break; // Get out of inner loop. Let main loop take over again.\n                    }\n                    else {\n                        // Append the original item to String.\n                        input+= line + System.lineSeparator();\n                    }\n                }\n            }\n            else {\n                input+= line + System.lineSeparator();\n            }\n        }   \n        // Re-Write File with new data\n        // Try With Resources is used to autoclose the Stream\n        try (FileOutputStream os = new FileOutputStream(fails)) {\n            os.write(input.getBytes());\n            os.flush();\n        }\n    }\n    catch (FileNotFoundException ex) {\n        ex.printStackTrace();\n    }\n    catch (IOException ex) {\n        ex.printStackTrace();\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 55468444,
+        "question_id": 55461948
+    }],
+    "answer_comments": {"55468444": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8e8fb64494ac5cdc0c71d1b4d2de31c8?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 14723969,
+            "user_type": "registered",
+            "user_id": 10633634,
+            "link": "https://stackoverflow.com/users/10633634/mezja",
+            "reputation": 55,
+            "display_name": "Mezja"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 55468444,
+        "edited": false,
+        "creation_date": 1554201422,
+        "comment_id": 97655856
+    }]}
+}

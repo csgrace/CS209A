@@ -1,0 +1,90 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/be235d7145f1740e8f275b6e6014c822?s=256&d=identicon&r=PG",
+            "account_id": 1035149,
+            "user_type": "registered",
+            "user_id": 1042646,
+            "link": "https://stackoverflow.com/users/1042646/punter-vicky",
+            "reputation": 17190,
+            "display_name": "Punter Vicky",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/42800632/xslt-using-java",
+        "last_activity_date": 1489550590,
+        "creation_date": 1489548761,
+        "answer_count": 2,
+        "title": "XSLT using Java",
+        "body": "<p>I came across the below example in one of the stackoverflow posts -<\/p>\n\n<pre><code>import javax.xml.transform.*;\nimport javax.xml.transform.stream.StreamResult;\nimport javax.xml.transform.stream.StreamSource;\nimport java.io.File;\nimport java.io.IOException;\nimport java.net.URISyntaxException;\n\npublic class TestMain {\n    public static void main(String[] args) throws IOException, URISyntaxException, TransformerException {\n        TransformerFactory factory = TransformerFactory.newInstance();\n        Source xslt = new StreamSource(new File(\"transform.xslt\"));\n        Transformer transformer = factory.newTransformer(xslt);\n\n        Source text = new StreamSource(new File(\"input.xml\"));\n        transformer.transform(text, new StreamResult(new File(\"output.xml\")));\n    }\n}\n<\/code><\/pre>\n\n<p>In the above example , I would like to use input as a string and output as string and read only xslt from file. Is it possible to achieve this?<\/p>\n",
+        "question_id": 42800632,
+        "tags": [
+            "java",
+            "xslt"
+        ],
+        "score": 2,
+        "accepted_answer_id": 42800777,
+        "is_answered": true,
+        "view_count": 658
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/58df0aa311a6bcce5cf9f40ee8cb163c?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 18798,
+            "user_type": "registered",
+            "user_id": 43452,
+            "link": "https://stackoverflow.com/users/43452/stobor",
+            "reputation": 45332,
+            "display_name": "Stobor"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 42800632,
+        "edited": false,
+        "creation_date": 1489550108,
+        "comment_id": 72715511
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9257522bf9e4196702b9f31dc1c556c1?s=256&d=identicon&r=PG",
+                "account_id": 1026069,
+                "user_type": "registered",
+                "user_id": 1035364,
+                "link": "https://stackoverflow.com/users/1035364/mjlowky",
+                "reputation": 1223,
+                "display_name": "mjlowky"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1489549773,
+            "creation_date": 1489549773,
+            "body": "<p>Have look at the <code>StreamSource<\/code> constructor with <code>InputStream<\/code> <a href=\"https://docs.oracle.com/javase/7/docs/api/javax/xml/transform/stream/StreamSource.html#StreamSource(java.io.InputStream)\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/7/docs/api/javax/xml/transform/stream/StreamSource.html#StreamSource(java.io.InputStream)<\/a><\/p>\n\n<p>You can create your input from <code>string<\/code> like this:<\/p>\n\n<pre><code>    InputStream input = new ByteArrayInputStream(\"&lt;your string input&gt;\".getBytes(StandardCharsets.UTF_8));\n    Source text = new StreamSource(input);\n<\/code><\/pre>\n\n<p>And get your output as <code>string<\/code> using <code>StringWriter<\/code> and <code>StreamResult<\/code>:<\/p>\n\n<pre><code>    StringWriter outputWriter = new StringWriter();\n    StreamResult result = new StreamResult( outputWriter );\n\n    transformer.transform( text, result );  \n\n    String outputAsString = outputWriter.getBuffer().toString(); \n<\/code><\/pre>\n",
+            "answer_id": 42800777,
+            "question_id": 42800632
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/be235d7145f1740e8f275b6e6014c822?s=256&d=identicon&r=PG",
+                "account_id": 1035149,
+                "user_type": "registered",
+                "user_id": 1042646,
+                "link": "https://stackoverflow.com/users/1042646/punter-vicky",
+                "reputation": 17190,
+                "display_name": "Punter Vicky",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1489550590,
+            "creation_date": 1489549896,
+            "body": "<p>I was able to do something similar to this which provided me the result -<\/p>\n\n<pre><code>import javax.xml.transform.*;\nimport javax.xml.transform.stream.StreamResult;\nimport javax.xml.transform.stream.StreamSource;\nimport java.io.File;\nimport java.io.IOException;\nimport java.net.URISyntaxException;\n\npublic class TestMain {\n    public static void main(String[] args) throws IOException, URISyntaxException, TransformerException {\n        TransformerFactory factory = TransformerFactory.newInstance();\n        Source xslt = new StreamSource(new File(\"transform.xslt\"));\n\n        Transformer transformer = factory.newTransformer(xslt);\nString xmlData = \"&lt;xml&gt;&lt;data&gt;test&lt;/data&gt;\";\nInputStream stream = new ByteArrayInputStream(xmlData.getBytes(StandardCharsets.UTF_8));\n        Source text = new StreamSource(stream);\n\n            StringWriter outWriter = new StringWriter();\n            StreamResult result = new StreamResult( outWriter );\n        transformer.transform(text, result);\n            StringBuffer sb = outWriter.getBuffer(); \n            String finalstring = sb.toString();\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 42800793,
+            "question_id": 42800632,
+            "last_edit_date": 1489550590
+        }
+    ],
+    "answer_comments": {}
+}

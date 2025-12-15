@@ -1,0 +1,124 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user3808470"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25005165/find-the-maximum-ratio-between-the-number-of-nodes-in-a-binary-tree",
+        "last_activity_date": 1406635981,
+        "creation_date": 1406585330,
+        "answer_count": 1,
+        "title": "Find the maximum ratio between the number of nodes in a binary tree",
+        "body": "<p>I wrote a class that defines some operations on binary trees. \nNow I have to add a method that returns a reference to the node (or to one of the nodes, if there are more than one) U such that the ratio between the number of nodes in the subtree of the root U (thus including the node itself) and height (+1) of the same is maximized. <\/p>\n\n<p>So I have to add to the sum the value 1 for the leaves otherwise the ratio would be 1/0 = infinity: that is, the result would be any leaf (wrong). <\/p>\n\n<p>The algorithm must be linear in the number of nodes, visiting the tree once. <\/p>\n\n<p>Can I define a private class auxiliary in case I need it.<\/p>\n\n<p>I do not know how to do, someone help me? <\/p>\n\n<p>My code is this.<\/p>\n\n<pre><code>public class BinaryTree {\n\n    protected class Node {\n\n        protected Integer element;\n        protected Node left;\n        protected Node right;\n\n        Node(int element) {\n            this.element = element;\n            left = right = null;\n        }\n\n        Node(int element, Node left, Node right) {\n            this.element = element;\n            this.left = left;\n            this.right = right;\n        }\n\n        boolean isLeaf() {\n            return left == null &amp;&amp; right == null;\n        }\n\n    } //end Node class\n\n    public class NodeReference {\n        private Node node;\n\n        private NodeReference(Node node) {\n            this.node = node;\n        }\n\n        public int getElement() {\n            return node.element;\n        }\n\n        public void setElement(int e) {\n            node.element = e;\n        }\n    } //end class NodeReference\n\n    protected Node root;\n\n    public BinaryTree() {\n        root = null;\n    }\n\n\n    public boolean isEmpty() {\n        return root == null;\n    }\n\n    public void add(int element, String path) {\n        //working properly\n    }\n\n    protected Node add(int elem, String path, Node node) {\n        //working properly\n    }\n\n    public void printPreOrder() {\n        //working properly\n    }\n\n    protected void printPreOrder(Node node) {\n        //working properly\n    }\n\n    public int height() {\n        //working properly\n    }\n\n    protected int height(Node node) {\n        //working properly\n    }\n\n    public int sum() {\n        //working properly\n    }\n\n    private int sum(Node node) {\n        //working properly\n    }\n\n    public int size() {\n        //working properly\n    }\n\n    private int size(Node node) {\n        //working properly\n    }\n\n    public boolean search(int x) {\n        //working properly\n    }\n\n    protected boolean search(int x, Node node) {\n        //working properly\n    }\n\n    public boolean equalTo(BinaryTree t) {\n        //working properly\n    }\n\n    public boolean equals(Object ob) {\n        //working properly\n    }\n\n    protected boolean areEqual(Node node1, Node node2) {\n        //working properly\n    }\n\n    public BinaryTree copy() {\n        //working properly\n    }\n\n    protected Node copy(Node node) {\n        //working properly\n    }\n\n    public NodeReference find(int x) {\n        //working properly\n    }\n\n    private Node find(int x, Node nd) {\n        //working properly\n    }\n\n    public boolean isCompletelyBalanced() {\n        //working properly\n    }\n\n    private int isCompletelyBalanced(Node node) {\n        //working properly\n    }\n\n    public boolean is1Balanced() {\n        //working properly\n    }\n\n    private int is1Balanced(Node node) {\n        //working properly\n    }\n\n\n    private class BoolNode {\n\n        boolean found; \n        Node node;\n\n        BoolNode(boolean found, Node node) {\n            this.found = found;\n            this.node = node;\n        }\n    }\n\n    public boolean removeSubtree(int x) {\n        //working properly\n    }\n\n    protected BoolNode removeSubtree(int x, Node node) {\n        //working properly\n    }\n\n    public int maxElem() throws IllegalStateException {\n        if(root == null)\n            throw new IllegalStateException(\"Empty tree.\");\n        return maxElem(root);\n    }\n\n    private static int max3(int x, int y, int z) {\n        return max(x, max(y, z));\n    }\n\n    private int maxElem(Node node) {\n        int max = node.element;\n        if(node.left != null)\n            max = Math.max(max, maxElem(node.left));\n        if(node.right != null)\n            max = Math.max(max, maxElem(node.right));\n        return max;\n    }\n\n    public NodeReference maxDescendantsHeightRatio() {\n        //As I write this method?\n    }\n\n}\n<\/code><\/pre>\n\n<p>I started doing it this way:<\/p>\n\n<pre><code>public NodeReference maxDescendantsHeightRatio() {\n    ArrayList&lt;Node&gt; list = iteratorPreOrder();\n    ArrayList&lt;NodeWithRatio&gt; listRatio = new ArrayList&lt;NodeWithRatio&gt;();\n    for(int i = 0; i &lt; list.size(); i++) {\n        int s = size();\n        int h = height() + 1;\n        int r = ratioScore(s, h);\n        listRatio.add(new NodeWithRatio(this, r));\n    }\n    //sort the array list\n    Collections.sort(listRatio, new Comparator&lt;Point&gt;() {\n        public int compare(NodeWithRatio o1, NodeWithRatio o2) {\n            return Integer.compare(o1.ratio, o2.ratio);\n        }\n    });\n    //find max value in the list of node with ratio\n    NodeWithRatio result = listRatio.get(listRatio.size() - 1); //gets the last item, largest for an ascending sort\n    return result.node;\n    //return null;\n}\n\nprivate int ratioScore(int size, int height) {\n    return size / height;\n}\n\nprivate class NodeWithRatio {\n    Node node;\n    int ratio;\n\n    public NodeWithRatio(Node n, int r) {\n        node = n;\n        ratio = r;\n    }\n} //end NodeWithRatio class\n\npublic ArrayList&lt;Node&gt; iteratorPreOrder()  {\n    ArrayList&lt;Node&gt; templist = new ArrayList&lt;Node&gt;();\n    preorder(root, templist);\n    for(int i = 0; i &lt; templist.size(); i++)\n        System.out.println(templist.get(i).element);  \n    return templist;\n}  \n\nprivate void preorder(Node node, ArrayList&lt;Node&gt; templist)  {\n    if(node != null)  {\n        templist.add(node); // adds to end of list.\n        preorder(node.left, templist);\n        preorder(node.right, templist);\n    }\n}\n\npublic int height() {\n    if(isEmpty())\n        return -1;\n    return height(root);\n}\n\nprotected int height(Node node) {\n    return (node == null)? -1: 1 + Math.max(height(node.left), height(node.right));\n}\n\npublic int size() {\n    if(isEmpty())\n        return 0;\n    return size(root);\n}\n\nprivate int size(Node node) {\n    if(node == null)\n        return 0;\n    return size(node.left) + size(node.right) + 1;\n}\n<\/code><\/pre>\n\n<p>I think it's the wrong piece of code:<\/p>\n\n<pre><code>    for(int i = 0; i &lt; list.size(); i++) {\n        int s = size();\n        int h = height() + 1;\n        int r = ratioScore(s, h);\n        listRatio.add(new NodeWithRatio(this, r));\n    }\n<\/code><\/pre>\n\n<p>Since it is not recursive, but I do not know how to fix it ... \nDoes anyone have any advice?<\/p>\n\n<p>Thanks!<\/p>\n",
+        "question_id": 25005165,
+        "tags": [
+            "java",
+            "algorithm",
+            "binary-tree"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 721,
+        "last_edit_date": 1406635981
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user3808470"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25005165,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/ieYOt.jpg?s=256",
+                "account_id": 220105,
+                "user_type": "registered",
+                "user_id": 477349,
+                "link": "https://stackoverflow.com/users/477349/sam-dufel",
+                "reputation": 17645,
+                "display_name": "Sam Dufel",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1406648900,
+            "comment_id": 38907305
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ieYOt.jpg?s=256",
+                "account_id": 220105,
+                "user_type": "registered",
+                "user_id": 477349,
+                "link": "https://stackoverflow.com/users/477349/sam-dufel",
+                "reputation": 17645,
+                "display_name": "Sam Dufel",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25005165,
+            "edited": false,
+            "creation_date": 1406585993,
+            "comment_id": 38880264
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/16e66eeea7a56792aff039fe5265834a?s=256&d=identicon&r=PG",
+                "account_id": 1292662,
+                "user_type": "registered",
+                "user_id": 1244442,
+                "link": "https://stackoverflow.com/users/1244442/swapnil",
+                "reputation": 8366,
+                "display_name": "Swapnil",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25005165,
+            "edited": false,
+            "creation_date": 1406585602,
+            "comment_id": 38880115
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/jXcg4.png?s=256",
+            "account_id": 1263831,
+            "user_type": "registered",
+            "user_id": 1221571,
+            "link": "https://stackoverflow.com/users/1221571/eran",
+            "reputation": 395099,
+            "display_name": "Eran",
+            "accept_rate": 67
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1406594726,
+        "creation_date": 1406594358,
+        "body": "<p>As you figured out, the calculation of the ratio is a combination of the calculation of the size and height of the tree.<\/p>\n\n<p>In order to find the max ratio in one pass over the nodes of the tree, we can use a recursive method that would calculate both the size and height of the tree. In order to calculate the ratio for a node, it's not enough to know the ratios of its two children - we need to know the size and height of the children's sub trees. For this purpose I'll return an array of two ints - the first is the size and the second the height.<\/p>\n\n<pre><code>public int[] ratio(Node node)\n{\n    int[] result = new int[2];\n    int[0] = 0;\n    int[1] = 0;\n    if (node = null)\n        return result;\n    int[] leftRatio = ratio(node.left);\n    int[] rightRatio = ratio(node.right);\n    result[0] = leftRatio[0] + rightRatio[0] + 1; // current sub tree size\n    result[1] = Math.max(leftRatio[1] + rightRatio[1]) + 1; // current sub tree height\n    return result;\n}\n<\/code><\/pre>\n\n<p>Now, if you want to find all the nodes with the highest ratio, you can add a static variable holding the current max ratio and another static variable holding the nodes having that max ratio (I know, it's ugly, but it works).<\/p>\n\n<pre><code>...\nstatic float maxRatio = 0;\nstatic Set&lt;Node&gt; maxRatioNodes = new Set&lt;Node&gt;();\n...\npublic int[] ratio(Node node)\n{\n    int[] result = new int[2];\n    int[0] = 0;\n    int[1] = 0;\n    if (node = null)\n        return result;\n    int[] leftRatio = ratio(node.left);\n    int[] rightRatio = ratio(node.right);\n    result[0] = leftRatio[0] + rightRatio[0] + 1; // current sub tree size\n    result[1] = Math.max(leftRatio[1] + rightRatio[1]) + 1; // current sub tree height\n    float currRatio = result[0]/result[1];\n    if (currRatio &gt; maxRatio) { // found a new max ratio\n        maxRatio = currRatio;\n        maxRatioNodes.clear();\n        maxRatioNodes.add (node);\n    } else if (currRatio == maxRatio) { //  node's ratio equals the current max ratio\n        maxRatioNodes.add (node);\n    }\n    return result;\n}\n<\/code><\/pre>\n",
+        "answer_id": 25006558,
+        "question_id": 25005165,
+        "last_edit_date": 1406594726
+    }],
+    "answer_comments": {"25006558": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/jXcg4.png?s=256",
+            "account_id": 1263831,
+            "user_type": "registered",
+            "user_id": 1221571,
+            "link": "https://stackoverflow.com/users/1221571/eran",
+            "reputation": 395099,
+            "display_name": "Eran",
+            "accept_rate": 67
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 25006558,
+        "edited": false,
+        "creation_date": 1406649066,
+        "comment_id": 38907435
+    }]}
+}

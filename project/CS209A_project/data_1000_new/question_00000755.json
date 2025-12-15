@@ -1,0 +1,300 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+            "account_id": 4069490,
+            "user_type": "registered",
+            "user_id": 3343155,
+            "link": "https://stackoverflow.com/users/3343155/nick",
+            "reputation": 109,
+            "display_name": "Nick",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49883480/combine-a-sequence-of-linestring",
+        "last_activity_date": 1524136141,
+        "creation_date": 1523983647,
+        "answer_count": 3,
+        "title": "Combine a sequence of LineString",
+        "body": "<p>I have a sequence of LineString, for example <code>lineString1<\/code> and <code>lineString2<\/code> <a href=\"https://i.sstatic.net/LKgcV.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/LKgcV.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>where <code>lineString1.getEndPoint() == lineString2.getStartPoint()<\/code> or \n<code>lineString1.getStartPoint() == lineString2.getEndPoint()<\/code>\nI want to get <code>LineString<\/code> object (not <code>MultiLineString<\/code>) which would be combined of <code>lineString1<\/code> and <code>lineString2<\/code>.<\/p>\n\n<p>I didn't find any good solution to do it.<\/p>\n",
+        "question_id": 49883480,
+        "tags": [
+            "java",
+            "gis",
+            "geotools"
+        ],
+        "score": 4,
+        "accepted_answer_id": 49919608,
+        "is_answered": true,
+        "view_count": 3351,
+        "last_edit_date": 1524002108
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+                "account_id": 4069490,
+                "user_type": "registered",
+                "user_id": 3343155,
+                "link": "https://stackoverflow.com/users/3343155/nick",
+                "reputation": 109,
+                "display_name": "Nick",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49883480,
+            "reply_to_user": {
+                "profile_image": "https://lh5.googleusercontent.com/-HcKtiretO2g/AAAAAAAAAAI/AAAAAAAAAH0/IXGAL7MX8sQ/s256-rj/photo.jpg",
+                "account_id": 5397431,
+                "user_type": "registered",
+                "user_id": 4298200,
+                "link": "https://stackoverflow.com/users/4298200/georg-plaz",
+                "reputation": 6098,
+                "display_name": "Georg Plaz",
+                "accept_rate": 62
+            },
+            "edited": false,
+            "creation_date": 1524002201,
+            "comment_id": 86792228
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-HcKtiretO2g/AAAAAAAAAAI/AAAAAAAAAH0/IXGAL7MX8sQ/s256-rj/photo.jpg",
+                "account_id": 5397431,
+                "user_type": "registered",
+                "user_id": 4298200,
+                "link": "https://stackoverflow.com/users/4298200/georg-plaz",
+                "reputation": 6098,
+                "display_name": "Georg Plaz",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49883480,
+            "edited": false,
+            "creation_date": 1523983911,
+            "comment_id": 86783040
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EQu58.gif?s=256",
+                "account_id": 195980,
+                "user_type": "registered",
+                "user_id": 439194,
+                "link": "https://stackoverflow.com/users/439194/ian-turton",
+                "reputation": 11066,
+                "display_name": "Ian Turton",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1524136141,
+            "creation_date": 1524136141,
+            "body": "<p>You need to use the <a href=\"http://javadox.com/com.vividsolutions/jts/1.13/com/vividsolutions/jts/operation/linemerge/LineMerger.html\" rel=\"nofollow noreferrer\">JTS <code>LineMerger<\/code><\/a> to achieve this, it returns a <code>Collection&lt;LineString&gt;<\/code> but in your example this is a single line as they join (in other cases only some of the lines may touch).<\/p>\n\n<pre><code>import java.util.Collection;\n\nimport com.vividsolutions.jts.geom.Geometry;\nimport com.vividsolutions.jts.geom.LineString;\nimport com.vividsolutions.jts.io.ParseException;\nimport com.vividsolutions.jts.io.WKTReader;\nimport com.vividsolutions.jts.operation.linemerge.LineMerger;\n\npublic class LineJoin {\n\n  public static void main(String[] args) throws ParseException {\n    /*String[] WKTS = { \"LINESTRING (254058.76074485347 475001.2186020431, 255351.04293761664 474966.9279243938)\",\n        \"LINESTRING (255351.04293761664 474966.9279243938, 255529.29662365236 474272.4599921228)\",\n        \"LINESTRING (255529.29662365236 474272.4599921228, 256166.05830998957 473979.44920198264)\",\n        \"LINESTRING (256166.05830998957 473979.44920198264, 256082.8878282134 472762.2531920295)\",\n        \"LINESTRING (256082.8878282134 472762.2531920295, 254245.37250651795 472802.681197444)\",\n        \"LINESTRING (254245.37250651795 472802.681197444, 254294.87550167093 473782.10435392085)\",\n        \"LINESTRING (255802.5570897992 475306.663459122, 256973.3861333156 473826.71649389854)\",\n        \"LINESTRING (256973.3861333156 473826.71649389854, 256996.781511873 472271.0759416939)\",\n        \"LINESTRING (254134.08645022905 471750.25133671844, 253091.20265363617 473772.75685744354)\",\n        \"LINESTRING (252764.19811300343 475015.97340571403, 253526.90397945273 476194.3201198712)\",\n        \"LINESTRING (253526.90397945273 476194.3201198712, 254983.29259833007 475930.5996061625)\" };*/\n    String[] WKTS = {\"LINESTRING(10 40,11 41)\",\"LINESTRING(11 41,12 42)\"};\n    WKTReader reader = new WKTReader();\n    LineMerger merger = new LineMerger();\n    for (String wkt : WKTS) {\n      Geometry geom = reader.read(wkt);\n      merger.add(geom);\n    }\n\n    Collection&lt;LineString&gt; collection = merger.getMergedLineStrings();\n\n    for (LineString l : collection) {\n      System.out.println(l);\n    }\n  }\n\n}\n<\/code><\/pre>\n\n<p>For your test inputs it gives:<\/p>\n\n<pre><code>LINESTRING (10 40, 11 41, 12 42)\n<\/code><\/pre>\n\n<p>For the commented out WKT you would get:<\/p>\n\n<pre><code>LINESTRING (252764.19811300343 475015.97340571403, 253526.90397945273 476194.3201198712, 254983.29259833007 475930.5996061625)\nLINESTRING (254134.08645022905 471750.25133671844, 253091.20265363617 473772.75685744354)\nLINESTRING (254058.76074485347 475001.2186020431, 255351.04293761664 474966.9279243938, 255529.29662365236 474272.4599921228, 256166.05830998957 473979.44920198264, 256082.8878282134 472762.2531920295, 254245.37250651795 472802.681197444, 254294.87550167093 473782.10435392085)\nLINESTRING (255802.5570897992 475306.663459122, 256973.3861333156 473826.71649389854, 256996.781511873 472271.0759416939)\n<\/code><\/pre>\n",
+            "answer_id": 49919608,
+            "question_id": 49883480
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/66e1f591d79ed7d383518cced8fbdf35?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13357055,
+                "user_type": "registered",
+                "user_id": 9640261,
+                "link": "https://stackoverflow.com/users/9640261/nayor",
+                "reputation": 721,
+                "display_name": "NayoR"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1524050968,
+            "creation_date": 1524003911,
+            "body": "<p>Following <a href=\"http://docs.geotools.org/stable/javadocs/org/opengis/geometry/coordinate/LineString.html\" rel=\"nofollow noreferrer\">geotool documentation<\/a>:<\/p>\n\n<pre><code>GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();\nLineString combinedLineString = GeometryFactory.createLineString(\n    lineString1.getControlPoints()\n        .addAll(lineString2.getControlPoints())\n    );\n<\/code><\/pre>\n",
+            "answer_id": 49888382,
+            "question_id": 49883480,
+            "last_edit_date": 1524050968
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EQu58.gif?s=256",
+                "account_id": 195980,
+                "user_type": "registered",
+                "user_id": 439194,
+                "link": "https://stackoverflow.com/users/439194/ian-turton",
+                "reputation": 11066,
+                "display_name": "Ian Turton",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1524040847,
+            "creation_date": 1524040847,
+            "body": "<p>You can use the <a href=\"https://locationtech.github.io/jts/javadoc/org/locationtech/jts/geom/Geometry.html#union()\" rel=\"nofollow noreferrer\"><code>union<\/code><\/a> method of <code>GeometryCollection<\/code> to join the LineStrings. See the documentation <a href=\"http://docs.geotools.org/latest/userguide/library/jts/combine.html\" rel=\"nofollow noreferrer\">here<\/a> - for a collection of line strings it has effect of fully noding and dissolving the linework.<\/p>\n\n<pre><code>static Geometry combineIntoOneGeometry( Collection&lt;Geometry&gt; geometryCollection ){\n     GeometryFactory factory = FactoryFinder.getGeometryFactory( null );\n\n     // note the following geometry collection may be invalid (say with overlapping polygons)\n     GeometryCollection geometryCollection =\n          (GeometryCollection) factory.buildGeometry( geometryCollection );\n\n     return geometryCollection.union();\n }\n<\/code><\/pre>\n",
+            "answer_id": 49895015,
+            "question_id": 49883480
+        }
+    ],
+    "answer_comments": {
+        "49919608": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+                "account_id": 4069490,
+                "user_type": "registered",
+                "user_id": 3343155,
+                "link": "https://stackoverflow.com/users/3343155/nick",
+                "reputation": 109,
+                "display_name": "Nick",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49919608,
+            "edited": false,
+            "creation_date": 1524145644,
+            "comment_id": 86861065
+        }],
+        "49888382": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/064ade16d540d7c683b7d37f9e93855f?s=256&d=identicon&r=PG",
+                    "account_id": 2695321,
+                    "user_type": "registered",
+                    "user_id": 2327550,
+                    "link": "https://stackoverflow.com/users/2327550/yar",
+                    "reputation": 663,
+                    "display_name": "Yar",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 49888382,
+                "edited": false,
+                "creation_date": 1628118465,
+                "comment_id": 121338671
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/66e1f591d79ed7d383518cced8fbdf35?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 13357055,
+                    "user_type": "registered",
+                    "user_id": 9640261,
+                    "link": "https://stackoverflow.com/users/9640261/nayor",
+                    "reputation": 721,
+                    "display_name": "NayoR"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 49888382,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+                    "account_id": 4069490,
+                    "user_type": "registered",
+                    "user_id": 3343155,
+                    "link": "https://stackoverflow.com/users/3343155/nick",
+                    "reputation": 109,
+                    "display_name": "Nick",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1524043627,
+                "comment_id": 86807268
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+                    "account_id": 4069490,
+                    "user_type": "registered",
+                    "user_id": 3343155,
+                    "link": "https://stackoverflow.com/users/3343155/nick",
+                    "reputation": 109,
+                    "display_name": "Nick",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 49888382,
+                "edited": false,
+                "creation_date": 1524038828,
+                "comment_id": 86804133
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+                    "account_id": 4069490,
+                    "user_type": "registered",
+                    "user_id": 3343155,
+                    "link": "https://stackoverflow.com/users/3343155/nick",
+                    "reputation": 109,
+                    "display_name": "Nick",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 49888382,
+                "edited": false,
+                "creation_date": 1524038793,
+                "comment_id": 86804102
+            }
+        ],
+        "49895015": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/79bfa3bd9e3dd1cd9378ea9bebb90989?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4238606,
+                    "user_type": "registered",
+                    "user_id": 3469138,
+                    "link": "https://stackoverflow.com/users/3469138/jechterhoff",
+                    "reputation": 175,
+                    "display_name": "jechterhoff"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 49895015,
+                "edited": false,
+                "creation_date": 1614008515,
+                "comment_id": 117246045
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+                    "account_id": 4069490,
+                    "user_type": "registered",
+                    "user_id": 3343155,
+                    "link": "https://stackoverflow.com/users/3343155/nick",
+                    "reputation": 109,
+                    "display_name": "Nick",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 49895015,
+                "edited": false,
+                "creation_date": 1524135239,
+                "comment_id": 86853812
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f56d5ecded56087c46ad2e97c7fc044d?s=256&d=identicon&r=PG",
+                    "account_id": 4069490,
+                    "user_type": "registered",
+                    "user_id": 3343155,
+                    "link": "https://stackoverflow.com/users/3343155/nick",
+                    "reputation": 109,
+                    "display_name": "Nick",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 49895015,
+                "edited": false,
+                "creation_date": 1524051582,
+                "comment_id": 86812955
+            }
+        ]
+    }
+}

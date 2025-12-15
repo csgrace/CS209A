@@ -1,0 +1,196 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/UhKVs.jpg?s=256",
+            "account_id": 2350981,
+            "user_type": "registered",
+            "user_id": 2059819,
+            "link": "https://stackoverflow.com/users/2059819/siavash",
+            "reputation": 7893,
+            "display_name": "Siavash",
+            "accept_rate": 56
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/16157851/why-do-it-this-way-use-string-namevaluepairs-and-stringbuilder",
+        "last_activity_date": 1366678965,
+        "creation_date": 1366669905,
+        "answer_count": 3,
+        "title": "Why do it this way? (use string Namevaluepairs and StringBuilder)",
+        "body": "<p>I recently saw a sample code that first creates NameValuePair object and populates it:<\/p>\n\n<pre><code>List&lt;NameValuePair&gt; params = new ArrayList&lt;NameValuePair&gt;();\nparams.add(new BasicNameValuePair(\"Param1\", param1));\nparams.add(new BasicNameValuePair(\"Param2\", param2));\nparams.add(new BasicNameValuePair(\"Param3\", param3));\n<\/code><\/pre>\n\n<p>then passes that to another method to turn it to one string:<\/p>\n\n<pre><code>    private String getQuery(List&lt;NameValuePair&gt; params) throws UnsupportedEncodingException\n{\n    StringBuilder result = new StringBuilder();\n    boolean first = true;\n\n    for (NameValuePair pair : params)\n    {\n        if (first)\n            first = false;\n        else\n            result.append(\"&amp;\");\n\n        result.append(URLEncoder.encode(pair.getName(), \"UTF-8\"));\n        result.append(\"=\");\n        result.append(URLEncoder.encode(pair.getValue(), \"UTF-8\"));\n    }\n\n    return result.toString();\n}\n<\/code><\/pre>\n\n<p>it seems to me that I could get the same result from doing this:<\/p>\n\n<pre><code>String query = \"\";\nquery += URLEncoder.encode(\"Param1\", \"UTF-8\") + \"=\" + URLEncoder.encode(Param1, \"UTF-8\")\nquery += \"&amp;\" + URLEncoder.encode(\"Param2\", \"UTF-8\") + \"=\" + URLEncoder.encode(Param2, \"UTF-8\")\nquery += \"&amp;\" + URLEncoder.encode(\"Param2\", \"UTF-8\") + \"=\" + URLEncoder.encode(Param2, \"UTF-8\")\n<\/code><\/pre>\n\n<p>would my code work? if no, why? if yes, whats the advantages of doing it the other way?<\/p>\n\n<p>I realize that former allows you to pass in any number of NVPs, but I just demonstrated that in the same number of lines it took to build the NVPs, I was able to build the whole POST string!<\/p>\n",
+        "question_id": 16157851,
+        "tags": [
+            "java",
+            "android",
+            "http",
+            "post"
+        ],
+        "score": -1,
+        "accepted_answer_id": 16157920,
+        "is_answered": true,
+        "view_count": 463,
+        "last_edit_date": 1366678965
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2d70e7bf08fe2e1e0d29edc68bf60651?s=256&d=identicon&r=PG",
+            "account_id": 1358888,
+            "user_type": "registered",
+            "user_id": 1296660,
+            "link": "https://stackoverflow.com/users/1296660/supericy",
+            "reputation": 5891,
+            "display_name": "Supericy"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 16157851,
+        "edited": false,
+        "creation_date": 1366670515,
+        "comment_id": 23089849
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3afe90516a61e94e295981649e3c94dc?s=256&d=identicon&r=PG",
+                "account_id": 391186,
+                "user_type": "registered",
+                "user_id": 751706,
+                "link": "https://stackoverflow.com/users/751706/niv-steingarten",
+                "reputation": 173,
+                "display_name": "Niv Steingarten"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1366671485,
+            "creation_date": 1366670273,
+            "body": "<p>The code which uses <code>NameValuePair<\/code>s is more generic. <code>getQuery<\/code> is reusable, and is completely agnostic to the pairs passed to it.<\/p>\n\n<p>If you leave design (and syntax) out of the equation, then your first alternative is equivalent.\nThe second alternative you suggested will <strong>NOT<\/strong> work, as it would escape the <code>=<\/code>s and the <code>&amp;<\/code>s along with the parameters.<\/p>\n",
+            "answer_id": 16157920,
+            "question_id": 16157851,
+            "last_edit_date": 1366671485
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/499587a3000d8afcedd23ed8aec25f49?s=256&d=identicon&r=PG",
+                "account_id": 984675,
+                "user_type": "registered",
+                "user_id": 1003503,
+                "link": "https://stackoverflow.com/users/1003503/creechy",
+                "reputation": 405,
+                "display_name": "creechy"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1366670462,
+            "creation_date": 1366670462,
+            "body": "<p>I think this is really about readability and reusability. The original code you saw is much more readable than a single inline string concatenation you suggest. Small, concise statements passed to a flexible method. Additionally, in the original, since the names and values are kept as separate fields, that name List could be reused for other things, if required, whereas your inline method is single purpose.<\/p>\n\n<p>The two pieces of code should be pretty identical performance. When you look at what the Java compiler does to your string concatenation, it actually instantiates a StringBuilder itself to do the concatenation similar to the original code.<\/p>\n",
+            "answer_id": 16157960,
+            "question_id": 16157851
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3e0c1c60b65b0c8ae97ea478be699c9d?s=256&d=identicon&r=PG",
+                "account_id": 1123478,
+                "user_type": "registered",
+                "user_id": 1111253,
+                "link": "https://stackoverflow.com/users/1111253/martin-v",
+                "reputation": 3750,
+                "display_name": "Martin V.",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1366670136,
+            "creation_date": 1366670136,
+            "body": "<p>from performance point of view does not matter as there is always small number of HTTP parameters. <\/p>\n\n<p>Personally i like this way : <\/p>\n\n<pre><code> new Uri.Builder()\n.scheme(\"http\")\n.authority(\"foo.com\")\n.path(\"someservlet\")\n.appendQueryParameter(\"param1\", foo)\n.appendQueryParameter(\"param2\", bar)\n.build();\n<\/code><\/pre>\n",
+            "answer_id": 16157896,
+            "question_id": 16157851
+        }
+    ],
+    "answer_comments": {
+        "16157920": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3afe90516a61e94e295981649e3c94dc?s=256&d=identicon&r=PG",
+                    "account_id": 391186,
+                    "user_type": "registered",
+                    "user_id": 751706,
+                    "link": "https://stackoverflow.com/users/751706/niv-steingarten",
+                    "reputation": 173,
+                    "display_name": "Niv Steingarten"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 16157920,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/UhKVs.jpg?s=256",
+                    "account_id": 2350981,
+                    "user_type": "registered",
+                    "user_id": 2059819,
+                    "link": "https://stackoverflow.com/users/2059819/siavash",
+                    "reputation": 7893,
+                    "display_name": "Siavash",
+                    "accept_rate": 56
+                },
+                "edited": false,
+                "creation_date": 1366679590,
+                "comment_id": 23092111
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/UhKVs.jpg?s=256",
+                    "account_id": 2350981,
+                    "user_type": "registered",
+                    "user_id": 2059819,
+                    "link": "https://stackoverflow.com/users/2059819/siavash",
+                    "reputation": 7893,
+                    "display_name": "Siavash",
+                    "accept_rate": 56
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 16157920,
+                "edited": false,
+                "creation_date": 1366678019,
+                "comment_id": 23091761
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/UhKVs.jpg?s=256",
+                    "account_id": 2350981,
+                    "user_type": "registered",
+                    "user_id": 2059819,
+                    "link": "https://stackoverflow.com/users/2059819/siavash",
+                    "reputation": 7893,
+                    "display_name": "Siavash",
+                    "accept_rate": 56
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 16157920,
+                "edited": false,
+                "creation_date": 1366677771,
+                "comment_id": 23091701
+            }
+        ],
+        "16157896": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UhKVs.jpg?s=256",
+                "account_id": 2350981,
+                "user_type": "registered",
+                "user_id": 2059819,
+                "link": "https://stackoverflow.com/users/2059819/siavash",
+                "reputation": 7893,
+                "display_name": "Siavash",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 16157896,
+            "edited": false,
+            "creation_date": 1366670293,
+            "comment_id": 23089763
+        }]
+    }
+}

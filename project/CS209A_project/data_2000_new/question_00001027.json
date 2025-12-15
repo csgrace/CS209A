@@ -1,0 +1,87 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d1cd63437d5b7774e995a5f3ba366c0d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15760967,
+            "user_type": "registered",
+            "user_id": 11372697,
+            "link": "https://stackoverflow.com/users/11372697/wicaledon",
+            "reputation": 840,
+            "display_name": "Wicaledon"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/68822062/rest-assured-spring-value-becomes-null-after-first-test",
+        "last_activity_date": 1629252415,
+        "creation_date": 1629223228,
+        "answer_count": 1,
+        "title": "Rest Assured &amp; Spring - Value Becomes Null After First Test",
+        "body": "<p>I have a strange problem. I've written my API and I just wanted to test it.<\/p>\n<p>I wrote a simple test code by using <code>Restassured<\/code>:<\/p>\n<pre><code>package com.example.restservicetest;\n\nimport io.restassured.RestAssured;\nimport io.restassured.response.Response;\nimport org.junit.jupiter.api.Test;\nimport org.springframework.boot.test.context.SpringBootTest;\nimport org.springframework.boot.web.server.LocalServerPort;\n\nimport java.util.*;\n\n@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)\nclass RestServiceTestApplicationTests {\n\n    @LocalServerPort\n    private int port;\n\n    private Response response;\n    private List&lt;Object&gt; folderList;\n\n    @Test\n    public void getWholeFolders() {\n        response = RestAssured.given().port(port).when().get(&quot;/api/opening&quot;).then().statusCode(200).extract().response();\n        folderList= response.jsonPath().getList(&quot;folders&quot;);\n    }\n\n    @Test\n    public void getRandomFolderNumber() {\n        Random rand = new Random();\n        RestAssured.given().port(port).when().get(&quot;/api/opening/folder/&quot; + rand.nextInt(folderList.size()-1)).then().statusCode(200);\n    }\n\n}\n\n<\/code><\/pre>\n<p>When I debug my test, at the end of first <code>getWholeFolders<\/code> test, I see that <code>folderList<\/code> is not empty as I expected. My whole folder list is assigning to it.<\/p>\n<p>But when the time is for 2nd test <code>getRandomFolderNumber<\/code>, I see that <code>folderList<\/code> becomes <code>null<\/code>.<\/p>\n<p>Why does it become null?<\/p>\n",
+        "question_id": 68822062,
+        "tags": [
+            "java",
+            "spring",
+            "rest-assured"
+        ],
+        "score": 0,
+        "accepted_answer_id": 68825785,
+        "is_answered": true,
+        "view_count": 684
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13515575,
+                "user_type": "registered",
+                "user_id": 9750259,
+                "link": "https://stackoverflow.com/users/9750259/andriy-zhuk",
+                "reputation": 143,
+                "display_name": "Andriy Zhuk"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 68822062,
+            "edited": false,
+            "creation_date": 1629228618,
+            "comment_id": 121630496
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xQVEN.jpg?s=256",
+                "account_id": 974448,
+                "user_type": "registered",
+                "user_id": 2042457,
+                "link": "https://stackoverflow.com/users/2042457/aksappy",
+                "reputation": 3460,
+                "display_name": "aksappy",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68822062,
+            "edited": false,
+            "creation_date": 1629225398,
+            "comment_id": 121629472
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/29ec25627cf7fe592bfdc9687400e91f?s=256&d=identicon&r=PG",
+            "account_id": 10263942,
+            "user_type": "registered",
+            "user_id": 7574461,
+            "link": "https://stackoverflow.com/users/7574461/lucas-nguyen-17",
+            "reputation": 5927,
+            "display_name": "lucas-nguyen-17"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1629252415,
+        "creation_date": 1629252415,
+        "body": "<p>As Andriy mentiond in comment, JUnit Jupiter will use a default lifecycle mode, it means JUnit creates a new instance of each test class before executing each test method <code>TestInstance.Lifecycle.PER_METHOD<\/code>.<\/p>\n<p>To change that, you change <code>PER_METHOD<\/code> --&gt; <code>PER_CLASS<\/code> (basically means one instance of test class for all test method).<\/p>\n<p>One more subtle thing, you need to set order for test method to make sure <code>getRandomFolderNumber<\/code> always run after <code>getWholeFolders<\/code><\/p>\n<pre><code>@TestInstance(TestInstance.Lifecycle.PER_CLASS)\n@TestMethodOrder(MethodOrderer.OrderAnnotation.class)\nclass RestServiceTestApplicationTests {\n    ...\n\n    @Test\n    @Order(1)\n    public void getWholeFolders() {\n        ...\n    }\n\n    @Test\n    @Order(2)\n    public void getRandomFolderNumber() {\n        ...\n    }\n\n}\n<\/code><\/pre>\n",
+        "answer_id": 68825785,
+        "question_id": 68822062
+    }],
+    "answer_comments": {}
+}

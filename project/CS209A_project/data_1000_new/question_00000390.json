@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c1921571e3208bc8fa7316be2932e482?s=256&d=identicon&r=PG",
+            "account_id": 16841821,
+            "user_type": "registered",
+            "user_id": 12177041,
+            "link": "https://stackoverflow.com/users/12177041/lonelydoor",
+            "reputation": 40,
+            "display_name": "LonelyDoor"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/77407068/jna-binding-for-win32-function-dwmgetcolorizationcolor-returning-e-invalidarg-er",
+        "last_activity_date": 1698912775,
+        "creation_date": 1698901653,
+        "answer_count": 1,
+        "title": "JNA Binding for Win32 function DwmGetColorizationColor returning E_INVALIDARG error",
+        "body": "<p>I am trying to create a binding for the Win32 function DwmGetColorizationColor using JNA.<\/p>\n<p>According to <a href=\"https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/nf-dwmapi-dwmgetcolorizationcolor\" rel=\"nofollow noreferrer\">MSDN<\/a>, this is the function signature:<\/p>\n<pre><code>HRESULT DwmGetColorizationColor(\n    [out] DWORD *pcrColorization,\n    [out] BOOL  *pfOpaqueBlend\n);\n<\/code><\/pre>\n<p>This is the binding I created:<\/p>\n<pre><code>WinNT.HRESULT DwmGetColorizationColor(\n    WinDef.DWORD pcrColorization,\n    WinDef.Bool pfOpaqueBlend\n);\n<\/code><\/pre>\n<p>This is how I am calling this method:<\/p>\n<pre><code>var pcrColorization = new WinDef.DWORD();\nvar pfOpaqueBlend = new WinDef.BOOL();\n\nvar result = CLibrary.INSTANCE.DwnGetColorizationColor(\n                pcrColorization,\n                pfOpaqueBlend\n             );\n\nif (!result.equals(S_OK)) {\n    System.out.println(result);\n    System.out.println(Kernel32.INSTANCE.GetLastError());\n}\n<\/code><\/pre>\n<p>The problem with this is the result is non-zero with the value <strong>E_INVALIDARG<\/strong> and the output of <code>GetLastError()<\/code> is <strong>127 (ERROR_PROC_NOT_FOUND)<\/strong>.<\/p>\n<p>I have zero experience with creating C/C++ or creating binding for it. But this looked fairly simple.<\/p>\n<p>So what am doing wrong?<\/p>\n",
+        "question_id": 77407068,
+        "tags": [
+            "java",
+            "windows",
+            "winapi",
+            "java-native-interface",
+            "jna"
+        ],
+        "score": 1,
+        "accepted_answer_id": 77407885,
+        "is_answered": true,
+        "view_count": 71
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1a474f3be606bcc6f964913b523626e9?s=256&d=identicon&r=PG",
+            "account_id": 237894,
+            "user_type": "registered",
+            "user_id": 506413,
+            "link": "https://stackoverflow.com/users/506413/jonathan-potter",
+            "reputation": 37494,
+            "display_name": "Jonathan Potter",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "post_id": 77407068,
+        "edited": false,
+        "creation_date": 1698909612,
+        "comment_id": 136464692
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/371797a0137ad4519049f88afac2d4e7?s=256&d=identicon&r=PG",
+            "account_id": 1187908,
+            "user_type": "registered",
+            "user_id": 1161484,
+            "link": "https://stackoverflow.com/users/1161484/daniel-widdis",
+            "reputation": 9355,
+            "display_name": "Daniel Widdis",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1698912775,
+        "creation_date": 1698912775,
+        "body": "<p>The function signatures are pointers:<\/p>\n<pre class=\"lang-c prettyprint-override\"><code>HRESULT DwmGetColorizationColor(\n    [out] DWORD *pcrColorization,\n    [out] BOOL  *pfOpaqueBlend\n);\n<\/code><\/pre>\n<p>So you don't need a <code>DWORD<\/code> and <code>BOOL<\/code>, you need a <code>DWORD *<\/code> and <code>BOOL *<\/code>, pointers to the actual values stored elsewhere.<\/p>\n<p>The most direct mappings from the <code>WinDef<\/code> class would be <code>DWORDByReference<\/code> and <code>BOOLByReference<\/code>:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>WinNT.HRESULT DwmGetColorizationColor(\n    WinDef.DWORDByReference pcrColorization,\n    WinDef.BOOLByReference pfOpaqueBlend\n);\n<\/code><\/pre>\n<p>After calling the function, you can use <code>.getValue()<\/code> on those variables to extract the returned value.<\/p>\n<p>Since a <code>DWORD<\/code> is just a 32-bit <code>int<\/code>, it can be more convenient to use <code>IntByReference<\/code> for that mapping if you choose, to save you the trouble of wrapping your <code>int<\/code> into a <code>DWORD<\/code> when constructing the <code>DWORDByReference<\/code> and an extra <code>intValue()<\/code> when fetching the returned value.  Unfortunately there's no similar shortcut for boolean by reference, as the bit width is OS-dependent.<\/p>\n",
+        "answer_id": 77407885,
+        "question_id": 77407068
+    }],
+    "answer_comments": {}
+}

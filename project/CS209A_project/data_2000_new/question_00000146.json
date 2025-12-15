@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AAuE7mADhUH-NNd3TCX2YFyHp3TgcIXc9FBHZcoqeynPfA=k-s256",
+            "account_id": 17769351,
+            "user_type": "registered",
+            "user_id": 12903385,
+            "link": "https://stackoverflow.com/users/12903385/ayoub-bentameur",
+            "reputation": 53,
+            "display_name": "Ayoub Bentameur"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76644985/retreive-a-specific-fields-in-realtime-database-with-firebase",
+        "last_activity_date": 1688852406,
+        "creation_date": 1688851009,
+        "answer_count": 1,
+        "title": "retreive a specific fields in realtime database with firebase",
+        "body": "<p>I'm currently learning Firebase. I have this path 'users/uid/key,' and my question is, how can I retrieve all the fields of 'firstname' so that I can use them with RecyclerView?<\/p>\n<pre><code>{\n&quot;6lcSTbUuivXBUJbdwcjYcbc3d8j1&quot;: {\n&quot;-NXvxRMb8UEJEwGcLx96&quot;: {\n&quot;age&quot;: &quot;23&quot;,\n&quot;firstname&quot;: &quot;jack&quot;,\n&quot;lastname&quot;: &quot;nick&quot;\n},\n&quot;-NXvx_DsNPIoJKDgbdiX&quot;: {\n&quot;age&quot;: &quot;55&quot;,\n&quot;firstname&quot;: &quot;john&quot;,\n&quot;lastname&quot;: &quot;tristian&quot;\n}\n\n      },\n      &quot;DEvUIPnT15NowmrawbHZmjDHQBw1&quot;: {\n        &quot;-NY-7qtEqPQWqxdmKTBO&quot;: {\n          &quot;age&quot;: &quot;18&quot;,\n          &quot;firstname&quot;: &quot;andrew&quot;,\n          &quot;lastname&quot;: &quot;cena&quot;\n        }\n      }\n    }\n<\/code><\/pre>\n<p>Here is my code:<\/p>\n<pre><code>mDatabase.child(&quot;users&quot;).child(&quot;firstname&quot;).get().addOnCompleteListener(new OnCompleteListener&lt;DataSnapshot&gt;() {\n            @Override\n            public void onComplete(@NonNull Task&lt;DataSnapshot&gt; task) {\n                if (!task.isSuccessful()) {\n                    Log.e(&quot;firebase&quot;, &quot;Error getting data&quot;, task.getException());\n                }\n                else {\n                    Log.d(&quot;firebase&quot;, String.valueOf(task.getResult().getValue()));\n                }\n            }\n        });\n<\/code><\/pre>\n<p>here is the result in Log it return me null<\/p>\n<pre><code>2023-07-08 22:06:57.961  9508-9508  firebase com.example.firebaserecyclerview   D  null\n<\/code><\/pre>\n<p>Someone can help me please ?<\/p>\n",
+        "question_id": 76644985,
+        "tags": [
+            "java",
+            "android",
+            "database",
+            "firebase",
+            "firebase-realtime-database"
+        ],
+        "score": 1,
+        "accepted_answer_id": 76645047,
+        "is_answered": true,
+        "view_count": 49
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AAuE7mADhUH-NNd3TCX2YFyHp3TgcIXc9FBHZcoqeynPfA=k-s256",
+            "account_id": 17769351,
+            "user_type": "registered",
+            "user_id": 12903385,
+            "link": "https://stackoverflow.com/users/12903385/ayoub-bentameur",
+            "reputation": 53,
+            "display_name": "Ayoub Bentameur"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1688852406,
+        "creation_date": 1688852406,
+        "body": "<p>I found the solution here the code :<\/p>\n<pre><code>mDatabase.child(&quot;users&quot;).addListenerForSingleValueEvent(new ValueEventListener() {\n    @Override\n    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {\n        List&lt;String&gt; firstNames = new ArrayList&lt;&gt;();\n\n        for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {\n            for (DataSnapshot keySnapshot : userSnapshot.getChildren()) {\n                DataSnapshot firstNameSnapshot = keySnapshot.child(&quot;firstname&quot;);\n                String firstName = firstNameSnapshot.getValue(String.class);\n                if (firstName != null) {\n                    firstNames.add(firstName);\n                }\n            }\n        }\n\n        // Use the 'firstNames' list with your RecyclerView adapter here\n\n        Log.d(&quot;firebase&quot;, &quot;First names: &quot; + firstNames);\n    }\n\n    @Override\n    public void onCancelled(@NonNull DatabaseError databaseError) {\n        Log.e(&quot;firebase&quot;, &quot;Error getting data&quot;, databaseError.toException());\n    }\n});\n<\/code><\/pre>\n<p>if you want to get 'firstname' fields of the current user just add the method <code>.child(&quot;uid&quot;)<\/code> Here is an example:<\/p>\n<pre><code>mDatabase.child(&quot;users&quot;).child(&quot;uid&quot;).addListenerForSingleValueEvent(new ValueEventListener() {\n    @Override\n    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {\n        List&lt;String&gt; firstNames = new ArrayList&lt;&gt;();\n\n        for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {\n            DataSnapshot firstNameSnapshot = userSnapshot.child(&quot;firstname&quot;);\n            String firstName = firstNameSnapshot.getValue(String.class);\n            if (firstName != null) {\n                firstNames.add(firstName);\n            }\n        }\n\n        // Use the 'firstNames' list with your RecyclerView adapter here\n\n        Log.d(&quot;firebase&quot;, &quot;First names: &quot; + firstNames);\n    }\n\n    @Override\n    public void onCancelled(@NonNull DatabaseError databaseError) {\n        Log.e(&quot;firebase&quot;, &quot;Error getting data&quot;, databaseError.toException());\n    }\n});\n<\/code><\/pre>\n",
+        "answer_id": 76645047,
+        "question_id": 76644985
+    }],
+    "answer_comments": {}
+}

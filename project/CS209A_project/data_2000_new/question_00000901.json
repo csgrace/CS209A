@@ -1,0 +1,101 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/dtkJm.jpg?s=256",
+            "account_id": 2527365,
+            "user_type": "registered",
+            "user_id": 2196460,
+            "link": "https://stackoverflow.com/users/2196460/hotkey",
+            "reputation": 149087,
+            "display_name": "hotkey",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/32246900/rxjava-onbackpressureblock-strange-behavior",
+        "last_activity_date": 1440762735,
+        "creation_date": 1440671198,
+        "answer_count": 1,
+        "title": "RxJava: onBackpressureBlock() strange behavior",
+        "body": "<p>I am playing around with RxJava (RxKotlin to be precise). Here I have the following <code>Observable<\/code>s:<\/p>\n\n<pre><code>fun metronome(ms: Int) = observable&lt;Int&gt; {\n    var i = 0;\n    while (true) {\n        if (ms &gt; 0) {\n            Thread.sleep(ms.toLong())\n        }\n        if (it.isUnsubscribed()) {\n            break\n        }\n        it.onNext(++i)\n    }\n}\n<\/code><\/pre>\n\n<p>And I'd like to have a few of them merged and running concurrently. They ignore backpressure so the backpressure operators have to be applied to them.<\/p>\n\n<p>Then I create<\/p>\n\n<pre><code>val cores = Runtime.getRuntime().availableProcessors()\nval threads = Executors.newFixedThreadPool(cores)\nval scheduler = Schedulers.from(threads)\n<\/code><\/pre>\n\n<p>And then I merge the <code>metronome<\/code>s:<\/p>\n\n<pre><code>val o = Observable.merge(listOf(metronome(0),\n                                metronome(1000).map { \"---------\" })\n                         .map { it.onBackpressureBlock().subscribeOn(scheduler) })\n                  .take(5000, TimeUnit.MILLISECONDS)\n<\/code><\/pre>\n\n<p>The first one is supposed to emit items incessantly.\nIf I do so in the last 3 seconds of the run I get the following output:<\/p>\n\n<pre><code>...\n[RxComputationThreadPool-5]: 369255\n[RxComputationThreadPool-5]: 369256\n[RxComputationThreadPool-5]: 369257\n[RxComputationThreadPool-5]: ---------\n[RxComputationThreadPool-5]: ---------\n[RxComputationThreadPool-5]: ---------\n<\/code><\/pre>\n\n<p>Seems that the <code>Observable<\/code>s are subscribed on the same one thread, and the first observable is blocked for 3+ seconds.<\/p>\n\n<p>But when I swap <code>onBackpressureBlock()<\/code> and <code>subscribeOn(scheduler)<\/code> calls the output becomes what I expected, the output gets merged during the whole execution.<\/p>\n\n<p>It's obvious to me that calls order matters in RxJava, but I don't quite understand what happens in this particular situation.<\/p>\n\n<p>So what happens when <code>onBackpressureBlock<\/code> operator is applied <em>before<\/em> <code>subscribeOn<\/code> and what if <em>after<\/em>?<\/p>\n",
+        "question_id": 32246900,
+        "tags": [
+            "java",
+            "rx-java",
+            "kotlin"
+        ],
+        "score": 0,
+        "accepted_answer_id": 32270424,
+        "is_answered": true,
+        "view_count": 303,
+        "last_edit_date": 1440720773
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dtkJm.jpg?s=256",
+                "account_id": 2527365,
+                "user_type": "registered",
+                "user_id": 2196460,
+                "link": "https://stackoverflow.com/users/2196460/hotkey",
+                "reputation": 149087,
+                "display_name": "hotkey",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32246900,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/bc4821b9c16457694f503b42831198f1?s=256&d=identicon&r=PG",
+                "account_id": 1573776,
+                "user_type": "registered",
+                "user_id": 1460833,
+                "link": "https://stackoverflow.com/users/1460833/sergey-mashkov",
+                "reputation": 4790,
+                "display_name": "Sergey Mashkov",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1440690205,
+            "comment_id": 52387900
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bc4821b9c16457694f503b42831198f1?s=256&d=identicon&r=PG",
+                "account_id": 1573776,
+                "user_type": "registered",
+                "user_id": 1460833,
+                "link": "https://stackoverflow.com/users/1460833/sergey-mashkov",
+                "reputation": 4790,
+                "display_name": "Sergey Mashkov",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32246900,
+            "edited": false,
+            "creation_date": 1440687664,
+            "comment_id": 52386164
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+            "account_id": 24127,
+            "user_type": "registered",
+            "user_id": 61158,
+            "link": "https://stackoverflow.com/users/61158/akarnokd",
+            "reputation": 70130,
+            "display_name": "akarnokd",
+            "accept_rate": 98
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1440762735,
+        "creation_date": 1440762735,
+        "body": "<p>The <code>onBackpressureBlock<\/code> operator is a failed experiment; it requires care where to apply. For example, <code>subscribeOn().onBackpressureBlock()<\/code> works but not the other way around.<\/p>\n\n<p>RxJava has non-blocking periodic timer called <code>interval<\/code> so you don't need to roll your own.<\/p>\n",
+        "answer_id": 32270424,
+        "question_id": 32246900
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,74 @@
+{
+  "question": {
+    "tags": [
+      "java",
+      "keystore",
+      "pkcs#11",
+      "elliptic-curve"
+    ],
+    "owner": {
+      "account_id": 31235712,
+      "reputation": 11,
+      "user_id": 24040072,
+      "user_type": "registered",
+      "profile_image": "https://www.gravatar.com/avatar/3bd7e8cf6ab3d2428520f797a5c11019?s=256&d=identicon&r=PG&f=y&so-version=2",
+      "display_name": "Cemil Bozlagan",
+      "link": "https://stackoverflow.com/users/24040072/cemil-bozlagan"
+    },
+    "is_answered": false,
+    "view_count": 54,
+    "answer_count": 1,
+    "score": 1,
+    "last_activity_date": 1762181989,
+    "creation_date": 1761992407,
+    "last_edit_date": 1762080836,
+    "question_id": 79806469,
+    "content_license": "CC BY-SA 4.0",
+    "link": "https://stackoverflow.com/questions/79806469/pkcs11-error-at-keystore-getentryalias-null-at-java-22-statement",
+    "title": "PKCS11 error at KeyStore.getEntry(alias, null) at Java 22 statement"
+  },
+  "answers": [
+    {
+      "owner": {
+        "account_id": 1340191,
+        "reputation": 45,
+        "user_id": 1282015,
+        "user_type": "registered",
+        "accept_rate": 100,
+        "profile_image": "https://www.gravatar.com/avatar/0538e3b936bb975512fda8f68da3db1f?s=256&d=identicon&r=PG",
+        "display_name": "Fabio Abreu",
+        "link": "https://stackoverflow.com/users/1282015/fabio-abreu"
+      },
+      "is_accepted": false,
+      "score": 0,
+      "last_activity_date": 1762181989,
+      "creation_date": 1762181989,
+      "answer_id": 79807995,
+      "question_id": 79806469,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<p>This could be &quot;not-related&quot; to your inquiry, but i've ran into problems with new cards which only support EC and not RSA and had to do a proper division and find which card i'm working with before doing anything with them, here's the code excerpt that i hope can be useful for you:</p>\n<pre><code>XMLSignatureFactory fac;\nfac = XMLSignatureFactory.getInstance(&quot;DOM&quot;);\n\nKeyStore.Builder builder = KeyStore.Builder.newInstance(&quot;PKCS11&quot;, providerPKCS11, new KeyStore.CallbackHandlerProtection(cmdLineHdlr));\n\nKeyStore keystore = builder.getKeyStore();\nKey key1 = keystore.getKey(assinaturaCertifLabel1, null);\n\nif (&quot;RSA&quot;.equalsIgnoreCase(key1.getAlgorithm())) {\n    System.out.println(&quot;I AM RSA AND GOING&quot;);\n\n    signedInfo = fac.newSignedInfo(\n        fac.newCanonicalizationMethod(\n            CanonicalizationMethod.EXCLUSIVE, // CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS,\n            (C14NMethodParameterSpec) null\n        ),\n        fac.newSignatureMethod(\n            &quot;http://www.w3.org/2001/04/xmldsig-more#rsa-sha256&quot;,\n            null\n        ),\n        Collections.singletonList(ref)\n    );\n\n} else if (&quot;EC&quot;.equals(key1.getAlgorithm())) {\n    System.out.println(&quot;I AM EC AND GOING&quot;);\n\n    signedInfo = fac.newSignedInfo(\n        fac.newCanonicalizationMethod(\n            CanonicalizationMethod.EXCLUSIVE, // CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS,\n            (C14NMethodParameterSpec) null\n        ),\n        fac.newSignatureMethod(\n            &quot;http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256&quot;,\n            null\n        ),\n        Collections.singletonList(ref)\n    );\n\n} else {\n    throw new InvalidAlgorithmParameterException(&quot;ALGORITHM IS NOT RSA OR EC&quot;);\n}\n</code></pre>\n",
+      "comments": [
+        {
+          "owner": {
+            "account_id": 31235712,
+            "reputation": 11,
+            "user_id": 24040072,
+            "user_type": "registered",
+            "profile_image": "https://www.gravatar.com/avatar/3bd7e8cf6ab3d2428520f797a5c11019?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "display_name": "Cemil Bozlagan",
+            "link": "https://stackoverflow.com/users/24040072/cemil-bozlagan"
+          },
+          "edited": false,
+          "score": 0,
+          "creation_date": 1762241617,
+          "post_id": 79807995,
+          "comment_id": 140835064,
+          "content_license": "CC BY-SA 4.0",
+          "body": "Thanks for your sharing Fabio, but my code stucks at statement &quot;Key key1 = keystore.getKey(certAlias, null);&quot;. Gets &quot;unsupported parameters&quot; error. I think it can be related with config of pkcs11 provider definition."
+        }
+      ]
+    }
+  ],
+  "question_comments": [],
+  "answer_comments": {}
+}

@@ -1,0 +1,149 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/212a446016d03a991c1a2226328f333f?s=256&d=identicon&r=PG",
+            "account_id": 1246449,
+            "user_type": "registered",
+            "user_id": 1207798,
+            "link": "https://stackoverflow.com/users/1207798/thehube",
+            "reputation": 784,
+            "display_name": "TheHube",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/9268485/bison-java-examples",
+        "last_activity_date": 1589014405,
+        "creation_date": 1329169383,
+        "answer_count": 2,
+        "title": "Bison java examples",
+        "body": "<p>Does anyone knows if there are some tutorials and/or examples of using GNU Bison with Java over the net. I've searched through the net. But i didn't manage to find anything. I have tried to implement an example but I could not compile it (since I need a lexer also). Here is my example:<\/p>\n\n\n\n<pre><code>%{\n  static void main(String[] args) {\n    yyparse();\n  }\n%}\n\n%union {\n  int     number;\n  char    operator;\n}\n\n%language \"Java\"\n\n%token&lt;number&gt;   NUMBER \n%token&lt;operator&gt; OPERATOR  \n\n%type &lt;number&gt; exp\n\n%left OPERATOR\n%%\n\ninput\n    : /* Empty string */\n    | exp { System.out.print(\"Result &gt;&gt; \" + $1); }\n    ;\n\nexp\n    : NUMBER\n    | exp OPERATOR exp { \n        switch($2) {\n            case '+': $$ = $1 + $3; break;\n            case '-': $$ = $1 - $3; break;\n            case '*': $$ = $1 * $3; break;\n            case '/': $$ = $1 / $3; break;\n        }\n    }\n\n%%\n<\/code><\/pre>\n\n<p>Any help would be appreciate!<\/p>\n",
+        "question_id": 9268485,
+        "tags": [
+            "java",
+            "grammar",
+            "bison",
+            "yacc",
+            "parser-generator"
+        ],
+        "score": 7,
+        "accepted_answer_id": 9270036,
+        "is_answered": true,
+        "view_count": 11350
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/5Zy2o.jpg?s=256",
+            "account_id": 903133,
+            "user_type": "registered",
+            "user_id": 938695,
+            "link": "https://stackoverflow.com/users/938695/austin-henley",
+            "reputation": 4633,
+            "display_name": "Austin Henley",
+            "accept_rate": 90
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 9268485,
+        "edited": false,
+        "creation_date": 1329170070,
+        "comment_id": 11682871
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7cab26bad4245b92453280089ba6800f?s=256&d=identicon&r=PG",
+                "account_id": 544268,
+                "user_type": "registered",
+                "user_id": 913663,
+                "link": "https://stackoverflow.com/users/913663/tim-landscheidt",
+                "reputation": 1400,
+                "display_name": "Tim Landscheidt",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 13,
+            "is_accepted": true,
+            "last_activity_date": 1329178632,
+            "creation_date": 1329178632,
+            "body": "<p>Unfortunately, virtually all public examples for Bison's Java generator are hidden in the testsuite.  If you are adventurous, after <code>./configure &amp;&amp; make<\/code> do <code>make check TESTSUITEFLAGS=\"-d -k java\"<\/code>.  This will run all tests with the keyword (<code>-k<\/code>) \"Java\" and not remove the sandbox directories after successful tests (<code>-d<\/code>) so you get beneath <code>tests/testsuite.dir<\/code> a bunch of directories with grammars, generated Java source code and compiled classes.  One example from Bison 2.5:<\/p>\n\n<pre><code>/* Infix notation calculator--calc */\n%language \"Java\"\n%name-prefix \"Calc\"\n%define parser_class_name \"Calc\"\n%define public\n\n\n%code {\n\n  public static void main (String args[]) throws IOException\n  {\n    CalcLexer l = new CalcLexer (System.in);\n    Calc p = new Calc (l);\n    p.parse ();\n  }\n\n}\n\n%code imports {\n  import java.io.StreamTokenizer;\n  import java.io.InputStream;\n  import java.io.InputStreamReader;\n  import java.io.Reader;\n  import java.io.IOException;\n}\n\n/* Bison Declarations */\n%token &lt;Integer&gt; NUM \"number\"\n%type  &lt;Integer&gt; exp\n\n%nonassoc '=' /* comparison            */\n%left '-' '+'\n%left '*' '/'\n%left NEG     /* negation--unary minus */\n%right '^'    /* exponentiation        */\n\n/* Grammar follows */\n%%\ninput:\n  line\n| input line\n;\n\nline:\n  '\\n'\n| exp '\\n'\n| error '\\n'\n;\n\nexp:\n  NUM                { $$ = $1;                                             }\n| exp '=' exp\n  {\n    if ($1.intValue () != $3.intValue ())\n      yyerror ( \"calc: error: \" + $1 + \" != \" + $3);\n  }\n| exp '+' exp        { $$ = new Integer ($1.intValue () + $3.intValue ());  }\n| exp '-' exp        { $$ = new Integer ($1.intValue () - $3.intValue ());  }\n| exp '*' exp        { $$ = new Integer ($1.intValue () * $3.intValue ());  }\n| exp '/' exp        { $$ = new Integer ($1.intValue () / $3.intValue ());  }\n| '-' exp  %prec NEG { $$ = new Integer (-$2.intValue ());                  }\n| exp '^' exp        { $$ = new Integer ((int)\n                                         Math.pow ($1.intValue (),\n                                                   $3.intValue ()));        }\n| '(' exp ')'        { $$ = $2;                                             }\n| '(' error ')'      { $$ = new Integer (1111);                             }\n| '!'                { $$ = new Integer (0); return YYERROR;                }\n| '-' error          { $$ = new Integer (0); return YYERROR;                }\n;\n\n\n%%\nclass CalcLexer implements Calc.Lexer {\n\n  StreamTokenizer st;\n\n  public CalcLexer (InputStream is)\n  {\n    st = new StreamTokenizer (new InputStreamReader (is));\n    st.resetSyntax ();\n    st.eolIsSignificant (true);\n    st.whitespaceChars (9, 9);\n    st.whitespaceChars (32, 32);\n    st.wordChars (48, 57);\n  }\n\n\n  public void yyerror (String s)\n  {\n    System.err.println (s);\n  }\n\n\n  Integer yylval;\n\n  public Object getLVal() {\n    return yylval;\n  }\n\n  public int yylex () throws IOException {\n    int ttype = st.nextToken ();\n\n    if (ttype == st.TT_EOF)\n      return Calc.EOF;\n\n    else if (ttype == st.TT_EOL)\n      {\n\n        return (int) '\\n';\n      }\n\n    else if (ttype == st.TT_WORD)\n      {\n        yylval = new Integer (st.sval);\n        return Calc.NUM;\n      }\n\n    else\n      return st.ttype;\n  }\n\n\n\n}\n\n\nclass Position {\n  public int line;\n  public int token;\n\n  public Position ()\n  {\n    line = 0;\n    token = 0;\n  }\n\n  public Position (int l, int t)\n  {\n    line = l;\n    token = t;\n  }\n\n  public boolean equals (Position l)\n  {\n    return l.line == line &amp;&amp; l.token == token;\n  }\n\n  public String toString ()\n  {\n    return Integer.toString (line) + \".\" + Integer.toString(token);\n  }\n\n  public int lineno ()\n  {\n    return line;\n  }\n\n  public int token ()\n  {\n    return token;\n  }\n}\n<\/code><\/pre>\n",
+            "answer_id": 9270036,
+            "question_id": 9268485
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/413d2645039577214eb6382b3166e1c4?s=256&d=identicon&r=PG",
+                "account_id": 1431154,
+                "user_type": "registered",
+                "user_id": 1353549,
+                "link": "https://stackoverflow.com/users/1353549/akim",
+                "reputation": 8931,
+                "display_name": "akim",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1589014405,
+            "creation_date": 1589014405,
+            "body": "<p>Since <a href=\"https://savannah.gnu.org/forum/forum.php?forum_id=9735\" rel=\"nofollow noreferrer\">release 3.6<\/a> Bison ships with examples in Java.  If Bison 3.6+ is installed on your machine, see <code>/usr/local/share/doc/bison/examples/java<\/code> (where <code>/usr/local<\/code> depends on your configuration).<\/p>\n\n<p>You can browse the Java examples online on <a href=\"https://git.savannah.gnu.org/cgit/bison.git/tree/examples/java\" rel=\"nofollow noreferrer\">Savannah<\/a> or on <a href=\"https://github.com/akimd/bison/tree/master/examples/java\" rel=\"nofollow noreferrer\">GitHub<\/a>.<\/p>\n",
+            "answer_id": 61694110,
+            "question_id": 9268485
+        }
+    ],
+    "answer_comments": {"9270036": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7cab26bad4245b92453280089ba6800f?s=256&d=identicon&r=PG",
+                "account_id": 544268,
+                "user_type": "registered",
+                "user_id": 913663,
+                "link": "https://stackoverflow.com/users/913663/tim-landscheidt",
+                "reputation": 1400,
+                "display_name": "Tim Landscheidt",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9270036,
+            "edited": false,
+            "creation_date": 1331420502,
+            "comment_id": 12254384
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3cb54f3ded9b1f1f5e5d9e9017f50ea7?s=256&d=identicon&r=PG",
+                "account_id": 238496,
+                "user_type": "registered",
+                "user_id": 507426,
+                "link": "https://stackoverflow.com/users/507426/rgbrgb",
+                "reputation": 1166,
+                "display_name": "rgbrgb",
+                "accept_rate": 25
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9270036,
+            "edited": false,
+            "creation_date": 1331412632,
+            "comment_id": 12252842
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/212a446016d03a991c1a2226328f333f?s=256&d=identicon&r=PG",
+                "account_id": 1246449,
+                "user_type": "registered",
+                "user_id": 1207798,
+                "link": "https://stackoverflow.com/users/1207798/thehube",
+                "reputation": 784,
+                "display_name": "TheHube",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9270036,
+            "edited": false,
+            "creation_date": 1329216858,
+            "comment_id": 11693040
+        }
+    ]}
+}

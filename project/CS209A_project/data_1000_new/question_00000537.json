@@ -1,0 +1,128 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/eT2FU.jpg?s=256",
+            "account_id": 951981,
+            "user_type": "registered",
+            "user_id": 977919,
+            "link": "https://stackoverflow.com/users/977919/sidgate",
+            "reputation": 15334,
+            "display_name": "sidgate",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/17107476/command-pattern-with-too-many-classes",
+        "last_activity_date": 1371213316,
+        "creation_date": 1371209395,
+        "answer_count": 2,
+        "title": "Command pattern with too many classes",
+        "body": "<p>Our legacy code has a long code of if else blocks that depend on events and object type<\/p>\n\n<pre><code>if(event == A &amp;&amp; objectType == O1){\n.....\n}\nelse if (event == A &amp;&amp; objectType == O2){\n ....\n}\nelse if (....)\n....\n....\n<\/code><\/pre>\n\n<p>With more and more conditions introducing, I was thinking of replacing this logic with Command pattern for each condition. But the number of classes required would be (no. of events) * (no. of object types). Is there any simpler way to refactor this code?<\/p>\n",
+        "question_id": 17107476,
+        "tags": [
+            "java",
+            "design-patterns"
+        ],
+        "score": 5,
+        "accepted_answer_id": 17107554,
+        "is_answered": true,
+        "view_count": 801
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/HhJ2o.png?s=256",
+                "account_id": 425670,
+                "user_type": "registered",
+                "user_id": 806407,
+                "link": "https://stackoverflow.com/users/806407/lakshman",
+                "reputation": 2739,
+                "display_name": "lakshman",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 17107476,
+            "edited": false,
+            "creation_date": 1371209667,
+            "comment_id": 24749897
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fe4f3ec6321893b7ed9902a6b70c9859?s=256&d=identicon&r=PG",
+                "account_id": 266683,
+                "user_type": "registered",
+                "user_id": 554397,
+                "link": "https://stackoverflow.com/users/554397/mehmet-ata%c5%9f",
+                "reputation": 11619,
+                "display_name": "Mehmet Ataş",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 17107476,
+            "edited": false,
+            "creation_date": 1371209573,
+            "comment_id": 24749853
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dGJXl.png?s=256",
+                "account_id": 2264130,
+                "user_type": "registered",
+                "user_id": 1993366,
+                "link": "https://stackoverflow.com/users/1993366/vikingsteve",
+                "reputation": 40722,
+                "display_name": "vikingsteve",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 17107476,
+            "edited": false,
+            "creation_date": 1371209559,
+            "comment_id": 24749845
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VjxwC.jpg?s=256",
+                "account_id": 1101161,
+                "user_type": "registered",
+                "user_id": 1093528,
+                "link": "https://stackoverflow.com/users/1093528/fge",
+                "reputation": 122410,
+                "display_name": "fge",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "is_accepted": true,
+            "last_activity_date": 1371209681,
+            "creation_date": 1371209681,
+            "body": "<p>Create a class enclosing <code>event<\/code> and <code>objectType<\/code>, make it implement <code>.equals()<\/code> and <code>.hashCode()<\/code>. Create a generic class for each execution block too.<\/p>\n\n<p>Then you'll be able to use a <code>Map<\/code> and a simple lookup will return what is needed to execute.<\/p>\n",
+            "answer_id": 17107554,
+            "question_id": 17107476
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0331e5e748a0ac3860b68f6cac130ef1?s=256&d=identicon&r=PG",
+                "account_id": 1288640,
+                "user_type": "registered",
+                "user_id": 1241193,
+                "link": "https://stackoverflow.com/users/1241193/bob-dalgleish",
+                "reputation": 8260,
+                "display_name": "Bob Dalgleish"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1371213316,
+            "creation_date": 1371213316,
+            "body": "<p>The pattern you may be looking for is often called double dispatching or sometimes Visitor pattern. <a href=\"http://en.wikipedia.org/wiki/Visitor_pattern\" rel=\"nofollow\">http://en.wikipedia.org/wiki/Visitor_pattern<\/a><\/p>\n\n<p>Create a set of classes for events and a set for object types. Create an interface <\/p>\n\n<pre><code>public interface VisitEvent {\n    public void visit(EventA eventA);\n    public void visit(EventB eventB);\n    // for each event class\n}\n<\/code><\/pre>\n\n<p>Within the event class, you have to invoke the visit pattern on the object type class.<\/p>\n\n<pre><code>public class EventA {\n    public void visit(ObjectTypeParent otp) {\n        otp.visit(this);\n    }\n}\n<\/code><\/pre>\n\n<p>Presuming that the object type classes inherit from a common class<\/p>\n\n<pre><code>public abstract class ObjectTypeParent implements VisitEvent {\n    public void visit(EventA eventA) {\n        // default code here\n    }\n    // same for each event visit from VisitEvent\n}\n<\/code><\/pre>\n\n<p>then<\/p>\n\n<pre><code>public class ObjectType01 extends ObjectTypeParent {\n    public void visit(EventA eventA) {\n       // stuff you want done for this combination\n    }\n    // don't implement the ones that have common behavior\n}\n<\/code><\/pre>\n",
+            "answer_id": 17108623,
+            "question_id": 17107476
+        }
+    ],
+    "answer_comments": {}
+}

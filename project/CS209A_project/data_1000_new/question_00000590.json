@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1081373285222754/picture?type=large",
+            "account_id": 5788820,
+            "user_type": "registered",
+            "user_id": 4567083,
+            "link": "https://stackoverflow.com/users/4567083/nahid-shah",
+            "reputation": 213,
+            "display_name": "Nahid Shah",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45778037/doesnt-executor-service-in-java-submits-tasks-parallelly",
+        "last_activity_date": 1503198192,
+        "creation_date": 1503197861,
+        "answer_count": 1,
+        "title": "Doesn&#39;t executor service in java submits tasks parallelly?",
+        "body": "<p>I was playing with java multithreading code. I created a executor service with fixed thread pool. I am submitting two tasks sequentially. I tried to make the first task really long with the Thread.sleep. I was thinking these two tasks will run parallelly. However, when I run the program, the programs waits for sometime, then prints A B, means the compiler finished the first task at first before going to the second task. Actually, I was expecting, as the second task is a short task, it would be complete before the first task. Any explanation please?<\/p>\n\n<pre><code> public static void main(String[] args) {\n    ExecutorService executor = Executors.newFixedThreadPool(10);\n    Map&lt;String, String&gt; map = new HashMap&lt;&gt;();\n    ReadWriteLock lock = new ReentrantReadWriteLock();\n    executor.submit(() -&gt; {\n        lock.writeLock().lock();\n        try {\n            Thread.sleep(10000);\n            map.put(\"boo\", \"mar\");\n            System.out.println(\"A\");\n        } catch (InterruptedException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        } finally {\n            lock.writeLock().unlock();\n        }\n    });\n\n    executor.submit(() -&gt; {\n        lock.writeLock().lock();\n        try {\n            Thread.sleep(1);\n            map.put(\"foo\", \"bar\");\n            System.out.println(\"B\");\n        } catch (InterruptedException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        } finally {\n            lock.writeLock().unlock();\n        }\n    });\n\n    executor.shutdown();\n}\n<\/code><\/pre>\n",
+        "question_id": 45778037,
+        "tags": [
+            "java",
+            "multithreading"
+        ],
+        "score": 0,
+        "accepted_answer_id": 45778061,
+        "is_answered": true,
+        "view_count": 73
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7d451483b64aa999fecf316e7132afc6?s=256&d=identicon&r=PG",
+            "account_id": 1576433,
+            "user_type": "registered",
+            "user_id": 1462718,
+            "link": "https://stackoverflow.com/users/1462718/brandon",
+            "reputation": 23565,
+            "display_name": "Brandon",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1503198192,
+        "creation_date": 1503198192,
+        "body": "<p>You are \"locking\" the <code>writeLock<\/code> BEFORE the first thread sleeps.. so the lock is actually locked for 10 seconds.. then it is unlocked. The second thread was waiting for 10 seconds to acquire the lock.<\/p>\n\n<p>Sequence of events:<\/p>\n\n<pre><code>Thread 1: Starts\nThread 2: Starts\n\nThread 1: Acquire Lock and wait for 10 seconds.\nThread 2: Try to acquire lock (ends up waiting 10 seconds because it is already acquired by Thread 1).\n\nThread 1: Prints Data.\nThread 1: Unlocks lock.\n\nThread 2: Acquires lock.\nThread 2: Prints data.\nThread 2: Unlocks lock.\n<\/code><\/pre>\n\n<p>Try something like the below (it acquires the lock only when necessary.. IE: When doing a write operation or modification of the map):<\/p>\n\n<pre><code>public static void main(String[] args) {\n        ExecutorService executor = Executors.newFixedThreadPool(10);\n        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();\n        ReadWriteLock lock = new ReentrantReadWriteLock();\n        executor.submit(() -&gt; {\n            try {\n                Thread.sleep(10000);\n\n                lock.writeLock().lock();\n                map.put(\"boo\", \"mar\");\n                lock.writeLock().unlock();\n\n                System.out.println(\"A\");\n            } catch (InterruptedException e) {\n                e.printStackTrace();\n            }\n        });\n\n        executor.submit(() -&gt; {\n            try {\n                Thread.sleep(1);\n\n                lock.writeLock().lock();\n                map.put(\"foo\", \"bar\");\n                lock.writeLock().unlock();\n\n                System.out.println(\"B\");\n            } catch (InterruptedException e) {\n                e.printStackTrace();\n            }\n        });\n\n        executor.shutdown();\n    }\n<\/code><\/pre>\n",
+        "answer_id": 45778061,
+        "question_id": 45778037
+    }],
+    "answer_comments": {"45778061": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1081373285222754/picture?type=large",
+            "account_id": 5788820,
+            "user_type": "registered",
+            "user_id": 4567083,
+            "link": "https://stackoverflow.com/users/4567083/nahid-shah",
+            "reputation": 213,
+            "display_name": "Nahid Shah",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 45778061,
+        "edited": false,
+        "creation_date": 1503198922,
+        "comment_id": 78513821
+    }]}
+}

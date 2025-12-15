@@ -1,0 +1,115 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/80a7ff6005d867c65413f9771684d91b?s=256&d=identicon&r=PG",
+            "account_id": 2150596,
+            "user_type": "registered",
+            "user_id": 1907090,
+            "link": "https://stackoverflow.com/users/1907090/nikolaos-zormpas",
+            "reputation": 57,
+            "display_name": "Nikolaos Zormpas"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/14272455/invalid-tables-error-when-querying-a-contentprovider",
+        "last_activity_date": 1478807007,
+        "creation_date": 1357883341,
+        "answer_count": 1,
+        "title": "&quot;Invalid Tables&quot; error when querying a ContentProvider",
+        "body": "<p>Secondly I'm really new in android and haven't completely grasped the way it works (which seems to be the case for the people who wrote most of the tutorials I could find online sadly so a good quick and dirty tutorial would also be great).\nMoving on with the problem I'll try to post only relevant code, if I skip something please let me know.<\/p>\n\n<p>Manifest Entry:<\/p>\n\n<pre><code>&lt;provider android:name=\"MyContentProvider\" android:authorities=\"hua.it20910.android.provider\"/&gt;\n<\/code><\/pre>\n\n<p>Main activity call:<\/p>\n\n<pre><code>Cursor c = getContentProvider().query(MyContentProvider.getTableUri(1), null, null, null, null);\n<\/code><\/pre>\n\n<p>Content Provider:<\/p>\n\n<pre><code>private static SQLiteDatabase db;\nprivate static final String database_name = \"contactlist.db\";\nprivate static final int database_version = 1;\nprivate static final String table1=\"Contacts\";\nprivate static final String[] table1_row={\"_id\",\"Surname\",\"Name\",\"Phone\",\"Email\",\"Address\",\"Group\"};\nprivate static final String table2=\"Groups\";\nprivate static final String[] table2_row={\"_id\",\"Name\"};\n\npublic static final String PROVIDER_NAME = \"hua.it20910.android.provider\";\npublic static final Uri CONTACTS_URI = Uri.parse(\"content://\"+ PROVIDER_NAME + \"/\"+table1);\npublic static final Uri GROUPS_URI = Uri.parse(\"Content://\"+PROVIDER_NAME + \"/\"+table2);\n\nprivate static final int CONTACTS = 1;\nprivate static final int CONTACT_ID = 2;\nprivate static final int GROUPS = 3;\nprivate static final int GROUP_ID = 4;\n\nprivate static final UriMatcher myMatcher;\nstatic {\n    myMatcher = new UriMatcher(UriMatcher.NO_MATCH);\n    myMatcher.addURI(PROVIDER_NAME, table1, CONTACTS);\n    myMatcher.addURI(PROVIDER_NAME, table1+\"/#\", CONTACT_ID);\n    myMatcher.addURI(PROVIDER_NAME, table2, GROUPS);\n    myMatcher.addURI(PROVIDER_NAME, table1+\"/#\", GROUP_ID);\n}\nprivate static final String table1Sql = \"CREATE TABLE \"\n            + table1 + \"(\" \n            + table1_row[0] + \" INTEGER PRIMARY KEY AUTOINCREMENT, \" \n            + table1_row[1] + \" VARCHAR(25), \"\n            + table1_row[2] + \" VARCHAR(25), \" \n            + table1_row[3] + \" INTEGER, \" \n            + table1_row[4] + \" VARCHAR(25), \"\n            + table1_row[5] + \" VARCHAR(25)) \";\n\n    private static final String table2Sql = \"CREATE TABLE \" \n            + table2 + \"(\"\n            + table2_row[0] + \" INTEGER PRIMARY KEY AUTOINCREMENT, \"\n            + table2_row[1] + \" VARCHAR(25))\";\n\n\nprivate class DatabaseHelper extends SQLiteOpenHelper{\n\n    public DatabaseHelper(Context context) {\n        super(context, database_name, null, database_version);\n    }\n\n    @Override\n    public void onCreate(SQLiteDatabase db) {\n        db.execSQL(table1Sql);\n        db.execSQL(table2Sql);\n    }\n\n    @Override\n      public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {\n         db.execSQL(\"DROP TABLE IF EXISTS \"+table1 );\n         db.execSQL(\"DROP TABLE IF EXISTS \"+table2 );\n         onCreate(db);\n      }     \n}\n\n\npublic static Uri getTableUri(int i){\n    if (i==1){\n        return CONTACTS_URI;\n    }\n    if (i==2){\n        return GROUPS_URI;\n    }\n    else{\n        return null;\n    }\n}\n\n@Override\npublic Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {\n    SQLiteQueryBuilder sqlBuilder = new SQLiteQueryBuilder();\n    switch (myMatcher.match(uri)){\n        case CONTACTS:\n            sqlBuilder.setTables(table1);\n            break;\n        case CONTACT_ID:\n            sqlBuilder.setTables(table1);\n            sqlBuilder.appendWhere(\"_id=\" + uri.getPathSegments().get(1));\n            break;\n        case GROUPS:\n            sqlBuilder.setTables(table2);\n            break;\n        case GROUP_ID:\n            sqlBuilder.setTables(table2);\n            sqlBuilder.appendWhere(\"_id=\" + uri.getPathSegments().get(1));\n            break;\n        default:\n            throw new SQLException(\"Wrong uri \" + uri);\n    }\n    if (sortOrder == null || sortOrder == \"\")\n        sortOrder = \"_id DESC\";\n    Cursor c = db.query(null, projection, selection, selectionArgs, null, null, sortOrder);\n    c.setNotificationUri(getContext().getContentResolver(), uri);\n    return null;\n}\n<\/code><\/pre>\n\n<p>As mentioned in the title the error message I'm currently getting is Invalid tables when executing the query but I've been through a hell of working arround other errors to get here and I'm not sure if I solved them or just walked arround them just to find them again in the future so any error correcting would be greatly appreciated.<\/p>\n\n<p>LogCat:<\/p>\n\n<pre><code>01-11 05:43:08.385: E/Trace(930): error opening trace file: No such file or directory (2)\n01-11 05:43:08.525: I/ActivityThread(930): Pub hua.it20910.android.provider: hua.it20910.android.MyContentProvider\n01-11 05:43:09.515: D/dalvikvm(930): GC_FOR_ALLOC freed 57K, 7% free 2583K/2760K, paused 191ms, total 193ms\n01-11 05:43:09.515: I/dalvikvm-heap(930): Grow heap (frag case) to 3.241MB for 635812-byte allocation\n01-11 05:43:09.565: D/dalvikvm(930): GC_FOR_ALLOC freed 1K, 6% free 3202K/3384K, paused 43ms, total 43ms\n01-11 05:43:09.616: D/dalvikvm(930): GC_CONCURRENT freed &lt;1K, 6% free 3214K/3384K, paused 5ms+13ms, total 52ms\n01-11 05:43:09.635: D/AndroidRuntime(930): Shutting down VM\n01-11 05:43:09.645: W/dalvikvm(930): threadid=1: thread exiting with uncaught exception (group=0x40a70930)\n01-11 05:43:09.655: E/AndroidRuntime(930): FATAL EXCEPTION: main\n01-11 05:43:09.655: E/AndroidRuntime(930): java.lang.RuntimeException: Unable to start activity ComponentInfo{hua.it20910.android/hua.it20910.android.MainActivity}: java.lang.IllegalStateException: Invalid tables\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2180)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2230)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.ActivityThread.access$600(ActivityThread.java:141)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1234)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.os.Handler.dispatchMessage(Handler.java:99)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.os.Looper.loop(Looper.java:137)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.ActivityThread.main(ActivityThread.java:5039)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at java.lang.reflect.Method.invokeNative(Native Method)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at java.lang.reflect.Method.invoke(Method.java:511)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:793)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:560)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at dalvik.system.NativeStart.main(Native Method)\n01-11 05:43:09.655: E/AndroidRuntime(930): Caused by: java.lang.IllegalStateException: Invalid tables\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.database.sqlite.SQLiteDatabase.findEditTable(SQLiteDatabase.java:971)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.database.sqlite.SQLiteDatabase.queryWithFactory(SQLiteDatabase.java:1161)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.database.sqlite.SQLiteDatabase.query(SQLiteDatabase.java:1032)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.database.sqlite.SQLiteDatabase.query(SQLiteDatabase.java:1200)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at hua.it20910.android.MyContentProvider.query(MyContentProvider.java:178)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.content.ContentProvider.query(ContentProvider.java:652)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.content.ContentProvider$Transport.query(ContentProvider.java:189)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.content.ContentResolver.query(ContentResolver.java:372)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.content.ContentResolver.query(ContentResolver.java:315)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at hua.it20910.android.MainActivity.displayRecords(MainActivity.java:31)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at hua.it20910.android.MainActivity.onCreate(MainActivity.java:19)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.Activity.performCreate(Activity.java:5104)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1080)\n01-11 05:43:09.655: E/AndroidRuntime(930):  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2144)\n01-11 05:43:09.655: E/AndroidRuntime(930):  ... 11 more\n<\/code><\/pre>\n",
+        "question_id": 14272455,
+        "tags": [
+            "java",
+            "android",
+            "sqlite",
+            "android-contentprovider"
+        ],
+        "score": 1,
+        "accepted_answer_id": 14274278,
+        "is_answered": true,
+        "view_count": 1917,
+        "last_edit_date": 1478807007
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80a7ff6005d867c65413f9771684d91b?s=256&d=identicon&r=PG",
+                "account_id": 2150596,
+                "user_type": "registered",
+                "user_id": 1907090,
+                "link": "https://stackoverflow.com/users/1907090/nikolaos-zormpas",
+                "reputation": 57,
+                "display_name": "Nikolaos Zormpas"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14272455,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/iWvRN.jpg?s=256",
+                "account_id": 1980300,
+                "user_type": "registered",
+                "user_id": 1777090,
+                "link": "https://stackoverflow.com/users/1777090/mysticmagic%cf%a1",
+                "reputation": 28823,
+                "display_name": "MysticMagicϡ",
+                "accept_rate": 89
+            },
+            "edited": false,
+            "creation_date": 1357885939,
+            "comment_id": 19814422
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/iWvRN.jpg?s=256",
+                "account_id": 1980300,
+                "user_type": "registered",
+                "user_id": 1777090,
+                "link": "https://stackoverflow.com/users/1777090/mysticmagic%cf%a1",
+                "reputation": 28823,
+                "display_name": "MysticMagicϡ",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14272455,
+            "edited": false,
+            "creation_date": 1357883650,
+            "comment_id": 19813766
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4c05af6283c4ba3654e0d9a75ffaf317?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 230367,
+            "user_type": "registered",
+            "user_id": 493939,
+            "link": "https://stackoverflow.com/users/493939/user",
+            "reputation": 87114,
+            "display_name": "user"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1357893002,
+        "creation_date": 1357893002,
+        "body": "<blockquote>\n  <p>As mentioned in the title the error message I'm currently getting is\n  Invalid tables when executing the query but I've been through a hell\n  of working arround other errors to get here and I'm not sure if I\n  solved them[...]<\/p>\n<\/blockquote>\n\n<p>It's normal that you get that exception because you pass <code>null<\/code> as the table name when you do the sqlite query in the <code>query<\/code> method of the <code>ContentProvider<\/code>, this line:<\/p>\n\n<pre><code>Cursor c = db.query(null, projection, selection, selectionArgs, null, null, sortOrder);\n<\/code><\/pre>\n\n<p>The <em>first parameter<\/em> is the table name and you must supply a valid table name for the query to be successful. So based on the <code>Uri<\/code> you get choose the proper table and assign a valid table name. Also, what is the purpose of using a <code>SQLiteQueryBuilder<\/code> in the same query method if you're going to ignore it completely and simply query the database directly? <\/p>\n\n<p>Regarding tutorials, I think you missed the most important one, <a href=\"http://developer.android.com/guide/topics/providers/content-providers.html\" rel=\"nofollow\">the official guide for <code>ContentProviders<\/code><\/a>, you even have an example of building one there.<\/p>\n",
+        "answer_id": 14274278,
+        "question_id": 14272455
+    }],
+    "answer_comments": {"14274278": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/80a7ff6005d867c65413f9771684d91b?s=256&d=identicon&r=PG",
+            "account_id": 2150596,
+            "user_type": "registered",
+            "user_id": 1907090,
+            "link": "https://stackoverflow.com/users/1907090/nikolaos-zormpas",
+            "reputation": 57,
+            "display_name": "Nikolaos Zormpas"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 14274278,
+        "edited": false,
+        "creation_date": 1357910633,
+        "comment_id": 19825008
+    }]}
+}

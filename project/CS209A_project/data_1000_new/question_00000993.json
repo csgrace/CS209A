@@ -1,0 +1,239 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4723754da2fb82742cac23f4f76f8636?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8463012,
+            "user_type": "registered",
+            "user_id": 6348032,
+            "link": "https://stackoverflow.com/users/6348032/asym",
+            "reputation": 1938,
+            "display_name": "Asym",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/40642857/addtextchangedlistener-to-loop-generated-edittext-views",
+        "last_activity_date": 1479395182,
+        "creation_date": 1479332420,
+        "answer_count": 2,
+        "title": "AddTextChangedListener to Loop-generated EditText views",
+        "body": "<p>I'm new to Android development. I'm facing a dead end developing an app for a project. Please take some time and help me out.<\/p>\n\n<p><strong>The problem:<\/strong>\nI am generating some <code>EditText<\/code> views nested in a <code>LinearLayout<\/code> using a <code>for loop<\/code>. <\/p>\n\n<p>For example:<\/p>\n\n<pre><code>LinearLayout rootView = (LinearLayout) findViewById(R.id.rootview);\nfor (int i=0,j=10;i&lt;j;i++) {\n    EditText et = new EditText(this);\n    rootView.addView(et);\n    et.setHint(\"EditText No. \"+ i);\n    et.setId(i);\n} // This code is for example purposes only.\n<\/code><\/pre>\n\n<p>Now, I can't seem to understand how I can set an addTextChangedListener on the EditText that is focused at a particular time and set that text on other EditTexts. Please tell me what approach should I adopt to achieve this. I tried my best to explain the problem; however, if there is still any ambiguity, feel free to comment and ask. I'm waiting for a solution to this problem.<\/p>\n\n<p><strong>In terms of screenshots:<\/strong><\/p>\n\n<p><strong>What I have:<\/strong><\/p>\n\n<p><a href=\"https://i.sstatic.net/lK0nC.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/lK0nC.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p><strong>What I want:<\/strong><\/p>\n\n<p><a href=\"https://i.sstatic.net/t7hvG.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/t7hvG.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>I hope this clears things up!<\/p>\n\n<p>**<\/p>\n\n<h2>EDIT:<\/h2>\n\n<p>Thanks to TylerSebastian for the solution. I got it to work. Here is the final code: (Inside OnCreate() method)<\/p>\n\n<pre><code>final LinearLayout rootView = (LinearLayout) findViewById(R.id.rootview);\n    for (int i=0,j=10;i&lt;j;i++) {\n\n        final EditText et = new EditText(this);\n        rootView.addView(et);\n        et.setHint(\"EditText No. \"+ i);\n        et.setId(i);\n        final TextWatcher textwatcher = new TextWatcher() {\n            @Override\n            public void beforeTextChanged(CharSequence s, int start, int count, int after) {\n\n            }\n\n            @Override\n            public void onTextChanged(CharSequence s, int start, int before, int count) {\n\n            }\n\n            @Override\n            public void afterTextChanged(final Editable s) {\n                for (int i=0;i&lt;10;i++){\n                    EditText view = (EditText) findViewById(i);\n                    if (view != et){\n                        view.setText(s.toString());\n                    }\n                }\n            }\n        };\n        et.setOnFocusChangeListener(new View.OnFocusChangeListener() {\n            @Override\n            public void onFocusChange(View v, boolean hasFocus) {\n                if (hasFocus) {\n                    et.addTextChangedListener(textwatcher);\n                } else {\n                    et.removeTextChangedListener(textwatcher);\n                }\n            }\n        });\n\n    } \n<\/code><\/pre>\n\n<p>**<\/p>\n",
+        "question_id": 40642857,
+        "tags": [
+            "java",
+            "android",
+            "for-loop",
+            "android-edittext",
+            "addtextchangedlistener"
+        ],
+        "score": 1,
+        "accepted_answer_id": 40642970,
+        "is_answered": true,
+        "view_count": 957,
+        "last_edit_date": 1479395182
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5fa0544f9a87c652a5b5c1d4b401fcae?s=256&d=identicon&r=PG",
+                "account_id": 470213,
+                "user_type": "registered",
+                "user_id": 877279,
+                "link": "https://stackoverflow.com/users/877279/tyler-sebastian",
+                "reputation": 9588,
+                "display_name": "Tyler Sebastian",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1479336251,
+            "creation_date": 1479332884,
+            "body": "<p>I don't have access to a machine with AS on it atm so no guarantee that the following is bug-free, but this should point you in the right direction: <\/p>\n\n<pre><code>final LinearLayout rootLayout = ...;\n\n// within your loop\net.addTextChangedListener(new TextWatcher() {\n    @Override\n    public void onTextChanged(CharSequence s, int start, int before, int count) {}\n\n    @Override\n    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}\n\n    @Override\n    public void afterTextChanged(final Editable s) {\n        for (int i = 0; i &lt; rootLayout.getChildCount(); i++) {\n            View view = rootLayout.getChildAt(i);\n\n            if (view instanceof EditText &amp;&amp; view != et) {\n                ((EditText) view).setText(s.toString());\n            }\n        }\n    }\n});\n<\/code><\/pre>\n\n<p><strong>edit<\/strong>: so the above will cause an infinite loop - see my comment below<\/p>\n\n<p>How about: <\/p>\n\n<pre><code>final LinearLayout rootLayout = ...;\n\n// again, within your loop\nTextWatcher textWatcher = new TextWatcher() {\n    @Override\n    public void onTextChanged(CharSequence s, int start, int before, int count) {}\n\n    @Override\n    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}\n\n    @Override\n    public void afterTextChanged(final Editable s) {\n        for (int i = 0; i &lt; rootLayout.getChildCount(); i++) {\n            View view = rootLayout.getChildAt(i);\n\n            if (view instanceof EditText &amp;&amp; view != et) {\n                ((EditText) view).setText(s.toString());\n            }\n        }\n    }\n};\n\net.setOnFocusChangeListener(new OnFocusChangeListener() {\n    public void onFocusChange(View v, boolean hasFocus) {\n        if (hasFocus) {\n             ((EditText) view).addTextChangedListener(textWatcher);\n        } else {\n             ((EditText) view).removeTextChangedListener(textWatcher);\n        }\n    }\n});\n<\/code><\/pre>\n\n<p>basically, only the focused element will have the <code>textwatcher<\/code><\/p>\n",
+            "answer_id": 40642970,
+            "question_id": 40642857,
+            "last_edit_date": 1479336251
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e5ac6ac67b89b790f9fe9423e9ca906b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9061055,
+                "user_type": "registered",
+                "user_id": 6747577,
+                "link": "https://stackoverflow.com/users/6747577/malik-abu-qaoud",
+                "reputation": 208,
+                "display_name": "Malik Abu Qaoud"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1479334090,
+            "creation_date": 1479333545,
+            "body": "<p>first add a LinearLayout in your XML like that <\/p>\n\n<pre><code>&lt;LinearLayout\n            android:id=\"@+id/linearLayout\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"wrap_content\"\n            android:orientation=\"vertical\" /&gt;\n<\/code><\/pre>\n\n<p>then create a new class<\/p>\n\n<pre><code>public class EditTextCust extends RelativeLayout  {\n\nEditText status;\n\npublic EditTextCust(Context context, Model post, int inputType,TextWatcher textWatcher) {\n    super(context);\n    inflate(context, R.layout.edit_text_cust, this);\n    status = (EditText) findViewById(R.id.editText);\n    status.setInputType(inputType);\n    post.setData(status.getText().toString());\n    status.setHint(post.getHint());\n    status.addTextChangedListener(textWatcher);\n}\n\npublic String getText() {\n\n\n    return status.getText().toString();\n}\n\npublic EditTextCust(Context context, AttributeSet attrs) {\n    super(context, attrs);\n}\n\npublic EditTextCust(Context context, AttributeSet attrs, int defStyleAttr) {\n    super(context, attrs, defStyleAttr);\n}\n}\n<\/code><\/pre>\n\n<p>and creat new XML file names edit_text_cust for this custom view class<\/p>\n\n<pre><code>            &lt;EditText\n                android:id=\"@+id/dateEditText\"\n                android:layout_width=\"match_parent\"\n                android:background=\"@android:color/transparent\"\n                android:padding=\"@dimen/_5sdp\"\n                android:layout_height=\"match_parent\"\n                android:textSize=\"@dimen/_12sdp\" /&gt; \n<\/code><\/pre>\n\n<p>and creat model class to set your data<\/p>\n\n<pre><code>public class Model {\n\nString hint;\nString id;\nString data;\n\npublic String getHint() {\n    return hint;\n}\n\npublic void setHint(String hint) {\n    this.hint = hint;\n}\n\npublic String getId() {\n    return id;\n}\n\npublic void setId(String id) {\n    this.id = id;\n}\n\npublic String getData() {\n    return data;\n}\n\npublic void setData(String data) {\n    this.data = data;\n}\n}\n<\/code><\/pre>\n\n<p>and in your class inside the for loop but this code<\/p>\n\n<pre><code> Model model = new Model();\n            model.setHint(\"HINT\");\n            model.setId(\"1\");\n\n            editTextCust = new EditTextCust(this, editTextCustModel, InputType.TYPE_CLASS_NUMBER, new TextWatcher() {\n                @Override\n                public void beforeTextChanged(CharSequence s, int start, int count, int after) {\n\n                }\n\n                @Override\n                public void onTextChanged(CharSequence s, int start, int before, int count) {\n                    // getText from here use\n                       s.toString();\n                }\n\n                @Override\n                public void afterTextChanged(Editable s) {\n\n                }\n            });\n            linearLayout.addView(editTextCust);\n<\/code><\/pre>\n\n<p>it's work with me correctly, and if you didn't understand any thing from this code just add comment and i will help you :)   <\/p>\n",
+            "answer_id": 40643127,
+            "question_id": 40642857,
+            "last_edit_date": 1479334090
+        }
+    ],
+    "answer_comments": {
+        "40642970": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4723754da2fb82742cac23f4f76f8636?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8463012,
+                    "user_type": "registered",
+                    "user_id": 6348032,
+                    "link": "https://stackoverflow.com/users/6348032/asym",
+                    "reputation": 1938,
+                    "display_name": "Asym",
+                    "accept_rate": 78
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40642970,
+                "edited": false,
+                "creation_date": 1479394647,
+                "comment_id": 68547352
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5fa0544f9a87c652a5b5c1d4b401fcae?s=256&d=identicon&r=PG",
+                    "account_id": 470213,
+                    "user_type": "registered",
+                    "user_id": 877279,
+                    "link": "https://stackoverflow.com/users/877279/tyler-sebastian",
+                    "reputation": 9588,
+                    "display_name": "Tyler Sebastian",
+                    "accept_rate": 41
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40642970,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4723754da2fb82742cac23f4f76f8636?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8463012,
+                    "user_type": "registered",
+                    "user_id": 6348032,
+                    "link": "https://stackoverflow.com/users/6348032/asym",
+                    "reputation": 1938,
+                    "display_name": "Asym",
+                    "accept_rate": 78
+                },
+                "edited": false,
+                "creation_date": 1479335868,
+                "comment_id": 68519296
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4723754da2fb82742cac23f4f76f8636?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8463012,
+                    "user_type": "registered",
+                    "user_id": 6348032,
+                    "link": "https://stackoverflow.com/users/6348032/asym",
+                    "reputation": 1938,
+                    "display_name": "Asym",
+                    "accept_rate": 78
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40642970,
+                "edited": false,
+                "creation_date": 1479333874,
+                "comment_id": 68518436
+            }
+        ],
+        "40643127": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4723754da2fb82742cac23f4f76f8636?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8463012,
+                    "user_type": "registered",
+                    "user_id": 6348032,
+                    "link": "https://stackoverflow.com/users/6348032/asym",
+                    "reputation": 1938,
+                    "display_name": "Asym",
+                    "accept_rate": 78
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 40643127,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5fa0544f9a87c652a5b5c1d4b401fcae?s=256&d=identicon&r=PG",
+                    "account_id": 470213,
+                    "user_type": "registered",
+                    "user_id": 877279,
+                    "link": "https://stackoverflow.com/users/877279/tyler-sebastian",
+                    "reputation": 9588,
+                    "display_name": "Tyler Sebastian",
+                    "accept_rate": 41
+                },
+                "edited": false,
+                "creation_date": 1479394771,
+                "comment_id": 68547444
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/e5ac6ac67b89b790f9fe9423e9ca906b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 9061055,
+                    "user_type": "registered",
+                    "user_id": 6747577,
+                    "link": "https://stackoverflow.com/users/6747577/malik-abu-qaoud",
+                    "reputation": 208,
+                    "display_name": "Malik Abu Qaoud"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40643127,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5fa0544f9a87c652a5b5c1d4b401fcae?s=256&d=identicon&r=PG",
+                    "account_id": 470213,
+                    "user_type": "registered",
+                    "user_id": 877279,
+                    "link": "https://stackoverflow.com/users/877279/tyler-sebastian",
+                    "reputation": 9588,
+                    "display_name": "Tyler Sebastian",
+                    "accept_rate": 41
+                },
+                "edited": false,
+                "creation_date": 1479371956,
+                "comment_id": 68531628
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5fa0544f9a87c652a5b5c1d4b401fcae?s=256&d=identicon&r=PG",
+                    "account_id": 470213,
+                    "user_type": "registered",
+                    "user_id": 877279,
+                    "link": "https://stackoverflow.com/users/877279/tyler-sebastian",
+                    "reputation": 9588,
+                    "display_name": "Tyler Sebastian",
+                    "accept_rate": 41
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40643127,
+                "edited": false,
+                "creation_date": 1479336306,
+                "comment_id": 68519470
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4723754da2fb82742cac23f4f76f8636?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8463012,
+                    "user_type": "registered",
+                    "user_id": 6348032,
+                    "link": "https://stackoverflow.com/users/6348032/asym",
+                    "reputation": 1938,
+                    "display_name": "Asym",
+                    "accept_rate": 78
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 40643127,
+                "edited": false,
+                "creation_date": 1479333947,
+                "comment_id": 68518473
+            }
+        ]
+    }
+}

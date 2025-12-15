@@ -1,0 +1,90 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/676268dcbd18bb5b438d5e4e796af795?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4094269,
+            "user_type": "registered",
+            "user_id": 3361509,
+            "link": "https://stackoverflow.com/users/3361509/adtrano",
+            "reputation": 185,
+            "display_name": "adtrano"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22871879/how-to-build-and-wire-spring-database-dependency-jar-project-for-use-with-multi",
+        "last_activity_date": 1396644343,
+        "creation_date": 1396641187,
+        "answer_count": 2,
+        "title": "How to build and wire Spring database dependency .JAR project for use with multiple .WAR projects?",
+        "body": "<p>I am building a suite of web services that all access the same database but using different credentials. So to modularize the database code I am moving it out of each web app .WAR files and giving the database calls its own .JAR file. So that if WebApp1 and WebApp2 use a getAllColumnsFromTable1 MyBatis call I don't have to define the same mapper and domain object in both projects.  That way I only have to change the MyBatis code in one place if Table1 ever changes, and less copy and paste mistakes. <\/p>\n\n<p>WebApp1 applicationContext.xml:<\/p>\n\n<pre><code>&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\n  xmlns:context=\"http://www.springframework.org/schema/context\"\n  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  xsi:schemaLocation=\"http://www.springframework.org/schema/beans \n    http://www.springframework.org/schema/beans/spring-beans.xsd\n    http://www.springframework.org/schema/context\n    http://www.springframework.org/schema/context/spring-context.xsd\"&gt;\n\n  &lt;context:annotation-config /&gt;\n\n  &lt;context:component-scan base-package=\"com.example.webapp1.service\" /&gt;\n  &lt;context:component-scan base-package=\"com.example.webapp1.controller\" /&gt;\n\n  &lt;bean id=\"dataSource\" class=\"org.springframework.jndi.JndiObjectFactoryBean\"&gt;\n    &lt;property name=\"jndiName\" value=\"java:/example/ds/WebApp1DS\" /&gt;\n  &lt;/bean&gt;\n\n  &lt;bean id=\"databaseConnector\" class=\"com.example.databaseconnector.connector\"\n    &lt;property name=\"dataSource\" ref=\"dataSource\" /&gt;\n  &lt;/bean&gt;\n&lt;/beans&gt;\n<\/code><\/pre>\n\n<p>So what I want to pass to the database connector .JAR file is just the data source that the .WAR is using.<\/p>\n\n<p>WebApp1 pom.xml : <\/p>\n\n<pre><code>&lt;project xmlns=\"http://maven.apache.org/POM/4.0.0\" \n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 \n                             http://maven.apache.org/xsd/maven-4.0.0.xsd\"&gt;\n  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;\n  &lt;groupId&gt;com.example&lt;/groupId&gt;\n  &lt;artifactId&gt;WebApp1&lt;/artifactId&gt;\n  &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;\n  &lt;packaging&gt;war&lt;/packaging&gt;\n\n  &lt;dependencies&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n      &lt;artifactId&gt;spring-jdbc&lt;/artifactId&gt;\n      &lt;version&gt;3.2.3.RELEASE&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n      &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;\n      &lt;version&gt;3.2.3.RELEASE&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;com.example&lt;/groupId&gt;\n      &lt;artifactId&gt;databaseconnector&lt;/artifactId&gt;\n      &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;\n    &lt;/dependency&gt;\n  &lt;/dependencies&gt;\n&lt;/project&gt;\n<\/code><\/pre>\n\n<p>Then have something like this in one of the services in the .WAR<\/p>\n\n<p>WebApp1 Service.java:<\/p>\n\n<pre><code>package com.example.webapp1.service;\n\nimport com.example.databaseconnector.domain.TableSearchResult;\nimport com.example.databaseconnector.persistence.TableMapper;\n\nimport java.util.List;\n\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.stereotype.Service;\n\n@Service\npublic class Service {\n  @Autowired\n  private TableMapper tableMapper;\n\n  public List&lt;TableSearchResult&gt; getSearchResults(String param) {\n    return tableMapper.getAllColumnsFromTable1(param);\n  }\n}\n<\/code><\/pre>\n\n<p>Then on the .JAR side I have<\/p>\n\n<p>databaseconnector pom.xml:<\/p>\n\n<pre><code>&lt;project xmlns=\"http://maven.apache.org/POM/4.0.0\" \n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 \n                             http://maven.apache.org/xsd/maven-4.0.0.xsd\"&gt;\n  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;\n  &lt;groupId&gt;com.example&lt;/groupId&gt;\n  &lt;artifactId&gt;databaseconnector&lt;/artifactId&gt;\n  &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;\n  &lt;name&gt;Database Connector&lt;/name&gt;\n\n  &lt;dependencies&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;org.mybatis&lt;/groupId&gt;\n      &lt;artifactId&gt;mybatis&lt;/artifactId&gt;\n      &lt;version&gt;3.2.3&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;org.mybatis&lt;/groupId&gt;\n      &lt;artifactId&gt;mybatis-spring&lt;/artifactId&gt;\n      &lt;version&gt;1.2.1&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n      &lt;artifactId&gt;spring-context&lt;/artifactId&gt;\n      &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n      &lt;artifactId&gt;spring-jdbc&lt;/artifactId&gt;\n      &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;\n    &lt;/dependency&gt;\n  &lt;/dependencies&gt;\n&lt;/project&gt;\n<\/code><\/pre>\n\n<p>databaseconnector DatabaseConnection.java:<\/p>\n\n<pre><code>package com.example.databaseconnector.connector;\n\nimport javax.sql.DataSource;\n\nimport org.mybatis.spring.SqlSessionFactoryBean;\nimport org.mybatis.spring.mapper.MapperScannerConfigurer;\nimport org.springframework.beans.factory.InitializingBean;\nimport org.springframework.core.io.ClassPathResource;\nimport org.springframework.jdbc.datasource.DataSourceTransactionManager;\n\npublic class DatabaseConnection implements InitializingBean {\n  private DataSource dataSource;\n  private DataSourceTransactionManager dataSourceTransactionManager;\n  private SqlSessionFactoryBean sqlSessionFactoryBean;\n  private MapperScannerConfigurer mapperScannerConfigurer;\n\n  public DataSource getDataSource() {\n    return this.dataSource;\n  }\n\n  public void setDataSource(DataSource dataSource) {\n    this.dataSource = dataSource;\n  }\n\n  @Override\n  public void afterPropertiesSet() throws Exception {\n    if (getDataSource() == null) {\n      throw new IllegalArgumentException(\"Property 'dataSource' is required\");\n    } else {\n      this.configureDataSourceTransactionManager();\n      this.configureSqlSessionFactoryBean();\n      this.configureMapperScannerConfigurer();\n    }\n  }\n\n  private void configureDataSourceTransactionManager() {\n    this.dataSourceTransactionManager = new DataSourceTransactionManager();\n\n    this.dataSourceTransactionManager.setDataSource(dataSource);\n  }\n\n  private void configureSqlSessionFactoryBean() {\n    this.sqlSessionFactoryBean = new SqlSessionFactoryBean();\n\n    this.sqlSessionFactoryBean.setDataSource(dataSource);\n\n    this.sqlSessionFactoryBean.setConfigLocation(\n        new ClassPathResource(\"mybatis-config.xml\"));\n\n    this.sqlSessionFactoryBean.setTypeAliasesPackage(\n        \"com.example.sewp5databaseconnector.domain\");\n  }\n\n  private void configureMapperScannerConfigurer() {\n    this.mapperScannerConfigurer = new MapperScannerConfigurer();\n\n    this.mapperScannerConfigurer.setBasePackage(\n        \"com.example.databaseconnector.persistence\");\n\n    this.mapperScannerConfigurer.setSqlSessionFactoryBeanName(\"sqlSessionFactoryBean\");\n  }\n}\n<\/code><\/pre>\n\n<p>When I run WebApp1 the program fails because it could not find the TableMapper bean to autowire the mapper in the service. What Spring setup am I missing to get this to all work together, or am I going about this the completely wrong way?<\/p>\n",
+        "question_id": 22871879,
+        "tags": [
+            "java",
+            "spring",
+            "maven",
+            "jndi",
+            "mybatis"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 2069
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ACuxG.png?s=256",
+                "account_id": 2922228,
+                "user_type": "registered",
+                "user_id": 2504224,
+                "link": "https://stackoverflow.com/users/2504224/geoand",
+                "reputation": 64852,
+                "display_name": "geoand"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1396642891,
+            "creation_date": 1396642891,
+            "body": "<p>You seem to be missing your Spring configuration for the <code>TableMapper<\/code> bean. That class need to be a Spring bean in order for it to be injected into <code>Service<\/code>. \nAdd the relevant bean configuration to your <code>applicationContext.xml<\/code><\/p>\n",
+            "answer_id": 22872324,
+            "question_id": 22871879
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e2c6f0434a7eb9b124d9560e09718dd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3926026,
+                "user_type": "registered",
+                "user_id": 3246484,
+                "link": "https://stackoverflow.com/users/3246484/prasad",
+                "reputation": 3793,
+                "display_name": "Prasad"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1396644343,
+            "creation_date": 1396643682,
+            "body": "<p>Spring context hierarchy can help in common code scenario. \nIf you have multiple webapps in a single EAR, EAR can have its own context, which is the parent of the individual webapp contexts.\nAlso in each webapp, you can have one root context and individual children context as well.\nYou can define this hierarchy in web.xml. Parent context can be specified through context parameters: locatorFactorySelector and parentContextKey. Root context through context parameter contextConfigLocation(outside servlet). Child context can be specified in the init param - context parameter of each of the servlet.<\/p>\n\n<p>Have one jar in EAR holding all your common service and DAO layer code and define them in beanRefContext.xml(which is basically another application context xml). make this jar available in classpath.<\/p>\n\n<p>In web.xml of each app where you want to refer parent context code:<\/p>\n\n<pre><code>    &lt;!--  root application context --&gt;\n    &lt;context-param&gt;\n        &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;\n        &lt;param-value&gt;classpath:rootContextBeans.xml&lt;/param-value&gt;\n    &lt;/context-param&gt;\n    &lt;!--  shared service layer - parent application context --&gt;\n    &lt;context-param&gt;\n        &lt;param-name&gt;locatorFactorySelector&lt;/param-name&gt;\n        &lt;param-value&gt;classpath:beanRefContext.xml&lt;/param-value&gt;\n    &lt;/context-param&gt;\n    &lt;context-param&gt;\n        &lt;param-name&gt;parentContextKey&lt;/param-name&gt;\n        &lt;param-value&gt;servicelayer-context&lt;/param-value&gt;\n    &lt;/context-param&gt;\n    &lt;listener&gt;\n        &lt;listener-class&gt;\n            org.springframework.web.context.ContextLoaderListener\n        &lt;/listener-class&gt;\n    &lt;/listener&gt;     \n    &lt;servlet&gt;\n        &lt;servlet-name&gt;dispatcherServletApp1&lt;/servlet-name&gt; \n        &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt; \n        &lt;init-param&gt; \n            &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt; \n            &lt;param-value&gt;classpath*:webApp1.xml&lt;/param-value&gt; \n        &lt;/init-param&gt; \n    &lt;/servlet&gt; \n<\/code><\/pre>\n\n<p>where beanRefContext.xml will be like:<\/p>\n\n<pre><code>    &lt;beans&gt;\n      &lt;bean id=\"servicelayer-context\" class=\"org.springframework.context.support.ClassPathXmlApplicationContext\"&gt;\n        &lt;constructor-arg&gt;\n          &lt;list&gt;\n            &lt;value&gt;data-layer-context.xml&lt;/value&gt;\n          &lt;/list&gt;\n        &lt;/constructor-arg&gt;\n      &lt;/bean&gt;\n    &lt;/beans&gt;\n<\/code><\/pre>\n\n<p>This way you will achieve what you want.<\/p>\n",
+            "answer_id": 22872512,
+            "question_id": 22871879,
+            "last_edit_date": 1396644343
+        }
+    ],
+    "answer_comments": {"22872324": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/676268dcbd18bb5b438d5e4e796af795?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4094269,
+            "user_type": "registered",
+            "user_id": 3361509,
+            "link": "https://stackoverflow.com/users/3361509/adtrano",
+            "reputation": 185,
+            "display_name": "adtrano"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 22872324,
+        "edited": false,
+        "creation_date": 1396906762,
+        "comment_id": 34991280
+    }]}
+}

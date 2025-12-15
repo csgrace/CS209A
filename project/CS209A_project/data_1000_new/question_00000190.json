@@ -1,0 +1,323 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user10481445"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/52830529/sql-for-paging-notice-board-in-jsp",
+        "last_activity_date": 1541726721,
+        "creation_date": 1539676531,
+        "answer_count": 2,
+        "title": "sql for paging notice board in jsp",
+        "body": "<p>I'm trying to make a notice board and before apply paging function it showed posts well. <\/p>\n\n<p>but after i applied paging fuction it shows only one post and paging function shows pages well. <\/p>\n\n<p>so i think this is a sql problem. \nwhen i try to show count it shows 1. even i tried with this shows 1.<\/p>\n\n<pre><code>sql = \"select * from mvc_board \";\n<\/code><\/pre>\n\n<p>this is my sql<\/p>\n\n<pre><code> String sql = \"SELECT ROWNUM, bId, bName, bTitle, bContent,\" +\n               \"bDate, bHit, bGroup, bStep, bIndent \" +\n               \"from(select * from mvc_board order by bGroup DESC , bStep asc)\";\n<\/code><\/pre>\n\n<p>i tried to make mine from this sql. but couldn't understand.<\/p>\n\n<pre><code>sql = \"select *, (select u_name from user where idx = writer_fk) writer, (select idx from answer where idx = answer_fk) answer from board order by idx desc limit \"+startRow+\", \"+endRow;\n<\/code><\/pre>\n\n<p>ref.  <a href=\"http://queserasera.tistory.com/14\" rel=\"nofollow noreferrer\">http://queserasera.tistory.com/14<\/a> <\/p>\n\n<p>this is DAO <\/p>\n\n<pre><code>  public ArrayList&lt;BDto&gt; getBoardList(int startRow, int endRow, String keyField, String keyWord) {\n        ArrayList&lt;BDto&gt; dtos = new ArrayList&lt;BDto&gt;();\n        Connection connection = null;\n        PreparedStatement preparedStatement = null;\n        ResultSet resultSet = null;\n        String sql = \"SELECT ROWNUM, bId, bName, bTitle, bContent,\" +\n               \"bDate, bHit, bGroup, bStep, bIndent \" +\n               \"from(select * from mvc_board order by bGroup DESC , bStep asc)\";\n       System.out.println(sql);\n         try{\n            if(keyWord != null &amp;&amp; !keyWord.equals(\"\") &amp;&amp; !keyWord.equals(\"null\")) {\n                sql += \" WHERE \" + keyField.trim() +\" LIKE '%\"+keyWord.trim()+\"%'\";\n            }\n\n\n           connection =  dataSource.getConnection();\n\n           //특정행부터  레코드를 가져오기 위해서 옵션 설정\n           preparedStatement = connection.prepareStatement(sql);\n            resultSet = preparedStatement.executeQuery();\n\n           while(resultSet.next()){\n\n             int count=0;\n\n                int ROWNUM = resultSet.getInt(\"ROWNUM\");\n                int bId = resultSet.getInt(\"bId\");\n                String bName = resultSet.getString(\"bName\");\n                String bTitle = resultSet.getString(\"bTitle\");\n                String bContent = resultSet.getString(\"bContent\");\n                Timestamp bDate = resultSet.getTimestamp(\"bDate\");\n                int bHit = resultSet.getInt(\"bHit\");\n                int bGroup = resultSet.getInt(\"bGroup\");\n                int bStep = resultSet.getInt(\"bStep\");\n                int bIndent = resultSet.getInt(\"bIndent\");\n\n                BDto dto = new BDto(ROWNUM, bId, bName, bTitle, bContent, bDate, bHit, bGroup, bStep, bIndent);\n                dtos.add(dto);\n\n                  count++;\n                  System.out.println(count);\n             //while문끝\n\n           }//if문끝\n\n\n        }catch (Exception e) {\n           System.out.println(e+\"=&gt; getBoardList fail\");\n       }finally {\n            try {\n                if(resultSet != null) resultSet.close();\n                if(preparedStatement != null) preparedStatement.close();\n                if(connection != null) connection.close();\n            } catch (Exception e2) {\n                // TODO: handle exception\n                e2.printStackTrace();\n            }\n        }\n\n       return dtos;\n   }\n<\/code><\/pre>\n\n<p>=============added sql on sql developer==================================<\/p>\n\n<pre><code>select rn, bId, bName, bTitle, bContent, bDate, bHit, bGroup, bStep, bIndent \nfrom ( select b.*, row_number() over (order by bGroup DESC, bStep asc) rn\nfrom mvc_board b %s ) \nwhere rn between 1 and 10\norder by rn;\n<\/code><\/pre>\n",
+        "question_id": 52830529,
+        "tags": [
+            "java",
+            "sql",
+            "oracle-database",
+            "jsp",
+            "oracle11g"
+        ],
+        "score": 1,
+        "accepted_answer_id": 52833600,
+        "is_answered": true,
+        "view_count": 199,
+        "last_edit_date": 1541726721
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user10481445"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "edited": false,
+            "creation_date": 1539682772,
+            "comment_id": 92581025
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "edited": false,
+            "creation_date": 1539682645,
+            "comment_id": 92580969
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user10481445"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "edited": false,
+            "creation_date": 1539682157,
+            "comment_id": 92580688
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "edited": false,
+            "creation_date": 1539681897,
+            "comment_id": 92580536
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user10481445"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "edited": false,
+            "creation_date": 1539681527,
+            "comment_id": 92580311
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "edited": false,
+            "creation_date": 1539680998,
+            "comment_id": 92580009
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user10481445"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "edited": false,
+            "creation_date": 1539680524,
+            "comment_id": 92579722
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830529,
+            "edited": false,
+            "creation_date": 1539679005,
+            "comment_id": 92578851
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cf51494d9e1d3031838abc8471435c56?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 14151320,
+                "user_type": "registered",
+                "user_id": 10223147,
+                "link": "https://stackoverflow.com/users/10223147/radagast81",
+                "reputation": 3046,
+                "display_name": "Radagast81"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1539683449,
+            "creation_date": 1539678157,
+            "body": "<p>In the example you gave us the paging is added by the <code>limit<\/code> clause, but <code>ORACLE<\/code>has it's own syntax for these. Try:<\/p>\n\n<pre><code> String sql = \"SELECT rown, bId, bName, bTitle, bContent,\" +\n              \"bDate, bHit, bGroup, bStep, bIndent \" +\n              \"from(select rownum rown, mvc_board.* from mvc_board order by bGroup DESC , bStep asc) \" +\n              \"WHERE rown between ? and ? \";\n<\/code><\/pre>\n\n<p>Bind <code>startRow<\/code> and <code>endRow<\/code> before executing the query:<\/p>\n\n<pre><code>preparedStatement = connection.prepareStatement(sql);\npreparedStatement.setInt(1,startRow);\npreparedStatement.setInt(2,endRow);\nresultSet = preparedStatement.executeQuery();\n<\/code><\/pre>\n\n<p>Change the <code>WHERE<\/code> to <code>AND<\/code>:<\/p>\n\n<pre><code>sql +=\" and \" + keyField.trim()+\" LIKE '%\"+keyWord.trim()+\"%'\" ;\n<\/code><\/pre>\n\n<p>And finally change the <code>if(resultSet.next()){<\/code> back to a <code>while<\/code> loop to get more then one row as result.<\/p>\n",
+            "answer_id": 52831003,
+            "question_id": 52830529,
+            "last_edit_date": 1539683449
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                "account_id": 536567,
+                "user_type": "registered",
+                "user_id": 905488,
+                "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                "reputation": 7956,
+                "display_name": "Mick Mnemonic"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1539686486,
+            "creation_date": 1539686486,
+            "body": "<p>The main problem in your <code>getBoardList()<\/code> method was the usage of <code>if (resultSet.next())<\/code> instead of <code>while (resultSet.next())<\/code> when iterating through the result set; that caused the code to only ever return a single DTO.<\/p>\n\n<p>There are other things you should also consider. For example, starting from Java 7, it's preferrable to use the <a href=\"https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html\" rel=\"nofollow noreferrer\">try-with resources statement<\/a> instead of traditional <code>try-finally<\/code> for JDBC resource handling.<\/p>\n\n<p>An important thing to note is that injecting field names like <code>keyField<\/code> from the UI is a really bad practice because it makes the query vulnerable to <a href=\"https://en.wikipedia.org/wiki/SQL_injection\" rel=\"nofollow noreferrer\">SQL injection<\/a>.\nYou should at least create a static whitelist of allowed field names to sanitize the input, if you cannot use static WHERE conditions.<\/p>\n\n<p>Finally, paging queries in Oracle 11g are traditionally done with an inline view that uses the <a href=\"https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions137.htm\" rel=\"nofollow noreferrer\"><code>row_number<\/code> analytic function<\/a>. Note that row-numbering starts from 1. Starting from Oracle 12c, <a href=\"https://oracle-base.com/articles/12c/row-limiting-clause-for-top-n-queries-12cr1\" rel=\"nofollow noreferrer\">the row-limiting clause<\/a> can be used and the inline view is no longer needed.<\/p>\n\n<p>An example implementation that considers the above points could look like the following:<\/p>\n\n<pre><code> public List&lt;BDto&gt; getBoardList(int startRow, int endRow, String keyField, String keyWord) {\n\n    List&lt;BDto&gt; dtos = new ArrayList&lt;BDto&gt;();\n\n    // the %s in the template will be replaced with a \n    // WHERE condition when a keyword is present\n    final String sqlTemplate = \"select rn, bId, bName, bTitle, \"\n            + \"bContent, bDate, bHit, bGroup, bStep, bIndent \"\n            + \"from ( \"\n            + \"     select b.*, row_number() over (order by bGroup DESC, bStep asc) rn\" \n            + \"    from mvc_board b %s \"\n            + \"    ) \"\n            + \"    where rn between ? and ? \"\n            + \"order by rn\";\n\n    boolean whereCondition = false;\n\n    String sql = null;\n\n    if (keyWord != null &amp;&amp; !keyWord.equals(\"\") &amp;&amp; !keyWord.equals(\"null\")) {\n        sql = String.format(sqlTemplate, \n                   \" WHERE \" + keyField.trim() + \" LIKE '%' || ? || '%'\");\n        whereCondition = true;\n    } else {\n        sql = String.format(sqlTemplate, \"\");\n    }\n\n    System.out.println(sql);\n\n    try (Connection connection = dataSource.getConnection();\n            PreparedStatement preparedStatement = connection.prepareStatement(sql)) {\n\n        int parameterIndex = 1;\n\n        if (whereCondition) {\n            preparedStatement.setString(parameterIndex++, keyWord);\n        }\n        preparedStatement.setInt(parameterIndex++, startRow);\n        preparedStatement.setInt(parameterIndex, endRow);\n\n        try (ResultSet resultSet = preparedStatement.executeQuery()) {\n\n            int count = 0;\n\n            while (resultSet.next()) {\n\n                int ROWNUM = resultSet.getInt(\"rn\");\n                int bId = resultSet.getInt(\"bId\");\n                String bName = resultSet.getString(\"bName\");\n                String bTitle = resultSet.getString(\"bTitle\");\n                String bContent = resultSet.getString(\"bContent\");\n                Timestamp bDate = resultSet.getTimestamp(\"bDate\");\n                int bHit = resultSet.getInt(\"bHit\");\n                int bGroup = resultSet.getInt(\"bGroup\");\n                int bStep = resultSet.getInt(\"bStep\");\n                int bIndent = resultSet.getInt(\"bIndent\");\n\n                dtos.add(new BDto(ROWNUM, bId, bName, bTitle, \n                        bContent, bDate, bHit, bGroup, bStep, bIndent));\n\n                count++;\n            }\n            System.out.println(count);\n        }\n\n    } catch (SQLException e) {\n        System.out.println(e + \"=&gt; getBoardList fail\");\n    }\n\n    return dtos;\n}\n<\/code><\/pre>\n",
+            "answer_id": 52833600,
+            "question_id": 52830529
+        }
+    ],
+    "answer_comments": {
+        "52831003": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                    "account_id": 536567,
+                    "user_type": "registered",
+                    "user_id": 905488,
+                    "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                    "reputation": 7956,
+                    "display_name": "Mick Mnemonic"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52831003,
+                "edited": false,
+                "creation_date": 1539680715,
+                "comment_id": 92579850
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user10481445"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52831003,
+                "edited": false,
+                "creation_date": 1539679118,
+                "comment_id": 92578910
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user10481445"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52831003,
+                "edited": false,
+                "creation_date": 1539679037,
+                "comment_id": 92578864
+            }
+        ],
+        "52833600": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/efb324daddc3ad22736171ba863234d8?s=256&d=identicon&r=PG",
+                    "account_id": 536567,
+                    "user_type": "registered",
+                    "user_id": 905488,
+                    "link": "https://stackoverflow.com/users/905488/mick-mnemonic",
+                    "reputation": 7956,
+                    "display_name": "Mick Mnemonic"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 52833600,
+                "edited": false,
+                "creation_date": 1541786963,
+                "comment_id": 93349117
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user10481445"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52833600,
+                "edited": false,
+                "creation_date": 1541726657,
+                "comment_id": 93324563
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user10481445"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52833600,
+                "edited": false,
+                "creation_date": 1539750619,
+                "comment_id": 92610450
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user10481445"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52833600,
+                "edited": false,
+                "creation_date": 1539743771,
+                "comment_id": 92608919
+            }
+        ]
+    }
+}

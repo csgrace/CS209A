@@ -1,0 +1,91 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/gyylm.jpg?s=256",
+            "account_id": 1874878,
+            "user_type": "registered",
+            "user_id": 2186177,
+            "link": "https://stackoverflow.com/users/2186177/mandar-khire",
+            "reputation": 39,
+            "display_name": "Mandar Khire",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15621521/trying-to-add-linearray-of-string-between-specific-lines-in-text-file-by-java",
+        "last_activity_date": 1364278145,
+        "creation_date": 1364234120,
+        "answer_count": 2,
+        "title": "trying to add line(array of string) between specific lines in text file by java program?",
+        "body": "<p>I am trying to write program by seeing from various forums.\nPrograms as bellow, aiming to add line after 3rd line of existing txt file, but before 5th line. &amp; i trying to keeping previous lines safely when i will see completion of execution of this program, but i failed to enter line between 3 &amp; 5. It add below 5th line.\nIf this basic program works then i will try to add 'array of string' in file between line 3 &amp; 5 like   <\/p>\n\n<pre><code>import java.io.BufferedWriter;  \nimport java.io.File;  \nimport java.io.FileReader;  \nimport java.io.FileWriter;  \nimport java.io.IOException;  \nimport java.io.LineNumberReader;  \n\npublic class WriteToFileExample {  \n\n    /** \n     * @param args \n     */  \n    public static void main(String[] args) {  \n        // TODO Auto-generated method stub  \nString content = \"This is the content to write into file by Mandar\";  \nFile file = new File(\"/example/mandar.txt\");  \nif(!file.exists()){  \n    try {  \n        file.createNewFile();  \n    } catch (IOException e) {  \n        // TODO Auto-generated catch block  \n        e.printStackTrace();  \n    }  \n    try {  \n        FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);  \n        BufferedWriter bw = new BufferedWriter(fw);  \n        bw.write(content);  \n        bw.newLine();  \n        bw.close();  \n        System.out.println(\"Done\");  \n    } catch (IOException e) {  \n        // TODO Auto-generated catch block  \n        e.printStackTrace();  \n    }  \n\n\n}else{  \n    try {  \n        LineNumberReader lnr = new LineNumberReader(new FileReader(file));  \n        FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);  \n        BufferedWriter bw = new BufferedWriter(fw);  \n        lnr.setLineNumber(6);  \n        for(int i =1; i&lt;lnr.getLineNumber();i++){  \n//          System.out.println(\"for = \"+i);  \n//          bw.newLine();  \n            if(i == 3){  \n                System.out.println(\"4\");  \n                bw.write(content);  \n//              bw.newLine();  \n            }  \n        }  \n        bw.close();  \n        System.out.println(\"Done1\");  \n    } catch (IOException e) {  \n        // TODO Auto-generated catch block  \n        e.printStackTrace();  \n    }  \n}  \n    }  \n\n}\n<\/code><\/pre>\n\n<p>Please help me. I am not getting any clue or idea.<\/p>\n",
+        "question_id": 15621521,
+        "tags": [
+            "java",
+            "arrays",
+            "string",
+            "filewriter"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 3291
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3568ffa10aa39fcb814d5394b1f429f1?s=256&d=identicon&r=PG",
+                "account_id": 2022292,
+                "user_type": "registered",
+                "user_id": 1808160,
+                "link": "https://stackoverflow.com/users/1808160/dr3wmurphy",
+                "reputation": 186,
+                "display_name": "dr3wmurphy"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1364235682,
+            "creation_date": 1364235682,
+            "body": "<p>You are using <code>lnr.setLineNumber(6)<\/code> to set the <code>lnr<\/code> to write to line 6. Your <code>for<\/code> loop simply loops from 1 to 6 and writes the content <strong>at line 6<\/strong> when <code>i==3<\/code>. I haven't tested this yet, but try using <code>lnr.setLineNumber(4)<\/code> and getting rid of your for loop.<\/p>\n",
+            "answer_id": 15621965,
+            "question_id": 15621521
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gyylm.jpg?s=256",
+                "account_id": 1874878,
+                "user_type": "registered",
+                "user_id": 2186177,
+                "link": "https://stackoverflow.com/users/2186177/mandar-khire",
+                "reputation": 39,
+                "display_name": "Mandar Khire",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1364278145,
+            "creation_date": 1364278145,
+            "body": "<p>Thanks javabreakpoint,\n I tried my scenario with your way as follows<\/p>\n\n<pre><code>import java.io.*;\n\npublic class JInsert {\n public static void main(String args[]){\n try {\n   JInsert j = new JInsert();\n   File file = new File(\"/example/mandar.txt\");\n   j.insertStringInFile(file, 4, \"4\");\n  // j.insertStringInFile(file,Integer.parseInt(args[1]), args[2]);\n   }\n catch (Exception e) {\n   e.printStackTrace();\n   }\n }\n\n public void insertStringInFile\n     (File inFile, int lineno, String lineToBeInserted) \n   throws Exception {\n // temp file\n File outFile = new File(\"/example/$$$$$$$$.tmp\");\n\n // input\n FileInputStream fis  = new FileInputStream(inFile);\n BufferedReader in = new BufferedReader\n     (new InputStreamReader(fis));\n\n // output         \n FileOutputStream fos = new FileOutputStream(outFile);\n PrintWriter out = new PrintWriter(fos);\n\n String thisLine = \"\";\n int i =1;\n while ((thisLine = in.readLine()) != null) {\n   if(i == lineno) out.println(lineToBeInserted);\n   out.println(thisLine);\n   i++;\n   }\nout.flush();\nout.close();\nin.close();\n\ninFile.delete();\noutFile.renameTo(inFile);\n}\n}\n<\/code><\/pre>\n\n<p>But 1 new problem i seen that in file mandar.txt which expected as follows before run the above program.<\/p>\n\n<pre><code>1\n2\n3\n\n5\n<\/code><\/pre>\n\n<p>What if mandar.txt modified before run the above program as follows:-<\/p>\n\n<pre><code>1\n\n2\n3\n5\n<\/code><\/pre>\n\n<p>means now blank line changes to between 1 &amp; 2 but we(human) know that string \"4\" should enter between 3 &amp; 5. But now program add line at line no 4 but now we can see mandar.txt as follows<\/p>\n\n<pre><code> 1\n\n 2\n 4\n 3\n 5\n<\/code><\/pre>\n\n<p><strong>How to secure that any time whether 3 &amp; 5 at any line number then my string enter between them?<\/strong>\nmeans i will get 2 ways in program\n1. line number\n2. line content securely insert where it should be insert.<\/p>\n",
+            "answer_id": 15630447,
+            "question_id": 15621521
+        }
+    ],
+    "answer_comments": {"15621965": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/gyylm.jpg?s=256",
+            "account_id": 1874878,
+            "user_type": "registered",
+            "user_id": 2186177,
+            "link": "https://stackoverflow.com/users/2186177/mandar-khire",
+            "reputation": 39,
+            "display_name": "Mandar Khire",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 15621965,
+        "edited": false,
+        "creation_date": 1364236635,
+        "comment_id": 22160210
+    }]}
+}

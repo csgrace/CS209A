@@ -1,0 +1,115 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0b524df25b1229764e7af64f55ffddb7?s=256&d=identicon&r=PG",
+            "account_id": 152786,
+            "user_type": "registered",
+            "user_id": 367544,
+            "link": "https://stackoverflow.com/users/367544/dasmowenator",
+            "reputation": 5538,
+            "display_name": "Dasmowenator",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/66806890/is-there-any-performance-downsides-to-using-the-xxperfdisablesharedmem-jvm",
+        "last_activity_date": 1710989232,
+        "creation_date": 1616703119,
+        "answer_count": 1,
+        "title": "Is there any performance downsides to using the `-XX:+PerfDisableSharedMem` JVM flag?",
+        "body": "<p>From what I've read online, it sounds like a lot of people recommend setting the <code>-XX:+PerfDisableSharedMem<\/code> JVM flag to fix high GC pause latencies due to IO blocking when the garbage collector tries to write to <code>/tmp<\/code> (hsperfdata).<\/p>\n<p>I'm trying to optimize the performance of our system's garbage collection, and I tried running a load test before setting the <code>-XX:+PerfDisableSharedMem<\/code> flag and after, and it actually performed slightly better <em><strong>without<\/strong><\/em> the flag!  I even reran the load tests a second time and got the same results.<\/p>\n<p><strong>So my question is:<\/strong> Was this just a fluke, or does <code>-XX:+PerfDisableSharedMem<\/code> actually have any potentially negative performance impacts?<\/p>\n<p>(I understand that using <code>-XX:+PerfDisableSharedMem<\/code> will mean that certain diagnostics tools like <code>jstat<\/code> that depend on this file won't work, but we don't use any of those tools -- I'm just asking about potential <em>performance<\/em> downsides, not tooling downsides.)<\/p>\n",
+        "question_id": 66806890,
+        "tags": [
+            "java",
+            "garbage-collection",
+            "jvm"
+        ],
+        "score": 1,
+        "accepted_answer_id": 66809042,
+        "is_answered": true,
+        "view_count": 1881,
+        "last_edit_date": 1616713312
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/54njx.png?s=256",
+            "account_id": 4210603,
+            "user_type": "registered",
+            "user_id": 3448419,
+            "link": "https://stackoverflow.com/users/3448419/apangin",
+            "reputation": 99840,
+            "display_name": "apangin"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 6,
+        "is_accepted": true,
+        "last_activity_date": 1710989232,
+        "creation_date": 1616715540,
+        "body": "<p>HotSpot JVM maintains certain <a href=\"http://openjdk.java.net/groups/hotspot/docs/Serviceability.html#bjvmstat\" rel=\"nofollow noreferrer\">Performance Counters<\/a> that can be read by various serviceability tools.<\/p>\n<p>By default, these performance counters are exported onto the file system under <code>/tmp/hsperfdata_&lt;user&gt;<\/code> directory, so that external tools like <code>jstat<\/code> can read them without direct communication to the JVM. <code>jps<\/code> tool also looks for these counters to find active JVMs.<\/p>\n<p>JVM does not update the file directly; instead it maps the file into memory and updates the counters in memory. Any such memory update can potentialy cause file I/O. For example, when GC counters are updated during a GC pause, the operating system may decide to flush data to disk, and this in turn may extend the pause. <a href=\"https://www.evanjones.ca/jvm-mmap-pause.html\" rel=\"nofollow noreferrer\">This blog post<\/a> describes the mentioned effect.<\/p>\n<p><code>-XX:+PerfDisableSharedMem<\/code> option forces JVM to use anonymous memory for Performance Counters instead of a mapped file. This helps to avoid random VM pauses caused by spontaneous disk I/O.<\/p>\n<p>With this option, <code>jps<\/code>, <code>jstat<\/code>, <code>JConsole<\/code> and other tools won't be able to find the JVM. However, performance counters will be still collected. <a href=\"https://github.com/apangin/hsperf\" rel=\"nofollow noreferrer\">hsperf<\/a> tool will be able to print these counters anyway.<\/p>\n<p>There is no other negative performance impact of <code>-XX:+PerfDisableSharedMem<\/code> option. JVM updates counters exactly the same way in both cases; the only difference is whether the counters memory is mapped to a file or not.<\/p>\n",
+        "answer_id": 66809042,
+        "question_id": 66806890,
+        "last_edit_date": 1710989232
+    }],
+    "answer_comments": {"66809042": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/54njx.png?s=256",
+                "account_id": 4210603,
+                "user_type": "registered",
+                "user_id": 3448419,
+                "link": "https://stackoverflow.com/users/3448419/apangin",
+                "reputation": 99840,
+                "display_name": "apangin"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 66809042,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/c20381ee8508b1344dd4c1aaa1cc5aa8?s=256&d=identicon&r=PG",
+                "account_id": 5180087,
+                "user_type": "registered",
+                "user_id": 4146053,
+                "link": "https://stackoverflow.com/users/4146053/volker-simonis",
+                "reputation": 71,
+                "display_name": "Volker Simonis"
+            },
+            "edited": false,
+            "creation_date": 1710989340,
+            "comment_id": 137859233
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c20381ee8508b1344dd4c1aaa1cc5aa8?s=256&d=identicon&r=PG",
+                "account_id": 5180087,
+                "user_type": "registered",
+                "user_id": 4146053,
+                "link": "https://stackoverflow.com/users/4146053/volker-simonis",
+                "reputation": 71,
+                "display_name": "Volker Simonis"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 66809042,
+            "edited": false,
+            "creation_date": 1710839028,
+            "comment_id": 137837747
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c20381ee8508b1344dd4c1aaa1cc5aa8?s=256&d=identicon&r=PG",
+                "account_id": 5180087,
+                "user_type": "registered",
+                "user_id": 4146053,
+                "link": "https://stackoverflow.com/users/4146053/volker-simonis",
+                "reputation": 71,
+                "display_name": "Volker Simonis"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 66809042,
+            "edited": false,
+            "creation_date": 1698769493,
+            "comment_id": 136446293
+        }
+    ]}
+}

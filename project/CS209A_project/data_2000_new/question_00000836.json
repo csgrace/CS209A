@@ -1,0 +1,117 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9fafed8521a2fbde111caae522ffa9bb?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4238315,
+            "user_type": "registered",
+            "user_id": 3468916,
+            "link": "https://stackoverflow.com/users/3468916/user3468916",
+            "reputation": 87,
+            "display_name": "user3468916",
+            "accept_rate": 91
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/23559989/confused-about-external-storage",
+        "last_activity_date": 1399628321,
+        "creation_date": 1399624318,
+        "answer_count": 1,
+        "title": "Confused about external storage",
+        "body": "<p>I am trying insert and retrieve some data into a specific path inside External and \nInternal Storage.I have found an example on the net.ıts succesfully done.<\/p>\n\n<p>this is my code to save and retrieve<\/p>\n\n<pre><code>public class MainActivity extends Activity implements OnClickListener{\n\n private String filename = \"MySampleFile.txt\";\n private String filepath = \"MyFileStorage\";\n File myInternalFile;\n File myExternalFile;\n @Override\n public void onCreate(Bundle savedInstanceState) {\n  super.onCreate(savedInstanceState);\n  setContentView(R.layout.activity_main);\n\n  ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());\n  File directory = contextWrapper.getDir(filepath, Context.MODE_PRIVATE);\n  myInternalFile = new File(directory , filename);\n\n  Button saveToInternalStorage =\n   (Button) findViewById(R.id.saveInternalStorage);\n  saveToInternalStorage.setOnClickListener(this);\n\n  Button readFromInternalStorage =\n   (Button) findViewById(R.id.getInternalStorage);\n  readFromInternalStorage.setOnClickListener(this);\n\n  Button saveToExternalStorage =\n   (Button) findViewById(R.id.saveExternalStorage);\n  saveToExternalStorage.setOnClickListener(this);\n -\n  Button readFromExternalStorage =\n   (Button) findViewById(R.id.getExternalStorage);\n  readFromExternalStorage.setOnClickListener(this);\n\n  //check if external storage is available and not read only \n  if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) { \n   saveToExternalStorage.setEnabled(false);\n  }\n  else {\n   myExternalFile = new File(getExternalFilesDir(filepath), filename);\n  }\n\n }\n\n public void onClick(View v) {\n\n  EditText myInputText = (EditText) findViewById(R.id.myInputText);\n  TextView responseText = (TextView) findViewById(R.id.responseText);\n  String myData = \"\";\n\n  switch (v.getId()) {\n  case R.id.saveInternalStorage:\n   try {\n    FileOutputStream fos = new FileOutputStream(myInternalFile);\n    fos.write(myInputText.getText().toString().getBytes());\n    fos.close();\n   } catch (IOException e) {\n    e.printStackTrace();\n   }\n   myInputText.setText(\"\");\n   responseText\n   .setText(\"MySampleFile.txt saved to Internal Storage...\");\n   break;\n\n  case R.id.getInternalStorage:\n   try {\n    FileInputStream fis = new FileInputStream(myInternalFile);\n   // DataInputStream in = new DataInputStream(fis);\n    BufferedReader br =\n     new BufferedReader(new InputStreamReader(fis));\n    String strLine;\n    while ((strLine = br.readLine()) != null) {\n     myData = myData + strLine;\n    }\n    br.close();\n   } catch (IOException e) {\n    e.printStackTrace();\n   }\n   myInputText.setText(myData);\n   responseText\n   .setText(\"MySampleFile.txt data retrieved from Internal Storage...\");\n   break;\n\n  case R.id.saveExternalStorage:\n   try {\n    FileOutputStream fos = new FileOutputStream(myExternalFile);\n    fos.write(myInputText.getText().toString().getBytes());\n    fos.close();\n   } catch (IOException e) {\n    e.printStackTrace();\n   }\n   myInputText.setText(\"\");\n   responseText\n   .setText(\"MySampleFile.txt saved to External Storage...\");\n   break;\n\n  case R.id.getExternalStorage:\n   try {\n    FileInputStream fis = new FileInputStream(myExternalFile);\n    DataInputStream in = new DataInputStream(fis);\n    BufferedReader br =\n     new BufferedReader(new InputStreamReader(in));\n    String strLine;\n    while ((strLine = br.readLine()) != null) {\n     myData = myData + strLine;\n    }\n    in.close();\n   } catch (IOException e) {\n    e.printStackTrace();\n   }\n   myInputText.setText(myData);\n   responseText\n   .setText(\"MySampleFile.txt data retrieved from Internal Storage...\");\n   break;\n\n\n  }\n }\n<\/code><\/pre>\n\n<p>Then I wanted to retreieve all the sdcard paths to understand if my path created or not ..such as <\/p>\n\n<p>storage/sdcard/MyFileStorage.. \nI am using this code for this<\/p>\n\n<pre><code>public class MainActivity extends ListActivity {\n\nList&lt;String&gt;fileList=new ArrayList&lt;String&gt;();\n\n    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        File root=\n                new File(Environment.getExternalStorageDirectory().getAbsolutePath());\n        listDir(root);\n      ArrayAdapter&lt;String&gt;adapter=\n              new ArrayAdapter&lt;String&gt;(this, android.R.layout.simple_list_item_1,fileList);\n   this.setListAdapter(adapter);\n\n    }\n\n    private void listDir(File f) {\n\n        File[]files=f.listFiles();\n        for (File file : files) {\n            fileList.add(file.getPath());\n\n        }\n    }\n\n\n\n}\n<\/code><\/pre>\n\n<p>But I excepted to  see this path below.But Its not exist.What am i doing wrong<\/p>\n\n<pre><code>storage/sdcard/MyFileStorage \n<\/code><\/pre>\n",
+        "question_id": 23559989,
+        "tags": [
+            "java",
+            "android",
+            "android-external-storage"
+        ],
+        "score": 0,
+        "accepted_answer_id": 23561307,
+        "is_answered": true,
+        "view_count": 140
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5517262d6b802f09dfc2bd2083fb5736?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3307208,
+            "user_type": "registered",
+            "user_id": 2781649,
+            "link": "https://stackoverflow.com/users/2781649/nmxprime",
+            "reputation": 1506,
+            "display_name": "nmxprime",
+            "accept_rate": 35
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 23559989,
+        "edited": false,
+        "creation_date": 1399625854,
+        "comment_id": 36151682
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5517262d6b802f09dfc2bd2083fb5736?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3307208,
+            "user_type": "registered",
+            "user_id": 2781649,
+            "link": "https://stackoverflow.com/users/2781649/nmxprime",
+            "reputation": 1506,
+            "display_name": "nmxprime",
+            "accept_rate": 35
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1399628321,
+        "creation_date": 1399628321,
+        "body": "<blockquote>\n  <p>myExternalFile = new File(getExternalFilesDir(filepath), filename);<\/p>\n<\/blockquote>\n\n<p>This line actually creates file in <code>/storage/sdcard0/Android/data/your.application.name/files/MyFileStorage<\/code><\/p>\n\n<p>Read documents about <code>getExternalFilesDir<\/code><\/p>\n",
+        "answer_id": 23561307,
+        "question_id": 23559989
+    }],
+    "answer_comments": {"23561307": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5517262d6b802f09dfc2bd2083fb5736?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3307208,
+                "user_type": "registered",
+                "user_id": 2781649,
+                "link": "https://stackoverflow.com/users/2781649/nmxprime",
+                "reputation": 1506,
+                "display_name": "nmxprime",
+                "accept_rate": 35
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 23561307,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/9fafed8521a2fbde111caae522ffa9bb?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4238315,
+                "user_type": "registered",
+                "user_id": 3468916,
+                "link": "https://stackoverflow.com/users/3468916/user3468916",
+                "reputation": 87,
+                "display_name": "user3468916",
+                "accept_rate": 91
+            },
+            "edited": false,
+            "creation_date": 1399630282,
+            "comment_id": 36154170
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9fafed8521a2fbde111caae522ffa9bb?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4238315,
+                "user_type": "registered",
+                "user_id": 3468916,
+                "link": "https://stackoverflow.com/users/3468916/user3468916",
+                "reputation": 87,
+                "display_name": "user3468916",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 23561307,
+            "edited": false,
+            "creation_date": 1399629449,
+            "comment_id": 36153672
+        }
+    ]}
+}

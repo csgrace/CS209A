@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/vkqaG.jpg?s=256",
+            "account_id": 484558,
+            "user_type": "registered",
+            "user_id": 900307,
+            "link": "https://stackoverflow.com/users/900307/rajeshkumar-kandhasamy",
+            "reputation": 6499,
+            "display_name": "Rajeshkumar Kandhasamy",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18202469/how-to-import-export-custom-fields-for-customer-list-in-quickbooks",
+        "last_activity_date": 1449862543,
+        "creation_date": 1376376695,
+        "answer_count": 1,
+        "title": "How to Import &amp; Export Custom Fields For Customer List in QuickBooks",
+        "body": "<p>In <code>Quickbooks Pro 2009<\/code> I'm Adding and Importing <code>list of Customers<\/code> through the <code>C# windows application<\/code>. In quick book itself <code>Import and Export<\/code> options are there for customers list, but we have defined our own business validations logics and we are pushing the data to Quick book DB for customers.<\/p>\n\n<p>In Quick Book there is a option to define custom fields under <code>Additional Tab<\/code>.<\/p>\n\n<p>While programmatically adding Quick Book List of Customers, I'm able to add the values for <code>Built-In Field values<\/code> Like <code>Customer Name<\/code> <code>Company Name<\/code> and Etc. If I try to push the data for <code>custom fields<\/code>. Its giving me the error...<\/p>\n\n<blockquote>\n  <p>QuickBooks found an error when parsing the provided XML text stream.<\/p>\n<\/blockquote>\n\n<p>If I skip the custom field data pushing operation then defined fields data passing is working fine.<\/p>\n\n<p><strong>My Code:<\/strong><\/p>\n\n<pre><code>    XmlDocument inputXMLDoc = new XmlDocument();\n    inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration(\"1.0\", null, null));\n    inputXMLDoc.AppendChild(inputXMLDoc.CreateProcessingInstruction(\"qbxml\", \"version=\\\"2.0\\\"\"));\n    XmlElement qbXML = inputXMLDoc.CreateElement(\"QBXML\");\n    inputXMLDoc.AppendChild(qbXML);\n    XmlElement qbXMLMsgsRq = inputXMLDoc.CreateElement(\"QBXMLMsgsRq\");\n    qbXML.AppendChild(qbXMLMsgsRq);\n    qbXMLMsgsRq.SetAttribute(\"onError\", \"stopOnError\");\n    XmlElement custAddRq = inputXMLDoc.CreateElement(\"CustomerAddRq\");\n    qbXMLMsgsRq.AppendChild(custAddRq);\n    custAddRq.SetAttribute(\"requestID\", \"1\");\n    XmlElement custAdd = inputXMLDoc.CreateElement(\"CustomerAdd\");\n    custAddRq.AppendChild(custAdd);\n\n    //In-Built Columns\n    custAdd.AppendChild(inputXMLDoc.CreateElement(\"Name\")).InnerText = Name;\n    custAdd.AppendChild(inputXMLDoc.CreateElement(\"AccountNumber\")).InnerText = AccountNumber;\n\n    //Defined Custom Columns\n    custAdd.AppendChild(inputXMLDoc.CreateElement(\"CUSTFLD1\")).InnerText = JRNL_NO;\n\n    String name = CustName.Text.Trim();\n\n    string input = inputXMLDoc.OuterXml;\n\n    //Push the Data to do the qbXMLRP request\n    RequestProcessor2 rp = null;\n    string ticket = null;\n    string response = null;\n    try\n    {\n        rp = new RequestProcessor2();\n        rp.OpenConnection(\"\", \"IDN CustomerAdd C# sample\");\n        ticket = rp.BeginSession(\"\", QBFileMode.qbFileOpenDoNotCare);\n        response = rp.ProcessRequest(ticket, input);\n\n    }\n    catch (System.Runtime.InteropServices.COMException ex)\n    {\n        MessageBox.Show(\"COM Error Description = \" + ex.Message, \"COM error\");\n    }\n<\/code><\/pre>\n\n<p>What am I doing wrong here.. any helps?? or any suggestions / Ideas ????<\/p>\n",
+        "question_id": 18202469,
+        "tags": [
+            "java",
+            "c#",
+            "window",
+            "quickbooks"
+        ],
+        "score": 6,
+        "accepted_answer_id": 18206884,
+        "is_answered": true,
+        "view_count": 1569,
+        "last_edit_date": 1449862543
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dfe9cf5d0681a2cd730408d5ac909851?s=256&d=identicon&r=PG",
+            "account_id": 13101,
+            "user_type": "registered",
+            "user_id": 26133,
+            "link": "https://stackoverflow.com/users/26133/keith-palmer-jr",
+            "reputation": 28102,
+            "display_name": "Keith Palmer Jr.",
+            "accept_rate": 46
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 4,
+        "is_accepted": true,
+        "last_activity_date": 1376390270,
+        "creation_date": 1376390270,
+        "body": "<p>QuickBooks has a very specific syntax you have to follow (defined by an XML .XSD) when creating requests for it to process. You can't just make up new XML nodes and expect them to work. <\/p>\n\n<p>Thus, this is going to break things:<\/p>\n\n<pre><code>//Defined Custom Columns\ncustAdd.AppendChild(inputXMLDoc.CreateElement(\"CUSTFLD1\")).InnerText = JRNL_NO;\n<\/code><\/pre>\n\n<p>Custom fields are added/modified by sending <code>DataExt<\/code> requests to QuickBooks. They are entirely separate from the main <code>CustomerAdd<\/code> or <code>CustomerMod<\/code> request. To add the custom fields, you can either send an entirely separate request:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;?qbxml version=\"7.0\"?&gt;\n&lt;QBXML&gt;\n    &lt;QBXMLMsgsRq onError=\"stopOnError\"&gt;\n        &lt;DataExtModRq&gt;\n            &lt;DataExtMod&gt;\n                &lt;OwnerID&gt;0&lt;/OwnerID&gt;\n                &lt;DataExtName&gt;Your Custom Field Name&lt;/DataExtName&gt;\n                &lt;ListDataExtType&gt;Customer&lt;/ListDataExtType&gt;\n                &lt;ListObjRef&gt;\n                    &lt;FullName&gt;Your Customer Name&lt;/FullName&gt;\n                &lt;/ListObjRef&gt;\n                &lt;DataExtValue&gt;Custom field value&lt;/DataExtValue&gt;\n            &lt;/DataExtMod&gt;\n        &lt;/DataExtModRq&gt;\n    &lt;/QBXMLMsgsRq&gt;\n&lt;/QBXML&gt;\n<\/code><\/pre>\n\n<p>Or, you can chain the two requests together:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;?qbxml version=\"7.0\"?&gt;\n&lt;QBXML&gt;\n    &lt;QBXMLMsgsRq onError=\"stopOnError\"&gt;\n\n        &lt;CustomerAddRq requestID=\"Q3VzdG9tZXJBZGR8MTExMTIxMjE=\"&gt;\n            &lt;CustomerAdd&gt;\n                &lt;Name&gt;Keith Palmer Jr.&lt;/Name&gt;\n                &lt;FirstName&gt;Keith&lt;/FirstName&gt;\n                &lt;MiddleName&gt;&lt;/MiddleName&gt;\n                &lt;LastName&gt;Palmer Jr.&lt;/LastName&gt;\n                &lt;BillAddress&gt;\n                    &lt;Addr1&gt;134 Stonemill Road&lt;/Addr1&gt;\n                    &lt;City&gt;Mansfield&lt;/City&gt;\n                    &lt;State&gt;CT&lt;/State&gt;\n                    &lt;PostalCode&gt;06268&lt;/PostalCode&gt;\n                    &lt;Country&gt;USA&lt;/Country&gt;\n                &lt;/BillAddress&gt;\n                &lt;Phone&gt;999-99-9999&lt;/Phone&gt;\n                &lt;Email&gt;test@example.com&lt;/Email&gt;\n                &lt;Contact&gt;Keith Palmer Jr.&lt;/Contact&gt;\n            &lt;/CustomerAdd&gt;\n        &lt;/CustomerAddRq&gt;\n\n        &lt;DataExtModRq&gt;\n            &lt;DataExtMod&gt;\n                &lt;OwnerID&gt;0&lt;/OwnerID&gt;\n                &lt;DataExtName&gt;Your Custom Field Name&lt;/DataExtName&gt;\n                &lt;ListDataExtType&gt;Customer&lt;/ListDataExtType&gt;\n                &lt;ListObjRef&gt;\n                        &lt;FullName&gt;Keith Palmer Jr.&lt;/FullName&gt;\n                &lt;/ListObjRef&gt;\n                &lt;DataExtValue&gt;Custom field value&lt;/DataExtValue&gt;\n            &lt;/DataExtMod&gt;\n        &lt;/DataExtModRq&gt;\n\n    &lt;/QBXMLMsgsRq&gt;\n&lt;/QBXML&gt;\n<\/code><\/pre>\n\n<p>Additional examples can be found on our <a href=\"http://wiki.consolibyte.com/wiki/doku.php/quickbooks\" rel=\"nofollow\">QuickBooks development wiki<\/a>.<\/p>\n",
+        "answer_id": 18206884,
+        "question_id": 18202469
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/225270517862151/picture?type=large",
+            "account_id": 8246209,
+            "user_type": "registered",
+            "user_id": 6202210,
+            "link": "https://stackoverflow.com/users/6202210/s1n7ax",
+            "reputation": 3159,
+            "display_name": "s1n7ax",
+            "accept_rate": 52
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/78812468/run-tests-without-database-auto-configuration",
+        "last_activity_date": 1722356263,
+        "creation_date": 1722351951,
+        "answer_count": 1,
+        "title": "Run tests without database auto configuration",
+        "body": "<p>In the test I want to send a request and validate the response payload. I want to do the entire flow <code>Request -&gt; ReaderController -&gt; ReaderService -&gt; ReaderRepository<\/code> and back. Here, I don't want the repository to hit the database, but mock the repository function to return the value I want.<\/p>\n<p>So far I have this code below. I have disabled the Hibernate configurer to stop the test service trying to connect to the actual postgresql instance at <code>http://localhost:5432<\/code>. Without the <code>HibernateJpaAutoConfiguration<\/code> exclude, test will fail due to connection failure to <code>http://localhost:5432<\/code>.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@SpringBootTest\n@EnableAutoConfiguration(exclude = {\n    HibernateJpaAutoConfiguration.class\n})\npublic class ReaderControllerTest {\n\n  @MockBean\n  private ReaderRepository readerRepository;\n\n  @Autowired\n  private MockMvc mockMvc;\n\n  @Test\n  void createUserTest() throws Exception {\n    var newReader = new Reader();\n    newReader.setName(&quot;user&quot;);\n    newReader.setEmail(&quot;user@email.com&quot;);\n\n    Mockito.when(readerRepository.save(null)).thenReturn(newReader);\n\n    mockMvc\n        .perform(\n            post(&quot;/user&quot;).contentType(&quot;application/json&quot;).content(&quot;{\\&quot;name\\&quot;: \\&quot;test\\&quot;}&quot;))\n        .andExpect(status().isOk());\n  }\n}\n<\/code><\/pre>\n<p>However, above code also fails because bean for <code>ReaderRepository<\/code> not found since I disabled <code>HibernateJpaAutoConfiguration<\/code>.<\/p>\n<pre><code>Error creating bean with name 'bookController': Unsatisfied dependency expressed through field 'bookService': Error creating bean with name 'bookServiceImpl': Unsatisfied dependency expressed through field 'bookRepository': Error creating bean with name 'bookRepository' defined in com.example.demo.repository.BookRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Cannot resolve reference to bean 'jpaSharedEM_entityManagerFactory' while setting bean property 'entityManager'\n<\/code><\/pre>\n<p><code>@MockBean<\/code> in the test for <code>ReaderRepository<\/code> does not have any effect apparently.<\/p>\n<pre><code>@MockBean\nprivate ReaderRepository readerRepository;\n<\/code><\/pre>\n<p>I want test to be light and run as fast as possible so I don't want incorporate Testcontainer.<\/p>\n",
+        "question_id": 78812468,
+        "tags": [
+            "java",
+            "spring"
+        ],
+        "score": -1,
+        "is_answered": false,
+        "view_count": 39
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/225270517862151/picture?type=large",
+            "account_id": 8246209,
+            "user_type": "registered",
+            "user_id": 6202210,
+            "link": "https://stackoverflow.com/users/6202210/s1n7ax",
+            "reputation": 3159,
+            "display_name": "s1n7ax",
+            "accept_rate": 52
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1722356263,
+        "creation_date": 1722356263,
+        "body": "<p>Found a solution. <code>@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.NONE)<\/code> Disables the database configuration.<\/p>\n<p>Here is the complete solution.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@SpringBootTest\n@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.NONE)\n@AutoConfigureMockMvc\npublic class ReaderControllerTest {\n  @MockBean\n  private ReaderRepository readerRepository;\n\n  @Autowired\n  private MockMvc mockMvc;\n\n  @Test\n  void createReaderTest() throws Exception {\n    var reader = ReaderData.getReader();\n\n    when(readerRepository.findByEmail(anyString())).thenReturn(Optional.empty());\n    when(readerRepository.save(null)).thenReturn(reader);\n\n    var json = &quot;&quot;&quot;\n        { &quot;name&quot;: &quot;%s&quot;, &quot;email&quot;: &quot;%s&quot; }\n        &quot;&quot;&quot;.formatted(reader.getName(), reader.getEmail());\n\n    mockMvc\n        .perform(\n            post(&quot;/user&quot;).contentType(&quot;application/json&quot;).content(json))\n        .andExpect(status().isOk());\n  }\n}\n<\/code><\/pre>\n",
+        "answer_id": 78812781,
+        "question_id": 78812468
+    }],
+    "answer_comments": {}
+}

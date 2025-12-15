@@ -1,0 +1,102 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user2363760"
+        },
+        "closed_date": 1368069710,
+        "link": "https://stackoverflow.com/questions/16449093/why-i-can-overwrite-some-methods-that-throws-exceptions-y-others-i-cant",
+        "last_activity_date": 1368044252,
+        "creation_date": 1368042835,
+        "answer_count": 3,
+        "title": "why i can overwrite some methods that throws exceptions y others i cant?",
+        "body": "<p>I'm preparing myself for a test, and I found this code that I don't understand.<\/p>\n\n<p>If I override a method just like this, it can't compile. Ok, fair enough. I have to throw a parent exception in line 2, (like throws Exception) and it would work just fine...\nBut, why is it possible then, to change line 7 with\npublic void charlie throws NullPointerException??   This would compile just fine, because I'm still not throwing anything in line 2.<\/p>\n\n<pre><code>    1.public class A {\n    2.  public void charlie() \n    3.  {\n    4. \n    5.  }\n    6.  class B extends A{\n    7.      public void charlie() throws IOException\n    8.      {}\n    9.  }\n    10.}\n<\/code><\/pre>\n",
+        "question_id": 16449093,
+        "tags": [
+            "java",
+            "exception"
+        ],
+        "score": 1,
+        "accepted_answer_id": 16449117,
+        "closed_reason": "exact duplicate",
+        "is_answered": true,
+        "view_count": 142,
+        "last_edit_date": 1368042997
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521070,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1368043016,
+            "creation_date": 1368042912,
+            "body": "<p><code>NullPointerException<\/code> is an <em>unchecked exception<\/em> (because it extends <code>RuntimeException<\/code>). It never needs to be declared, and it <em>can<\/em> be declared without affecting anything else.<\/p>\n\n<p>You should revise your understanding of checked and unchecked exceptions.<\/p>\n\n<p>The <a href=\"http://docs.oracle.com/javase/tutorial/essential/exceptions/\" rel=\"nofollow\">Java exceptions tutorial<\/a> is probably a reasonable starting point.<\/p>\n",
+            "answer_id": 16449117,
+            "question_id": 16449093,
+            "last_edit_date": 1368043016
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ECmJC.png?s=256",
+                "account_id": 985197,
+                "user_type": "registered",
+                "user_id": 1003886,
+                "link": "https://stackoverflow.com/users/1003886/kajacx",
+                "reputation": 13109,
+                "display_name": "kajacx",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1368044252,
+            "creation_date": 1368044252,
+            "body": "<p>The answer is easy:\nYou cannot throw an exception in overwriten methot in class B, if original method in class A doesn't \"support\" throwing it.<\/p>\n\n<p>Let's say you will call your method from somewhere else:<\/p>\n\n<pre><code>A a = new A();\na.charlie();\n<\/code><\/pre>\n\n<p>Since method <code>charlie<\/code> in class <code>A<\/code> doens throw any exception, it's OK. If that method would throw an exception, you would have to write<\/p>\n\n<pre><code>A a = new A();\ntry {\n    a();\n} catch(IOException ex) { //or any other exception\n    //oh noes\n}\n<\/code><\/pre>\n\n<p>But now it gets complicated, because something called class polymorphism comes to make your work mode complicated:<\/p>\n\n<pre><code>private A getA() {\n    return new B(); //this will work since B extends A\n}\n\nprivate void doSomething() {\n    A a = new A(); //you could also write A a = new B();\n    a.charlie();\n}\n<\/code><\/pre>\n\n<p>Now this code takes <code>a<\/code> as it was object from class <code>A<\/code> and it has method <code>charlie()<\/code> with no thrown exceptions. Even though <code>a<\/code> is object from class <code>B<\/code>, compilator doesn't know it and doesn't look what exceptions are thrown in methods in class <code>B<\/code>, because <code>a<\/code> is from class <code>A<\/code>, at least from compilator's view.<\/p>\n\n<p>And thats why method <code>charlie()<\/code> in class <code>B<\/code> must be same(input parameters, return type and thrown exceptions) as in class <code>A<\/code>, you can only change body of the method.<\/p>\n\n<p>However, you can still throw NullPointerException or UnsuportedOperationException, because these belong to RuntimeException, and every existing method in Java automaticly thorws RuntimeException, so you can throw any of these any time you want.<\/p>\n",
+            "answer_id": 16449444,
+            "question_id": 16449093
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OlaWnEy1.png?s=256",
+                "account_id": 378962,
+                "user_type": "registered",
+                "user_id": 732016,
+                "link": "https://stackoverflow.com/users/732016/wchargin",
+                "reputation": 16147,
+                "display_name": "wchargin",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1368042973,
+            "creation_date": 1368042973,
+            "body": "<p><code>IOException<\/code> is an exception that must be <em>caught<\/em>; you can't call a method that <code>throws<\/code> it without a <code>try-catch<\/code> block.<\/p>\n\n<p>However, now consider the following:<\/p>\n\n<pre><code>A myObject;\nmyObject = new B(); // legal - polymorphism\nmyObject.charlie();\n<\/code><\/pre>\n\n<p>One might expect that this would not throw an error, because <code>A<\/code> doesn't have a <code>throws<\/code> declaration, but <code>B<\/code> does. Therefore, this code cannot be legal.<\/p>\n\n<p>A method may have <em>fewer<\/em> thrown exceptions declared, but not <em>more<\/em>.<\/p>\n",
+            "answer_id": 16449137,
+            "question_id": 16449093
+        }
+    ],
+    "answer_comments": {"16449117": [{
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user2363760"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 16449117,
+        "edited": false,
+        "creation_date": 1368044348,
+        "comment_id": 23595357
+    }]}
+}

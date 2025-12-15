@@ -1,0 +1,98 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/keonJ.jpg?s=256",
+            "account_id": 9072418,
+            "user_type": "registered",
+            "user_id": 6755092,
+            "link": "https://stackoverflow.com/users/6755092/jay-hyber",
+            "reputation": 321,
+            "display_name": "Jay Hyber",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45069693/how-to-trap-the-413-error-in-play-framework",
+        "last_activity_date": 1585075770,
+        "creation_date": 1499906630,
+        "answer_count": 1,
+        "title": "How to trap the 413 error in Play Framework?",
+        "body": "<p>I want to return a JSON response instead of HTML. \nI dont know how to trap it. \nFor example i set the 'play.http.parser.maxMemoryBuffer' to 1MB, and if the request body will exceed 1 MB, it will return a JSON response but not HTML format saying that it is a bad response.<\/p>\n",
+        "question_id": 45069693,
+        "tags": [
+            "java",
+            "playframework"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 209,
+        "last_edit_date": 1507023366
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/keonJ.jpg?s=256",
+                "account_id": 9072418,
+                "user_type": "registered",
+                "user_id": 6755092,
+                "link": "https://stackoverflow.com/users/6755092/jay-hyber",
+                "reputation": 321,
+                "display_name": "Jay Hyber",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45069693,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/IfPnf.jpg?s=256",
+                "account_id": 10738788,
+                "user_type": "registered",
+                "user_id": 7902625,
+                "link": "https://stackoverflow.com/users/7902625/vasyl-lyashkevych",
+                "reputation": 2268,
+                "display_name": "Vasyl Lyashkevych",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1499913514,
+            "comment_id": 77114010
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IfPnf.jpg?s=256",
+                "account_id": 10738788,
+                "user_type": "registered",
+                "user_id": 7902625,
+                "link": "https://stackoverflow.com/users/7902625/vasyl-lyashkevych",
+                "reputation": 2268,
+                "display_name": "Vasyl Lyashkevych",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 45069693,
+            "edited": false,
+            "creation_date": 1499910589,
+            "comment_id": 77113345
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/8Fg7Z.jpg?s=256",
+            "account_id": 18044449,
+            "user_type": "registered",
+            "user_id": 13115809,
+            "link": "https://stackoverflow.com/users/13115809/bpop",
+            "reputation": 11,
+            "display_name": "bpop"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1585075770,
+        "creation_date": 1585075770,
+        "body": "<p>According to <a href=\"https://www.playframework.com/documentation/2.8.x/JavaErrorHandling\" rel=\"nofollow noreferrer\">the documentation<\/a>:\nTo switch from HTML to JSON response you can add this line to application.conf<\/p>\n\n<pre><code>play.http.errorHandler = play.http.JsonHttpErrorHandler\n<\/code><\/pre>\n\n<p>If you also want to customize the message, you should instead add this line to application.conf<\/p>\n\n<pre><code>play.http.errorHandler = \"com.example.ErrorHandler\"\n<\/code><\/pre>\n\n<p>Obviously, the line above, should point to your own implementation of the error handler, that could look like this:<\/p>\n\n<pre><code>package com.example\n\nimport play.http.HttpErrorHandler;\nimport play.mvc.*;\nimport play.mvc.Http.*;\nimport java.util.concurrent.CompletableFuture;\nimport java.util.concurrent.CompletionStage;\nimport javax.inject.Singleton;\n\n@Singleton\npublic class ErrorHandler implements HttpErrorHandler {\n  public CompletionStage&lt;Result&gt; onClientError(RequestHeader request, int statusCode, String message) {\n    if (statusCode == 413) {\n        return CompletableFuture.completedFuture(Results.status(statusCode, \"A client error occurred: \" + message + \" The payload size should be lower than 1Mb.\"));\n    } else {\n        return CompletableFuture.completedFuture(Results.status(statusCode, \"A client error occurred: \" + message));\n    }\n  }\n\n  public CompletionStage&lt;Result&gt; onServerError(RequestHeader request, Throwable exception) {\n    return CompletableFuture.completedFuture(\n        Results.internalServerError(\"A server error occurred: \" + exception.getMessage()));\n  }\n}\n<\/code><\/pre>\n",
+        "answer_id": 60837436,
+        "question_id": 45069693
+    }],
+    "answer_comments": {}
+}

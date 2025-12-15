@@ -1,0 +1,266 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+            "account_id": 11971210,
+            "user_type": "registered",
+            "user_id": 8759664,
+            "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+            "reputation": 13,
+            "display_name": "Tom Lakesman"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/48586616/jmeter-variable-set-in-preprocessor-is-not-available-to-sampler",
+        "last_activity_date": 1545132998,
+        "creation_date": 1517587752,
+        "answer_count": 2,
+        "title": "JMeter - Variable set in preprocessor is not available to sampler",
+        "body": "<p>I have a relatively simple JMeter test plan setup as shown here:\n<a href=\"https://i.sstatic.net/TYsq3.jpg\" rel=\"nofollow noreferrer\">https://i.sstatic.net/TYsq3.jpg<\/a><\/p>\n<p>The relevant part of this is the BeanShell Preprocessor (shown as <em>Setup element data<\/em>) and its relationship to the HTTP Request sampler (shown as <em>POST /elements<\/em>). Both of these are inside a Loop Controller (shown as <em>Do a few times<\/em>).<\/p>\n<p>The Preprocessor gets an array of data stored on the <code>bsh.shared<\/code> object and randomly selects one item. It then sets a variable called <code>elementTypeId<\/code>.<\/p>\n<p>When I run this test, <code>elementTypeId<\/code> gets logged (and I therefore assume is set) correctly. However, the first time around, the variable is not set correctly and still appears as <code>${elementTypeId}<\/code>. Further samples appear to be set but use the n-1th value.<\/p>\n<p>The first, failing sample is shown here: <a href=\"https://i.sstatic.net/kkvvw.jpg\" rel=\"nofollow noreferrer\">https://i.sstatic.net/kkvvw.jpg<\/a><\/p>\n<p>The final sample (and logged values) are shown here: <a href=\"https://i.sstatic.net/jDwhe.jpg\" rel=\"nofollow noreferrer\">https://i.sstatic.net/jDwhe.jpg<\/a><\/p>\n<p><strong>Setup element data - BeanShell Preprocessor code:<\/strong><\/p>\n<pre><code>import java.util.Random;\nimport com.eclipsesource.json.*;\n\nRandom rand = new Random();\nint idx = rand.nextInt(bsh.shared.elementTypes.size());\n\nJsonValue elementType = bsh.shared.elementTypes.get(idx);\nString elementTypeId = String.valueOf(elementType.get(&quot;id&quot;).asInt());\nlog.info(elementTypeId);\nvars.put(&quot;elementTypeId&quot;, elementTypeId);\n<\/code><\/pre>\n<p>It looks to me as if the sampler is firing before the preprocessor has set the variable - which seems counter to what <em>should<\/em> be happening.<\/p>\n<h2>Update following UBIK's answer<\/h2>\n<p>When I disable the SetQueryParams PreProcessor, it appears that the variable is set correctly (although the request fails as it needs a query parameter to be added).<\/p>\n<p><strong>SetQueryParams PreProcessor:<\/strong><\/p>\n<pre><code>import org.apache.jmeter.protocol.http.sampler.HTTPSamplerBase;\n\nif (sampler instanceof HTTPSamplerBase &amp;&amp; \nsampler.getMethod().equalsIgnoreCase(&quot;post&quot;)) {\n    // add query parameter to url\n    var customPath = sampler.getPath() + '?' + sampler.getQueryString();\n    sampler.setPath(customPath);\n\n    // remove query parameter from body\n    arguments = sampler.getArguments();\n    while (arguments.getArgumentCount() &gt; 1) {\n        arguments.removeArgument(arguments.getArgumentCount() - 1);\n    }\n    sampler.setArguments(arguments);\n}\n<\/code><\/pre>\n<p>Is it possible to have both preprocessors applied to the POST request?<\/p>\n",
+        "question_id": 48586616,
+        "tags": [
+            "java",
+            "jmeter",
+            "beanshell"
+        ],
+        "score": 1,
+        "accepted_answer_id": 48590008,
+        "is_answered": true,
+        "view_count": 2191,
+        "last_edit_date": 1592644375
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48586616,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/1M0bF.png?s=256",
+                "account_id": 6927673,
+                "user_type": "registered",
+                "user_id": 5318223,
+                "link": "https://stackoverflow.com/users/5318223/timbre-timbre",
+                "reputation": 14106,
+                "display_name": "timbre timbre",
+                "accept_rate": 92
+            },
+            "edited": false,
+            "creation_date": 1517819076,
+            "comment_id": 84233101
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/1M0bF.png?s=256",
+                "account_id": 6927673,
+                "user_type": "registered",
+                "user_id": 5318223,
+                "link": "https://stackoverflow.com/users/5318223/timbre-timbre",
+                "reputation": 14106,
+                "display_name": "timbre timbre",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 48586616,
+            "edited": false,
+            "creation_date": 1517598825,
+            "comment_id": 84175914
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gzSq5.png?s=256",
+                "account_id": 209652,
+                "user_type": "registered",
+                "user_id": 460802,
+                "link": "https://stackoverflow.com/users/460802/ubik-load-pack",
+                "reputation": 34736,
+                "display_name": "UBIK LOAD PACK"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1517601394,
+            "creation_date": 1517601394,
+            "body": "<p>I think you issue might be coming from the other PreProcessor :<\/p>\n\n<ul>\n<li>SetQueryParams PreProcessor<\/li>\n<\/ul>\n\n<p>As per <a href=\"https://jmeter.apache.org/usermanual/test_plan.html#scoping_rules\" rel=\"nofollow noreferrer\">scoping rules<\/a> , this one runs for every HTTP Sampler.<\/p>\n",
+            "answer_id": 48590008,
+            "question_id": 48586616
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-HbUZW3b4jj8/AAAAAAAAAAI/AAAAAAAAADA/HbfH6217ErE/s256-rj/photo.jpg",
+                "account_id": 14832463,
+                "user_type": "registered",
+                "user_id": 10711584,
+                "link": "https://stackoverflow.com/users/10711584/adarsh-j",
+                "reputation": 61,
+                "display_name": "Adarsh J"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1545132998,
+            "creation_date": 1545132998,
+            "body": "<p>Check in console for the exception thrown.\ntry resolving that<\/p>\n\n<p>if nothing is working please copy your script, delete Beanshell preprocessor and add BeanShell again and paste your script.\nThis may be silly but it worked for me.<\/p>\n",
+            "answer_id": 53832192,
+            "question_id": 48586616
+        }
+    ],
+    "answer_comments": {"48590008": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48590008,
+            "edited": false,
+            "creation_date": 1517912426,
+            "comment_id": 84277656
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gzSq5.png?s=256",
+                "account_id": 209652,
+                "user_type": "registered",
+                "user_id": 460802,
+                "link": "https://stackoverflow.com/users/460802/ubik-load-pack",
+                "reputation": 34736,
+                "display_name": "UBIK LOAD PACK"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48590008,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "edited": false,
+            "creation_date": 1517910360,
+            "comment_id": 84276204
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48590008,
+            "edited": false,
+            "creation_date": 1517906259,
+            "comment_id": 84273561
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gzSq5.png?s=256",
+                "account_id": 209652,
+                "user_type": "registered",
+                "user_id": 460802,
+                "link": "https://stackoverflow.com/users/460802/ubik-load-pack",
+                "reputation": 34736,
+                "display_name": "UBIK LOAD PACK"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48590008,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "edited": false,
+            "creation_date": 1517847680,
+            "comment_id": 84250664
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48590008,
+            "edited": false,
+            "creation_date": 1517846300,
+            "comment_id": 84249824
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gzSq5.png?s=256",
+                "account_id": 209652,
+                "user_type": "registered",
+                "user_id": 460802,
+                "link": "https://stackoverflow.com/users/460802/ubik-load-pack",
+                "reputation": 34736,
+                "display_name": "UBIK LOAD PACK"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48590008,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "edited": false,
+            "creation_date": 1517844622,
+            "comment_id": 84248688
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc531f850e513fd7f4dd62faea5a4e9?s=256&d=identicon&r=PG",
+                "account_id": 11971210,
+                "user_type": "registered",
+                "user_id": 8759664,
+                "link": "https://stackoverflow.com/users/8759664/tom-lakesman",
+                "reputation": 13,
+                "display_name": "Tom Lakesman"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48590008,
+            "edited": false,
+            "creation_date": 1517819230,
+            "comment_id": 84233177
+        }
+    ]}
+}

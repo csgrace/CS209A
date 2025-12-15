@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1cbae5363bf53db295435dc22187805e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1249465,
+            "user_type": "registered",
+            "user_id": 1210191,
+            "link": "https://stackoverflow.com/users/1210191/argonath88",
+            "reputation": 453,
+            "display_name": "argonath88",
+            "accept_rate": 57
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/42965574/how-to-load-properties-files-inside-a-filter",
+        "last_activity_date": 1490378985,
+        "creation_date": 1490232182,
+        "answer_count": 1,
+        "title": "How to load properties files inside a filter",
+        "body": "<p>I have an application that requires SAML implementation so I included a filter to do the verification or required redirect. The redirect works and everything is fine, however, the redirect URL changes depending on the environment in which I'm running the app, so I need to be able to load that from a properties file. Same goes for another property needed to decode the token. \nThe process to load the properties file fails and the properties come empty.<\/p>\n\n<p>Here's the error<\/p>\n\n<pre><code>[INFO] Mar 23, 2017 1:20:49 AM mypackage.SamlFilter init\n[INFO] SEVERE: FAILED TO LOAD PROPERTIES FOR FILTER!!!!!!!!!!\n[INFO] Mar 23, 2017 1:20:49 AM com.google.apphosting.utils.jetty.JettyLogger warn\n[INFO] WARNING: failed SamlFilter: javax.servlet.ServletException: FAILED TO LOAD PROPERTIES FOR FILTER!!!!!!!!!!\n<\/code><\/pre>\n\n<p>Here's the class<\/p>\n\n<pre><code>package mypackage;\n\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.util.Enumeration;\nimport java.util.Properties;\n\nimport javax.servlet.Filter;\nimport javax.servlet.FilterChain;\nimport javax.servlet.FilterConfig;\nimport javax.servlet.ServletException;\nimport javax.servlet.ServletRequest;\nimport javax.servlet.ServletResponse;\nimport javax.servlet.http.Cookie;\nimport javax.servlet.http.HttpServletRequest;\nimport javax.servlet.http.HttpServletResponse;\nimport javax.ws.rs.core.MediaType;\n\nimport org.apache.http.HttpStatus;\nimport org.codehaus.jettison.json.JSONObject;\n\nimport mypackage.utilities.JsonToken;\nimport mypackage.utilities.JsonTokenProcessor;\n\nimport lombok.extern.slf4j.Slf4j;\n\n@Slf4j\npublic class SamlFilter implements Filter {\n    private JsonTokenProcessor jsonTokenProcessor;\n    private String SSOurl;\n\n    @Override\n    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)\n            throws IOException, ServletException {\n\n        HttpServletRequest req = (HttpServletRequest) request;\n        HttpServletResponse res = (HttpServletResponse) response;\n\n        Cookie[] cookies = req.getCookies();\n        if(cookies != null) { \n            for (Cookie cookie : cookies) {\n                if(cookie.getName().equals(\"token\")) {\n                    String token = cookie.getValue();\n                    JsonToken jsonToken;\n                    try {\n                        jsonToken = jsonTokenProcessor.decode(token);\n                    } catch (Exception e) {\n                        log.error(e.getClass().getName() + \" while decoding SAML token. Error: \" + e.getLocalizedMessage());\n                        res.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);\n                        return;\n                    }\n                    if(!jsonToken.isExpired()) {\n                        request.setAttribute(\"token\", jsonToken);\n                        chain.doFilter(request, response);\n                        return;\n                    }\n                    break;\n                }\n            }\n        }\n        res.setStatus(HttpStatus.SC_UNAUTHORIZED);\n        res.addHeader(\"Cache-Control\", \"no-cache, no-store, must-revalidate\");\n        res.addHeader(\"Content-Type\", MediaType.APPLICATION_JSON);\n        res.addHeader(\"Expires\", \"0\");\n        res.addHeader(\"Pragma\",\"no-cache\");\n        JSONObject returnObject = null;\n        try {\n            returnObject = new JSONObject();\n            returnObject.put(\"redirectURL\", redirectURL);\n        } catch (Exception e) {\n            log.warn(\"SamlFilter(): \" + e.getClass().getName() + \" Can't create redirect body. Error: \" + e.getLocalizedMessage());\n        }\n        res.getWriter().write(returnObject.toString());\n        res.getWriter().flush();\n        res.getWriter().close();\n        return;\n    }\n\n    @Override\n    public void init(FilterConfig filterConfig) throws ServletException {\n        Properties properties =     LoadProperties(\"properties/myfile.properties\");\n        String myproperty = properties.getProperty(\"myproperty\");\n\n        SSOurl = properties.getProperty(\"redirectURL\");\n        if(myproperty == null || myproperty.isEmpty() || SSOurl ==  null || SSOurl.isEmpty()) {\n            throw new ServletException(\"FAILED TO LOAD PROPERTIES FOR FILTER!!!!!!!!!!\");\n        }\n        try {\n            jsonTokenProcessor = new JsonTokenProcessor(myproperty);\n        } catch (Exception e) {\n            log.error(\"Error: \" + e.getLocalizedMessage());\n        }\n    }\n\n    @Override\n    public void destroy() {\n    }\n\n    private static Properties LoadProperties(String filename) {\n        Properties newProperties = new Properties();\n        try {\n            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);\n            if (inputStream != null) {\n                newProperties.load(inputStream);\n                Enumeration&lt;?&gt; e = newProperties.propertyNames();\n                while (e.hasMoreElements()) {\n                    String key = (String) e.nextElement();\n                    String value = newProperties.getProperty(key);\n                    log.info(\"Key : \" + key + \", Value : \" + value);\n                }\n            }\n        } catch (Exception ex) {\n            log.warn(\"Error: \" + ex.getLocalizedMessage());\n        }\n        return newProperties;\n    }\n}\n<\/code><\/pre>\n\n<p>Here's the filter definition on web.xml<\/p>\n\n<pre><code>&lt;filter&gt;\n    &lt;filter-name&gt;SamlFilter&lt;/filter-name&gt;\n    &lt;filter-class&gt;mypackage.SamlFilter&lt;/filter-class&gt;\n&lt;/filter&gt;\n&lt;filter-mapping&gt;\n    &lt;filter-name&gt;SamlFilter&lt;/filter-name&gt;\n    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;\n&lt;/filter-mapping&gt;\n<\/code><\/pre>\n",
+        "question_id": 42965574,
+        "tags": [
+            "java",
+            "filter",
+            "saml"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 1978
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1cbae5363bf53db295435dc22187805e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1249465,
+            "user_type": "registered",
+            "user_id": 1210191,
+            "link": "https://stackoverflow.com/users/1210191/argonath88",
+            "reputation": 453,
+            "display_name": "argonath88",
+            "accept_rate": 57
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1490378985,
+        "creation_date": 1490378985,
+        "body": "<p>So I found a solution by making all the code of loading properties a static block. That solved everything<\/p>\n\n<pre><code>@Override\npublic void init(FilterConfig filterConfig) throws ServletException {\n}\n\n@Override\npublic void destroy() {\n}\n\nstatic {\n    Properties newProperties = new Properties();\n    try {\n        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(\"properties/myfile.properties\");\n        if (inputStream != null) {\n            newProperties.load(inputStream);\n            Enumeration&lt;?&gt; e = newProperties.propertyNames();\n            while (e.hasMoreElements()) {\n                String key = (String) e.nextElement();\n                String value = newProperties.getProperty(key);\n                log.info(\"Key : \" + key + \", Value : \" + value);\n            }\n        }\n    } catch (Exception ex) {\n        log.warn(\"Error: \" + ex.getLocalizedMessage());\n    }\n\n    String myproperty = properties.getProperty(\"myproperty\");\n\n    SSOurl = properties.getProperty(\"redirectURL\");\n    if(myproperty == null || myproperty.isEmpty() || SSOurl ==  null || SSOurl.isEmpty()) {\n        throw new ServletException(\"FAILED TO LOAD PROPERTIES FOR FILTER!!!!!!!!!!\");\n    }\n    try {\n        jsonTokenProcessor = new JsonTokenProcessor(myproperty);\n    } catch (Exception e) {\n        log.error(\"Error: \" + e.getLocalizedMessage());\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 43006414,
+        "question_id": 42965574
+    }],
+    "answer_comments": {}
+}

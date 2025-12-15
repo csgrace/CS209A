@@ -1,0 +1,136 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/322acd8eee1820fde66a9be602718bb1?s=256&d=identicon&r=PG",
+            "account_id": 367739,
+            "user_type": "registered",
+            "user_id": 714104,
+            "link": "https://stackoverflow.com/users/714104/dominik",
+            "reputation": 1118,
+            "display_name": "Dominik",
+            "accept_rate": 20
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49883550/noclassdeffounderror-when-using-simplegraphqlservlet-builder",
+        "last_activity_date": 1579635018,
+        "creation_date": 1523983954,
+        "answer_count": 2,
+        "title": "NoClassDefFoundError when using SimpleGraphQLServlet.Builder",
+        "body": "<p>I wrote a simple GraphQL Servlet based on class <code>SimpleGraphQLServlet<\/code>. The constructor of this class is deprecated and it is recommended to use the builder instead. So what I did is to provide my own servlet which forwards the requests to an instance of <code>SimpleGraphQLServlet<\/code> which can be builded in my servlet's <code>init<\/code> method:<\/p>\n\n<pre><code>@WebServlet(\"/graphql\")\npublic class GraphQLEndpoint extends HttpServlet {\n\n    SimpleGraphQLServlet graphQLServlet;\n\n    @Override\n    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n        graphQLServlet.service(req, resp);\n    }\n\n    @Override\n    public void init() throws ServletException {\n        graphQLServlet = SimpleGraphQLServlet.builder(buildSchema()).withInstrumentation(new TracingInstrumentation()).build();\n    }\n\n    private GraphQLSchema buildSchema() { /* ... */ }\n}\n<\/code><\/pre>\n\n<p>However, when the <code>SimpleGraphQLServlet<\/code> instance is created, the following exception is thrown:<\/p>\n\n<pre><code>java.lang.NoClassDefFoundError: graphql/execution/instrumentation/NoOpInstrumentation\n        at graphql.servlet.SimpleGraphQLServlet$Builder.&lt;init&gt;(SimpleGraphQLServlet.java:134) ~[graphql-java-servlet-4.7.0.jar:na]\n<\/code><\/pre>\n\n<p>which is strange as the class seems to be available in the jar file <code>graphql-java-8.0.jar<\/code>. I declared the following dependencies:<\/p>\n\n<pre><code>dependencies {\n    compile \"com.graphql-java:graphql-java:8.0\"\n    compile \"com.graphql-java:graphql-java-tools:4.3.0\"\n    compile \"com.graphql-java:graphql-java-servlet:4.7.0\"\n\n    compile \"org.slf4j:slf4j-simple:1.7.25\"\n\n    testCompile \"junit:junit:3.8.1\"\n    providedCompile \"javax.servlet:javax.servlet-api:3.0.1\"\n}\n<\/code><\/pre>\n\n<p>What did I miss?<\/p>\n",
+        "question_id": 49883550,
+        "tags": [
+            "java",
+            "graphql-java"
+        ],
+        "score": 2,
+        "accepted_answer_id": 49884895,
+        "is_answered": true,
+        "view_count": 2230
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/322acd8eee1820fde66a9be602718bb1?s=256&d=identicon&r=PG",
+                "account_id": 367739,
+                "user_type": "registered",
+                "user_id": 714104,
+                "link": "https://stackoverflow.com/users/714104/dominik",
+                "reputation": 1118,
+                "display_name": "Dominik",
+                "accept_rate": 20
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49883550,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5909ef9a70ab511c1a4398f3d8784341?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11116330,
+                "user_type": "registered",
+                "user_id": 8160553,
+                "link": "https://stackoverflow.com/users/8160553/dimwittedanimal",
+                "reputation": 656,
+                "display_name": "dimwittedanimal"
+            },
+            "edited": false,
+            "creation_date": 1523988171,
+            "comment_id": 86785432
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5909ef9a70ab511c1a4398f3d8784341?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11116330,
+                "user_type": "registered",
+                "user_id": 8160553,
+                "link": "https://stackoverflow.com/users/8160553/dimwittedanimal",
+                "reputation": 656,
+                "display_name": "dimwittedanimal"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49883550,
+            "edited": false,
+            "creation_date": 1523984147,
+            "comment_id": 86783180
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/322acd8eee1820fde66a9be602718bb1?s=256&d=identicon&r=PG",
+                "account_id": 367739,
+                "user_type": "registered",
+                "user_id": 714104,
+                "link": "https://stackoverflow.com/users/714104/dominik",
+                "reputation": 1118,
+                "display_name": "Dominik",
+                "accept_rate": 20
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1523988986,
+            "creation_date": 1523988986,
+            "body": "<p>I did receive a hint from @kaqqao who informed me, that my exception is a graphql-java version mismatch. Version 8.0 which I was using is not yet compatible.<\/p>\n\n<p>Now I use the following graphql-java dependencies, and it works fine:<\/p>\n\n<pre><code>compile \"com.graphql-java:graphql-java:7.0\"\ncompile \"com.graphql-java:graphql-java-tools:4.3.0\"\ncompile \"com.graphql-java:graphql-java-servlet:4.7.0\"\n<\/code><\/pre>\n\n<p>@kaqqao closed with the comment \"Overriding dependency versions is scary business.\". I agree ;-)<\/p>\n",
+            "answer_id": 49884895,
+            "question_id": 49883550
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/67c216ca182451567e17c2098d47f26d?s=256&d=identicon&r=PG",
+                "account_id": 1613382,
+                "user_type": "registered",
+                "user_id": 1502439,
+                "link": "https://stackoverflow.com/users/1502439/janac-meena",
+                "reputation": 3687,
+                "display_name": "Janac Meena",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1579635018,
+            "creation_date": 1579635018,
+            "body": "<p>2020 Answer: <\/p>\n\n<pre><code>implementation 'com.graphql-java-kickstart:graphiql-spring-boot-starter:5.10.0'\nimplementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'\nimplementation 'com.graphql-java-kickstart:graphql-java-tools:5.6.1'\n<\/code><\/pre>\n\n<p>Was missing those dependencies<\/p>\n",
+            "answer_id": 59848000,
+            "question_id": 49883550
+        }
+    ],
+    "answer_comments": {"49884895": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c858688cffaffffb2dfabae6bc89ba7e?s=256&d=identicon&r=PG",
+            "account_id": 111563,
+            "user_type": "registered",
+            "user_id": 294657,
+            "link": "https://stackoverflow.com/users/294657/kaqqao",
+            "reputation": 16134,
+            "display_name": "kaqqao",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 49884895,
+        "edited": false,
+        "creation_date": 1524524339,
+        "comment_id": 86998724
+    }]}
+}

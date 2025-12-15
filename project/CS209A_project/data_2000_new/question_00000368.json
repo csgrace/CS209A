@@ -1,0 +1,93 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5f1aff511c5c9b3e8c04d0d00fa3f9ef?s=256&d=identicon&r=PG",
+            "account_id": 205124,
+            "user_type": "registered",
+            "user_id": 453712,
+            "link": "https://stackoverflow.com/users/453712/michele",
+            "reputation": 26648,
+            "display_name": "michele",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47887722/elasticsearch-matching-string-with-like-operator",
+        "last_activity_date": 1513857452,
+        "creation_date": 1513688787,
+        "answer_count": 3,
+        "title": "Elasticsearch matching string with like operator",
+        "body": "<p>I would query elasticsearch for retrieve all the document that has field value like a given string.<\/p>\n\n<p>For example <code>field LIKE \"abc\"<\/code> has to return <\/p>\n\n<ul>\n<li>\"abc\"<\/li>\n<li>\"abcdef\"<\/li>\n<li>\"abcd\"<\/li>\n<li>\"abc1\"<\/li>\n<\/ul>\n\n<p>So all the field that has <code>\"abc\"<\/code> string inside.<\/p>\n\n<p>I try this query but return only the document with <code>field = \"abc\"<\/code>:<\/p>\n\n<pre><code>{\"query\":{\"more_like_this\":{\"fields\":[\"FIELD\"],\"like_text\":\"abc\",\"min_term_freq\" : 1,\"max_query_terms\" : 12}}}\n<\/code><\/pre>\n\n<p>What is the correct query?<\/p>\n\n<p>Thanks<\/p>\n",
+        "question_id": 47887722,
+        "tags": [
+            "java",
+            "elasticsearch",
+            "elasticsearch-query"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 3129
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qgSjU.jpg?s=256",
+                "account_id": 4920207,
+                "user_type": "registered",
+                "user_id": 3962972,
+                "link": "https://stackoverflow.com/users/3962972/aryeetey-solomon-aryeetey",
+                "reputation": 5905,
+                "display_name": "Aryeetey Solomon Aryeetey"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1513696535,
+            "creation_date": 1513696535,
+            "body": "<p>If you're trying to do a Prefix Query, then you can use this.<\/p>\n\n<pre><code>{ \"query\": {\n  \"prefix\" : { \"field\" : \"abc\" }\n}\n<\/code><\/pre>\n\n<p>See ElasticSearch Prefix Query <a href=\"https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-prefix-query.html\" rel=\"nofollow noreferrer\">ElasticSearch Prefix Query<\/a><\/p>\n",
+            "answer_id": 47889978,
+            "question_id": 47887722
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0664938b177ecadec529c7869c9d741c?s=256&d=identicon&r=PG",
+                "account_id": 379232,
+                "user_type": "registered",
+                "user_id": 732456,
+                "link": "https://stackoverflow.com/users/732456/user732456",
+                "reputation": 2716,
+                "display_name": "user732456",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1513857452,
+            "creation_date": 1513850926,
+            "body": "<p>Although your question is incomplete. I will try to give you several ideas.<\/p>\n\n<p>One way surely is a prefix query, but much more efficiently is to build an edge ngram analyzer. That way you'll have your data prepared on inserts and query will be much faster. edge ngram is the most flexible way to do your functionality also, because you can autocomplete words that appear in any order. If you don't need to do this, but you only need \"search as you type\" queries then the best way is to use completion suggester. If you need to find strings that appear in the middle of the words than you can check ngram analyzer.<\/p>\n\n<p>Here is how I set an edge ngram analyzer from my code. <\/p>\n\n<pre><code>        \"settings\": {\n            \"analysis\": {\n                \"filter\"  : {\n                    \"edge_filter\"        : {\n                        \"type\"    : \"edge_ngram\",\n                        \"min_gram\": 1,\n                        \"max_gram\": 256\n                    }\n                },\n                \"analyzer\": {\n                    \"edge_analyzer\" : {\n                        \"type\"     : \"custom\",\n                        \"tokenizer\": \"whitespace\",\n                        \"filter\"   : [\"lowercase\", \"edge_filter\"]\n                    },\n                    \"lowercase_whitespace\": {\n                        \"type\": \"custom\",\n                        \"tokenizer\": \"whitespace\",\n                        \"filter\": [ \"lowercase\" ]\n                    }\n                }\n            }\n        },\n        \"mappings\": {\n            \"my_type\": {\n                \"properties\": {\n                    \"name\": {\n                        \"type\": \"keyword\",\n                        \"fields\": {\n                            \"suggest\": {\n                                \"type\": \"text\",\n                                \"analyzer\" : \"edge_analyzer\",\n                                \"search_analyzer\": \"lowercase_whitespace\"\n                            }\n                        }\n                    }\n                }\n            }\n        }\n<\/code><\/pre>\n",
+            "answer_id": 47922514,
+            "question_id": 47887722,
+            "last_edit_date": 1513857452
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-rfK5tDtADWs/AAAAAAAAAAI/AAAAAAAANaU/rYJJgnFZN1s/s256-rj/photo.jpg",
+                "account_id": 12459950,
+                "user_type": "registered",
+                "user_id": 9071912,
+                "link": "https://stackoverflow.com/users/9071912/adampillingtech",
+                "reputation": 476,
+                "display_name": "AdamPillingTech"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1513690539,
+            "creation_date": 1513690539,
+            "body": "<p>You should be able to perform a wildcard query as described here.<\/p>\n\n<p><a href=\"https://hackerbruecke.wordpress.com/2017/03/29/finding-a-string-in-a-haystack-partial-matching-with-elasticsearch/\" rel=\"nofollow noreferrer\">Elasticsearch like query<\/a><\/p>\n\n<pre><code>{\n  \"query\": {\n    \"wildcard\": {\n      \"&lt;&lt;FIELD NAME&gt;&gt;\": \"*&lt;&lt;QUERY TEXT&gt;&gt;*\"\n    }\n  }\n}\n<\/code><\/pre>\n",
+            "answer_id": 47888210,
+            "question_id": 47887722
+        }
+    ],
+    "answer_comments": {}
+}

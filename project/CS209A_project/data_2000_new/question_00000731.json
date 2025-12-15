@@ -1,0 +1,161 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-XeiGnWjAfUY/AAAAAAAAAAI/AAAAAAAAAsA/7mqdC63-xpc/s256-rj/photo.jpg",
+            "account_id": 5041195,
+            "user_type": "registered",
+            "user_id": 4048512,
+            "link": "https://stackoverflow.com/users/4048512/derry-susilo",
+            "reputation": 35,
+            "display_name": "Derry Susilo",
+            "accept_rate": 54
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26558530/onbackpressed-not-working",
+        "last_activity_date": 1414205822,
+        "creation_date": 1414200892,
+        "answer_count": 3,
+        "title": "onBackPressed not working",
+        "body": "<p>i trying to make a back button working on fragment.\nim using a onBackPressed.. but every compile and click back button,\nthe screen always go to home screen, not to go to previous fragment\nwhats wrong with my code?\nthanks before<\/p>\n\n<p>this my code<\/p>\n\n<blockquote>\n<pre><code>public class FragmentScheduleRoom extends Fragment{\n    ListView list;\n    // Array of strings storing country names\n    String[] room = new String[] {\n            \"304\",\n            \"305\",\n            \"306\",\n            \"307\",\n            \"308\",\n    };\n\n    @Override\n    public View onCreateView(LayoutInflater inflater, ViewGroup container,\n                             Bundle savedInstanceState) {\n        Log.d(\"ZZZ\", \"ada di oncreateView Schedule room\");\n        super.onCreate(savedInstanceState);\n        View rootView = inflater.inflate(R.layout.fragment_layout_schedule_room, container,\n<\/code><\/pre>\n  \n  <p>false);\n              final List> aList = new ArrayList>();<\/p>\n\n<pre><code>        for(int i=0;i&lt;5;i++) {\n            HashMap&lt;String, String&gt; hm = new HashMap&lt;String, String&gt;();\n            hm.put(\"room\", room[i]);\n            aList.add(hm);\n            // R.layout.listview_layout defines the layout of each item\n            list = (ListView) rootView.findViewById(R.id.list);\n            ListAdapter adapter = new SimpleAdapter(getActivity(), aList, R.layout.list_schedule_room, new String[]{\"room\"}, new\n<\/code><\/pre>\n  \n  <p>int[]{R.id.room});<\/p>\n\n<pre><code>            list.setAdapter(adapter);\n            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {\n                @Override\n                public void onItemClick(AdapterView&lt;?&gt; parent, View view,\n                                        int position, long id) {\n                    String room = ((TextView) view.findViewById(R.id.room)).getText().toString();\n//                    Intent in = new Intent(getActivity(),FragmentScheduleDetail.class);\n//                    in.putExtra(\"txt\",day);\n                    String selectday = getArguments().getString(\"selectday\");\n                    Fragment fragment = new FragmentScheduleDetail();\n                    Bundle data = new Bundle();\n                    data.putString(\"selectroom\", room);\n                    data.putString(\"selectday\", selectday);\n                    fragment.setArguments(data);\n                    FragmentManager frgManager = getFragmentManager();\n                    Log.d(\"tag\", \"ROOM SELECT: \" + data.getString(\"selectroom\"));\n                    frgManager.beginTransaction().replace(R.id.content_frame, fragment)\n                            .commit();\n                    //Toast.makeText(getActivity(), \"You Clicked at \" + aList.get(+position).get(\"day\"), Toast.LENGTH_SHORT).show();\n                }\n            });\n        }\n        return rootView;\n    }\n    public void onBackPressed() {\n        //super.onBackPressed();\n        //Toast.makeText(getApplicationContext(), \"click\",2000).show();\n        Fragment fragment = new FragmentScheduleDay();\n        FragmentManager frgManager = getFragmentManager();\n        frgManager.beginTransaction().replace(R.id.content_frame, fragment)\n                .commit();\n    }\n\n}\n<\/code><\/pre>\n<\/blockquote>\n",
+        "question_id": 26558530,
+        "tags": [
+            "java",
+            "android",
+            "android-fragments",
+            "back-button"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 513
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c018bb09f23b1b1805a1c130e0d0b4df?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4284021,
+                "user_type": "registered",
+                "user_id": 3502466,
+                "link": "https://stackoverflow.com/users/3502466/anglev",
+                "reputation": 76,
+                "display_name": "AngleV"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1414201874,
+            "creation_date": 1414201874,
+            "body": "<p>Take a look at the getFragmentManager().popBackStack() methods <\/p>\n",
+            "answer_id": 26558603,
+            "question_id": 26558530
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/34474b97ae369a62b0d9ad2d83162d61?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4824596,
+                "user_type": "registered",
+                "user_id": 3894351,
+                "link": "https://stackoverflow.com/users/3894351/elltz",
+                "reputation": 10877,
+                "display_name": "Elltz",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1414203088,
+            "creation_date": 1414201898,
+            "body": "<p>no need to do that bro, just do this<\/p>\n\n<pre><code> public void onBackPressed() {\n    super.onBackPressed();\n}\n<\/code><\/pre>\n\n<p>then in your previous fragment <code>FragmentScheduleDay<\/code> that brings you to <code>FragmentScheduleRoom<\/code> do this when calling  the next fragment (which is <code>FragmentScheduleRoom<\/code>) <code>transaction.addToBackStack(null);<\/code><\/p>\n\n<p>EDIT 1: mostly fragment replace function detaches() and attaches() fragment.. so to use your style.. use detach(old fragment); then attach(new fragment); then commit() it will work..this aint correct code formats..<\/p>\n\n<p>try and let me know if it solves ur problem     <\/p>\n",
+            "answer_id": 26558604,
+            "question_id": 26558530,
+            "last_edit_date": 1414203088
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/F8AGw.jpg?s=256",
+                "account_id": 2715411,
+                "user_type": "registered",
+                "user_id": 2342904,
+                "link": "https://stackoverflow.com/users/2342904/md-shahadat-sarker",
+                "reputation": 849,
+                "display_name": "Md. Shahadat Sarker"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1414205822,
+            "creation_date": 1414205822,
+            "body": "<p>you can try with this:<\/p>\n\n<pre><code>public boolean onKeyDown(int keyCode, KeyEvent event) {\n    if ((keyCode == KeyEvent.KEYCODE_BACK)) {\n        // do your task here\n    }\n    return super.onKeyDown(keyCode, event);\n}\n<\/code><\/pre>\n\n<p>Hope this will work for you. It's work for me.<\/p>\n",
+            "answer_id": 26558922,
+            "question_id": 26558530
+        }
+    ],
+    "answer_comments": {
+        "26558922": [{
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-XeiGnWjAfUY/AAAAAAAAAAI/AAAAAAAAAsA/7mqdC63-xpc/s256-rj/photo.jpg",
+                "account_id": 5041195,
+                "user_type": "registered",
+                "user_id": 4048512,
+                "link": "https://stackoverflow.com/users/4048512/derry-susilo",
+                "reputation": 35,
+                "display_name": "Derry Susilo",
+                "accept_rate": 54
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26558922,
+            "edited": false,
+            "creation_date": 1414208902,
+            "comment_id": 41739011
+        }],
+        "26558604": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/34474b97ae369a62b0d9ad2d83162d61?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4824596,
+                    "user_type": "registered",
+                    "user_id": 3894351,
+                    "link": "https://stackoverflow.com/users/3894351/elltz",
+                    "reputation": 10877,
+                    "display_name": "Elltz",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26558604,
+                "reply_to_user": {
+                    "profile_image": "https://lh5.googleusercontent.com/-XeiGnWjAfUY/AAAAAAAAAAI/AAAAAAAAAsA/7mqdC63-xpc/s256-rj/photo.jpg",
+                    "account_id": 5041195,
+                    "user_type": "registered",
+                    "user_id": 4048512,
+                    "link": "https://stackoverflow.com/users/4048512/derry-susilo",
+                    "reputation": 35,
+                    "display_name": "Derry Susilo",
+                    "accept_rate": 54
+                },
+                "edited": false,
+                "creation_date": 1414202909,
+                "comment_id": 41738246
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh5.googleusercontent.com/-XeiGnWjAfUY/AAAAAAAAAAI/AAAAAAAAAsA/7mqdC63-xpc/s256-rj/photo.jpg",
+                    "account_id": 5041195,
+                    "user_type": "registered",
+                    "user_id": 4048512,
+                    "link": "https://stackoverflow.com/users/4048512/derry-susilo",
+                    "reputation": 35,
+                    "display_name": "Derry Susilo",
+                    "accept_rate": 54
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26558604,
+                "edited": false,
+                "creation_date": 1414202285,
+                "comment_id": 41738160
+            }
+        ]
+    }
+}

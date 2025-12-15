@@ -1,0 +1,146 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1051040108261701/picture?type=large",
+            "account_id": 7239171,
+            "user_type": "registered",
+            "user_id": 5523282,
+            "link": "https://stackoverflow.com/users/5523282/aleks",
+            "reputation": 43,
+            "display_name": "Aleks"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/33514842/how-do-i-flip-an-image-vertically-in-java",
+        "last_activity_date": 1446620615,
+        "creation_date": 1446617389,
+        "answer_count": 4,
+        "title": "How do I flip an image vertically in Java?",
+        "body": "<p>I have to flip the image horizontally but when I put in my code it only flips half of so that it reflects halfway through the image. \nWhat am I doing wrong?<\/p>\n\n<pre><code>public static void flipVertical(Pixel[][] imageArr)\n{\n    int height = imageArr.length;\n    int width = imageArr[0].length;\n\n    for(int row = 0; row &lt; height; row++)\n        {\n            for(int col = 0; col &lt; width; col++)\n            {\n                Pixel p = imageArr[row][col];\n\n                imageArr[height - row - 1][col] = p;\n            }\n        }\n<\/code><\/pre>\n",
+        "question_id": 33514842,
+        "tags": ["java"],
+        "score": 3,
+        "accepted_answer_id": 33514952,
+        "is_answered": true,
+        "view_count": 9658,
+        "last_edit_date": 1446618503
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d19da124fb19e7dba8c5db752a17ec06?s=256&d=identicon&r=PG",
+            "account_id": 6342341,
+            "user_type": "registered",
+            "user_id": 4923889,
+            "link": "https://stackoverflow.com/users/4923889/uma-kanth",
+            "reputation": 5629,
+            "display_name": "Uma Kanth",
+            "accept_rate": 47
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 33514842,
+        "edited": false,
+        "creation_date": 1446617507,
+        "comment_id": 54812256
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/44c841338e1646af9a977f1fa0e23948?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 162699,
+                "user_type": "registered",
+                "user_id": 3788176,
+                "link": "https://stackoverflow.com/users/3788176/andy-turner",
+                "reputation": 141045,
+                "display_name": "Andy Turner",
+                "accept_rate": 54
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1446620615,
+            "creation_date": 1446617838,
+            "body": "<p>Your code doesn't work currently because it is copying the flipped bottom half of the image into the top half without keeping the original data in the top half of the image. As such, when it processes the bottom half of the image, it is effectively copying the same data back to the bottom half again.<\/p>\n\n<p>When you swap two values, <code>a<\/code> and <code>b<\/code>, you would need to use a temporary variable:<\/p>\n\n<pre><code>Pixel tmp = a;\na = b;\nb = a;\n<\/code><\/pre>\n\n<p>If you do it like you have:<\/p>\n\n<pre><code>a = b;  // After, a == b and b == b.\nb = a;\n<\/code><\/pre>\n\n<p>then the second assignment is effectively a no-op, since <code>a<\/code>'s value is already <code>b<\/code>.<\/p>\n\n<p>As such, you need to update your inner loop to:<\/p>\n\n<pre><code>Pixel p = imageArr[row][col];\nimageArr[row][col] = imageArr[height - row - 1][col];\nimageArr[height - row - 1][col] = p;\n<\/code><\/pre>\n\n<p>Also, the outer for loop should be:<\/p>\n\n<pre><code>for(int row = 0; row &lt; height/2; row++)\n<\/code><\/pre>\n\n<p>Otherwise you flip the image, and then flip it back again.<\/p>\n",
+            "answer_id": 33514952,
+            "question_id": 33514842,
+            "last_edit_date": 1446620615
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VyUv5.jpg?s=256",
+                "account_id": 1626304,
+                "user_type": "registered",
+                "user_id": 1501794,
+                "link": "https://stackoverflow.com/users/1501794/rahul-tripathi",
+                "reputation": 173334,
+                "display_name": "Rahul Tripathi",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1446617624,
+            "creation_date": 1446617624,
+            "body": "<p>You can use the <a href=\"http://docs.oracle.com/javase/7/docs/api/java/awt/geom/AffineTransform.html\" rel=\"nofollow\">AffineTransform<\/a> class and its method <code>translate<\/code> to flip the image horizontally. See the code <a href=\"http://examples.javacodegeeks.com/desktop-java/awt/image/flipping-a-buffered-image\" rel=\"nofollow\">here<\/a>:<\/p>\n\n<pre><code>// Flip the image horizontally\ntx = AffineTransform.getScaleInstance(-1, 1);\ntx.translate(-image.getWidth(null), 0);\nop = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);\nimage = op.filter(image, null);\n<\/code><\/pre>\n",
+            "answer_id": 33514896,
+            "question_id": 33514842
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/508c3cc96cdca194c0204f1f7c2758e0?s=256&d=identicon&r=PG",
+                "account_id": 2871026,
+                "user_type": "registered",
+                "user_id": 2464386,
+                "link": "https://stackoverflow.com/users/2464386/ajb",
+                "reputation": 31779,
+                "display_name": "ajb",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1446617822,
+            "creation_date": 1446617822,
+            "body": "<p>The problem is that you're changing pixels that you will still need later.  When <code>row<\/code> goes through the top half of the rows, you modify the pixels in the bottom half by copying them from the top half.  When <code>row<\/code> later goes through the bottom half of the rows, you try to modify the pixels in the top half by copying them from the bottom half--<strong>but the first half of the algorithm already changed the bottom half<\/strong>.  So you're not copying the original pixels when you set the top half.<\/p>\n\n<p>There are at least two ways to solve this:<\/p>\n\n<p>(1) Don't use the same array.  Create a new array to hold the result, and copy after you're done.<\/p>\n\n<p>(2) Let <code>row<\/code> go only up to half the height, and for each loop iteration, <em>swap<\/em> the pixels in <code>imageArr[row][col]<\/code> and <code>imageArr[height-row-1][col]<\/code>, something like:<\/p>\n\n<pre><code>Pixel p1 = imageArr[row][col];\nPixel p2 = imageArr[height-row-1][col];\nimageArr[row][col] = p2;\nimageArr[height-row-1][col] = p1;\n<\/code><\/pre>\n\n<p>(Specifically, you want to do this only as long as <code>row &lt; height-row-1<\/code>.  When you reach a point where <code>row &gt;= height-row-1<\/code>, then you have to exit the loop.  Otherwise you're going to start undoing the work you've already done.)<\/p>\n",
+            "answer_id": 33514948,
+            "question_id": 33514842
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7feab598abfc27783641fe2b796a0155?s=256&d=identicon&r=PG",
+                "account_id": 370994,
+                "user_type": "registered",
+                "user_id": 719263,
+                "link": "https://stackoverflow.com/users/719263/jean-baptiste-yun%c3%a8s",
+                "reputation": 36649,
+                "display_name": "Jean-Baptiste Yun&#232;s",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1446618547,
+            "creation_date": 1446618547,
+            "body": "<p>What do you mean by flipping the image horizontally? It seems taht you want to swap it vertically... Swapping horizontally (resp. vertically) means mirroring it through vertical (resp. horizontal) axe.<\/p>\n\n<p>Anyway. Two things : swap pixels correctly and limit your loop to half the dimension (once you swap two pixels, you don't need to swap them again) :<\/p>\n\n<pre><code>public static void flipHorizontal(Pixel[][] imageArr)\n{\n    int height = imageArr.length;\n    int width = imageArr[0].length;\n    for(int row = 0; row &lt; height; row++)\n      {\n        for(int col = 0; col &lt; width/2; col++)\n          { // swap two symmetric pixels\n            Pixel tmp = imageArr[row][col];\n            imageArr[row][col] = imageArr[row][width-col-1];\n            imageArr[row][width-col-1] = tmp;\n          }\n      }\n}\n<\/code><\/pre>\n",
+            "answer_id": 33515104,
+            "question_id": 33514842
+        }
+    ],
+    "answer_comments": {"33514896": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/508c3cc96cdca194c0204f1f7c2758e0?s=256&d=identicon&r=PG",
+            "account_id": 2871026,
+            "user_type": "registered",
+            "user_id": 2464386,
+            "link": "https://stackoverflow.com/users/2464386/ajb",
+            "reputation": 31779,
+            "display_name": "ajb",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 33514896,
+        "edited": false,
+        "creation_date": 1446618170,
+        "comment_id": 54812511
+    }]}
+}

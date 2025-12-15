@@ -1,0 +1,187 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3e5c687c0cd23dcf7c42a93477fb61a2?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5335758,
+            "user_type": "registered",
+            "user_id": 4254806,
+            "link": "https://stackoverflow.com/users/4254806/j-ldap",
+            "reputation": 153,
+            "display_name": "J_LDAP"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/52830491/android-fragment-with-viewpagers-oncreateview-called-in-wrong-fragment",
+        "last_activity_date": 1539678751,
+        "creation_date": 1539676377,
+        "answer_count": 2,
+        "title": "Android Fragment with ViewPagers oncreateView Called in Wrong Fragment",
+        "body": "<p>I have a main activity which shows 3 fragments inside View Pagers with tabs.<\/p>\n\n<p><strong>mainActivity.java<\/strong><\/p>\n\n<pre><code>public class mainActivity extends AppCompatActivity {\n\nglobalVariableActivity variable = new globalVariableActivity();\n\nprivate APIService mAPIService;\nprivate TextView mResponseTv;\n\nprivate RecyclerView recyclerView;\n\nprivate Token token = new Token(\"\",\"\",\"\");\n\nprivate Gson gson = new Gson();\n\nprivate Context context=mainActivity.this;\n\nprivate Toolbar toolbar;\nprivate TabLayout tabLayout;\nprivate ViewPager viewPager;\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main);\n\n    //check if token is still active\n\n    String current_token=token.getToken(context);\n\n    MyFirebaseInstanceIDService Fcm= new MyFirebaseInstanceIDService();\n    Fcm.onTokenRefresh(context,current_token);\n\n    toolbar = (Toolbar) findViewById(R.id.toolbar);\n    setSupportActionBar(toolbar);\n\n    getSupportActionBar().setDisplayHomeAsUpEnabled(false);\n\n    viewPager = (ViewPager) findViewById(R.id.viewpager);\n    setupViewPager(viewPager);\n\n    tabLayout = (TabLayout) findViewById(R.id.tabs);\n    tabLayout.setupWithViewPager(viewPager);\n\n}\n\nprivate void setupViewPager(ViewPager viewPager) {\n    ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());\n    adapter.addFragment(new BeritaFragment(), \"Berita\");\n    adapter.addFragment(new DiskusiFragment(), \"Diskusi\");\n    adapter.addFragment(new PesanFragment(), \"Pesan\");\n    viewPager.setAdapter(adapter);\n}\n\n\nclass ViewPagerAdapter extends FragmentPagerAdapter {\n    private final List&lt;Fragment&gt; mFragmentList = new ArrayList&lt;&gt;();\n    private final List&lt;String&gt; mFragmentTitleList = new ArrayList&lt;&gt;();\n\n    public ViewPagerAdapter(FragmentManager manager) {\n        super(manager);\n    }\n\n    @Override\n    public Fragment getItem(int position) {\n\n        //Toast.makeText(context,\"Item \" + position + \" shown.\", Toast.LENGTH_SHORT).show();\n        return mFragmentList.get(position);\n    }\n\n    @Override\n    public int getCount() {\n        return mFragmentList.size();\n    }\n\n    public void addFragment(Fragment fragment, String title) {\n        mFragmentList.add(fragment);\n        mFragmentTitleList.add(title);\n    }\n\n    @Override\n    public CharSequence getPageTitle(int position) {\n        Toast.makeText(context,\"Position : \" + position + \" Title : \"+ mFragmentTitleList.get(position) + \" shown.\", Toast.LENGTH_SHORT).show();\n        return mFragmentTitleList.get(position);\n    }\n}\n\ninterface LyfecycleListener {\n    void onCreatedView();\n}\n<\/code><\/pre>\n\n<p>here's the first fragment code<\/p>\n\n<p><strong>beritaFragment.java<\/strong><\/p>\n\n<pre><code>public class BeritaFragment extends Fragment {\n// TODO: Rename parameter arguments, choose names that match\n// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER\n\nprivate APIService mAPIService = APIUtils.getAPIService();;\nprivate Gson gson = new Gson();\n\nprivate TextView createdAtText;\nprivate TextView judulText;\nprivate ImageView imageView;\nprivate RecyclerView mRecyclerView;\nprivate ListAdapter mListadapter;\n\n\n\nprivate ArrayList&lt;DataBerita&gt; list_berita= new ArrayList&lt;&gt;();\n\nprivate OnFragmentInteractionListener mListener;\n\npublic BeritaFragment() {\n}\n\n// TODO: Rename and change types and number of parameters\npublic static BeritaFragment newInstance(String param1, String param2) {\n    BeritaFragment fragment = new BeritaFragment();\n\n    return fragment;\n}\n\n@Override\npublic void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n\n    getBeritaTask getBerita= new getBeritaTask();\n    try {\n        Log.d(\"berita :\", \"On create 1\");\n        getBerita.execute().get(10000, TimeUnit.MILLISECONDS);\n\n        Log.d(\"berita :\", \"On create 2\");\n    } catch (InterruptedException e) {\n        e.printStackTrace();\n    } catch (ExecutionException e) {\n        e.printStackTrace();\n    } catch (TimeoutException e) {\n        e.printStackTrace();\n    }\n\n}\n\n@Override\npublic View onCreateView(LayoutInflater inflater, ViewGroup container,\n                         Bundle savedInstanceState) {\n    // Inflate the layout for this fragment\n    View view = inflater.inflate(R.layout.fragment_berita, container, false);\n\n    Log.d(\"Berita\",\"On create view\");\n\n    Toast.makeText(getActivity() ,\"Berita Fragment onCreateView\", Toast.LENGTH_SHORT).show();\n\n\n    ArrayList&lt;DataBerita&gt; data_berita;\n\n    mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);\n    judulText = (TextView)view.findViewById(R.id.summary_judul);\n    createdAtText = (TextView)view.findViewById(R.id.created_at);\n    //imageView = (ImageView)view.findViewById(R.id.gambar);\n\n    final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());\n    layoutManager.setOrientation(LinearLayoutManager.VERTICAL);\n    mRecyclerView.setLayoutManager(layoutManager);\n\n    //data_berita=getBeritaList();\n\n    Log.d(\"Berita\",\"1\");\n\n    Log.d(\"Berita List : \", list_berita.toString());\n\n    Log.d(\"Berita\",\"3\");\n    mListadapter = new ListAdapter(list_berita);\n    mRecyclerView.setAdapter(mListadapter);\n\n    //Log.d(\"Berita view :\", view.toString());\n    return view;\n\n}\n\npublic void onViewCreated(View view, @Nullable Bundle savedInstanceState) {\n    super.onViewCreated(view, savedInstanceState);\n}\n\n// TODO: Rename method, update argument and hook method into UI event\npublic void onButtonPressed(Uri uri) {\n    if (mListener != null) {\n        mListener.onFragmentInteraction(uri);\n    }\n}\n\npublic interface OnFragmentInteractionListener {\n    // TODO: Update argument type and name\n    void onFragmentInteraction(Uri uri);\n}\n\n\npublic class ListAdapter extends RecyclerView.Adapter&lt;ListAdapter.ViewHolder&gt;\n{\n    private ArrayList&lt;DataBerita&gt; dataList;\n\n    public ListAdapter(ArrayList&lt;DataBerita&gt; data)\n    {\n        this.dataList = data;\n    }\n\n    public class ViewHolder extends RecyclerView.ViewHolder\n    {\n        TextView judulText;\n        TextView waktuText;\n        ImageView gambarView;\n\n        public ViewHolder(View itemView)\n        {\n            super(itemView);\n            this.judulText = (TextView) itemView.findViewById(R.id.summary_judul);\n            this.waktuText = (TextView) itemView.findViewById(R.id.created_at);\n            //this.gambarView = (ImageView) itemView.findViewById(R.id.gambar);\n        }\n    }\n\n    @Override\n    public ListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)\n    {\n        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.berita_list_layout, parent, false);\n\n        ViewHolder viewHolder = new ViewHolder(view);\n        return viewHolder;\n    }\n\n    @Override\n    public void onBindViewHolder(ListAdapter.ViewHolder holder, final int position)\n    {\n        Uri ImageURI=Uri.parse(dataList.get(position).getGambar_utama());\n        holder.judulText.setText(dataList.get(position).getSummary_judul());\n        holder.waktuText.setText(dataList.get(position).getCreated_at());\n        //holder.gambarView.setImageURI(ImageURI);\n\n        holder.itemView.setOnClickListener(new View.OnClickListener()\n        {\n            @Override\n            public void onClick(View v)\n            {\n                Toast.makeText(getActivity(), \"Item \" + position + \" is clicked.\", Toast.LENGTH_SHORT).show();\n            }\n        });\n    }\n\n    @Override\n    public int getItemCount()\n    {\n        return dataList.size();\n    }\n}\n\n\nprivate class getBeritaTask extends AsyncTask&lt;Void, Void, Void&gt; {\n\n    protected void onPreExecute() {\n        Log.d(\"Berita\",\"2.1\");\n    }\n\n    protected Void doInBackground(Void... voids) {\n\n        mAPIService.getBeritaList().enqueue(new Callback&lt;Berita&gt;() {\n            @Override\n            public void onResponse(Call&lt;Berita&gt; call, Response&lt;Berita&gt; response) {\n\n                list_berita = new ArrayList&lt;&gt;();\n\n                DataBerita data_berita = new DataBerita(\"\",\"\",\"\",\"\");\n\n                String id_berita;\n                String judul;\n                String gambar_utama;\n                String created_at;\n\n                Log.d(\"Berita\",\"2.2\");\n                if(response.isSuccessful()) {\n\n                    Berita body = gson.fromJson(response.body().toString(),Berita.class);\n\n                    for (int i = 0; i &lt; body.getList_berita().getData().size(); i ++) {\n\n                        id_berita=body.getList_berita().getData().get(i).getId_berita();\n                        judul=body.getList_berita().getData().get(i).getSummary_judul();\n                        gambar_utama=body.getList_berita().getData().get(i).getGambar_utama();\n                        created_at=body.getList_berita().getData().get(i).getCreated_at();\n\n                        data_berita = new DataBerita(id_berita,judul,gambar_utama,created_at);\n                        list_berita.add(data_berita);\n                    }\n                    Log.d(\"Berita List\",list_berita.toString());\n\n                }else{\n                    Log.d(\"Berita\", \"Fail\");\n                }\n\n            }\n\n            @Override\n            public void onFailure(Call&lt;Berita&gt; call, Throwable t) {\n                Log.d(\"Berita Fail\", t.getMessage());\n            }\n        });\n\n        return null;\n    }\n}\n<\/code><\/pre>\n\n<p>here's the 2nd and 3rd fragment (these 2 fragments are still mostly empty, with code for toast and log only for now)<\/p>\n\n<p><strong>DiskusiFragment.java<\/strong><\/p>\n\n<pre><code>public class DiskusiFragment extends Fragment {\n// TODO: Rename parameter arguments, choose names that match\n// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER\nprivate static final String ARG_PARAM1 = \"param1\";\nprivate static final String ARG_PARAM2 = \"param2\";\n\n// TODO: Rename and change types of parameters\nprivate String mParam1;\nprivate String mParam2;\n\nprivate OnFragmentInteractionListener mListener;\n\npublic DiskusiFragment() {\n    // Required empty public constructor\n}\n\n// TODO: Rename and change types and number of parameters\npublic static DiskusiFragment newInstance(String param1, String param2) {\n    DiskusiFragment fragment = new DiskusiFragment();\n\n    return fragment;\n}\n\n@Override\npublic void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n}\n\n@Override\npublic View onCreateView(LayoutInflater inflater, ViewGroup container,\n                         Bundle savedInstanceState) {\n\n    Toast.makeText(getActivity() ,\"Diskusi Fragment onCreateView\", Toast.LENGTH_SHORT).show();\n\n    return inflater.inflate(R.layout.fragment_diskusi, container, false);\n}\n\n// TODO: Rename method, update argument and hook method into UI event\npublic void onButtonPressed(Uri uri) {\n    if (mListener != null) {\n        mListener.onFragmentInteraction(uri);\n    }\n}\n\npublic interface OnFragmentInteractionListener {\n    // TODO: Update argument type and name\n    void onFragmentInteraction(Uri uri);\n}\n}\n<\/code><\/pre>\n\n<p>here's the problem,<\/p>\n\n<p>fragment onCreateView function seems to be called on / in the wrong fragment.<\/p>\n\n<p>when I start the app here's what happened :<\/p>\n\n<ol>\n<li>Item position 0 , 1, and 2 is called<\/li>\n<li>1st fragment on create view is called, and 2nd fragment on create view is called immediately<\/li>\n<\/ol>\n\n<p>what happens next, depends on what I do :<\/p>\n\n<p>when I change from 1st fragment => 2nd fragment, 3rd fragment on create view is called<\/p>\n\n<p>when I change from 1st fragment => 3rd fragment, 3rd fragment on create view is called<\/p>\n\n<p>when I switch from 2nd fragment => 1st fragment, no fragment on create view called<\/p>\n\n<p>when I switch from 2nd fragment => 3rd fragment, no fragment on create view called<\/p>\n\n<p>when I switch from 3rd fragment => 2nd fragment, no fragment on create view called (or sometimes 1st fragment on create view is called)<\/p>\n\n<p>when I change from 3rd fragment => 1st fragment, 1st fragment on create view called<\/p>\n\n<p>is this what suppose (in regard to onCreateView function is called on the wrong fragment) to happen?<\/p>\n\n<p>if not, where did I code wrong?<\/p>\n\n<p>Thank you very much<\/p>\n\n<p>*EDIT : this behaviour is normal, I'm really new to android. Very sorry for the inconvenience guys<\/p>\n",
+        "question_id": 52830491,
+        "tags": [
+            "java",
+            "android",
+            "android-fragments",
+            "android-viewpager",
+            "fragment-oncreateview"
+        ],
+        "score": 3,
+        "accepted_answer_id": 52831180,
+        "is_answered": true,
+        "view_count": 1464,
+        "last_edit_date": 1539678051
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3e5c687c0cd23dcf7c42a93477fb61a2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5335758,
+                "user_type": "registered",
+                "user_id": 4254806,
+                "link": "https://stackoverflow.com/users/4254806/j-ldap",
+                "reputation": 153,
+                "display_name": "J_LDAP"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830491,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/02b9edd3c34d613b496f11148dded6f8?s=256&d=identicon&r=PG",
+                "account_id": 2747028,
+                "user_type": "registered",
+                "user_id": 2367237,
+                "link": "https://stackoverflow.com/users/2367237/gonzalo",
+                "reputation": 1916,
+                "display_name": "Gonzalo",
+                "accept_rate": 20
+            },
+            "edited": false,
+            "creation_date": 1539677985,
+            "comment_id": 92578275
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/02b9edd3c34d613b496f11148dded6f8?s=256&d=identicon&r=PG",
+                "account_id": 2747028,
+                "user_type": "registered",
+                "user_id": 2367237,
+                "link": "https://stackoverflow.com/users/2367237/gonzalo",
+                "reputation": 1916,
+                "display_name": "Gonzalo",
+                "accept_rate": 20
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830491,
+            "edited": false,
+            "creation_date": 1539677435,
+            "comment_id": 92577995
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-JnVqZRNtelk/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DX4gNBH9YTQ_431oeBOdZGZoKKr_w/mo/s256-rj/photo.jpg",
+                "account_id": 14512491,
+                "user_type": "registered",
+                "user_id": 10482491,
+                "link": "https://stackoverflow.com/users/10482491/vladimir-gladun",
+                "reputation": 416,
+                "display_name": "Vladimir Gladun"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1539678088,
+            "creation_date": 1539677845,
+            "body": "<p>What do you mean by \"wrong\" fragment? View pager creates next fragment prior to navigating to it to make the transition smooth and quick. And when the fragment is created its lifecycle methods are called accordingly, there's nothing wrong with this behaviour. If you want to perform some action when the user swipes to specific fragment in your view pager, you can use OnPageChangeListener.<\/p>\n",
+            "answer_id": 52830914,
+            "question_id": 52830491,
+            "last_edit_date": 1539678088
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/yMl70.jpg?s=256",
+                "account_id": 6993753,
+                "user_type": "registered",
+                "user_id": 5362029,
+                "link": "https://stackoverflow.com/users/5362029/gil-g",
+                "reputation": 1869,
+                "display_name": "Gil G",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1539678751,
+            "creation_date": 1539678751,
+            "body": "<p>The FragmentPagerAdapter keeps additional fragments, besides the one shown, in the resumed state.<\/p>\n\n<p>If you want to initialize stuff in the fragment you should do it when\n<code>OnCreate<\/code> is called. <\/p>\n\n<p>Anything that is related to the UI been loaded properly should happen on \n<code>onViewCreated<\/code><\/p>\n\n<p>In addition, if you want to receive more information about how to handle fragments inside a ViewPager<\/p>\n\n<p><a href=\"https://stackoverflow.com/users/2510253/shreyas-shetty\">@Shreyas Shetty<\/a> answered it really well on <a href=\"https://stackoverflow.com/a/33363283/5362029\">this<\/a> thread <\/p>\n",
+            "answer_id": 52831180,
+            "question_id": 52830491
+        }
+    ],
+    "answer_comments": {
+        "52831180": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/yMl70.jpg?s=256",
+                    "account_id": 6993753,
+                    "user_type": "registered",
+                    "user_id": 5362029,
+                    "link": "https://stackoverflow.com/users/5362029/gil-g",
+                    "reputation": 1869,
+                    "display_name": "Gil G",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52831180,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e5c687c0cd23dcf7c42a93477fb61a2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5335758,
+                    "user_type": "registered",
+                    "user_id": 4254806,
+                    "link": "https://stackoverflow.com/users/4254806/j-ldap",
+                    "reputation": 153,
+                    "display_name": "J_LDAP"
+                },
+                "edited": false,
+                "creation_date": 1539840605,
+                "comment_id": 92648579
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e5c687c0cd23dcf7c42a93477fb61a2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5335758,
+                    "user_type": "registered",
+                    "user_id": 4254806,
+                    "link": "https://stackoverflow.com/users/4254806/j-ldap",
+                    "reputation": 153,
+                    "display_name": "J_LDAP"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52831180,
+                "edited": false,
+                "creation_date": 1539832888,
+                "comment_id": 92646772
+            }
+        ],
+        "52830914": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3e5c687c0cd23dcf7c42a93477fb61a2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5335758,
+                "user_type": "registered",
+                "user_id": 4254806,
+                "link": "https://stackoverflow.com/users/4254806/j-ldap",
+                "reputation": 153,
+                "display_name": "J_LDAP"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52830914,
+            "edited": false,
+            "creation_date": 1539678008,
+            "comment_id": 92578288
+        }]
+    }
+}

@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/100bbedea4c837a7e0d7cb09d857c68f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3682527,
+            "user_type": "registered",
+            "user_id": 3067148,
+            "link": "https://stackoverflow.com/users/3067148/harold-l-brown",
+            "reputation": 10270,
+            "display_name": "Harold L. Brown",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/78812216/opentelemetry-java-agent-extension-not-loaded",
+        "last_activity_date": 1722350294,
+        "creation_date": 1722348647,
+        "answer_count": 1,
+        "title": "OpenTelemetry Java Agent extension not loaded",
+        "body": "<p>I have created a simple, dummy OpenTelemetry Java Agent extension. It contains only one class and it looks like this:<\/p>\n<pre><code>import com.google.auto.service.AutoService;\nimport io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;\nimport io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;\n\n@AutoService(AutoConfigurationCustomizerProvider.class)\npublic class DummyAutoConfigurationCustomizerProvider implements AutoConfigurationCustomizerProvider {\n\n    static {\n        System.out.println(&quot;initialized DummyAutoConfigurationCustomizerProvider&quot;);\n    }\n\n    @Override\n    public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {\n        System.out.println(&quot;customizing DummyAutoConfigurationCustomizerProvider&quot;);\n    }\n}\n<\/code><\/pre>\n<p>I have created a shaded JAR of this extension.<\/p>\n<p>I have then run my application with the following Java options:<\/p>\n<pre><code>-javaagent:/opentelemetry-javaagent.jar -Dotel.javaagent.extensions=/lib-all.jar\n<\/code><\/pre>\n<p>However, I don't see any sign that my extension is loaded. The only log statement I get is this:<\/p>\n<pre><code>[otel.javaagent 2024-07-30 16:04:35:751 +0200] [main] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent - version: 2.5.0\n<\/code><\/pre>\n<p>What am I missing? Why is my OpenTelemetry Java Agent not loaded?<\/p>\n",
+        "question_id": 78812216,
+        "tags": [
+            "java",
+            "open-telemetry",
+            "javaagents",
+            "distributed-tracing",
+            "open-telemetry-java"
+        ],
+        "score": -1,
+        "accepted_answer_id": 78812361,
+        "is_answered": true,
+        "view_count": 68
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/100bbedea4c837a7e0d7cb09d857c68f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3682527,
+            "user_type": "registered",
+            "user_id": 3067148,
+            "link": "https://stackoverflow.com/users/3067148/harold-l-brown",
+            "reputation": 10270,
+            "display_name": "Harold L. Brown",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1722350294,
+        "creation_date": 1722350294,
+        "body": "<p>The <code>@com.google.auto.service.AutoService<\/code> annotation requires an annotation processor.<\/p>\n<p>I have removed the <code>@com.google.auto.service.AutoService<\/code> annotation.<\/p>\n<p>Then I created the file <code>META-INF/services/io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider<\/code> containing the content following content:<\/p>\n<pre><code>DummyAutoConfigurationCustomizerProvider\n<\/code><\/pre>\n<p>Now it works.<\/p>\n",
+        "answer_id": 78812361,
+        "question_id": 78812216
+    }],
+    "answer_comments": {}
+}

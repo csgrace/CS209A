@@ -1,0 +1,112 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f61f8cbe0a69549bd8d2d8a6e57ceea1?s=256&d=identicon&r=PG",
+            "account_id": 45512,
+            "user_type": "registered",
+            "user_id": 134186,
+            "link": "https://stackoverflow.com/users/134186/stanley",
+            "reputation": 529,
+            "display_name": "stanley",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2183188/add-a-folder-having-files-into-a-zip-file-using-java",
+        "last_activity_date": 1265106624,
+        "creation_date": 1265105323,
+        "answer_count": 2,
+        "title": "Add a folder having files into a zip file using JAVA",
+        "body": "<p>I am using java's java.util.zip api to add files and folders to a zip file, but when i add multiple files into the same folder, it deleted the old contents. Is there any way i can add files into the zip file without modifying existing contents in the folder?. \nKindly help, its important!<\/p>\n\n<p>This is my sample code:<\/p>\n\n<pre><code>ZipOutputStream zip = null;\nFileOutputStream fileWriter = null;\nfileWriter = new FileOutputStream(destZipFile);\nzip = new ZipOutputStream(fileWriter);\nzip.putNextEntry(new ZipEntry(destFilePath));\nzip.write(content);\nzip.flush();\nzip.close();\n<\/code><\/pre>\n",
+        "question_id": 2183188,
+        "tags": [
+            "java",
+            "zip"
+        ],
+        "score": 1,
+        "accepted_answer_id": 2183285,
+        "is_answered": true,
+        "view_count": 7415,
+        "last_edit_date": 1265106426
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9503d8699f2f4e733131d4e025990483?s=256&d=identicon&r=PG",
+                "account_id": 60641,
+                "user_type": "registered",
+                "user_id": 181106,
+                "link": "https://stackoverflow.com/users/181106/uckelman",
+                "reputation": 26530,
+                "display_name": "uckelman",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2183188,
+            "edited": false,
+            "creation_date": 1265113041,
+            "comment_id": 2131283
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f61f8cbe0a69549bd8d2d8a6e57ceea1?s=256&d=identicon&r=PG",
+                "account_id": 45512,
+                "user_type": "registered",
+                "user_id": 134186,
+                "link": "https://stackoverflow.com/users/134186/stanley",
+                "reputation": 529,
+                "display_name": "stanley",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2183188,
+            "edited": false,
+            "creation_date": 1265105388,
+            "comment_id": 2130600
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f4b25a9b88b44aeb8e27697426867ffc?s=256&d=identicon&r=PG",
+                "account_id": 2151,
+                "user_type": "registered",
+                "user_id": 2965,
+                "link": "https://stackoverflow.com/users/2965/laurent-k",
+                "reputation": 3533,
+                "display_name": "Laurent K",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1265106284,
+            "creation_date": 1265106284,
+            "body": "<p>If you want to add a new file to an existing zip file, you must first unzip everything, then add all the files and zip again.<\/p>\n\n<p>See <a href=\"http://java.sun.com/developer/technicalArticles/Programming/compression/\" rel=\"nofollow noreferrer\">this link<\/a> for samples.<\/p>\n",
+            "answer_id": 2183285,
+            "question_id": 2183188
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/KCtEx.png?s=256",
+                "account_id": 38309,
+                "user_type": "registered",
+                "user_id": 109880,
+                "link": "https://stackoverflow.com/users/109880/fortega",
+                "reputation": 19710,
+                "display_name": "Fortega",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1265106624,
+            "creation_date": 1265106624,
+            "body": "<p>I found this once... It creates a temporary file and adds all files from the existing zip to the 'new' zip before adding the extra files. If two files have the same name, it only adds the 'newest' one. <\/p>\n\n<pre><code>public static void addFilesToExistingZip(File zipFile,\n         File[] files) throws IOException {\n            // get a temp file\n    File tempFile = File.createTempFile(zipFile.getName(), null);\n            // delete it, otherwise you cannot rename your existing zip to it.\n    tempFile.delete();\n\n    boolean renameOk=zipFile.renameTo(tempFile);\n    if (!renameOk)\n    {\n        throw new RuntimeException(\"could not rename the file \"+zipFile.getAbsolutePath()+\" to \"+tempFile.getAbsolutePath());\n    }\n    byte[] buf = new byte[1024];\n\n    ZipInputStream zin = new ZipInputStream(new FileInputStream(tempFile));\n    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));\n\n    ZipEntry entry = zin.getNextEntry();\n    while (entry != null) {\n        String name = entry.getName();\n        boolean notInFiles = true;\n        for (File f : files) {\n            if (f.getName().equals(name)) {\n                notInFiles = false;\n                break;\n            }\n        }\n        if (notInFiles) {\n            // Add ZIP entry to output stream.\n            out.putNextEntry(new ZipEntry(name));\n            // Transfer bytes from the ZIP file to the output file\n            int len;\n            while ((len = zin.read(buf)) &gt; 0) {\n                out.write(buf, 0, len);\n            }\n        }\n        entry = zin.getNextEntry();\n    }\n    // Close the streams        \n    zin.close();\n    // Compress the files\n    for (int i = 0; i &lt; files.length; i++) {\n        InputStream in = new FileInputStream(files[i]);\n        // Add ZIP entry to output stream.\n        out.putNextEntry(new ZipEntry(files[i].getName()));\n        // Transfer bytes from the file to the ZIP file\n        int len;\n        while ((len = in.read(buf)) &gt; 0) {\n            out.write(buf, 0, len);\n        }\n        // Complete the entry\n        out.closeEntry();\n        in.close();\n    }\n    // Complete the ZIP file\n    out.close();\n    tempFile.delete();\n}\n<\/code><\/pre>\n\n<p>EDIT:\nI think this is more than 2 years old, so possibly some things are not really up to date anymore.<\/p>\n",
+            "answer_id": 2183306,
+            "question_id": 2183188
+        }
+    ],
+    "answer_comments": {}
+}

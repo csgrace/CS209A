@@ -1,0 +1,284 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d682dd63853a6210ad1ea13b9d51ea0b?s=256&d=identicon&r=PG",
+            "account_id": 223085,
+            "user_type": "registered",
+            "user_id": 482085,
+            "link": "https://stackoverflow.com/users/482085/alexramallo",
+            "reputation": 617,
+            "display_name": "AlexRamallo",
+            "accept_rate": 53
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/4717525/pointer-of-an-object-in-java-with-multiple-threads",
+        "last_activity_date": 1295301548,
+        "creation_date": 1295296001,
+        "answer_count": 6,
+        "title": "Pointer of an object in Java with multiple threads",
+        "body": "<p>I have two threads. One thread has an instance of myObjectManager. myObjectManager has a list of objects, and a method for retrieving an object( public myObjectClass getObjectById(int ID) )<\/p>\n\n<p>I need the first thread to render an object in myObjectManagers list of objects, and the second thread to perform game logic and move it around etc.<\/p>\n\n<p>This is what I tried<\/p>\n\n<pre><code>//thread 1:\nm = myObjectManager.getObjectById(100);\nm.render();\n\n//thread 2:\nm = myObjectManager.getObjectById(100);\nm.rotate( m.getRotation() + 5 ); //increment rotation value\n<\/code><\/pre>\n\n<p>However, it seems that thread 1 has an instance of the object without the updated rotation.  When I run it, the rendered object doesn't rotate, but when I make the second thread print out the rotation value it is rotated.<\/p>\n\n<p>In C++ I would just make the function getObjectById() return a pointer to an instance of myObjectClass, but I'm not sure what exactly java does when I say \"return myInstance;\"\nHow would I do something similar in java?<\/p>\n\n<p><em>Sorry, I'm new to this language!<\/em><\/p>\n",
+        "question_id": 4717525,
+        "tags": [
+            "java",
+            "multithreading",
+            "pointers"
+        ],
+        "score": 3,
+        "accepted_answer_id": 4717576,
+        "is_answered": true,
+        "view_count": 1828,
+        "last_edit_date": 1295296858
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7deca8ec973c3c0875e9a36e1e3e2c44?s=256&d=identicon&r=PG",
+            "account_id": 15988,
+            "user_type": "registered",
+            "user_id": 34397,
+            "link": "https://stackoverflow.com/users/34397/slaks",
+            "reputation": 891393,
+            "display_name": "SLaks",
+            "accept_rate": 87
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "post_id": 4717525,
+        "edited": false,
+        "creation_date": 1295296392,
+        "comment_id": 5209910
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3acb8bae5a2b5a28f6fe522a4ea9b873?s=256&d=identicon&r=PG",
+                "account_id": 15562,
+                "user_type": "registered",
+                "user_id": 33006,
+                "link": "https://stackoverflow.com/users/33006/martin-v-l%c3%b6wis",
+                "reputation": 128207,
+                "display_name": "Martin v. L&#246;wis",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1295301548,
+            "creation_date": 1295296312,
+            "body": "<p>In Java, all Object variables are \"pointers\" (or \"references\", as people typically say). The problem must be elsewhere. My guess is that thread 1 has already rendered the object before thread 2 has even modified it.<\/p>\n\n<p><strong>Edit<\/strong>: Another theory: subsequent render() operations don't actually change the screen display. The rotation value is updated just fine - but it doesn't reflect to the display.<\/p>\n",
+            "answer_id": 4717576,
+            "question_id": 4717525,
+            "last_edit_date": 1295301548
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/79f682361ccbe900f8846a1098d13921?s=256&d=identicon&r=PG",
+                "account_id": 279365,
+                "user_type": "registered",
+                "user_id": 574479,
+                "link": "https://stackoverflow.com/users/574479/biziclop",
+                "reputation": 49954,
+                "display_name": "biziclop",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1295296272,
+            "creation_date": 1295296272,
+            "body": "<p>The references (pointers) are alright but in Java each thread is allowed to make local copies of objects (think of it like a cache) they're working with and unless they are synchronized in some way, changes made by one thread may not be visible to the other.<\/p>\n\n<p><a href=\"http://download.oracle.com/javase/tutorial/essential/concurrency/sync.html\" rel=\"nofollow\">This<\/a> tutorial will hopefully help.<\/p>\n",
+            "answer_id": 4717562,
+            "question_id": 4717525
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8be4691d697474170946184567d36814?s=256&d=identicon&r=PG",
+                "account_id": 11385,
+                "user_type": "registered",
+                "user_id": 21925,
+                "link": "https://stackoverflow.com/users/21925/robin",
+                "reputation": 24322,
+                "display_name": "Robin",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1295296854,
+            "creation_date": 1295296854,
+            "body": "<p>You have 2 potential problems, both of which have been stated here in different answers.<\/p>\n\n<ol>\n<li>You give no indication as to any\ncontrol of ordering of your thread\noperations.  Therefore the render\nmay be occurring before the rotation\nupdate.  This assumes that the the\nclasses involved are in fact\nthreadsafe and will behave as\nexpected. <\/li>\n<li>If the classes are not\n    threadsafe (i.e. synchronized in\n    some way), then the updates to the\n    rotation thread may never be seen in\n    the rendering thread.<\/li>\n<\/ol>\n\n<p>To know for sure we would have to see the source for the <strong>m<\/strong> class.  Also, you may have issues with the getObjectById() as well if it is not threadsafe either.<\/p>\n",
+            "answer_id": 4717674,
+            "question_id": 4717525
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/558d305c602a3092f6196c8338469322?s=256&d=identicon&r=PG",
+                "account_id": 262710,
+                "user_type": "registered",
+                "user_id": 547766,
+                "link": "https://stackoverflow.com/users/547766/adamax",
+                "reputation": 3895,
+                "display_name": "adamax"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1295296635,
+            "creation_date": 1295296635,
+            "body": "<p>Try marking your <code>rotation<\/code> variable in the object as <code>volatile<\/code><\/p>\n",
+            "answer_id": 4717640,
+            "question_id": 4717525
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7deca8ec973c3c0875e9a36e1e3e2c44?s=256&d=identicon&r=PG",
+                "account_id": 15988,
+                "user_type": "registered",
+                "user_id": 34397,
+                "link": "https://stackoverflow.com/users/34397/slaks",
+                "reputation": 891393,
+                "display_name": "SLaks",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1295296296,
+            "creation_date": 1295296296,
+            "body": "<p>All objects in Java are passed by reference.<br>\nIt is impossible to write code that does what you're trying not to do.<\/p>\n\n<p>Your first thread is probably running before the second thread.<\/p>\n",
+            "answer_id": 4717569,
+            "question_id": 4717525
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2d505d3fd867e284a384986533c2e5f8?s=256&d=identicon&r=PG",
+                "account_id": 142616,
+                "user_type": "registered",
+                "user_id": 350428,
+                "link": "https://stackoverflow.com/users/350428/axel-fontaine",
+                "reputation": 35397,
+                "display_name": "Axel Fontaine",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1295296309,
+            "creation_date": 1295296309,
+            "body": "<p><strong>All object references in Java<\/strong>, like your m variable, <strong>are in fact pointers<\/strong>.<\/p>\n\n<p>So in your example, both m variables point to the same object.<\/p>\n",
+            "answer_id": 4717573,
+            "question_id": 4717525
+        }
+    ],
+    "answer_comments": {"4717576": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d682dd63853a6210ad1ea13b9d51ea0b?s=256&d=identicon&r=PG",
+                "account_id": 223085,
+                "user_type": "registered",
+                "user_id": 482085,
+                "link": "https://stackoverflow.com/users/482085/alexramallo",
+                "reputation": 617,
+                "display_name": "AlexRamallo",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4717576,
+            "edited": false,
+            "creation_date": 1295316184,
+            "comment_id": 5213214
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3acb8bae5a2b5a28f6fe522a4ea9b873?s=256&d=identicon&r=PG",
+                "account_id": 15562,
+                "user_type": "registered",
+                "user_id": 33006,
+                "link": "https://stackoverflow.com/users/33006/martin-v-l%c3%b6wis",
+                "reputation": 128207,
+                "display_name": "Martin v. L&#246;wis",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4717576,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d682dd63853a6210ad1ea13b9d51ea0b?s=256&d=identicon&r=PG",
+                "account_id": 223085,
+                "user_type": "registered",
+                "user_id": 482085,
+                "link": "https://stackoverflow.com/users/482085/alexramallo",
+                "reputation": 617,
+                "display_name": "AlexRamallo",
+                "accept_rate": 53
+            },
+            "edited": false,
+            "creation_date": 1295301601,
+            "comment_id": 5210973
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d682dd63853a6210ad1ea13b9d51ea0b?s=256&d=identicon&r=PG",
+                "account_id": 223085,
+                "user_type": "registered",
+                "user_id": 482085,
+                "link": "https://stackoverflow.com/users/482085/alexramallo",
+                "reputation": 617,
+                "display_name": "AlexRamallo",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4717576,
+            "edited": false,
+            "creation_date": 1295298245,
+            "comment_id": 5210272
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3acb8bae5a2b5a28f6fe522a4ea9b873?s=256&d=identicon&r=PG",
+                "account_id": 15562,
+                "user_type": "registered",
+                "user_id": 33006,
+                "link": "https://stackoverflow.com/users/33006/martin-v-l%c3%b6wis",
+                "reputation": 128207,
+                "display_name": "Martin v. L&#246;wis",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "post_id": 4717576,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d682dd63853a6210ad1ea13b9d51ea0b?s=256&d=identicon&r=PG",
+                "account_id": 223085,
+                "user_type": "registered",
+                "user_id": 482085,
+                "link": "https://stackoverflow.com/users/482085/alexramallo",
+                "reputation": 617,
+                "display_name": "AlexRamallo",
+                "accept_rate": 53
+            },
+            "edited": false,
+            "creation_date": 1295297046,
+            "comment_id": 5210025
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d682dd63853a6210ad1ea13b9d51ea0b?s=256&d=identicon&r=PG",
+                "account_id": 223085,
+                "user_type": "registered",
+                "user_id": 482085,
+                "link": "https://stackoverflow.com/users/482085/alexramallo",
+                "reputation": 617,
+                "display_name": "AlexRamallo",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4717576,
+            "edited": false,
+            "creation_date": 1295296604,
+            "comment_id": 5209945
+        }
+    ]}
+}

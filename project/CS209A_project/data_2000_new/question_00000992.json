@@ -1,0 +1,165 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user10952539"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/55462044/how-to-use-memento-pattern-with-undo-functionality",
+        "last_activity_date": 1554147074,
+        "creation_date": 1554146060,
+        "answer_count": 1,
+        "title": "How to use memento pattern with undo functionality",
+        "body": "<p>I have a problem using the memento and the command pattern simultaneously. I fully understand the memento pattern is used to save the state of my object on execute before <strong>executing<\/strong> the change on the object so that I can return back to the initial object in on <strong>unexecute<\/strong>, but the memento pattern is always saving the same reference of the object when I set the state of it in the memento, do I need to clone the object before creating a memento and setting it too it?<\/p>\n\n<p>Here's what I have:<\/p>\n\n<pre><code>public class Memento\n{\n    MyObject myObject;\n\n    public MyObject getState()\n    {\n        return myObject;\n    }\n\n    public void setState(MyObject myObject)\n    {\n        this.myObject = myObject;\n    }\n}\n<\/code><\/pre>\n\n<p>Command:<\/p>\n\n<pre><code>public class ZoomCommand extends Command\n{\n    Image image;\n    Memento memento\n\n    public InsertCharacterCommand(Image image)\n    {\n        //instantiate \n        this.image = image;\n    }\n\n    @Override public void execute()\n    {\n        //create Memento before executing\n        memento = new Memento();\n        // set the initial zoom level of the image before executing\n        memento.setState(image);\n        //set new state\n        image.zoomIn(image.getZoom() + 1);\n    }\n\n    @Override public void unExecute()\n    {\n        // redo go back to initial state of image before zoom, but image has the same zoom level\n        this.image = memento.getState();\n    }\n}\n<\/code><\/pre>\n\n<p>Image has the same same zoom level in unExecute too, how can I fix this?<\/p>\n",
+        "question_id": 55462044,
+        "tags": [
+            "java",
+            "design-patterns"
+        ],
+        "score": 0,
+        "accepted_answer_id": 55462281,
+        "is_answered": true,
+        "view_count": 689
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fffbd790673da16e29da3e7ed405b8a3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3318843,
+                "user_type": "registered",
+                "user_id": 2790482,
+                "link": "https://stackoverflow.com/users/2790482/reasurria",
+                "reputation": 1858,
+                "display_name": "Reasurria"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 55462044,
+            "edited": false,
+            "creation_date": 1554185592,
+            "comment_id": 97647135
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1233ec65168f4aae4d939ae8fe6cde1e?s=256&d=identicon&r=PG",
+                "account_id": 36137,
+                "user_type": "registered",
+                "user_id": 102937,
+                "link": "https://stackoverflow.com/users/102937/robert-harvey",
+                "reputation": 181600,
+                "display_name": "Robert Harvey",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 55462044,
+            "edited": false,
+            "creation_date": 1554146432,
+            "comment_id": 97636733
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user10952539"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 55462044,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1233ec65168f4aae4d939ae8fe6cde1e?s=256&d=identicon&r=PG",
+                "account_id": 36137,
+                "user_type": "registered",
+                "user_id": 102937,
+                "link": "https://stackoverflow.com/users/102937/robert-harvey",
+                "reputation": 181600,
+                "display_name": "Robert Harvey",
+                "accept_rate": 90
+            },
+            "edited": false,
+            "creation_date": 1554146342,
+            "comment_id": 97636694
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1233ec65168f4aae4d939ae8fe6cde1e?s=256&d=identicon&r=PG",
+                "account_id": 36137,
+                "user_type": "registered",
+                "user_id": 102937,
+                "link": "https://stackoverflow.com/users/102937/robert-harvey",
+                "reputation": 181600,
+                "display_name": "Robert Harvey",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 55462044,
+            "edited": false,
+            "creation_date": 1554146233,
+            "comment_id": 97636631
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1233ec65168f4aae4d939ae8fe6cde1e?s=256&d=identicon&r=PG",
+            "account_id": 36137,
+            "user_type": "registered",
+            "user_id": 102937,
+            "link": "https://stackoverflow.com/users/102937/robert-harvey",
+            "reputation": 181600,
+            "display_name": "Robert Harvey",
+            "accept_rate": 90
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1554147074,
+        "creation_date": 1554147074,
+        "body": "<p>Yes, you need to clone the object.<\/p>\n\n<p>As usual, the examples found on the internet are rather anemic, but <a href=\"https://refactoring.guru/design-patterns/memento/java/example\" rel=\"nofollow noreferrer\">Refactoring Guru<\/a> has a workable example.  Their code for loading and saving the object looks like this:<\/p>\n\n<pre><code>public String backup() {\n    try {\n        ByteArrayOutputStream b= new ByteArrayOutputStream();\n        ObjectOutputStream o= new ObjectOutputStream(b);\n        o.writeObject(this.allShapes);\n        o.close();\n        return Base64.getEncoder().encodeToString(b.toByteArray());\n    } catch (IOException e) {\n        return \"\";\n    }\n}\n\npublic void restore(String state) {\n    try {\n        byte[] data = Base64.getDecoder().decode(state);\n        ObjectInputStream o = new ObjectInputStream(new ByteArrayInputStream(data));\n        this.allShapes = (CompoundShape) o.readObject();\n        o.close();\n    } catch (ClassNotFoundException e) {\n        System.out.print(\"ClassNotFoundException occurred.\");\n    } catch (IOException e) {\n        System.out.print(\"IOException occurred.\");\n    }\n}\n<\/code><\/pre>\n\n<p>Notice that it doesn't deal in references.  Rather, it provides a scheme for saving out and restoring the entire object's state.  Essentially it is a <strong>deep copy<\/strong> of the Java object.<\/p>\n",
+        "answer_id": 55462281,
+        "question_id": 55462044
+    }],
+    "answer_comments": {"55462281": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user10952539"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 55462281,
+            "edited": false,
+            "creation_date": 1554150137,
+            "comment_id": 97638313
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1233ec65168f4aae4d939ae8fe6cde1e?s=256&d=identicon&r=PG",
+                "account_id": 36137,
+                "user_type": "registered",
+                "user_id": 102937,
+                "link": "https://stackoverflow.com/users/102937/robert-harvey",
+                "reputation": 181600,
+                "display_name": "Robert Harvey",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 55462281,
+            "edited": false,
+            "creation_date": 1554148859,
+            "comment_id": 97637744
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user10952539"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 55462281,
+            "edited": false,
+            "creation_date": 1554148684,
+            "comment_id": 97637653
+        }
+    ]}
+}

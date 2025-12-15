@@ -1,0 +1,196 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/piBNb.jpg?s=256",
+            "account_id": 1628184,
+            "user_type": "registered",
+            "user_id": 1503237,
+            "link": "https://stackoverflow.com/users/1503237/matthias-ronge",
+            "reputation": 10230,
+            "display_name": "Matthias Ronge",
+            "accept_rate": 67
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20093845/always-call-thread-currentthread-interrupt-when-catching-an-interruptedexce",
+        "last_activity_date": 1706464828,
+        "creation_date": 1384944590,
+        "answer_count": 4,
+        "title": "Always call Thread.currentThread().interrupt(); when catching an InterruptedException?",
+        "body": "<p><a href=\"http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html\" rel=\"noreferrer\">This IBM developerWorks article<\/a> states:<\/p>\n\n<blockquote>\n  <p>\u201cThe one time it is acceptable to swallow an interrupt is when you know the thread is about to exit. This scenario only occurs when the class calling the interruptible method is part of a <code>Thread<\/code>, not a <code>Runnable<\/code> [\u2026]\u201d.<\/p>\n<\/blockquote>\n\n<p>I always implemented <code>Runnable<\/code> for my threads by now. Giving a <code>Runnable<\/code> implementation like this:<\/p>\n\n<pre><code>public class View() implements Runnable {\n    @Overload\n    public void run(){\n        Thread worker = new Thread(new Worker());\n        worker.start();\n        do{\n            try{\n                TimeUnit.SECONDS.sleep(3);\n                updateView();\n            }catch(InterruptedException e){\n                worker.interrupt();\n                // Thread.currentThread().interrupt();\n                return;\n            }\n        }while(true);\n    }\n\n    protected void updateView(){\n        // \u2026\n    }\n}\n<\/code><\/pre>\n\n<p>Is it really necessary to call <code>Thread.currentThread().interrupt();<\/code> right before my <code>return;<\/code> statement? Doesn\u2019t <code>return;<\/code> perform a clean enaugh exit already? What\u2019s the benefit of calling it? The article states that it should be done because otherwise \u201c[\u2026] code higher up on the call stack won't be able to find out about it [\u2026]\u201d. What\u2019s the benefit of a thread in <code>Thread.State.TERMINATED<\/code> with interrupted flag set over one without it upon application shutdown? Can you give me an example where code outside the <code>Runnable<\/code> inspects the interrupted flag for a sensible reason?<\/p>\n\n<p>BTW, is it a better code design to extend <code>Thread<\/code> instead of implementing <code>Runnable<\/code>?<\/p>\n",
+        "question_id": 20093845,
+        "tags": [
+            "java",
+            "multithreading"
+        ],
+        "score": 12,
+        "is_answered": true,
+        "view_count": 6658,
+        "last_edit_date": 1462829725
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+            "account_id": 775068,
+            "user_type": "registered",
+            "user_id": 823393,
+            "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+            "reputation": 66057,
+            "display_name": "OldCurmudgeon",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 20093845,
+        "edited": false,
+        "creation_date": 1384946036,
+        "comment_id": 29938300
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c53d539b59c19087182f0b1c53bb52de?s=256&d=identicon&r=PG",
+                "account_id": 7450,
+                "user_type": "registered",
+                "user_id": 12960,
+                "link": "https://stackoverflow.com/users/12960/brian-agnew",
+                "reputation": 273383,
+                "display_name": "Brian Agnew"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 12,
+            "is_accepted": false,
+            "last_activity_date": 1384944753,
+            "creation_date": 1384944753,
+            "body": "<p>It resets the interrupt flag. This <a href=\"http://www.javaspecialists.eu/archive/Issue056.html\">JavaSpecialists newsletter<\/a> covers this confusing topic in more detail.<\/p>\n\n<blockquote>\n  <p>In my example, after I caught the InterruptedException, I used\n  Thread.currentThread().interrupt() to immediately interrupted the\n  thread again. Why is this necessary? When the exception is thrown, the\n  interrupted flag is cleared, so if you have nested loops, you will\n  cause trouble in the outer loops<\/p>\n<\/blockquote>\n\n<p>So if you know that your code is not going to be used by another component, then you don't need to re-interrupt. However I really wouldn't make that minor optimisation. Who knows how your code is going to be used/reused in the future (even by copy/paste) and consequently I would reset the flag for every interrupt.<\/p>\n",
+            "answer_id": 20093903,
+            "question_id": 20093845
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f6f8642f8cc40a5ecf17af803c5da239?s=256&d=identicon&r=PG",
+                "account_id": 100259,
+                "user_type": "registered",
+                "user_id": 270349,
+                "link": "https://stackoverflow.com/users/270349/aalku",
+                "reputation": 2878,
+                "display_name": "aalku",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1384946664,
+            "creation_date": 1384946664,
+            "body": "<p>Here is an example where return it is not enough:<\/p>\n\n<pre><code>public void doSomething1() {\n  while (someCondition1()) {\n    synchronized {\n       try {\n         this.wait();\n       } catch (InterruptedException e) {\n         return; // Should be Thread.currentThread().interrupt();\n       }\n    }\n  }\n}\npublic void doSomething2() {\n  while (someCondition2()) {\n    doSomething1();\n  }\n}\n<\/code><\/pre>\n\n<p>As the exception throw clears the interrupted state next time doSomething1() is executed the status is cleared and the thread does not terminates.<\/p>\n",
+            "answer_id": 20094591,
+            "question_id": 20093845
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dddbaad8e8cc991d4b9120c10b801963?s=256&d=identicon&r=PG",
+                "account_id": 1867908,
+                "user_type": "registered",
+                "user_id": 1690982,
+                "link": "https://stackoverflow.com/users/1690982/ddmps",
+                "reputation": 4390,
+                "display_name": "ddmps"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1384946162,
+            "creation_date": 1384945298,
+            "body": "<p>I prefer extending <code>Thread<\/code> because it gives you a better understanding of what the thread is doing, but it is not necessarily better code design. <\/p>\n\n<p>As Brian stated ,it resets the interrupt flag but that doesn't say much. In your case it will do nothing and the <code>View<\/code>-Thread will keep on running. <\/p>\n\n<p>When interrupting a Thread, the standard procedure is that the Thread should stop running. It won't do this automatically and you have to implement a way to stop it once it is interrupted. <\/p>\n\n<p>Using the built-in functionality there are two options:<\/p>\n\n<ul>\n<li>Have the main loop inside the try-block for the <code>InterruptedException<\/code>. This way, when it is interrupted you you will be thrown out of the loop and the method will exit.<\/li>\n<li>The above can be bad if you have to save the state as it may corrupt the state. As an alternative, you can set the interrupted-flag (as said when it's thrown. re-interrupt it Interrupt the Thread<\/li>\n<\/ul>\n\n<p>Either way, you have to check that the Thread is interrupted in your while-loop (with <code>!Thread.currentThread().isInterrupted()<\/code>-statement in the while-loop) or it may/will not exit. You're not fulfilling one of the first options and neither checking the flag, so your <code>View<\/code>-thread will keep on running after being interrupted.<\/p>\n",
+            "answer_id": 20094106,
+            "question_id": 20093845,
+            "last_edit_date": 1384946162
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6b2c535fac79e482b71f15de561f55ca?s=256&d=identicon&r=PG",
+                "account_id": 60171,
+                "user_type": "registered",
+                "user_id": 179850,
+                "link": "https://stackoverflow.com/users/179850/gray",
+                "reputation": 117198,
+                "display_name": "Gray",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1706464828,
+            "creation_date": 1462831318,
+            "body": "<blockquote>\n<p>Is it really necessary to call <code>Thread.currentThread().interrupt();<\/code> right before my <code>return;<\/code> statement? (after catching <code>InterruptedException<\/code>)<\/p>\n<\/blockquote>\n<p>As a point, I always do.  We all copy-and-paste code and swallowing the interrupt is such a serious problem that I as a rule <em>always<\/em> do it, even if the thread is about to die.<\/p>\n<blockquote>\n<p>Doesn\u2019t <code>return;<\/code> perform a clean enough exit already?<\/p>\n<\/blockquote>\n<p>If you are sure that it is the last return before the <code>run()<\/code> method completes and the thread exits, then yes, it not technically necessary.  But see above.<\/p>\n<p>The question is whether your <code>View<\/code> class has been wrapped.  Are you sure that when you return you are exiting the <code>Thread<\/code>.  Maybe someone is delegating to it.  AOP may be in place to do some sort of instrumentation.<\/p>\n<blockquote>\n<p>What\u2019s the benefit of calling it? The article states that it should be done because otherwise \u201c[\u2026] code higher up on the call stack won't be able to find out about it [\u2026]\u201d.<\/p>\n<\/blockquote>\n<p>In general, it is important to not swallow the interrupt when your code is called by some sort of wrapping code (delegation, AOP, etc) which needs the interrupt flag.  If you are swallowing it, the wrapper won't be able to use it.  But in this case, there is no benefit.<\/p>\n<blockquote>\n<p>What\u2019s the benefit of a thread in Thread.State.TERMINATED with interrupted flag set over one without it upon application shutdown?<\/p>\n<\/blockquote>\n<p>Nothing.  Once the thread exits the interrupt state is worthless.  And actually, it looks like the interrupt state isn't even persisted after the thread is dead.<\/p>\n<pre><code>Thread thread = new Thread(new Runnable() {\n    public void run() {\n        try {\n            Thread.sleep(100);\n        } catch (InterruptedException e) {\n            Thread.currentThread().interrupt();\n            System.out.println(&quot;caught&quot;);\n        }\n    }\n});\nthread.start();\nthread.interrupt();\nSystem.out.println(thread.isInterrupted());\nthread.join();\nSystem.out.println(thread.isInterrupted());\n<\/code><\/pre>\n<p>Prints:<\/p>\n<pre><code>true\ncaught\nfalse\n<\/code><\/pre>\n<blockquote>\n<p>Can you give me an example where code outside the Runnable inspects the interrupted flag for a sensible reason?<\/p>\n<\/blockquote>\n<p>I can't.  There is no code outside of the thread's <code>run()<\/code> method unless someone is wrapping your runnable in other code without your knowledge.<\/p>\n<p>This may happen if you are using an <code>ExecutorService<\/code> but in that case the thread's interrupt status is specifically cleared with a <code>wt.isInterrupted()<\/code> before the job is run.<\/p>\n<p>So again, the reason is to do is is because it's a good pattern and that's what's important in software engineering.<\/p>\n",
+            "answer_id": 37126154,
+            "question_id": 20093845,
+            "last_edit_date": 1706464828
+        }
+    ],
+    "answer_comments": {
+        "20094106": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dddbaad8e8cc991d4b9120c10b801963?s=256&d=identicon&r=PG",
+                    "account_id": 1867908,
+                    "user_type": "registered",
+                    "user_id": 1690982,
+                    "link": "https://stackoverflow.com/users/1690982/ddmps",
+                    "reputation": 4390,
+                    "display_name": "ddmps"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 20094106,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/zflGZ.png?s=256",
+                    "account_id": 440158,
+                    "user_type": "registered",
+                    "user_id": 829571,
+                    "link": "https://stackoverflow.com/users/829571/assylias",
+                    "reputation": 330070,
+                    "display_name": "assylias",
+                    "accept_rate": 94
+                },
+                "edited": false,
+                "creation_date": 1384949791,
+                "comment_id": 29940474
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/zflGZ.png?s=256",
+                    "account_id": 440158,
+                    "user_type": "registered",
+                    "user_id": 829571,
+                    "link": "https://stackoverflow.com/users/829571/assylias",
+                    "reputation": 330070,
+                    "display_name": "assylias",
+                    "accept_rate": 94
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 20094106,
+                "edited": false,
+                "creation_date": 1384946351,
+                "comment_id": 29938469
+            }
+        ],
+        "37126154": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e49dded35cacd5ae2e406f9bf7de917b?s=256&d=identicon&r=PG",
+                "account_id": 1465203,
+                "user_type": "registered",
+                "user_id": 1378277,
+                "link": "https://stackoverflow.com/users/1378277/draukadin",
+                "reputation": 79,
+                "display_name": "Draukadin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37126154,
+            "edited": false,
+            "creation_date": 1499306005,
+            "comment_id": 76853440
+        }]
+    }
+}

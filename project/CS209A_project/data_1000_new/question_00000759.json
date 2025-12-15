@@ -1,0 +1,237 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/69e8237fbc3b4103bd6cb5aede6a8a77?s=256&d=identicon&r=PG",
+            "account_id": 184949,
+            "user_type": "registered",
+            "user_id": 421341,
+            "link": "https://stackoverflow.com/users/421341/dehodson",
+            "reputation": 459,
+            "display_name": "Dehodson"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49883305/httpurlconnection-getinputstream-hangs-and-never-finishes",
+        "last_activity_date": 1523988924,
+        "creation_date": 1523982981,
+        "answer_count": 4,
+        "title": "HttpURLConnection.getInputStream() hangs and never finishes",
+        "body": "<p>I am attempting to get a token from a JSON endpoint using the following code:<\/p>\n\n<pre><code>public class FetchToken extends AsyncTask&lt;String, Void, Void&gt; {\n    String data = \"\";\n    String token = \"\";\n\n    public TokenDelegate delegate = null;\n\n    @Override\n    protected Void doInBackground(String... identity) {\n        try {\n            if (identity.length == 1) {\n                URL url = new URL(identity[0]);\n\n                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();\n                InputStream inputStream = httpURLConnection.getInputStream();\n                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));\n                String line = \"\";\n\n                while (line != null) {\n                    line = bufferedReader.readLine();\n                    data = data + line;\n                }\n\n                JSONObject JO = new JSONObject(data);\n                token = JO.get(\"token\").toString();\n            }\n        } catch (MalformedURLException e) {\n            e.printStackTrace();\n        } catch (IOException e) {\n            e.printStackTrace();\n        } catch (JSONException e) {\n            e.printStackTrace();\n        }\n\n        return null;\n    }\n\n    @Override\n    protected void onPostExecute(Void aVoid) {\n        Log.d(\"token\", token);\n        //delegate.processFinish(token);\n        super.onPostExecute(aVoid);\n    }\n}\n<\/code><\/pre>\n\n<p>I have tried printing to the debug log after every line, and it seems that the line <code>InputStream inputStream = httpURLConnection.getInputStream();<\/code> never finishes, nor does the rest of the code get executed. However, this is taking place inside of an AsyncTask, and the onPostExecute method of that AsyncTask is firing as if the task has been completed, which it doesn't seem as if it has been.<\/p>\n\n<p>None of the catch blocks are being executed, it seems like, and when I inspect the Network panel in the Android Profiler then the request says it is not passing anything back. However, accessing the JSON endpoint in browser brings everything back correctly.<\/p>\n\n<p>Hopefully someone knows what the problem may be. I've attempted to google things to no avail. Let me know if more information is needed. Thanks.<\/p>\n",
+        "question_id": 49883305,
+        "tags": [
+            "java",
+            "android",
+            "android-studio",
+            "android-asynctask"
+        ],
+        "score": 5,
+        "accepted_answer_id": 49884878,
+        "is_answered": true,
+        "view_count": 6283
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xNLSM.png?s=256",
+                "account_id": 3842534,
+                "user_type": "registered",
+                "user_id": 3185183,
+                "link": "https://stackoverflow.com/users/3185183/eugenio",
+                "reputation": 334,
+                "display_name": "Eugenio"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 49883305,
+            "edited": false,
+            "creation_date": 1554413119,
+            "comment_id": 97754405
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e64eb6a32d266092a01234cdb76f3636?s=256&d=identicon&r=PG",
+                "account_id": 23079,
+                "user_type": "registered",
+                "user_id": 1283217,
+                "link": "https://stackoverflow.com/users/1283217/bahad%c4%b1r-ek%c4%b0c%c4%b0",
+                "reputation": 1059,
+                "display_name": "Bahadır EKİCİ",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 49883305,
+            "edited": false,
+            "creation_date": 1540536556,
+            "comment_id": 92909864
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/6nZz0.jpg?s=256",
+                "account_id": 5332007,
+                "user_type": "registered",
+                "user_id": 4252352,
+                "link": "https://stackoverflow.com/users/4252352/mark",
+                "reputation": 10009,
+                "display_name": "Mark",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49883305,
+            "edited": false,
+            "creation_date": 1523984127,
+            "comment_id": 86783168
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/okzdXNA4.jpg?s=256",
+                "account_id": 1754145,
+                "user_type": "registered",
+                "user_id": 1602555,
+                "link": "https://stackoverflow.com/users/1602555/karol-dowbecki",
+                "reputation": 45318,
+                "display_name": "Karol Dowbecki"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": false,
+            "last_activity_date": 1523983459,
+            "creation_date": 1523983158,
+            "body": "<p>You most likely want to set timeouts to ensure that the connection fails when the external resource isn't available in timely manner. The values are in milliseconds e.g. 5 sec timeout for both connect and read would be:<\/p>\n\n<pre><code> HttpURLConnection conn = ...\n conn.setConnectTimeout(5000);\n conn.setReadTimeout(5000);\n<\/code><\/pre>\n\n<p>By default the timeouts are set to <code>0<\/code> and as per <code>setConnectTimeout()<\/code> this means:<\/p>\n\n<blockquote>\n  <p>A timeout of zero is interpreted as an infinite timeout.<\/p>\n<\/blockquote>\n",
+            "answer_id": 49883360,
+            "question_id": 49883305,
+            "last_edit_date": 1523983459
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/69e8237fbc3b4103bd6cb5aede6a8a77?s=256&d=identicon&r=PG",
+                "account_id": 184949,
+                "user_type": "registered",
+                "user_id": 421341,
+                "link": "https://stackoverflow.com/users/421341/dehodson",
+                "reputation": 459,
+                "display_name": "Dehodson"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1523988924,
+            "creation_date": 1523988924,
+            "body": "<p>The line <code>InputStream inputStream = httpURLConnection.getInputStream();<\/code> was never completing because it was throwing a <code>java.security.cert.CertPathValidatorException<\/code>. The error was not being logged because I was not catching this type of error in my try / catch block.<\/p>\n",
+            "answer_id": 49884878,
+            "question_id": 49883305
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/901691989888195/picture?type=large",
+                "account_id": 6413292,
+                "user_type": "registered",
+                "user_id": 4972235,
+                "link": "https://stackoverflow.com/users/4972235/devendra-dora",
+                "reputation": 587,
+                "display_name": "Devendra Dora"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1523984029,
+            "creation_date": 1523984029,
+            "body": "<p>Have a look at below code and modify your code accordingly.<\/p>\n\n<p>1) if method is GET, then data or headers can be null.<\/p>\n\n<p>Example usage<\/p>\n\n<pre><code> url = &lt;some url&gt;\n Map&lt;String, String&gt; headers = new HashMap&lt;String, String&gt;();       \n headers.put(\"Content-Type\", \"application/json\");       \n headers.put(\"Accept\", \"application/json\");\n<\/code><\/pre>\n\n<p>a) GET : <\/p>\n\n<pre><code>invokeHTTPRequest(url, \"GET\", headers, null);\n<\/code><\/pre>\n\n<p>b) POST<\/p>\n\n<pre><code>Student st = new Student();\nGson gson = new Gson();\nString jsonReqData = gson.toJson(st);\nString resp = invokeHTTPRequest3(url, \"POST\", headers,  jsonReqData);\n<\/code><\/pre>\n\n<p>public static String invokeHTTPRequest(String urlString, String method, Map headers,String data) {<\/p>\n\n<pre><code>    URL url = null;\n    try {\n        url = new URL(urlString);\n        HttpURLConnection conn = null;\n        conn = (HttpURLConnection) url.openConnection();\n        conn.setRequestMethod(method);\n        conn.setConnectTimeout(10000);\n        conn.setReadTimeout(10000);\n\n        if (headers != null) {\n            for (Map.Entry&lt;String, String&gt; header : headers.entrySet()) {\n                conn.setRequestProperty(header.getKey(), header.getValue());\n            }\n        }\n\n\n\n        if (data != null) {\n            byte[] postDataBytes = data.toString().getBytes();\n            conn.setRequestProperty(\"Content-Length\", String.valueOf(postDataBytes.length));\n            conn.setDoOutput(true);\n            conn.getOutputStream().write(postDataBytes);\n\n        }\n\n        BufferedReader rd = null;\n\n        if(conn.getResponseCode() == 200){\n            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));\n        }\n        else{\n            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));\n        }\n\n        StringBuilder result = new StringBuilder();\n\n        String line;\n        while ((line = rd.readLine()) != null) {\n            result.append(line);\n        }\n        rd.close();\n\n\n        return result.toString();\n\n    } catch (Exception e) {\n        //handle exception here\n    }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 49883576,
+            "question_id": 49883305
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-1JCJG0Q4b8I/AAAAAAAAAAI/AAAAAAAAB1w/2ghArTJ7KEs/s256-rj/photo.jpg",
+                "account_id": 6450102,
+                "user_type": "registered",
+                "user_id": 7765139,
+                "link": "https://stackoverflow.com/users/7765139/levi-moreira",
+                "reputation": 12007,
+                "display_name": "Levi Moreira"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1523983184,
+            "creation_date": 1523983184,
+            "body": "<p>You forgot to call <code>connect<\/code> on the <code>HttpUrlConnection<\/code>:<\/p>\n\n<pre><code>HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();\nhttpURLConnection.connect();\nInputStream inputStream = httpURLConnection.getInputStream();\n<\/code><\/pre>\n",
+            "answer_id": 49883363,
+            "question_id": 49883305
+        }
+    ],
+    "answer_comments": {
+        "49883360": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/69e8237fbc3b4103bd6cb5aede6a8a77?s=256&d=identicon&r=PG",
+                "account_id": 184949,
+                "user_type": "registered",
+                "user_id": 421341,
+                "link": "https://stackoverflow.com/users/421341/dehodson",
+                "reputation": 459,
+                "display_name": "Dehodson"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49883360,
+            "edited": false,
+            "creation_date": 1523983695,
+            "comment_id": 86782929
+        }],
+        "49883363": [
+            {
+                "owner": {
+                    "profile_image": "https://lh6.googleusercontent.com/-1JCJG0Q4b8I/AAAAAAAAAAI/AAAAAAAAB1w/2ghArTJ7KEs/s256-rj/photo.jpg",
+                    "account_id": 6450102,
+                    "user_type": "registered",
+                    "user_id": 7765139,
+                    "link": "https://stackoverflow.com/users/7765139/levi-moreira",
+                    "reputation": 12007,
+                    "display_name": "Levi Moreira"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 49883363,
+                "edited": false,
+                "creation_date": 1523984362,
+                "comment_id": 86783320
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6eac749b1d1e6f905e9b46228d4f7181?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 10938609,
+                    "user_type": "registered",
+                    "user_id": 8039298,
+                    "link": "https://stackoverflow.com/users/8039298/barns",
+                    "reputation": 4839,
+                    "display_name": "Barns"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 4,
+                "post_id": 49883363,
+                "edited": false,
+                "creation_date": 1523984325,
+                "comment_id": 86783300
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/69e8237fbc3b4103bd6cb5aede6a8a77?s=256&d=identicon&r=PG",
+                    "account_id": 184949,
+                    "user_type": "registered",
+                    "user_id": 421341,
+                    "link": "https://stackoverflow.com/users/421341/dehodson",
+                    "reputation": 459,
+                    "display_name": "Dehodson"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 49883363,
+                "edited": false,
+                "creation_date": 1523983640,
+                "comment_id": 86782902
+            }
+        ]
+    }
+}

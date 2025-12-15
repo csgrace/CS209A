@@ -1,0 +1,288 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cb8db1396123a7f010fd68f55f00aa86?s=256&d=identicon&r=PG",
+            "account_id": 1967127,
+            "user_type": "registered",
+            "user_id": 1767061,
+            "link": "https://stackoverflow.com/users/1767061/user1767061",
+            "reputation": 46,
+            "display_name": "user1767061"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15621673/java-socket-write-error",
+        "last_activity_date": 1364246421,
+        "creation_date": 1364234677,
+        "answer_count": 2,
+        "title": "Java Socket Write Error",
+        "body": "<p>I'm getting a \"Socket Write Error\". While scouting around on StackOverflow I found some suggestions for using flush(); method to send bytes through the stream. The problem I'm having is that after using the flush(); method, I still get the error. I'm not sure what is causing the problem. Any ideas? This is the complete client code:<\/p>\n\n<pre><code>import java.io.*;\nimport java.net.*;\nimport java.util.ArrayList;\nimport java.util.Scanner;\n\npublic class TCPClient {\n\n   public static void main(String[] args) throws Exception {\n\n      String origSentence;\n      String modifiedSentence;\n      boolean win = false;\n      boolean lose = false;\n\n      //BufferedReader inFromUser;\n      //inFromUser = new BufferedReader(new InputStreamReader(System.in));\n      Scanner inFromUser = new Scanner(System.in);\n      Socket clientSocket = new Socket(\"10.64.121.145\", 6784);\n      boolean first = true;\n      DataOutputStream outToServer =\n              new DataOutputStream(clientSocket.getOutputStream());\n      origSentence = inFromUser.nextLine();\n      outToServer.writeBytes(origSentence + '\\n');\n      outToServer.flush();\n\n      Scanner inFromServer = new Scanner(clientSocket.getInputStream());\n      modifiedSentence = inFromServer.nextLine();\n      GUI gui = new GUI(Integer.parseInt(modifiedSentence));\n      System.out.println(\"The word is \" + modifiedSentence + \" letters long. Pick a letter!\");\n      gui.isNotSolved();\n\n      while (win != true &amp;&amp; lose != true) {\n         origSentence = inFromUser.nextLine();\n         System.out.println(origSentence);\n         outToServer.writeBytes(origSentence + '\\n'); //The failure is on this line\n         outToServer.flush();\n         modifiedSentence = inFromServer.nextLine();\n         if (modifiedSentence.equals(\"\"))//guess not in word so add a miss\n         {\n            if (gui.addMiss(origSentence) == false) {\n               lose = true;\n            }\n         }\n         if (!modifiedSentence.equals(\"\"))//guess is in word so display where letter occurs\n         {\n            ArrayList&lt;Character&gt; list = new ArrayList&lt;Character&gt;();\n            int length = modifiedSentence.length();\n            for (int i = 0; i &lt; length; i++) {\n               list.add(modifiedSentence.charAt(i));\n            }\n            for (char c : list) {\n               if (c == ' ') {\n                  list.remove(c);\n               }\n            }\n            for (int i = 0; i &lt; list.size(); i++) {\n               String s = list.get(i).toString();\n               gui.addLetter(origSentence.charAt(0), Integer.parseInt(s));\n            }\n\n         }\n\n         if (gui.isNotSolved() == false)//game won send server \"won\" message to terminate connection\n         {\n            String won = \"won\";\n            outToServer.writeBytes(won);\n            outToServer.flush();\n         }\n\n         if (lose == true)//game lost send server \"lost\" message to\n         {            //have server send the word to display for player\n            String lost = \"lost\";\n            outToServer.writeBytes(lost);\n            gui.setWord(modifiedSentence);\n            outToServer.flush();\n         }\n      }\n      clientSocket.close();\n\n   }\n}\n<\/code><\/pre>\n\n<p>... the code continues but it doesn't seem to make it to the rest of the code anyway. I'm a bit lost as to why it keeps failing. I flush() after the first use of outToServer but on the second use it fails. I'm guessing this is a Client-side problem. Any help? Thanks. Here is the Server Code:<\/p>\n\n<pre><code>import java.io.*;\nimport java.net.*;\nimport java.util.Scanner;\n\npublic class TCPServer {\n\n   public static void main(String[] args) throws Exception {\n      String clientSentence;\n      Word word = new Word();\n      int wordLen = word.getLength();\n      ServerSocket welcomeSocket = new ServerSocket(6784);\n      System.out.println(InetAddress.getLocalHost());\n      boolean begin = true;\n\n      while (true) {\n         Socket connSocket = welcomeSocket.accept();\n         Scanner inFromClient = new Scanner(connSocket.getInputStream());\n         clientSentence = inFromClient.nextLine(); //cap would go after this\n         DataOutputStream outToClient =\n                 new DataOutputStream(connSocket.getOutputStream());\n\n         if (begin == true) {\n            //DataOutputStream outToClient =\n            //new DataOutputStream(connSocket.getOutputStream());\n            System.out.println(\"begin \" + word.getWord());\n            outToClient.writeBytes(\"\" + word.getLength());\n            outToClient.flush();\n         }\n         if (begin == false) {\n            System.out.println(\"hello\");\n            //DataOutputStream outToClient =\n            //new DataOutputStream(connSocket.getOutputStream());\n            String pos = word.getSpots(clientSentence.charAt(0));\n            outToClient.writeBytes(pos);\n            outToClient.flush();\n         }\n         if (clientSentence.equals(\"lost\")) {\n            outToClient.writeBytes(word.getWord());\n            outToClient.flush();\n         }\n         if (clientSentence.equals(\"won\")) {\n            connSocket.close();\n         }\n         begin = false;\n         connSocket.close();\n      }\n\n\n   }\n}\n<\/code><\/pre>\n\n<p>Here is the error:<\/p>\n\n<pre><code>Exception in thread \"main\" h //Ignore the 'h', it's just a print statement checking input\njava.net.SocketException: Software caused connection abort: socket write error\nat java.net.SocketOutputStream.socketWrite0(Native Method)\nat java.net.SocketOutputStream.socketWrite(Unknown Source)\nat java.net.SocketOutputStream.write(Unknown Source)\nat java.io.DataOutputStream.writeBytes(Unknown Source)\nat TCPClient.main(TCPClient.java:35)\n\nThe error now is:\nException in thread \"main\" java.net.ConnectException: Connection timed out: connect\nat java.net.PlainSocketImpl.socketConnect(Native Method)\nat java.net.PlainSocketImpl.doConnect(Unknown Source)\nat java.net.PlainSocketImpl.connectToAddress(Unknown Source)\nat java.net.PlainSocketImpl.connect(Unknown Source)\nat java.net.SocksSocketImpl.connect(Unknown Source)\nat java.net.Socket.connect(Unknown Source)\nat java.net.Socket.connect(Unknown Source)\nat java.net.Socket.&lt;init&gt;(Unknown Source)\nat java.net.Socket.&lt;init&gt;(Unknown Source)\nat TCPClient.main(TCPClient.java:17)\n<\/code><\/pre>\n",
+        "question_id": 15621673,
+        "tags": [
+            "java",
+            "sockets",
+            "tcp",
+            "client",
+            "client-server"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 14167,
+        "last_edit_date": 1364239742
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb8db1396123a7f010fd68f55f00aa86?s=256&d=identicon&r=PG",
+                "account_id": 1967127,
+                "user_type": "registered",
+                "user_id": 1767061,
+                "link": "https://stackoverflow.com/users/1767061/user1767061",
+                "reputation": 46,
+                "display_name": "user1767061"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "edited": false,
+            "creation_date": 1364236491,
+            "comment_id": 22160128
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/764c0373fe244be19db5167edd1a206d?s=256&d=identicon&r=PG",
+                "account_id": 1237772,
+                "user_type": "registered",
+                "user_id": 1201013,
+                "link": "https://stackoverflow.com/users/1201013/saurcery",
+                "reputation": 2215,
+                "display_name": "saurcery"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "edited": false,
+            "creation_date": 1364236184,
+            "comment_id": 22159952
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb8db1396123a7f010fd68f55f00aa86?s=256&d=identicon&r=PG",
+                "account_id": 1967127,
+                "user_type": "registered",
+                "user_id": 1767061,
+                "link": "https://stackoverflow.com/users/1767061/user1767061",
+                "reputation": 46,
+                "display_name": "user1767061"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "edited": false,
+            "creation_date": 1364235254,
+            "comment_id": 22159507
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/TgXEW.png?s=256",
+                "account_id": 794766,
+                "user_type": "registered",
+                "user_id": 871026,
+                "link": "https://stackoverflow.com/users/871026/reimeus",
+                "reputation": 160134,
+                "display_name": "Reimeus",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "edited": false,
+            "creation_date": 1364235040,
+            "comment_id": 22159397
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb8db1396123a7f010fd68f55f00aa86?s=256&d=identicon&r=PG",
+                "account_id": 1967127,
+                "user_type": "registered",
+                "user_id": 1767061,
+                "link": "https://stackoverflow.com/users/1767061/user1767061",
+                "reputation": 46,
+                "display_name": "user1767061"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "edited": false,
+            "creation_date": 1364234979,
+            "comment_id": 22159365
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "edited": false,
+            "creation_date": 1364234867,
+            "comment_id": 22159306
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb8db1396123a7f010fd68f55f00aa86?s=256&d=identicon&r=PG",
+                "account_id": 1967127,
+                "user_type": "registered",
+                "user_id": 1767061,
+                "link": "https://stackoverflow.com/users/1767061/user1767061",
+                "reputation": 46,
+                "display_name": "user1767061"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "edited": false,
+            "creation_date": 1364234782,
+            "comment_id": 22159269
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621673,
+            "edited": false,
+            "creation_date": 1364234736,
+            "comment_id": 22159247
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1364237761,
+            "creation_date": 1364237761,
+            "body": "<p>You're closing the connection in the server immediately:<\/p>\n\n<pre><code>Socket connSocket = welcomeSocket.accept();\nScanner inFromClient = new Scanner(connSocket.getInputStream());\nclientSentence = inFromClient.nextLine(); //cap would go after this\nDataOutputStream outToClient =\n    new DataOutputStream(connSocket.getOutputStream());\n\n[...]\nconnSocket.close();\n<\/code><\/pre>\n\n<p>So obviously, as soon as the first line from the client has been read by the server and the response has been sent, the connection is closed, and the client can't send anything more.<\/p>\n",
+            "answer_id": 15622567,
+            "question_id": 15621673
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/764c0373fe244be19db5167edd1a206d?s=256&d=identicon&r=PG",
+                "account_id": 1237772,
+                "user_type": "registered",
+                "user_id": 1201013,
+                "link": "https://stackoverflow.com/users/1201013/saurcery",
+                "reputation": 2215,
+                "display_name": "saurcery"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1364246421,
+            "creation_date": 1364246421,
+            "body": "<p>Should work with below changes in the server code:<\/p>\n\n<pre><code>Socket connSocket = welcomeSocket.accept();\nScanner inFromClient = new Scanner(connSocket.getInputStream());\nDataOutputStream outToClient = new DataOutputStream(connSocket.getOutputStream());\nwhile (inFromClient.hasNext()) {\n    clientSentence = inFromClient.nextLine(); //cap would go after this\n    System.out.println(\"received from client: \"+clientSentence);\n}\n.\n.\n.\n.\nconnSocket.close();\n<\/code><\/pre>\n\n<p>Your client creates IO stream just once while server did it for every iteration so no connection could be established.<\/p>\n",
+            "answer_id": 15624988,
+            "question_id": 15621673
+        }
+    ],
+    "answer_comments": {"15622567": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311888,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622567,
+            "edited": false,
+            "creation_date": 1364248336,
+            "comment_id": 22166084
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb8db1396123a7f010fd68f55f00aa86?s=256&d=identicon&r=PG",
+                "account_id": 1967127,
+                "user_type": "registered",
+                "user_id": 1767061,
+                "link": "https://stackoverflow.com/users/1767061/user1767061",
+                "reputation": 46,
+                "display_name": "user1767061"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622567,
+            "edited": false,
+            "creation_date": 1364239623,
+            "comment_id": 22161749
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb8db1396123a7f010fd68f55f00aa86?s=256&d=identicon&r=PG",
+                "account_id": 1967127,
+                "user_type": "registered",
+                "user_id": 1767061,
+                "link": "https://stackoverflow.com/users/1767061/user1767061",
+                "reputation": 46,
+                "display_name": "user1767061"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622567,
+            "edited": false,
+            "creation_date": 1364239607,
+            "comment_id": 22161740
+        }
+    ]}
+}

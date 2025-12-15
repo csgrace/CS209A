@@ -1,0 +1,80 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100005824387879/picture?type=large",
+            "account_id": 4216040,
+            "user_type": "registered",
+            "user_id": 3452221,
+            "link": "https://stackoverflow.com/users/3452221/belerico",
+            "reputation": 31,
+            "display_name": "belerico"
+        },
+        "closed_date": 1429102898,
+        "link": "https://stackoverflow.com/questions/29646817/jpanel-resize-flickering",
+        "last_activity_date": 1429099605,
+        "creation_date": 1429090895,
+        "answer_count": 0,
+        "title": "JPanel resize flickering",
+        "body": "<p>I draw a (co)sinusoid signal in the time domain using a JPanel and overriding its paintComponent(Graphics g).\nWhen i do a resize my application starts flickering and appears a black background until the resizing is not finished.\nIs there a way to prevent this sort of flickering?\nThanks in advance. <\/p>\n\n<pre><code>import javax.swing.JFrame;\nimport javax.swing.JPanel;\nimport java.awt.Color;\nimport java.awt.Graphics;\nimport java.awt.Graphics2D;\nimport java.awt.Dimension;\n\npublic class AnotherSignalGraph extends JPanel {\n\n    private double offset = 0.0;\n    private double scaleX = 0.0;\n    private double scaleY = 0.0;\n    protected double maxX = 0.0;\n    private double minX = 0.0;\n    private double maxY = 0.0;\n    private double minY = 0.0;\n    private Point[] points = null;\n    private Signal s = null;\n\n    private void initPoints(int pointsToGenerate) {\n        this.points = new Point[pointsToGenerate];\n        double t = 0;\n        double dt = this.maxX / pointsToGenerate;\n        for (int i=0; i&lt;pointsToGenerate; i++, t += dt)\n            points[i] = new Point(t, this.s.v(t));\n    }\n    public AnotherSignalGraph(int pointsToGenerate, int width, int height) {\n        super.setPreferredSize(new Dimension(width, height));\n        this.s = new Sinusoid(1000, 10, 0);\n        this.maxX = (1 / this.s.frequency) * 2;\n        this.maxY = this.s.amplitude;\n        this.minY = -this.maxY;\n        this.offset = super.getHeight() / 2.0;\n        this.initPoints(pointsToGenerate);\n        this.updateScale();\n    }\n    private void updateScale() {\n        this.scaleX = super.getWidth() / (this.maxX - this.minX);\n        this.scaleY = super.getHeight() / (this.maxY - this.minY);\n        this.offset = super.getHeight() / 2.0;\n    }\n    private void drawSignal(Graphics2D g2D) {\n        int x1, x2, y1, y2;\n        g2D.setColor(Color.blue);\n        g2D.setClip(0, (int)(this.offset - (this.s.amplitude * this.scaleY)), (int)(super.getWidth()), (int)((this.s.amplitude * 2 * this.scaleY) + 2));\n        for (int i=0; i&lt;this.points.length - 1; i++) {\n            x1 = (int)(this.scaleX * this.points[i].getX());\n            y1 = (int)(this.offset - (this.scaleY * this.points[i].getY()));\n            x2 = (int)(scaleX * this.points[i + 1].getX());\n            y2 = (int)(this.offset - (this.scaleY * this.points[i + 1].getY()));\n            g2D.drawLine(x1, y1, x2, y2);\n        }\n    }\n    private void graphIt(Graphics2D g2D) {\n        this.updateScale();\n        this.drawSignal(g2D);\n    }\n    @Override\n    public void paintComponent(Graphics g) {\n        super.paintComponent(g);\n        Graphics2D g2D = (Graphics2D) g;\n        this.graphIt(g2D);\n    }\n    private class Point {\n\n        private double x;\n        private double y;\n\n        public Point(double x, double y){\n            this.x = x;\n            this.y = y;\n        }\n        public double getX(){\n            return this.x;\n        }\n        public double getY(){\n            return this.y;\n        }\n    }\n    private abstract class Signal {\n\n        double frequency;   //Signal frequency in Hz\n        double amplitude;   //Signal amplitude in Volt\n        double initPhase;   //Signal initial phase in radians\n\n        public Signal(double frequency, double amplitude, double degInitPhase) throws IllegalArgumentException{ //degInitPhase parameter specifies the initial angle phase in degrees\n            this.frequency = frequency;\n            this.amplitude = amplitude;\n            this.initPhase = degInitPhase;\n        }   \n        public abstract double v(double t);\n    }\n    private class Sinusoid extends Signal {\n\n        public Sinusoid(double frequency, double amplitude, double degInitPhase){   //degInitPhase parameter specifies the initial angle phase in degrees\n            super(frequency, amplitude, degInitPhase);\n        }\n        @Override\n        public double v(double t){  //t parameter indicates the specific time frame in seconds\n            return super.amplitude * Math.sin((super.frequency * Math.PI * t) + super.initPhase);\n        }\n    }\n    public static void main(String[] args) {\n        JFrame frame = new JFrame();\n        frame.add(new AnotherSignalGraph(50000, 600, 600));\n        frame.pack();\n        frame.setVisible(true);\n        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 29646817,
+        "tags": [
+            "java",
+            "swing",
+            "resize",
+            "graphics2d",
+            "flicker"
+        ],
+        "score": 2,
+        "closed_reason": "Not suitable for this site",
+        "is_answered": false,
+        "view_count": 254,
+        "last_edit_date": 1429099605
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100005824387879/picture?type=large",
+                "account_id": 4216040,
+                "user_type": "registered",
+                "user_id": 3452221,
+                "link": "https://stackoverflow.com/users/3452221/belerico",
+                "reputation": 31,
+                "display_name": "belerico"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646817,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e30269add309c8ae23228a4c2e9047e5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2880367,
+                "user_type": "registered",
+                "user_id": 2471439,
+                "link": "https://stackoverflow.com/users/2471439/kiheru",
+                "reputation": 6618,
+                "display_name": "kiheru"
+            },
+            "edited": false,
+            "creation_date": 1429195991,
+            "comment_id": 47494170
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e30269add309c8ae23228a4c2e9047e5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2880367,
+                "user_type": "registered",
+                "user_id": 2471439,
+                "link": "https://stackoverflow.com/users/2471439/kiheru",
+                "reputation": 6618,
+                "display_name": "kiheru"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646817,
+            "edited": false,
+            "creation_date": 1429106907,
+            "comment_id": 47444771
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

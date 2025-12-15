@@ -1,0 +1,180 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/aLKQa.png?s=256",
+            "account_id": 138128,
+            "user_type": "registered",
+            "user_id": 342852,
+            "link": "https://stackoverflow.com/users/342852/sean-patrick-floyd",
+            "reputation": 300632,
+            "display_name": "Sean Patrick Floyd",
+            "accept_rate": 97
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/3660547/apt-and-aop-in-the-same-project-using-maven",
+        "last_activity_date": 1367924214,
+        "creation_date": 1283876635,
+        "answer_count": 2,
+        "title": "APT and AOP in the same project, using Maven",
+        "body": "<p>I have to use Annotation Processing (apt) and AspectJ in the same Maven project.<\/p>\n\n<p>Both work for themselves, but I need to create aspects based on code created by apt. So I would need binary weaving (the original source files are extended by apt). How can I enable binary weaving within a maven project?<\/p>\n\n<p>I know the only standard option is to supply a dependency using the <a href=\"http://mojo.codehaus.org/aspectj-maven-plugin/compile-mojo.html#weaveDependencies\" rel=\"noreferrer\">weaveDependencies<\/a> parameter, but this is awful. Is there any other way?<\/p>\n\n<p>OK, I could embed the <a href=\"http://www.eclipse.org/aspectj/doc/next/devguide/antTasks.html\" rel=\"noreferrer\">AspectJ ant tasks<\/a> using the <a href=\"http://maven.apache.org/plugins/maven-antrun-plugin/\" rel=\"noreferrer\">Maven Antrun Plugin<\/a> but I'd hate to resort to that. <\/p>\n",
+        "question_id": 3660547,
+        "tags": [
+            "java",
+            "maven-2",
+            "aop",
+            "aspectj"
+        ],
+        "score": 5,
+        "accepted_answer_id": 3665818,
+        "is_answered": true,
+        "view_count": 2449,
+        "last_edit_date": 1283884312
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/aLKQa.png?s=256",
+            "account_id": 138128,
+            "user_type": "registered",
+            "user_id": 342852,
+            "link": "https://stackoverflow.com/users/342852/sean-patrick-floyd",
+            "reputation": 300632,
+            "display_name": "Sean Patrick Floyd",
+            "accept_rate": 97
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 3660547,
+        "reply_to_user": {
+            "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+            "account_id": 63162,
+            "user_type": "registered",
+            "user_id": 187141,
+            "link": "https://stackoverflow.com/users/187141/yegor256",
+            "reputation": 105862,
+            "display_name": "yegor256",
+            "accept_rate": 82
+        },
+        "edited": false,
+        "creation_date": 1362039542,
+        "comment_id": 21296333
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/aLKQa.png?s=256",
+                "account_id": 138128,
+                "user_type": "registered",
+                "user_id": 342852,
+                "link": "https://stackoverflow.com/users/342852/sean-patrick-floyd",
+                "reputation": 300632,
+                "display_name": "Sean Patrick Floyd",
+                "accept_rate": 97
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 11,
+            "is_accepted": true,
+            "last_activity_date": 1284104093,
+            "creation_date": 1283934136,
+            "body": "<p>I am apparently the only one who can answer my own questions.<\/p>\n\n<p>I have resorted to compiling AspectJ via ant using the <a href=\"http://maven.apache.org/plugins/maven-antrun-plugin/\" rel=\"noreferrer\">Maven Antrun Plugin<\/a>. Here's my pom snippet:<\/p>\n\n<pre><code>&lt;plugin&gt;\n    &lt;artifactId&gt;maven-antrun-plugin&lt;/artifactId&gt;\n    &lt;version&gt;1.4&lt;/version&gt;\n    &lt;dependencies&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.aspectj&lt;/groupId&gt;\n            &lt;artifactId&gt;aspectjtools&lt;/artifactId&gt;\n            &lt;version&gt;${aspectj.version}&lt;/version&gt;\n        &lt;/dependency&gt;\n    &lt;/dependencies&gt;\n    &lt;executions&gt;\n        &lt;execution&gt;\n            &lt;id&gt;ajc-compile&lt;/id&gt;\n            &lt;phase&gt;process-classes&lt;/phase&gt;\n            &lt;configuration&gt;\n                &lt;tasks&gt;\n                    &lt;property name=\"aspectj.sourcepath\"\n                        value=\"${project.basedir}/src/main/aspect\" /&gt;\n                    &lt;property name=\"aspectj.binarypath\"\n                        value=\"${project.build.outputDirectory}\" /&gt;\n                    &lt;property name=\"aspectj.targetpath\"\n                        value=\"${project.build.directory}/aspectj-classes\" /&gt;\n                    &lt;property name=\"scope_classpath\" refid=\"maven.compile.classpath\" /&gt;\n                    &lt;property name=\"plugin_classpath\" refid=\"maven.plugin.classpath\" /&gt;\n                    &lt;ant antfile=\"ajc-ant.xml\" /&gt;\n                &lt;/tasks&gt;\n            &lt;/configuration&gt;\n            &lt;goals&gt;\n                &lt;goal&gt;run&lt;/goal&gt;\n            &lt;/goals&gt;\n        &lt;/execution&gt;\n        &lt;execution&gt;\n            &lt;id&gt;ajc-test-compile&lt;/id&gt;\n            &lt;phase&gt;process-test-classes&lt;/phase&gt;\n            &lt;configuration&gt;\n                &lt;tasks unless=\"maven.test.skip\"&gt;\n                    &lt;property name=\"aspectj.sourcepath\"\n                        value=\"${project.basedir}/src/test/aspect;${project.basedir}/src/main/aspect\" /&gt;\n                    &lt;property name=\"aspectj.binarypath\"\n                        value=\"${project.build.testOutputDirectory}\" /&gt;\n                    &lt;property name=\"aspectj.targetpath\"\n                        value=\"${project.build.directory}/aspectj-test-classes\" /&gt;\n                    &lt;property name=\"scope_classpath\" refid=\"maven.test.classpath\" /&gt;\n                    &lt;property name=\"plugin_classpath\" refid=\"maven.plugin.classpath\" /&gt;\n                    &lt;ant antfile=\"ajc-ant.xml\" /&gt;\n                &lt;/tasks&gt;\n            &lt;/configuration&gt;\n            &lt;goals&gt;\n                &lt;goal&gt;run&lt;/goal&gt;\n            &lt;/goals&gt;\n        &lt;/execution&gt;\n    &lt;/executions&gt;\n&lt;/plugin&gt;\n<\/code><\/pre>\n\n<p>I compile java classes first (and let APT do it's stuff), use the compiled classes as binary input for aspectj, compile aspectj into a new folder and move the resulting woven classes to the original compile directory, overwriting the non-aspectj classes. Here's my ant XML file (the nice part is that I can use it for both compile and test-compile):<\/p>\n\n<pre><code>&lt;project basedir=\".\" default=\"ajc\"&gt;\n    &lt;path id=\"classpath\"&gt;\n        &lt;pathelement path=\"${scope_classpath}\" /&gt;\n        &lt;pathelement path=\"${plugin_classpath}\" /&gt;\n    &lt;/path&gt;\n    &lt;taskdef\n        classname=\"org.aspectj.tools.ant.taskdefs.AjcTask\"\n        name=\"iajc\" classpathref=\"classpath\" /&gt;\n    &lt;target name=\"ajc\"&gt;\n        &lt;iajc\n            sourceroots=\"${aspectj.sourcepath}\"\n            inpath=\"${aspectj.binarypath}\"\n            destdir=\"${aspectj.targetpath}\"\n            classpathref=\"classpath\"\n            source=\"1.6\"\n            target=\"1.6\"\n        /&gt;\n        &lt;move todir=\"${aspectj.binarypath}\"&gt;\n            &lt;fileset dir=\"${aspectj.targetpath}\"&gt;\n                &lt;include name=\"**/*.class\" /&gt;\n            &lt;/fileset&gt;\n        &lt;/move&gt;\n    &lt;/target&gt;\n&lt;/project&gt;\n<\/code><\/pre>\n\n<hr>\n\n<p>In the next step I have now created a Maven Plugin that does all this ant calling internally. While I can't share the code here, I'll show how it simplified POM configuration:<\/p>\n\n<pre><code>&lt;plugin&gt;\n    &lt;groupId&gt;com.myclient.maven.plugins&lt;/groupId&gt;\n    &lt;artifactId&gt;maven-ajc-plugin&lt;/artifactId&gt;\n    &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;\n    &lt;executions&gt;\n        &lt;execution&gt;\n            &lt;id&gt;compile-ajc&lt;/id&gt;\n            &lt;goals&gt;\n                &lt;goal&gt;compile&lt;/goal&gt;\n            &lt;/goals&gt;\n        &lt;/execution&gt;\n        &lt;execution&gt;\n            &lt;id&gt;testcompile-ajc&lt;/id&gt;\n            &lt;goals&gt;\n                &lt;goal&gt;test-compile&lt;/goal&gt;\n            &lt;/goals&gt;\n            &lt;configuration&gt;\n                &lt;aspectSourcePath&gt;${project.basedir}/src/main/aspect&lt;/aspectSourcePath&gt;\n            &lt;/configuration&gt;\n        &lt;/execution&gt;\n    &lt;/executions&gt;\n    &lt;configuration&gt;\n\n    &lt;/configuration&gt;\n&lt;/plugin&gt;\n<\/code><\/pre>\n\n<p>Using <a href=\"http://docs.codehaus.org/display/GMAVEN/Implementing+Maven+Plugins#ImplementingMavenPlugins-Using%zb%7bant%7d%7d\" rel=\"noreferrer\">ANT / GMaven integration<\/a>, it was easy to assembly the parameters combining the powers of Maven, Groovy and Ant.<\/p>\n",
+            "answer_id": 3665818,
+            "question_id": 3660547,
+            "last_edit_date": 1284104093
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VCrmCnBt.jpg?s=256",
+                "account_id": 63162,
+                "user_type": "registered",
+                "user_id": 187141,
+                "link": "https://stackoverflow.com/users/187141/yegor256",
+                "reputation": 105862,
+                "display_name": "yegor256",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": false,
+            "last_activity_date": 1367924214,
+            "creation_date": 1367924214,
+            "body": "<p>Inspired by the solution proposed above by Sean Patrick Floyd I created a <a href=\"http://www.jcabi.com/jcabi-maven-plugin/example-ajc.html\" rel=\"noreferrer\">Maven plugin<\/a> that does all that out of the box:<\/p>\n\n<pre><code>&lt;plugin&gt;\n  &lt;groupId&gt;com.jcabi&lt;/groupId&gt;\n  &lt;artifactId&gt;jcabi-maven-plugin&lt;/artifactId&gt;\n  &lt;version&gt;0.7.18&lt;/version&gt;\n  &lt;executions&gt;\n    &lt;execution&gt;\n      &lt;goals&gt;\n        &lt;goal&gt;ajc&lt;/goal&gt;\n      &lt;/goals&gt;\n    &lt;/execution&gt;\n  &lt;/executions&gt;\n&lt;/plugin&gt;\n<\/code><\/pre>\n\n<p>Mojo goal documentation is at <a href=\"http://www.jcabi.com/jcabi-maven-plugin/ajc-mojo.html\" rel=\"noreferrer\"><code>com.jcabi:jcabi-maven-plugin:ajc<\/code><\/a> usage page.<\/p>\n",
+            "answer_id": 16417297,
+            "question_id": 3660547
+        }
+    ],
+    "answer_comments": {
+        "3665818": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/UN6N9.png?s=256",
+                    "account_id": 79535,
+                    "user_type": "registered",
+                    "user_id": 225448,
+                    "link": "https://stackoverflow.com/users/225448/zoran-regvart",
+                    "reputation": 4708,
+                    "display_name": "Zoran Regvart"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 3665818,
+                "edited": false,
+                "creation_date": 1311082439,
+                "comment_id": 7997899
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dc1a5b5fdba36ae9cdcf6e267f1a86ca?s=256&d=identicon&r=PG",
+                    "account_id": 26957,
+                    "user_type": "registered",
+                    "user_id": 70604,
+                    "link": "https://stackoverflow.com/users/70604/pascal-thivent",
+                    "reputation": 571962,
+                    "display_name": "Pascal Thivent"
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 3,
+                "post_id": 3665818,
+                "edited": false,
+                "creation_date": 1284181060,
+                "comment_id": 3887883
+            }
+        ],
+        "16417297": [
+            {
+                "owner": {
+                    "profile_image": "https://lh3.googleusercontent.com/-iQE_z9TuurE/AAAAAAAAAAI/AAAAAAAAADs/RXIYGtUyTr4/s256-rj/photo.jpg",
+                    "account_id": 9611957,
+                    "user_type": "registered",
+                    "user_id": 7136025,
+                    "link": "https://stackoverflow.com/users/7136025/santhosh-kumar",
+                    "reputation": 2029,
+                    "display_name": "santhosh kumar",
+                    "accept_rate": 25
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 16417297,
+                "edited": false,
+                "creation_date": 1518154701,
+                "comment_id": 84397272
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/aLKQa.png?s=256",
+                    "account_id": 138128,
+                    "user_type": "registered",
+                    "user_id": 342852,
+                    "link": "https://stackoverflow.com/users/342852/sean-patrick-floyd",
+                    "reputation": 300632,
+                    "display_name": "Sean Patrick Floyd",
+                    "accept_rate": 97
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 16417297,
+                "edited": false,
+                "creation_date": 1367928164,
+                "comment_id": 23541652
+            }
+        ]
+    }
+}

@@ -1,0 +1,297 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fb55d3aa241c69d20957d417ac5adeca?s=256&d=identicon&r=PG",
+            "account_id": 1102632,
+            "user_type": "registered",
+            "user_id": 1094888,
+            "link": "https://stackoverflow.com/users/1094888/anthony",
+            "reputation": 401,
+            "display_name": "anthony",
+            "accept_rate": 73
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8901025/java-problems-reading-an-input",
+        "last_activity_date": 1326840612,
+        "creation_date": 1326830896,
+        "answer_count": 4,
+        "title": "Java. Problems reading an input",
+        "body": "<p>I am doing a homework assignment that deals with classes and objects. In it, I have an Address class, Letter class, and PostOffice class that when calling PostOffice, takes an input file and scans through it, printing basically everything in the input file the way it should appear on a letter (to: bla, from: bla, postage amount, to and from address, etc.) <\/p>\n\n<p>i get an error that reads:<\/p>\n\n<pre><code>Exception in thread \"main\" java.util.NoSuchElementException: No line found\nat java.util.Scanner.nextLine(Scanner.java:1516)\nat PostOffice.readLetters(PostOffice.java:33)\nat PostOffice.main(PostOffice.java:14)\n<\/code><\/pre>\n\n<p>and I dont really understand why....<\/p>\n\n<p>here is my post office class:<\/p>\n\n<pre><code>import java.util.Scanner;\nimport java.io.File;\nimport java.io.FileNotFoundException;\nimport java.io.IOException;\n\npublic class PostOffice {\n\nprivate final int MAX = 1000;\nprivate Letter [] letterArray = new Letter[MAX];\nprivate int count;\n\npublic static void main(String [] args) {\n    PostOffice postOffice = new PostOffice();\n    postOffice.readLetters(\"letters.in\");\n    postOffice.sortLetters();\n    postOffice.printLetters();\n}\n\npublic PostOffice() {\n    Letter [] myLetters = letterArray;\n    this.count = 0;\n}\n\npublic void readLetters(String filename) {\n    String toName, toStreet, toCity, toState, toZip;\n    String fromName, fromStreet, fromCity, fromState, fromZip, temp; //, weight;\n    double weight;\n    int index;\n    Scanner s = new Scanner(filename);\n    if (s != null) {\n        while(s.hasNext()){\n            toName = s.nextLine();\n            toStreet = s.nextLine();\n            temp = s.nextLine();\n            index = temp.indexOf(\",\");\n            toCity = temp.substring (0, index);\n            index = index + 2;\n            toState = temp.substring (index, index + 2);\n            toZip = temp.substring (index);\n            fromName = s.nextLine();\n            fromStreet = s.nextLine();\n            temp = s.nextLine();\n            index = temp.indexOf(\",\");\n            fromCity = temp.substring (0, index);\n            index = index + 2;\n            fromState = temp.substring (index, index + 2);\n            fromZip = temp.substring (index);\n            String var = s.nextLine();\n            weight = Double.parseDouble(var);\n            //weight = s.nextLine();\n            Letter l = new Letter(toName, toStreet, toCity, toState, toZip, fromName, fromStreet, fromCity, fromState, fromZip, weight);\n            this.count += 1;\n            this.letterArray[count - 1] = l;\n        }\n    }\n    s.close();\n}\n\npublic static void sortLetters() {\n//call sortSearchUtil This method should call the compareTo method provided by the Letter class to sort.  \n//You may use any sorting routine you wish (see SortSearchUtil.java)\n}\n\npublic static void printLetters() {\n//call tostring of letter class. print the count of Letters followed by the total postage followed \n//by each Letter (make sure you use the toString method provided by the Address and Letter classes for this)\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>my letter class:<\/p>\n\n<pre><code>    public class Letter extends PostOffice implements Comparable&lt;Letter&gt; {\nprivate static final double POSTAGE_RATE = 0.46;\nprivate String fromName;\nprivate Address fromAddr;\nprivate String toName;\nprivate Address toAddr;\nprivate double weight;\n\n\n    public Letter (String fromName, String fromStreet, String fromCity, String fromState,       String fromZip, String toName, \nString toStreet, String toCity, String toState, String toZip, double weight) {\nthis.fromName = fromName;\nthis.fromAddr = new Address(fromStreet, fromCity, fromState, fromZip);\nthis.toName = toName;\nthis.toAddr = new Address(toStreet, toCity, toState, toZip);\nthis.weight = weight;   \n}\n\npublic String toString() {\nString result;\nresult = String.format(\"from: %s\\t\\t\\t%5.2f\\n%s\", fromName, getPostage(weight), fromAddr);\nresult = result + String.format(\"\\t\\t To: %s\\n\\t\\t%s\", toName, toAddr);\nreturn result;\n}\n\n    public int compareTo(Letter that) {\nint value;\nvalue = this.toAddr.getZip().compareTo(that.toAddr.getZip());\nreturn value;\n}\n\n\npublic static double getPostage(double weight) {\ndouble workWeight;\nworkWeight = weight + 0.999;\nworkWeight = (int)workWeight;   \nreturn workWeight * POSTAGE_RATE;\n    } \n}\n<\/code><\/pre>\n\n<p>and my address class:<\/p>\n\n<pre><code>import java.awt.*;\nimport java.util.*;\n\npublic class Address {\nprivate String street;\nprivate String city;\nprivate String state;\nprivate String zip;\n\n    public Address (String street, String city, String state, String zip) {\n    this.street = street;\n    this.city = city;\n    this.state = state;\n    this.zip = zip;\n    }\n\n    public String getStreet() {\n    return street;\n    }\n\n    public void setStreet(String street) {\n    this.street = street;\n    }\n\n    public String getCity() {\n    return city;\n    }\n\n    public void setCity(String city) {\n    this.city = city;\n    }\n\n    public String getState() {\n    return state;\n    }\n\n    public void setState(String state) {\n    this.state = state;\n    }\n\n    public String getZip() {\n    return zip;\n    }\n\n    public void setZip(String zip) {\n    this.zip = zip;\n    }\n\n    public String toString() {\n    String result;\n    result = String.format(\"%s\\n%s, %s %s\", street, city, state, zip);\n    return result;  \n    }\n}\n<\/code><\/pre>\n\n<p>and this is the content of the text file <\/p>\n\n<pre>\nStu Steiner (NEW LINE)\n123 Slacker Lane (NEW LINE)\nSlackerville, IL  09035 (NEW LINE)\nTom Capaul(NEW LINE)\n999 Computer Nerd Court (NEW LINE)\nDweebsville, NC  28804-1359 (NEW LINE)\n0.50 (NEW LINE)\nTom Capaul (NEW LINE)\n999 Computer Nerd Court (NEW LINE)\nDweebsville, NC  28804-1359 (NEW LINE)\nChris Peters (NEW LINE)\n123 Some St. (NEW LINE)\nAnytown, CA  92111-0389 (NEW LINE)\n1.55 (NEW LINE)\n<\/pre>\n\n<p>Everything compiles, I just need it to output like this:<\/p>\n\n<pre>\n----------------------------------------------------------------------------\n\nFrom: From value                                              Postage value\nFrom Address value (be sure and use Address toString)\n\n                    To: To value\n                    To Address value (be sure and use Address toString)\n\n----------------------------------------------------------------------------\n<\/pre>\n",
+        "question_id": 8901025,
+        "tags": [
+            "java",
+            "input"
+        ],
+        "score": 0,
+        "accepted_answer_id": 8901146,
+        "is_answered": true,
+        "view_count": 1408,
+        "last_edit_date": 1326833865
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/87b4e4d0c43e349fad30838e605e5c10?s=256&d=identicon&r=PG",
+                "account_id": 1055494,
+                "user_type": "registered",
+                "user_id": 1058319,
+                "link": "https://stackoverflow.com/users/1058319/adel-boutros",
+                "reputation": 10345,
+                "display_name": "Adel Boutros",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901025,
+            "edited": false,
+            "creation_date": 1366359754,
+            "comment_id": 22988814
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/96300de14a76309c3af5e020b26951ca?s=256&d=identicon&r=PG",
+                "account_id": 1170788,
+                "user_type": "registered",
+                "user_id": 1148035,
+                "link": "https://stackoverflow.com/users/1148035/tim",
+                "reputation": 2037,
+                "display_name": "tim",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901025,
+            "edited": false,
+            "creation_date": 1326832478,
+            "comment_id": 11132217
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fb55d3aa241c69d20957d417ac5adeca?s=256&d=identicon&r=PG",
+                "account_id": 1102632,
+                "user_type": "registered",
+                "user_id": 1094888,
+                "link": "https://stackoverflow.com/users/1094888/anthony",
+                "reputation": 401,
+                "display_name": "anthony",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901025,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/CIKgz.png?s=256",
+                "account_id": 4693,
+                "user_type": "registered",
+                "user_id": 7178,
+                "link": "https://stackoverflow.com/users/7178/jim-kiley",
+                "reputation": 3652,
+                "display_name": "Jim Kiley",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1326831150,
+            "comment_id": 11131800
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/CIKgz.png?s=256",
+                "account_id": 4693,
+                "user_type": "registered",
+                "user_id": 7178,
+                "link": "https://stackoverflow.com/users/7178/jim-kiley",
+                "reputation": 3652,
+                "display_name": "Jim Kiley",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8901025,
+            "edited": false,
+            "creation_date": 1326831084,
+            "comment_id": 11131780
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/87b4e4d0c43e349fad30838e605e5c10?s=256&d=identicon&r=PG",
+                "account_id": 1055494,
+                "user_type": "registered",
+                "user_id": 1058319,
+                "link": "https://stackoverflow.com/users/1058319/adel-boutros",
+                "reputation": 10345,
+                "display_name": "Adel Boutros",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1326840612,
+            "creation_date": 1326831448,
+            "body": "<p>You do <code>s.readline()<\/code> many times inside 1 iteration of <code>while<\/code> loop. This is why you're getting the error.<\/p>\n\n<p>You need to call <code>readLine()<\/code> only once inside your while loop<\/p>\n\n<p>Example in your code:<\/p>\n\n<pre><code>while(s.hasNext()){\n        toName = s.nextLine();\n        toStreet = s.nextLine();\n        temp = s.nextLine();\n        // ...\n    }\n<\/code><\/pre>\n\n<p>These are 3 calls to nextLine, how are you sure there are still lines?<\/p>\n\n<p><strong>SOLUTION:<\/strong><\/p>\n\n<p>put an if statement before every s.nextLine() except the first one.\nExample:<\/p>\n\n<pre><code>while(s.hasNext()){\n     toName = s.nextLine();\n     if (s.hasNext()) {\n         toStreet = s.nextLine();\n     }\n     if (s.hasNext()) {\n         temp = s.nextLine();\n     }\n     // ...\n}\n<\/code><\/pre>\n",
+            "answer_id": 8901146,
+            "question_id": 8901025,
+            "last_edit_date": 1326840612
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user800014"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1326831381,
+            "creation_date": 1326831381,
+            "body": "<p>Probably you missed to test if you have the next line:<\/p>\n\n<p><a href=\"http://docs.oracle.com/javase/1.5.0/docs/api/java/util/Scanner.html#hasNext%28%29\" rel=\"nofollow\">http://docs.oracle.com/javase/1.5.0/docs/api/java/util/Scanner.html#hasNext%28%29<\/a><\/p>\n",
+            "answer_id": 8901133,
+            "question_id": 8901025
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5252d061371ebb5944acc4447b455d87?s=256&d=identicon&r=PG",
+                "account_id": 383107,
+                "user_type": "registered",
+                "user_id": 738746,
+                "link": "https://stackoverflow.com/users/738746/bhesh-gurung",
+                "reputation": 51080,
+                "display_name": "Bhesh Gurung",
+                "accept_rate": 97
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1326834618,
+            "creation_date": 1326833639,
+            "body": "<p>The problem is the mistmatch (<code>hasNext()<\/code> and <code>nextLine()<\/code>). <\/p>\n\n<p>With <code>nextLine()<\/code> you should use <code>hasNextLine()<\/code>. This is probably the combination you need as you seem to read it line by line.<\/p>\n\n<p>e.g. looking at your text file something as follows should but modification must be made in case if the text file is not always well formed:<\/p>\n\n<pre><code>while(s.hasNextLine()) { // check if there is next line\n    String toName = s.nextLine();\n    String toAddrLine1 = s.nextLine();\n    String toAddrLine2 = s.nextLine();\n    String fromName = s.nextLine();\n    String fromAddrLine1 = s.nextLine();\n    String fromAddrLine2 = s.nextLine();\n    String postageValueStr = s.nextLine();\n\n    //do further processing down here\n<\/code><\/pre>\n\n<p>While <code>hasNext()<\/code> should be used in combination with <code>next()<\/code>.<\/p>\n\n<p>Please, go through the <code>Scanner<\/code> <a href=\"http://docs.oracle.com/javase/6/docs/api/java/util/Scanner.html\" rel=\"nofollow\">doc<\/a>.<\/p>\n",
+            "answer_id": 8901609,
+            "question_id": 8901025,
+            "last_edit_date": 1326834618
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/96300de14a76309c3af5e020b26951ca?s=256&d=identicon&r=PG",
+                "account_id": 1170788,
+                "user_type": "registered",
+                "user_id": 1148035,
+                "link": "https://stackoverflow.com/users/1148035/tim",
+                "reputation": 2037,
+                "display_name": "tim",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1326833879,
+            "creation_date": 1326833879,
+            "body": "<p>Your suspicion was right: you are not opening up a file but just passing the string \"letter.in\" to the scanner. The correct code would be:<\/p>\n\n<pre><code>    Scanner s = null;\n    try {\n        s = new Scanner(new File(filename));\n    } catch (FileNotFoundException ex) {\n        Logger.getLogger(PostOffice.class.getName()).log(Level.SEVERE, null, ex);\n    }\n    if (s != null) {\n         ....\n    }\n<\/code><\/pre>\n\n<p>Your program still will not print anything as the printLetters() method is not implemented, but it will not crash anymore (at least not if the file always has a multiple of 7 lines).\nThe input format is not very well chosen, but as it is homework I guess it was not really your choice. to make the code at least a little bit less error prone you could ask before every nextLine if there actually is a next line (this is not a good solution, but one that is done without much work).<\/p>\n",
+            "answer_id": 8901654,
+            "question_id": 8901025
+        }
+    ],
+    "answer_comments": {
+        "8901133": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fb55d3aa241c69d20957d417ac5adeca?s=256&d=identicon&r=PG",
+                "account_id": 1102632,
+                "user_type": "registered",
+                "user_id": 1094888,
+                "link": "https://stackoverflow.com/users/1094888/anthony",
+                "reputation": 401,
+                "display_name": "anthony",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901133,
+            "edited": false,
+            "creation_date": 1326832465,
+            "comment_id": 11132214
+        }],
+        "8901146": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/87b4e4d0c43e349fad30838e605e5c10?s=256&d=identicon&r=PG",
+                    "account_id": 1055494,
+                    "user_type": "registered",
+                    "user_id": 1058319,
+                    "link": "https://stackoverflow.com/users/1058319/adel-boutros",
+                    "reputation": 10345,
+                    "display_name": "Adel Boutros",
+                    "accept_rate": 98
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8901146,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/fb55d3aa241c69d20957d417ac5adeca?s=256&d=identicon&r=PG",
+                    "account_id": 1102632,
+                    "user_type": "registered",
+                    "user_id": 1094888,
+                    "link": "https://stackoverflow.com/users/1094888/anthony",
+                    "reputation": 401,
+                    "display_name": "anthony",
+                    "accept_rate": 73
+                },
+                "edited": false,
+                "creation_date": 1326876895,
+                "comment_id": 11140937
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fb55d3aa241c69d20957d417ac5adeca?s=256&d=identicon&r=PG",
+                    "account_id": 1102632,
+                    "user_type": "registered",
+                    "user_id": 1094888,
+                    "link": "https://stackoverflow.com/users/1094888/anthony",
+                    "reputation": 401,
+                    "display_name": "anthony",
+                    "accept_rate": 73
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8901146,
+                "edited": false,
+                "creation_date": 1326832610,
+                "comment_id": 11132248
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/CIKgz.png?s=256",
+                    "account_id": 4693,
+                    "user_type": "registered",
+                    "user_id": 7178,
+                    "link": "https://stackoverflow.com/users/7178/jim-kiley",
+                    "reputation": 3652,
+                    "display_name": "Jim Kiley",
+                    "accept_rate": 93
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 8901146,
+                "edited": false,
+                "creation_date": 1326832130,
+                "comment_id": 11132109
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fb55d3aa241c69d20957d417ac5adeca?s=256&d=identicon&r=PG",
+                    "account_id": 1102632,
+                    "user_type": "registered",
+                    "user_id": 1094888,
+                    "link": "https://stackoverflow.com/users/1094888/anthony",
+                    "reputation": 401,
+                    "display_name": "anthony",
+                    "accept_rate": 73
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8901146,
+                "edited": false,
+                "creation_date": 1326831776,
+                "comment_id": 11132006
+            }
+        ]
+    }
+}

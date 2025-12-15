@@ -1,0 +1,68 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a/ALm5wu1sWj_sg3OEFcyJg7T2L-70fdJ2XZ4YStP7TI8_=k-s256",
+            "account_id": 26822911,
+            "user_type": "registered",
+            "user_id": 20411977,
+            "link": "https://stackoverflow.com/users/20411977/guiguietben",
+            "reputation": 15,
+            "display_name": "guiguietben"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75166559/java-how-to-manage-callback-correctly",
+        "last_activity_date": 1674106098,
+        "creation_date": 1674087162,
+        "answer_count": 1,
+        "title": "java how to manage callback correctly",
+        "body": "<p>I will try to be clear with my question.\nI had a callback function in a class like that, udes to retrieve card information from a reader.<\/p>\n<pre><code>public void CallbackFunction(CardContent PresentedCard) {\n        \n        }\n<\/code><\/pre>\n<p>So normally, i could write my code into this callback function for example if i want to print the content of the card data =&gt; this part doesn't take a long time.<\/p>\n<p>But imagine if i want to do a big process that request a long time, like i need to transfert the information in different server so far away =&gt; this could take a long time<\/p>\n<p>So what i understand is that during this time if a new card is presented on the reader, i supposed that the callback will be not wake up during this long time, and i will must wait the end of the previous process (send all the data to all the servers) for detecting a new card again.<\/p>\n<p>So my question is what's the best practice to manage this case with a callback function ?<\/p>\n<p>thanks<\/p>\n",
+        "question_id": 75166559,
+        "tags": [
+            "java",
+            "process",
+            "callback"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 116
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f00e2127ef8a9bddd43831c628540d9?s=256&d=identicon&r=PG",
+            "account_id": 2213952,
+            "user_type": "registered",
+            "user_id": 1955093,
+            "link": "https://stackoverflow.com/users/1955093/magus",
+            "reputation": 141,
+            "display_name": "Magus"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1674106098,
+        "creation_date": 1674088806,
+        "body": "<p>Use a thread to handle a long-running callback function. The callback function may handle new card events without being blocked.<\/p>\n<p>Here's how to utilise Java's Thread class:<\/p>\n<pre><code>public void CallbackFunction(CardContent PresentedCard) {\n    Thread thread = new Thread(() -&gt; {\n        // long-running process here\n        sendDataToServer(PresentedCard);\n    });\n    thread.start();\n}\n<\/code><\/pre>\n<p>The callback function may handle new card events while transmitting data to the server in this example.<\/p>\n<p>Executor, Future, and CompletableFuture provide extra thread management choices.<\/p>\n<p>The callback function might add card information to a message queue, and a separate thread would process the queue and transmit the data to the server. If necessary, this method may retain event order.<\/p>\n<p>It's also vital to handle problems and exceptions throughout the long-running process and appropriately end or interrupt the thread if the programme is closed or the process takes too long.<\/p>\n",
+        "answer_id": 75166720,
+        "question_id": 75166559,
+        "last_edit_date": 1674106098
+    }],
+    "answer_comments": {"75166720": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e442a53d36f9351aee11b5ecb8369691?s=256&d=identicon&r=PG",
+            "account_id": 6520,
+            "user_type": "registered",
+            "user_id": 11002,
+            "link": "https://stackoverflow.com/users/11002/tgdavies",
+            "reputation": 11634,
+            "display_name": "tgdavies",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 75166720,
+        "edited": false,
+        "creation_date": 1674091946,
+        "comment_id": 132643464
+    }]}
+}

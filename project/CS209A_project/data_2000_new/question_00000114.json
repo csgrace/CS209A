@@ -1,0 +1,137 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f6ef4147d021b1a05ffbac971c0af6e?s=256&d=identicon&r=PG",
+            "account_id": 1001450,
+            "user_type": "registered",
+            "user_id": 1016210,
+            "link": "https://stackoverflow.com/users/1016210/thiru",
+            "reputation": 13,
+            "display_name": "thiru"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/11482663/how-can-i-store-values-in-java-parameters-that-are-passed-to-jni-native-c-call",
+        "last_activity_date": 1342397913,
+        "creation_date": 1342258775,
+        "answer_count": 2,
+        "title": "How can I store values in Java parameters that are passed to JNI native C call",
+        "body": "<p>I am writing a program which does security modules such as encryption, signing, etc... I had written library in C which does the above mentioned functionality. Now I am calling this C native functions from java by using jni.<\/p>\n\n<p>The problem I am facing is I am unable to store the result(signed data or encrypted data)into the parameters passed by java. I want to store the result in parameters which I receive. please help me. Thanks alot in advance.<\/p>\n\n<p>The following are the API that I use in java to call native functions<\/p>\n\n<pre><code>sign(\"sign\",byte[] file,int filelen,byte[] output,int outputlen)\n<\/code><\/pre>\n\n<p>In native C call I will perform the sign on \"file\" which is a buffer consists of input file contents and I want to store it to the output. How can I do it can anyone help me I did not found any related information.<\/p>\n",
+        "question_id": 11482663,
+        "tags": [
+            "java",
+            "java-native-interface"
+        ],
+        "score": 1,
+        "accepted_answer_id": 11492184,
+        "is_answered": true,
+        "view_count": 2852,
+        "last_edit_date": 1342260733
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+            "account_id": 277416,
+            "user_type": "registered",
+            "user_id": 571407,
+            "link": "https://stackoverflow.com/users/571407/jb-nizet",
+            "reputation": 694302,
+            "display_name": "JB Nizet",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 11482663,
+        "edited": false,
+        "creation_date": 1342259187,
+        "comment_id": 15163934
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fbee3fb23bf3384af84de44621e93b1a?s=256&d=identicon&r=PG",
+                "account_id": 94189,
+                "user_type": "registered",
+                "user_id": 257288,
+                "link": "https://stackoverflow.com/users/257288/tbroberg",
+                "reputation": 645,
+                "display_name": "tbroberg",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1342304251,
+            "creation_date": 1342304251,
+            "body": "<p>Typically, native libraries are called with a direct ByteBuffer.<\/p>\n\n<p>Interface is <code>MyClass.submit(ByteBuffer source, ByteBuffer dest)<\/code><\/p>\n\n<pre><code>static jmethodID ByteBuffer_position;\nstatic jmethodID ByteBuffer_limit;\n\n// Find method id's for ByteBuffer methods.\nJNIEXPORT jint JNICALL Java_MyClass_initAPI\n    (JNIEnv *env, jclass thisj) {\n  jint error = 0;\n\n  ByteBuffer_position = (*env)-&gt;GetMethodID(env, byteBufferClass, \"position\", \"()I\");\n  if (ByteBuffer_position == NULL) error = -1;\n  ByteBuffer_limit = (*env)-&gt;GetMethodID(env, byteBufferClass, \"limit\", \"()I\");\n  if (ByteBuffer_limit == NULL) error = -1;\n\n  return error;\n}\n\n// Get ByteBuffer pointers and sizes and encrypt\n// Expects source buffer's position to indicate end of source\n// Expects dest buffer's limit to indicate max output length\nJNIEXPORT jint JNICALL Java_MyClass_submit (JNIEnv *env, jobject thisj,\n    jobject sourceBuffer, jobject destBuffer ) {\n    jint error = 0;\n\n    unsigned char* sourcePtr = (*env)-&gt;GetDirectBufferAddress(env, source);\n    unsigned char* destPtr = (*env)-&gt;GetDirectBufferAddress(env, dest);\n    jlong sourceLen = (*env)-&gt;CallIntMethod(env, source, ByteBuffer_position);\n    jlong destLen = (*env)-&gt;CallIntMethod(env, dest, ByteBuffer_limit);\n\n    // Encrypt sourcePtr --&gt; destPtr\n\n    return error;\n}\n<\/code><\/pre>\n\n<p>This should be enough to get the idea across. It's paraphrased from working code, but untested in current form.<\/p>\n",
+            "answer_id": 11487799,
+            "question_id": 11482663
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9a89d4cf026c5eb3af2b3fdea1925723?s=256&d=identicon&r=PG",
+                "account_id": 9322,
+                "user_type": "registered",
+                "user_id": 17175,
+                "link": "https://stackoverflow.com/users/17175/technomage",
+                "reputation": 10099,
+                "display_name": "technomage",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1342397913,
+            "creation_date": 1342357768,
+            "body": "<p>The following code allows your native code to directly access the contents of both primitive byte array inputs.<\/p>\n\n<pre><code>JNIEXPORT void JNICALL Java_*mypackage*_sign(JNIEnv* env, jbytearray input, jint ilen, jbytearray output, jint olen) {\n  char* pinput = (*env)-&gt;GetByteArrayElements(env, input, NULL);\n  char* poutput = (*env)-&gt;GetByteArrayElements(env, output, NULL);\n\n  sign(pinput, ilen, poutput, olen);\n\n  (*env)-&gt;ReleaseByteArrayElements(env, input, pinput, 0);\n  (*env)-&gt;ReleaseByteArrayElements(env, output, poutput, 0);\n}\n<\/code><\/pre>\n\n<p>Depending on your performance considerations (i.e. if you want to ensure that you avoid copying the array data, or avoid concurrent access to the byte arrays), <a href=\"https://stackoverflow.com/questions/6728616/how-to-read-a-bytearray-in-jni\">here is an example<\/a> of using <code>GetPrimitiveArrayCritical<\/code>.<\/p>\n\n<p>An NIO/direct buffer is only recommended if you need the buffer to be shared between native and Java code for longer than the duration of a single function call.<\/p>\n",
+            "answer_id": 11492184,
+            "question_id": 11482663,
+            "last_edit_date": 1495541548
+        }
+    ],
+    "answer_comments": {"11492184": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9a89d4cf026c5eb3af2b3fdea1925723?s=256&d=identicon&r=PG",
+                "account_id": 9322,
+                "user_type": "registered",
+                "user_id": 17175,
+                "link": "https://stackoverflow.com/users/17175/technomage",
+                "reputation": 10099,
+                "display_name": "technomage",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 11492184,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2f6ef4147d021b1a05ffbac971c0af6e?s=256&d=identicon&r=PG",
+                "account_id": 1001450,
+                "user_type": "registered",
+                "user_id": 1016210,
+                "link": "https://stackoverflow.com/users/1016210/thiru",
+                "reputation": 13,
+                "display_name": "thiru"
+            },
+            "edited": false,
+            "creation_date": 1342524916,
+            "comment_id": 15227576
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f6ef4147d021b1a05ffbac971c0af6e?s=256&d=identicon&r=PG",
+                "account_id": 1001450,
+                "user_type": "registered",
+                "user_id": 1016210,
+                "link": "https://stackoverflow.com/users/1016210/thiru",
+                "reputation": 13,
+                "display_name": "thiru"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 11492184,
+            "edited": false,
+            "creation_date": 1342518440,
+            "comment_id": 15224929
+        }
+    ]}
+}

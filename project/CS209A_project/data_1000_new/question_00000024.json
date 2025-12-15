@@ -1,0 +1,115 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1522866600/picture?type=large",
+            "account_id": 4503059,
+            "user_type": "registered",
+            "user_id": 3661160,
+            "link": "https://stackoverflow.com/users/3661160/spongyboss",
+            "reputation": 291,
+            "display_name": "spongyboss",
+            "accept_rate": 40
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/23785804/java-sliding-jpanels",
+        "last_activity_date": 1409441568,
+        "creation_date": 1400681631,
+        "answer_count": 2,
+        "title": "Java sliding JPanels",
+        "body": "<p>I have a menu that has a variety of buttons on display, I'm able to make the buttons call their respective JPanels when clicked. The thing is I would like to make the Jpanel slide in when its called instead of instantaneously popping in. I tried using tween engine and as Java beginner,  I find it really overwhelming, so I decided to use timed animation.  I was able to make the Jpanel on top to slide to one side but for some reason the next panel doesn't want to display,  im really tired, can someone help please!  There code is below:<\/p>\n\n<pre><code>public class Listener implements ActionListener {\n    @Override\n    public void actionPerformed(ActionEvent e) {\n\n        new Timer(0, new ActionListener() {\n           public void actionPerformed(ActionEvent e) {                \n\n              mainpane.setLocation(mainpane.getX() - 10, 0);\n              if (mainpane.getX() + mainpane.getWidth() == 0) \n              {\n                 ((Timer) e.getSource()).stop();\n                   System.out.println(\"Timer stopped\");\n              } \n           }\n        }).start();   \n   } \n}\n<\/code><\/pre>\n",
+        "question_id": 23785804,
+        "tags": [
+            "java",
+            "animation",
+            "slide",
+            "effects"
+        ],
+        "score": 8,
+        "accepted_answer_id": 23795304,
+        "is_answered": true,
+        "view_count": 13756,
+        "last_edit_date": 1400710652
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7auRa.png?s=256",
+                "account_id": 1300215,
+                "user_type": "registered",
+                "user_id": 1250303,
+                "link": "https://stackoverflow.com/users/1250303/java42",
+                "reputation": 7716,
+                "display_name": "Java42"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 18,
+            "is_accepted": true,
+            "last_activity_date": 1403808236,
+            "creation_date": 1400713654,
+            "body": "<p>Sliding panels can be tricky.  Here is some starter code.  Modify to fit \nyour needs.  Add error checking and exception handling as necessary.<\/p>\n\n<p>This example uses JButtons and a JTree as content but you can use just about any type of content.<\/p>\n\n<p><img src=\"https://i.sstatic.net/Nnp3e.gif\" alt=\"Example Slider\"><\/p>\n\n<p>Usage:  <\/p>\n\n<pre><code>static public void main(final String[] args) throws Exception {\n    SwingUtilities.invokeAndWait(new Runnable() {\n        @Override\n        public void run() {\n            final JFrame jFrame = new JFrame() {\n                {\n                    final PanelSlider42&lt;JFrame&gt; slider = new PanelSlider42&lt;JFrame&gt;(this);\n                    final JPanel jPanel = slider.getBasePanel();\n\n                    slider.addComponent(new JButton(\"1\"));\n                    slider.addComponent(new JButton(\"22\"));\n                    slider.addComponent(new JButton(\"333\"));\n                    slider.addComponent(new JButton(\"4444\"));\n\n                    getContentPane().add(jPanel);\n                    setSize(300, 300);\n                    setLocationRelativeTo(null);\n                    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);\n                    setVisible(true);\n                }\n            };\n        }\n    });\n}\n<\/code><\/pre>\n\n<p>The impl is lengthy ...<\/p>\n\n<pre><code>package com.java42.example.code;\n\nimport java.awt.BorderLayout;\nimport java.awt.Component;\nimport java.awt.Container;\nimport java.awt.Cursor;\nimport java.awt.Insets;\nimport java.awt.Point;\nimport java.awt.Toolkit;\nimport java.awt.event.ActionEvent;\nimport java.awt.event.ActionListener;\nimport java.awt.event.KeyAdapter;\nimport java.awt.event.MouseAdapter;\nimport java.awt.event.MouseMotionAdapter;\nimport java.util.ArrayList;\n\nimport javax.swing.JButton;\nimport javax.swing.JDialog;\nimport javax.swing.JFrame;\nimport javax.swing.JPanel;\nimport javax.swing.JWindow;\nimport javax.swing.SwingUtilities;\n\npublic class PanelSlider42&lt;ParentType extends Container&gt; {\n\nprivate static final int           RIGHT             = 0x01;\nprivate static final int           LEFT              = 0x02;\nprivate static final int           TOP               = 0x03;\nprivate static final int           BOTTOM            = 0x04;\nprivate final JPanel               basePanel         = new JPanel();\nprivate final ParentType           parent;\nprivate final Object               lock              = new Object();\nprivate final ArrayList&lt;Component&gt; jPanels           = new ArrayList&lt;Component&gt;();\nprivate final boolean              useSlideButton    = true;\nprivate boolean                    isSlideInProgress = false;\n\nprivate final JPanel               glassPane;\n{\n    glassPane = new JPanel();\n    glassPane.setOpaque(false);\n    glassPane.addMouseListener(new MouseAdapter() {\n    });\n    glassPane.addMouseMotionListener(new MouseMotionAdapter() {\n    });\n    glassPane.addKeyListener(new KeyAdapter() {\n    });\n}\n\npublic PanelSlider42(final ParentType parent) {\n    if (parent == null) {\n        throw new RuntimeException(\"ProgramCheck: Parent can not be null.\");\n    }\n    if ((parent instanceof JFrame) || (parent instanceof JDialog) || (parent instanceof JWindow) || (parent instanceof JPanel)) {\n    }\n    else {\n        throw new RuntimeException(\"ProgramCheck: Parent type not supported. \" + parent.getClass().getSimpleName());\n    }\n    this.parent = parent;\n    attach();\n    basePanel.setSize(parent.getSize());\n    basePanel.setLayout(new BorderLayout());\n    if (useSlideButton) {\n        final JPanel statusPanel = new JPanel();\n        basePanel.add(statusPanel, BorderLayout.SOUTH);\n        statusPanel.add(new JButton(\"Slide Left\") {\n            private static final long serialVersionUID = 9204819004142223529L;\n            {\n                setMargin(new Insets(0, 0, 0, 0));\n            }\n            {\n                addActionListener(new ActionListener() {\n                    @Override\n                    public void actionPerformed(final ActionEvent e) {\n                        slideLeft();\n                    }\n                });\n            }\n        });\n        statusPanel.add(new JButton(\"Slide Right\") {\n            {\n                setMargin(new Insets(0, 0, 0, 0));\n            }\n            private static final long serialVersionUID = 9204819004142223529L;\n            {\n                addActionListener(new ActionListener() {\n                    @Override\n                    public void actionPerformed(final ActionEvent e) {\n                        slideRight();\n                    }\n                });\n            }\n        });\n        statusPanel.add(new JButton(\"Slide Up\") {\n            {\n                setMargin(new Insets(0, 0, 0, 0));\n            }\n            private static final long serialVersionUID = 9204819004142223529L;\n            {\n                addActionListener(new ActionListener() {\n                    @Override\n                    public void actionPerformed(final ActionEvent e) {\n                        slideTop();\n                    }\n                });\n            }\n        });\n        statusPanel.add(new JButton(\"Slide Down\") {\n            {\n                setMargin(new Insets(0, 0, 0, 0));\n            }\n            private static final long serialVersionUID = 9204819004142223529L;\n            {\n                addActionListener(new ActionListener() {\n                    @Override\n                    public void actionPerformed(final ActionEvent e) {\n                        slideBottom();\n                    }\n                });\n            }\n        });\n    }\n}\n\npublic JPanel getBasePanel() {\n    return basePanel;\n}\n\nprivate void attach() {\n    final ParentType w = this.parent;\n    if (w instanceof JFrame) {\n        final JFrame j = (JFrame) w;\n        if (j.getContentPane().getComponents().length &gt; 0) {\n            throw new RuntimeException(\"ProgramCheck: Parent already contains content.\");\n        }\n        j.getContentPane().add(basePanel);\n    }\n    if (w instanceof JDialog) {\n        final JDialog j = (JDialog) w;\n        if (j.getContentPane().getComponents().length &gt; 0) {\n            throw new RuntimeException(\"ProgramCheck: Parent already contains content.\");\n        }\n        j.getContentPane().add(basePanel);\n    }\n    if (w instanceof JWindow) {\n        final JWindow j = (JWindow) w;\n        if (j.getContentPane().getComponents().length &gt; 0) {\n            throw new RuntimeException(\"ProgramCheck: Parent already contains content.\");\n        }\n        j.getContentPane().add(basePanel);\n    }\n    if (w instanceof JPanel) {\n        final JPanel j = (JPanel) w;\n        if (j.getComponents().length &gt; 0) {\n            throw new RuntimeException(\"ProgramCheck: Parent already contains content.\");\n        }\n        j.add(basePanel);\n    }\n}\n\npublic void addComponent(final Component component) {\n    if (jPanels.contains(component)) {\n    }\n    else {\n        jPanels.add(component);\n        if (jPanels.size() == 1) {\n            basePanel.add(component);\n        }\n        component.setSize(basePanel.getSize());\n        component.setLocation(0, 0);\n    }\n}\n\npublic void removeComponent(final Component component) {\n    if (jPanels.contains(component)) {\n        jPanels.remove(component);\n    }\n}\n\npublic void slideLeft() {\n    slide(LEFT);\n}\n\npublic void slideRight() {\n    slide(RIGHT);\n}\n\npublic void slideTop() {\n    slide(TOP);\n}\n\npublic void slideBottom() {\n    slide(BOTTOM);\n}\n\nprivate void enableUserInput(final ParentType w) {\n    if (w instanceof JFrame) {\n        ((JFrame) w).getGlassPane().setVisible(false);\n    }\n    if (w instanceof JDialog) {\n        ((JDialog) w).getGlassPane().setVisible(false);\n    }\n    if (w instanceof JWindow) {\n        ((JWindow) w).getGlassPane().setVisible(false);\n    }\n}\n\nprivate void disableUserInput(final ParentType w) {\n    if (w instanceof JFrame) {\n        ((JFrame) w).setGlassPane(glassPane);\n    }\n    if (w instanceof JDialog) {\n        ((JDialog) w).setGlassPane(glassPane);\n    }\n    if (w instanceof JWindow) {\n        ((JWindow) w).setGlassPane(glassPane);\n    }\n    glassPane.setVisible(true);\n}\n\nprivate void enableTransparentOverylay() {\n    if (parent instanceof JFrame) {\n        ((JFrame) parent).getContentPane().setBackground(jPanels.get(0).getBackground());\n        parent.remove(basePanel);\n        parent.validate();\n    }\n    if (parent instanceof JDialog) {\n        ((JDialog) parent).getContentPane().setBackground(jPanels.get(0).getBackground());\n        parent.remove(basePanel);\n        parent.validate();\n    }\n    if (parent instanceof JWindow) {\n        ((JWindow) parent).getContentPane().setBackground(jPanels.get(0).getBackground());\n        parent.remove(basePanel);\n        parent.validate();\n    }\n}\n\nprivate void slide(final int slideType) {\n    if (!isSlideInProgress) {\n        isSlideInProgress = true;\n        final Thread t0 = new Thread(new Runnable() {\n            @Override\n            public void run() {\n                parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));\n                disableUserInput(parent);\n                slide(true, slideType);\n                enableUserInput(parent);\n                parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));\n                isSlideInProgress = false;\n            }\n        });\n        t0.setDaemon(true);\n        t0.start();\n    }\n    else {\n        Toolkit.getDefaultToolkit().beep();\n    }\n}\n\nprivate void slide(final boolean useLoop, final int slideType) {\n    if (jPanels.size() &lt; 2) {\n        System.err.println(\"Not enough panels\");\n        return;\n    }\n    synchronized (lock) {\n        Component componentOld = null;\n        Component componentNew = null;\n        if ((slideType == LEFT) || (slideType == TOP)) {\n            componentNew = jPanels.remove(jPanels.size() - 1);\n            componentOld = jPanels.get(0);\n            jPanels.add(0, componentNew);\n        }\n        if ((slideType == RIGHT) || (slideType == BOTTOM)) {\n            componentOld = jPanels.remove(0);\n            jPanels.add(componentOld);\n            componentNew = jPanels.get(0);\n        }\n        final int w = componentOld.getWidth();\n        final int h = componentOld.getHeight();\n        final Point p1 = componentOld.getLocation();\n        final Point p2 = new Point(0, 0);\n        if (slideType == LEFT) {\n            p2.x += w;\n        }\n        if (slideType == RIGHT) {\n            p2.x -= w;\n        }\n        if (slideType == TOP) {\n            p2.y += h;\n        }\n        if (slideType == BOTTOM) {\n            p2.y -= h;\n        }\n        componentNew.setLocation(p2);\n        int step = 0;\n        if ((slideType == LEFT) || (slideType == RIGHT)) {\n            step = (int) (((float) parent.getWidth() / (float) Toolkit.getDefaultToolkit().getScreenSize().width) * 40.f);\n        }\n        else {\n            step = (int) (((float) parent.getHeight() / (float) Toolkit.getDefaultToolkit().getScreenSize().height) * 20.f);\n        }\n        step = step &lt; 5 ? 5 : step;\n        basePanel.add(componentNew);\n        basePanel.revalidate();\n        if (useLoop) {\n            final int max = (slideType == LEFT) || (slideType == RIGHT) ? w : h;\n            final long t0 = System.currentTimeMillis();\n            for (int i = 0; i != (max / step); i++) {\n                switch (slideType) {\n                    case LEFT: {\n                        p1.x -= step;\n                        componentOld.setLocation(p1);\n                        p2.x -= step;\n                        componentNew.setLocation(p2);\n                        break;\n                    }\n                    case RIGHT: {\n                        p1.x += step;\n                        componentOld.setLocation(p1);\n                        p2.x += step;\n                        componentNew.setLocation(p2);\n                        break;\n                    }\n                    case TOP: {\n                        p1.y -= step;\n                        componentOld.setLocation(p1);\n                        p2.y -= step;\n                        componentNew.setLocation(p2);\n                        break;\n                    }\n                    case BOTTOM: {\n                        p1.y += step;\n                        componentOld.setLocation(p1);\n                        p2.y += step;\n                        componentNew.setLocation(p2);\n                        break;\n                    }\n                    default:\n                        new RuntimeException(\"ProgramCheck\").printStackTrace();\n                        break;\n                }\n\n                try {\n                    Thread.sleep(500 / (max / step));\n                } catch (final Exception e) {\n                    e.printStackTrace();\n                }\n            }\n            final long t1 = System.currentTimeMillis();\n        }\n        componentOld.setLocation(-10000, -10000);\n        componentNew.setLocation(0, 0);\n    }\n}\n}\n<\/code><\/pre>\n",
+            "answer_id": 23795304,
+            "question_id": 23785804,
+            "last_edit_date": 1403808236
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xvYQG.jpg?s=256",
+                "account_id": 2233919,
+                "user_type": "registered",
+                "user_id": 2736313,
+                "link": "https://stackoverflow.com/users/2736313/andrew-dublin",
+                "reputation": 745,
+                "display_name": "Andrew_Dublin",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1409441568,
+            "creation_date": 1409439827,
+            "body": "<p>I have searched for that problem some time ago.I found this sample code somewhere - saved in my evernote for future reference. This is the shortest way to implement that when I googled that in the past<\/p>\n\n<pre><code>import java.awt.Color;\nimport java.awt.event.ActionEvent;\nimport java.awt.event.ActionListener;\nimport javax.swing.JButton;\nimport javax.swing.JFrame;\nimport javax.swing.JPanel;\nimport javax.swing.SwingUtilities;\nimport javax.swing.Timer;\n\npublic class SlidingPanel {\n\n   JPanel panel;\n\n   public void makeUI() {\n      panel = new JPanel();\n      panel.setBackground(Color.RED);\n      panel.setBounds(0, 0, 400, 400);\n\n      JButton button = new JButton(\"Click\");\n      button.addActionListener(new ActionListener() {\n         public void actionPerformed(ActionEvent e) {\n            ((JButton) e.getSource()).setEnabled(false);\n            new Timer(1, new ActionListener() {\n               public void actionPerformed(ActionEvent e) {\n                  panel.setLocation(panel.getX() - 1, 0);\n                  if (panel.getX() + panel.getWidth() == 0) {\n                     ((Timer) e.getSource()).stop();\n               System.out.println(\"Timer stopped\");\n            }\n               }\n            }).start();\n         }\n      });\n      panel.add(button);\n      JFrame frame = new JFrame(\"Sliding Panel\");\n      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n      frame.setSize(400, 400);\n      frame.setLocationRelativeTo(null);\n      frame.setLayout(null);\n      frame.add(panel);\n      frame.setVisible(true);\n   }\n\n   public static void main(String[] args) {\n      SwingUtilities.invokeLater(new Runnable() {\n         public void run() {\n            new SlidingPanel().makeUI();\n         }\n      });\n   }\n}\n<\/code><\/pre>\n",
+            "answer_id": 25587470,
+            "question_id": 23785804,
+            "last_edit_date": 1409441568
+        }
+    ],
+    "answer_comments": {"23795304": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1522866600/picture?type=large",
+                "account_id": 4503059,
+                "user_type": "registered",
+                "user_id": 3661160,
+                "link": "https://stackoverflow.com/users/3661160/spongyboss",
+                "reputation": 291,
+                "display_name": "spongyboss",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 23795304,
+            "edited": false,
+            "creation_date": 1401228910,
+            "comment_id": 36799154
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c1e5a582ea6b95ae24cdb75aecd4aad3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 403740,
+                "user_type": "registered",
+                "user_id": 771665,
+                "link": "https://stackoverflow.com/users/771665/mirroredfate",
+                "reputation": 12904,
+                "display_name": "MirroredFate",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 23795304,
+            "edited": false,
+            "creation_date": 1400780261,
+            "comment_id": 36634048
+        }
+    ]}
+}

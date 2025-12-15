@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/acd95a7ac10021cb884e67d5aeb772d7?s=256&d=identicon&r=PG",
+            "account_id": 27228211,
+            "user_type": "registered",
+            "user_id": 20756369,
+            "link": "https://stackoverflow.com/users/20756369/hababbeldu",
+            "reputation": 9,
+            "display_name": "Hababbeldu"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76780917/apache-htmlemail-setport-is-ignored",
+        "last_activity_date": 1690550171,
+        "creation_date": 1690469133,
+        "answer_count": 0,
+        "title": "Apache HtmlEmail setPort is ignored",
+        "body": "<p>When I try to send a Apache Commons HtmlEmail with a specific port set, it works locally on my machine, but in the deployed docker container, the connection is refused because the port setting is ignored and the default port is used.<\/p>\n<p>I cannot share the code of the whole application, which contains an email service written in Kotlin, that is compiled to a jar with other java sources with Maven and run in a docker container based on eclipse temurin 11. The crazy thing is that this is not a problem (with the same container!) on an Ubuntu 18.04 host, but it fails on an Ubuntu 22.04 host.<\/p>\n<p>I tried to reproduce the problem locally, but locally, it worked. The Kotlin code that is basically the same that runs in the app can be run on the Kotlin CLI (needs <a href=\"https://mvnrepository.com/artifact/javax.activation/activation/1.1.1\" rel=\"nofollow noreferrer\">https://mvnrepository.com/artifact/javax.activation/activation/1.1.1<\/a>, <a href=\"https://javaee.github.io/javamail/#Download_JavaMail_Release\" rel=\"nofollow noreferrer\">https://javaee.github.io/javamail/#Download_JavaMail_Release<\/a> and <a href=\"https://commons.apache.org/proper/commons-email/download_email.cgi\" rel=\"nofollow noreferrer\">https://commons.apache.org/proper/commons-email/download_email.cgi<\/a>):<\/p>\n<pre class=\"lang-bash prettyprint-override\"><code>kotlinc -cp commons-email-1.5.jar:javax.mail.jar:activation-1.1.1.jar\n<\/code><\/pre>\n<pre class=\"lang-kotlin prettyprint-override\"><code>import org.apache.commons.mail.DefaultAuthenticator\nimport org.apache.commons.mail.HtmlEmail\nval email = HtmlEmail()\nemail.hostName = &quot;smtp.ionos.de&quot;\nemail.setSmtpPort(587)\nemail.setAuthenticator(DefaultAuthenticator(&quot;[redacted]&quot;,&quot;[redacted]&quot;))\nemail.isSSLOnConnect = true\nemail.setFrom(&quot;mail@[redacted]&quot;)\nemail.subject = &quot;Test from ThinkPad&quot;\nemail.setTextMsg(&quot;This is a drill&quot;)\nemail.addTo(&quot;[redacted]&quot;)\nemail.send()\n<\/code><\/pre>\n<p>I found nearly nothing specific to Apache Commons Mail, and found something on different settings that influence the default behaviour, but a) should they not be set by the framework? and b) this should not be an issue since the thing runs inside a docker container...<\/p>\n<p>Edit: Thank you Robert for clarifying!\n<em>Also I found this answer <a href=\"https://stackoverflow.com/a/21296375/20756369\">https://stackoverflow.com/a/21296375/20756369<\/a> and I would have liked to just ask &quot;HOW do I set the server's default settings&quot; but I do not have enough Karma to comment so apparently it is better if I spam an entirely new question.<\/em><\/p>\n<h2>Edit: I found my mistake<\/h2>\n<p>As per the <a href=\"https://commons.apache.org/proper/commons-email/javadocs/api-release/index.html\" rel=\"nofollow noreferrer\">documentation<\/a>, <code>isSSLOnConnect(true)<\/code> needs to be used with <code>setSslSmtpPort(String)<\/code>, while no TLS or <code>setStartTLSRequired(true)<\/code> use the port that is set by <code>setSmtpPort(Int)<\/code>.<\/p>\n<p>The used hosting provider (IONOS) apparently only offers startTLS on port 587, and I have yet to get SSL on port 995 to work, but that is a different topic.<\/p>\n<p>As for why it works on the old on-premise host, but not on the one in the cloud: Some Hosting Providers <strong>block port 465<\/strong> to prevent spammers from using their services.<\/p>\n",
+        "question_id": 76780917,
+        "tags": [
+            "java",
+            "jakarta-mail",
+            "apache-commons"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 115,
+        "last_edit_date": 1690550171
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f5a1388d4d3b2bf03b11bb5658c68c29?s=256&d=identicon&r=PG",
+                "account_id": 1535561,
+                "user_type": "registered",
+                "user_id": 1431720,
+                "link": "https://stackoverflow.com/users/1431720/robert",
+                "reputation": 9056,
+                "display_name": "Robert",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 76780917,
+            "edited": false,
+            "creation_date": 1690474198,
+            "comment_id": 135362200
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f5a1388d4d3b2bf03b11bb5658c68c29?s=256&d=identicon&r=PG",
+                "account_id": 1535561,
+                "user_type": "registered",
+                "user_id": 1431720,
+                "link": "https://stackoverflow.com/users/1431720/robert",
+                "reputation": 9056,
+                "display_name": "Robert",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 76780917,
+            "edited": false,
+            "creation_date": 1690472844,
+            "comment_id": 135361925
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

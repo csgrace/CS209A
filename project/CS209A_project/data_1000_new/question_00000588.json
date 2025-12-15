@@ -1,0 +1,190 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/05f62b4df844c476995fcac0d7a7ca90?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5198247,
+            "user_type": "registered",
+            "user_id": 4158667,
+            "link": "https://stackoverflow.com/users/4158667/tittarella",
+            "reputation": 15,
+            "display_name": "tittarella",
+            "accept_rate": 40
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26718468/method-iscelleditable-and-suppresswarningsserial",
+        "last_activity_date": 1520476352,
+        "creation_date": 1415031849,
+        "answer_count": 3,
+        "title": "Method isCellEditable and @SuppressWarnings(&quot;serial&quot;)",
+        "body": "<p>Why if i use this code inside a method:<\/p>\n\n<pre><code>DefaultTableModel model = new DefaultTableModel(null, vett){\n    public boolean isCellEditable(int row, int col) {\n        return false;\n    }\n};\n<\/code><\/pre>\n\n<p>I get a warning and i have to use \"<code>@SuppressWarnings(\"serial\")<\/code>\" before the beginning of the method?<\/p>\n",
+        "question_id": 26718468,
+        "tags": [
+            "java",
+            "serialization",
+            "jtable",
+            "suppress-warnings"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 238,
+        "last_edit_date": 1415031888
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IZotl.png?s=256",
+                "account_id": 2385304,
+                "user_type": "registered",
+                "user_id": 2086401,
+                "link": "https://stackoverflow.com/users/2086401/stupointerexception",
+                "reputation": 7277,
+                "display_name": "StuPointerException",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1415032226,
+            "creation_date": 1415032226,
+            "body": "<p>This is Eclipse(?) warning you that you aren't supplying a <code>SerialVersionUID<\/code> to a class that you're creating that implements Serializable (your inner class extends DefaultTableModel which is serializable). <\/p>\n\n<p>Adding this will resolve the warning:<\/p>\n\n<pre><code>private static final long serialVersionUID = 1L;\n<\/code><\/pre>\n\n<p>Personally I dislike this warning since as developers we're in a better position to know whether the version ID is needed (probably not in this case).<\/p>\n",
+            "answer_id": 26718576,
+            "question_id": 26718468
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4f7a56d365c780490a80b054fa6744ff?s=256&d=identicon&r=PG",
+                "account_id": 2864779,
+                "user_type": "registered",
+                "user_id": 2459308,
+                "link": "https://stackoverflow.com/users/2459308/pierpaolo-cira",
+                "reputation": 1487,
+                "display_name": "Pierpaolo Cira",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1415032503,
+            "creation_date": 1415032503,
+            "body": "<p>As you can see (<a href=\"http://docs.oracle.com/javase/7/docs/api/javax/swing/table/DefaultTableModel.html\" rel=\"nofollow noreferrer\">http://docs.oracle.com/javase/7/docs/api/javax/swing/table/DefaultTableModel.html<\/a>) DefaultTableModel implements Serializable interface (<a href=\"http://docs.oracle.com/javase/7/docs/api/java/io/Serializable.html\" rel=\"nofollow noreferrer\">http://docs.oracle.com/javase/7/docs/api/java/io/Serializable.html<\/a>).<\/p>\n\n<p>It means the DefaultTableModel anonymous subclass you are creating needs for a private static final long serialVersionUID.<\/p>\n\n<p>So you have to declare (and set) that variable, eg:<\/p>\n\n<pre><code>private static final long serialVersionUID = 1L;\n<\/code><\/pre>\n\n<p>By the way, 1L is not the preferred value to use; a better idea is to use a random value (if you use Eclipse, use embedded function to autogenerate a value).<\/p>\n\n<p>But, in my mind, is not a good idea to suppress the warning.<\/p>\n\n<p>UPDATE:\nRead this useful information: <a href=\"https://stackoverflow.com/questions/5576047/why-does-serialization-require-a-serial-version-uid-in-implemented-class\">Why does serialization require a serial version UID in implemented class?<\/a><\/p>\n",
+            "answer_id": 26718666,
+            "question_id": 26718468,
+            "last_edit_date": 1495542437
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-o_zQa3Z_w9A/AAAAAAAAAAI/AAAAAAAAAWc/EG4QTaxTr4w/s256-rj/photo.jpg",
+                "account_id": 5261520,
+                "user_type": "registered",
+                "user_id": 4202937,
+                "link": "https://stackoverflow.com/users/4202937/ben-minton",
+                "reputation": 118,
+                "display_name": "Ben Minton"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1520476352,
+            "creation_date": 1415032551,
+            "body": "<p>It's because DefaultTableModel is serializable and it really wants you to add a serialVersionUID to that implementation class to prevent a InvalidClassException on the receiving end.<\/p>\n\n<p>From <a href=\"https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html\" rel=\"nofollow noreferrer\">the Serializable javadoc<\/a>:<\/p>\n\n<blockquote>\n  <p>The serialization runtime associates with each serializable class a\n  version number, called a serialVersionUID, which is used during\n  deserialization to verify that the sender and receiver of a serialized\n  object have loaded classes for that object that are compatible with\n  respect to serialization. If the receiver has loaded a class for the\n  object that has a different serialVersionUID than that of the\n  corresponding sender's class, then deserialization will result in an\n  InvalidClassException. A serializable class can declare its own\n  serialVersionUID explicitly by declaring a field named\n  \"serialVersionUID\" that must be static, final, and of type long:<\/p>\n\n<pre><code>ANY-ACCESS-MODIFIER static final long serialVersionUID = 42L;\n<\/code><\/pre>\n<\/blockquote>\n",
+            "answer_id": 26718680,
+            "question_id": 26718468,
+            "last_edit_date": 1520476352
+        }
+    ],
+    "answer_comments": {"26718576": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IZotl.png?s=256",
+                "account_id": 2385304,
+                "user_type": "registered",
+                "user_id": 2086401,
+                "link": "https://stackoverflow.com/users/2086401/stupointerexception",
+                "reputation": 7277,
+                "display_name": "StuPointerException",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718576,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/05f62b4df844c476995fcac0d7a7ca90?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5198247,
+                "user_type": "registered",
+                "user_id": 4158667,
+                "link": "https://stackoverflow.com/users/4158667/tittarella",
+                "reputation": 15,
+                "display_name": "tittarella",
+                "accept_rate": 40
+            },
+            "edited": false,
+            "creation_date": 1415032654,
+            "comment_id": 42027363
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/05f62b4df844c476995fcac0d7a7ca90?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5198247,
+                "user_type": "registered",
+                "user_id": 4158667,
+                "link": "https://stackoverflow.com/users/4158667/tittarella",
+                "reputation": 15,
+                "display_name": "tittarella",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718576,
+            "edited": false,
+            "creation_date": 1415032580,
+            "comment_id": 42027332
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IZotl.png?s=256",
+                "account_id": 2385304,
+                "user_type": "registered",
+                "user_id": 2086401,
+                "link": "https://stackoverflow.com/users/2086401/stupointerexception",
+                "reputation": 7277,
+                "display_name": "StuPointerException",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718576,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/05f62b4df844c476995fcac0d7a7ca90?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5198247,
+                "user_type": "registered",
+                "user_id": 4158667,
+                "link": "https://stackoverflow.com/users/4158667/tittarella",
+                "reputation": 15,
+                "display_name": "tittarella",
+                "accept_rate": 40
+            },
+            "edited": false,
+            "creation_date": 1415032539,
+            "comment_id": 42027312
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/05f62b4df844c476995fcac0d7a7ca90?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5198247,
+                "user_type": "registered",
+                "user_id": 4158667,
+                "link": "https://stackoverflow.com/users/4158667/tittarella",
+                "reputation": 15,
+                "display_name": "tittarella",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26718576,
+            "edited": false,
+            "creation_date": 1415032315,
+            "comment_id": 42027190
+        }
+    ]}
+}

@@ -1,0 +1,212 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8fd56a4f0d601fd953ed6b220e5e1d4a?s=256&d=identicon&r=PG",
+            "account_id": 1655641,
+            "user_type": "registered",
+            "user_id": 1525288,
+            "link": "https://stackoverflow.com/users/1525288/incognito",
+            "reputation": 43,
+            "display_name": "INCOGNITO"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/11482204/how-to-recursively-scan-directories-in-android",
+        "last_activity_date": 1687112979,
+        "creation_date": 1342254267,
+        "answer_count": 3,
+        "title": "How to recursively scan directories in Android",
+        "body": "<p>How can I recursively scan directories in Android and display file name(s)? I'm trying to scan, but it's slow (force close or wait). I'm using the <code>FileWalker<\/code> class given in a separate answer <a href=\"https://stackoverflow.com/questions/2056221/recursively-list-files-in-java\">to this question<\/a>.<\/p>\n",
+        "question_id": 11482204,
+        "tags": [
+            "java",
+            "android",
+            "file-io",
+            "android-anr-dialog",
+            "directory-traversal"
+        ],
+        "score": 4,
+        "accepted_answer_id": 11482350,
+        "is_answered": true,
+        "view_count": 11371,
+        "last_edit_date": 1495541894
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/73d5cadd09acc6b8c5f6303a8188d88b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 55332,
+                "user_type": "registered",
+                "user_id": 165674,
+                "link": "https://stackoverflow.com/users/165674/dheeraj-vepakomma",
+                "reputation": 28974,
+                "display_name": "Dheeraj Vepakomma",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 20,
+            "is_accepted": true,
+            "last_activity_date": 1672353031,
+            "creation_date": 1342255852,
+            "body": "<p>You should almost always access the file system only from a non-UI thread. Otherwise you risk blocking the UI thread for long periods and getting an <a href=\"https://en.wikipedia.org/wiki/ANR#Technology\" rel=\"nofollow noreferrer\">ANR<\/a>. Run the FileWalker in an <code>AsyncTask<\/code>'s <code>doInBackground()<\/code>.<\/p>\n<p>This is a slightly optimized version of FileWalker:<\/p>\n<pre><code>public class Filewalker {\n\n    public void walk(File root) {\n\n        File[] list = root.listFiles();\n\n        for (File f : list) {\n            if (f.isDirectory()) {\n                Log.d(&quot;&quot;, &quot;Dir: &quot; + f.getAbsoluteFile());\n                walk(f);\n            }\n            else {\n                Log.d(&quot;&quot;, &quot;File: &quot; + f.getAbsoluteFile());\n            }\n        }\n    }\n}\n<\/code><\/pre>\n<p>You can invoke it from a background thread like this:<\/p>\n<pre><code>Filewalker fw = new Filewalker();\nfw.walk(context.getFilesDir());\n<\/code><\/pre>\n",
+            "answer_id": 11482350,
+            "question_id": 11482204,
+            "last_edit_date": 1672353031
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/02440fbef6de93028c408a85bbf524d4?s=256&d=identicon&r=PG",
+                "account_id": 254272,
+                "user_type": "registered",
+                "user_id": 533552,
+                "link": "https://stackoverflow.com/users/533552/dalmas",
+                "reputation": 26567,
+                "display_name": "Dalmas",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1342255238,
+            "creation_date": 1342255238,
+            "body": "<p><code>System.out.println<\/code> calls are really slow (well it's not really the function itself, but the underlying PrintStream which takes a lot of time to write text in the console).<\/p>\n\n<p>Replace them by something else and it should be fine. For example, you can create and return an array with the file names.<\/p>\n",
+            "answer_id": 11482289,
+            "question_id": 11482204
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7531f33ac87dfcff17015903fd639e57?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4980512,
+                "user_type": "registered",
+                "user_id": 4005650,
+                "link": "https://stackoverflow.com/users/4005650/ianeperson",
+                "reputation": 39,
+                "display_name": "ianeperson"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1687112979,
+            "creation_date": 1684512716,
+            "body": "<p>If you prefer a non-recursive method you could try something like:<\/p>\n<pre><code>public void filetree (File directory)\n{\n    List&lt;File&gt; dirlist = new ArrayList&lt;File&gt;();  // The list of directories to scan\n    dirlist.add(directory);     // Initialize - with the stating point\n    do {            // The scan list cannot start with zero entries - so bottom exit\n        File f = dirlist.remove(0);     // Extract the directory to scan\n        if (f.listFiles() != null)      // Check for permissions problems\n            for (File fl : f.listFiles())\n                if (fl.isDirectory()) dirlist.add(fl.getAbsoluteFile());    // directory - add to list\n                else Log.i (&quot;msg&quot;, &quot;File: &quot; + fl.getAbsoluteFile());  // File - do something with it\n    } while (!dirlist.isEmpty());  // Continue until there is nothing left to scan\n}\n<\/code><\/pre>\n",
+            "answer_id": 76290797,
+            "question_id": 11482204,
+            "last_edit_date": 1687112979
+        }
+    ],
+    "answer_comments": {
+        "11482350": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/678a08b96e820a669786ed55ee1312f0?s=256&d=identicon&r=PG",
+                    "account_id": 304023,
+                    "user_type": "registered",
+                    "user_id": 613305,
+                    "link": "https://stackoverflow.com/users/613305/biscuitstack",
+                    "reputation": 12242,
+                    "display_name": "biscuitstack",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 11482350,
+                "edited": false,
+                "creation_date": 1468243266,
+                "comment_id": 64032609
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/73d5cadd09acc6b8c5f6303a8188d88b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 55332,
+                    "user_type": "registered",
+                    "user_id": 165674,
+                    "link": "https://stackoverflow.com/users/165674/dheeraj-vepakomma",
+                    "reputation": 28974,
+                    "display_name": "Dheeraj Vepakomma",
+                    "accept_rate": 67
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 11482350,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/678a08b96e820a669786ed55ee1312f0?s=256&d=identicon&r=PG",
+                    "account_id": 304023,
+                    "user_type": "registered",
+                    "user_id": 613305,
+                    "link": "https://stackoverflow.com/users/613305/biscuitstack",
+                    "reputation": 12242,
+                    "display_name": "biscuitstack",
+                    "accept_rate": 90
+                },
+                "edited": false,
+                "creation_date": 1468243120,
+                "comment_id": 64032500
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/678a08b96e820a669786ed55ee1312f0?s=256&d=identicon&r=PG",
+                    "account_id": 304023,
+                    "user_type": "registered",
+                    "user_id": 613305,
+                    "link": "https://stackoverflow.com/users/613305/biscuitstack",
+                    "reputation": 12242,
+                    "display_name": "biscuitstack",
+                    "accept_rate": 90
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 11482350,
+                "edited": false,
+                "creation_date": 1468235954,
+                "comment_id": 64027619
+            }
+        ],
+        "76290797": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7531f33ac87dfcff17015903fd639e57?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4980512,
+                    "user_type": "registered",
+                    "user_id": 4005650,
+                    "link": "https://stackoverflow.com/users/4005650/ianeperson",
+                    "reputation": 39,
+                    "display_name": "ianeperson"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 76290797,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/RIZKi.png?s=256",
+                    "account_id": 24885,
+                    "user_type": "registered",
+                    "user_id": 63550,
+                    "link": "https://stackoverflow.com/users/63550/peter-mortensen",
+                    "reputation": 31356,
+                    "display_name": "Peter Mortensen",
+                    "accept_rate": 78
+                },
+                "edited": false,
+                "creation_date": 1698351152,
+                "comment_id": 136398091
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/RIZKi.png?s=256",
+                    "account_id": 24885,
+                    "user_type": "registered",
+                    "user_id": 63550,
+                    "link": "https://stackoverflow.com/users/63550/peter-mortensen",
+                    "reputation": 31356,
+                    "display_name": "Peter Mortensen",
+                    "accept_rate": 78
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 76290797,
+                "edited": false,
+                "creation_date": 1687113040,
+                "comment_id": 134888105
+            }
+        ]
+    }
+}

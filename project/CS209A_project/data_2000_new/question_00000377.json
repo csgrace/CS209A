@@ -1,0 +1,166 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7fc04502396d5eb6cc6461c5d89e7826?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11516394,
+            "user_type": "registered",
+            "user_id": 8439649,
+            "link": "https://stackoverflow.com/users/8439649/stoetti",
+            "reputation": 103,
+            "display_name": "stoetti"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59404071/using-query-parameter-of-type-not-supported-in-spring-data-jdbc",
+        "last_activity_date": 1729181984,
+        "creation_date": 1576735620,
+        "answer_count": 2,
+        "title": "Using query parameter of type not supported in Spring Data JDBC?",
+        "body": "<p>I tried to write a query method in my repository similar to this<\/p>\n\n<pre><code>@Modifying\n@Query(\"UPDATE foo SET some_timestamp = :someTimestamp WHERE id = :id\")\nvoid updateSomeTimestamp(@Param(\"id\") long id, @Param(\"someTimestamp\") Instant someTimestamp)\n<\/code><\/pre>\n\n<p>When executing the code I got the following error:<\/p>\n\n<p><em>org.postgresql.util.PSQLException: Can't infer the SQL type to use for an instance of java.time.Instant. Use setObject() with an explicit Types value to specify the type to use.<\/em><\/p>\n\n<p>Did I forget something or is usage of Instant as parameter simply not supported by Spring Data Jdbc? If so, is such a support planned in the future?<\/p>\n",
+        "question_id": 59404071,
+        "tags": [
+            "java",
+            "spring",
+            "type-conversion",
+            "spring-data",
+            "spring-data-jdbc"
+        ],
+        "score": 4,
+        "accepted_answer_id": 59404260,
+        "is_answered": true,
+        "view_count": 6928,
+        "last_edit_date": 1581324075
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/af4775ef84f53425a4da057e5aca4136?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4422339,
+                "user_type": "registered",
+                "user_id": 3601868,
+                "link": "https://stackoverflow.com/users/3601868/acker9",
+                "reputation": 493,
+                "display_name": "acker9"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1729181984,
+            "creation_date": 1579206472,
+            "body": "<p>For those who came here looking for a solution to generate <code>java.sql.Timestamp<\/code> instances with better than millisecond precision (the <code>Timestamp<\/code> constructor that accepts nanos is deprecated):<\/p>\n<p><code>Timestamp timestamp = Timestamp.from(Instant.now());<\/code><\/p>\n<p>This assumes your operating system supports better than millisecond precision for the system clock.  It's useful for databases that support better-than-millisecond TIMESTAMP precision, such as with PostgreSQL, which supports microsecond precision.<\/p>\n<p>You can convert it back to an <code>Instant<\/code> or <code>LocalDateTime<\/code>:<\/p>\n<p><code>System.out.println(timestamp.toInstant()); // UTC<\/code><\/p>\n<p>or<\/p>\n<p><code>System.out.println(timestamp.toLocalDateTime()); // local time<\/code><\/p>\n<p>I will also reiterate information stoetti provided in a comment, that according to the documentation link that stoetti provided,\n<a href=\"https://jdbc.postgresql.org/documentation/query/#using-java-8-date-and-time-classes\" rel=\"nofollow noreferrer\">https://jdbc.postgresql.org/documentation/query/#using-java-8-date-and-time-classes<\/a>, the PostgreSQL JDBC driver does recognize the following <code>java.time<\/code> classes as timestamps:<\/p>\n<p><code>java.time.LocalTime<\/code> as <code>TIME [ WITHOUT TIMEZONE ]<\/code><\/p>\n<p><code>java.time.LocalDateTime<\/code> as <code>TIMESTAMP [ WITHOUT TIMEZONE ]<\/code><\/p>\n<p><code>java.time.OffsetDateTime<\/code> as <code>TIMESTAMP WITH TIMEZONE<\/code><\/p>\n<p>But not <code>java.time.Instant<\/code>, as stoetti pointed out.<\/p>\n",
+            "answer_id": 59777332,
+            "question_id": 59404071,
+            "last_edit_date": 1729181984
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5c09f46f4edab31c43465b9f36638678?s=256&d=identicon&r=PG",
+                "account_id": 25822,
+                "user_type": "registered",
+                "user_id": 66686,
+                "link": "https://stackoverflow.com/users/66686/jens-schauder",
+                "reputation": 82662,
+                "display_name": "Jens Schauder",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1576736708,
+            "creation_date": 1576736708,
+            "body": "<p>Spring Data JDBC has no knowledge of the type expected by the SQL-statement. Therefore it passes parameters a long without any conversion and relies on the database to properly handle the parameter.<\/p>\n\n<p>One might argue that it should convert parameters if a matching converter is registered, but this is currently not the case. <\/p>\n\n<p>Therefore currently the solution is to convert the argument yourself and changing the argument type to <code>java.util.Date<\/code> or whatever your JDBC driver is accepting.<\/p>\n",
+            "answer_id": 59404260,
+            "question_id": 59404071
+        }
+    ],
+    "answer_comments": {"59404260": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5c09f46f4edab31c43465b9f36638678?s=256&d=identicon&r=PG",
+                "account_id": 25822,
+                "user_type": "registered",
+                "user_id": 66686,
+                "link": "https://stackoverflow.com/users/66686/jens-schauder",
+                "reputation": 82662,
+                "display_name": "Jens Schauder",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 59404260,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc04502396d5eb6cc6461c5d89e7826?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11516394,
+                "user_type": "registered",
+                "user_id": 8439649,
+                "link": "https://stackoverflow.com/users/8439649/stoetti",
+                "reputation": 103,
+                "display_name": "stoetti"
+            },
+            "edited": false,
+            "creation_date": 1576821497,
+            "comment_id": 105027759
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc04502396d5eb6cc6461c5d89e7826?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11516394,
+                "user_type": "registered",
+                "user_id": 8439649,
+                "link": "https://stackoverflow.com/users/8439649/stoetti",
+                "reputation": 103,
+                "display_name": "stoetti"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59404260,
+            "edited": false,
+            "creation_date": 1576771582,
+            "comment_id": 105013782
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5c09f46f4edab31c43465b9f36638678?s=256&d=identicon&r=PG",
+                "account_id": 25822,
+                "user_type": "registered",
+                "user_id": 66686,
+                "link": "https://stackoverflow.com/users/66686/jens-schauder",
+                "reputation": 82662,
+                "display_name": "Jens Schauder",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59404260,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc04502396d5eb6cc6461c5d89e7826?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11516394,
+                "user_type": "registered",
+                "user_id": 8439649,
+                "link": "https://stackoverflow.com/users/8439649/stoetti",
+                "reputation": 103,
+                "display_name": "stoetti"
+            },
+            "edited": false,
+            "creation_date": 1576756876,
+            "comment_id": 105005848
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fc04502396d5eb6cc6461c5d89e7826?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11516394,
+                "user_type": "registered",
+                "user_id": 8439649,
+                "link": "https://stackoverflow.com/users/8439649/stoetti",
+                "reputation": 103,
+                "display_name": "stoetti"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59404260,
+            "edited": false,
+            "creation_date": 1576750431,
+            "comment_id": 105002731
+        }
+    ]}
+}

@@ -1,0 +1,115 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Ot3Pp.jpg?s=256",
+            "account_id": 2182911,
+            "user_type": "registered",
+            "user_id": 1931996,
+            "link": "https://stackoverflow.com/users/1931996/jan",
+            "reputation": 4075,
+            "display_name": "jan",
+            "accept_rate": 64
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/17095267/gwt-jsni-call-java-method-of-specific-object",
+        "last_activity_date": 1371490807,
+        "creation_date": 1371151067,
+        "answer_count": 2,
+        "title": "GWT JSNI - Call java method of specific object",
+        "body": "<p>Consider the following widget. I add two of them to my page. The first one gets the name \"widget1\", the second one the name \"widget2\". It just should give out its own name, but called from javascript. (The example makes no sense, but is just a simple example to figure out, how it could be done.)<\/p>\n\n<pre><code>public class MyComponent extends Composite{\n\n    String name;\n    public MyComponent(String name) {\n        this.name =name;\n\n        Button b = new Button(name);\n        b.addClickHandler(new ClickHandler() {\n\n            @Override\n            public void onClick(ClickEvent event) {\n                myonclick();\n\n            }\n        });\n        initWidget(b);\n        declareMethod(this);\n    }\n\n    public native void declareMethod(MyComponent myWidget) /*-{\n            $wnd.myWidget = myWidget;\n\n    }-*/;\n\n    public native void myonclick() /*-{\n        $wnd.myWidget.@de.jsni.test.client.MyComponent::doSomething()();\n    }-*/;\n\n    public void doSomething() {\n        Window.alert(name);\n    }\n}\n<\/code><\/pre>\n\n<p>My problem now is: Both button alert the message \"widget2\". That's because I override the \"myWidget\"-variable in the \"declareMethod\". How can I archieve to call the doSomething()-method of the correct object? Can I use some kind of namespacing approach here?<\/p>\n",
+        "question_id": 17095267,
+        "tags": [
+            "java",
+            "javascript",
+            "gwt",
+            "namespaces",
+            "jsni"
+        ],
+        "score": 1,
+        "accepted_answer_id": 17153513,
+        "is_answered": true,
+        "view_count": 2039
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/66f29d4a65bf32a855a84f971102b761?s=256&d=identicon&r=PG",
+                "account_id": 2731309,
+                "user_type": "registered",
+                "user_id": 2355043,
+                "link": "https://stackoverflow.com/users/2355043/thy-stack-overfloweth",
+                "reputation": 442,
+                "display_name": "thy_stack_overfloweth",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1371223991,
+            "creation_date": 1371157780,
+            "body": "<p>The problem you have is when a <code>MyComponent<\/code> is created, <code>$wnd.myWidget<\/code> is set to refer to that item. So, if you create <code>MyComponent<\/code> #1, then <code>MyComponent<\/code> #2, you will always have <code>$wnd.myWidget<\/code> that equals <code>MyComponent<\/code> #2.<\/p>\n\n<p>Rather than defining a method which sets a JS variable, refer to the window directly in the native method, as follows:<\/p>\n\n<pre><code>public native void myonclick(MyComponent comp) /*-{\n    comp.@de.jsni.test.client.MyComponent::doSomething()();\n}-*/;\n<\/code><\/pre>\n\n<p>Then, in the click handler, call <code>myonclick<\/code> as follows:<\/p>\n\n<pre><code>@Override\npublic void onClick(ClickEvent event) {\n     myonclick(MyComponent.this);\n}\n<\/code><\/pre>\n\n<p>I think this should work. Let me know if there are any issues, I'll try to help.<\/p>\n\n<p><strong>update<\/strong>:\nYou could try the following, but honestly, I don't know if it will play well with external javascript. I've never really had to work through this use case.<\/p>\n\n<pre><code>public native void myonclick() /*-{\n    this.@de.jsni.test.client.MyComponent::doSomething()();\n}-*/;\n<\/code><\/pre>\n",
+            "answer_id": 17097142,
+            "question_id": 17095267,
+            "last_edit_date": 1371223991
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Ot3Pp.jpg?s=256",
+                "account_id": 2182911,
+                "user_type": "registered",
+                "user_id": 1931996,
+                "link": "https://stackoverflow.com/users/1931996/jan",
+                "reputation": 4075,
+                "display_name": "jan",
+                "accept_rate": 64
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1371490807,
+            "creation_date": 1371490807,
+            "body": "<p>I was solving my problem now by sinking the events i'm interested in e.g.: sinkEvents(Event) in the constructor and handling them in my onBrowserEvent(Event e) method. This was a mich more easy and convinient way for my problem. <\/p>\n",
+            "answer_id": 17153513,
+            "question_id": 17095267
+        }
+    ],
+    "answer_comments": {"17097142": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Ot3Pp.jpg?s=256",
+                "account_id": 2182911,
+                "user_type": "registered",
+                "user_id": 1931996,
+                "link": "https://stackoverflow.com/users/1931996/jan",
+                "reputation": 4075,
+                "display_name": "jan",
+                "accept_rate": 64
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 17097142,
+            "edited": false,
+            "creation_date": 1371216019,
+            "comment_id": 24753483
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/66f29d4a65bf32a855a84f971102b761?s=256&d=identicon&r=PG",
+                "account_id": 2731309,
+                "user_type": "registered",
+                "user_id": 2355043,
+                "link": "https://stackoverflow.com/users/2355043/thy-stack-overfloweth",
+                "reputation": 442,
+                "display_name": "thy_stack_overfloweth",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 17097142,
+            "edited": false,
+            "creation_date": 1371157899,
+            "comment_id": 24732777
+        }
+    ]}
+}

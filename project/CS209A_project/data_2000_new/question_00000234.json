@@ -1,0 +1,162 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7351059b5b7826357eceb5ba77b21ab7?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12239390,
+            "user_type": "registered",
+            "user_id": 8932880,
+            "link": "https://stackoverflow.com/users/8932880/d-bryan",
+            "reputation": 19,
+            "display_name": "D.Bryan",
+            "accept_rate": 40
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48992469/sending-float-data-to-my-client-application",
+        "last_activity_date": 1549227915,
+        "creation_date": 1519661170,
+        "answer_count": 3,
+        "title": "Sending Float data to my client application",
+        "body": "<p>I wrote a piece of server code in C and I would like to send data continuously to my client application every iteration.<\/p>\n\n<pre><code>while (1)\n{\n    startInt = mymillis();//capture starting time\n\n    Sensor_raw_data_float = Sensor_Read_Values_();\n    float data = Sensor_raw_data_float.x * 0.007;\n\n    send(sockfd, &amp;data , sizeof(float),0);//Send to client\n\n    //Wait until 5ms\n    while (mymillis() - startInt &lt; (5))\n    {\n        usleep(100);\n    }\n\n}\n<\/code><\/pre>\n\n<p>I tried using \"snprintf\" to convert my float data to string before sending but I realise the whole system start to slow down and lagged alot.<\/p>\n\n<p>As such I tried to do the editing on the client code. Attached is the main part of my client code that is related to what i am trying to do<\/p>\n\n<pre><code>    import android.os.Bundle;\n    import android.os.Handler;\n    import android.os.Message;\n    import android.support.v7.app.AppCompatActivity;\n    import android.view.View;\n    import android.widget.Button;\n    import android.widget.EditText;\n    import android.widget.TextView;\n\npublic class MainActivity extends AppCompatActivity {\n\nEditText editTextAddress, editTextPort, editTextMsg;\nButton buttonConnect, buttonDisconnect, buttonSend;\nTextView textViewState, textViewRx;\n\nClientHandler clientHandler;\nClientThread clientThread;\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n\ntextViewRx = (TextView) findViewById(R.id.received);\n\n    clientHandler = new ClientHandler(this);\n}\n\nprivate void updateState(String state){\n    textViewState.setText(state);\n}\n\nprivate void updateRxMsg(String rxmsg){\n    textViewRx.append(rxmsg + \"\\n\");\n\n}\n\n\npublic static class ClientHandler extends Handler {\n    public static final int UPDATE_STATE = 0;\n    public static final int UPDATE_MSG = 1;\n    public static final int UPDATE_END = 2;\n    private MainActivity parent;\n\n    public ClientHandler(MainActivity parent) {\n        super();\n        this.parent = parent;\n    }\n\n    @Override\n    public void handleMessage(Message msg) {\n\n        switch (msg.what){\n            case UPDATE_STATE:\n                parent.updateState((String)msg.obj);\n                break;\n            case UPDATE_MSG:\n                parent.updateRxMsg((String)msg.obj);\n                break;\n            case UPDATE_END:\n                parent.clientEnd();\n                break;\n            default:\n                super.handleMessage(msg);\n        }\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>I tried to edit my updateRxMsg(String rxmsg)'s code to<\/p>\n\n<pre><code> private void updateRxMsg(String rxmsg){\n    private void updateRxMsg(String rxmsg){\n    //textViewRx.append(rxmsg + \"\\n\");\n    float f = Float.parseFloat(rxmsg);\n    String mytext=Float.toString(f);\n    textViewRx.append(mytext + \"\\n\");\n}\n\n}\n<\/code><\/pre>\n\n<p>but i am still getting garbage printed out on my TextView. I am not able to figure out what is the problem but i do suspect it is related to encoding. I would like to get some help on how to get my float data from my server to my client side.<\/p>\n\n<p>Update: Attach is the codes for my bufferreader etc.., initially i thought that the problem does not lies here but i will post it here too.<\/p>\n\n<pre><code>public class ClientThread extends Thread{\n\nString dstAddress;\nint dstPort;\nprivate boolean running;\nMainActivity.ClientHandler handler;\n\nSocket socket;\nPrintWriter printWriter=null;\nBufferedReader bufferedReader;\n\npublic ClientThread(String addr, int port, MainActivity.ClientHandler handler) {\n    super();\n    dstAddress = addr;\n    dstPort = port;\n    this.handler = handler;\n    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()\n            .permitAll().build();\n    StrictMode.setThreadPolicy(policy);\n}\n\npublic void setRunning(boolean running){\n    this.running = running;\n}\n\nprivate void sendState(String state){\n    handler.sendMessage(\n            Message.obtain(handler,\n                    MainActivity.ClientHandler.UPDATE_STATE, state));\n}\n\npublic void txMsg(String msgToSend){\n    if(printWriter != null){\n        printWriter.println(msgToSend);\n    }\n}\n\n@Override\npublic void run() {\n    sendState(\"connecting...\");\n\n    running = true;\n\n    try {\n        socket = new Socket(dstAddress, dstPort);\n        sendState(\"connected\");\n\n        OutputStream outputStream = socket.getOutputStream();\n        printWriter = new PrintWriter(outputStream, true);\n\n        InputStream inputStream = socket.getInputStream();\n        InputStreamReader inputStreamReader =\n                new InputStreamReader(inputStream);\n        bufferedReader = new BufferedReader(inputStreamReader);\n\n        while(running){\n\n            //bufferedReader block the code\n            String line = bufferedReader.readLine();\n            if(line != null){\n                handler.sendMessage(\n                        Message.obtain(handler,\n                                MainActivity.ClientHandler.UPDATE_MSG, line));\n            }\n\n        }\n\n    } catch (IOException e) {\n        e.printStackTrace();\n    } finally {\n        if(bufferedReader != null){\n            try {\n                bufferedReader.close();\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n\n        if(printWriter != null){\n            printWriter.close();\n        }\n\n        if(socket != null){\n            try {\n                socket.close();\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n    }\n\n    handler.sendEmptyMessage(MainActivity.ClientHandler.UPDATE_END);\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>I updated my code to:<\/p>\n\n<pre><code>import android.os.Message;\nimport android.os.StrictMode;\n\nimport java.io.BufferedInputStream;\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.InputStreamReader;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\nimport java.net.Socket;\nimport java.nio.ByteBuffer;\n<\/code><\/pre>\n\n<p>public class ClientThread extends Thread{<\/p>\n\n<pre><code>String dstAddress;\nint dstPort;\nprivate boolean running;\nMainActivity.ClientHandler handler;\n\nSocket socket;\nPrintWriter printWriter=null;\nBufferedReader bufferedReader;\n\npublic ClientThread(String addr, int port, MainActivity.ClientHandler handler) {\n    super();\n    dstAddress = addr;\n    dstPort = port;\n    this.handler = handler;\n    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()\n            .permitAll().build();\n    StrictMode.setThreadPolicy(policy);\n}\n\npublic void setRunning(boolean running){\n    this.running = running;\n}\n\nprivate void sendState(String state){\n    handler.sendMessage(\n            Message.obtain(handler,\n                    MainActivity.ClientHandler.UPDATE_STATE, state));\n}\n\npublic void txMsg(String msgToSend){\n    if(printWriter != null){\n        printWriter.println(msgToSend);\n    }\n}\n\n@Override\npublic void run() {\n    sendState(\"connecting...\");\n\n    running = true;\n\n    try {\n        socket = new Socket(dstAddress, dstPort);\n        sendState(\"connected\");\n\n        OutputStream outputStream = socket.getOutputStream();\n        printWriter = new PrintWriter(outputStream, true);\n\n        InputStream inputStream = socket.getInputStream();\n        InputStreamReader inputStreamReader =\n                new InputStreamReader(inputStream);\n        bufferedReader = new BufferedReader(inputStreamReader);\n\n        int bufferSize = 8192;\n\n        ByteBuffer bf = ByteBuffer.allocate(bufferSize);\n            BufferedInputStream inFromServer = new BufferedInputStream(socket.getInputStream());\n            while (true) {\n                int b = inFromServer.read();\n                if (b == -1) {\n                    break;\n                }\n                bf.put( (byte) b);\n\n                handler.sendMessage(\n                        Message.obtain(handler,\n                                MainActivity.ClientHandler.UPDATE_MSG, (byte) b));\n            }\n\n       // while(running){\n\n            //bufferedReader block the code\n        //    String line = bufferedReader.readLine();\n       //     if(line != null){\n       //         handler.sendMessage(\n       //                 Message.obtain(handler,\n       //                         MainActivity.ClientHandler.UPDATE_MSG, line));\n      //      }\n\n      //  }\n\n    } catch (IOException e) {\n        e.printStackTrace();\n    } finally {\n        if(bufferedReader != null){\n            try {\n                bufferedReader.close();\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n\n        if(printWriter != null){\n            printWriter.close();\n        }\n\n        if(socket != null){\n            try {\n                socket.close();\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n    }\n\n    handler.sendEmptyMessage(MainActivity.ClientHandler.UPDATE_END);\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>I am very confuse on what should be change inorder for bytebuffer to work and is unsure if i changed it correctly.\nThank You!<\/p>\n",
+        "question_id": 48992469,
+        "tags": [
+            "java",
+            "c",
+            "sockets",
+            "floating-point"
+        ],
+        "score": -1,
+        "is_answered": true,
+        "view_count": 507,
+        "last_edit_date": 1519693214
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1519693574,
+            "creation_date": 1519693574,
+            "body": "<p>Make up your mind.<\/p>\n\n<p>If you're sending the <code>float<\/code> directly, as per the code you posted, read it with <code>DataInputStream.readFloat()<\/code>. If you're lucky and the endianness is the same, you're done. <\/p>\n\n<p><strong>Or<\/strong> convert it to a string, send it as a line, read it as a line, and parse it back to <code>float<\/code>.<\/p>\n\n<p>Not a mixture of the two.<\/p>\n",
+            "answer_id": 48999591,
+            "question_id": 48992469
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cf0dcfe4c987a0cfff095dccb60cdb29?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4952514,
+                "user_type": "registered",
+                "user_id": 3986021,
+                "link": "https://stackoverflow.com/users/3986021/m%c4%81rcis-vijups",
+                "reputation": 13,
+                "display_name": "Mārcis Vijups"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1549227915,
+            "creation_date": 1519662378,
+            "body": "<p>As a workaround I'd suggest you try converting the float to an integer before sending (just multiply by 10 to the power of the precision you'd like to have) and see what data you get. That could help you narrow down the problem. If you really insist on using floating point numbers you might want to refer to this question : <a href=\"https://stackoverflow.com/questions/7644699/how-are-floating-point-numbers-are-stored-in-memory\">How are floating point numbers are stored in memory?<\/a> <\/p>\n",
+            "answer_id": 48992829,
+            "question_id": 48992469,
+            "last_edit_date": 1549227915
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Z2KYN.jpg?s=256",
+                "account_id": 960307,
+                "user_type": "registered",
+                "user_id": 984823,
+                "link": "https://stackoverflow.com/users/984823/joop-eggen",
+                "reputation": 110397,
+                "display_name": "Joop Eggen"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1519663270,
+            "creation_date": 1519663270,
+            "body": "<p>When transmitting the float as binary data, bytes, I would assume that msg.obj is actually a byte array. When the float is sent from an Intel little endian platform as 4 bytes, the following code should work.<\/p>\n\n<pre><code>       case UPDATE_MSG:\n            byte[] flt = (byte[])msg.obj;\n            if (flt.length != 4) {\n                throw new IllegalStateException();\n            }\n            float x = ByteBuffer.wrap(flt)\n                .order(ByteOrder.LITTLE_ENDIAN)\n                .getFloat();\n            break;\n<\/code><\/pre>\n\n<p>As you did not receive a ClassCastException I still have some doubts.\nHowever binary data cannot be held by a String, that uses internally Unicode, as UTF-16, which can corrupt binary data.<\/p>\n",
+            "answer_id": 48993110,
+            "question_id": 48992469
+        }
+    ],
+    "answer_comments": {
+        "48999591": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 48999591,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/7351059b5b7826357eceb5ba77b21ab7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 12239390,
+                    "user_type": "registered",
+                    "user_id": 8932880,
+                    "link": "https://stackoverflow.com/users/8932880/d-bryan",
+                    "reputation": 19,
+                    "display_name": "D.Bryan",
+                    "accept_rate": 40
+                },
+                "edited": false,
+                "creation_date": 1519698760,
+                "comment_id": 85005589
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7351059b5b7826357eceb5ba77b21ab7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 12239390,
+                    "user_type": "registered",
+                    "user_id": 8932880,
+                    "link": "https://stackoverflow.com/users/8932880/d-bryan",
+                    "reputation": 19,
+                    "display_name": "D.Bryan",
+                    "accept_rate": 40
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 48999591,
+                "edited": false,
+                "creation_date": 1519694951,
+                "comment_id": 85004705
+            }
+        ],
+        "48993110": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7351059b5b7826357eceb5ba77b21ab7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12239390,
+                "user_type": "registered",
+                "user_id": 8932880,
+                "link": "https://stackoverflow.com/users/8932880/d-bryan",
+                "reputation": 19,
+                "display_name": "D.Bryan",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48993110,
+            "edited": false,
+            "creation_date": 1519664628,
+            "comment_id": 84992223
+        }]
+    }
+}

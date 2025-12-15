@@ -1,0 +1,100 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/dATHJ.jpg?s=256",
+            "account_id": 3650367,
+            "user_type": "registered",
+            "user_id": 3042700,
+            "link": "https://stackoverflow.com/users/3042700/gon%c3%a7alo-ribeiro",
+            "reputation": 115,
+            "display_name": "Gon&#231;alo Ribeiro",
+            "accept_rate": 25
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22028298/android-java-getting-array-from-php",
+        "last_activity_date": 1393371443,
+        "creation_date": 1393370057,
+        "answer_count": 1,
+        "title": "Android JAVA getting array from php",
+        "body": "<p>I've this php that returns an array with values from database:<\/p>\n\n<pre><code>public function getHashTags(){\n    $res = array();\n    $i = 0;\n\n    $userID = $this-&gt;getUserID();\n    $db_ = $this-&gt;dbSelect(\"hashTags\",\"userID = '$userID' ORDER BY hashTag ASC\");\n\n    while($db = $this-&gt;dbAssoc($db_)){\n        $key = $db['id'];\n        $res[$key] = $db['hashTag'];\n        $i++;\n    }\n\n    return $this-&gt;genResponse($res);\n}\n<\/code><\/pre>\n\n<p>And I don't know how can I receive this array on JAVA, because this array have no name...\nI've tried this:<\/p>\n\n<pre><code>class LoadHashTags extends AsyncTask&lt;String, String, String&gt; {\n\n    protected String doInBackground(String... args) {\n\n        // Building Parameters\n        List&lt;NameValuePair&gt; params = new ArrayList&lt;NameValuePair&gt;();\n        params.add(new BasicNameValuePair(\"token\", token));\n\n        // getting JSON string from URL\n        JSONObject json = jParser.makeHttpRequest(getHashTagsURL, \"POST\", params);\n\n        // Check your log cat for JSON response\n        Log.d(\"All hashTags: \", json.toString());\n\n        try { //Trying to get hashTags\n\n            JSONArray hashTagsArray = new JSONArray(json.toString());\n\n            // Looping through all videos\n            for (int i = 0; i &lt; hashTagsArray.length(); i++) {\n\n                JSONObject c = hashTagsArray.getJSONObject(i);\n\n                    int hashTagId = c.getInt(\"id\");\n                String hashTagTxt = c.getString(\"hashTag\");\n\n                // creating new HashMap\n                HashMap&lt;String, String&gt; map = new HashMap&lt;String, String&gt;();\n\n                // adding each child node to HashMap key =&gt; value\n                map.put(\"hashId\", hashTagId);\n                map.put(\"hashTagTxt\", hashTagTxt);\n\n                // adding HashList to ArrayList\n                hashTagsList.add(map);\n\n            } //End for\n\n        } catch (JSONException e) {\n\n            e.printStackTrace();\n\n        }\n\n        return null;\n    }\n\n    protected void onPostExecute(String file_url) {\n\n        runOnUiThread(new Runnable() {\n\n            public void run() {\n\n                Toast.makeText(getApplicationContext(), \"HashTags Loaded\", Toast.LENGTH_LONG).show();       \n            }\n        });\n\n        // dismiss the dialog after getting all hashTags\n        pDialog.dismiss();\n\n        // updating UI from Background Thread\n        runOnUiThread(new Runnable() {\n\n            public void run() {\n\n                ListAdapter adapter = new SimpleAdapter(\n\n                    VideoUpload.this, hashTagsList,\n                    R.layout.hashTags_list_item, new String[] { \"hashTagId\", \"hashTagTxt\"}, \n                    new int[] { R.id.hashTagId, R.id.hashTagTxt}\n                );\n\n                // updating spinner\n                setListAdapter(adapter);        \n            }\n        });\n\n    } //Close PostExecute\n\n} // CLOSER LOAD HASHTAGS\n<\/code><\/pre>\n\n<p>But it's throwing an exception:<\/p>\n\n<pre><code>02-25 22:48:58.450: W/System.err(1639): org.json.JSONException: Value {\"270\":\"My hashTag      test\",\"272\":\"my hastag test2\",\"271\":\"my hashtag test2\",\"274\":\"my hashtag test5\",\"273\":\"my   hashtag test3\"} of type org.json.JSONObject cannot be converted to JSONArray\n02-25 22:48:58.450: W/System.err(1639):     at org.json.JSON.typeMismatch(JSON.java:111)\n02-25 22:48:58.460: W/System.err(1639):     at org.json.JSONArray.&lt;init&gt;  (JSONArray.java:96)\n02-25 22:48:58.460: W/System.err(1639):     at org.json.JSONArray.&lt;init&gt;(JSONArray.java:108)\n02-25 22:48:58.460: W/System.err(1639):     at com.example.kroosky.VideoUpload$LoadHashTags.doInBackground(VideoUpload.java:484)\n02-25 22:48:58.480: W/System.err(1639):     at com.example.kroosky.VideoUpload$LoadHashTags.doInBackground(VideoUpload.java:1)\n02-25 22:48:58.480: W/System.err(1639):     at android.os.AsyncTask$2.call(AsyncTask.java:288)\n02-25 22:48:58.490: W/System.err(1639):     at java.util.concurrent.FutureTask.run(FutureTask.java:237)\n02-25 22:48:58.490: W/System.err(1639):     at android.os.AsyncTask$SerialExecutor$1.run(AsyncTask.java:231)\n02-25 22:48:58.490: W/System.err(1639):     at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)\n02-25 22:48:58.490: W/System.err(1639):     at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)\n02-25 22:48:58.490: W/System.err(1639):     at java.lang.Thread.run(Thread.java:841)\n<\/code><\/pre>\n\n<p>Any idea ? Thanks<\/p>\n",
+        "question_id": 22028298,
+        "tags": [
+            "java",
+            "php",
+            "android",
+            "arrays",
+            "json"
+        ],
+        "score": 0,
+        "accepted_answer_id": 22028606,
+        "is_answered": true,
+        "view_count": 101
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dATHJ.jpg?s=256",
+                "account_id": 3650367,
+                "user_type": "registered",
+                "user_id": 3042700,
+                "link": "https://stackoverflow.com/users/3042700/gon%c3%a7alo-ribeiro",
+                "reputation": 115,
+                "display_name": "Gon&#231;alo Ribeiro",
+                "accept_rate": 25
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028298,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/Tjw2mwJj.png?s=256",
+                "account_id": 353320,
+                "user_type": "registered",
+                "user_id": 690952,
+                "link": "https://stackoverflow.com/users/690952/selvin",
+                "reputation": 6807,
+                "display_name": "Selvin"
+            },
+            "edited": false,
+            "creation_date": 1393411053,
+            "comment_id": 33411981
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Tjw2mwJj.png?s=256",
+                "account_id": 353320,
+                "user_type": "registered",
+                "user_id": 690952,
+                "link": "https://stackoverflow.com/users/690952/selvin",
+                "reputation": 6807,
+                "display_name": "Selvin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028298,
+            "edited": false,
+            "creation_date": 1393378420,
+            "comment_id": 33397246
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Q7ZiN.jpg?s=256",
+            "account_id": 3613591,
+            "user_type": "registered",
+            "user_id": 3014036,
+            "link": "https://stackoverflow.com/users/3014036/ahmed-khan-89",
+            "reputation": 2773,
+            "display_name": "ahmed_khan_89",
+            "accept_rate": 63
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1393371443,
+        "creation_date": 1393371443,
+        "body": "<p>this is what I use to get json array :<\/p>\n\n<pre><code>// send a httpRequest to the url\n// and parse the json response to a string\npublic String sendHttpRequest(String url) {\n    try {\n        // the HTTP request\n        HttpParams p = new BasicHttpParams();\n        HttpClient httpclient = new DefaultHttpClient(p);\n        HttpPost httppost = new HttpPost(url);\n        httppost.setHeader(\"charset\", \"UTF-8\");\n        httppost.setHeader(\"Content-Type\", \"application/json\");\n\n        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));\n        HttpResponse response = httpclient.execute(httppost);\n        HttpEntity entity = response.getEntity();\n        inputStream = entity.getContent();\n\n    } catch (Exception e) {\n        Log.e(\"taghttppost\", \"\" + e.toString());\n    }\n    // conversion of the httpResponse to a string\n    try {\n        InputStreamReader isr = new InputStreamReader(inputStream, \"UTF-8\");\n        BufferedReader reader = new BufferedReader(isr);\n        StringBuilder sb = new StringBuilder();\n\n        String line = null;\n        while ((line = reader.readLine()) != null) {\n            sb.append(line + \"\\n\");\n        }\n        inputStream.close();\n        result = sb.toString();\n        result = new String(sb.toString().getBytes(\"UTF-8\"));\n\n    } catch (Exception e) {\n        Log.e(\"tagconvertstr\", \"\" + e.toString());\n    }\n\n    return result;\n}\n<\/code><\/pre>\n\n<p>then I call it like this :<\/p>\n\n<pre><code>JSONArray jArray;\nJSONObject jobj = new JSONObject(); // if you need it\nString result = sendHttpRequest(\"www.yourUrl.com\");\n// Parse the string to get a json array\ntry {\n    jArray = new JSONArray(result);\n    jobj = jArray.getJSONObject(0); // 0 is the index in the json array...\n} catch (JSONException e) {\n}\n<\/code><\/pre>\n\n<p>then you can use this json object as you like...<\/p>\n\n<pre><code>int id = Integer.parseInt(jobj.getString(\"id\")); \n// or simply :\nint id=jobj.getInt(\"op_country_id\");\nString str = jobj.getString(\"str\");\n<\/code><\/pre>\n\n<p>I hope it helps you.<\/p>\n",
+        "answer_id": 22028606,
+        "question_id": 22028298
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/9OpuM.jpg?s=256",
+            "account_id": 1802345,
+            "user_type": "registered",
+            "user_id": 1640348,
+            "link": "https://stackoverflow.com/users/1640348/bart-pelle",
+            "reputation": 757,
+            "display_name": "Bart Pelle",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15621505/java-jna-mapping-d2d1createfactory-from-d2d1",
+        "last_activity_date": 1364238301,
+        "creation_date": 1364234060,
+        "answer_count": 1,
+        "title": "Java JNA mapping D2D1CreateFactory from D2D1",
+        "body": "<p>I was trying to map the function D2D1CreateFactory from the DLL D2D1.dll. From there I want to build up on creating a Direct2D Java mapping, but that's off-topic. I so far had this:<\/p>\n\n<pre><code>public WinNT.HRESULT D2D1CreateFactory(int factoryType, REFIID riid, ID2D1Factory.ByReference ppIFactory);\n<\/code><\/pre>\n\n<p>The ID2D1Factory looks like this:<\/p>\n\n<pre><code>public class ID2D1Factory extends IUnknown {\n\n    public ID2D1Factory() { }\n\n    public ID2D1Factory(Pointer pvInstance) {\n        super(pvInstance);\n    }\n\n}\n<\/code><\/pre>\n\n<p>When I try to run my code using the code below, \"java.lang.Error: Invalid memory access\" is thrown (when turning on JNA.setProtected()).<\/p>\n\n<p>The code to run:<\/p>\n\n<pre><code>ID2D1Factory.ByReference ref= new ID2D1Factory.ByReference();\nD2D1.INSTANCE.D2D1CreateFactory(0, new REFIID(new IID(\"06152247-6f50-465a-9245-118bfd3b6007\").toByteArray()), ref);\n<\/code><\/pre>\n\n<p>I have no clue why. Is there anything I am doing wrong?<\/p>\n\n<p><strong>EDIT:<\/strong> Thanks to technomage I was able to get the correct method declaration. The method should be declared like this:<\/p>\n\n<pre><code>public WinNT.HRESULT D2D1CreateFactory(int factoryType, REFIID riid, D2D1_FACTORY_OPTIONS opts, PointerByReference pref);\n<\/code><\/pre>\n\n<p>The D2D1_FACTORY_OPTIONS structure was mapped as following:<\/p>\n\n<pre><code>public static class D2D1_FACTORY_OPTIONS extends Structure {\n    public int debugLevel;\n    protected List&lt;String&gt; getFieldOrder() {\n        return Arrays.asList(new String[] { \"debugLevel\" });\n    }\n    public D2D1_FACTORY_OPTIONS() {}\n    public D2D1_FACTORY_OPTIONS(int size) {\n        super(new Memory(size));\n    }\n    public D2D1_FACTORY_OPTIONS(Pointer memory) {\n        super(memory);\n        read();\n    }\n}\n<\/code><\/pre>\n\n<p>Finally, the snippet to call the method:<\/p>\n\n<pre><code>D2D1_FACTORY_OPTIONS opts = new D2D1_FACTORY_OPTIONS();\nPointerByReference pp = new PointerByReference();\nD2D1.INSTANCE.D2D1CreateFactory(0, new REFIID(new IID(\"06152247-6f50-465a-9245-118bfd3b6007\").toByteArray()), opts, pp);\n<\/code><\/pre>\n",
+        "question_id": 15621505,
+        "tags": [
+            "java",
+            "c++",
+            "jna"
+        ],
+        "score": 0,
+        "accepted_answer_id": 15621951,
+        "is_answered": true,
+        "view_count": 289,
+        "last_edit_date": 1364238301
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9a89d4cf026c5eb3af2b3fdea1925723?s=256&d=identicon&r=PG",
+            "account_id": 9322,
+            "user_type": "registered",
+            "user_id": 17175,
+            "link": "https://stackoverflow.com/users/17175/technomage",
+            "reputation": 10099,
+            "display_name": "technomage",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1364235620,
+        "creation_date": 1364235620,
+        "body": "<p>According to <a href=\"http://msdn.microsoft.com/en-us/library/windows/desktop/dd368034%28v=vs.85%29.aspx\" rel=\"nofollow\">this reference<\/a>, <code>D2D1CreateFactory<\/code> requires pointer types as third and fourth arguments (you are declaring only three arguments).<\/p>\n\n<p>Assuming you insert the options pointer (a simple <code>struct *<\/code>), your final argument needs to be <code>PointerByReference<\/code>, since the function will be \"returning\" a pointer value in the address that you give it.  <\/p>\n\n<p>You can then use <code>PointerByReference.getValue()<\/code> to initialize a new <code>ID2D1Factory<\/code> instance (the <code>Structure.ByReference<\/code> in this case is superfluous, since by default all structures as function parameters are treated as <code>struct *<\/code> by JNA unless explicitly defined otherwise).<\/p>\n\n<pre><code>public WinNT.HRESULT D2D1CreateFactory(int factoryType, REFIID riid, D2D1_FACTORY_OPTIONS options, ID2D1Factory ppIFactory);\n\npublic class D2D1_FACTORY_OPTIONS extends Structure { ... }\n\nD2D1_FACTORY_OPTIONS options = ...;\nPointerByReference pref = new PointerByReference();\n\nD2D1.INSTANCE.D2D1CreateFactory(0, new REFIID(...), options, pref);\nID2D1Factory factory = new ID2D1Factory(pref.getValue());\n<\/code><\/pre>\n\n<p>And don't forget to call <code>Structure.read()<\/code> in your <code>ID2D1Factory(Pointer)<\/code> ctor.<\/p>\n",
+        "answer_id": 15621951,
+        "question_id": 15621505
+    }],
+    "answer_comments": {"15621951": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/9OpuM.jpg?s=256",
+            "account_id": 1802345,
+            "user_type": "registered",
+            "user_id": 1640348,
+            "link": "https://stackoverflow.com/users/1640348/bart-pelle",
+            "reputation": 757,
+            "display_name": "Bart Pelle",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 15621951,
+        "edited": false,
+        "creation_date": 1364237588,
+        "comment_id": 22160711
+    }]}
+}

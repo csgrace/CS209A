@@ -1,0 +1,90 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ab76db4c7db78939bf0f881f45691e33?s=256&d=identicon&r=PG",
+            "account_id": 10242,
+            "user_type": "registered",
+            "user_id": 19246,
+            "link": "https://stackoverflow.com/users/19246/martin-carpella",
+            "reputation": 12703,
+            "display_name": "Martin Carpella",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2183329/spring-defaultmessagelistenercontainer-activemq-and-message-redelivery",
+        "last_activity_date": 1312891939,
+        "creation_date": 1265106940,
+        "answer_count": 1,
+        "title": "Spring DefaultMessageListenerContainer, ActiveMQ and message redelivery",
+        "body": "<p>if I use the <a href=\"http://static.springsource.org/spring/docs/3.0.x/api/org/springframework/jms/listener/DefaultMessageListenerContainer.html\" rel=\"nofollow noreferrer\"><code>DefaultMessageListenerContainer<\/code><\/a> of <a href=\"http://www.springsource.org/\" rel=\"nofollow noreferrer\">Spring<\/a> to recieve JMS messages, I don't get JMS messages redelivered, even if I set <code>sessionAcknowledgeMode<\/code> to 2.<\/p>\n\n<p>In case of a <code>RuntimeException<\/code> within the <code>onMessage()<\/code> of my JavaBean, the message is not acknowledged within the JMS provider (<a href=\"http://activemq.apache.org/\" rel=\"nofollow noreferrer\">ActiveMQ<\/a>), it stays as pending in the queue. But it is never redelivered, which I think is caused by the fact that Spring never calls <code>session.recover()<\/code>, which according to <a href=\"http://activemq.apache.org/message-redelivery-and-dlq-handling.html\" rel=\"nofollow noreferrer\">ActiveMQ's documentation<\/a> is required to  is required for redelivery to happen.<\/p>\n\n<p>Can anybode give me a hint how I can configure <code>DefaultMessageListenerContainer<\/code> to call <code>session.recover()<\/code> in case of RuntimeExceptions?<\/p>\n\n<p>Best regards,<br/>\nMartin<\/p>\n",
+        "question_id": 2183329,
+        "tags": [
+            "java",
+            "spring",
+            "exception",
+            "jms",
+            "activemq-classic"
+        ],
+        "score": 2,
+        "accepted_answer_id": 2193589,
+        "is_answered": true,
+        "view_count": 6096,
+        "last_edit_date": 1265118924
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/p1aFYifg.jpg?s=256",
+            "account_id": 28975,
+            "user_type": "registered",
+            "user_id": 77912,
+            "link": "https://stackoverflow.com/users/77912/rockmanjoe",
+            "reputation": 1678,
+            "display_name": "RockmanJoe",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 2183329,
+        "edited": false,
+        "creation_date": 1336742781,
+        "comment_id": 13655268
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6628a1d00769000acdd5a67686723820?s=256&d=identicon&r=PG",
+            "account_id": 61561,
+            "user_type": "registered",
+            "user_id": 183395,
+            "link": "https://stackoverflow.com/users/183395/bsnyder",
+            "reputation": 1199,
+            "display_name": "bsnyder"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 4,
+        "is_accepted": true,
+        "last_activity_date": 1312891939,
+        "creation_date": 1265215218,
+        "body": "<p>You indicate that you're using sessionAcknowledgeMode 2 which is Session.CLIENT_ACKNOWLEDGE. The following statement is taken directly from the <a href=\"http://static.springsource.org/spring/docs/3.0.x/api/org/springframework/jms/listener/AbstractMessageListenerContainer.html\" rel=\"nofollow noreferrer\">AbstractMessageListenerContainer Javadocs<\/a>:<\/p>\n<ul>\n<li>&quot;CLIENT_ACKNOWLEDGE&quot;: Automatic message acknowledgment after successful listener execution; no redelivery in case of exception thrown.<\/li>\n<\/ul>\n<p>So the problem is not with the Spring DMLC and it's ability to call Session.recover() when a runtime exception is thrown. Is it possible for you to use a try/catch in your listener's onMessage() method to handle runtime exceptions by calling Session.recover() yourself?<\/p>\n<h3>Update:<\/h3>\n<p>You make a good point about the boilerplate code. It gets sprinkled in many places and begs to be refactored. Is it not possible for you to abstract such code? This is a common solution. Creating an abstract parent class with a method that contains the try/catch with the appropriate processing should do the trick. Then just extend the parent class to implement as many custom processors as necessary. You can even then wire together the processors in an appropriate manner using your Spring app context.<\/p>\n<p>I've never had a problem adding Spring-specific code to an application because it runs anywhere. This was important for me way back when I began using the Spring. It's not specific to any single app server or servlet container so it's not like I'm coding myself into a corner with Spring the way I am if I import com.ibm or com.oracle into my source code. In fact, I've used the Spring JMS APIs with one MOM and switched to another MOM without changing anything other than the JMS connection factory definition.<\/p>\n",
+        "answer_id": 2193589,
+        "question_id": 2183329,
+        "last_edit_date": 1592644375
+    }],
+    "answer_comments": {"2193589": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ab76db4c7db78939bf0f881f45691e33?s=256&d=identicon&r=PG",
+            "account_id": 10242,
+            "user_type": "registered",
+            "user_id": 19246,
+            "link": "https://stackoverflow.com/users/19246/martin-carpella",
+            "reputation": 12703,
+            "display_name": "Martin Carpella",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "post_id": 2193589,
+        "edited": false,
+        "creation_date": 1265488208,
+        "comment_id": 2167262
+    }]}
+}

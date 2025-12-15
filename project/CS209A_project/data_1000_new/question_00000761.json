@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/crV34.jpg?s=256",
+            "account_id": 945123,
+            "user_type": "registered",
+            "user_id": 972501,
+            "link": "https://stackoverflow.com/users/972501/vijin-paulraj",
+            "reputation": 4688,
+            "display_name": "Vijin Paulraj",
+            "accept_rate": 66
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45747360/how-to-import-a-csv-file-into-a-bigquery-table-without-any-column-names-or-schem",
+        "last_activity_date": 1503260959,
+        "creation_date": 1503021434,
+        "answer_count": 1,
+        "title": "How to import a CSV file into a BigQuery table without any column names or schema?",
+        "body": "<p>I'm currently writing a Java utility to import few CSV files from GCS into BigQuery. I can easily achieve this by <code>bq load<\/code>, but I wanted to do it using a Dataflow job. So I'm using Dataflow's Pipeline and ParDo transformer (returns TableRow to apply it on the BigQueryIO) and I have created the StringToRowConverter() for the transformation. Here the actual problem starts - I am forced to specify the schema for the destination table although I don't want to create a new table if it doesn't exist - only trying to load data. So I do not want to manually set the column name for the TableRow as I have about 600 columns. <\/p>\n\n<pre><code>public class StringToRowConverter extends DoFn&lt;String, TableRow&gt; {\n\nprivate static Logger logger = LoggerFactory.getLogger(StringToRowConverter.class);\n\npublic void processElement(ProcessContext c) {\n    TableRow row = new TableRow();          \n    row.set(\"DO NOT KNOW THE COLUMN NAME\", c.element());\n    c.output(row);\n}\n}\n<\/code><\/pre>\n\n<p>Moreover, it is assumed that the table already exists in the BigQuery dataset and I don't need to create it, and also the CSV file contains the columns in a correct order.<\/p>\n\n<p>If there's no workaround to this scenario and the column name is needed for the data load, then I can have it in the first row of the CSV file.<\/p>\n\n<p>Any help will be appreciated.<\/p>\n",
+        "question_id": 45747360,
+        "tags": [
+            "java",
+            "csv",
+            "google-bigquery",
+            "google-cloud-dataflow"
+        ],
+        "score": 13,
+        "accepted_answer_id": 45786518,
+        "is_answered": true,
+        "view_count": 2661,
+        "last_edit_date": 1503021790
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f8f70598ec3f9f6ebe727eb5a8a01b66?s=256&d=identicon&r=PG",
+            "account_id": 1625940,
+            "user_type": "registered",
+            "user_id": 1501501,
+            "link": "https://stackoverflow.com/users/1501501/fgasparini",
+            "reputation": 1328,
+            "display_name": "fgasparini"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 7,
+        "is_accepted": true,
+        "last_activity_date": 1503260959,
+        "creation_date": 1503260959,
+        "body": "<p>To avoid the creation of the table, you should use the BigQueryIO.Write.CreateDisposition.CREATE_NEVER of the BigQueryIO.Write during the pipeline configuration. Source: <a href=\"https://cloud.google.com/dataflow/java-sdk/JavaDoc/com/google/cloud/dataflow/sdk/io/BigQueryIO.Write\" rel=\"noreferrer\">https://cloud.google.com/dataflow/java-sdk/JavaDoc/com/google/cloud/dataflow/sdk/io/BigQueryIO.Write<\/a><\/p>\n\n<p>You don't need to know a BigQuery table schema upfront, you can discover it dynamically. For instance, you can use the BigQuery API (<a href=\"https://cloud.google.com/bigquery/docs/reference/rest/v2/tables/get\" rel=\"noreferrer\">https://cloud.google.com/bigquery/docs/reference/rest/v2/tables/get<\/a>) to query a table schema and pass it as a parameter for class StringToRowConverter. Another option and assuming that first row is a header, is to skip the first row and use it to map the rest of the file correctly.<\/p>\n\n<p>The code below implements the 2nd approach and also configures the output to append to an existing BigQuery table.<\/p>\n\n<pre><code>public class DFJob {\n\n    public static class StringToRowConverter extends DoFn&lt;String, TableRow&gt; {\n\n        private String[] columnNames;\n\n        private boolean isFirstRow = true;\n\n        public void processElement(ProcessContext c) {\n            TableRow row = new TableRow();\n\n            String[] parts = c.element().split(\",\");\n\n            if (isFirstRow) {\n                columnNames = Arrays.copyOf(parts, parts.length);\n                isFirstRow = false;\n            } else {\n                for (int i = 0; i &lt; parts.length; i++) {\n                    row.set(columnNames[i], parts[i]);\n                }\n                c.output(row);\n            }\n        }\n    }\n\n    public static void main(String[] args) {\n        DataflowPipelineOptions options = PipelineOptionsFactory.create()\n                .as(DataflowPipelineOptions.class);\n        options.setRunner(BlockingDataflowPipelineRunner.class);\n\n        Pipeline p = Pipeline.create(options);\n\n        p.apply(TextIO.Read.from(\"gs://dataflow-samples/myfile.csv\"))\n                .apply(ParDo.of(new StringToRowConverter()))\n                .apply(BigQueryIO.Write.to(\"myTable\")\n                        .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)\n                        .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));\n\n        PipelineResult result = p.run();\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 45786518,
+        "question_id": 45747360
+    }],
+    "answer_comments": {}
+}

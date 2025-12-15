@@ -1,0 +1,129 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/00ac2c90d0701890c06ce30e6d4ad1a6?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3592510,
+            "user_type": "registered",
+            "user_id": 2998199,
+            "link": "https://stackoverflow.com/users/2998199/sohanarg34",
+            "reputation": 1,
+            "display_name": "sohanarg34"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20012674/same-server-listening-on-different-sockets",
+        "last_activity_date": 1490239303,
+        "creation_date": 1384559463,
+        "answer_count": 1,
+        "title": "same server listening on different sockets",
+        "body": "<p>I have a UDP multicast server listening on 2 sockets on 2 different ports. I achieved listening on these 2 sockets from clients. But i want to identify on which socket a client is sending a packet. Since my problem is that ; on the server if I listen on socket(9999) and if the client is sending on socket(8888) then at the server side I want it to identify the incoming packet is from which port.<\/p>\n\n<pre><code>public class MulticastReceiver \n{\n  public static void main(String[] args)\n  {\n      MulticastSocket socket = null;\n      DatagramPacket packet  = null;\n\n      MulticastSocket soc = null;\n      byte[] inBuf = null;\n      try\n      {\n          socket = new MulticastSocket(8888);\n          soc = new MulticastSocket(9999);\n\n          InetAddress address = InetAddress.getByName(\"224.2.2.3\");\n          socket.joinGroup(address);\n          soc.joinGroup(address);\n\n          System.out.println(\"224.2.2.3 ready to receive packets\");\n          while(true)\n          {\n              inBuf=new byte[256];\n\n              packet = new DatagramPacket(inBuf,inBuf.length);\n              System.out.println(\"port is: \"+ packet.getAddress() + packet.getPort());\n              if(packet.getPort() == 9999) \n              {\n                  soc.receive(packet);\n              //System.out.println(\"Data at 224.2.2.3:: \" + new String(packet.getData()));\n              }\n              else\n                  socket.receive(packet);\n\n              System.out.println(\"Data at 224.2.2.3:: \" + new String(packet.getData()));\n          }\n      }\n      catch(Exception e)\n      {\n\n      }\n\n\n  }\n}\n\n\n\n\n\npublic class MulticastSender {\n  public static void main(String[] args) {\n    DatagramSocket socket = null;\n    DatagramPacket outPacket = null;\n    byte[] outBuf;\n    final int PORT = 8888;\n\n    try {\n      socket = new DatagramSocket();\n      long counter = 0;\n      String msg;\n\n        msg = \"This is multicast! \";\n\n        outBuf = msg.getBytes();\n\n        //Send to multicast IP address and port\n        InetAddress address = InetAddress.getByName(\"224.2.2.3\");\n        outPacket = new DatagramPacket(outBuf, outBuf.length, address, PORT);\n\n        socket.send(outPacket);\n\n        System.out.println(\"Server sends : \" + msg);\n        try {\n          Thread.sleep(500);\n        } catch (InterruptedException ie) {\n        }\n\n    } catch (IOException ioe) {\n      System.out.println(ioe);\n    }\n  }\n}\n\n\n\n\npublic class AnotherSender {\n  public static void main(String[] args) {\n    DatagramSocket socket = null;\n    DatagramPacket outPacket = null;\n    byte[] outBuf;\n    final int PORT = 9999;\n\n    try {\n      socket = new DatagramSocket();\n      long counter = 0;\n      String msg;\n\n        msg = \"This is another multicast! \" + counter;\n        counter++;\n        outBuf = msg.getBytes();\n\n        //Send to multicast IP address and port\n        InetAddress address = InetAddress.getByName(\"224.2.2.3\");\n        outPacket = new DatagramPacket(outBuf, outBuf.length, address, PORT);\n\n        socket.send(outPacket);\n\n        System.out.println(\"Server sends : \" + msg);\n        try {\n          Thread.sleep(500);\n        } catch (InterruptedException ie) {\n        }\n\n    } catch (IOException ioe) {\n      System.out.println(ioe);\n    }\n  }\n}\n<\/code><\/pre>\n",
+        "question_id": 20012674,
+        "tags": [
+            "java",
+            "sockets",
+            "udp",
+            "multicast",
+            "multicastsocket"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 265
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+            "account_id": 71739,
+            "user_type": "registered",
+            "user_id": 207421,
+            "link": "https://stackoverflow.com/users/207421/user207421",
+            "reputation": 311890,
+            "display_name": "user207421",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1490239303,
+        "creation_date": 1384560225,
+        "body": "<p>Your code doesn't make sense. The packet won't have a port number at all until you put one into it or <code>receive()<\/code> does, and at best this will just read alternately between the two sockets, blocking each time, possibly forever, receiving from one socket, and thus starving the other one.<\/p>\n\n<p>You need a receiving thread for each non-blocking socket.<\/p>\n",
+        "answer_id": 20012805,
+        "question_id": 20012674,
+        "last_edit_date": 1490239303
+    }],
+    "answer_comments": {"20012805": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012805,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/f00013ceab8fb1928885c5c172fbfd4a?s=256&d=identicon&r=PG",
+                "account_id": 25589,
+                "user_type": "registered",
+                "user_id": 65863,
+                "link": "https://stackoverflow.com/users/65863/remy-lebeau",
+                "reputation": 609643,
+                "display_name": "Remy Lebeau",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1385337880,
+            "comment_id": 30089264
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f00013ceab8fb1928885c5c172fbfd4a?s=256&d=identicon&r=PG",
+                "account_id": 25589,
+                "user_type": "registered",
+                "user_id": 65863,
+                "link": "https://stackoverflow.com/users/65863/remy-lebeau",
+                "reputation": 609643,
+                "display_name": "Remy Lebeau",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012805,
+            "edited": false,
+            "creation_date": 1384644732,
+            "comment_id": 29820607
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012805,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/f00013ceab8fb1928885c5c172fbfd4a?s=256&d=identicon&r=PG",
+                "account_id": 25589,
+                "user_type": "registered",
+                "user_id": 65863,
+                "link": "https://stackoverflow.com/users/65863/remy-lebeau",
+                "reputation": 609643,
+                "display_name": "Remy Lebeau",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1384592158,
+            "comment_id": 29805895
+        }
+    ]}
+}

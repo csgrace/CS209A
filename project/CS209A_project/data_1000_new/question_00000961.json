@@ -1,0 +1,192 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user4155739"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/32602118/as-i-find-a-string-in-another-java",
+        "last_activity_date": 1442388763,
+        "creation_date": 1442388018,
+        "answer_count": 3,
+        "title": "as I find a string in another java",
+        "body": "<p>I wish you can help me I want to do is I have two variables of type string<\/p>\n\n<pre><code>String text = \"HELLO HOW ARE YOU\";\nString value = \"abc\";\n<\/code><\/pre>\n\n<p>I want to do is see if any character of the variable values in text and contains tested but I only detects a single character but not<\/p>\n\n<pre><code>if(text.toUpperCase().contains(value.toUpperCase()))throw new Exception(\"NOT LETTERS\");\n<\/code><\/pre>\n",
+        "question_id": 32602118,
+        "tags": [
+            "java",
+            "string"
+        ],
+        "score": 1,
+        "accepted_answer_id": 32602230,
+        "is_answered": true,
+        "view_count": 76,
+        "last_edit_date": 1442388074
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xlyJP.jpg?s=256",
+                "account_id": 2849686,
+                "user_type": "registered",
+                "user_id": 2447152,
+                "link": "https://stackoverflow.com/users/2447152/rustam",
+                "reputation": 6515,
+                "display_name": "Rustam"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602118,
+            "edited": false,
+            "creation_date": 1442388582,
+            "comment_id": 53056680
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 32602118,
+            "edited": false,
+            "creation_date": 1442388334,
+            "comment_id": 53056524
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VjxwC.jpg?s=256",
+                "account_id": 1101161,
+                "user_type": "registered",
+                "user_id": 1093528,
+                "link": "https://stackoverflow.com/users/1093528/fge",
+                "reputation": 122410,
+                "display_name": "fge",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 32602118,
+            "edited": false,
+            "creation_date": 1442388294,
+            "comment_id": 53056492
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-FFtP7NX3Uf0/AAAAAAAAAAI/AAAAAAAAABY/5-T_w94uciA/s256-rj/photo.jpg",
+                "account_id": 6532372,
+                "user_type": "registered",
+                "user_id": 5053124,
+                "link": "https://stackoverflow.com/users/5053124/nicholas-robinson",
+                "reputation": 1429,
+                "display_name": "Nicholas Robinson",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602118,
+            "edited": false,
+            "creation_date": 1442388211,
+            "comment_id": 53056451
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1442388763,
+            "creation_date": 1442388763,
+            "body": "<p>You could use the <code>List<\/code> API...<\/p>\n\n<pre><code>String text = \"HELLO HOW ARE YOU\";\nString value = \"abc\";\n\nList&lt;String&gt; left = new ArrayList&lt;&gt;(Arrays.asList(text.toUpperCase().split(\"\")));\nList&lt;String&gt; right = new ArrayList&lt;&gt;(Arrays.asList(value.toUpperCase().split(\"\")));\n\nboolean hasAny = left.removeAll(right);\n<\/code><\/pre>\n\n<p>Basically this creates a <code>List<\/code> of each word then removes all the matches from the second in the first.  A return value of <code>true<\/code> means the first <code>List<\/code> was modified, meaning it had matching values.  You might even be able to compare the difference in size to determine how many matches there were.<\/p>\n\n<p>You could also use Java 8's <code>Stream<\/code> API...<\/p>\n\n<pre><code>String text = \"HELLO HOW ARE YOU\";\nString value = \"abc\";\n\nList&lt;String&gt; left = new ArrayList&lt;&gt;(Arrays.asList(text.toUpperCase().split(\"\")));\nList&lt;String&gt; right = new ArrayList&lt;&gt;(Arrays.asList(value.toUpperCase().split(\"\")));\n\nboolean anyMatch = left.stream().anyMatch((String t) -&gt; {\n    return right.contains(t);\n});\n<\/code><\/pre>\n\n<p>Again, this will simply return <code>true<\/code> if the first <code>List<\/code> contains ANY of the values in the second <code>List<\/code><\/p>\n\n<p>Now, if you wanted to know which values actually matched, you might be able to use something like...<\/p>\n\n<pre><code>Set&lt;String&gt; collect = right.stream().filter((String t) -&gt; {\n    return left.contains(t);\n}).collect(Collectors.toSet());\nSystem.out.println(collect);\n<\/code><\/pre>\n\n<p>Which in you example, would print<\/p>\n\n<pre><code>[A]\n<\/code><\/pre>\n",
+            "answer_id": 32602362,
+            "question_id": 32602118
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VyUv5.jpg?s=256",
+                "account_id": 1626304,
+                "user_type": "registered",
+                "user_id": 1501794,
+                "link": "https://stackoverflow.com/users/1501794/rahul-tripathi",
+                "reputation": 173334,
+                "display_name": "Rahul Tripathi",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1442388420,
+            "creation_date": 1442388420,
+            "body": "<p>You can try like this:<\/p>\n\n<pre><code>public static boolean findLetters() {\n    String text = \"HELLO HOW ARE YOU\";\n    String value = \"abc\";\n    for (int i = 0; i &lt; value.length(); i++) {\n        if (text.indexOf(value.toUpperCase().charAt(i)) == -1) {\n            return false;\n        }\n    }\n    return true;\n}\n<\/code><\/pre>\n",
+            "answer_id": 32602258,
+            "question_id": 32602118
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ede1422479af17fd0456fb376383272f?s=256&d=identicon&r=PG",
+                "account_id": 1015767,
+                "user_type": "registered",
+                "user_id": 1027359,
+                "link": "https://stackoverflow.com/users/1027359/dotvav",
+                "reputation": 2848,
+                "display_name": "dotvav",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1442388355,
+            "creation_date": 1442388355,
+            "body": "<p>Not sure if I understand the question quite well, but you may try this:<\/p>\n\n<pre><code>String text = \"HELLO HOW ARE YOU\";\nString value = \"abc\";\n\nfor(char c : value.toUpperCase().toCharArray()) {\n    if (text.indexOf(c) != -1) {\n        throw new Exception(\"NOT LETTERS\");\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 32602230,
+            "question_id": 32602118
+        }
+    ],
+    "answer_comments": {"32602230": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ede1422479af17fd0456fb376383272f?s=256&d=identicon&r=PG",
+                "account_id": 1015767,
+                "user_type": "registered",
+                "user_id": 1027359,
+                "link": "https://stackoverflow.com/users/1027359/dotvav",
+                "reputation": 2848,
+                "display_name": "dotvav",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602230,
+            "edited": false,
+            "creation_date": 1442388798,
+            "comment_id": 53056814
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user4155739"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32602230,
+            "edited": false,
+            "creation_date": 1442388647,
+            "comment_id": 53056726
+        }
+    ]}
+}

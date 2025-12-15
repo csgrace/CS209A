@@ -1,0 +1,155 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/64d5e2910b69c2dc2e75e329c427ced6?s=256&d=identicon&r=PG",
+            "account_id": 2574871,
+            "user_type": "registered",
+            "user_id": 2232802,
+            "link": "https://stackoverflow.com/users/2232802/artur-peniche",
+            "reputation": 477,
+            "display_name": "Artur Peniche"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34243335/how-do-i-serialize-several-frames-of-my-object-without-getting-the-current-on-de",
+        "last_activity_date": 1449947317,
+        "creation_date": 1449944392,
+        "answer_count": 2,
+        "title": "How do I Serialize several frames of my object without getting the current on deserialization?",
+        "body": "<p>I'm trying to keep a \"picture\" of my java object during execution of my program, in order to let the user view any state of the object afterwards.<\/p>\n\n<p>But the problem is, while it apparently serializes the several states of the object, when I deserialize it, however \"picture\" I pick I get the last state.<\/p>\n\n<p>One of the objects I want to serialize<\/p>\n\n<pre><code>public class Board implements IObject{\n    /**\n     * \n     */\n    private static final long serialVersionUID = 3964220699069459042L;\n    private char[][] board;\n    public static final char X = 'X';\n    public static final char O = 'O';\n    public static final char blank = '-';\n\n    public Board(int x, int y)\n    {\n        board = new char[x][y];\n        for (int i = 0; i &lt; x; i++) {\n            for (int j = 0; j &lt; y ; j++) {\n                board[i][j] = blank;\n            }\n        }\n    }\n    @Override\n    public void print()\n    {\n        for(int i = 0; i &lt; board.length; i++)\n        {\n            for(int j = 0; j &lt;board[i].length; j++ )\n            {\n                System.out.print(board[i][j]);\n            }\n            System.out.println();\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Everytime I change the board I run the following:<\/p>\n\n<pre><code>roundStatus.addFrame(rf.getPlayer(), rf.getRound(), rf.getStatus());\n<\/code><\/pre>\n\n<p>My serialize and deserialize functions<\/p>\n\n<pre><code>public void addFrame(String p, Integer round, IObject board)\n    {\n        frames.add(new RoundFrame(p,round,board));\n    }\n\nString path;\n    ObjectOutput out;\n\n    public void save(String id) \n    {\n        path = String.format(\"%s\\\\%s\\\\%s.ser\",System.getProperty(\"user.dir\"),LOGPATH,id);\n        System.out.println(path);\n        File yourFile = new File(path);\n        try \n        {\n            if(!yourFile.exists()) \n                yourFile.createNewFile();\n            out = new ObjectOutputStream(new FileOutputStream(path,true));\n            out.writeObject(getFrames());\n            out.close();\n        } \n        catch(IOException cause) \n        {\n            cause.printStackTrace();\n        }\n    }\n\n    public RoundFrame open(String id, int round)\n    {\n        RoundFrame ls=null;\n        try\n        {\n            FileInputStream fileIn = new FileInputStream(String.format(\"%s\\\\%s\\\\%s.ser\",System.getProperty(\"user.dir\"),LOGPATH,id));\n            ObjectInputStream in = new ObjectInputStream(fileIn);\n            System.out.println(String.format(\"%s\\\\%s\\\\%s.ser\",System.getProperty(\"user.dir\"),LOGPATH,id));\n            Object orf = in.readObject();\n            if (orf instanceof ArrayList&lt;?&gt;) {\n                ArrayList&lt;?&gt; lrf = (ArrayList&lt;?&gt;) orf;\n                System.out.println(lrf.size());\n                for(Object obj : lrf)\n                {\n                    RoundFrame rf = (RoundFrame) obj;\n                    System.out.println(rf.getRound());\n                    if(rf instanceof RoundFrame)\n                    {\n                        rf.getStatus().print();\n                    }\n                }\n                for(Object obj : lrf)\n                {\n                    RoundFrame rf = (RoundFrame) obj;\n                    System.out.println(rf.getRound());\n                    if(rf.getRound() == round &amp;&amp; rf instanceof RoundFrame)\n                    {\n                        ls = rf;\n                        break;\n                    }\n                }\n            }\n            in.close();\n            fileIn.close();\n\n        }catch (FileNotFoundException e) {\n            System.err.println(\"File not found: \" + e);\n        }catch (EOFException e) {\n            System.err.println(\"End of stream: \" + e);\n        }catch (IOException e) {\n            System.err.println(\"Read error: \" + e);\n        }catch (ClassNotFoundException e) {\n            e.printStackTrace();\n        }\n         return ls;\n    }\n<\/code><\/pre>\n\n<p>And my Frame class<\/p>\n\n<pre><code>public class RoundFrame implements Serializable\n{\n    /**\n     * \n     */\n    private static final long serialVersionUID = 3565826725666895011L;\n    private String player;\n    private Integer round;\n    private IObject status;\n\n    public RoundFrame()\n    {\n\n    }\n\n    public RoundFrame(String p, Integer round, IObject board)\n    {\n        setPlayer(p);\n        setRound(round);\n        setStatus(board);       \n    }\n /*gets and sets*/\n}\n<\/code><\/pre>\n\n<p>The roundturn and the player are being well serialized, and even thought the IObject is also being serialized, I'm always getting N copies of the same frame.<\/p>\n\n<p>Is it possible to save several states of the same object? <\/p>\n",
+        "question_id": 34243335,
+        "tags": [
+            "java",
+            "serialization",
+            "abstract"
+        ],
+        "score": 2,
+        "accepted_answer_id": 34243566,
+        "is_answered": true,
+        "view_count": 337
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/FKKLW.jpg?s=256",
+            "account_id": 404649,
+            "user_type": "registered",
+            "user_id": 773113,
+            "link": "https://stackoverflow.com/users/773113/mike-nakis",
+            "reputation": 63073,
+            "display_name": "Mike Nakis",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 34243335,
+        "edited": false,
+        "creation_date": 1449945548,
+        "comment_id": 56228737
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/162a70e3c8818fbaca490baea74e2944?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3594580,
+                "user_type": "registered",
+                "user_id": 2999723,
+                "link": "https://stackoverflow.com/users/2999723/esoares",
+                "reputation": 196,
+                "display_name": "ESoares"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1449945957,
+            "creation_date": 1449945957,
+            "body": "<p>Each time you call <\/p>\n\n<blockquote>\n  <p>roundStatus.addFrame(rf.getPlayer(), rf.getRound(), rf.getStatus());<\/p>\n<\/blockquote>\n\n<p>You are passing a reference to the board object. If you edit the board and call it again the new frame and the last one are pointing to the same object, and will have the same internal values. <\/p>\n\n<p>I would advice to use immutable objects to represent the Board, this way you can easy achieve what you want to do and avoid erros like this. <\/p>\n",
+            "answer_id": 34243566,
+            "question_id": 34243335
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ade70926bd1568806affeb9c7aaefd33?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1689472,
+                "user_type": "registered",
+                "user_id": 1552136,
+                "link": "https://stackoverflow.com/users/1552136/harshitpthk",
+                "reputation": 4136,
+                "display_name": "harshitpthk",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1449946361,
+            "creation_date": 1449946361,
+            "body": "<blockquote>\n  <p>Everytime I change the board I run the following:<\/p>\n  \n  <p>roundStatus.addFrame(rf.getPlayer(), rf.getRound(), rf.getStatus());<\/p>\n<\/blockquote>\n\n<p>how are you changing the board? are you creating copies of your board object or are you changing by using getStatus().somechange();<\/p>\n\n<p>as even though you are creating new RoundFrame object<\/p>\n\n<pre><code> new RoundFrame(p,round,board)\n<\/code><\/pre>\n\n<p>the board is simply a reference to a single object. which means all RoundFrame object points to same board object.<\/p>\n",
+            "answer_id": 34243633,
+            "question_id": 34243335
+        }
+    ],
+    "answer_comments": {
+        "34243633": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/ade70926bd1568806affeb9c7aaefd33?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 1689472,
+                    "user_type": "registered",
+                    "user_id": 1552136,
+                    "link": "https://stackoverflow.com/users/1552136/harshitpthk",
+                    "reputation": 4136,
+                    "display_name": "harshitpthk",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 34243633,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/64d5e2910b69c2dc2e75e329c427ced6?s=256&d=identicon&r=PG",
+                    "account_id": 2574871,
+                    "user_type": "registered",
+                    "user_id": 2232802,
+                    "link": "https://stackoverflow.com/users/2232802/artur-peniche",
+                    "reputation": 477,
+                    "display_name": "Artur Peniche"
+                },
+                "edited": false,
+                "creation_date": 1449947572,
+                "comment_id": 56229397
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/64d5e2910b69c2dc2e75e329c427ced6?s=256&d=identicon&r=PG",
+                    "account_id": 2574871,
+                    "user_type": "registered",
+                    "user_id": 2232802,
+                    "link": "https://stackoverflow.com/users/2232802/artur-peniche",
+                    "reputation": 477,
+                    "display_name": "Artur Peniche"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 34243633,
+                "edited": false,
+                "creation_date": 1449946938,
+                "comment_id": 56229157
+            }
+        ],
+        "34243566": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/40762ba3bb07ad05fdcfa713b671673f?s=256&d=identicon&r=PG",
+                "account_id": 2696411,
+                "user_type": "registered",
+                "user_id": 2328352,
+                "link": "https://stackoverflow.com/users/2328352/andr%c3%a9-fratelli",
+                "reputation": 6098,
+                "display_name": "Andr&#233; Fratelli",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 34243566,
+            "edited": false,
+            "creation_date": 1450040903,
+            "comment_id": 56254366
+        }]
+    }
+}

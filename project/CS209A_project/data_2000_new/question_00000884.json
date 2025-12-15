@@ -1,0 +1,71 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/084480f61682322f1dc4938e2b6ad36c?s=256&d=identicon&r=PG",
+            "account_id": 2742398,
+            "user_type": "registered",
+            "user_id": 2363637,
+            "link": "https://stackoverflow.com/users/2363637/boydtwa",
+            "reputation": 23,
+            "display_name": "boydtwa"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/16449153/weird-characters-between-header-and-request-in-c-request-to-java-web-service-pr",
+        "last_activity_date": 1368052541,
+        "creation_date": 1368043057,
+        "answer_count": 1,
+        "title": "Weird characters between header and request in C# request to Java web service prevent success",
+        "body": "<p>I have a C# method that creates a request to a Java based web service. I serialize my class and post it to the service and it returns a status <code>400<\/code> indicating it can't find the named root element. When using fiddler I take the request and manually construct it in the Composer and process it and it succeeds. Using a hex viewer I notice that the request issued from C# has the following characters between the header and the request data <b><code>EF BB BF<\/code><\/b>. The cut and pasted request I executed in Fiddler does not and it succeeds. As I am not well versed in the construction of Java Services would it be easier to find a way to tell Java to ignore the characters when processing the request or would it be easier to build yet another serializer in .Net? It is not my intent to start a religious war here just to get to the fastest possible solution.<\/p>\n\n<p><img src=\"https://i.sstatic.net/SpvIr.png\" alt=\"Three Ugly Characters Between Request And Response\"><\/p>\n\n<p>The code to serialize looks like:<\/p>\n\n<pre><code>//seralize the Request\n XmlSerializer msgSerializer = new XmlSerializer(Msg.GetType());\n  try\n  {\n      request = (HttpWebRequest)WebRequest.Create(_endpoint);\n      request.Method = \"POST\";\n      request.KeepAlive = true;\n      request.SendChunked = true;\n      using (Stream myRequestStream = request.GetRequestStream())\n      {\n            XmlTextWriter requestWriter = new XmlTextWriter(myRequestStream, Encoding.UTF8);\n            msgSerializer.Serialize(requestWriter, Msg);\n            myRequestStream.Close();\n      }\n      response = request.GetResponse();\n  }\n  catch (WebException webE)\n  {\n        //Yada Yada Yada\n        ...\n  }\n<\/code><\/pre>\n",
+        "question_id": 16449153,
+        "tags": [
+            "c#",
+            "java",
+            "web-services",
+            "jakarta-ee",
+            "xml-serialization"
+        ],
+        "score": 2,
+        "accepted_answer_id": 16449196,
+        "is_answered": true,
+        "view_count": 235,
+        "last_edit_date": 1368052541
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+            "account_id": 11683,
+            "user_type": "registered",
+            "user_id": 22656,
+            "link": "https://stackoverflow.com/users/22656/jon-skeet",
+            "reputation": 1521070,
+            "display_name": "Jon Skeet",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1368043257,
+        "creation_date": 1368043257,
+        "body": "<p>That's a UTF-8 <a href=\"http://en.wikipedia.org/wiki/Byte_order_mark\" rel=\"nofollow\">byte order mark<\/a>. It's entirely valid for it to be there.<\/p>\n\n<p>Frankly the Java code <em>should<\/em> cope with it, but the simplest way to fix it is probably to specify that you don't want it in the encoding:<\/p>\n\n<pre><code>XmlTextWriter requestWriter = new XmlTextWriter(myRequestStream,\n    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));\n<\/code><\/pre>\n\n<p>(If you're not using C# 4 or 5, just omit the <code>encoderShouldEmitUTF8Identifier:<\/code> part; that's a named argument, which makes it clearer what the argument value is there for.)<\/p>\n",
+        "answer_id": 16449196,
+        "question_id": 16449153
+    }],
+    "answer_comments": {"16449196": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/084480f61682322f1dc4938e2b6ad36c?s=256&d=identicon&r=PG",
+            "account_id": 2742398,
+            "user_type": "registered",
+            "user_id": 2363637,
+            "link": "https://stackoverflow.com/users/2363637/boydtwa",
+            "reputation": 23,
+            "display_name": "boydtwa"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 16449196,
+        "edited": false,
+        "creation_date": 1368045075,
+        "comment_id": 23595677
+    }]}
+}

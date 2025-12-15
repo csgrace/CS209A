@@ -1,0 +1,247 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+            "account_id": 244367,
+            "user_type": "registered",
+            "user_id": 517123,
+            "link": "https://stackoverflow.com/users/517123/masterchris-99",
+            "reputation": 2723,
+            "display_name": "masterchris_99",
+            "accept_rate": 59
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18119825/objectify-create-cost-effective-entities-best-practise-for-entity-design",
+        "last_activity_date": 1376036879,
+        "creation_date": 1375945346,
+        "answer_count": 1,
+        "title": "Objectify - create cost-effective entities. best practise for entity design",
+        "body": "<p>is there a tutorial for a cost-effective entity design?<\/p>\n\n<p>If I make a small sample and say I want to store <strong>users<\/strong> and <strong>groups<\/strong>. These groups have a <strong>List of users<\/strong>. If any user wants to join this group I have to check is this group existing and the user isn't part of the group. <\/p>\n\n<p><em><strong>My question is not how to do this. The question is for a good entity-design or a good objectify-using.<\/em><\/strong> <\/p>\n\n<p>Here is some shortened sample code how I would do this:<\/p>\n\n<p><strong>User.java<\/strong><\/p>\n\n<pre><code>@Entity\n@Cache\n@Embed\npublic class User {\n    @Id Long id;\n    @Index String name;\n    String passwordHash;\n}\n<\/code><\/pre>\n\n<p><strong>Group.java<\/strong><\/p>\n\n<pre><code>@Entity\n@Cache\npublic class Group {\n    @Id Long id;\n    @Index Long groupAdministratorUserId;\n    @Index String name;\n    List&lt;User&gt; users = new ArrayList&lt;User&gt;();\n    @Index Boolean isPublic;\n}\n<\/code><\/pre>\n\n<p>using<\/p>\n\n<pre><code>if (!app.authenticate(getRequest(), getResponse())) \n{\n    // Not authenticated\n    setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);\n}\nelse\n{\n    Group newGroup = ofy().load().type(Group.class).id(Long.parseLong(id)).now(); // is it correct that the embedded data is already loaded?\n    // following check and insert is only for illustration!\n    newGroup.getUsers().contains(connectedUser);\n    newGroup.getUsers().add(connectedUser);\n    ofy().save().entity(newGroup).now();\n}\n<\/code><\/pre>\n\n<p><strong>My \"overhead\" (authentication)<\/strong><\/p>\n\n<pre><code>public class MyVerifier extends LocalVerifier {\n    private User fetched;\n\n    public User getFetched() {\n        return fetched;\n    }\n\n    @Override\n    public char[] getLocalSecret(String identifier) {\n        // this is behind search... and another list()\n        // User fetched = ofy().load().type(User.class).filter(\"name\", userName).first().now();\n        fetched = User.searchByExactName(identifier);\n        if (fetched != null)\n        {\n            return fetched.getPasswordHash().toCharArray();\n        }\n\n        return null;\n    }\n}\n<\/code><\/pre>\n\n<p>P.S. I know the page from google: <a href=\"https://code.google.com/p/objectify-appengine/wiki/BestPractices\" rel=\"nofollow\">https://code.google.com/p/objectify-appengine/wiki/BestPractices<\/a><\/p>\n\n<p>But that is not what I'm searching for<\/p>\n",
+        "question_id": 18119825,
+        "tags": [
+            "java",
+            "google-app-engine",
+            "entity",
+            "objectify"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 606,
+        "last_edit_date": 1376036879
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8ab5c87b798ddabafd04c36cb11fd4aa?s=256&d=identicon&r=PG",
+            "account_id": 1970560,
+            "user_type": "registered",
+            "user_id": 1769636,
+            "link": "https://stackoverflow.com/users/1769636/ingo",
+            "reputation": 1582,
+            "display_name": "Ingo",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1375983135,
+        "creation_date": 1375983135,
+        "body": "<p>I would store the list of groups IDs the <code>User<\/code> entity. No need to use <code>@Embed<\/code>. What the best solution is really depends on what the most common operations will be in your application. Based on what you said I would recommend the following:<\/p>\n\n<pre><code>@Entity\n@Cache\npublic class User {\n    @Id long id;\n    String name;\n    String passwordHash;\n    List&lt;Long&gt; groups;\n    // constructor left out for brevity.\n}\n\n@Entity\n@Cache\npublic class Group {\n    @Id long id;\n    long adminId;\n    String name;\n    boolean isPublic;\n    // constructor left out for brevity.\n}\n\nUser user1 = new User(userName1, passwordHash1);\nUser user2 = new User(userName2, passwordHash2);\n\nKey&lt;User&gt; user1Key = ofy().save().entity(user1).now(); // Create two users.\nKey&lt;User&gt; user2Key = ofy().save().entity(user2).now(); // The don't have any groups yet.\n\nlong adminId = user1Key.getId();\nGroup group = new Group(name, adminId, isPublic)\nKey&lt;Group&gt; groupKey = ofy().save().entity(group).now(); // Create a group\n\nuser2.addToGroup(groupKey.getId()); // This adds the group ID to the User.groups list.\nofy().save().entity(user2).now(); // Add user2 to group.\n<\/code><\/pre>\n\n<p>To save costs (specifically on small datastore operations during updates) make sure to create as few indexes as possible. Start with few <code>@Index<\/code>es and add them as necessary.<\/p>\n",
+        "answer_id": 18132381,
+        "question_id": 18119825
+    }],
+    "answer_comments": {"18132381": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "edited": false,
+            "creation_date": 1376067068,
+            "comment_id": 26586915
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ab5c87b798ddabafd04c36cb11fd4aa?s=256&d=identicon&r=PG",
+                "account_id": 1970560,
+                "user_type": "registered",
+                "user_id": 1769636,
+                "link": "https://stackoverflow.com/users/1769636/ingo",
+                "reputation": 1582,
+                "display_name": "Ingo",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "edited": false,
+            "creation_date": 1376052603,
+            "comment_id": 26578360
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "edited": false,
+            "creation_date": 1376038726,
+            "comment_id": 26572169
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "edited": false,
+            "creation_date": 1376037026,
+            "comment_id": 26571369
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ab5c87b798ddabafd04c36cb11fd4aa?s=256&d=identicon&r=PG",
+                "account_id": 1970560,
+                "user_type": "registered",
+                "user_id": 1769636,
+                "link": "https://stackoverflow.com/users/1769636/ingo",
+                "reputation": 1582,
+                "display_name": "Ingo",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "edited": false,
+            "creation_date": 1375995062,
+            "comment_id": 26559722
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "edited": false,
+            "creation_date": 1375994084,
+            "comment_id": 26559182
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "edited": false,
+            "creation_date": 1375992486,
+            "comment_id": 26558309
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8ab5c87b798ddabafd04c36cb11fd4aa?s=256&d=identicon&r=PG",
+                "account_id": 1970560,
+                "user_type": "registered",
+                "user_id": 1769636,
+                "link": "https://stackoverflow.com/users/1769636/ingo",
+                "reputation": 1582,
+                "display_name": "Ingo",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "edited": false,
+            "creation_date": 1375992194,
+            "comment_id": 26558149
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1645bcef01f949f5384466350a2122d8?s=256&d=identicon&r=PG",
+                "account_id": 244367,
+                "user_type": "registered",
+                "user_id": 517123,
+                "link": "https://stackoverflow.com/users/517123/masterchris-99",
+                "reputation": 2723,
+                "display_name": "masterchris_99",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18132381,
+            "edited": false,
+            "creation_date": 1375991037,
+            "comment_id": 26557510
+        }
+    ]}
+}

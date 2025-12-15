@@ -1,0 +1,149 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/412f7a08e1f7952c2da13f1d862e31c2?s=256&d=identicon&r=PG",
+            "account_id": 587373,
+            "user_type": "unregistered",
+            "user_id": 264137,
+            "link": "https://stackoverflow.com/users/264137/bhardwaj",
+            "reputation": 101,
+            "display_name": "bhardwaj"
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2183245/internationalization-in-a-website",
+        "last_activity_date": 1370286766,
+        "creation_date": 1265105927,
+        "answer_count": 2,
+        "title": "Internationalization in a website",
+        "body": "<p>I m using ResourceBundle method getBundle(Propertyfilename,Local.languagename) class which returns an object of ResourceBundle of the local <\/p>\n\n<p>rb = ResourceBundle.get Bundle(\"Locale Strings\", Locale.ARABIC);-Not Supported<\/p>\n\n<p>How can i use this to support arabic,band english.<\/p>\n",
+        "question_id": 2183245,
+        "tags": [
+            "java",
+            "internationalization"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 2315,
+        "last_edit_date": 1265107477
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/31090e3d12227ea3361a13262030dc56?s=256&d=identicon&r=PG",
+                "account_id": 2172789,
+                "user_type": "registered",
+                "user_id": 1924299,
+                "link": "https://stackoverflow.com/users/1924299/eng-samer-t",
+                "reputation": 6566,
+                "display_name": "Eng. Samer T",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 2183245,
+            "edited": false,
+            "creation_date": 1421515734,
+            "comment_id": 44393316
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23de335ea2208b179ece18bec0b2597f?s=256&d=identicon&r=PG",
+                "account_id": 91502,
+                "user_type": "registered",
+                "user_id": 251173,
+                "link": "https://stackoverflow.com/users/251173/buhake-sindi",
+                "reputation": 89455,
+                "display_name": "Buhake Sindi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2183245,
+            "edited": false,
+            "creation_date": 1265106654,
+            "comment_id": 2130717
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/89927e2f4bde24991649b353a37678b9?s=256&d=identicon&r=PG",
+                "account_id": 52822,
+                "user_type": "registered",
+                "user_id": 157882,
+                "link": "https://stackoverflow.com/users/157882/balusc",
+                "reputation": 1114580,
+                "display_name": "BalusC",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1268782873,
+            "creation_date": 1268782276,
+            "body": "<p>First, the <a href=\"http://java.sun.com/javase/6/docs/api/java/util/Locale.html\" rel=\"nofollow noreferrer\"><code>java.util.Locale<\/code><\/a> indeed doesn't have a <code>Locale.ARABIC<\/code> constant. But that shouldn't stop you from defining it yourself using the <code>Locale<\/code> constructor taking the language code:<\/p>\n\n<pre><code>public static final Locale ARABIC = new Locale(\"ar\");\n<\/code><\/pre>\n\n<p>Second, <a href=\"http://java.sun.com/javase/6/docs/api/java/util/Properties.html\" rel=\"nofollow noreferrer\">by default<\/a> the properties files are under the <code>ResourceBundle<\/code> hoods read as an <code>InputStream<\/code> with the <code>ISO-8859-1<\/code> encoding. So you'll really need to have two different properties files, one in <code>UTF-8<\/code> encoding which you use to maintain the values (e.g. <code>text_ar.properties.utf8<\/code>) and other in <code>ISO-8859-1<\/code> encoding (e.g. <code>text_ar.properties<\/code>) which you just use to provide to the Java application. You can use the <code>native2ascii<\/code> tool to convert from <code>UTF-8<\/code> file to <code>ISO-8859-1<\/code> file as follows:<\/p>\n\n<pre><code>c:\\path\\to\\jdk\\bin\\native2ascii.exe -encoding UTF-8 text_ar.properties.utf8 text_ar.properties\n<\/code><\/pre>\n\n<p>This will convert non <code>ISO-8859-1<\/code> characters to Unicode codepoints. E.g. <code>القيمة<\/code> would become <code>\\u0627\\u0644\\u0642\\u064a\\u0645\\u0629<\/code> (which thus makes it unmaintainable, hence the recommendation to keep the original for editing).<\/p>\n\n<p>Or, if you're already on Java 6, then you can make use of <a href=\"http://java.sun.com/javase/6/docs/api/java/util/ResourceBundle.Control.html#newBundle%28java.lang.String,%20java.util.Locale,%20java.lang.String,%20java.lang.ClassLoader,%20boolean%29\" rel=\"nofollow noreferrer\"><code>ResourceBundle.Control#newBundle()<\/code><\/a> and the <a href=\"http://java.sun.com/javase/6/docs/api/java/util/PropertyResourceBundle.html#PropertyResourceBundle%28java.io.Reader%29\" rel=\"nofollow noreferrer\"><code>PropertyResourceBundle<\/code> constructor taking an <code>Reader<\/code><\/a> to read the properties files using <code>UTF-8<\/code> by default.<\/p>\n\n<p>Here's a kickoff example assuming that there's a \"plain\" <code>UTF-8<\/code> encoded <code>text_ar.properties<\/code> file in the classpath with the following content:<\/p>\n\n<pre><code>key=القيمة\n<\/code><\/pre>\n\n<hr>\n\n<pre><code>package com.stackoverflow.q2183245;\n\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.InputStreamReader;\nimport java.net.URL;\nimport java.net.URLConnection;\nimport java.util.Locale;\nimport java.util.PropertyResourceBundle;\nimport java.util.ResourceBundle;\nimport java.util.ResourceBundle.Control;\n\npublic class Test {\n\n    private static final Locale ARABIC = new Locale(\"ar\");\n    private static final Control UTF8CONTROL = new UTF8Control();\n\n    public static void main(String args[]) throws Exception {\n        ResourceBundle bundle = ResourceBundle.getBundle(\"text\", ARABIC, UTF8CONTROL);\n        System.out.println(bundle.getString(\"key\")); // Prints القيمة\n    }\n\n}\n\nclass UTF8Control extends Control {\n    public ResourceBundle newBundle\n        (String baseName, Locale locale, String format, ClassLoader loader, boolean reload)\n            throws IllegalAccessException, InstantiationException, IOException\n    {\n        String bundleName = toBundleName(baseName, locale);\n        String resourceName = toResourceName(bundleName, \"properties\");\n        ResourceBundle bundle = null;\n        InputStream stream = null;\n        if (reload) {\n            URL url = loader.getResource(resourceName);\n            if (url != null) {\n                URLConnection connection = url.openConnection();\n                if (connection != null) {\n                    connection.setUseCaches(false);\n                    stream = connection.getInputStream();\n                }\n            }\n        } else {\n            stream = loader.getResourceAsStream(resourceName);\n        }\n        if (stream != null) {\n            try {\n                // This line is changed to make it to read properties files as UTF-8.\n                bundle = new PropertyResourceBundle(new InputStreamReader(stream, \"UTF-8\"));\n            } finally {\n                stream.close();\n            }\n        }\n        return bundle;\n    }\n}\n<\/code><\/pre>\n\n<p><em>Note: the <code>newBundle()<\/code> method is copypasted from original source and slightly changed to make the code example less verbose, if you want you can revert it to original and just change the line with <code>PropertyResourceBundle<\/code> construct to let it take an <code>UTF-8<\/code> encoded <code>Reader<\/code>.<\/em><\/p>\n",
+            "answer_id": 2458938,
+            "question_id": 2183245,
+            "last_edit_date": 1268782873
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23de335ea2208b179ece18bec0b2597f?s=256&d=identicon&r=PG",
+                "account_id": 91502,
+                "user_type": "registered",
+                "user_id": 251173,
+                "link": "https://stackoverflow.com/users/251173/buhake-sindi",
+                "reputation": 89455,
+                "display_name": "Buhake Sindi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1265108753,
+            "creation_date": 1265108417,
+            "body": "<p>1) Each properties file must be renamed by <em><\/em>.properties where language_code is 2 character lower case language code and country_code is 2 letters UPPERCASE letter.<\/p>\n\n<p>E.g.  <\/p>\n\n<pre><code>MyResource_fr_FR.properties \n<\/code><\/pre>\n\n<p>specifies  MyResource (fr for French, FR for FRANCE).<\/p>\n\n<p>To support Arabic in your properties file, you have to type escape sequences for the language.<\/p>\n\n<p>Arabic uses the ISO 8859-6 CharSet so (e.g.) <\/p>\n\n<p>if you have in your properties file:<\/p>\n\n<pre><code>char_ren=\\u00631, 8859_6_CHARSET\n<\/code><\/pre>\n\n<p>char_ren will represent the Arabic CHARACTER RHEN.<\/p>\n\n<p>PS. Naming of your properties file will be<\/p>\n\n<pre><code>MyResource_ar.properties\n<\/code><\/pre>\n\n<p>The \\u00631 is the hexadecimal value of the RHEN character.<\/p>\n",
+            "answer_id": 2183434,
+            "question_id": 2183245,
+            "last_edit_date": 1265108753
+        }
+    ],
+    "answer_comments": {"2183434": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/45bebec8b1581ef6b27dc6783ad3bb96?s=256&d=identicon&r=PG",
+                "account_id": 50470,
+                "user_type": "registered",
+                "user_id": 150566,
+                "link": "https://stackoverflow.com/users/150566/mike",
+                "reputation": 2444,
+                "display_name": "Mike",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "post_id": 2183434,
+            "edited": false,
+            "creation_date": 1265123122,
+            "comment_id": 2132473
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23de335ea2208b179ece18bec0b2597f?s=256&d=identicon&r=PG",
+                "account_id": 91502,
+                "user_type": "registered",
+                "user_id": 251173,
+                "link": "https://stackoverflow.com/users/251173/buhake-sindi",
+                "reputation": 89455,
+                "display_name": "Buhake Sindi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2183434,
+            "edited": false,
+            "creation_date": 1265108573,
+            "comment_id": 2130865
+        }
+    ]}
+}

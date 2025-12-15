@@ -1,0 +1,107 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/5asqT.jpg?s=256",
+            "account_id": 2887780,
+            "user_type": "registered",
+            "user_id": 2477215,
+            "link": "https://stackoverflow.com/users/2477215/ashish",
+            "reputation": 1962,
+            "display_name": "Ashish",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/48463515/aes-encryption-decryption-takes-longer-time",
+        "last_activity_date": 1530003660,
+        "creation_date": 1516977407,
+        "answer_count": 1,
+        "title": "AES Encryption Decryption takes longer time",
+        "body": "<p>I am using below code for encryption &amp; decryption in Spring boot project with conveter annotation on attributes which I want to encrypt &amp; decrypt<\/p>\n\n<pre><code>import org.apache.commons.codec.binary.Base64;\n\nimport javax.crypto.*;\nimport javax.crypto.spec.IvParameterSpec;\nimport javax.crypto.spec.PBEKeySpec;\nimport javax.crypto.spec.SecretKeySpec;\nimport javax.persistence.AttributeConverter;\nimport javax.persistence.Converter;\nimport java.io.UnsupportedEncodingException;\nimport java.nio.ByteBuffer;\nimport java.security.*;\nimport java.security.spec.InvalidKeySpecException;\nimport java.security.spec.InvalidParameterSpecException;\n\n@Converter\npublic class CryptoConverter implements AttributeConverter&lt;String, String&gt; {\n\n    @Override\n    public String convertToDatabaseColumn(String attribute) {\n        if(attribute == null){\n            return null;\n        }\n        try {\n        byte[] ivBytes;\n        //String password=\"Hello\";\n        String password = EncryptionUtil.key.get();\n        SecureRandom random = new SecureRandom();\n        byte bytes[] = new byte[20];\n        random.nextBytes(bytes);\n        byte[] saltBytes = bytes;\n// Derive the key\n        SecretKeyFactory factory = null;\n\n            factory = SecretKeyFactory.getInstance(\"PBKDF2WithHmacSHA1\");\n\n        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(),saltBytes,65556,256);\n        SecretKey secretKey = factory.generateSecret(spec);\n        SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), \"AES\");\n\n            //encrypting the word\n            Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");\n            cipher.init(Cipher.ENCRYPT_MODE, secret);\n            AlgorithmParameters params = cipher.getParameters();\n            ivBytes =   params.getParameterSpec(IvParameterSpec.class).getIV();\n            byte[] encryptedTextBytes =  cipher.doFinal(attribute.getBytes(\"UTF-8\"));\n            //prepend salt and vi\n            byte[] buffer = new byte[saltBytes.length + ivBytes.length + encryptedTextBytes.length];\n            System.arraycopy(saltBytes, 0, buffer, 0, saltBytes.length);\n            System.arraycopy(ivBytes, 0, buffer, saltBytes.length, ivBytes.length);\n            System.arraycopy(encryptedTextBytes, 0, buffer, saltBytes.length + ivBytes.length, encryptedTextBytes.length);\n            return new Base64().encodeToString(buffer);\n\n        } catch (NoSuchAlgorithmException e) {\n            e.printStackTrace();\n        } catch (InvalidKeySpecException e) {\n            e.printStackTrace();\n        } catch (InvalidKeyException e) {\n            e.printStackTrace();\n        } catch (NoSuchPaddingException e) {\n            e.printStackTrace();\n        } catch (BadPaddingException e) {\n            e.printStackTrace();\n        } catch (UnsupportedEncodingException e) {\n            e.printStackTrace();\n        } catch (InvalidParameterSpecException e) {\n            e.printStackTrace();\n        } catch (IllegalBlockSizeException e) {\n            e.printStackTrace();\n        }\n\n        return null;\n    }\n\n    @Override\n    public String convertToEntityAttribute(String dbData) {\n\n        if(dbData == null){\n            return null;\n        }\n\n        try {\n            String password = EncryptionUtil.key.get();\n        Cipher cipher = Cipher.getInstance(\"AES/CBC/PKCS5Padding\");\n        //strip off the salt and iv\n        ByteBuffer buffer = ByteBuffer.wrap(new Base64().decode(dbData));\n        byte[] saltBytes = new byte[20];\n        buffer.get(saltBytes, 0, saltBytes.length);\n        byte[] ivBytes1 = new byte[cipher.getBlockSize()];\n        buffer.get(ivBytes1, 0, ivBytes1.length);\n        byte[] encryptedTextBytes = new byte[buffer.capacity() - saltBytes.length - ivBytes1.length];\n\n        buffer.get(encryptedTextBytes);\n        // Deriving the key\n        SecretKeyFactory factory = SecretKeyFactory.getInstance(\"PBKDF2WithHmacSHA1\");\n        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), saltBytes, 65556, 256);\n        SecretKey secretKey = factory.generateSecret(spec);\n        SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), \"AES\");\n        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(ivBytes1));\n        byte[] decryptedTextBytes = null;\n\n            decryptedTextBytes = cipher.doFinal(encryptedTextBytes);\n\n\n        return new String(decryptedTextBytes);\n\n        } catch (IllegalBlockSizeException e) {\n            e.printStackTrace();\n        } catch (BadPaddingException e) {\n            e.printStackTrace();\n        } catch (NoSuchAlgorithmException e) {\n            e.printStackTrace();\n        } catch (InvalidKeyException e) {\n            e.printStackTrace();\n        } catch (InvalidAlgorithmParameterException e) {\n            e.printStackTrace();\n        } catch (NoSuchPaddingException e) {\n            e.printStackTrace();\n        } catch (InvalidKeySpecException e) {\n            e.printStackTrace();\n        }\n        return null;\n    }\n}\n<\/code><\/pre>\n\n<p>The issue is this code takes a lot of time to encrypt &amp; decrypt.<\/p>\n\n<p>With this I am getting a serious performance hit.<\/p>\n",
+        "question_id": 48463515,
+        "tags": [
+            "java",
+            "encryption",
+            "cryptography"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1423,
+        "last_edit_date": 1530003660
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/vJbKg.jpg?s=256",
+                "account_id": 288696,
+                "user_type": "registered",
+                "user_id": 589259,
+                "link": "https://stackoverflow.com/users/589259/maarten-bodewes",
+                "reputation": 94628,
+                "display_name": "Maarten Bodewes",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463515,
+            "edited": false,
+            "creation_date": 1517005909,
+            "comment_id": 83934863
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VgOZI.png?s=256",
+                "account_id": 85671,
+                "user_type": "registered",
+                "user_id": 238704,
+                "link": "https://stackoverflow.com/users/238704/president-james-k-polk",
+                "reputation": 42272,
+                "display_name": "President James K. Polk"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 48463515,
+            "edited": false,
+            "creation_date": 1516993844,
+            "comment_id": 83929549
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f8c60eb5f46783d753e86238a9c18cd9?s=256&d=identicon&r=PG",
+                "account_id": 265649,
+                "user_type": "registered",
+                "user_id": 552759,
+                "link": "https://stackoverflow.com/users/552759/jtahlborn",
+                "reputation": 53782,
+                "display_name": "jtahlborn"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463515,
+            "edited": false,
+            "creation_date": 1516977818,
+            "comment_id": 83920216
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/vJbKg.jpg?s=256",
+            "account_id": 288696,
+            "user_type": "registered",
+            "user_id": 589259,
+            "link": "https://stackoverflow.com/users/589259/maarten-bodewes",
+            "reputation": 94628,
+            "display_name": "Maarten Bodewes",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1517006140,
+        "creation_date": 1517005077,
+        "body": "<p>If you want to encrypt faster than simply use an actual randomly generated key instead of a password. You can store that in a <code>KeyStore<\/code> instance that you protect with a password if you like.<\/p>\n\n<p>You could also simply move the PBKDF2 key derivation out of the encryption method itself and store the resulting <code>SecretKey<\/code> instance in a field <em>if and only if<\/em> the password doesn't change in between calls. That way you only have to derive the key once.<\/p>\n\n<p>PBKDF2 currently uses 65556 iterations <em>each time<\/em> you want to encrypt/decrypt anything. And PBKDF2 consists of a single hash - in this case SHA-1 - taking 64 bytes at a time. So even before you start encrypting you've hashed at least 65556 (or 64Ki + 20 for some reason) times 64 bytes. That's 4 MiB of hashing you're doing before starting to encrypt. Compared to that you won't even notice the AES encryption.<\/p>\n",
+        "answer_id": 48470375,
+        "question_id": 48463515,
+        "last_edit_date": 1517006140
+    }],
+    "answer_comments": {}
+}

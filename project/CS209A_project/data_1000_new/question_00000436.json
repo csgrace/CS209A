@@ -1,0 +1,56 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100001141388575/picture?type=large",
+            "account_id": 4531256,
+            "user_type": "registered",
+            "user_id": 3681671,
+            "link": "https://stackoverflow.com/users/3681671/turoni",
+            "reputation": 1435,
+            "display_name": "turoni",
+            "accept_rate": 96
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37433916/deserialize-json-datatype-file",
+        "last_activity_date": 1464605651,
+        "creation_date": 1464170850,
+        "answer_count": 1,
+        "title": "Deserialize Json Datatype File",
+        "body": "<p>I'm trying to deserialize a Json string to a custom class.\nMy json is:<\/p>\n\n<pre><code>externDossierNr:\"foo10\"\ninternDossierNr:\"2016010\"\nrapport:File\ntestarray:Array[3]\ntestword:42\n__proto__:Object \n<\/code><\/pre>\n\n<p>externDossierNr, internDossierNr and rapport are data I get from my form.\nI can deserialize externDossierNr and internDossierNr.\nWhen I try to deserialize rapport it gives {}.\nI've then added testarray and testword in javascript and I can read those as well.<\/p>\n\n<p>I think the problem lies in the JsonType File.\n<a href=\"http://www.tutorialspoint.com/json/json_data_types.htm\" rel=\"nofollow\">Here<\/a> I find different Json data types but File is not one of them.<\/p>\n\n<p>I'm sending my file trough RestAngular<\/p>\n\n<pre><code>public save(item: any): any  {\n\n\n    item[\"testword\"] = 42;\n    item[\"testarray\"] = [2,5,9];\n\n    console.log(\"item to save is \", item);\n    console.log(\"rapport is \", item[\"rapport\"]);\n\n    if (item.id === undefined) {\n        this.restService.save(this.metadata.apiDomain, item).then((addedItem: any) =&gt; {\n            toastr.success(`${addedItem.naam} successfully created.`, `Overzicht Dossiers Created`);\n        });\n    } else {\n        this.restService.update(this.metadata.apiDomain, item).then((updatedItem: any) =&gt; {\n            toastr.success(`${updatedItem.naam} successfully updated.`, `Overzicht Dossiers Updated`);\n        });\n    }\n}\n<\/code><\/pre>\n\n<p>For my deserialization I used <a href=\"http://www.tutorialspoint.com/json/json_data_types.htm\" rel=\"nofollow\">this<\/a> and ([this][2] from sghill not enough rep) article<\/p>\n\n<p>Producing the following code\n    package be.ugent.lca.data.entities.deserializers;<\/p>\n\n<pre><code>import be.ugent.lca.data.entities.Dossier;\nimport com.fasterxml.jackson.core.JsonParser;\nimport com.fasterxml.jackson.core.JsonToken;\nimport com.fasterxml.jackson.core.ObjectCodec;\nimport com.fasterxml.jackson.databind.DeserializationContext;\nimport com.fasterxml.jackson.databind.JsonDeserializer;\nimport com.fasterxml.jackson.databind.JsonNode;\nimport java.io.IOException;\n\npublic class DossierDeserializer extends JsonDeserializer {\n    @Override\n    public Dossier deserialize(JsonParser jsonParser,\n            DeserializationContext deserializationContext) throws IOException {\n        ObjectCodec oc = jsonParser.getCodec();\n        JsonNode root = oc.readTree(jsonParser);\n        Dossier dossier = new Dossier();\n\n        dossier.setExternDossierNr(root.get(\"externDossierNr\").asText());\n        dossier.setInternDossierNr(root.get(\"internDossierNr\").asText());\n\n        System.out.println(\"Intern Dossier nr is \" + root.get(\"internDossierNr\"));\n        System.out.println(\"Test word \" +  root.get(\"testword\"));\n        System.out.println(\"Test array \" + root.get(\"testarray\"));\n        JsonNode node = root.get(\"rapport\");\n        if(node == null){\n            System.out.println(\"Rapport is a null pointer.\");\n        }else{\n            System.out.println(\"Rapport is \" + node + \" with size \" + node.size());\n        }\n        return dossier;\n    }\n}\n<\/code><\/pre>\n\n<p>Is there somewhere I can find more info on the File Json data type.\nHow can I send it so I can read it and deserialize it?<\/p>\n",
+        "question_id": 37433916,
+        "tags": [
+            "java",
+            "angularjs",
+            "json",
+            "deserialization",
+            "restangular"
+        ],
+        "score": 0,
+        "accepted_answer_id": 37457535,
+        "is_answered": true,
+        "view_count": 79
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100001141388575/picture?type=large",
+            "account_id": 4531256,
+            "user_type": "registered",
+            "user_id": 3681671,
+            "link": "https://stackoverflow.com/users/3681671/turoni",
+            "reputation": 1435,
+            "display_name": "turoni",
+            "accept_rate": 96
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1464605651,
+        "creation_date": 1464256851,
+        "body": "<p>My assumption that was wrong that I was already printing the Json.\nI was just posting the javascript object.<\/p>\n\n<p>As for not being able to send it is because altough I have multipart/formdata in my html form upon sending it trough restangular it becomes application/json.<\/p>\n\n<p>On <a href=\"https://github.com/mgonto/restangular/issues/420\" rel=\"nofollow\">this<\/a>  restangular issue I've found how to package it in Formdata.<\/p>\n",
+        "answer_id": 37457535,
+        "question_id": 37433916,
+        "last_edit_date": 1464605651
+    }],
+    "answer_comments": {}
+}

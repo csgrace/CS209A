@@ -1,0 +1,218 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/0lPeX.jpg?s=256",
+            "account_id": 32915,
+            "user_type": "registered",
+            "user_id": 1038182,
+            "link": "https://stackoverflow.com/users/1038182/ori-popowski",
+            "reputation": 10722,
+            "display_name": "Ori Popowski",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8901243/how-a-threaded-server-continues-to-listen-on-the-post-for-more-incoming-connecti",
+        "last_activity_date": 1525056109,
+        "creation_date": 1326831910,
+        "answer_count": 5,
+        "title": "How a threaded server continues to listen on the post for more incoming connections?",
+        "body": "<p>I am going through Sun's Java tutorial. I am in the lesson about sockets. There is the following code for a simple threaded server:<\/p>\n\n<pre><code>import java.net.*;\nimport java.io.*;\n\npublic class KKMultiServer {\n    public static void main(String[] args) throws IOException {\n        ServerSocket serverSocket = null;\n        boolean listening = true;\n\n        try {\n            serverSocket = new ServerSocket(4444);\n        } catch (IOException e) {\n            System.err.println(\"Could not listen on port: 4444.\");\n            System.exit(-1);\n        }\n\n        while (listening)\n        new KKMultiServerThread(serverSocket.accept()).start();\n\n        serverSocket.close();\n    }   \n}\n<\/code><\/pre>\n\n<p>The server is said to \"keep listening for more incoming connections\". I just don't understand how it's possible; the line <code>serverSocket.accept()<\/code> constructs a new (client) <code>Socket<\/code> object which is, according to the tutorial \"bound to the <strong>same<\/strong> local port and has its...\". Well, how is it possible that the server is communicating with the client and listening to more incoming connections on the same port? As far as I know, if a port is used for some connection it is blocked and cannot be used for more things.<\/p>\n\n<p>So what am I getting wrong here?<\/p>\n",
+        "question_id": 8901243,
+        "tags": [
+            "java",
+            "sockets"
+        ],
+        "score": 4,
+        "accepted_answer_id": 8901431,
+        "is_answered": true,
+        "view_count": 1853
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/45bc0fdfbca5c9d55edb50834280b97f?s=256&d=identicon&r=PG",
+            "account_id": 297024,
+            "user_type": "registered",
+            "user_id": 602323,
+            "link": "https://stackoverflow.com/users/602323/kevin",
+            "reputation": 25319,
+            "display_name": "Kevin",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 8901243,
+        "edited": false,
+        "creation_date": 1326832409,
+        "comment_id": 11132200
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/95057d4c05e1cd82f30bf69b4302a7e6?s=256&d=identicon&r=PG",
+                "account_id": 21755,
+                "user_type": "registered",
+                "user_id": 53139,
+                "link": "https://stackoverflow.com/users/53139/matt",
+                "reputation": 10574,
+                "display_name": "Matt",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1340242803,
+            "creation_date": 1326832725,
+            "body": "<p>Well, a socket is not one-to-one based on a port, it is unique on a tuple of (address, port). A connection - the pair of the local and remote sockets involved in the communication - is used to demux incoming data from a port to the correct socket, allowing multiple sockets on one port. <a href=\"http://en.wikipedia.org/wiki/Network_socket#Socket_pairs\" rel=\"nofollow\">See Wikipedia<\/a>. In other words, the relationship of sockets to ports are N-to-1<\/p>\n",
+            "answer_id": 8901431,
+            "question_id": 8901243,
+            "last_edit_date": 1340242803
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6e2168c4647a4f096a14c254bd3d3f68?s=256&d=identicon&r=PG",
+                "account_id": 378721,
+                "user_type": "registered",
+                "user_id": 731620,
+                "link": "https://stackoverflow.com/users/731620/ratchet-freak",
+                "reputation": 48366,
+                "display_name": "ratchet freak",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1326832705,
+            "creation_date": 1326832705,
+            "body": "<p>getting multiple connections on the same port is entirely possible as each TCP connection is a (local host, local port, remote host, remote port) tuple as long as at least 1 is different the connections are distinct and won't interfere (besides bandwidth drops)<\/p>\n\n<p>clients attempting to connect to a server generally get a port assigned from the OS that is not used currently <\/p>\n",
+            "answer_id": 8901426,
+            "question_id": 8901243
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dcd9836a94720caadd7dfc82d1df627d?s=256&d=identicon&r=PG",
+                "account_id": 10525,
+                "user_type": "registered",
+                "user_id": 1715673,
+                "link": "https://stackoverflow.com/users/1715673/peter-wone",
+                "reputation": 19013,
+                "display_name": "Peter Wone",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1340242449,
+            "creation_date": 1340240118,
+            "body": "<p>Listening sockets work like a receptionist in on a business's phone switch. Everyone calls the switch number, and the receptionist responds to each incoming call on the switch line by having someone else handle the call on another line. Even though the receptionist can only take one call at a time, the switch line is tied up only very briefly because it is used only to <em>establish<\/em> a connection.<\/p>\n\n<blockquote>\n  <p>[...]TCP demultiplexes incoming segments using all four values that comprise the local and foreign addresses: destination IP address, destination port number, source IP address, and source port number. TCP cannot determine which process gets an incoming segment by looking at the destination port only. Also, the only one of the [various] endpoints at [a given port number] that will receive incoming connection requests is the one in the listen state. (p255, <em>TCP-IP Illustrated Volume 1<\/em>, W. Richard Stevens)<\/p>\n<\/blockquote>\n\n<p>The last sentence in the above quote is the key to understanding. <\/p>\n\n<p>Interestingly, a socket isn't really identified by the combination of IP address and port. This is unique only in context, where the context is either a particular connection or the listening state. Only one listener socket can bind to a particular IP/port combination.<\/p>\n",
+            "answer_id": 11130228,
+            "question_id": 8901243,
+            "last_edit_date": 1340242449
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d42a80b4c1210d697031449b8f86df38?s=256&d=identicon&r=PG",
+                "account_id": 1102504,
+                "user_type": "registered",
+                "user_id": 1094597,
+                "link": "https://stackoverflow.com/users/1094597/kosa",
+                "reputation": 66745,
+                "display_name": "kosa",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1525056109,
+            "creation_date": 1326832656,
+            "body": "<p>Based on this <a href=\"http://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html\" rel=\"nofollow noreferrer\">link<\/a><\/p>\n\n<p>The accept method waits until a client starts up and requests a connection on the host and port of this server (in this example, the server is running on the hypothetical machine taranis on port 4444). When a connection is requested and successfully established, the accept method returns a new Socket object which is bound to the same local port and has its remote address and remote port set to that of the client.The server can communicate with the client over this new Socket and continue to listen for client connection requests on the original ServerSocket This particular version of the program doesn't listen for more client connection requests. <\/p>\n\n<p>Here is SO discussion which may clear confusion about how single port handles multiple client calls <a href=\"https://stackoverflow.com/questions/152457/what-is-the-difference-between-a-port-and-a-socket\">Port and Socket SO discussion<\/a> .<\/p>\n\n<p>To put it in simple terms, most of the webservers listen on port 8080 and multiple clients will access same port to access your website.<\/p>\n",
+            "answer_id": 8901414,
+            "question_id": 8901243,
+            "last_edit_date": 1525056109
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54fe3741d2afaaf237b59b6b24268189?s=256&d=identicon&r=PG",
+                "account_id": 2264530,
+                "user_type": "registered",
+                "user_id": 1993632,
+                "link": "https://stackoverflow.com/users/1993632/benjamin",
+                "reputation": 41,
+                "display_name": "Benjamin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1373464913,
+            "creation_date": 1373464913,
+            "body": "<p>The short and sweet answer is that the port is blocked for OTHER programs and processes.  Only the program that opened the port can now listen on it.  BUT it can listen to many different clients on the same port.  <\/p>\n\n<p>When a client connects, it creates a unique socket.  A socket is comprised of the listening IP address and port (the one you opened)  AND the calling IP address and port.  Because the caller's IP address and port are always unique, each socket is unique and identifiable to your listener.  <\/p>\n\n<p>Even if I connected to your program twice from the same machine, my machine would select a new and random source port for each connection -- thus ensuring that we have a unique socket each time.<\/p>\n",
+            "answer_id": 17572701,
+            "question_id": 8901243
+        }
+    ],
+    "answer_comments": {"8901431": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dcd9836a94720caadd7dfc82d1df627d?s=256&d=identicon&r=PG",
+                "account_id": 10525,
+                "user_type": "registered",
+                "user_id": 1715673,
+                "link": "https://stackoverflow.com/users/1715673/peter-wone",
+                "reputation": 19013,
+                "display_name": "Peter Wone",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901431,
+            "edited": false,
+            "creation_date": 1340239712,
+            "comment_id": 14586704
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/95057d4c05e1cd82f30bf69b4302a7e6?s=256&d=identicon&r=PG",
+                "account_id": 21755,
+                "user_type": "registered",
+                "user_id": 53139,
+                "link": "https://stackoverflow.com/users/53139/matt",
+                "reputation": 10574,
+                "display_name": "Matt",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8901431,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/0lPeX.jpg?s=256",
+                "account_id": 32915,
+                "user_type": "registered",
+                "user_id": 1038182,
+                "link": "https://stackoverflow.com/users/1038182/ori-popowski",
+                "reputation": 10722,
+                "display_name": "Ori Popowski",
+                "accept_rate": 78
+            },
+            "edited": false,
+            "creation_date": 1326844143,
+            "comment_id": 11135423
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/0lPeX.jpg?s=256",
+                "account_id": 32915,
+                "user_type": "registered",
+                "user_id": 1038182,
+                "link": "https://stackoverflow.com/users/1038182/ori-popowski",
+                "reputation": 10722,
+                "display_name": "Ori Popowski",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901431,
+            "edited": false,
+            "creation_date": 1326834576,
+            "comment_id": 11132811
+        }
+    ]}
+}

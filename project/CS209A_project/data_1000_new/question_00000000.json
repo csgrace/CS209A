@@ -1,0 +1,213 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d278acfea88236adf0151a277647b007?s=256&d=identicon&r=PG",
+            "account_id": 5454087,
+            "user_type": "registered",
+            "user_id": 4349635,
+            "link": "https://stackoverflow.com/users/4349635/littlemahdy",
+            "reputation": 59,
+            "display_name": "LittleMahdy",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/64728598/getgeneratedkeys-returns-an-empty-resultset",
+        "last_activity_date": 1604950752,
+        "creation_date": 1604758621,
+        "answer_count": 4,
+        "title": "getGeneratedKeys() returns an Empty ResultSet",
+        "body": "<p>Hello there and thanks for reading.\nI'm trying to retrieve the ID of the newly inserted data, but I always get an empty ResultSet.<\/p>\n<pre><code> Connection con = main.getCon();\n String sqlCommand = &quot;Insert Into Relations(name,explanation) values(?,?)&quot;;\n PreparedStatement state = \n con.prepareStatement(sqlCommand,Statement.RETURN_GENERATED_KEYS);\n state.setString(1,name.getText());\n state.setString(2,explanation.getText());\n int affectedRows = state.executeUpdate();\n assert (affectedRows&gt;0);\n        \n ResultSet rs = state.getGeneratedKeys();\n assert rs.next();\n int instertedID= rs.getInt(&quot;ID&quot;);\n<\/code><\/pre>\n<p>Not sure what's wrong with it. Checked different samples online, but couldn't figure out what's my mistake.\nI also tried it with Statement, but no luck with that either.<br />\nPoint 1: the code runs smoothly and my data in inserted into the database.\nPoint 2: there are examples online for this very case, you can check it here:\n<a href=\"https://www.baeldung.com/jdbc-returning-generated-keys\" rel=\"nofollow noreferrer\">https://www.baeldung.com/jdbc-returning-generated-keys<\/a><\/p>\n<p>I just realized that my ResultSet wasn't empty, I had problem with using my debugger and that's why I thought it was empty.\nAs Mark Rotteveel mentioned in a comment, the problem was with &quot;assert&quot; statement.<\/p>\n",
+        "question_id": 64728598,
+        "tags": [
+            "java",
+            "jdbc",
+            "derby"
+        ],
+        "score": 2,
+        "accepted_answer_id": 64731303,
+        "is_answered": true,
+        "view_count": 1708,
+        "last_edit_date": 1604775432
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d873f397779db38cd510d9ee5416fd43?s=256&d=identicon&r=PG",
+                "account_id": 213468,
+                "user_type": "registered",
+                "user_id": 466862,
+                "link": "https://stackoverflow.com/users/466862/mark-rotteveel",
+                "reputation": 110280,
+                "display_name": "Mark Rotteveel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64728598,
+            "edited": false,
+            "creation_date": 1604775604,
+            "comment_id": 114452065
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d278acfea88236adf0151a277647b007?s=256&d=identicon&r=PG",
+                "account_id": 5454087,
+                "user_type": "registered",
+                "user_id": 4349635,
+                "link": "https://stackoverflow.com/users/4349635/littlemahdy",
+                "reputation": 59,
+                "display_name": "LittleMahdy",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64728598,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d873f397779db38cd510d9ee5416fd43?s=256&d=identicon&r=PG",
+                "account_id": 213468,
+                "user_type": "registered",
+                "user_id": 466862,
+                "link": "https://stackoverflow.com/users/466862/mark-rotteveel",
+                "reputation": 110280,
+                "display_name": "Mark Rotteveel"
+            },
+            "edited": false,
+            "creation_date": 1604770685,
+            "comment_id": 114450807
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d873f397779db38cd510d9ee5416fd43?s=256&d=identicon&r=PG",
+                "account_id": 213468,
+                "user_type": "registered",
+                "user_id": 466862,
+                "link": "https://stackoverflow.com/users/466862/mark-rotteveel",
+                "reputation": 110280,
+                "display_name": "Mark Rotteveel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "post_id": 64728598,
+            "edited": false,
+            "creation_date": 1604769643,
+            "comment_id": 114450545
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d873f397779db38cd510d9ee5416fd43?s=256&d=identicon&r=PG",
+                "account_id": 213468,
+                "user_type": "registered",
+                "user_id": 466862,
+                "link": "https://stackoverflow.com/users/466862/mark-rotteveel",
+                "reputation": 110280,
+                "display_name": "Mark Rotteveel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1604775422,
+            "creation_date": 1604775422,
+            "body": "<p>The problem is your use of <code>assert rs.next()<\/code>. Assertions in Java are intended for checking invariants (eg during testing), but when you normally run Java, <code>assert<\/code> statements are not executed, they are only executed when explicitly enabling this with the <code>-ea<\/code> commandline option.<\/p>\n<p>As a result, <code>rs.next()<\/code> is not called, so your result set is still positioned before the first row when you call <code>rs.getInt(1)<\/code>. Instead use <code>if (rs.next()) { ... }<\/code>.<\/p>\n",
+            "answer_id": 64731303,
+            "question_id": 64728598
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b13bedc5215730fbce5edff6c130988a?s=256&d=identicon&r=PG",
+                "account_id": 401843,
+                "user_type": "registered",
+                "user_id": 768644,
+                "link": "https://stackoverflow.com/users/768644/rzwitserloot",
+                "reputation": 107206,
+                "display_name": "rzwitserloot"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1604759436,
+            "creation_date": 1604759436,
+            "body": "<p>This is DB engine dependent. Some tips:<\/p>\n<h2>JDBC is low-level and not appropriate to program with<\/h2>\n<p>It's a complicated API. Use something that makes it easier: JDBI, or JOOQ. They may have abstractions over insertion that takes care of this stuff for you.<\/p>\n<h2>Some DB engines require that you list the column name<\/h2>\n<p>Try:<\/p>\n<p><code>con.prepareStatement(sqlCommand, new String[] {&quot;UNID&quot;});<\/code><\/p>\n<h2>Some DB engines will only return generated values as direct resultset<\/h2>\n<p>Don't call <code>.executeUpdate()<\/code>; instead, call <code>.executeQuery()<\/code> which returns a <code>ResultSet<\/code>; check that one.<\/p>\n<h2>Something else<\/h2>\n<p>Post the exact table structure and DB engine you're working with if the above doesn't help.<\/p>\n<h2>Your code is broken<\/h2>\n<p>You can't create resource objects (once that <strong>must<\/strong> be closed) unless you do so safely, and you're not doing so safely. Use try-with-resources:<\/p>\n<pre><code>String sql = &quot;INSERT INTO relations(name, explanation) VALUES (?, ?)&quot;;\ntry (Connection con = main.getCon();\n    PreparedStatement ps = con.prepareStatement(sql, new String[] {&quot;unid&quot;})) {\n\n    state.setString(1, name.getText());\n    state.setString(2, explanation.getText());\n    try (ResultSet rs = state.executeQuery()) {\n        if (!rs.next()) throw new SQLException(&quot;insert didn't return autogen?&quot;);\n        System.out.println(rs.getInt(1));\n    }\n}\n<\/code><\/pre>\n<p>ResultSets, Statements, PreparedStatements, and Connections are all resources (must be closed!) - if you want to store one of those things in a field, you can do that, but only if the class that contains this field is itself a resource: It must have a close() method, it must implement <code>AutoClosable<\/code>, and you can then only make instances of this class with try-with-resources as above.<\/p>\n<p>Failure to adhere to these rules means your app seems to work, but is leaking resources as it runs, thus, if you let it run long enough, it will start crashing. Also, your DB engine will grind to a halt as more and more connections are left open, stuck forever.<\/p>\n",
+            "answer_id": 64728743,
+            "question_id": 64728598
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9acdd474a3135d7039126f9faa20db14?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7227100,
+                "user_type": "registered",
+                "user_id": 5515287,
+                "link": "https://stackoverflow.com/users/5515287/mustafa-poya",
+                "reputation": 3123,
+                "display_name": "Mustafa Poya"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1604763361,
+            "creation_date": 1604761089,
+            "body": "<p>change the last line of code to this because the DBMS you are using may not support the getting value by column name so pass the index of that column:<\/p>\n<pre><code>int instertedID = rs.getInt(1); \n<\/code><\/pre>\n",
+            "answer_id": 64729034,
+            "question_id": 64728598,
+            "last_edit_date": 1604763361
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-tvrS-hMIfG4/AAAAAAAAAAI/AAAAAAAAJuk/4Qk-P-k4B68/s256-rj/photo.jpg",
+                "account_id": 14932630,
+                "user_type": "registered",
+                "user_id": 10781641,
+                "link": "https://stackoverflow.com/users/10781641/divya-maddipudi",
+                "reputation": 1,
+                "display_name": "divya maddipudi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1604950752,
+            "creation_date": 1604763808,
+            "body": "<pre><code>String sqlCommand = &quot;Insert Into Relations (name, explanation) values(?, ?)&quot;;\nPreparedStatement state = con.prepareStatement(sqlCommand, Statement.RETURN_GENERATED_KEYS);\n state.setString(1,name.getText());\n state.setString(2,explanation.getText());\n state.executeUpdate();\n \n\nResultSet resultSet = state.getGeneratedKeys();\n\nif(resultSet.next()) {\n    System.out.println(resultSet.getInt(1)); //Indicate the corresponding column index value.\n}\n<\/code><\/pre>\n",
+            "answer_id": 64729465,
+            "question_id": 64728598,
+            "last_edit_date": 1604950752
+        }
+    ],
+    "answer_comments": {
+        "64729034": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d278acfea88236adf0151a277647b007?s=256&d=identicon&r=PG",
+                "account_id": 5454087,
+                "user_type": "registered",
+                "user_id": 4349635,
+                "link": "https://stackoverflow.com/users/4349635/littlemahdy",
+                "reputation": 59,
+                "display_name": "LittleMahdy",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64729034,
+            "edited": false,
+            "creation_date": 1604765662,
+            "comment_id": 114449472
+        }],
+        "64728743": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d278acfea88236adf0151a277647b007?s=256&d=identicon&r=PG",
+                "account_id": 5454087,
+                "user_type": "registered",
+                "user_id": 4349635,
+                "link": "https://stackoverflow.com/users/4349635/littlemahdy",
+                "reputation": 59,
+                "display_name": "LittleMahdy",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 64728743,
+            "edited": false,
+            "creation_date": 1604765308,
+            "comment_id": 114449385
+        }]
+    }
+}

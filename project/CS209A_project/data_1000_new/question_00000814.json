@@ -1,0 +1,68 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/JxKAu.jpg?s=256",
+            "account_id": 3429292,
+            "user_type": "registered",
+            "user_id": 2874207,
+            "link": "https://stackoverflow.com/users/2874207/plg",
+            "reputation": 75,
+            "display_name": "PLG"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19338771/how-to-measure-task-progress-and-update-it-using-jprogressbar",
+        "last_activity_date": 1381751720,
+        "creation_date": 1381608976,
+        "answer_count": 1,
+        "title": "How to measure task progress and update it using JProgressBar",
+        "body": "<p>I want to display the percentage of the task completed. But since the length of the task depends on the amount of data there is to be read from a file I can not hard code the value for <code>pb3.setValue(...)<\/code> like I am doing it now. I know I can use <code>setIntermediate(true)<\/code> to display that the task is in progress, but is there any way of determining the exact task progress basing on the size of a file.<\/p>\n\n<p>This is the operation that I am trying to measure, where <code>fileArray[2]<\/code> is a <strong>text file<\/strong> I select through the JFileChooser.<\/p>\n\n<pre><code>BufferedReader br3 = new BufferedReader(new FileReader(fileArray[2]));\nString line;\n\n    while ((line = br3.readLine()) != null) {\n\n        StringBuffer sb3 = new StringBuffer(br3.readLine());\n            progress += 1;\n            Thread.sleep(10);\n            pb3.setValue(Math.min(progress, 100));\n        sb3.reverse();\n        bwr3.write(sb3.toString());\n            txt3.append(sb3.toString());\n\n    }\n<\/code><\/pre>\n\n<p>Thanks in advance for any help or suggestions.<\/p>\n",
+        "question_id": 19338771,
+        "tags": [
+            "java",
+            "jprogressbar"
+        ],
+        "score": 1,
+        "accepted_answer_id": 19359681,
+        "is_answered": true,
+        "view_count": 563
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fcbd636611fa901a055a84a16c463219?s=256&d=identicon&r=PG",
+            "account_id": 165405,
+            "user_type": "registered",
+            "user_id": 388827,
+            "link": "https://stackoverflow.com/users/388827/qqilihq",
+            "reputation": 11534,
+            "display_name": "qqilihq",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "post_id": 19338771,
+        "edited": false,
+        "creation_date": 1381609162,
+        "comment_id": 28649229
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ccdd481ec01fabed6fd797956d33353e?s=256&d=identicon&r=PG",
+            "account_id": 2040121,
+            "user_type": "registered",
+            "user_id": 1821541,
+            "link": "https://stackoverflow.com/users/1821541/saint",
+            "reputation": 480,
+            "display_name": "Saint",
+            "accept_rate": 87
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1381751720,
+        "creation_date": 1381751720,
+        "body": "<p>Try this:<\/p>\n\n<pre><code>BufferedReader br1 = new BufferedReader(\n            new FileReader(fileArray[1]));\n\nwhile ((line = br1.readLine()) != null) {\n\n    StringBuffer sb1 = new StringBuffer(\n            br1.readLine());\n    sb1.reverse();\n    String lineReversed = sb1.toString();\n\n    byte[] bytesRead = lineReversed.getBytes();\n\n    for (int i = 0; i &lt; bytesRead.length; i++) {\n        totalBytesRead = totalBytesRead\n                + bytesRead[i];\n    }\n}\n\n\nBufferedReader br1n = new BufferedReader(\n        new FileReader(fileArray[1]));\n\nint totalBytesReadNow = 0;\nint progress = 0;\n\nwhile ((line = br1n.readLine()) != null) {\n\n    StringBuffer sb1n = new StringBuffer(\n            br1n.readLine());\n\n    sb1n.reverse();\n\n    String lineReversed = sb1n.toString();\n\n    byte[] bytesReadNow = lineReversed.getBytes();\n\n    for (int i = 0; i &lt; bytesReadNow.length; i++) {\n        totalBytesReadNow = totalBytesReadNow\n                + bytesReadNow[i];\n\n        if (totalBytesReadNow &gt;= totalBytesRead * 0.01) {\n            progress = progress + 1;\n            totalBytesReadNow = 0;\n        }\n\n        pb2.setValue(Math.min(progress, 100));\n    }\n\n    bwr1.write(lineReversed + \"\\n\");\n    txt2.append(lineReversed);\n    Thread.sleep(0, 1);\n\n}\n\nbwr1.flush();\nbwr1.close();\nbr1n.close();\nbr1.close();\n<\/code><\/pre>\n",
+        "answer_id": 19359681,
+        "question_id": 19338771
+    }],
+    "answer_comments": {}
+}

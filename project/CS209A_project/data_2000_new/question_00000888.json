@@ -1,0 +1,328 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1fe41278c24b82e509c31cdcc5849d89?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 13013533,
+            "user_type": "registered",
+            "user_id": 9405672,
+            "link": "https://stackoverflow.com/users/9405672/thadaboy",
+            "reputation": 425,
+            "display_name": "thadaBoy"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/51565220/setter-method-is-not-working-when-i-try-to-pass-values-through-different-scenes",
+        "last_activity_date": 1533501016,
+        "creation_date": 1532723816,
+        "answer_count": 1,
+        "title": "Setter method is not working when I try to pass values through different scenes in javaFX",
+        "body": "<p>I'm trying to pass values through setter methods between multiple scenes in java. But <code>NullPointerException<\/code> is popping up when I try to that. I want to keep the email(username) in the other controllers as well to identify the user. here is my login code.<\/p>\n\n<pre><code>public class Controller {\n\n    public JFXTextField newsletterEmail;\n    public JFXButton regButton;\n    public JFXTextField loginUserName;\n    public JFXPasswordField loginPassword;\n    public JFXButton loginButton;\n    Connectivity connection = new Connectivity();\n    Connection connec = connection.getConnection();\n    SceneSwitcher sceneSwitcher = new SceneSwitcher();\n    ViewMyAccount viewMyAccount = new ViewMyAccount();\n\n    loginValidation validateLogin = new loginValidation();\n\n    public void loginButtonClicked(ActionEvent actionEvent) {\n\n        System.out.println(loginUserName.getText());\n\n\n\n        boolean validateCustomer = validateLogin.CusLoginValidate(loginUserName.getText(),loginPassword.getText(),connec);\n        boolean validateStaff = validateLogin.StaffLoginValidate(loginUserName.getText(),loginPassword.getText(),connec);\n        boolean validateOwner = validateLogin.OwnerLoginValidate(loginUserName.getText(),loginPassword.getText(),connec);\n\n        if(loginUserName.getText().equals(\"\") || loginPassword.getText().equals(\"\")){\n            AlertBox.displayAlertBox(\"ERROR!\",\"Both fields can't be empty!\");\n        }else{\n            if(validateCustomer){\n                sceneSwitcher.switchScene(loginButton,\"customerView.fxml\",\"Customer\");\n            }else if(validateStaff){\n                sceneSwitcher.switchScene(loginButton,\"staffView.fxml\",\"Customer\");\n            }else if(validateOwner){\n                sceneSwitcher.switchScene(loginButton,\"ownerView.fxml\",\"Customer\");\n            }else{\n                AlertBox.displayAlertBox(\"ERROR!\",\"Invalid Username or Password! \");\n            }\n        }\n\n\n\n    }\n\n    public void registerButtonClicked(ActionEvent actionEvent) {\n\n        sceneSwitcher.switchScene(regButton,\"register.fxml\",\"Register\");\n    }\n\n    NewsletterValidation validateEmail = new NewsletterValidation();\n\n    public void newsletterButtonClicked(ActionEvent actionEvent) throws SQLException {\n\n\n        boolean isNewsletterEmailEmpty = validateEmail.invalidError(newsletterEmail);\n        boolean isValid = validateEmail.isValidEmailAddress(newsletterEmail);\n        boolean isEmailExist = validateEmail.checkEmailExists(newsletterEmail.getText(),connec);\n\n        if(isNewsletterEmailEmpty &amp;&amp; isValid &amp;&amp; isEmailExist){\n\n            PreparedStatement pstmt = null;\n            String sql = \"INSERT INTO `nwemails` (`email`)\\n\" +\n                    \"VALUES (?);\";\n\n\n\n            try {\n                pstmt = connec.prepareStatement(sql);\n                pstmt.setString(1,newsletterEmail.getText());\n\n                int i = pstmt.executeUpdate();\n                System.out.println(\"newsletter email update status = \" + i);\n                AlertBox.displayAlertBox(\"Alert!\",\"You have successfully signed up for the news letter\");\n\n\n            } catch (SQLException e) {\n                System.err.println(e);\n            }finally {\n                pstmt.close();\n            }\n\n        }else{\n            System.out.println(\"Validation failed\");\n        }\n\n\n\n    }\n\n\n}\n<\/code><\/pre>\n\n<p>Here is my login screen:<\/p>\n\n<p><a href=\"https://i.sstatic.net/3jmcS.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/3jmcS.png\" alt=\"Here is my login screen\"><\/a><\/p>\n\n<p>And I want to pass the values to this controller:<\/p>\n\n<pre><code>public class ViewMyAccount implements Initializable {\n\n\n    public Label errorPassword;\n    public Label errorMobile;\n    public Label errorEmail;\n    public Label errorLastName;\n    public Label errorFirstName;\n    public TextField notes;\n    public TextField address;\n    public PasswordField confirmPassword;\n    public PasswordField password;\n    public TextField occupation;\n    public TextField mobile;\n    public TextField email;\n    public TextField lastName;\n    public TextField firstName;\n    public Button updateButton;\n    public Button backButton;\n    Connectivity connection = new Connectivity();\n    Connection connec = connection.getConnection();\n    registerValidation validate = new registerValidation();\n    SceneSwitcher sceneSwitcher = new SceneSwitcher();\n\n\n\npublic String mail = \"mangalika@gmail.com\"; //I want the logged in mail to assign this  \n\n\n\n\n\npublic void initialize(URL url, ResourceBundle rb) {\n\n\n            //fill info in fields\n            PreparedStatement pstmtGetInfo = null;\n            ResultSet rslt = null;\n            String sqlGetInfo = \"SELECT * FROM users WHERE email=?\";\n            System.out.println(mail);\n\n            try {\n                pstmtGetInfo = connec.prepareStatement(sqlGetInfo);\n                pstmtGetInfo.setString(1,mail);\n                rslt = pstmtGetInfo.executeQuery();\n\n                if(rslt.next()){\n                    StringBuffer stringBuffer1 = new StringBuffer();\n                    stringBuffer1.append(rslt.getString(\"firstName\"));\n                    firstName.setText(stringBuffer1.toString());\n\n                    StringBuffer stringBuffer2 = new StringBuffer();\n                    stringBuffer2.append(rslt.getString(\"lastName\"));\n                    lastName.setText(stringBuffer2.toString());\n\n                    StringBuffer stringBuffer3 = new StringBuffer();\n                    stringBuffer3.append(rslt.getString(\"email\"));\n                    email.setText(stringBuffer3.toString());\n\n                    StringBuffer stringBuffer4 = new StringBuffer();\n                    stringBuffer4.append(rslt.getString(\"mobile\"));\n                    mobile.setText(stringBuffer4.toString());\n\n                    StringBuffer stringBuffer5 = new StringBuffer();\n                    stringBuffer5.append(rslt.getString(\"occupation\"));\n                    occupation.setText(stringBuffer5.toString());\n\n                    StringBuffer stringBuffer6 = new StringBuffer();\n                    stringBuffer6.append(rslt.getString(\"address\"));\n                    address.setText(stringBuffer6.toString());\n\n                    StringBuffer stringBuffer7 = new StringBuffer();\n                    stringBuffer7.append(rslt.getString(\"password\"));\n                    password.setText(stringBuffer7.toString());\n                    confirmPassword.setText(stringBuffer7.toString());\n\n                    StringBuffer stringBuffer8 = new StringBuffer();\n                    stringBuffer8.append(rslt.getString(\"notes\"));\n                    notes.setText(stringBuffer8.toString());\n                }else{\n                    System.out.println(\"no rows for this mail ID\");\n                }\n\n\n\n\n            } catch (SQLException e) {\n                System.err.println(e);\n\n\n            }\n\n\n        }\n\n\n        public void updateButtonClicked(ActionEvent actionEvent) throws SQLException{\n\n            boolean isFirstNameEmpty = validate.emptyError(firstName,errorFirstName,\"First name is required!\");\n            boolean isFirstNameNum = validate.isNotNum(firstName,errorFirstName,\"First name can't be numbers!\");\n            boolean isLastNameEmpty = validate.emptyError(lastName,errorLastName,\"Last name is required!\");\n            boolean isLastNameNum = validate.isNotNum(lastName,errorLastName,\"Last name can't be numbers!\");\n            boolean isEmailEmpty = validate.emptyError(email,errorEmail,\"Email address is required!\");\n            boolean isPasswordEmpty = validate.emptyError(password,errorPassword,\"Password is required!\");\n            boolean isemailValid = validate.isValidEmailAddress(email);\n            boolean isPasswordValid = validate.isValidPassword(password,confirmPassword,errorPassword);\n            boolean isPasswordMatched = validate.isPasswordMatch(password,confirmPassword);\n            boolean isUserNameExist = validate.checkUsernameExists(email.getText(),connec,errorEmail);\n\n\n\n\n            if(isFirstNameEmpty &amp;&amp; isFirstNameNum &amp;&amp; isLastNameEmpty &amp;&amp; isLastNameNum &amp;&amp; isEmailEmpty &amp;&amp; isPasswordEmpty &amp;&amp; isPasswordValid &amp;&amp; isemailValid &amp;&amp; isPasswordMatched &amp;&amp; isUserNameExist){\n                PreparedStatement pstmt = null;\n                String sql = \"UPDATE users\\n\" +\n                        \"SET firstName = ?, lastName= ?, email= ?, mobile= ?, occupation= ?, address= ?, password= ?, notes= ?\\n\" +\n                        \"WHERE email = ?;\";\n\n\n\n\n\n\n                try {\n                    pstmt = connec.prepareStatement(sql);\n                    pstmt.setString(1,firstName.getText());\n                    pstmt.setString(2,lastName.getText());\n                    pstmt.setString(3,email.getText());\n                    pstmt.setString(4,mobile.getText());\n                    pstmt.setString(5,occupation.getText());\n                    pstmt.setString(6,address.getText());\n                    pstmt.setString(7,password.getText());\n                    pstmt.setString(8,notes.getText());\n                    pstmt.setString(9,mail);\n\n                    int i = pstmt.executeUpdate();\n                    System.out.println(\"customer info UPDATE status = \" + i);\n\n                    if(i == 1){\n                        AlertBox.displayAlertBox(\"Congratulations!\",\"You have successfully registered to JFS\");\n                        sceneSwitcher.switchScene(updateButton,\"sample.fxml\",\"JFS\");\n                    }else{\n                        AlertBox.displayAlertBox(\"Error\",\"Database couldn't be updated\");\n                    }\n\n\n\n                } catch (SQLException e) {\n                    System.err.println(e);\n                }finally {\n                    pstmt.close();\n                }\n\n                AlertBox.displayAlertBox(\"Congratulations!\",\"You have successfully updated your account\");\n                sceneSwitcher.switchScene(updateButton,\"sample.fxml\",\"JFS\");\n\n            }else{\n                System.out.println(\"Validation failed\");\n            }\n        }\n\n        public void backButtonClicked(ActionEvent actionEvent) {\n            sceneSwitcher.switchScene(backButton,\"customerView.fxml\",\"Welcome to JFS \");\n        }\n\n\n\n\n    }\n<\/code><\/pre>\n\n<p>I want to get the email which was input by the user in the login screen to use in this controller. Because I need that email to identify the user through process. but it shows as null. Please help me to find out what's wrong.<\/p>\n",
+        "question_id": 51565220,
+        "tags": [
+            "java",
+            "javafx"
+        ],
+        "score": 3,
+        "accepted_answer_id": 51584784,
+        "is_answered": true,
+        "view_count": 272,
+        "last_edit_date": 1533473464
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1fe41278c24b82e509c31cdcc5849d89?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13013533,
+                "user_type": "registered",
+                "user_id": 9405672,
+                "link": "https://stackoverflow.com/users/9405672/thadaboy",
+                "reputation": 425,
+                "display_name": "thadaBoy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "edited": false,
+            "creation_date": 1533500872,
+            "comment_id": 90357423
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "edited": false,
+            "creation_date": 1533500806,
+            "comment_id": 90357404
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "edited": false,
+            "creation_date": 1533500311,
+            "comment_id": 90357294
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1fe41278c24b82e509c31cdcc5849d89?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13013533,
+                "user_type": "registered",
+                "user_id": 9405672,
+                "link": "https://stackoverflow.com/users/9405672/thadaboy",
+                "reputation": 425,
+                "display_name": "thadaBoy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "edited": false,
+            "creation_date": 1533473497,
+            "comment_id": 90350249
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1fe41278c24b82e509c31cdcc5849d89?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13013533,
+                "user_type": "registered",
+                "user_id": 9405672,
+                "link": "https://stackoverflow.com/users/9405672/thadaboy",
+                "reputation": 425,
+                "display_name": "thadaBoy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "edited": false,
+            "creation_date": 1533472888,
+            "comment_id": 90350101
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "edited": false,
+            "creation_date": 1533472847,
+            "comment_id": 90350088
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1fe41278c24b82e509c31cdcc5849d89?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13013533,
+                "user_type": "registered",
+                "user_id": 9405672,
+                "link": "https://stackoverflow.com/users/9405672/thadaboy",
+                "reputation": 425,
+                "display_name": "thadaBoy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "edited": false,
+            "creation_date": 1533449922,
+            "comment_id": 90345364
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "edited": false,
+            "creation_date": 1533429423,
+            "comment_id": 90342919
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1fe41278c24b82e509c31cdcc5849d89?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13013533,
+                "user_type": "registered",
+                "user_id": 9405672,
+                "link": "https://stackoverflow.com/users/9405672/thadaboy",
+                "reputation": 425,
+                "display_name": "thadaBoy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "edited": false,
+            "creation_date": 1532754646,
+            "comment_id": 90102764
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "edited": false,
+            "creation_date": 1532733320,
+            "comment_id": 90099879
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1fe41278c24b82e509c31cdcc5849d89?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13013533,
+                "user_type": "registered",
+                "user_id": 9405672,
+                "link": "https://stackoverflow.com/users/9405672/thadaboy",
+                "reputation": 425,
+                "display_name": "thadaBoy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "edited": false,
+            "creation_date": 1532731489,
+            "comment_id": 90099526
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d3f3f4320c25d18603de3bb3476fa6fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3583958,
+                "user_type": "registered",
+                "user_id": 2991525,
+                "link": "https://stackoverflow.com/users/2991525/fabian",
+                "reputation": 82886,
+                "display_name": "fabian"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565220,
+            "edited": false,
+            "creation_date": 1532730182,
+            "comment_id": 90099241
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11434115,
+                "user_type": "registered",
+                "user_id": 8382028,
+                "link": "https://stackoverflow.com/users/8382028/viatech",
+                "reputation": 3080,
+                "display_name": "ViaTech"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 51565220,
+            "edited": false,
+            "creation_date": 1532725609,
+            "comment_id": 90097926
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fa7b207ef400cc69c5f58a89718bc155?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11434115,
+            "user_type": "registered",
+            "user_id": 8382028,
+            "link": "https://stackoverflow.com/users/8382028/viatech",
+            "reputation": 3080,
+            "display_name": "ViaTech"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1533501016,
+        "creation_date": 1532900550,
+        "body": "<p>Your issue is occurring because you are not setting the <strong>mail<\/strong> variable in your code before initialize is called in the <strong>ViewMyActivity<\/strong> controller you are attempting to pass values to.<\/p>\n\n<p>Take my code below and create a project and test it out. This shows how to pass values between controllers in a simple, but mostly functional JavaFX FXML layout.<\/p>\n\n<p>First <strong>loginLayout.fxml<\/strong>:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n\n&lt;?import java.net.*?&gt;\n&lt;?import javafx.geometry.*?&gt;\n&lt;?import javafx.scene.control.*?&gt;\n&lt;?import javafx.scene.layout.*?&gt;\n&lt;?import javafx.scene.text.*?&gt;\n\n&lt;GridPane fx:controller=\"FXMLController\" \n    xmlns:fx=\"http://javafx.com/fxml\" \n    alignment=\"center\" \n    hgap=\"10\" \n    vgap=\"10\" \n    styleClass=\"root\"&gt;\n\n  &lt;Text id=\"welcome-text\" text=\"Login Below:\" \n      GridPane.columnIndex=\"0\" GridPane.rowIndex=\"0\" \n      GridPane.columnSpan=\"2\"/&gt;\n\n  &lt;padding&gt;&lt;Insets top=\"25\" right=\"25\" bottom=\"10\" left=\"25\" /&gt;&lt;/padding&gt;\n\n  &lt;Label text=\"Username:\" GridPane.columnIndex=\"0\" GridPane.rowIndex=\"1\" /&gt;\n\n  &lt;TextField fx:id=\"usernameField\" GridPane.columnIndex=\"1\" GridPane.rowIndex=\"1\" /&gt;\n\n  &lt;Label text=\"Password:\" GridPane.columnIndex=\"0\" GridPane.rowIndex=\"2\" /&gt;\n\n  &lt;PasswordField fx:id=\"passwordField\"  GridPane.columnIndex=\"1\" GridPane.rowIndex=\"2\" /&gt;\n\n  &lt;HBox spacing=\"10\" alignment=\"bottom_right\" \n      GridPane.columnIndex=\"1\" GridPane.rowIndex=\"4\"&gt;\n      &lt;Button text=\"Login\" \n       onAction=\"#handleLogin\" /&gt;\n  &lt;/HBox&gt;\n\n  &lt;Text fx:id=\"usernameEntered\"  GridPane.columnIndex=\"1\" GridPane.rowIndex=\"6\" /&gt;\n\n&lt;/GridPane&gt;\n<\/code><\/pre>\n\n<p>Now <strong>FXMLController<\/strong>:<\/p>\n\n<pre><code>import javafx.event.ActionEvent;\nimport javafx.fxml.FXML;\nimport javafx.scene.control.TextField;\nimport javafx.scene.text.Text;\n\npublic class FXMLController {\n    ViewMyAccount viewMyAccount = new ViewMyAccount();\n    @FXML private Text usernameEntered;\n    @FXML private TextField usernameField;\n\n    @FXML protected void handleLogin(ActionEvent event) {\n        String enteredValue = usernameField.getText().toString();\n        usernameEntered.setText(\"Username: \" + enteredValue);\n\n        System.out.println(\"From Controller: \" + enteredValue);\n\n        System.out.println(\"From ViewMyAccount: \"+ \n                viewMyAccount.setAndReturnMail(enteredValue));\n\n        //I cannot tell why you want to call initialize from \n        //ViewMyAccount, but this is a test showing it works\n        viewMyAccount.initialize(null, null); \n    }\n}\n<\/code><\/pre>\n\n<p>Now <strong>FXMLMain<\/strong>, you run this class:<\/p>\n\n<pre><code>import javafx.application.Application;\nimport javafx.fxml.FXMLLoader;\nimport javafx.scene.Parent;\nimport javafx.scene.Scene;\nimport javafx.stage.Stage;\n\npublic class FXMLMain extends Application {\n\n    public static void main(String[] args) {\n        //you should know this but this is how you launch your application\n        Application.launch(FXMLMain.class, args);\n    }\n\n    @Override\n    public void start(Stage stage) throws Exception {\n        Parent root = FXMLLoader.load(getClass().getResource(\"loginLayout.fxml\"));\n\n        stage.setTitle(\"Login\");\n        stage.setScene(new Scene(root, 600, 475));\n        stage.show();\n    }\n}\n<\/code><\/pre>\n\n<p>Now your <strong>ViewMyAccount<\/strong> class, note I did comment out all of the 'pieces' that I could not run without the code:<\/p>\n\n<pre><code>import java.net.URL;\nimport java.sql.*;\nimport java.util.ResourceBundle;\n\nimport javafx.fxml.Initializable;\nimport javafx.scene.control.*;\nimport javafx.event.ActionEvent;\n\npublic class ViewMyAccount implements Initializable {\n\n    public Label errorPassword;\n    public Label errorMobile;\n    public Label errorEmail;\n    public Label errorLastName;\n    public Label errorFirstName;\n    public TextField notes;\n    public TextField address;\n    public PasswordField confirmPassword;\n    public PasswordField password;\n    public TextField occupation;\n    public TextField mobile;\n    public TextField email;\n    public TextField lastName;\n    public TextField firstName;\n    public Button updateButton;\n    public Button backButton;\n    //I don't have this code...\n\n    //Connectivity connection = new Connectivity();\n    //Connection connec = connection.getConnection();\n    //registerValidation validate = new registerValidation();\n    //SceneSwitcher sceneSwitcher = new SceneSwitcher();\n\n\n    public String mail = \"mangalika@gmail.com\"; //I want the logged in mail to assign this \n\n    public String setAndReturnMail(String userEnteredValue) {\n        this.mail = userEnteredValue;\n        return this.mail;\n    }\n\n    public void initialize(URL url, ResourceBundle rb) {\n\n            //fill info in fields\n            PreparedStatement pstmtGetInfo = null;\n            ResultSet rslt = null;\n            String sqlGetInfo = \"SELECT * FROM users WHERE email=?\";\n            System.out.println(mail);\n\n            /*\n            try {\n                pstmtGetInfo = connec.prepareStatement(sqlGetInfo);\n                pstmtGetInfo.setString(1,mail);\n                rslt = pstmtGetInfo.executeQuery();\n\n                if(rslt.next()){\n                    StringBuffer stringBuffer1 = new StringBuffer();\n                    stringBuffer1.append(rslt.getString(\"firstName\"));\n                    firstName.setText(stringBuffer1.toString());\n\n                    StringBuffer stringBuffer2 = new StringBuffer();\n                    stringBuffer2.append(rslt.getString(\"lastName\"));\n                    lastName.setText(stringBuffer2.toString());\n\n                    StringBuffer stringBuffer3 = new StringBuffer();\n                    stringBuffer3.append(rslt.getString(\"email\"));\n                    email.setText(stringBuffer3.toString());\n\n                    StringBuffer stringBuffer4 = new StringBuffer();\n                    stringBuffer4.append(rslt.getString(\"mobile\"));\n                    mobile.setText(stringBuffer4.toString());\n\n                    StringBuffer stringBuffer5 = new StringBuffer();\n                    stringBuffer5.append(rslt.getString(\"occupation\"));\n                    occupation.setText(stringBuffer5.toString());\n\n                    StringBuffer stringBuffer6 = new StringBuffer();\n                    stringBuffer6.append(rslt.getString(\"address\"));\n                    address.setText(stringBuffer6.toString());\n\n                    StringBuffer stringBuffer7 = new StringBuffer();\n                    stringBuffer7.append(rslt.getString(\"password\"));\n                    password.setText(stringBuffer7.toString());\n                    confirmPassword.setText(stringBuffer7.toString());\n\n                    StringBuffer stringBuffer8 = new StringBuffer();\n                    stringBuffer8.append(rslt.getString(\"notes\"));\n                    notes.setText(stringBuffer8.toString());\n                }else{\n                    System.out.println(\"no rows for this mail ID\");\n                }\n\n            } catch (SQLException e) {\n                System.err.println(e);\n\n            }\n            */\n\n        }\n\n\n        public void updateButtonClicked(ActionEvent actionEvent) throws SQLException{\n\n           /* boolean isFirstNameEmpty = validate.emptyError(firstName,errorFirstName,\"First name is required!\");\n            boolean isFirstNameNum = validate.isNotNum(firstName,errorFirstName,\"First name can't be numbers!\");\n            boolean isLastNameEmpty = validate.emptyError(lastName,errorLastName,\"Last name is required!\");\n            boolean isLastNameNum = validate.isNotNum(lastName,errorLastName,\"Last name can't be numbers!\");\n            boolean isEmailEmpty = validate.emptyError(email,errorEmail,\"Email address is required!\");\n            boolean isPasswordEmpty = validate.emptyError(password,errorPassword,\"Password is required!\");\n            boolean isemailValid = validate.isValidEmailAddress(email);\n            boolean isPasswordValid = validate.isValidPassword(password,confirmPassword,errorPassword);\n            boolean isPasswordMatched = validate.isPasswordMatch(password,confirmPassword);\n            boolean isUserNameExist = validate.checkUsernameExists(email.getText(),connec,errorEmail);\n\n            if(isFirstNameEmpty &amp;&amp; isFirstNameNum &amp;&amp; isLastNameEmpty &amp;&amp; isLastNameNum &amp;&amp; isEmailEmpty &amp;&amp; isPasswordEmpty &amp;&amp; isPasswordValid &amp;&amp; isemailValid &amp;&amp; isPasswordMatched &amp;&amp; isUserNameExist){\n                PreparedStatement pstmt = null;\n                String sql = \"UPDATE users\\n\" +\n                        \"SET firstName = ?, lastName= ?, email= ?, mobile= ?, occupation= ?, address= ?, password= ?, notes= ?\\n\" +\n                        \"WHERE email = ?;\";\n\n                try {\n                    pstmt = connec.prepareStatement(sql);\n                    pstmt.setString(1,firstName.getText());\n                    pstmt.setString(2,lastName.getText());\n                    pstmt.setString(3,email.getText());\n                    pstmt.setString(4,mobile.getText());\n                    pstmt.setString(5,occupation.getText());\n                    pstmt.setString(6,address.getText());\n                    pstmt.setString(7,password.getText());\n                    pstmt.setString(8,notes.getText());\n                    pstmt.setString(9,mail);\n\n                    int i = pstmt.executeUpdate();\n                    System.out.println(\"customer info UPDATE status = \" + i);\n\n                    if(i == 1){\n                        AlertBox.displayAlertBox(\"Congratulations!\",\"You have successfully registered to JFS\");\n                        sceneSwitcher.switchScene(updateButton,\"sample.fxml\",\"JFS\");\n                    }else{\n                        AlertBox.displayAlertBox(\"Error\",\"Database couldn't be updated\");\n                    }\n\n\n\n                } catch (SQLException e) {\n                    System.err.println(e);\n                }finally {\n                    pstmt.close();\n                }\n\n                AlertBox.displayAlertBox(\"Congratulations!\",\"You have successfully updated your account\");\n                sceneSwitcher.switchScene(updateButton,\"sample.fxml\",\"JFS\");\n\n            }else{\n                System.out.println(\"Validation failed\");\n            }\n\n             */\n        }\n\n        public void backButtonClicked(ActionEvent actionEvent) {\n           // sceneSwitcher.switchScene(backButton,\"customerView.fxml\",\"Welcome to JFS \");\n        }\n\n}\n<\/code><\/pre>\n",
+        "answer_id": 51584784,
+        "question_id": 51565220,
+        "last_edit_date": 1533501016
+    }],
+    "answer_comments": {}
+}

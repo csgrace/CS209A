@@ -1,0 +1,61 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user3696929"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/35602689/joptionpane-implement-in-a-jdialog-call-once-but-that-run-repeatedly-why",
+        "last_activity_date": 1456321585,
+        "creation_date": 1456318148,
+        "answer_count": 2,
+        "title": "JOptionpane implement in a JDialog, call once, but that run repeatedly. Why?",
+        "body": "<p>There are 2 files in the source folder to four times a JOptionPane. <\/p>\n\n<p>Previously, it was 5 files in the source folder, the message appeared seven times.\nIt is based on the number of appearances does not depend on the number of files copied.<\/p>\n\n<p>Caller code:<\/p>\n\n<pre><code>JButton btnCopyAllFiles = new JButton(\"Copy All Files\");\nbtnCopyAllFiles.addActionListener(new ActionListener() \n{\n    public void actionPerformed(ActionEvent arg0) \n    {\n        final JDialog dialog = new JDialog(WebAdmin.this, \"Copy files\", true);\n        dialog.setSize(500, 80);\n        JPanel panel = new JPanel();\n\n        GridBagLayout gbl_panel = new GridBagLayout();\n        GridBagConstraints gBC = new GridBagConstraints();\n        //gBC.fill = GridBagConstraints.HORIZONTAL;\n        panel.setLayout(gbl_panel);\n\n        final JTextField txtTargetDir = new JTextField(30);\n        txtTargetDir.setFont(new Font(\"Dialog\", Font.BOLD, 12));\n        gBC.insets = gridBagInsets;\n        gBC.fill = GridBagConstraints.BOTH;\n        gBC.gridx = 1;\n        gBC.gridy = 0;\n        panel.add(txtTargetDir, gBC);\n\n        JButton btnBrowseTarget = new JButton(\"Browse\");\n        btnBrowseTarget.addActionListener(new ActionListener() {\n            public void actionPerformed(ActionEvent arg0) \n            {\n                JFileChooser chooser = new JFileChooser();\n                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);\n                chooser.setAcceptAllFileFilterUsed(false);\n                chooser.showOpenDialog(WebAdmin.this);\n                File ff = chooser.getCurrentDirectory();\n                File fl = chooser.getSelectedFile();\n                String filename_last = fl.getName();\n                String filename_first = ff.getAbsolutePath();\n\n                txtTargetDir.setText(filename_first + \"/\" + filename_last + \"/\");\n            }\n        });         \n        gBC.insets = gridBagInsets;\n        gBC.fill = GridBagConstraints.BOTH;\n        gBC.gridx = 2;\n        gBC.gridy = 0;\n        gBC.gridwidth = 2;\n        panel.add(btnBrowseTarget, gBC);\n\n        JButton btnOK = new JButton(\"OK\");\n        btnOK.setToolTipText(\"All files copied to the specified folder\");\n        btnOK.addActionListener(new ActionListener() {\n            public void actionPerformed(ActionEvent arg0) {\n                try {\n                    File source = new File(Functions.readStoreFile());\n                    File target = new File(txtTargetDir.getText());\n                    Functions.copyDirectory(source, target);\n                    dialog.dispose();\n                } catch (Exception e) {\n                    e.printStackTrace();\n                }\n            }\n        });\n        gBC.insets = gridBagInsets;\n        gBC.fill = GridBagConstraints.BOTH;\n        gBC.gridx = 3;\n        gBC.gridy = 1;\n        gBC.gridwidth = 1;\n        panel.add(btnOK, gBC);\n\n        dialog.add(panel);\n        dialog.pack();\n        dialog.setVisible(true);\n    }\n});\n<\/code><\/pre>\n\n<p>Method call place:<\/p>\n\n<pre><code>JButton btnOK = new JButton(\"OK\");\n        btnOK.setToolTipText(\"All files copied to the specified folder\");\n        btnOK.addActionListener(new ActionListener() {\n            public void actionPerformed(ActionEvent arg0) {\n                try {\n                    File source = new File(Functions.readStoreFile());\n                    File target = new File(txtTargetDir.getText());\n                    Functions.copyDirectory(source, target);\n                    dialog.dispose();\n                } catch (Exception e) {\n                    e.printStackTrace();\n                }\n            }\n        });\n<\/code><\/pre>\n\n<p>Called method:<\/p>\n\n<pre><code>public static void copyDirectory(File sourceLocation , File targetLocation) {\n    boolean isOK = true;\n    if (sourceLocation.isDirectory()) {\n        if (!targetLocation.exists()) {\n            targetLocation.mkdir();\n        }\n\n        String[] children = sourceLocation.list();\n        for (int i=0; i&lt;children.length; i++) {\n            copyDirectory(new File(sourceLocation, children[i]),\n                new File(targetLocation, children[i]));\n        }\n    } \n    else {\n        try {\n            InputStream in = new FileInputStream(sourceLocation);\n            OutputStream out = new FileOutputStream(targetLocation);\n\n            // Copy the bits from instream to outstream\n            byte[] buf = new byte[1024];\n            int len;\n            while ((len = in.read(buf)) &gt; 0) {\n                out.write(buf, 0, len);\n            }\n            in.close();\n            out.close();\n        } catch (Exception e) {\n            isOK = false;\n            e.printStackTrace();\n        }\n    }\n    if (isOK){\n        JOptionPane.showMessageDialog(null, \"Files copied success!\", \"Copy finished!\", JOptionPane.INFORMATION_MESSAGE);\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 35602689,
+        "tags": [
+            "java",
+            "joptionpane",
+            "jdialog"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 23
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-6fH5pGQO0rs/AAAAAAAAAAI/AAAAAAAAAaQ/eckzOFHZXOo/s256-rj/photo.jpg",
+                "account_id": 5704855,
+                "user_type": "registered",
+                "user_id": 4508754,
+                "link": "https://stackoverflow.com/users/4508754/paulo-santos",
+                "reputation": 42,
+                "display_name": "Paulo Santos"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1456318829,
+            "creation_date": 1456318829,
+            "body": "<p>Your code will produce one JOptionPane for each file copied that fail.<\/p>\n\n<p>Probably, you are trying to copy the directory special \"..\".\nPrint the list of files to certify that.<\/p>\n\n<p>Check the stacktrace for more details.<\/p>\n",
+            "answer_id": 35602921,
+            "question_id": 35602689
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user3696929"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1456321585,
+            "creation_date": 1456321585,
+            "body": "<p>I managed to solve! A copy of each was successful, but because the method itself recursively called JOptionPane so the number of files + 1 times appeared.<\/p>\n\n<pre><code>btnOK.addActionListener(new ActionListener() {\n    public void actionPerformed(ActionEvent arg0) {\n        try {\n            ...\n            if ( Functions.copyDirectory(source, target) ){\n                JOptionPane.showMessageDialog(null, \"Files copied success!\", \"Copy finished!\", JOptionPane.INFORMATION_MESSAGE);\n            }\n            dialog.dispose();\n        } catch (Exception e) {\n            e.printStackTrace();\n        }\n    }\n});\n\npublic static boolean copyDirectory(File sourceLocation , File targetLocation) {\n    boolean isOK = true;\n    try{\n            ...\n            ...\n            in.close();\n            out.close();\n            isOK = true;\n        } catch (Exception e) {\n            isOK = false;\n            e.printStackTrace();\n        }\n    }\n    return isOK;\n}\n<\/code><\/pre>\n",
+            "answer_id": 35603941,
+            "question_id": 35602689
+        }
+    ],
+    "answer_comments": {}
+}

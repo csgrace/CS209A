@@ -1,0 +1,226 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5b5a2278b36469103a9b903be7160805?s=256&d=identicon&r=PG",
+            "account_id": 335755,
+            "user_type": "registered",
+            "user_id": 663011,
+            "link": "https://stackoverflow.com/users/663011/saurabh-kumar",
+            "reputation": 16729,
+            "display_name": "Saurabh Kumar",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8901121/why-unexpected-behaviour-for-conditional-operator",
+        "last_activity_date": 1331747965,
+        "creation_date": 1326831324,
+        "answer_count": 4,
+        "title": "why unexpected behaviour for conditional operator",
+        "body": "<p>I have a piece of code like follows<\/p>\n\n<pre><code>public class Test{\n               public static void main(String[] args) {\n                  System.out.println(true?false:true == true?false:true);\n                                                -----------------------\n               }\n            }\n<\/code><\/pre>\n\n<p>The output is <code>false<\/code>. If you are using Eclipse you get a wavy (dashed here) line and warning like \"Comparing identical expressions\". Note the start of the wavy line.<\/p>\n\n<p>I changed the code to the following<\/p>\n\n<pre><code>              public class Test{\n               public static void main(String[] args) {\n                  System.out.println((true?false:true) == (true?false:true));\n                                     ---------------------------------------\n               }\n            }\n<\/code><\/pre>\n\n<p>The output is <code>true<\/code>. If you are using Eclipse you get a wavy (dashed here) line and warning like \"Comparing identical expressions\". Note the start of the wavy line now.<\/p>\n\n<p>Why the difference?<\/p>\n",
+        "question_id": 8901121,
+        "tags": [
+            "java",
+            "conditional-statements"
+        ],
+        "score": 1,
+        "accepted_answer_id": 8901204,
+        "is_answered": true,
+        "view_count": 642,
+        "last_edit_date": 1326835028
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5b5a2278b36469103a9b903be7160805?s=256&d=identicon&r=PG",
+                "account_id": 335755,
+                "user_type": "registered",
+                "user_id": 663011,
+                "link": "https://stackoverflow.com/users/663011/saurabh-kumar",
+                "reputation": 16729,
+                "display_name": "Saurabh Kumar",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901121,
+            "edited": false,
+            "creation_date": 1326831691,
+            "comment_id": 11131987
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/91a78cf1465182161a79685058d8b39b?s=256&d=identicon&r=PG",
+                "account_id": 262258,
+                "user_type": "registered",
+                "user_id": 546999,
+                "link": "https://stackoverflow.com/users/546999/nanne",
+                "reputation": 64422,
+                "display_name": "Nanne",
+                "accept_rate": 97
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 8901121,
+            "edited": false,
+            "creation_date": 1326831545,
+            "comment_id": 11131932
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/62703deeb2e0f7a687e09cfe47084e31?s=256&d=identicon&r=PG",
+                "account_id": 369805,
+                "user_type": "registered",
+                "user_id": 717383,
+                "link": "https://stackoverflow.com/users/717383/james-montagne",
+                "reputation": 78896,
+                "display_name": "James Montagne"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901121,
+            "edited": false,
+            "creation_date": 1326831466,
+            "comment_id": 11131907
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a0a3a4200899708103f7430d87d56e24?s=256&d=identicon&r=PG",
+                "account_id": 299251,
+                "user_type": "registered",
+                "user_id": 605744,
+                "link": "https://stackoverflow.com/users/605744/tomasz-nurkiewicz",
+                "reputation": 342179,
+                "display_name": "Tomasz Nurkiewicz",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1326832741,
+            "creation_date": 1326831579,
+            "body": "<p>Because ternary operator (<code>?:<\/code>) has lower <a href=\"http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html\" rel=\"nofollow\">priority<\/a> than equality operator (<code>==<\/code>). This means that:<\/p>\n\n<pre><code>true?false:true == true?false:true\n<\/code><\/pre>\n\n<p>is actually interpreted as:<\/p>\n\n<pre><code>true?false:(true == true?false:true)\n<\/code><\/pre>\n\n<p>This, in turns, is evaluated to:<\/p>\n\n<pre><code>true?false:((true == true)?false:true)\n<\/code><\/pre>\n\n<p>cont.:<\/p>\n\n<pre><code>true?false:(true?false:true)\n<\/code><\/pre>\n\n<p>...and eventually:<\/p>\n\n<pre><code>true?false:(false)\n<\/code><\/pre>\n\n<p>and eventually:<\/p>\n\n<pre><code>true?false:false\n<\/code><\/pre>\n\n<p>And obviously this explains the output of the first code snippet. Eclipse correctly recognizes operator precedence and highlights possibly incorrect statement.<\/p>\n\n<p><strong>UPDATE<\/strong>: Thanks for all the comments. In fact I forgot about operator precedence on the left side. I checked the exact behaviour using the program below:<\/p>\n\n<pre><code>public static boolean a(char label, boolean result) {\n    System.out.println(label);\n    return result;\n}\n\npublic static void main(String[] args) {\n    System.out.println(\n        a('a', true) ? a('b', false) : a('c', true) == a('d', true) ? a('e', false) : a('f', true)\n    );\n}\n<\/code><\/pre>\n\n<p>The results are consistent with <em>@Milad Naseri<\/em> suggestion.<\/p>\n",
+            "answer_id": 8901171,
+            "question_id": 8901121,
+            "last_edit_date": 1326832741
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c97bba51cc8f938dcc806703fb55efc2?s=256&d=identicon&r=PG",
+                "account_id": 913338,
+                "user_type": "registered",
+                "user_id": 946679,
+                "link": "https://stackoverflow.com/users/946679/zeller",
+                "reputation": 4974,
+                "display_name": "zeller",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1326831633,
+            "creation_date": 1326831633,
+            "body": "<p>There is nothing unexpected here, the answer is operator precedence.\nIn the first case it is:<br/>\n<code>true?false:(true == true?false:true)<\/code> <br/>\nWhile the in the second case your paretheses override the precedence rules.<\/p>\n",
+            "answer_id": 8901189,
+            "question_id": 8901121
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/vSC6X.jpg?s=256",
+                "account_id": 1042420,
+                "user_type": "registered",
+                "user_id": 1048157,
+                "link": "https://stackoverflow.com/users/1048157/milad-naseri",
+                "reputation": 4128,
+                "display_name": "Milad Naseri",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1326831577,
+            "creation_date": 1326831577,
+            "body": "<p>That is because the conditional equality operator (<code>==<\/code>) takes precedence over the ternary conditional <code>?:<\/code>. So, in <code>a?b:x==y?z:t<\/code> <code>x==y?z:t<\/code> is evaluated before <code>a?b:x<\/code> and <code>y?z:t<\/code> are.<\/p>\n",
+            "answer_id": 8901170,
+            "question_id": 8901121
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c3b5ca501c8756c075f442808d148729?s=256&d=identicon&r=PG",
+                "account_id": 1092551,
+                "user_type": "registered",
+                "user_id": 1086871,
+                "link": "https://stackoverflow.com/users/1086871/g-bach",
+                "reputation": 3919,
+                "display_name": "G. Bach",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1331747965,
+            "creation_date": 1326831709,
+            "body": "<p>In case your problem is the difference of outcomes, this is because of the order of precedence of the operators you use. Check <a href=\"http://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html\" rel=\"nofollow\">here<\/a> for details. According to that order of precedence: <\/p>\n\n<pre><code>true ? false : true == true ? false : true\n<\/code><\/pre>\n\n<p>is the same as this:<\/p>\n\n<pre><code>true ? false : ((true == true) ? false : true)\n<\/code><\/pre>\n\n<p>so it will always evaluate to <strong>false<\/strong>. You could put anything after the colon since it's never evaluated anyway (if I remember correctly and the ternary operator uses lazy evaluation); the reason for this is that<\/p>\n\n<pre><code>true ? A : B\n<\/code><\/pre>\n\n<p>always evaluates to A.<\/p>\n\n<hr>\n\n<p>On the other hand,<\/p>\n\n<pre><code>(true ? false : true) == (true ? false : true)\n<\/code><\/pre>\n\n<p>will have both sides of the comparison operator == evaluate to false, so<\/p>\n\n<pre><code>false == false\n<\/code><\/pre>\n\n<p>which is a <strong>true<\/strong> statement.<\/p>\n\n<p>So the difference here is the order in which the operators are evaluated, which is determined by the parentheses you use and, if there is ambiguity that isn't resolved by parentheses, by the order of precedence of the operators that are used.<\/p>\n\n<hr>\n\n<p>In general, the ternary operator \"? :\" works like this<\/p>\n\n<pre><code>A ? B : C\n<\/code><\/pre>\n\n<p>If A is true, evaluate to B, else evaluate to C. A has to be a boolean expression, B and C can be whatever you want; you'll have to deal with type mismatches though if you want to assign the evaluated value to a variable and they are of different types.<\/p>\n",
+            "answer_id": 8901204,
+            "question_id": 8901121,
+            "last_edit_date": 1331747965
+        }
+    ],
+    "answer_comments": {"8901171": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/vSC6X.jpg?s=256",
+                "account_id": 1042420,
+                "user_type": "registered",
+                "user_id": 1048157,
+                "link": "https://stackoverflow.com/users/1048157/milad-naseri",
+                "reputation": 4128,
+                "display_name": "Milad Naseri",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8901171,
+            "edited": false,
+            "creation_date": 1326832525,
+            "comment_id": 11132226
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c3b5ca501c8756c075f442808d148729?s=256&d=identicon&r=PG",
+                "account_id": 1092551,
+                "user_type": "registered",
+                "user_id": 1086871,
+                "link": "https://stackoverflow.com/users/1086871/g-bach",
+                "reputation": 3919,
+                "display_name": "G. Bach",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8901171,
+            "edited": false,
+            "creation_date": 1326832224,
+            "comment_id": 11132150
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5b5a2278b36469103a9b903be7160805?s=256&d=identicon&r=PG",
+                "account_id": 335755,
+                "user_type": "registered",
+                "user_id": 663011,
+                "link": "https://stackoverflow.com/users/663011/saurabh-kumar",
+                "reputation": 16729,
+                "display_name": "Saurabh Kumar",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8901171,
+            "edited": false,
+            "creation_date": 1326831968,
+            "comment_id": 11132064
+        }
+    ]}
+}

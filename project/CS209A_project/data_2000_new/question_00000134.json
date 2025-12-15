@@ -1,0 +1,94 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lS9ZR.png?s=256",
+            "account_id": 10197972,
+            "user_type": "registered",
+            "user_id": 7529228,
+            "link": "https://stackoverflow.com/users/7529228/cactuschibre",
+            "reputation": 2505,
+            "display_name": "cactuschibre",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53260483/spring-integration-retry-configuration-with-multi-instances",
+        "last_activity_date": 1542296460,
+        "creation_date": 1542019461,
+        "answer_count": 2,
+        "title": "Spring Integration : retry configuration with multi-instances",
+        "body": "<p>I'm running 4 instances of Spring Boot Integration based apps on 4 differents servers.\nThe process is :<\/p>\n\n<ol>\n<li>Read XML files one by one in a shared folder. <\/li>\n<li>Process the file (check structure, content...), transform the data and send email. <\/li>\n<li>Write a report about this file in another shared folder. <\/li>\n<li>Delete successfully processed file.<\/li>\n<\/ol>\n\n<p>I'm looking for a non-blocking and safe solution to process theses files.<\/p>\n\n<p><strong>Use cases :<\/strong><\/p>\n\n<ul>\n<li>If an instance crashes while reading or processing a file (so without ending the integration chain) : another instance must process the file or the same instance must process the file after it restarts.<\/li>\n<li>If an instance is processing a file, the others instances must not process the file.<\/li>\n<\/ul>\n\n<p>I have built this Spring Integration XML configuration file (it includes JDBC metadatastore with a shared H2 database) :<\/p>\n\n<pre><code>    &lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\n    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n    xmlns:int=\"http://www.springframework.org/schema/integration\"\n    xmlns:int-file=\"http://www.springframework.org/schema/integration/file\"\n    xsi:schemaLocation=\"\n    http://www.springframework.org/schema/beans\n    http://www.springframework.org/schema/beans/spring-beans.xsd\n    http://www.springframework.org/schema/integration\n    http://www.springframework.org/schema/integration/spring-integration.xsd\n    http://www.springframework.org/schema/integration/file\n    http://www.springframework.org/schema/integration/file/spring-integration-file.xsd\"&gt;\n\n&lt;int:poller default=\"true\" fixed-rate=\"1000\"/&gt;\n&lt;int:channel id=\"inputFilesChannel\"&gt;\n    &lt;int:queue/&gt;\n&lt;/int:channel&gt;\n\n&lt;!-- Input --&gt;\n&lt;int-file:inbound-channel-adapter \n    id=\"inputFilesAdapter\"\n    channel=\"inputFilesChannel\"\n    directory=\"file:${input.files.path}\" \n    ignore-hidden=\"true\"\n    comparator=\"lastModifiedFileComparator\"\n    filter=\"compositeFilter\"&gt;\n   &lt;int:poller fixed-rate=\"10000\" max-messages-per-poll=\"1\"  task-executor=\"taskExecutor\"/&gt;\n&lt;/int-file:inbound-channel-adapter&gt;\n\n&lt;task:executor id=\"taskExecutor\" pool-size=\"1\"/&gt;\n\n&lt;!-- Metadatastore --&gt;\n&lt;bean id=\"jdbcDataSource\" class=\"org.apache.commons.dbcp.BasicDataSource\"&gt;\n    &lt;property name=\"url\" value=\"jdbc:h2:file:${database.path}/shared;AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE;MVCC=TRUE\"/&gt;\n    &lt;property name=\"driverClassName\" value=\"org.h2.Driver\"/&gt;\n    &lt;property name=\"username\" value=\"${database.username}\"/&gt;\n    &lt;property name=\"password\" value=\"${database.password}\"/&gt;\n    &lt;property name=\"maxIdle\" value=\"4\"/&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"jdbcMetadataStore\" class=\"org.springframework.integration.jdbc.metadata.JdbcMetadataStore\"&gt;\n    &lt;constructor-arg ref=\"jdbcDataSource\"/&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"transactionManager\" class=\"org.springframework.jdbc.datasource.DataSourceTransactionManager\"&gt;\n    &lt;property name=\"dataSource\" ref=\"jdbcDataSource\"/&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"compositeFilter\" class=\"org.springframework.integration.file.filters.CompositeFileListFilter\"&gt;\n    &lt;constructor-arg&gt;\n        &lt;list&gt;\n            &lt;bean class=\"org.springframework.integration.file.filters.FileSystemPersistentAcceptOnceFileListFilter\"&gt;\n                &lt;constructor-arg index=\"0\" ref=\"jdbcMetadataStore\"/&gt;\n                &lt;constructor-arg index=\"1\" value=\"files\"/&gt;\n            &lt;/bean&gt;\n        &lt;/list&gt;\n    &lt;/constructor-arg&gt;\n&lt;/bean&gt;\n\n&lt;!-- Workflow --&gt;\n&lt;int:chain input-channel=\"inputFilesChannel\" output-channel=\"outputFilesChannel\"&gt;\n    &lt;int:service-activator ref=\"fileActivator\" method=\"fileRead\"/&gt;\n    &lt;int:service-activator ref=\"fileActivator\" method=\"fileProcess\"/&gt;\n    &lt;int:service-activator ref=\"fileActivator\" method=\"fileAudit\"/&gt;\n&lt;/int:chain&gt;\n\n&lt;bean id=\"lastModifiedFileComparator\" class=\"org.apache.commons.io.comparator.LastModifiedFileComparator\"/&gt;\n\n&lt;int-file:outbound-channel-adapter \n    id=\"outputFilesChannel\" \n    directory=\"file:${output.files.path}\"\n    filename-generator-expression =\"payload.name\"&gt;\n    &lt;int-file:request-handler-advice-chain&gt;\n        &lt;bean class=\"org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice\"&gt;\n             &lt;property name=\"onSuccessExpressionString\" value=\"headers[file_originalFile].delete()\"/&gt;\n        &lt;/bean&gt;\n    &lt;/int-file:request-handler-advice-chain&gt;\n&lt;/int-file:outbound-channel-adapter&gt;\n\n&lt;/beans&gt;\n<\/code><\/pre>\n\n<p><strong>Problem :<\/strong> \nWith multiple files, when 1 file is successfully processed, the transaction commit the others existing files in the metadatastore (table <code>INT_METADATA_STORE<\/code>). So if the app is restarted, the other files will never be processed\n(it works fine if the app crashes when the first file is being processed).\nIt seems it only apply for reading files, not for processing files in an integration chain ... How to manage rollback transaction on JVM crash file by file ?<\/p>\n\n<p>Any help is very appreciated. It's going to make me crazy :(<\/p>\n\n<p>Thanks !<\/p>\n\n<p><strong>Edits / Notes :<\/strong><\/p>\n\n<ul>\n<li><p><em>Inspired from <a href=\"https://github.com/caoimhindenais/spring-integration-files/blob/master/src/main/resources/context.xml\" rel=\"nofollow noreferrer\">https://github.com/caoimhindenais/spring-integration-files/blob/master/src/main/resources/context.xml<\/a><\/em><\/p><\/li>\n<li><p><em>I have updated my configuration with the answer from Artem Bilan. And remove the <code>transactional<\/code> block in the <code>poller<\/code> block : I had conflict of transactions between instances (ugly table locks exceptions). Although the behaviour was the same.<\/em><\/p><\/li>\n<li><p><em>I have unsuccessfully tested this configuration in the <code>poller<\/code> block (same behaviour) :<\/em><\/p>\n\n<pre><code>&lt;int:advice-chain&gt;\n    &lt;tx:advice id=\"txAdvice\" transaction-manager=\"transactionManager\"&gt;\n        &lt;tx:attributes&gt;\n            &lt;tx:method name=\"file*\" timeout=\"30000\" propagation=\"REQUIRED\"/&gt;\n        &lt;/tx:attributes&gt;\n    &lt;/tx:advice&gt;\n&lt;/int:advice-chain&gt;\n<\/code><\/pre><\/li>\n<li><p><em>Maybe a solution based on <a href=\"https://docs.spring.io/spring-integration/reference/htmlsingle/#idempotent-receiver\" rel=\"nofollow noreferrer\">Idempotent Receiver Enterprise Integration Pattern<\/a> could work. But I didn't manage to configure it... I don't find precise documentation.<\/em><\/p><\/li>\n<\/ul>\n",
+        "question_id": 53260483,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "spring-integration"
+        ],
+        "score": 1,
+        "accepted_answer_id": 53322958,
+        "is_answered": true,
+        "view_count": 1412,
+        "last_edit_date": 1542282607
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2158ce6e7c048277890eb64458864c1c?s=256&d=identicon&r=PG",
+                "account_id": 3273937,
+                "user_type": "registered",
+                "user_id": 2756547,
+                "link": "https://stackoverflow.com/users/2756547/artem-bilan",
+                "reputation": 122596,
+                "display_name": "Artem Bilan",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1542033169,
+            "creation_date": 1542033169,
+            "body": "<p>You shouldn't use a <code>PseudoTransactionManager<\/code>, but <code>DataSourceTransactionManager<\/code> instead.<\/p>\n\n<p>Since you use a <code>JdbcMetadataStore<\/code>, it is going to participate in the transaction and if downstream flow fails, the entry in the metadata store is going to be rolled back as well.<\/p>\n",
+            "answer_id": 53264340,
+            "question_id": 53260483
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lS9ZR.png?s=256",
+                "account_id": 10197972,
+                "user_type": "registered",
+                "user_id": 7529228,
+                "link": "https://stackoverflow.com/users/7529228/cactuschibre",
+                "reputation": 2505,
+                "display_name": "cactuschibre",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1542296460,
+            "creation_date": 1542296460,
+            "body": "<p>Ok. I found a working solution. Maybe not the cleanest one but it works :<\/p>\n\n<ul>\n<li>Multi-instances on separate servers, sharing the same H2 database (network folder mount). I think it should work via remote TCP. MVCC has been activated on H2 (check its <a href=\"http://www.h2database.com/html/advanced.html#mvcc\" rel=\"nofollow noreferrer\">doc<\/a>).<\/li>\n<li><code>inbound-channel-adapter<\/code> has <code>scan-each-poll<\/code> option activated to permit repolling files that could be previously ignored (if the process already begun by another instance). So, if another instance crashes, the file can be polled and processed again without restart for this very instance.<\/li>\n<li>Option <code>defaultAutoCommit<\/code> is set to <code>false<\/code> on the DB.<\/li>\n<li>I didn't use the <code>FileSystemPersistentAcceptOnceFileListFilter<\/code> because it was aggregating all read files in the metadatastore when one file get successfully processed. I didn't manage to use it in my context ...<\/li>\n<li><p>I wrote my own conditions and actions in expressions through filter and transaction synchronization.<\/p>\n\n<pre><code>&lt;!-- Input --&gt;\n&lt;bean id=\"lastModifiedFileComparator\" class=\"org.apache.commons.io.comparator.LastModifiedFileComparator\"/&gt;\n&lt;int-file:inbound-channel-adapter\n    id=\"inputAdapter\"\n    channel=\"inputChannel\"\n    directory=\"file:${input.files.path}\"\n    comparator=\"lastModifiedFileComparator\"\n    scan-each-poll=\"true\"&gt;\n   &lt;int:poller max-messages-per-poll=\"1\" fixed-rate=\"5000\"&gt;\n        &lt;int:transactional transaction-manager=\"transactionManager\"  isolation=\"READ_COMMITTED\" propagation=\"REQUIRED\" timeout=\"60000\" synchronization-factory=\"syncFactory\"/&gt;\n   &lt;/int:poller&gt;\n&lt;/int-file:inbound-channel-adapter&gt;\n\n&lt;!-- Continue only if the concurrentmetadatastore doesn't contain the file. If if is not the case : insert it in the metadatastore --&gt;\n&lt;int:filter input-channel=\"inputChannel\" output-channel=\"processChannel\"  discard-channel=\"nullChannel\" throw-exception-on-rejection=\"false\" expression=\"@jdbcMetadataStore.putIfAbsent(headers[file_name], headers[timestamp]) == null\"/&gt;\n\n&lt;!-- Rollback by removing the file from the metadatastore --&gt;\n&lt;int:transaction-synchronization-factory id=\"syncFactory\"&gt;\n    &lt;int:after-rollback expression=\"@jdbcMetadataStore.remove(headers[file_name])\" /&gt;\n&lt;/int:transaction-synchronization-factory&gt;\n\n&lt;!-- Metadatastore configuration --&gt;\n&lt;bean id=\"jdbcDataSource\" class=\"org.apache.commons.dbcp.BasicDataSource\"&gt;\n    &lt;property name=\"url\" value=\"jdbc:h2:file:${database.path}/shared;AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE;MVCC=TRUE\"/&gt;\n    &lt;property name=\"driverClassName\" value=\"org.h2.Driver\"/&gt;\n    &lt;property name=\"username\" value=\"${database.username}\"/&gt;\n    &lt;property name=\"password\" value=\"${database.password}\"/&gt;\n    &lt;property name=\"maxIdle\" value=\"4\"/&gt;\n    &lt;property name=\"defaultAutoCommit\" value=\"false\"/&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"jdbcMetadataStore\" class=\"org.springframework.integration.jdbc.metadata.JdbcMetadataStore\"&gt;\n    &lt;constructor-arg ref=\"jdbcDataSource\"/&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"transactionManager\" class=\"org.springframework.jdbc.datasource.DataSourceTransactionManager\"&gt;\n    &lt;property name=\"dataSource\" ref=\"jdbcDataSource\"/&gt;\n&lt;/bean&gt;\n\n&lt;!-- Workflow --&gt;\n&lt;int:chain input-channel=\"processChannel\" output-channel=\"outputChannel\"&gt;\n    &lt;int:service-activator ref=\"fileActivator\" method=\"fileRead\"/&gt;\n    &lt;int:service-activator ref=\"fileActivator\" method=\"fileProcess\"/&gt;\n    &lt;int:service-activator ref=\"fileActivator\" method=\"fileAudit\"/&gt;\n&lt;/int:chain&gt;\n\n\n&lt;!-- Output --&gt;\n&lt;int-file:outbound-channel-adapter \n    id=\"outputChannel\" \n    directory=\"file:${output.files.path}\"\n    filename-generator-expression =\"payload.name\"&gt;\n    &lt;!-- Delete the source file --&gt;\n    &lt;int-file:request-handler-advice-chain&gt;\n        &lt;bean class=\"org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice\"&gt;\n             &lt;property name=\"onSuccessExpressionString\" value=\"headers[file_originalFile].delete()\"/&gt;\n        &lt;/bean&gt;\n    &lt;/int-file:request-handler-advice-chain&gt;\n&lt;/int-file:outbound-channel-adapter&gt;\n<\/code><\/pre><\/li>\n<\/ul>\n\n<p>Any improvement or other solution is welcome.<\/p>\n",
+            "answer_id": 53322958,
+            "question_id": 53260483
+        }
+    ],
+    "answer_comments": {"53264340": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lS9ZR.png?s=256",
+            "account_id": 10197972,
+            "user_type": "registered",
+            "user_id": 7529228,
+            "link": "https://stackoverflow.com/users/7529228/cactuschibre",
+            "reputation": 2505,
+            "display_name": "cactuschibre",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 53264340,
+        "edited": false,
+        "creation_date": 1542191794,
+        "comment_id": 93477115
+    }]}
+}

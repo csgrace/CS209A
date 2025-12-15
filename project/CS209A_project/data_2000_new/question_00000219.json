@@ -1,0 +1,131 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user11725387"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/56959431/how-do-pragmatically-login-to-a-website-from-an-android-app",
+        "last_activity_date": 1562708521,
+        "creation_date": 1562700589,
+        "answer_count": 0,
+        "title": "how do pragmatically login to a website from an android app?",
+        "body": "<p>OK,Recently i was trying to make an android app that logs in to a website my android app contains 3 text boxes and an image view the 3 text boxes will contain username, password and verification code and the image view will contain the code i want to make the user type in the verification text box  the username, password and verification code written in the image view but all of the 4 things are gotten from the website and after the text boxes are written in the app the data is send to the website and if the data is correct it will go to another page and the app will get data from that page (in the website) and display it in the app and the the user edit that data and click save and the data is sent back to the website <\/p>\n\n<p>that is the website am trying to login to <a href=\"https://noor.moe.gov.sa/noor/login.aspx\" rel=\"nofollow noreferrer\">https://noor.moe.gov.sa/noor/login.aspx<\/a><\/p>\n\n<p>any help?<\/p>\n\n<p>i have already tried HTTPUrlPost but the app just stops working!<\/p>\n\n<p>here is the code:\npublic class MainActivity extends AppCompatActivity {<\/p>\n\n<pre><code>EditText name,pass,verfi;\nButton save;\nImageView captcha;\n\nString url = \"https://noor.moe.gov.sa/noor/CAPTCHAImage.aspx?GUID=53eb1d8a-f61b-411e-8dd8-ad756e49771e\";\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main);\n    name = (EditText) findViewById(R.id.name);\n    pass = (EditText) findViewById(R.id.pass);\n    verfi = (EditText) findViewById(R.id.verf);\n    save = (Button) findViewById(R.id.button);\n    captcha = (ImageView) findViewById(R.id.cap);\n    String getname = name.getText().toString();\n    String getpass = name.getText().toString();\n    String getverf = name.getText().toString();\n    String data = \"tbPublic=name&amp;tbPrivate=password&amp;tbCaptcha=captcha\";\n    final String loginUrl = \"https://noor.moe.gov.sa/noor/login.aspx\";\n    final String Login = POST_req(loginUrl, data, 10000); /*last parameter is a limit of page content length*/\n\n    LoadImageFromURL(url);\n\n\n}\n\nprivate void LoadImageFromURL(String url) {\n    Picasso.with(this).load(url).placeholder(R.mipmap.ic_launcher)\n            .error(R.mipmap.ic_launcher).into(captcha,new com.squareup.picasso.Callback(){\n\n        @Override\n        public void onSuccess() {\n\n        }\n\n        @Override\n        public void onError() {\n\n        }\n    });\n}\n\n\n\n\n\n    public String POST_req(String url, String post_data, int len) {\n        URL addr = null;\n\n        try {\n            addr = new URL(url);\n        } catch (MalformedURLException e) {\n            return \"Некорректный URL\";\n        }\n        StringBuffer data = new StringBuffer();\n        HttpURLConnection conn = null;\n        try {\n            conn = (HttpURLConnection) addr.openConnection();\n        } catch (IOException e) {\n            return \"Open connection error\";\n        }\n        conn.setRequestProperty(\"Connection\", \"keep-alive\");\n        conn.setRequestProperty(\"Accept-Language\", \"ru,en-GB;q=0.8,en;q=0.6\");\n        conn.setRequestProperty(\"Accept-Charset\", \"utf-8\");\n        conn.setRequestProperty(\"Accept\", \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\");\n        conn.setRequestProperty(\"Cookie\", \"\");\n        conn.setDoOutput(true);\n        conn.setDoInput(true);\n        //conn.setInstanceFollowRedirects(true);\n        set_cookie(conn);\n\n        //POST data:\n        String post_str = post_data;\n        data.append(post_str);\n        try {\n            conn.connect();\n        } catch (IOException e) {\n            return \"Connecting error\";\n        }\n        DataOutputStream dataOS = null;\n        try {\n            dataOS = new DataOutputStream(conn.getOutputStream());\n        } catch (IOException e2) {\n            return \"Out stream error\";\n        }\n        try {\n            ((DataOutputStream) dataOS).writeBytes(data.toString());\n        } catch (IOException e) {\n            return \"Out stream error 1\";\n        }\n\n        /*If redirect: */\n        int status;\n        try {\n            status = conn.getResponseCode();\n        } catch (IOException e2) {\n            return \"Response error\";\n        }\n        if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_SEE_OTHER) {\n            String new_url = conn.getHeaderField(\"Location\");\n            String cookies = conn.getHeaderField(\"Set-Cookie\");\n            URL red_url;\n            try {\n                red_url = new URL(new_url);\n            } catch (MalformedURLException e) {\n                return \"Redirect error\";\n            }\n            try {\n                conn = (HttpURLConnection) red_url.openConnection();\n            } catch (IOException e) {\n                return \"Redirect connection error\";\n            }\n            //conn.setRequestProperty(\"Content-type\", \"text/html\");\n            conn.setRequestProperty(\"Connection\", \"keep-alive\");\n            conn.setRequestProperty(\"Accept-Language\", \"ru,en-GB;q=0.8,en;q=0.6\");\n            conn.setRequestProperty(\"Accept-Charset\", \"utf-8\");\n            conn.setRequestProperty(\"Accept\", \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\");\n            conn.setRequestProperty(\"Cookie\", cookies);\n            conn.setDoOutput(true);\n            conn.setDoInput(true);\n            //conn.setInstanceFollowRedirects(true);\n        }\n\n        java.io.InputStream in = null;\n        try {\n            in = (java.io.InputStream) conn.getInputStream();\n        } catch (IOException e) {\n            return \"In stream error\";\n        }\n        InputStreamReader reader = null;\n        try {\n            reader = new InputStreamReader(in, \"UTF-8\");\n        } catch (UnsupportedEncodingException e) {\n            return \"In stream error\";\n        }\n        char[] buf = new char[len];\n        try {\n            reader.read(buf);\n        } catch (IOException e) {\n            return \"In stream error\";\n        }\n        get_cookie(conn);\n\n        return (new String(buf));\n    }\n    public void get_cookie(HttpURLConnection conn) {\n        SharedPreferences sh_pref_cookie = getSharedPreferences(\"cookies\", Context.MODE_PRIVATE);\n        String cook_new;\n        String COOKIES_HEADER;\n        if (conn.getHeaderField(\"Set-Cookie\") != null) {\n            COOKIES_HEADER = \"Set-Cookie\";\n        }\n        else {\n            COOKIES_HEADER = \"Cookie\";\n        }\n        cook_new = conn.getHeaderField(COOKIES_HEADER);\n        if (cook_new.indexOf(\"sid\", 0) &gt;= 0) {\n            SharedPreferences.Editor editor = sh_pref_cookie.edit();\n            editor.putString(\"Cookie\", cook_new);\n            editor.commit();\n        }\n    }\n    public void set_cookie(HttpURLConnection conn) {\n        SharedPreferences sh_pref_cookie = getSharedPreferences(\"cookies\", Context.MODE_PRIVATE);\n        String COOKIES_HEADER = \"Cookie\";\n        String cook = sh_pref_cookie.getString(COOKIES_HEADER, \"no_cookie\");\n        if (!cook.equals(\"no_cookie\")) {\n            conn.setRequestProperty(COOKIES_HEADER, cook);\n        }\n    }\n<\/code><\/pre>\n",
+        "question_id": 56959431,
+        "tags": [
+            "java",
+            "android",
+            "android-studio"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 64,
+        "last_edit_date": 1562708521
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user11725387"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56959431,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1a5530da29f23682b10bb5568076f83d?s=256&d=identicon&r=PG",
+                "account_id": 2787344,
+                "user_type": "registered",
+                "user_id": 2398375,
+                "link": "https://stackoverflow.com/users/2398375/vince",
+                "reputation": 15210,
+                "display_name": "Vince",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1562708567,
+            "comment_id": 100459645
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user11725387"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56959431,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1a5530da29f23682b10bb5568076f83d?s=256&d=identicon&r=PG",
+                "account_id": 2787344,
+                "user_type": "registered",
+                "user_id": 2398375,
+                "link": "https://stackoverflow.com/users/2398375/vince",
+                "reputation": 15210,
+                "display_name": "Vince",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1562708271,
+            "comment_id": 100459570
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1a5530da29f23682b10bb5568076f83d?s=256&d=identicon&r=PG",
+                "account_id": 2787344,
+                "user_type": "registered",
+                "user_id": 2398375,
+                "link": "https://stackoverflow.com/users/2398375/vince",
+                "reputation": 15210,
+                "display_name": "Vince",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56959431,
+            "edited": false,
+            "creation_date": 1562701082,
+            "comment_id": 100457030
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user11725387"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56959431,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1a5530da29f23682b10bb5568076f83d?s=256&d=identicon&r=PG",
+                "account_id": 2787344,
+                "user_type": "registered",
+                "user_id": 2398375,
+                "link": "https://stackoverflow.com/users/2398375/vince",
+                "reputation": 15210,
+                "display_name": "Vince",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1562701040,
+            "comment_id": 100457014
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1a5530da29f23682b10bb5568076f83d?s=256&d=identicon&r=PG",
+                "account_id": 2787344,
+                "user_type": "registered",
+                "user_id": 2398375,
+                "link": "https://stackoverflow.com/users/2398375/vince",
+                "reputation": 15210,
+                "display_name": "Vince",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56959431,
+            "edited": false,
+            "creation_date": 1562700934,
+            "comment_id": 100456982
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

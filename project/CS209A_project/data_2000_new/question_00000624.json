@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Zq9tm.jpg?s=256",
+            "account_id": 93590,
+            "user_type": "registered",
+            "user_id": 255971,
+            "link": "https://stackoverflow.com/users/255971/mohamad-alhamoud",
+            "reputation": 4949,
+            "display_name": "Mohamad Alhamoud",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/4183720/java-server-reply-is-not-printed-as-expected",
+        "last_activity_date": 1289819780,
+        "creation_date": 1289819370,
+        "answer_count": 1,
+        "title": "Java Server reply is not printed as expected",
+        "body": "<p>I am building a simple client-server program , I have in main : <br/><\/p>\n\n<pre><code>FTPClient ftp = new FTPClient(\"www.kernel.org\");\nftp.getReply();\nftp.sendCommand(\"USER \" + \"anonymous\");\nftp.getReply();\nftp.sendCommand(\"PASS \" + \"anonymous\");\nftp.getReply();\nString com=\"\";\nwhile (!com.equalsIgnoreCase(\"quit\")){\n    System.out.println(\"Enter your Commands . or Enter quit\");\n    BufferedReader Keyboard = new BufferedReader(new InputStreamReader(System.in));\n    com = Keyboard.readLine();\n    ftp.sendCommand((com));\n    ftp.getReply();\n    System.out.println(\"===============\");\n}\nftp.close();\n<\/code><\/pre>\n\n<p>the problem is in the getReply() function, this function is :<\/p>\n\n<pre><code>public void getReply() throws IOException {\n    String line=\"\";\n    while (br.ready())\n    {\n        line = br.readline();\n        System.out.println(line);\n        System.out.flush();\n    }\n}\n<\/code><\/pre>\n\n<p><code>br<\/code> is a BufferedReader.<br/>Now all the problem is that when the program starts it doesn't show the welcome message from the Server until I press <code>Enter<\/code> or any command, when I Debug the program Step by Step every thing is working perfectly.So is the problem  in the <code>readline<\/code> and I should use something else or what?<\/p>\n",
+        "question_id": 4183720,
+        "tags": [
+            "java",
+            "client-server"
+        ],
+        "score": 0,
+        "accepted_answer_id": 4183767,
+        "is_answered": true,
+        "view_count": 273
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/YPWiu.png?s=256",
+            "account_id": 19462,
+            "user_type": "registered",
+            "user_id": 45664,
+            "link": "https://stackoverflow.com/users/45664/andrzej-doyle",
+            "reputation": 104113,
+            "display_name": "Andrzej Doyle",
+            "accept_rate": 91
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1289819780,
+        "creation_date": 1289819780,
+        "body": "<p>The problem is likely that the end of the server response does not contain a newline character.  The BufferedReader's <code>readLine<\/code> method will block until a line of data is received, where \"a line\" consists of some characters <em>followed by a newline character<\/em> (or the end of the stream).  Consequently, the readLine call will not return if no newline is received.<\/p>\n\n<p>In this situation then, the BufferedReader isn't doing you any good.  You'd be better off using the underlying Reader yourself, reading into an array and emitting the output as soon as it comes in, such as the following:<\/p>\n\n<pre><code>final char[] buffer = new char[256]; // or whatever size you want\nint nRead;\nwhile ((nRead = reader.read(buffer)) != -1)\n{\n    System.out.println(new String(buffer, 0, nRead));\n    System.out.flush();\n}\n<\/code><\/pre>\n\n<p>The condition in the <code>while<\/code> loop there might look confusing if you're not used to it before, but it combines the read operation (which reads into the buffer) with the check that the end of the stream has not been reached.  Likewise, the construction of the <code>String<\/code> within the while loop takes into account the fact that the buffer may not have been filled entirely, so only as many characters as were supplied are used.<\/p>\n\n<p>Note that this particular snippet keeps looping until the stream is empty; you may wish to add another exit condition in your particular case.<\/p>\n",
+        "answer_id": 4183767,
+        "question_id": 4183720
+    }],
+    "answer_comments": {"4183767": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Zq9tm.jpg?s=256",
+            "account_id": 93590,
+            "user_type": "registered",
+            "user_id": 255971,
+            "link": "https://stackoverflow.com/users/255971/mohamad-alhamoud",
+            "reputation": 4949,
+            "display_name": "Mohamad Alhamoud",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "post_id": 4183767,
+        "edited": false,
+        "creation_date": 1289819968,
+        "comment_id": 4520510
+    }]}
+}

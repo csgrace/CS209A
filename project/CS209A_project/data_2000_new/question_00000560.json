@@ -1,0 +1,268 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/1892710857405653/picture?type=large",
+            "account_id": 13287424,
+            "user_type": "registered",
+            "user_id": 9593060,
+            "link": "https://stackoverflow.com/users/9593060/mattia-surricchio",
+            "reputation": 1618,
+            "display_name": "Mattia Surricchio"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/50888578/add-a-custom-component-in-javafx",
+        "last_activity_date": 1529265612,
+        "creation_date": 1529157701,
+        "answer_count": 1,
+        "title": "Add a custom component in JavaFX",
+        "body": "<p>I would like to add a custom element into a VBox.<\/p>\n\n<p><strong>For example<\/strong>: being able to write <code>VBox.getChildren().add(element)<\/code> and <code>element<\/code> is a custom node created by me in FXML.<\/p>\n\n<p>I already followed this tutorial: <a href=\"https://docs.oracle.com/javafx/2/fxml_get_started/custom_control.htm\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javafx/2/fxml_get_started/custom_control.htm<\/a>\nbut the example only shows how to do this inside the same controller (a single controller, i already have my \"big\" controller, which is <code>WinnerController<\/code>, I would like to split the  two classes, one that manages the single element, and one that manages the whole scene <code>Winner.fxml<\/code>).<\/p>\n\n<p>I already have a class <code>WinnerController<\/code> which is the controller of my FXML <code>Winner.fxml<\/code>.<\/p>\n\n<p>Here the code of my <code>Winner.fxml<\/code>:<\/p>\n\n<pre><code>&lt;AnchorPane id=\"paneWinner\" fx:id=\"paneWinner\" prefHeight=\"800.0\" prefWidth=\"1280.0\" stylesheets=\"@winner.css\" xmlns=\"http://javafx.com/javafx/9.0.1\" xmlns:fx=\"http://javafx.com/fxml/1\" fx:controller=\"client.gui.WinnerController\"&gt;\n\n&lt;children&gt;\n  &lt;VBox layoutX=\"434.0\" layoutY=\"125.0\" prefHeight=\"250.0\" prefWidth=\"413.0\" spacing=\"10.0\"&gt;\n     &lt;children&gt;\n        &lt;AnchorPane id=\"leaderBoardElement\" prefHeight=\"80.0\" prefWidth=\"413.0\" stylesheets=\"@leaderBoard.css\"&gt;\n           &lt;children&gt;\n              &lt;Text layoutX=\"49.0\" layoutY=\"45.0\" strokeType=\"OUTSIDE\" strokeWidth=\"0.0\" text=\"Text\" wrappingWidth=\"107.13671875\" /&gt;\n           &lt;/children&gt;&lt;/AnchorPane&gt;\n     &lt;/children&gt;\n  &lt;/VBox&gt;\n<\/code><\/pre>\n\n<p>\n<\/p>\n\n<p>I would like to dynamically add element with the id \"leaderBoardElement\" (so an AnchorPane + Text) into my VBox.<\/p>\n\n<p>How can i do that?<\/p>\n\n<p><strong>Edit<\/strong>: I also tried with this solution:<a href=\"https://stackoverflow.com/questions/23600926/how-to-understand-and-use-fxroot-in-javafx\">How to understand and use `&lt;fx:root&gt;` , in JavaFX?<\/a>\nbut i keep getting nothing. When i do <code>vbox.getChildren().add(new MyComponent());\n<\/code> called in my <code>WinnerController<\/code>i get nothing. <\/p>\n\n<p>WinnerController class:<\/p>\n\n<pre><code>public class WinnerController implements Initializable {\n\n@FXML\nprivate VBox leaderBoard;\n\n@FXML\npublic void initialize(URL location, ResourceBundle resources)  {\n    System.out.println(\"Winner Init\");\n\n    MyComponent test = new MyComponent();\n    System.out.println(test);\n\n\n    // leaderBoard.getChildren().add(new MyComponent());\n}\n\n\n\n}\n<\/code><\/pre>\n\n<p>My Component class:<\/p>\n\n<pre><code>public class MyComponent extends AnchorPane {\n@FXML\nprivate TextField textField ;\n@FXML\nprivate Button button ;\npublic MyComponent() {\n    try {\n        FXMLLoader loader = new FXMLLoader(getClass().getResource(\"MyComponent.fxml\"));\n        loader.setController(this);\n        loader.setRoot(this);\n        loader.load();\n        textField.setText(\"HELLO!\");\n    } catch (IOException exc) {\n        // handle exception\n        System.out.println(\"ELEMENT NOT CREATE!!!\");\n\n    }\n  }\n}\n<\/code><\/pre>\n\n<p>Winner.fxml:<\/p>\n\n<pre><code>&lt;AnchorPane id=\"paneWinner\" fx:id=\"paneWinner\" prefHeight=\"800.0\" \n    prefWidth=\"1280.0\" stylesheets=\"@winner.css\" xmlns=\"http://javafx.com/javafx/9.0.1\" xmlns:fx=\"http://javafx.com/fxml/1\" fx:controller=\"client.gui.WinnerController\"&gt;\n     &lt;children&gt;\n  &lt;VBox fx:id=\"leaderBoard\" layoutX=\"434.0\" layoutY=\"125.0\" prefHeight=\"250.0\" prefWidth=\"413.0\" spacing=\"10.0\" /&gt;\n<\/code><\/pre>\n\n<p>\n<\/p>\n\n<p>MyComponent.fxml:<\/p>\n\n<pre><code>&lt;fx:root type=\"javafx.scene.layout.AnchorPane\" fx:id=\"leaderBoardElement\" id=\"leaderBoardElement\"&gt;\n&lt;TextField fx:id=\"textField\" /&gt;\n&lt;Button fx:id=\"button\" /&gt;\n<\/code><\/pre>\n\n<p><\/p>\n\n<p>And i call the creation and loading of <code>Winner.fxml<\/code> from another class like this:<\/p>\n\n<pre><code> FXMLLoader loader = new FXMLLoader(getClass().getResource(\"/Winner.fxml\"));\n                if (loader!=null)\n                    System.out.println(\"LOADER NOT NULL!!\");\n\n                try{\n                    System.out.println(\"TRY!\");\n\n                    Parent root = (Parent) loader.load();\n                    if(root!=null)\n                        System.out.println(\"ROOT NOT NULL!!\");\n\n                    Scene startedGame = new Scene(root, 1280, 800, Color.WHITE);\n                    if(startedGame!=null)\n                        System.out.println(\"SCENE NOT  NULL!\");\n\n                    Stage window = (Stage) paneCarta0.getScene().getWindow();\n                    if (window!=null)\n                        System.out.println(\"WINDOW NOT NULL!!\");\n\n                    window.setScene(startedGame);\n                    window.show();\n                    catch (IOException Exception) {\n                        System.out.println(\"View not found. Error while loading\");\n\n                }\n<\/code><\/pre>\n\n<p>The problem is inside the <code>new MyComponent()<\/code>, where probably i get an exception and it propagates to my main caller. I've tried everything but i can't figure out why it can't create the <code>MyComponent<\/code> object.<\/p>\n",
+        "question_id": 50888578,
+        "tags": [
+            "java",
+            "javafx"
+        ],
+        "score": 1,
+        "accepted_answer_id": 50889023,
+        "is_answered": true,
+        "view_count": 3327,
+        "last_edit_date": 1529171700
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 50888578,
+            "edited": false,
+            "creation_date": 1529161556,
+            "comment_id": 88779327
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1892710857405653/picture?type=large",
+                "account_id": 13287424,
+                "user_type": "registered",
+                "user_id": 9593060,
+                "link": "https://stackoverflow.com/users/9593060/mattia-surricchio",
+                "reputation": 1618,
+                "display_name": "Mattia Surricchio"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888578,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1529161508,
+            "comment_id": 88779316
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888578,
+            "edited": false,
+            "creation_date": 1529160883,
+            "comment_id": 88779157
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1892710857405653/picture?type=large",
+                "account_id": 13287424,
+                "user_type": "registered",
+                "user_id": 9593060,
+                "link": "https://stackoverflow.com/users/9593060/mattia-surricchio",
+                "reputation": 1618,
+                "display_name": "Mattia Surricchio"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888578,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1529160654,
+            "comment_id": 88779111
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888578,
+            "edited": false,
+            "creation_date": 1529160044,
+            "comment_id": 88778965
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1892710857405653/picture?type=large",
+                "account_id": 13287424,
+                "user_type": "registered",
+                "user_id": 9593060,
+                "link": "https://stackoverflow.com/users/9593060/mattia-surricchio",
+                "reputation": 1618,
+                "display_name": "Mattia Surricchio"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888578,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1529159985,
+            "comment_id": 88778952
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888578,
+            "edited": false,
+            "creation_date": 1529159722,
+            "comment_id": 88778888
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2tGDI.png?s=256",
+                "account_id": 8664592,
+                "user_type": "registered",
+                "user_id": 6485651,
+                "link": "https://stackoverflow.com/users/6485651/zephyr",
+                "reputation": 10303,
+                "display_name": "Zephyr",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 50888578,
+            "edited": false,
+            "creation_date": 1529159503,
+            "comment_id": 88778836
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9685f38927932bd2ff98f75aa9940629?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7747854,
+            "user_type": "registered",
+            "user_id": 5864903,
+            "link": "https://stackoverflow.com/users/5864903/staad",
+            "reputation": 856,
+            "display_name": "staad"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1529265612,
+        "creation_date": 1529161218,
+        "body": "<p>If your custom component is in a separate FXML file you can do this.<\/p>\n\n<p>In your <code>WinnerController<\/code> class:<\/p>\n\n<pre><code>@FXML\nprivate void initialize() throws IOException {\n    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getRessource(\"customElement.fxml\"));\n    fxmlLoader.setController(new CustomElementController()); //Or just specify the Controller in the FXML file\n    myVBox.getChildren().add(fxmlLoader.load());\n}\n<\/code><\/pre>\n\n<p>Edit: In this solution there should be NO <code>&lt;fx:include&gt;<\/code> tags in your main fxml<\/p>\n",
+        "answer_id": 50889023,
+        "question_id": 50888578,
+        "last_edit_date": 1529265612
+    }],
+    "answer_comments": {"50889023": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9685f38927932bd2ff98f75aa9940629?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7747854,
+                "user_type": "registered",
+                "user_id": 5864903,
+                "link": "https://stackoverflow.com/users/5864903/staad",
+                "reputation": 856,
+                "display_name": "staad"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50889023,
+            "reply_to_user": {
+                "profile_image": "https://graph.facebook.com/1892710857405653/picture?type=large",
+                "account_id": 13287424,
+                "user_type": "registered",
+                "user_id": 9593060,
+                "link": "https://stackoverflow.com/users/9593060/mattia-surricchio",
+                "reputation": 1618,
+                "display_name": "Mattia Surricchio"
+            },
+            "edited": false,
+            "creation_date": 1529265711,
+            "comment_id": 88799979
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1892710857405653/picture?type=large",
+                "account_id": 13287424,
+                "user_type": "registered",
+                "user_id": 9593060,
+                "link": "https://stackoverflow.com/users/9593060/mattia-surricchio",
+                "reputation": 1618,
+                "display_name": "Mattia Surricchio"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50889023,
+            "edited": false,
+            "creation_date": 1529167174,
+            "comment_id": 88780675
+        }
+    ]}
+}

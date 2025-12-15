@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7b80313a3e396f8d31ca90c36ed793a8?s=256&d=identicon&r=PG",
+            "account_id": 443707,
+            "user_type": "registered",
+            "user_id": 835084,
+            "link": "https://stackoverflow.com/users/835084/mino",
+            "reputation": 7318,
+            "display_name": "mino",
+            "accept_rate": 94
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/36892411/porting-java-object-including-state-trained-libsvm",
+        "last_activity_date": 1478535217,
+        "creation_date": 1461766400,
+        "answer_count": 1,
+        "title": "Porting Java object including state (trained LIBSVM)",
+        "body": "<p>This can pretty much be applied to any Java object, but I ask within the context of machine learning and specifically libsvm. I have an SVM trained on one live Java system. Is there a way to get a system to save the state of this sort of object and move the trained object to a different Java system?<\/p>\n\n<p>Thank you.<\/p>\n",
+        "question_id": 36892411,
+        "tags": [
+            "java",
+            "oop",
+            "object",
+            "machine-learning",
+            "libsvm"
+        ],
+        "score": 1,
+        "accepted_answer_id": 40469664,
+        "is_answered": true,
+        "view_count": 83
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3fc1138e52a00959a83cb949c53a3329?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4587113,
+            "user_type": "registered",
+            "user_id": 3721429,
+            "link": "https://stackoverflow.com/users/3721429/mgoksu",
+            "reputation": 569,
+            "display_name": "MGoksu"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 36892411,
+        "edited": false,
+        "creation_date": 1461769827,
+        "comment_id": 61351865
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/253acac93a901affc693387ea67e56fd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8214788,
+            "user_type": "registered",
+            "user_id": 6181599,
+            "link": "https://stackoverflow.com/users/6181599/thatguy",
+            "reputation": 22292,
+            "display_name": "thatguy"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1478535217,
+        "creation_date": 1478535217,
+        "body": "<p>Yes, there are several ways. The easiest is to serialize the trained <code>svm_model<\/code> like this with an <code>ObjectOutputStream<\/code>:<\/p>\n\n<pre><code>import java.io.*;\npublic class SerializeSVMModel {\n\n    public static void main(String [] args) {\n\n    // Set up your SVM model\n    svm_model model = svm_train(...);\n    // ...\n\n    try {\n\n        FileOutputStream fileOutputStream = new FileOutputStream(\"c:/svm/serialized_svm_model.ser\");\n        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream );\n\n        // Writes the object\n        objectOutputStream .writeObject(model );\n\n    } catch(IOException e) {\n        e.printStackTrace();\n    } finally {\n        if (objectOutputStream != null) {\n            objectOutputStream.close();\n        }\n    }\n\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>To deserialize the <code>model<\/code>, you use the <code>ObjectInputStream<\/code>.<\/p>\n\n<p>Another way is to use the <a href=\"https://de.wikipedia.org/wiki/Java_Architecture_for_XML_Binding\" rel=\"nofollow noreferrer\"><em>Java Architecture for XML Binding<\/em> (JAXB)<\/a>. In this case, you need to write a wrapper class to be able to access the fields of <code>svm_model<\/code>, because you need to mark them with annotations. This approach is better, since you have a human readable XML output file or other custom formats. However, you would need a lot of further reading for this.<\/p>\n",
+        "answer_id": 40469664,
+        "question_id": 36892411
+    }],
+    "answer_comments": {}
+}

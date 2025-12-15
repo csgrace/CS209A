@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-M-fbMDKea5A/AAAAAAAAAAI/AAAAAAAAAFE/23QCtWfKUB4/s256-rj/photo.jpg",
+            "account_id": 16498239,
+            "user_type": "registered",
+            "user_id": 11920187,
+            "link": "https://stackoverflow.com/users/11920187/sophie",
+            "reputation": 123,
+            "display_name": "Sophie"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75166828/deep-copy-with-lombok-tobuilder-within-a-nested-class-cleaner-way",
+        "last_activity_date": 1674091105,
+        "creation_date": 1674089963,
+        "answer_count": 1,
+        "title": "Deep copy with lombok toBuilder within a nested class - cleaner way?",
+        "body": "<pre><code>@Data\n@AllArgsConstructor\n@NoArgsConstructor\n@Builder(toBuilder = true)\npublic class Example {\n  public ExampleTwo exampleTwo;\n\n@lombok.Data\n@AllArgsConstructor\n@NoArgsConstructor\n@Builder(toBuilder = true)\npublic static class ExampleTwo {\n    private SomeData someData;\n    private AnotherField anotherField;\n\n   }\n\n}\n\n@Data\n@AllArgsConstructor\n@NoArgsConstructor\n@Builder(toBuilder = true)\npublic class SomeData {\n   private String specialId;\n   private String firstName;\n   private String lastName;\n\n}\n<\/code><\/pre>\n<p>So I retrieved an Example instance and made a deep copy to duplicate it. But I want to be able to set one of the fields of the copied object which is specialId from the SomeData nested class. My current working implementation is this:<\/p>\n<pre><code>     SomeData someData = example.getExampleTwo().getSomeData().toBuilder().specialID(&quot;SPE_1&quot;).build();\n     Example.ExampleTwo exampleTwo = example.getExampleTwo().toBuilder().someData(someData).build();\n     Example duplicateExample = example.toBuilder().exampleTwo(exampleTwo).build();\n<\/code><\/pre>\n<p>Do you have thoughts on ways to make this cleaner without having to go through these additional steps? Would prefer it to be easier to read. I'm avoiding Serializable implementation and declaring it as a Cloneable interface since I've read to avoid those. Last resort would be to use a library.<\/p>\n",
+        "question_id": 75166828,
+        "tags": [
+            "java",
+            "spring",
+            "lombok"
+        ],
+        "score": 0,
+        "accepted_answer_id": 75166913,
+        "is_answered": true,
+        "view_count": 3052
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/v58O6.jpg?s=256",
+            "account_id": 4181375,
+            "user_type": "registered",
+            "user_id": 3426309,
+            "link": "https://stackoverflow.com/users/3426309/andrey-b-panfilov",
+            "reputation": 6263,
+            "display_name": "Andrey B. Panfilov"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1674091105,
+        "creation_date": 1674091105,
+        "body": "<p><a href=\"https://projectlombok.org/features/With\" rel=\"nofollow noreferrer\"><code>@With<\/code><\/a> might be helpful:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>Example example = Example.builder().build();\nExample.ExampleTwo exampleTwo = example.getExampleTwo();\nSomeData someData = exampleTwo.getSomeData();\n\nreturn example.withExampleTwo(\n        exampleTwo.withSomeData(\n                someData.withSpecialId(&quot;SPE_1&quot;)\n        )\n);\n<\/code><\/pre>\n",
+        "answer_id": 75166913,
+        "question_id": 75166828
+    }],
+    "answer_comments": {}
+}

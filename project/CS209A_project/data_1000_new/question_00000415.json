@@ -1,0 +1,208 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+            "account_id": 5918235,
+            "user_type": "registered",
+            "user_id": 4656324,
+            "link": "https://stackoverflow.com/users/4656324/techcabana",
+            "reputation": 367,
+            "display_name": "TechCabana",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29734645/delete-listview-item-with-async-class",
+        "last_activity_date": 1435921236,
+        "creation_date": 1429471134,
+        "answer_count": 1,
+        "title": "Delete Listview item with Async Class?",
+        "body": "<p>I've got my listview which displays my database entries from my localhost db. I want to delete a row every time I click the listview item. Then the counter updates and the list is refreshed. Any ideas?<\/p>\n\n<p>Class:<\/p>\n\n<pre><code>public class ViewAllLocations extends ListActivity {\n\nString id;\n\n// Progress Dialog\nprivate ProgressDialog pDialog;\n\n// JSON parser class\nJSONParser jsonParser = new JSONParser();\n\nArrayList&lt;HashMap&lt;String, String&gt;&gt; profileList;\n\n// url to get all products list\nprivate static String url_all_profile = \"http://MYIP:8888/android_connect/get_all_location.php\";\n// url to delete product\nprivate static final String url_delete_profile = \"http://MYIP:8888/android_connect/delete_location.php\";\n\n// JSON Node names\nprivate static final String TAG_SUCCESS = \"success\";\nprivate static final String TAG_LOCATION = \"Location\";\nprivate static final String TAG_ID = \"id\";\nprivate static final String TAG_LATITUDE = \"latitude\";\nprivate static final String TAG_LONGITUDE = \"longitude\";\n\n\n// products JSONArray\nJSONArray userprofile = null;\n\nTextView locationCount;\nint count = 0;\nButton deleteLocation;\n\n\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_view_all_locations);\n    // Hashmap for ListView\n    profileList = new ArrayList&lt;HashMap&lt;String, String&gt;&gt;();\n\n    deleteLocation = (Button) findViewById(R.id.deleteLocation);\n    locationCount = (TextView) findViewById(R.id.locationCount);\n\n    // Loading products in Background Thread\n        new LoadAllLocation().execute();\n\n\n\n  // Get listview\n        ListView lo = getListView();\n        lo.setOnItemClickListener(new AdapterView.OnItemClickListener() {\n            @Override\n            public void onItemClick(AdapterView&lt;?&gt; parent, View view, int position, long id) {\n                new DeleteLocation().execute();\n                profileList.remove(position);\n            }\n        });\n    }\n\n    /*****************************************************************\n     * Background Async Task to Delete Product\n     * */\n    class DeleteLocation extends AsyncTask&lt;String, String, String&gt; {\n\n\n        /**\n     * Before starting background thread Show Progress Dialog\n     * */\n    @Override\n    protected void onPreExecute() {\n        super.onPreExecute();\n        pDialog = new ProgressDialog(ViewAllLocations.this);\n        pDialog.setMessage(\"Deleting Location...\");\n        pDialog.setIndeterminate(false);\n        pDialog.setCancelable(true);\n        pDialog.show();\n    }\n\n    /**\n     * Deleting product\n     * */\n    protected String doInBackground(String... args) {\n\n        // Check for success tag\n        int success;\n        try {\n            // Building Parameters\n            List&lt;NameValuePair&gt; params = new ArrayList&lt;NameValuePair&gt;();\n            params.add(new BasicNameValuePair(\"id\", id));\n\n            // getting product details by making HTTP request\n            JSONObject json = jsonParser.makeHttpRequest(\n                    url_delete_profile, \"POST\", params);\n\n            // check your log for json response\n            Log.d(\"Delete Product\", json.toString());\n\n            // json success tag\n            success = json.getInt(TAG_SUCCESS);\n            if (success == 1) {\n                // product successfully deleted\n                // notify previous activity by sending code 100\n               // Intent i = getIntent();\n                // send result code 100 to notify about product deletion\n                //setResult(100, i);\n                Toast.makeText(getApplicationContext(), \"Location Deleted\",\n                        Toast.LENGTH_SHORT).show();\n                finish();\n            }\n        } catch (JSONException e) {\n            e.printStackTrace();\n        }\n\n        return null;\n    }\n\n\n    /**\n     * After completing background task Dismiss the progress dialog\n     * **/\n    protected void onPostExecute(String file_url) {\n        // dismiss the dialog once product deleted\n        pDialog.dismiss();\n\n    }\n\n}\n\n/**\n * Background Async Task to Load all product by making HTTP Request\n * */\nclass LoadAllLocation extends AsyncTask&lt;String, String, String&gt; {\n\n    /**\n     * Before starting background thread Show Progress Dialog\n     * */\n    @Override\n    protected void onPreExecute() {\n        super.onPreExecute();\n        pDialog = new ProgressDialog(ViewAllLocations.this);\n        pDialog.setMessage(\"Loading Locations. Please wait...\");\n        pDialog.setIndeterminate(false);\n        pDialog.setCancelable(false);\n        pDialog.show();\n    }\n\n    /**\n     * getting All products from url\n     * */\n    protected String doInBackground(String... args) {\n        // Building Parameters\n        List&lt;NameValuePair&gt; params = new ArrayList&lt;NameValuePair&gt;();\n        // getting JSON string from URL\n        JSONObject json = jsonParser.makeHttpRequest(url_all_profile, \"GET\", params);\n\n        // Check your log cat for JSON reponse\n        Log.d(\"All Profiles: \", json.toString());\n\n        try {\n            // Checking for SUCCESS TAG\n            int success = json.getInt(TAG_SUCCESS);\n\n            if (success == 1) {\n                // products found\n                // Getting Array of Products\n                userprofile = json.getJSONArray(TAG_LOCATION);\n\n                // looping through All Products\n                for (int i = 0; i &lt; userprofile.length(); i++) {\n                    JSONObject c = userprofile.getJSONObject(i);\n\n                    // Storing each json item in variable\n                    String id = c.getString(TAG_ID);\n                    String latitude = c.getString(TAG_LATITUDE);\n                    String longitude = c.getString(TAG_LONGITUDE);\n\n\n                    // creating new HashMap\n                    HashMap&lt;String, String&gt; map = new HashMap&lt;String, String&gt;();\n\n                    // adding each child node to HashMap key =&gt; value\n                    map.put(TAG_ID, id);\n                    map.put(TAG_LATITUDE, latitude);\n                    map.put(TAG_LONGITUDE, longitude);\n\n\n                    // adding HashList to ArrayList\n                    profileList.add(map);\n                }\n            } else {\n                // no products found\n                // Launch Add New product Activity\n                Intent i = new Intent(getApplicationContext(),\n                        UserLocation.class);\n                // Closing all previous activities\n                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);\n                startActivity(i);\n            }\n        } catch (JSONException e) {\n            e.printStackTrace();\n        }\n\n        return null;\n    }\n\n    /**\n     * After completing background task Dismiss the progress dialog\n     * **/\n    protected void onPostExecute(String file_url) {\n        // dismiss the dialog after getting all products\n        pDialog.dismiss();\n        // updating UI from Background Thread\n        runOnUiThread(new Runnable() {\n            public void run() {\n                /**\n                 * Updating parsed JSON data into ListView\n                 * */\n\n\n                 ListAdapter adapter = new SimpleAdapter(\n                        ViewAllLocations.this, profileList,\n                        R.layout.locationitem, new String[] { TAG_ID,\n                        TAG_LATITUDE, TAG_LONGITUDE},\n                        new int[] { R.id.id, R.id.latitude, R.id.longitude});\n                // updating listview\n                setListAdapter(adapter);\n                locationCount.setText(\"\"+profileList.size());\n\n            }\n        });\n\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 29734645,
+        "tags": [
+            "java",
+            "android",
+            "listview",
+            "android-asynctask"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 254,
+        "last_edit_date": 1435921090
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+            "account_id": 5918235,
+            "user_type": "registered",
+            "user_id": 4656324,
+            "link": "https://stackoverflow.com/users/4656324/techcabana",
+            "reputation": 367,
+            "display_name": "TechCabana",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 29734645,
+        "reply_to_user": {
+            "profile_image": "https://i.sstatic.net/1pefW.png?s=256",
+            "account_id": 2529002,
+            "user_type": "registered",
+            "user_id": 2197700,
+            "link": "https://stackoverflow.com/users/2197700/anubian-noob",
+            "reputation": 13616,
+            "display_name": "Anubian Noob",
+            "accept_rate": 80
+        },
+        "edited": false,
+        "creation_date": 1429471538,
+        "comment_id": 47602553
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2ee4caf9894f5ff90a830478c84de6a3?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6073107,
+            "user_type": "registered",
+            "user_id": 4741246,
+            "link": "https://stackoverflow.com/users/4741246/divya-jain",
+            "reputation": 393,
+            "display_name": "Divya Jain"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1435921236,
+        "creation_date": 1429534435,
+        "body": "<p>When you get successfully delete product you also need to remove that product from your list. <\/p>\n\n<p>Using <code>yourList.remove(position)<\/code> and get your list refresh.<\/p>\n",
+        "answer_id": 29748456,
+        "question_id": 29734645,
+        "last_edit_date": 1435921236
+    }],
+    "answer_comments": {"29748456": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+                "account_id": 5918235,
+                "user_type": "registered",
+                "user_id": 4656324,
+                "link": "https://stackoverflow.com/users/4656324/techcabana",
+                "reputation": 367,
+                "display_name": "TechCabana",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29748456,
+            "edited": false,
+            "creation_date": 1429608539,
+            "comment_id": 47667048
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2ee4caf9894f5ff90a830478c84de6a3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6073107,
+                "user_type": "registered",
+                "user_id": 4741246,
+                "link": "https://stackoverflow.com/users/4741246/divya-jain",
+                "reputation": 393,
+                "display_name": "Divya Jain"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 29748456,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+                "account_id": 5918235,
+                "user_type": "registered",
+                "user_id": 4656324,
+                "link": "https://stackoverflow.com/users/4656324/techcabana",
+                "reputation": 367,
+                "display_name": "TechCabana",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1429595003,
+            "comment_id": 47659266
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+                "account_id": 5918235,
+                "user_type": "registered",
+                "user_id": 4656324,
+                "link": "https://stackoverflow.com/users/4656324/techcabana",
+                "reputation": 367,
+                "display_name": "TechCabana",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29748456,
+            "edited": false,
+            "creation_date": 1429544016,
+            "comment_id": 47636488
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+                "account_id": 5918235,
+                "user_type": "registered",
+                "user_id": 4656324,
+                "link": "https://stackoverflow.com/users/4656324/techcabana",
+                "reputation": 367,
+                "display_name": "TechCabana",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29748456,
+            "edited": false,
+            "creation_date": 1429543645,
+            "comment_id": 47636188
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+                "account_id": 5918235,
+                "user_type": "registered",
+                "user_id": 4656324,
+                "link": "https://stackoverflow.com/users/4656324/techcabana",
+                "reputation": 367,
+                "display_name": "TechCabana",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29748456,
+            "edited": false,
+            "creation_date": 1429541188,
+            "comment_id": 47634262
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2ee4caf9894f5ff90a830478c84de6a3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6073107,
+                "user_type": "registered",
+                "user_id": 4741246,
+                "link": "https://stackoverflow.com/users/4741246/divya-jain",
+                "reputation": 393,
+                "display_name": "Divya Jain"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29748456,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/m2Gxg.jpg?s=256",
+                "account_id": 5918235,
+                "user_type": "registered",
+                "user_id": 4656324,
+                "link": "https://stackoverflow.com/users/4656324/techcabana",
+                "reputation": 367,
+                "display_name": "TechCabana",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1429535793,
+            "comment_id": 47630177
+        }
+    ]}
+}

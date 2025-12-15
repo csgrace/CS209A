@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1ed5d7fef10eb76db7db215f8e282baa?s=256&d=identicon&r=PG",
+            "account_id": 275580,
+            "user_type": "registered",
+            "user_id": 2509368,
+            "link": "https://stackoverflow.com/users/2509368/nickpharris",
+            "reputation": 485,
+            "display_name": "nickpharris",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29203622/sharing-google-analytics-clientid-between-javascript-client-and-java-server",
+        "last_activity_date": 1446729867,
+        "creation_date": 1427087243,
+        "answer_count": 1,
+        "title": "Sharing Google Analytics ClientID between javascript client and java server",
+        "body": "<p>I have been using Google Analytics for basic analytics for my web app - just tracking page impressions using javascript calls like this:<\/p>\n\n<pre><code>ga('create', 'UA-XXXXXXXXX-1', 'mydomain.com');ga('send', 'pageview')\n<\/code><\/pre>\n\n<p>This approach has always frustrated me because I couldn't reliably capture some server-side events. I have just discovered I can use Measurement Protocol to record events server-side. Recording the events on my server looks easy, except regarding the cid (clientid) parameter...<\/p>\n\n<p>What I understand is that on the browser, with the javascript I currently have the cid gets randomly created and then stored in the _ga cookie. I also understand that I should share that clientid/cid value between client ('page view') and server (other events) calls for the same client so that they are correlated together.<\/p>\n\n<p><a href=\"https://stackoverflow.com/questions/14227331/what-is-the-client-id-when-sending-tracking-data-to-google-analytics-via-the-mea\">This StackOverflow link<\/a> was a helpful reference for me.<\/p>\n\n<p>Question is: should I<\/p>\n\n<ol>\n<li>Create a clientid on the server and then share it with the client; or<\/li>\n<li>Should I let the javascript on the client create the clientid and then try to share it with my server? (I suspect this is the better answer)<\/li>\n<\/ol>\n\n<p>For (1), what I was thinking I could do is:<\/p>\n\n<ul>\n<li>Store a UUID in the session on the server (which is google app engine)<\/li>\n<li>Directly use that UUID when I use Measurement Protocol to create events directly server-side<\/li>\n<li><p>Use the same UUID when I create a ga object on a page using jsp:<\/p>\n\n<pre><code>ga('create', 'UA-XXXXXXXXX-1', 'mydomain.com', \n{'clientId': '&lt;%=[value from the session]%&gt;'});\n<\/code><\/pre><\/li>\n<\/ul>\n\n<p>The thing that worries me about this approach is that the ID will only persist across the session on the server. I think the intent of the clientId (cid) is that it persists for the client over an extended period... So I think I will lose track of who is new versus returning user?<\/p>\n\n<p>For (2), frankly I don't know how to do this... I know from the above StackOverflow link that I can get the cid out of the clientId parameters in the ga object. I don't know how I would then send it back to my server (this is probably a simple javascript question).<\/p>\n\n<p>Would definitely appreciate advice on which approach to use.... thank you!<\/p>\n",
+        "question_id": 29203622,
+        "tags": [
+            "java",
+            "javascript",
+            "google-analytics",
+            "measurement-protocol"
+        ],
+        "score": 7,
+        "accepted_answer_id": 33545732,
+        "is_answered": true,
+        "view_count": 1135,
+        "last_edit_date": 1495542736
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ajihl.jpg?s=256",
+            "account_id": 333599,
+            "user_type": "registered",
+            "user_id": 659533,
+            "link": "https://stackoverflow.com/users/659533/andy-h",
+            "reputation": 536,
+            "display_name": "Andy H."
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1446729867,
+        "creation_date": 1446729867,
+        "body": "<p>I would also recommend you go with option 2: Let Google handle setting of <code>cid<\/code> parameter.<\/p>\n\n<p>Since the parameter is already set in the _ga cookie on your domain, it is passed to your app server with every HTTP request.<\/p>\n\n<p>All that you need to do is <strong>on the server side<\/strong> : <\/p>\n\n<ol>\n<li>Extract the CID from the _ga cookie<\/li>\n<li>Link it to the current user (your app probably uses its own session cookies to identify the user)<\/li>\n<\/ol>\n\n<p>For example, <a href=\"https://stackoverflow.com/questions/14227331/what-is-the-client-id-when-sending-tracking-data-to-google-analytics-via-the-mea\">this answer provides the Rails code<\/a>:<\/p>\n\n<pre><code>def save_google_analytics_client_id\n    if current_user &amp;&amp; cookies[\"_ga\"]\n      client_id = cookies[\"_ga\"].split(\".\").last(2).join(\".\")\n      if current_user.google_analytics_client_id != client_id\n        current_user.google_analytics_client_id = client_id\n        current_user.save\n      end\n    end\n  end\n<\/code><\/pre>\n",
+        "answer_id": 33545732,
+        "question_id": 29203622,
+        "last_edit_date": 1495541867
+    }],
+    "answer_comments": {}
+}

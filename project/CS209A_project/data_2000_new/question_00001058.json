@@ -1,0 +1,114 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Qxl6L.jpg?s=256",
+            "account_id": 308413,
+            "user_type": "registered",
+            "user_id": 620273,
+            "link": "https://stackoverflow.com/users/620273/blong824",
+            "reputation": 4030,
+            "display_name": "blong824",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/5197236/spring-jndi-configuration-server-xml",
+        "last_activity_date": 1421261266,
+        "creation_date": 1299260131,
+        "answer_count": 2,
+        "title": "Spring Jndi Configuration, Server.xml",
+        "body": "<p>I have a problem setting up my configuration for JNDI with Spring.  I checked the other posts but could not get my problem solved.  I am using Tomcat 6 as my container.  From my understanding I need to set up a resource on the server.  So in my <code>server.xml<\/code> file I have this:<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;GlobalNamingResources&gt;\n    &lt;Resource auth=&quot;Container&quot; driverClassName=&quot;org.postgresql.Driver&quot;\n            maxActive=&quot;100&quot; maxIdle=&quot;5&quot; maxWait=&quot;10000&quot;\n            minEvictableIdleTimeMillis=&quot;60000&quot; name=&quot;jdbc/myTomcatPool&quot;\n            password=&quot;password&quot; testOnBorrow=&quot;true&quot; testWhileIdle=&quot;true&quot;\n            timeBetweenEvictionRunsMillis=&quot;10000&quot; type=&quot;javax.sql.DataSource&quot;\n            url=&quot;jdbc:postgresql://localhost:5432/postgis&quot; username=&quot;postgres&quot;\n            validationQuery=&quot;SELECT 1&quot;/&gt;\n&lt;/GlobalNamingResources&gt;\n<\/code><\/pre>\n<p>I have the following in my <code>spring-context.xml<\/code> (which is on the classpath):<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;jee:jndi-lookup id=&quot;geoCodeData&quot; jndi-name=&quot;java:comp/env/jdbc/myTomcatPool&quot; /&gt;\n\n&lt;bean id=&quot;geoCodeService&quot; class=&quot;com.sample.SampleImpl&quot;&gt;\n    &lt;property name=&quot;dataSource&quot; ref=&quot;geoCodeData&quot;/&gt;\n&lt;/bean&gt;\n<\/code><\/pre>\n<p>I then have this in file <code>META-INF/context.xml<\/code>:<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;Context path=&quot;/myApp&quot; reloadable=&quot;true&quot; cacheMaxSize=&quot;51200&quot;\n        cacheObjectMaxSize=&quot;2560&quot;&gt;\n    &lt;ResourceLink global=&quot;jdbc/myTomcatPool&quot; name=&quot;jdbc/myTomcatPool&quot;\n            type=&quot;javax.sql.DataSource&quot;/&gt;\n&lt;/Context&gt;\n<\/code><\/pre>\n<p>My server starts up free of errors.<\/p>\n<p>When I try to run the following test (that worked before I added the JNDI code):<\/p>\n<pre><code>public class Test {\n    public static void main(String[] args) {\n        ApplicationContext ctx =\n            new ClassPathXmlApplicationContext(&quot;spring-context.xml&quot;);\n    }\n}\n<\/code><\/pre>\n<p>I get the following error:<\/p>\n<blockquote>\n<p>Exception in thread &quot;main&quot; org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'geoCodeData': Invocation of init method failed;<\/p>\n<p>nested exception is javax.naming.NoInitialContextException: Need to specify class name in environment or system property, or as an applet parameter, or in an application resource file:  java.naming.factory.initial<\/p>\n<\/blockquote>\n<p>Is my configuration wrong or is the way I am trying to run the test incorrect?<\/p>\n",
+        "question_id": 5197236,
+        "tags": [
+            "java",
+            "spring",
+            "configuration",
+            "jndi"
+        ],
+        "score": 7,
+        "accepted_answer_id": 5198022,
+        "is_answered": true,
+        "view_count": 41612,
+        "last_edit_date": 1592644375
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/cw2NL.jpg?s=256",
+                "account_id": 137377,
+                "user_type": "registered",
+                "user_id": 341508,
+                "link": "https://stackoverflow.com/users/341508/limc",
+                "reputation": 40296,
+                "display_name": "limc",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 11,
+            "is_accepted": true,
+            "last_activity_date": 1299264914,
+            "creation_date": 1299264914,
+            "body": "<p>When you run your testcases, you will want to use JDBC instead of JNDI lookup. The simple reason is because you usually don't run your testcases from the application server. Thus, JNDI lookup will fail.<\/p>\n\n<p>What I do on my end is to place data source in a separate file. I have one file for production that uses JNDI:-<\/p>\n\n<p><strong>project-datasource.xml<\/strong><\/p>\n\n<pre><code>&lt;jee:jndi-lookup id=\"geoCodeData\" jndi-name=\"java:comp/env/jdbc/myTomcatPool\"&gt;&lt;/jee:jndi-lookup&gt;\n<\/code><\/pre>\n\n<p>... another another file for unit test that uses JDBC:-<\/p>\n\n<p><strong>project-datasource-test.xml<\/strong><\/p>\n\n<pre><code>// use the same bean name \"geoCodeData\"\n&lt;bean id=\"geoCodeData\" class=\"...\"&gt;\n    &lt;property name=\"driverClassName\" value=\"...\" /&gt;\n    &lt;property name=\"url\" value=\"...\" /&gt;\n    &lt;property name=\"username\" value=\"...\" /&gt;\n    &lt;property name=\"password\" value=\"...\" /&gt;\n&lt;/bean&gt;\n<\/code><\/pre>\n\n<p>The web app will use <strong>project-datasource.xml<\/strong> whereas the unit test will use <strong>project-datasource-test.xml<\/strong>.<\/p>\n",
+            "answer_id": 5198022,
+            "question_id": 5197236
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3b008fbb67cecf320f80c398b012e764?s=256&d=identicon&r=PG",
+                "account_id": 151104,
+                "user_type": "registered",
+                "user_id": 364743,
+                "link": "https://stackoverflow.com/users/364743/geeb",
+                "reputation": 651,
+                "display_name": "Geeb",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1314976023,
+            "creation_date": 1314975595,
+            "body": "<p>After several hours of tearing out my (already sparse) hair I have managed to get my tomcat server to pool database connections to Oracle and use the Spring framework.\nI though I would reply to this question even though there seems to be an answer, just in case it helped anybody else.<\/p>\n\n<p>What I wanted:\nA connection pool administered by Tomcat (rather than per servlet) and the config for the DB connection in the Tomcat server config (again, rather than the servlet config files).<\/p>\n\n<p>We have several instances of Tomcat and each one connects to a specific Oracle DB, but developers are producing servlets that could be required to run on any one of them, hence I don't want the DB connection details in the WAR file they produce, but to let them look it up and be provided with that server's data source, via JNDI.<\/p>\n\n<p>In the <em>Tomcat server<\/em> <code>conf/context.xml<\/code> I added the following code:<\/p>\n\n<hr>\n\n<pre><code>&lt;Resource       name=\"jdbc/banner\"\n                auth=\"Container\"\n            factory=\"org.apache.commons.dbcp.BasicDataSourceFactory\"\n                    type=\"javax.sql.DataSource\"\n                    driverClassName=\"oracle.jdbc.OracleDriver\"\n                    url=\"jdbc:oracle:thin:@DBan8DB1.example.ac.uk:1522:bde8\"\n            username=\"dbsro\"\n            password=\"verysecret\"\n            initialSize=\"5\"\n            maxActive=\"20\"\n            maxIdle=\"10\"\n            removeAbandoned=\"true\"\n            global=\"jdbc/banner\"\n            maxWait=\"-1\"/&gt;\n<\/code><\/pre>\n\n<hr>\n\n<p>Obviously I have the ojdbc, pool and dbcp JAR files present in Tomcat's <code>lib<\/code> directory on the server.\nAn important point to note here is that the <code>type<\/code> is of <code>\"javax.sql.DataSource\"<\/code> rather than <code>\"org.apache.commons.dbcp.BasicDataSource\"<\/code> which I originally thought it should be.<\/p>\n\n<p>Now in the <em>Web Application's<\/em> <code>WEB-INF/web.xml<\/code> I added the following:<\/p>\n\n<hr>\n\n<pre><code>   &lt;resource-ref&gt;\n        &lt;description&gt;Oracle Banner Datasource&lt;/description&gt;\n        &lt;res-ref-name&gt;jdbc/banner&lt;/res-ref-name&gt;\n        &lt;res-type&gt;javax.sql.DataSource&lt;/res-type&gt;\n        &lt;res-auth&gt;Container&lt;/res-auth&gt;\n    &lt;/resource-ref&gt;\n<\/code><\/pre>\n\n<hr>\n\n<p>and in my <em>Web Application's<\/em> <code>servlet-context.xml<\/code> file (where ever you keep yours might vary) I had this. This is not the whole file but the XML name space is important here, for the jee parts:<\/p>\n\n<hr>\n\n<pre><code>&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:context=\"http://www.springframework.org/schema/context\"\nxmlns:jee=\"http://www.springframework.org/schema/jee\" xmlns:mvc=\"http://www.springframework.org/schema/mvc\"\nxsi:schemaLocation=\"\n    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd\n    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd\n    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd\n    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd\"&gt;\n\n\n&lt;jee:jndi-lookup id=\"dataSource\" jndi-name=\"java:comp/env/jdbc/banner\" resource-ref=\"true\" /&gt;\n<\/code><\/pre>\n\n<hr>\n\n<p>Again note the fully qualified reference <code>jndi-name=\"java:comp/env/jdbc/banner\"<\/code> which seemed to be required. Why is isn't needed in the resource-ref section of the <code>web.xml<\/code> file, I have no idea.<\/p>\n\n<p>If anyone has any thoughts on this I would be pleased to read them.<\/p>\n\n<p>By the way, this URL helped: <a href=\"https://tomcat.apache.org/tomcat-6.0-doc/jndi-datasource-examples-howto.html#Oracle_8i,_9i_&amp;_10g\" rel=\"nofollow\">Tomcat6 JNDI data source how-to<\/a><\/p>\n\n<p>After all that, the connection worked. So I mopped the blood, sweat and tears from my work station and enjoyed a delicious cup of fresh coffee.<\/p>\n",
+            "answer_id": 7285342,
+            "question_id": 5197236,
+            "last_edit_date": 1314976023
+        }
+    ],
+    "answer_comments": {"5198022": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/CAlXE.jpg?s=256",
+                "account_id": 2077773,
+                "user_type": "registered",
+                "user_id": 1850609,
+                "link": "https://stackoverflow.com/users/1850609/acdcjunior",
+                "reputation": 136196,
+                "display_name": "acdcjunior"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 5198022,
+            "edited": false,
+            "creation_date": 1386189960,
+            "comment_id": 30438284
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Qxl6L.jpg?s=256",
+                "account_id": 308413,
+                "user_type": "registered",
+                "user_id": 620273,
+                "link": "https://stackoverflow.com/users/620273/blong824",
+                "reputation": 4030,
+                "display_name": "blong824",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5198022,
+            "edited": false,
+            "creation_date": 1299266566,
+            "comment_id": 5843289
+        }
+    ]}
+}

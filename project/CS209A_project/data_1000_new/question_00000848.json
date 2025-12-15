@@ -1,0 +1,355 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8acc360915702814b41209dfad497d37?s=256&d=identicon&r=PG",
+            "account_id": 2200873,
+            "user_type": "registered",
+            "user_id": 1945306,
+            "link": "https://stackoverflow.com/users/1945306/idoda",
+            "reputation": 6458,
+            "display_name": "idoda",
+            "accept_rate": 66
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/31815778/converting-cassandra-blob-type-to-string",
+        "last_activity_date": 1487967135,
+        "creation_date": 1438709834,
+        "answer_count": 4,
+        "title": "Converting cassandra blob type to string",
+        "body": "<p>I have an old column family which has a column named \"value\" which was defined as a blob data type. This column usually holds two numbers separated with an underscore, like \"421_2\". <\/p>\n\n<p>When im using the python datastax driver and execute the query, the results return with that field parsed as a string:<\/p>\n\n<pre><code>In [21]: session.execute(q)\nOut[21]: \n[Row(column1=4776015, value='145_0'),\n Row(column1=4891778, value='114_0'),\n Row(column1=4891780, value='195_0'),\n Row(column1=4893662, value='105_0'),\n Row(column1=4893664, value='115_0'),\n Row(column1=4898493, value='168_0'),\n Row(column1=4945162, value='148_0'),\n Row(column1=4945163, value='131_0'),\n Row(column1=4945168, value='125_0'),\n Row(column1=4945169, value='211_0'),\n Row(column1=4998426, value='463_0')]\n<\/code><\/pre>\n\n<p>When I use the java driver I get a com.datastax.driver.core.Row object back. When I try to read the value field by, for example, <code>row.getString(\"value\")<\/code> I get the expected <code>InvalidTypeException: Column value is of type blob<\/code>. Seems like the only way to read the field is via <code>row.getBytes(\"value\")<\/code> and then I get back an <code>java.nio.HeapByteBuffer<\/code> object.<\/p>\n\n<p>Problem is, I cant seem to convert this object to string in an easy fashion. Googling yielded two answers from 2012 that suggest the following:<\/p>\n\n<pre><code>String string_value = new String(result.getBytes(\"value\"), \"UTF-8\");\n<\/code><\/pre>\n\n<p>But such a String constructor doesn't seems to exist anymore.\nSo, my questions are:<\/p>\n\n<ol>\n<li>How do I convert HeapByteBuffer into string?<\/li>\n<li>How come the python driver converted the blob easily and the java one did not?<\/li>\n<\/ol>\n\n<p>Side Note:\nI could debug the python driver, but currently that seems too much work for something that should be trivial. (and the fact that no one asked about it suggests Im missing something simple here..)<\/p>\n",
+        "question_id": 31815778,
+        "tags": [
+            "java",
+            "cassandra",
+            "blob",
+            "cql",
+            "datastax"
+        ],
+        "score": 6,
+        "accepted_answer_id": 31821956,
+        "is_answered": true,
+        "view_count": 23675
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9316155dc87084cae02134965332dc3d?s=256&d=identicon&r=PG",
+                "account_id": 272330,
+                "user_type": "registered",
+                "user_id": 563353,
+                "link": "https://stackoverflow.com/users/563353/popcorny",
+                "reputation": 1956,
+                "display_name": "popcorny"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 13,
+            "is_accepted": true,
+            "last_activity_date": 1438737960,
+            "creation_date": 1438737960,
+            "body": "<p>Another easier way is to change the CQL statement.<\/p>\n\n<pre><code>select column1, blobastext(value) from YourTable where key = xxx\n<\/code><\/pre>\n\n<p>The second column would be type of String.<\/p>\n",
+            "answer_id": 31821956,
+            "question_id": 31815778
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c36778b79fea1b7754711c541ce81af6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4661214,
+                "user_type": "registered",
+                "user_id": 3775443,
+                "link": "https://stackoverflow.com/users/3775443/olivier-michallat",
+                "reputation": 2312,
+                "display_name": "Olivier Michallat"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": false,
+            "last_activity_date": 1438718421,
+            "creation_date": 1438718421,
+            "body": "<p>You can also get direct access to the Java driver's serializers. This way you don't have to deal with low-level details, and it also works for other types.<\/p>\n\n<p>Driver 2.0.x:<\/p>\n\n<pre><code>String s = (String)DataType.text().deserialize(byteBuffer);\n<\/code><\/pre>\n\n<p>Driver 2.1.x:<\/p>\n\n<pre><code>ProtocolVersion protocolVersion = cluster.getConfiguration().getProtocolOptions().getProtocolVersion();\nString s = (String)DataType.text().deserialize(byteBuffer, protocolVersion);\n<\/code><\/pre>\n\n<p>Driver 2.2.x:<\/p>\n\n<pre><code>ProtocolVersion protocolVersion = cluster.getConfiguration().getProtocolOptions().getProtocolVersion();\nString s = TypeCodec.VarcharCodec.instance.deserialize(byteBuffer, protocolVersion);\n<\/code><\/pre>\n",
+            "answer_id": 31818219,
+            "question_id": 31815778
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1a5d2ffc894db53a3f546747e368006c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10328220,
+                "user_type": "registered",
+                "user_id": 7619035,
+                "link": "https://stackoverflow.com/users/7619035/jenna",
+                "reputation": 11,
+                "display_name": "Jenna"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1487967135,
+            "creation_date": 1487967135,
+            "body": "<p>For version 3.1.4 of the datastax java driver the following will convert a blob to a string:<\/p>\n\n<pre><code>ProtocolVersion proto = cluster.getConfiguration().getProtocolOptions().getProtocolVersion();\n\nString deserialize = TypeCodec.varchar().deserialize(row.getBytes(i), proto);\n<\/code><\/pre>\n",
+            "answer_id": 42447459,
+            "question_id": 31815778
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/zXFJg.jpg?s=256",
+                "account_id": 10854,
+                "user_type": "registered",
+                "user_id": 20688,
+                "link": "https://stackoverflow.com/users/20688/adam-holmberg",
+                "reputation": 7365,
+                "display_name": "Adam Holmberg",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1438714854,
+            "creation_date": 1438714854,
+            "body": "<p>1.) Converting from byte buffer in Java is discussed in <a href=\"https://stackoverflow.com/a/26720655/20688\">this answer<\/a>.<\/p>\n\n<p>2.) Assuming you're using Python 2, it's coming back as a string in Python because str is the binary type.<\/p>\n",
+            "answer_id": 31817167,
+            "question_id": 31815778,
+            "last_edit_date": 1495540025
+        }
+    ],
+    "answer_comments": {
+        "31818219": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/05551bec06c5e0ef814da865326f7135?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 2333599,
+                    "user_type": "registered",
+                    "user_id": 2046426,
+                    "link": "https://stackoverflow.com/users/2046426/andrew-james-ramirez",
+                    "reputation": 524,
+                    "display_name": "Andrew James Ramirez",
+                    "accept_rate": 44
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31818219,
+                "edited": false,
+                "creation_date": 1466067573,
+                "comment_id": 63167244
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/734bc2ff4cc537d045813b4bdb400f1d?s=256&d=identicon&r=PG",
+                    "account_id": 1259980,
+                    "user_type": "registered",
+                    "user_id": 1218544,
+                    "link": "https://stackoverflow.com/users/1218544/artii",
+                    "reputation": 180,
+                    "display_name": "Artii",
+                    "accept_rate": 33
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31818219,
+                "edited": false,
+                "creation_date": 1448042696,
+                "comment_id": 55431558
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8acc360915702814b41209dfad497d37?s=256&d=identicon&r=PG",
+                    "account_id": 2200873,
+                    "user_type": "registered",
+                    "user_id": 1945306,
+                    "link": "https://stackoverflow.com/users/1945306/idoda",
+                    "reputation": 6458,
+                    "display_name": "idoda",
+                    "accept_rate": 66
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31818219,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/D2fkQ.jpg?s=256",
+                    "account_id": 60456,
+                    "user_type": "registered",
+                    "user_id": 1054558,
+                    "link": "https://stackoverflow.com/users/1054558/aaron",
+                    "reputation": 58040,
+                    "display_name": "Aaron",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1438764332,
+                "comment_id": 51578199
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/D2fkQ.jpg?s=256",
+                    "account_id": 60456,
+                    "user_type": "registered",
+                    "user_id": 1054558,
+                    "link": "https://stackoverflow.com/users/1054558/aaron",
+                    "reputation": 58040,
+                    "display_name": "Aaron",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 31818219,
+                "edited": false,
+                "creation_date": 1438718564,
+                "comment_id": 51561694
+            }
+        ],
+        "31821956": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/523221e5dee3b803feab95c789c05487?s=256&d=identicon&r=PG",
+                    "account_id": 2164963,
+                    "user_type": "registered",
+                    "user_id": 1918268,
+                    "link": "https://stackoverflow.com/users/1918268/jgmjgm",
+                    "reputation": 4743,
+                    "display_name": "jgmjgm"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 31821956,
+                "edited": false,
+                "creation_date": 1559559706,
+                "comment_id": 99446574
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2155435d66eb4390311872cabead5393?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 7332214,
+                    "user_type": "registered",
+                    "user_id": 5584716,
+                    "link": "https://stackoverflow.com/users/5584716/monk",
+                    "reputation": 2125,
+                    "display_name": "monk",
+                    "accept_rate": 96
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 31821956,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/523221e5dee3b803feab95c789c05487?s=256&d=identicon&r=PG",
+                    "account_id": 2164963,
+                    "user_type": "registered",
+                    "user_id": 1918268,
+                    "link": "https://stackoverflow.com/users/1918268/jgmjgm",
+                    "reputation": 4743,
+                    "display_name": "jgmjgm"
+                },
+                "edited": false,
+                "creation_date": 1559170429,
+                "comment_id": 99341588
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/05551bec06c5e0ef814da865326f7135?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 2333599,
+                    "user_type": "registered",
+                    "user_id": 2046426,
+                    "link": "https://stackoverflow.com/users/2046426/andrew-james-ramirez",
+                    "reputation": 524,
+                    "display_name": "Andrew James Ramirez",
+                    "accept_rate": 44
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31821956,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8acc360915702814b41209dfad497d37?s=256&d=identicon&r=PG",
+                    "account_id": 2200873,
+                    "user_type": "registered",
+                    "user_id": 1945306,
+                    "link": "https://stackoverflow.com/users/1945306/idoda",
+                    "reputation": 6458,
+                    "display_name": "idoda",
+                    "accept_rate": 66
+                },
+                "edited": false,
+                "creation_date": 1466065445,
+                "comment_id": 63165851
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8acc360915702814b41209dfad497d37?s=256&d=identicon&r=PG",
+                    "account_id": 2200873,
+                    "user_type": "registered",
+                    "user_id": 1945306,
+                    "link": "https://stackoverflow.com/users/1945306/idoda",
+                    "reputation": 6458,
+                    "display_name": "idoda",
+                    "accept_rate": 66
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31821956,
+                "edited": false,
+                "creation_date": 1439209552,
+                "comment_id": 51751508
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9316155dc87084cae02134965332dc3d?s=256&d=identicon&r=PG",
+                    "account_id": 272330,
+                    "user_type": "registered",
+                    "user_id": 563353,
+                    "link": "https://stackoverflow.com/users/563353/popcorny",
+                    "reputation": 1956,
+                    "display_name": "popcorny"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31821956,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8acc360915702814b41209dfad497d37?s=256&d=identicon&r=PG",
+                    "account_id": 2200873,
+                    "user_type": "registered",
+                    "user_id": 1945306,
+                    "link": "https://stackoverflow.com/users/1945306/idoda",
+                    "reputation": 6458,
+                    "display_name": "idoda",
+                    "accept_rate": 66
+                },
+                "edited": false,
+                "creation_date": 1438784416,
+                "comment_id": 51592154
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8acc360915702814b41209dfad497d37?s=256&d=identicon&r=PG",
+                    "account_id": 2200873,
+                    "user_type": "registered",
+                    "user_id": 1945306,
+                    "link": "https://stackoverflow.com/users/1945306/idoda",
+                    "reputation": 6458,
+                    "display_name": "idoda",
+                    "accept_rate": 66
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31821956,
+                "edited": false,
+                "creation_date": 1438778727,
+                "comment_id": 51587714
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8acc360915702814b41209dfad497d37?s=256&d=identicon&r=PG",
+                    "account_id": 2200873,
+                    "user_type": "registered",
+                    "user_id": 1945306,
+                    "link": "https://stackoverflow.com/users/1945306/idoda",
+                    "reputation": 6458,
+                    "display_name": "idoda",
+                    "accept_rate": 66
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31821956,
+                "edited": false,
+                "creation_date": 1438763595,
+                "comment_id": 51577761
+            }
+        ]
+    }
+}

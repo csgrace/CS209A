@@ -1,0 +1,263 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/38e9065db8f6cef513444441df38d1db?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4000610,
+            "user_type": "registered",
+            "user_id": 3296736,
+            "link": "https://stackoverflow.com/users/3296736/corejavare",
+            "reputation": 1469,
+            "display_name": "coreJavare",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25196168/what-jvm-do-with-marker-interface-in-java",
+        "last_activity_date": 1524847896,
+        "creation_date": 1407472874,
+        "answer_count": 4,
+        "title": "what jvm do with marker interface in java",
+        "body": "<p>As question said what JVM gives extra treatment to classes implementing Marker interface .\nFor example I have test it using Serializable like below:<\/p>\n\n<p>import java.io.*;<\/p>\n\n<pre><code>public class SerialazationDemo {\n    public static void main(String[] args) {\n        //serialized object\n/*      Employee e = new Employee();\n        e.name = \"Reyan Ali\";\n        e.address = \"Phokka Kuan, Ambehta Peer\";\n        e.SSN = 11122333;\n        e.number = 101;\n        try {\n            FileOutputStream fileOut = new FileOutputStream(\"E:\\\\temp\\\\employee.ser\");\n            ObjectOutputStream out = new ObjectOutputStream(fileOut);\n            out.writeObject(e);\n            out.close();\n            fileOut.close();\n            System.out.printf(\"Serialized data is saved in /tmp/employee.ser\");\n        } catch (IOException i) {\n            i.printStackTrace();\n        }*/\n\n        //deserialized object\n         Employee e = null;\n          try\n          {\n             FileInputStream fileIn = new FileInputStream(\"E:\\\\temp\\\\employee.ser\");\n             ObjectInputStream in = new ObjectInputStream(fileIn);\n             e = (Employee) in.readObject();\n             in.close();\n             fileIn.close();\n          }catch(IOException i)\n          {\n             i.printStackTrace();\n             return;\n          }catch(ClassNotFoundException c)\n          {\n             System.out.println(\"Employee class not found\");\n             c.printStackTrace();\n             return;\n          }\n          System.out.println(\"Deserialized Employee...\");\n          System.out.println(\"Name: \" + e.name);\n          System.out.println(\"Address: \" + e.address);\n          System.out.println(\"SSN: \" + e.SSN);\n          System.out.println(\"Number: \" + e.number);\n    }\n}\n\nclass Employee {\n    public String name;\n    public String address;\n    public transient int SSN;\n    public int number;\n\n    public void mailCheck() {\n        System.out.println(\"Mailing a check to \" + name + \" \" + address);\n    }\n}\n<\/code><\/pre>\n\n<p>And i found that jvm gives exception as java.io.NotSerializableException But FILES was created on given path, similar exception for deserialization. So why JVM required it to be serialized , It could directly allow creating a serialization.?<\/p>\n",
+        "question_id": 25196168,
+        "tags": [
+            "java",
+            "serialization",
+            "jvm",
+            "marker-interfaces"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1227
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+            "account_id": 71739,
+            "user_type": "registered",
+            "user_id": 207421,
+            "link": "https://stackoverflow.com/users/207421/user207421",
+            "reputation": 311880,
+            "display_name": "user207421",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 25196168,
+        "edited": false,
+        "creation_date": 1407475168,
+        "comment_id": 39237696
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1407474829,
+            "creation_date": 1407473729,
+            "body": "<blockquote>\n  <p>question said what JVM gives extra treatment to classes implementing Marker interface<\/p>\n<\/blockquote>\n\n<p>The correct answer to that question is <em>nothing.<\/em> But it probably requires eludication, as the questioner may be using terms imprecisely.<\/p>\n\n<p>The <strong><em>JRE<\/em><\/strong> treats them specially in appropriate places. This action is located in the Java Class Library, not in the JVM. For example:<\/p>\n\n<ul>\n<li><code>Object.clone()<\/code> tests that the object implements <code>Cloneable.<\/code><\/li>\n<li><code>ObjectOutputStream.writeObject()<\/code> tests that the object being written implements <code>Serializable.<\/code><\/li>\n<li><code>rmic<\/code> and parts of the RMI runtime test that a remote object implements a remote interface, which means an interface that extends <code>Remote.<\/code><\/li>\n<\/ul>\n\n<p>This has nothing to do with the JVM <em>per se.<\/em><\/p>\n\n<blockquote>\n  <p>I found that jvm gives exception as java.io.NotSerializableException<\/p>\n<\/blockquote>\n\n<p>No you didn't. You found that <code>ObjectOutputStream.writeObject()<\/code> threw an exception. It isn't the same thing.<\/p>\n\n<blockquote>\n  <p>But FILES was created on given path<\/p>\n<\/blockquote>\n\n<p>The file was created by <code>new FileOutputStream(...),<\/code> which had already executed before you got the exception.<\/p>\n\n<blockquote>\n  <p>So why JVM required it to be serialized , It could directly allow creating a serialization.?<\/p>\n<\/blockquote>\n\n<p>It doesn't. See above. But <code>ObjectOutputStream.writeObject()<\/code> does, and it does so because making everything <code>Serializable<\/code> has numerous disadvantages that need to be considered before you suggest it. Consider for example the security risk of a serializable password field that you didn't intend.<\/p>\n",
+            "answer_id": 25196298,
+            "question_id": 25196168,
+            "last_edit_date": 1407474829
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/1XtZi.jpg?s=256",
+                "account_id": 9,
+                "user_type": "registered",
+                "user_id": 13,
+                "link": "https://stackoverflow.com/users/13/c-k-young",
+                "reputation": 224191,
+                "display_name": "C. K. Young",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1407473028,
+            "creation_date": 1407473028,
+            "body": "<p>The reason you're required to extend <code>Serializable<\/code> (or <code>Externalizable<\/code>) is to ensure that you're only serialising classes that are <em>designed<\/em> for serialisation. You certainly don't want to serialise classes that aren't designed for it, because then their format would be quite fragile; the smallest change to the class would break your deserialisation.<\/p>\n\n<p>One could argue that the same fragility applies to classes marked <code>Serializable<\/code>, but you're supposed to think about serial form stability when marking a class as <code>Serializable<\/code> (or else explicitly disavow any stability, as Guava does).<\/p>\n",
+            "answer_id": 25196192,
+            "question_id": 25196168
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/buvFz.png?s=256",
+                "account_id": 2678195,
+                "user_type": "registered",
+                "user_id": 2314073,
+                "link": "https://stackoverflow.com/users/2314073/juned-ahsan",
+                "reputation": 68865,
+                "display_name": "Juned Ahsan",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1407473147,
+            "creation_date": 1407473147,
+            "body": "<p>If the object is not <code>Serializable<\/code> its state cannot be saved using <code>ObjectOutputStrem<\/code>. <\/p>\n\n<p>File must be created because that is done using <code>FileInputStream<\/code> and as soon as you close the stream, there will be a new file. But if try to check the contents of the file, it should be empty, because the state of non-serializable state will not be saved.<\/p>\n",
+            "answer_id": 25196210,
+            "question_id": 25196168
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/L2xbH.jpg?s=256",
+                "account_id": 4575430,
+                "user_type": "registered",
+                "user_id": 3713995,
+                "link": "https://stackoverflow.com/users/3713995/abhijeet-panwar",
+                "reputation": 1875,
+                "display_name": "Abhijeet Panwar",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1524847896,
+            "creation_date": 1407474213,
+            "body": "<p>What is a Marker Interface?<\/p>\n\n<p>An interface is called a marker interface when it is provided as a\n handle by java interpreter to mark a class so that it can provide\n special behaviour to it at runtime and they do not have any method\n declarations<\/p>\n\n<p>Marker interface just marks a class as being of a particular type. <\/p>\n\n<p>Why marker Interface is required?<\/p>\n\n<p>Marker interface is used as a tag to inform a message to the java\n compiler so that it can add special behaviour to the class\n implementing it.So if JVM sees a Class is Serializable it done some\n special operation on it<\/p>\n\n<p>What JVM does with Serialiize Interface?<\/p>\n\n<p>When a class implements serializable interface it assures JVM that\n this class may provide a special\n behavior(Serialization/Deserialization) at run time.<\/p>\n\n<p>So when you are trying to serialize object JVM wants to confirm that whether class of object of this type has made a contract(Implementing Serialize interface) to show this special behavior at runtime(To be serialize/deserialized).If it has implemented,JVM is assured that it can proceed further for serialization Otherwise it throws exception that you are trying to serialize an object  that  does't agree to terms and condition of being ready for serialization or deserialization.<\/p>\n",
+            "answer_id": 25196377,
+            "question_id": 25196168,
+            "last_edit_date": 1524847896
+        }
+    ],
+    "answer_comments": {"25196377": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196377,
+            "edited": false,
+            "creation_date": 1524847781,
+            "comment_id": 87150386
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196377,
+            "edited": false,
+            "creation_date": 1407480223,
+            "comment_id": 39239457
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/L2xbH.jpg?s=256",
+                "account_id": 4575430,
+                "user_type": "registered",
+                "user_id": 3713995,
+                "link": "https://stackoverflow.com/users/3713995/abhijeet-panwar",
+                "reputation": 1875,
+                "display_name": "Abhijeet Panwar",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196377,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "edited": false,
+            "creation_date": 1407475351,
+            "comment_id": 39237753
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196377,
+            "edited": false,
+            "creation_date": 1407475220,
+            "comment_id": 39237710
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/L2xbH.jpg?s=256",
+                "account_id": 4575430,
+                "user_type": "registered",
+                "user_id": 3713995,
+                "link": "https://stackoverflow.com/users/3713995/abhijeet-panwar",
+                "reputation": 1875,
+                "display_name": "Abhijeet Panwar",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196377,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "edited": false,
+            "creation_date": 1407475138,
+            "comment_id": 39237689
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 25196377,
+            "edited": false,
+            "creation_date": 1407475096,
+            "comment_id": 39237674
+        }
+    ]}
+}

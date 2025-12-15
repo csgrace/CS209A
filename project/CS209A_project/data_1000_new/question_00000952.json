@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bccf9804d2972dfaf0fd45d93f748a3f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6290020,
+            "user_type": "registered",
+            "user_id": 4888033,
+            "link": "https://stackoverflow.com/users/4888033/alpha",
+            "reputation": 256,
+            "display_name": "Alpha"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60025977/read-write-simultaneously-on-same-java-rxtx-serial-port-within-same-thread",
+        "last_activity_date": 1588275404,
+        "creation_date": 1580645608,
+        "answer_count": 1,
+        "title": "Read &amp; Write simultaneously on same JAVA RXTX Serial Port within same thread",
+        "body": "<h2>Read &amp; Write simultaneously on same JAVA RXTX  Serial Port within same thread<\/h2>\n\n<p>Is it possible to read and write from same serial port within same Java thread in real time.Actually I am reading data from Arduino and I need to send same data to Arduino in realtime.\nIm using while true condition inside my Runnable that's why unable to get data inside EventListner.<\/p>\n\n<p><strong>Code Snippet<\/strong><\/p>\n\n<pre><code> public void initialize() \n{\n        CommPortIdentifier portId = null;\n        Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();\n\n        //First, Find an instance of serial port as set in PORT_NAMES.\n        while (portEnum.hasMoreElements()) {\n            CommPortIdentifier currPortId\n                    = (CommPortIdentifier) portEnum.nextElement();\n            for (String portName : PORT_NAMES) {\n                if (currPortId.getName().equals(portName)) {\n                    portId = currPortId;\n                    break;\n                }\n            }\n        }\n        if (portId == null) {\n            System.out.println(\"Could not find COM port.\");\n            logText=\"Could not find COM Port. Please Change your device port to COM3.\";\n            isconnected=false;\n            return;\n        } else {\n            System.out.println(\"Port Name: \" + portId.getName() + \"\\n\"\n                    + \"Current Owner: \" + portId.getCurrentOwner() + \"\\n\"\n                    + \"Port Type: \" + portId.getPortType());\n            logText = portId.getName()+ \" Successfully Connected!\";\n            isconnected=true;\n            isRunning=true;\n            //Controller.labelStatus.setText(\" Successfully Connected!\");\n        }\n\n        try {\n            // open serial port, and use class name for the appName.\n            serialPort = (SerialPort) portId.open(this.getClass().getName(),\n                    TIMEOUT);\n\n            // set port parameters\n            serialPort.setSerialPortParams(DATA_RATE,\n                    SerialPort.DATABITS_8,\n                    SerialPort.STOPBITS_1,\n                    SerialPort.PARITY_NONE);\n\n            // open the streams\n            inputstream = serialPort.getInputStream();\n            output = serialPort.getOutputStream();\n            serialPort.addEventListener(this);\n            serialPort.notifyOnDataAvailable(true);\n             thread = new Thread(){\n                public void run(){\n                    while(isRunning) {\n                        System.out.println(\"Thread Running \"+bytesToHexString(BtnHexData.getInstance().getSendingPack()));\n\n                        try {\n                            output.write(BtnHexData.getInstance().getSendingPack());\n\n                        } catch (IOException e) {\n                            e.printStackTrace();\n                        }\n                        try {\n                            Thread.sleep(200);\n                            //System.out.println(\"\\t\\t Thread Receiving \"+bytesToHexString(input.readAllBytes()));\n                        } catch (InterruptedException e) {\n                            e.printStackTrace();\n                        }\n                    }\n                }\n            };\n\n            thread.start();\n\n        } catch (Exception e) {\n            serialPort.close();\n            System.err.println(e.toString());\n            logText=\"Error: \"+e.toString();\n        }\n    }\n<\/code><\/pre>\n",
+        "question_id": 60025977,
+        "tags": [
+            "java",
+            "multithreading",
+            "rxtx",
+            "real-time-data"
+        ],
+        "score": 2,
+        "accepted_answer_id": 61531368,
+        "is_answered": true,
+        "view_count": 2752
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/uavZE.jpg?s=256",
+            "account_id": 3477991,
+            "user_type": "registered",
+            "user_id": 2910751,
+            "link": "https://stackoverflow.com/users/2910751/martin-frank",
+            "reputation": 3462,
+            "display_name": "Martin Frank",
+            "accept_rate": 90
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 60025977,
+        "edited": false,
+        "creation_date": 1582730957,
+        "comment_id": 106879747
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f8eeae3179663cdc1a789c86248ec0f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 18454242,
+            "user_type": "registered",
+            "user_id": 13443488,
+            "link": "https://stackoverflow.com/users/13443488/mianali",
+            "reputation": 175,
+            "display_name": "MianAli"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1588275404,
+        "creation_date": 1588275404,
+        "body": "<h2>I had same problem but finally I got the Solution !<\/h2>\n<p>There is another JAVA comm library &quot;com.fazecast.jSerialComm&quot; which is the ultimate solution for real-time read &amp; write operations on serial port simultaneously.\nI'm posting my findings, if someone needs help regarding this issue...<\/p>\n<h3>SerialPort Class using jSerialComm<\/h3>\n<pre><code>import com.fazecast.jSerialComm.SerialPort;\nimport com.fazecast.jSerialComm.SerialPortDataListener;\nimport com.fazecast.jSerialComm.SerialPortEvent;\n\npublic class MySerialPort {\n    public static SerialPort arduinoPort = null;\n    public static InputStream arduinoStream = null;\n    static String logText=&quot;&quot;;\n    private static boolean isRunning=false;\n    private   byte[] sendingPack;\n    private   byte[] receivingPack;\n    public static boolean isRunning() {\n        return isRunning;\n    }\n\n    public static void setRunning(boolean running) {\n        sendingPack = new byte[6];\n        receivingPack= new byte[36];\n        isRunning = running;\n       \n    }\n   public static void connectPort(String port) {\n        devicePortName = port;\n\n        int len = SerialPort.getCommPorts().length;\n        SerialPort serialPorts[] = new SerialPort[len];\n        serialPorts = SerialPort.getCommPorts();\n\n        for (int i = 0; i &lt; len; i++) {\n\n            String portName = serialPorts[i].getDescriptivePortName();\n            System.out.println(serialPorts[i].getSystemPortName() + &quot;: &quot; + portName + &quot;: &quot; \n             + i);\n           \n            if (portName.contains(devicePortName)) {\n                try {\n                    arduinoPort = serialPorts[i];\n                    arduinoPort.setBaudRate(115200);\n                    arduinoPort.openPort();\n                    setRunning(true);\n                    System.out.println(&quot;connected to: &quot; + portName + &quot;[&quot; + i + &quot;]&quot;);\n                    logText=&quot;Connected to: &quot; + portName ;\n\n                    break;\n                } catch (Exception e) {\n                    e.printStackTrace();\n                    loogger.stop();\n                    arduinoPort.closePort();\n                }\n           } }\n \n      (new Thread(new SerialReader(receivingPack))).start();\n      (new Thread(new SerialWriter(sendingPack))).start();\n     }\n    public static class SerialReader implements Runnable\n      {\n        byte[] buffer;\n\n        public SerialReader ( byte[] buffer )\n        {\n            this.buffer = buffer;\n            System.out.println(&quot;Reader&quot;);\n\n        }\n\n        public void run () {\n\n            readData(buffer,isRunning());\n        }\n    }\n  public static class SerialWriter implements Runnable\n    {\n        byte[] buffer;\n\n        public SerialWriter ( byte[] buffer )\n        {\n            this.buffer = buffer;\n\n        }\n\n        public void run () {\n\n            sendData(buffer);\n\n        }\n    }\n   public static void sendData(byte[] buffer){\n           \n        while (isRunning){\n             \n            arduinoPort.writeBytes(sendingPack,6,0);\n\n     System.out.println(&quot;Sending&quot;+bytesToHexString(sendingPack));\n            try {\n                Thread.sleep(200);\n            } catch (Exception e) {\n                e.printStackTrace();\n            }\n            }\n       }\n\n  public static void readData(byte[] buffer,boolean loopStatus){\n        while (isRunning()){\n\n            arduinoPort.readBytes(receivingPack,36,0);\n           \n            if(receivingPack()[0] &amp; 0xff)==144 ){           \n                    \n         String bufferD=bytesToHexString(receivingPack);\n                    System.out.println(bufferD);\n                \n            }\n            try {\n                Thread.sleep(50);\n            } catch (Exception e) {\n                e.printStackTrace();\n        }    }\n        \n\n  public static String bytesToHexString(byte[] bytes){\n          StringBuilder sb = new StringBuilder();\n        for (byte b : bytes){\n            sb.append(String.format(&quot;%02x&quot;, b&amp;0xff));\n        }\n        return sb.toString();\n    }\n    }\n<\/code><\/pre>\n<h2>Main Class<\/h2>\n<pre><code>   public static void main(String[] args) {\n            MySerialPort.setRunning(true);\n            MySerialPort.connectPort(&quot;COM3&quot;);\n    }\n<\/code><\/pre>\n",
+        "answer_id": 61531368,
+        "question_id": 60025977,
+        "last_edit_date": 1592644375
+    }],
+    "answer_comments": {}
+}

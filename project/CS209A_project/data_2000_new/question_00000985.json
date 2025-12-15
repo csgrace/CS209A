@@ -1,0 +1,102 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2298ec9d99cc683d1c63e96b76efa8a7?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8243104,
+            "user_type": "registered",
+            "user_id": 6200146,
+            "link": "https://stackoverflow.com/users/6200146/mavi",
+            "reputation": 1146,
+            "display_name": "mavi",
+            "accept_rate": 65
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/44724890/how-to-call-stored-procedure-with-multiple-values-in-java",
+        "last_activity_date": 1498293314,
+        "creation_date": 1498231087,
+        "answer_count": 1,
+        "title": "How to call stored procedure with multiple values in Java?",
+        "body": "<p>I need to call a SQL Server stored procedure from Java. This is the stored procedure:<\/p>\n\n<pre><code> DECLARE @t_certificate v.vt_VidaDollarsCertificates\n INSERT INTO @t_certificate VALUES(1,710335,'FFRLODOLAR',363)\n INSERT INTO @t_certificate VALUES(1,710335,'FFRLODOLAR05',363)\n INSERT INTO @t_certificate VALUES(1,710335,'FFRLODOLAR06',363)\n EXEC v.vprdl_CertificateInsert @t_certificate \n<\/code><\/pre>\n\n<p>What I do is to create a raw query and then with a PreparedStatement add the information.<\/p>\n\n<p>I create the raw query like this:<\/p>\n\n<pre><code>StringBuilder query = new StringBuilder();\nquery.append(\n        \"DECLARE @t_certificate v.vt_VidaDollarsCertificates;\"\n        + \"INSERT @t_certificate VALUES(?,?,?,?)\");\nfor (int i = 0; i &lt; arrCertificates.size() - 1; ++i) {\n    query.append(\",(?,?,?,?) \");\n}\nquery.append(\"; EXEC v.vprdl_CertificateInsert @t_certificate\");\n<\/code><\/pre>\n\n<p>This is the raw query that is formed <\/p>\n\n<pre><code>DECLARE @t_certificate v.vt_VidaDollarsCertificates;INSERT @t_certificate VALUES(?,?,?,?),(?,?,?,?) ,(?,?,?,?) ; EXEC v.vprdl_CertificateInsert @t_certificate\n<\/code><\/pre>\n\n<p>Then I create the PreparedStatement.<\/p>\n\n<pre><code>PreparedStatement preparedStmt = con.prepareStatement(query.toString());\nfor (int i = 0; i &lt; arrCertificates.size(); ++i) {\n    preparedStmt.setInt(1, arrCertificates.get(i).getCertificateTypeID());\n    preparedStmt.setInt(2, arrCertificates.get(i).getContratoID());\n    preparedStmt.setString(3, arrCertificates.get(i).getFolio());\n    preparedStmt.setInt(4, Integer.parseInt(arrCertificates.get(i).getID()));\n\n}\n<\/code><\/pre>\n\n<p>After that I use executeUpdate.<\/p>\n\n<pre><code>preparedStmt.executeUpdate();\nResultSet rs = preparedStmt.getGeneratedKeys();\n<\/code><\/pre>\n\n<p>But it is not working, it throws an exception <\/p>\n\n<blockquote>\n  <p>the value is not set for the parameter number<\/p>\n<\/blockquote>\n",
+        "question_id": 44724890,
+        "tags": [
+            "java",
+            "sql-server",
+            "jdbc"
+        ],
+        "score": 1,
+        "accepted_answer_id": 44725453,
+        "is_answered": true,
+        "view_count": 1239,
+        "last_edit_date": 1498293314
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-GFXl3bQPSrM/AAAAAAAAAAI/AAAAAAAAARY/Fvg3zPWA3x0/s256-rj/photo.jpg",
+            "account_id": 7291967,
+            "user_type": "registered",
+            "user_id": 5558072,
+            "link": "https://stackoverflow.com/users/5558072/youcef-laidani",
+            "reputation": 60268,
+            "display_name": "Youcef LAIDANI",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1498235228,
+        "creation_date": 1498232906,
+        "body": "<p>It seems you set the wrong index to the prepapred statement because in all iteration you set the same values :<\/p>\n\n<pre><code>VALUES(?,?,?,?),(?,?,?,?) ,(?,?,?,?)\n       1 2 3 4   1 2 3 4    1 2 3 4\n<\/code><\/pre>\n\n<p>it seems this is not correct, instead you can use :<\/p>\n\n<pre><code>int j = 1;\nfor (int i = 0; i &lt; arrCertificates.size(); ++i) {\n    preparedStmt.setInt(j++, arrCertificates.get(i).getCertificateTypeID());\n    preparedStmt.setInt(j++, arrCertificates.get(i).getContratoID());\n    preparedStmt.setString(j++, arrCertificates.get(i).getFolio());\n    preparedStmt.setInt(j++, Integer.parseInt(arrCertificates.get(i).getID()));\n}\n<\/code><\/pre>\n\n<hr>\n\n<p>So for 3 inputs it should gives you :<\/p>\n\n<pre><code>VALUES(?, ?, ?, ?),(?, ?, ?, ?) ,(?, ?, ?, ?)\n       1  2  3  4   5  6  7  8    9  10 11 12 \n<\/code><\/pre>\n",
+        "answer_id": 44725453,
+        "question_id": 44724890,
+        "last_edit_date": 1498235228
+    }],
+    "answer_comments": {"44725453": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2298ec9d99cc683d1c63e96b76efa8a7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8243104,
+                "user_type": "registered",
+                "user_id": 6200146,
+                "link": "https://stackoverflow.com/users/6200146/mavi",
+                "reputation": 1146,
+                "display_name": "mavi",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 44725453,
+            "edited": false,
+            "creation_date": 1498237504,
+            "comment_id": 76435721
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-GFXl3bQPSrM/AAAAAAAAAAI/AAAAAAAAARY/Fvg3zPWA3x0/s256-rj/photo.jpg",
+                "account_id": 7291967,
+                "user_type": "registered",
+                "user_id": 5558072,
+                "link": "https://stackoverflow.com/users/5558072/youcef-laidani",
+                "reputation": 60268,
+                "display_name": "Youcef LAIDANI",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 44725453,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2298ec9d99cc683d1c63e96b76efa8a7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8243104,
+                "user_type": "registered",
+                "user_id": 6200146,
+                "link": "https://stackoverflow.com/users/6200146/mavi",
+                "reputation": 1146,
+                "display_name": "mavi",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1498235264,
+            "comment_id": 76434537
+        }
+    ]}
+}

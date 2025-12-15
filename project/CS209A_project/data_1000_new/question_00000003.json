@@ -1,0 +1,119 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-RxakPKib4tY/AAAAAAAAAAI/AAAAAAAAAAA/ACevoQPAcj4tVM3ka7AMSICyU-iYyfsHdg/mo/s256-rj/photo.jpg",
+            "account_id": 15409351,
+            "user_type": "registered",
+            "user_id": 11116528,
+            "link": "https://stackoverflow.com/users/11116528/baalaji",
+            "reputation": 15,
+            "display_name": "Baalaji"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/66807153/verify-scheduledexecutorservice-calls-the-runnable-multiple-times-using-java-moc",
+        "last_activity_date": 1616751851,
+        "creation_date": 1616704202,
+        "answer_count": 1,
+        "title": "Verify scheduledExecutorService calls the runnable multiple times using Java mockito",
+        "body": "<p>I have a service invoked once every minute. I am trying to write a unit test to check whether the scheduler continues calling the runnable even if of the calls throw an exception.\nAlready have a test case that confirms exception caught in the runnable is not bubbled up.<\/p>\n<pre><code>class ServiceRunner {\n\n@NonNull\nprivate final Service service;\n\n@NonNull\nprivate final ScheduledExecutorService scheduler;\n\n@Inject\npublic ServiceRunner(final Service service) {\n    this(service, Executors.newSingleThreadScheduledExecutor());\n}\n\npublic void run() {\n    scheduler.scheduleAtFixedRate(this::runService, 0, 1, TimeUnit.MINUTES);\n}\n\n@VisibleForTesting\nvoid runService() {\n    try {\n        service.run();\n    } catch {\n        log.info(&quot;Exception&quot;);\n    }\n} } \n<\/code><\/pre>\n<p>So far I tried creating a mock scheduler and a scheduler object.\nBoth approaches work with<\/p>\n<pre><code>verify(service).run();\n<\/code><\/pre>\n<p>But<\/p>\n<pre><code>verify(service, times(2)).run();\n<\/code><\/pre>\n<p>fails with message stating it was called only once.<\/p>\n<p>Both just call the runnable method once and then terminates in unit test.\nI don't understand why scheduler is not working while testing.<\/p>\n<p>Please suggest how to write a test case for this use case.<\/p>\n",
+        "question_id": 66807153,
+        "tags": [
+            "java",
+            "unit-testing",
+            "mockito",
+            "guice",
+            "scheduledexecutorservice"
+        ],
+        "score": 1,
+        "accepted_answer_id": 66814414,
+        "is_answered": true,
+        "view_count": 1582,
+        "last_edit_date": 1616704254
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c5e7514d38ccb3f8b4855d68c269bcee?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4099584,
+                "user_type": "registered",
+                "user_id": 3365479,
+                "link": "https://stackoverflow.com/users/3365479/madteapot",
+                "reputation": 2304,
+                "display_name": "madteapot",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 66807153,
+            "edited": false,
+            "creation_date": 1616753342,
+            "comment_id": 118107196
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-RxakPKib4tY/AAAAAAAAAAI/AAAAAAAAAAA/ACevoQPAcj4tVM3ka7AMSICyU-iYyfsHdg/mo/s256-rj/photo.jpg",
+                "account_id": 15409351,
+                "user_type": "registered",
+                "user_id": 11116528,
+                "link": "https://stackoverflow.com/users/11116528/baalaji",
+                "reputation": 15,
+                "display_name": "Baalaji"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 66807153,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/xQVEN.jpg?s=256",
+                "account_id": 974448,
+                "user_type": "registered",
+                "user_id": 2042457,
+                "link": "https://stackoverflow.com/users/2042457/aksappy",
+                "reputation": 3460,
+                "display_name": "aksappy",
+                "accept_rate": 56
+            },
+            "edited": false,
+            "creation_date": 1616716141,
+            "comment_id": 118097577
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xQVEN.jpg?s=256",
+                "account_id": 974448,
+                "user_type": "registered",
+                "user_id": 2042457,
+                "link": "https://stackoverflow.com/users/2042457/aksappy",
+                "reputation": 3460,
+                "display_name": "aksappy",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 66807153,
+            "edited": false,
+            "creation_date": 1616704515,
+            "comment_id": 118094366
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/AWsdT.png?s=256",
+            "account_id": 60521,
+            "user_type": "registered",
+            "user_id": 180719,
+            "link": "https://stackoverflow.com/users/180719/olivier-gr%c3%a9goire",
+            "reputation": 35795,
+            "display_name": "Olivier Gr&#233;goire",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1616751851,
+        "creation_date": 1616751851,
+        "body": "<p>Your test case is completely flawed because you didn't abstract enough.<\/p>\n<p>Let's imagine you have 2000 unit tests, and still have a wrong abstraction. 2000 tests isn't that much, but it can run in around 1 minute. Now imagine that 1% of your tests rely on your <code>ServiceRunner<\/code> class, that's 20 tests. It's not unreasonable to think that 20 classes use a class named <code>ServiceRunner<\/code>. Well, now your tests, instead of running for around 1 minute, they run for 1 minute + 20 * 1 minute, so 21 minutes.<\/p>\n<p>So do yourself a favor, and add a parameter to your constructor that say the fixed rate at which your service must run. And when you test it, make sure that it runs every fixed rate.<\/p>\n<p>This way, you could allow your test to wait for 2 * 1 second (if you wrote 1 second), or better 2 * 100 milliseconds.<\/p>\n<p>Your test would become this:<\/p>\n<pre><code>var unit = MILLISECONDS;\nvar duration = 100;\n\nvar service = mock(Service.class);\nvar serviceRunner = new ServiceRunner(service, duration, unit);\nserviceRunner.run();\nunit.sleep(2 * duration);\nverify(service, times(2)).run();\n<\/code><\/pre>\n<p>Also, don't forget to shutdown your <code>scheduler<\/code>, usually by wrap-calling it:<\/p>\n<pre><code>class ServiceRunner {\n...\npublic void shutdown() {\n  scheduler.shutdown();\n}\n...\n}\n<\/code><\/pre>\n<p>Then adapt your test:<\/p>\n<pre><code>var unit = MILLISECONDS;\nvar duration = 100;\n\nvar service = mock(Service.class);\nvar serviceRunner = new ServiceRunner(service, duration, unit);\nserviceRunner.run();\nunit.sleep(2 * duration);\nserviceRunner.shutdown();\nunit.sleep(duration); // Give it more time to make sure it's called twice and not three times.\nverify(service, times(2)).run(); //\n<\/code><\/pre>\n",
+        "answer_id": 66814414,
+        "question_id": 66807153
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,185 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e48d5ac0cd77709b2f66ad72c64de2f1?s=256&d=identicon&r=PG",
+            "account_id": 703036,
+            "user_type": "unregistered",
+            "user_id": 591359,
+            "link": "https://stackoverflow.com/users/591359/kyle",
+            "reputation": 53,
+            "display_name": "kyle",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/5197158/launch-app-at-a-user-specified-time",
+        "last_activity_date": 1299602348,
+        "creation_date": 1299259835,
+        "answer_count": 2,
+        "title": "Launch app at a user specified time?",
+        "body": "<p>I have an app that plays radio stations, and I now want to integrate an alarm clock such that it plays a radio station when the alarm goes off. I have been looking into the Alarm Manager, which seems to be the best way to do it.<\/p>\n\n<p>My app has an alarm button which calls a dialog to set the alarm. If an alarm is set, I need to have my app start at the specified time. However, I am having trouble with this section of code:<\/p>\n\n<pre><code>Intent intent = new Intent(\"some Context\", null, null, MainActivity.class);\nPendingIntent pendInt = PendingIntent.getBroadcast(\"some Context\", 0, intent, 0);\nAlarmManager alarmService = (AlarmManager) getSystemService(Context.ALARM_SERVICE);\nalarmService.set(AlarmManager.RTC_WAKEUP, timeToSound, pendInt);\n<\/code><\/pre>\n\n<p>Specifically, I am confused about what <code>context<\/code> needs to be. I have seen many examples, but none really explain it in detail. I would appreciate it if someone could shed some light on this matter.<br>\nmore code that might help...  <\/p>\n\n<pre><code>@Override\n    protected Dialog onCreateDialog(int id) {\n        Dialog d = null;\n        switch (id) {\n        case LINEUP_DIALOG_ID:\n            d = new LineupDialog(this);\n            d.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);\n            WindowManager.LayoutParams lp = d.getWindow().getAttributes();\n            lp.dimAmount = 0.5f;\n            d.getWindow().setAttributes(lp);\n            break;\n<\/code><\/pre>\n\n<p>this calls my dialog^  <\/p>\n\n<pre><code>private View.OnClickListener lineupAction = new View.OnClickListener() {\n\n        @Override\n        public void onClick(View v) {\n            //showAlarm();\n            showDialog(LINEUP_DIALOG_ID);\n        }\n    };\n<\/code><\/pre>\n\n<p>both of these are in my mainActivity.<br>\nthen i have an xml file that holds the layouts (can be provided if needed.. just allows the user to chose a time and checkbox, then save)<br>\nsave button has an onclickListener--- it is in my LineupDialog class that extends my NavDialog, and my navdialog just extends Dialog. <\/p>\n",
+        "question_id": 5197158,
+        "tags": [
+            "java",
+            "android",
+            "alarmmanager"
+        ],
+        "score": 0,
+        "accepted_answer_id": 5235413,
+        "is_answered": true,
+        "view_count": 154,
+        "last_edit_date": 1299266406
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jKkRB.jpg?s=256",
+                "account_id": 283185,
+                "user_type": "registered",
+                "user_id": 580556,
+                "link": "https://stackoverflow.com/users/580556/will-tate",
+                "reputation": 33539,
+                "display_name": "Will Tate",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1299262981,
+            "creation_date": 1299262981,
+            "body": "<p>Kyle,<\/p>\n\n<p>It should be the package Context, but this can sometimes depend on where in your code you are creating the <code>Intent<\/code> and <code>PendingIntent<\/code>.  Have you just tried <code>this<\/code> or <code>getApplicationContext()<\/code>?<\/p>\n",
+            "answer_id": 5197698,
+            "question_id": 5197158
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e48d5ac0cd77709b2f66ad72c64de2f1?s=256&d=identicon&r=PG",
+                "account_id": 703036,
+                "user_type": "unregistered",
+                "user_id": 591359,
+                "link": "https://stackoverflow.com/users/591359/kyle",
+                "reputation": 53,
+                "display_name": "kyle",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1299602348,
+            "creation_date": 1299602348,
+            "body": "<p>turns out that i needed to make a new class also... the part of the context worked by making a variable, and just if anyone else needs it, here is my code for the new service that i had to make.  <\/p>\n\n<pre><code>//imports here\npublic class AlarmService extends Service{\n\n    @Override\n    public IBinder onBind(Intent arg0) {\n        // TODO Auto-generated method stub\n        //System.out.println(\"hello im in the alarmService Binder\");\n\n        return null;\n    }\n\n    @Override\n    public void onStart(Intent intent, int startid) {\n        Intent mainAct = new Intent(\"android.intent.action.MAIN\");\n        //System.out.println(\"hello im in the alarmService onStart \" + mainAct);\n        mainAct.setClass(AlarmService.this, MainActivity.class);\n        mainAct.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);\n        mainAct.putExtra(\"alarm\",\"true\");\n        startActivity(mainAct);\n    }\n\n    @Override\n    public void onCreate() {\n        //System.out.println(\"hello im in the alarmService onCreate\");\n        //code to execute when the service is first created\n    }\n\n}\n<\/code><\/pre>\n\n<p>then dont forget to add it to your manifest<\/p>\n",
+            "answer_id": 5235413,
+            "question_id": 5197158
+        }
+    ],
+    "answer_comments": {"5197698": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jKkRB.jpg?s=256",
+                "account_id": 283185,
+                "user_type": "registered",
+                "user_id": 580556,
+                "link": "https://stackoverflow.com/users/580556/will-tate",
+                "reputation": 33539,
+                "display_name": "Will Tate",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5197698,
+            "edited": false,
+            "creation_date": 1299266607,
+            "comment_id": 5843299
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e48d5ac0cd77709b2f66ad72c64de2f1?s=256&d=identicon&r=PG",
+                "account_id": 703036,
+                "user_type": "unregistered",
+                "user_id": 591359,
+                "link": "https://stackoverflow.com/users/591359/kyle",
+                "reputation": 53,
+                "display_name": "kyle",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5197698,
+            "edited": false,
+            "creation_date": 1299266459,
+            "comment_id": 5843266
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jKkRB.jpg?s=256",
+                "account_id": 283185,
+                "user_type": "registered",
+                "user_id": 580556,
+                "link": "https://stackoverflow.com/users/580556/will-tate",
+                "reputation": 33539,
+                "display_name": "Will Tate",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5197698,
+            "edited": false,
+            "creation_date": 1299265961,
+            "comment_id": 5843154
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e48d5ac0cd77709b2f66ad72c64de2f1?s=256&d=identicon&r=PG",
+                "account_id": 703036,
+                "user_type": "unregistered",
+                "user_id": 591359,
+                "link": "https://stackoverflow.com/users/591359/kyle",
+                "reputation": 53,
+                "display_name": "kyle",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5197698,
+            "edited": false,
+            "creation_date": 1299265109,
+            "comment_id": 5842961
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jKkRB.jpg?s=256",
+                "account_id": 283185,
+                "user_type": "registered",
+                "user_id": 580556,
+                "link": "https://stackoverflow.com/users/580556/will-tate",
+                "reputation": 33539,
+                "display_name": "Will Tate",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5197698,
+            "edited": false,
+            "creation_date": 1299264853,
+            "comment_id": 5842909
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e48d5ac0cd77709b2f66ad72c64de2f1?s=256&d=identicon&r=PG",
+                "account_id": 703036,
+                "user_type": "unregistered",
+                "user_id": 591359,
+                "link": "https://stackoverflow.com/users/591359/kyle",
+                "reputation": 53,
+                "display_name": "kyle",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 5197698,
+            "edited": false,
+            "creation_date": 1299264719,
+            "comment_id": 5842881
+        }
+    ]}
+}

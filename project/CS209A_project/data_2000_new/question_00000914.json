@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5108c5943fad55dcbf5849a01ce854fa?s=256&d=identicon&r=PG",
+            "account_id": 2056257,
+            "user_type": "registered",
+            "user_id": 1833945,
+            "link": "https://stackoverflow.com/users/1833945/andreanobili",
+            "reputation": 43355,
+            "display_name": "AndreaNobili",
+            "accept_rate": 65
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13827689/how-are-handled-the-http-request-using-json-in-spring-mvc-showcase-some-problem",
+        "last_activity_date": 1374142338,
+        "creation_date": 1355256519,
+        "answer_count": 1,
+        "title": "How are handled the HTTP request using JSON in Spring MVC showcase? Some problems to understand",
+        "body": "<p>in this period I am studying the Spring MVC showcase example dowlodable form STS dashboard.<\/p>\n\n<p>I have some doubt about some thype of rmapping (shown in the Request Mapping section of the showcase).<\/p>\n\n<p>In the home.jsp view I have this two links :<\/p>\n\n<pre class=\"lang-html prettyprint-override\"><code>&lt;li&gt;\n&lt;a id=\"byProducesAcceptJson\" class=\"writeJsonLink\" \n        href=\"&lt;c:url value=\"/mapping/produces\" /&gt;\"&gt;\n        By produces via Accept=application/json&lt;/a&gt;\n&lt;/li&gt;\n\n &lt;li&gt;\n    &lt;a id=\"byProducesJsonExt\" class=\"writeJsonLink\" \n       href=\"&lt;c:url value=\"/mapping/produces.json\" /&gt;\"&gt;By produces via \".json\"&lt;/a&gt;\n &lt;/li&gt;\n<\/code><\/pre>\n\n<p>The first link generate an HTTP Request towards the URL: <strong>\"/mapping/produces\"<\/strong>\nThe second link generate an HTTP Request towards the URL: <strong>\"/mapping/produces.json\"<\/strong><\/p>\n\n<p>Related to the <strong>writeJsonLink<\/strong> class I have the following simple Jquery callback function:<\/p>\n\n<pre class=\"lang-javascript prettyprint-override\"><code>$(\"a.writeJsonLink\").click(function() {\n\n    var link = $(this);                     // Variabile che si riferisce all'elemento del DOM che ha scatenato l'evento click (il link clickato) \n\n    // Esegue la chiamata ajax \n    $.ajax({ \n        url: this.href,                     // Indirizzo verso cui è indirizzata la richiesta           \n        beforeSend: function(req) {         // Prima di inviare l'HTTP Request esegui la funzione passandogli il parametro req \n            if (!this.url.match(/\\.json$/)) {                               // Se l'url termina con .json \n                req.setRequestHeader(\"Accept\", \"application/json\");         // Aggiunge alla HTTP Request l'header Accept: application/json \n            }\n        },\n        success: function(json) {\n            MvcUtil.showSuccessResponse(JSON.stringify(json), link);\n        },\n        error: function(xhr) {\n            MvcUtil.showErrorResponse(xhr.responseText, link);\n        }});\n    return false;\n});\n<\/code><\/pre>\n\n<p>What do this function it is very clear for me: <strong>simply execute an AJAX call<\/strong> and before send the call do a check to check if the URL ends with .json<\/p>\n\n<p>Ok, in my controller class I have the following method which handles both previous HTTP Requests:<\/p>\n\n<pre><code>@RequestMapping(value=\"/mapping/produces\", method=RequestMethod.GET,\n produces=MediaType.APPLICATION_JSON_VALUE)\npublic @ResponseBody JavaBean byProducesJson() {\n    System.out.println(\"Dentro byProducesJson()\");\n    return new JavaBean();\n}\n<\/code><\/pre>\n\n<p>The behavior of this method is quite clear for me:<\/p>\n\n<p><strong>This method handles HTTP GET Request towards the URL \"/mapping/produces\" and the *<em>produces<\/strong> element specifies that the method will not accept requests with the header named Accept incompatible with the specified MediaType and that this method produces a new object having JSON format that is put in the body field of the HTTP Response<\/em>*<\/p>\n\n<p>The new JavaBean object contatin only two inizialized variables and getter\\setter method:<\/p>\n\n<pre><code>public class JavaBean {\n\nprivate String foo = \"bar\";\nprivate String fruit = \"apple\";\n\n    // Getter &amp; Setter Method\n<\/code><\/pre>\n\n<p>Ok...so a new JavaBean object is created with this variables value and this value are stored inside a JSON object that is put inside the HTTP Response towards the Browser.<\/p>\n\n<p>Clicking on both link, in the browser appear me the same output, this one: <strong>{\"foo\":\"bar\",\"fruit\":\"apple\"}<\/strong><\/p>\n\n<p>Now I have some doubt about it:<\/p>\n\n<ol>\n<li><p>The first link generate an HTTP Request towards: <strong>/mapping/produces<\/strong><\/p>\n\n<p>The second link generate an HTTP Request towards: <strong>/mapping/produces.json<\/strong><\/p>\n\n<p>My method handles HTTP Request towards the URL having form: \"/mapping/produces\", why this    method handles also the second type of HTTP Request that end with .json?<\/p><\/li>\n<li><p>The first HTTP Request don't end with <strong>.json<\/strong> extension so, when the previus Jquery code     is executed I don't enter in the <strong>if body<\/strong> and so the following header is not setted:    <strong>(\"Accept\", \"application/json\")<\/strong> for my HTTP Request.<\/p>\n\n<p>Ok, the @RequestMapping annotation of my method contain the      <strong>produces=MediaType.APPLICATION_JSON_VALUE<\/strong> element. For what I have understand reading the documentation this method have to handle the HTTP Request <strong>only if in its header there is an Accept Header that contain \"Accept\", \"application/json\" as value<\/strong>.<\/p>\n\n<p>This HTTP Request do not contain this header, why is it handled by my method?<\/p><\/li>\n<li><p>What is the difference from the 2 type of HTTP Request? are handled in the same way? why?<\/p><\/li>\n<\/ol>\n\n<p>Thank you very much<\/p>\n\n<p>Andrea<\/p>\n",
+        "question_id": 13827689,
+        "tags": [
+            "java",
+            "json",
+            "spring",
+            "spring-mvc",
+            "httprequest"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 959,
+        "last_edit_date": 1374142338
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/RJgJM.png?s=256",
+            "account_id": 261142,
+            "user_type": "registered",
+            "user_id": 545127,
+            "link": "https://stackoverflow.com/users/545127/raedwald",
+            "reputation": 49254,
+            "display_name": "Raedwald",
+            "accept_rate": 69
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1371423533,
+        "creation_date": 1371423533,
+        "body": "<p>I think you are seeing the effect of <em>content negotiation<\/em> by Spring. HTTP itself provides only one means for indicating the wanted content type for a response: the <code>Accept<\/code> header. Spring provides two additional means, through a content negotiation bean. It can interpret a URI suffix (<code>.json<\/code> in this case) as a request for a particular content type. The bean strips off the suffix before passing the controller class.<\/p>\n",
+        "answer_id": 17138514,
+        "question_id": 13827689
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ac8b182351a52912a793fcf193d0b02b?s=256&d=identicon&r=PG",
+            "account_id": 1612911,
+            "user_type": "registered",
+            "user_id": 1491378,
+            "link": "https://stackoverflow.com/users/1491378/hett",
+            "reputation": 3865,
+            "display_name": "Hett",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/56161727/jersey-http-client-put-request-with-custom-content-length",
+        "last_activity_date": 1558249192,
+        "creation_date": 1557986535,
+        "answer_count": 1,
+        "title": "Jersey http client: put request with custom Content-Length",
+        "body": "<p>A want to put data from InputStream, but Jersey can not detect data length automatically and not preset Content-Length header. <\/p>\n\n<pre><code>Response destinationResponse = responseWebTarget\n                    .request()\n                    .header(HEADER_X_AUTH_TOKEN, cmd.getOptionValue(\"dat\"))\n                    .put(Entity.entity(inputStream, MediaType.APPLICATION_OCTET_STREAM))\n<\/code><\/pre>\n\n<p>result is:<\/p>\n\n<pre><code>INFO: 2 * Sending client request on thread main\n2 &gt; PUT http://192.168.1.10:8080/v1/AUTH_system/08138784704e2/test\n2 &gt; Content-Type: application/octet-stream\n2 &gt; X-Auth-Token: AUTH_tka2d071e5ba3e46e58cbbc3bdcc57bc70\n<\/code><\/pre>\n\n<p>I know data length and try to add header manually:<\/p>\n\n<pre><code>            Object contentLength = sourceResponse.getHeaders().get(HTTP.CONTENT_LEN).get(0);\n            Response destinationResponse = responseWebTarget\n                    .request()\n                    .header(HTTP.CONTENT_LEN, contentLength)\n                    .header(HEADER_X_AUTH_TOKEN, cmd.getOptionValue(\"dat\"))\n                    .put(Entity.entity(is, MediaType.APPLICATION_OCTET_STREAM))\n<\/code><\/pre>\n\n<p>Now request looks fine, but Jersey throws exception:<\/p>\n\n<pre><code>INFO: 2 * Sending client request on thread main\n2 &gt; PUT http://192.168.1.10:8080/v1/AUTH_system/08138784704e2/test\n2 &gt; Content-Length: 2760033628\n2 &gt; Content-Type: application/octet-stream\n2 &gt; X-Auth-Token: AUTH_tka2d071e5ba3e46e58cbbc3bdcc57bc70\n\nException in thread \"main\" javax.ws.rs.ProcessingException: org.apache.http.client.ClientProtocolException\n    at org.glassfish.jersey.apache.connector.ApacheConnector.apply(ApacheConnector.java:472)\n    at org.glassfish.jersey.client.ClientRuntime.invoke(ClientRuntime.java:254)\n    at org.glassfish.jersey.client.JerseyInvocation.lambda$invoke$0(JerseyInvocation.java:729)\n    at org.glassfish.jersey.internal.Errors.process(Errors.java:292)\n    at org.glassfish.jersey.internal.Errors.process(Errors.java:274)\n    at org.glassfish.jersey.internal.Errors.process(Errors.java:205)\n    at org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:390)\n    at org.glassfish.jersey.client.JerseyInvocation.invoke(JerseyInvocation.java:728)\n    at org.glassfish.jersey.client.JerseyInvocation$Builder.method(JerseyInvocation.java:421)\n    at org.glassfish.jersey.client.JerseyInvocation$Builder.put(JerseyInvocation.java:310)\n    at copier.Main.main(Main.java:118)\nCaused by: org.apache.http.client.ClientProtocolException\n    at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:186)\n    at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:71)\n    at org.glassfish.jersey.apache.connector.ApacheConnector.apply(ApacheConnector.java:426)\n    ... 10 more\nCaused by: org.apache.http.ProtocolException: Content-Length header already present\n    at org.apache.http.protocol.RequestContent.process(RequestContent.java:96)\n    at org.apache.http.protocol.ImmutableHttpProcessor.process(ImmutableHttpProcessor.java:132)\n    at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:182)\n    at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:88)\n    at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)\n    at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:184)\n    ... 12 more\n<\/code><\/pre>\n\n<p>How to do it correctly?<\/p>\n",
+        "question_id": 56161727,
+        "tags": [
+            "java",
+            "jersey",
+            "jersey-client"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 541,
+        "last_edit_date": 1558248896
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ac8b182351a52912a793fcf193d0b02b?s=256&d=identicon&r=PG",
+            "account_id": 1612911,
+            "user_type": "registered",
+            "user_id": 1491378,
+            "link": "https://stackoverflow.com/users/1491378/hett",
+            "reputation": 3865,
+            "display_name": "Hett",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1558249192,
+        "creation_date": 1558248862,
+        "body": "<p>I replaced Jersey with Apache HC,<\/p>\n\n<pre><code>    Long contentLength = Long.parseLong(sourceResponse.getHeaders(HTTP.CONTENT_LEN)[0].getValue());\n    HttpPut putRequest = new HttpPut(destinationUrl);\n    putRequest.addHeader(HEADER_X_AUTH_TOKEN, cmd.getOptionValue(\"dat\"));\n    InputStreamEntity entity = new InputStreamEntity(is, contentLength, ContentType.APPLICATION_OCTET_STREAM);\n    putRequest.setEntity(entity);\n<\/code><\/pre>\n\n<p>It has <code>InputStream<\/code> wrapper with the ability to specify the length.<\/p>\n\n<p>PS^ In addition, Chunked Transfer Encoding works correctly in Apache HC, but I could not turn it on in Jersey Client.<\/p>\n",
+        "answer_id": 56205451,
+        "question_id": 56161727,
+        "last_edit_date": 1558249192
+    }],
+    "answer_comments": {}
+}

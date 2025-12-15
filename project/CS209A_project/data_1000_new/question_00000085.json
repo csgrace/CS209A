@@ -1,0 +1,248 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/80eb22f49198047ca24dbd17036883f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5791492,
+            "user_type": "registered",
+            "user_id": 4568800,
+            "link": "https://stackoverflow.com/users/4568800/tiddi-rastogi",
+            "reputation": 526,
+            "display_name": "tiddi rastogi",
+            "accept_rate": 41
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29203615/filter-map-to-one-row-per-multiple-of-ten-based-on-difference-in-decreasing-orde",
+        "last_activity_date": 1427433736,
+        "creation_date": 1427087182,
+        "answer_count": 1,
+        "title": "Filter map to one row per multiple of ten,based on difference in decreasing order in java",
+        "body": "<p>I have a method through which I can filter rows per multiple of ten i.e. I can filter rows which are nearest to multiple of tens such as 10,20,30 etc in ascending order.Now I want to do the same process in decreasing order.<\/p>\n\n<p>Please refer the following link-<strong><a href=\"https://stackoverflow.com/questions/27941610/filter-array-to-one-row-per-multiple-of-ten-based-on-difference\">Filter array to one row per multiple of ten, based on difference?<\/a><\/strong><\/p>\n\n<p>In the above mentioned link,the same process is done in ascending order,I want to do this in decreasing order and store the values in map.But I'm not able to do.<\/p>\n\n<p>I'm using the following code to retrieve rows where beam_current is multiple of ten in a increasing order-<\/p>\n\n<pre><code>public static  LinkedHashMap&lt;Double, String&gt; ClosestToMultiplesOfTen_User() throws SQLException {\n\n    int row_id ;\n    int bIdx = 0;\n    double[] vals = new double[34];\n   // double[] bucket =new double[bucketCount];\n    int rowIndex = 0 ;\n    int i=0;\n\n    try\n            { \n              con = getConnection();\n              stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);\n           //   String sql=\"select logtime,beam_current from INDUS2_BDS.dbo.DCCT where logtime between '\"+name+\" 00:00:00' and '\"+name+\" 23:59:59'\"+\n            //  \"and (beam_current like '%9.96' or beam_current like '%9.97' or beam_current like '%9.98' or  beam_current like '%9.99'  or beam_current like '%0' or beam_current like '%_0.01' or beam_current like '%_0.02' or beam_current like '%_0.03' or beam_current like '%_0.04' or beam_current like '%_0.05' or beam_current like '%_0.06') and beam_energy between '550' and '552'\";\n\n              String sql=\"select logtime,beam_current from INDUS2_BDS.dbo.DCCT where logtime between '2014-10-10 08:50:00' and '2014-10-10 12:50:00'\"+\n                      \"and (beam_current like '%9.96' or beam_current like '%9.97' or beam_current like '%9.98' or  beam_current like '%9.99'  or beam_current like '%0' or beam_current like '%_0.01' or beam_current like '%_0.02' or beam_current like '%_0.03' or beam_current like '%_0.04' or beam_current like '%_0.05' or beam_current like '%_0.06')\";\n\n              System.out.println(\"Value of sql of ClosestToMultiplesOfTen_User is\"+sql);\n              stmt.executeQuery(sql);\n              rs = stmt.getResultSet();\n       while(rs.next()) \n        {\n           for(int j=0; j&lt;1; j++)\n             {\n               vals[i]  = rs.getDouble(2);\n             }\n            i++;\n         }\n        }\n     catch( Exception e )\n        {\n            System.out.println(\"\\nException \"+e);\n        }\n    //  get the max value, and its multiple of ten to get the number of buckets\n    double max = java.lang.Double.MIN_VALUE;\n    for (double v : vals) max = Math.max(max, v);\n    int bucketCount = 1 + (int)(max/10);\n    double[] bucket =new double[bucketCount];\n\n    //  initialise the buckets array to store the closest values\n   double[][] buckets = new double[bucketCount][3];\n for (int i1 = 0; i1 &lt; bucketCount; i1++){\n        // store the current smallest delta in the first element\n        buckets[i1][0] = java.lang.Double.MAX_VALUE; \n        // store the current \"closest\" index in the second element\n        buckets[i1][1] = -1d;\n        // store the current \"closest\" value in the third element\n        buckets[i1][2] = java.lang.Double.MAX_VALUE;\n    }\n\n    //  iterate the rows\n    for (row_id=1 ; row_id &lt; vals.length; row_id++)\n    {\n        //  get the value from the row\n        double v = vals[row_id];\n        //  get the closest multiple of ten to v\n        double mult = getMultipleOfTen(v);\n        //  get the absolute distance of v from the multiple of ten\n        double delta = Math.abs(mult - v);\n        //  get the bucket index based on the value of `mult`\n       bIdx = (int)(mult / 10d);\n      // System.out.println(\"value of bidx for bucket index is\"+bIdx);\n        //    test the last known \"smallest delta\" for this bucket\n        if (buckets[bIdx][0] &gt; delta)\n        {\n         //  this is closer than the last known \"smallest delta\"\n          buckets[bIdx][0] = delta;\n          buckets[bIdx][1] = row_id;\n          buckets[bIdx][2] = v;\n\n        }\n     }  \n   //   print out the result\n for (int i1 =1; i1 &lt;buckets.length; i1++)\n   {\n         bucket = buckets[i1];\n         rowIndex = (int) bucket[1];\n         int row_no=rowIndex+1;\n         double rowValue = bucket[2];\n         System.out.println(\"row index \"+row_no+ \"value is \"+rowValue);\n         DecimalFormat twoDForm = new DecimalFormat(\"#.##\"); \n\n         rs.absolute(rowIndex);\n         user_current_map.put(java.lang.Double.valueOf(twoDForm.format(rs.getDouble(2))),(rs.getString(1)));\n        // map1.put(rs.getString(2),(rs.getString(1)));\n         //l.add(map1);\n     }\nSystem.out.println(\"user_current_map \"+user_current_map);\n\nreturn user_current_map;\n}\n\npublic static  double getMultipleOfTen(double v)\n{\n     System.out.println(10d * Math.round(v / 10d));\n    return 10d * Math.round(v / 10d);\n}\n<\/code><\/pre>\n\n<p>Now I just want to reverse the order i.e now I want decreasing order of beam_current i.e 210,22,190 etc.<\/p>\n",
+        "question_id": 29203615,
+        "tags": [
+            "java",
+            "linkedhashmap"
+        ],
+        "score": 1,
+        "accepted_answer_id": 29293823,
+        "is_answered": true,
+        "view_count": 92,
+        "last_edit_date": 1495539807
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80eb22f49198047ca24dbd17036883f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5791492,
+                "user_type": "registered",
+                "user_id": 4568800,
+                "link": "https://stackoverflow.com/users/4568800/tiddi-rastogi",
+                "reputation": 526,
+                "display_name": "tiddi rastogi",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29203615,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1427193164,
+            "comment_id": 46666962
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80eb22f49198047ca24dbd17036883f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5791492,
+                "user_type": "registered",
+                "user_id": 4568800,
+                "link": "https://stackoverflow.com/users/4568800/tiddi-rastogi",
+                "reputation": 526,
+                "display_name": "tiddi rastogi",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29203615,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1427171775,
+            "comment_id": 46658157
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80eb22f49198047ca24dbd17036883f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5791492,
+                "user_type": "registered",
+                "user_id": 4568800,
+                "link": "https://stackoverflow.com/users/4568800/tiddi-rastogi",
+                "reputation": 526,
+                "display_name": "tiddi rastogi",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29203615,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1427091688,
+            "comment_id": 46619757
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 29203615,
+            "edited": false,
+            "creation_date": 1427090876,
+            "comment_id": 46619512
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80eb22f49198047ca24dbd17036883f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5791492,
+                "user_type": "registered",
+                "user_id": 4568800,
+                "link": "https://stackoverflow.com/users/4568800/tiddi-rastogi",
+                "reputation": 526,
+                "display_name": "tiddi rastogi",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29203615,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1427090244,
+            "comment_id": 46619359
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29203615,
+            "edited": false,
+            "creation_date": 1427089370,
+            "comment_id": 46619126
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80eb22f49198047ca24dbd17036883f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5791492,
+                "user_type": "registered",
+                "user_id": 4568800,
+                "link": "https://stackoverflow.com/users/4568800/tiddi-rastogi",
+                "reputation": 526,
+                "display_name": "tiddi rastogi",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29203615,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1427088762,
+            "comment_id": 46618973
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5d6943dd857964bb88c2e5fe2206be63?s=256&d=identicon&r=PG",
+                "account_id": 1556557,
+                "user_type": "registered",
+                "user_id": 1447477,
+                "link": "https://stackoverflow.com/users/1447477/matter-cat",
+                "reputation": 1578,
+                "display_name": "Matter Cat",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29203615,
+            "edited": false,
+            "creation_date": 1427088312,
+            "comment_id": 46618850
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c4d861a463c0e2dfebacae8d3e0cc79e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5183268,
+            "user_type": "registered",
+            "user_id": 4148298,
+            "link": "https://stackoverflow.com/users/4148298/mes",
+            "reputation": 122,
+            "display_name": "MES",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1427433736,
+        "creation_date": 1427433736,
+        "body": "<p>To represent it in reverse order do,order by time in your sql query and change the size of buckets to<\/p>\n\n<pre><code> for (double v : vals) max = Math.max(max, v);\nArrays.sort(vals);\nSystem.out.println(\"value at vals[0] c \"+vals[0]);\ndouble min=vals[0];\nint m2=(int) Math.round(min);\nint m3=(int) Math.round(max);\n\n**int bucketCount = 1+((m3-m2)/10);\ndouble[] bucket =new double[bucketCount];\ndouble[][] buckets = new double[bucketCount][3];**\n<\/code><\/pre>\n",
+        "answer_id": 29293823,
+        "question_id": 29203615
+    }],
+    "answer_comments": {}
+}

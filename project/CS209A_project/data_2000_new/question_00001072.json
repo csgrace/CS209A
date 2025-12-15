@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/90fad2f95d3370d7fe687b5367754697?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 17952764,
+            "user_type": "registered",
+            "user_id": 13045538,
+            "link": "https://stackoverflow.com/users/13045538/kxkkuri",
+            "reputation": 33,
+            "display_name": "kxkkuri"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60637771/accessing-object-variable-in-extended-generic-arraylist",
+        "last_activity_date": 1583936060,
+        "creation_date": 1583935086,
+        "answer_count": 1,
+        "title": "Accessing object variable in extended generic arraylist",
+        "body": "<p>For an assignment, I have to create and manipulate a generic object arraylist <code>MyArrayList&lt;E&gt;<\/code> extended from <code>java.util.ArrayList&lt;E&gt;<\/code>. I need to access a variable <code>highScore<\/code> inside the object <code>GameEntry<\/code> for the purpose of adding the entry into a <code>MyArrayList<\/code> if it meets the requirements, but I can't seem to do it?<\/p>\n\n<p><strong>GameEntry class<\/strong><\/p>\n\n<pre><code>public class GameEntry\n{   public String name;\n    public int highScore;\n    public String handle;\n\n    public GameEntry()\n    {   name = this.name;\n        highScore = this.highScore;\n        handle = this.handle;\n    }\n\n    public GameEntry(String n, int hs, String h)\n    {   name = n;\n        highScore = hs;\n        handle = h;\n    }\n\n    public String getName() { return name; }\n    public int getHScore() { return highScore; }\n    public String getHandle() { return handle; }\n\n    public String toString() {\n        return \"(\" + handle + \", \" + name + \": \" + highScore + \")\";\n    }\n}\n<\/code><\/pre>\n\n<p><strong>MyArrayList class<\/strong><\/p>\n\n<pre><code>public class MyArrayList&lt;E&gt; extends java.util.ArrayList&lt;E&gt;\n{   private int numEntries = 0;\n    public MyArrayList() { super(); }\n    public MyArrayList(int capacity) { super(capacity); }\n\n    public boolean isListEmpty() { return this.isEmpty(); }\n\n    // add new score to MyArrayList (if it is high enough)\n    public void addInOrder(GameEntry e) {\n        int newScore = e.getHScore();\n\n        // is the new entry e really a high score?\n        if(numEntries&lt;this.size() || newScore &gt; this.get(numEntries-1).getHScore())\n        //ERROR: cannot find symbol - method getHScore()\n        // ...rest of addInOrder code...\n        }\n    }    \n}\n<\/code><\/pre>\n",
+        "question_id": 60637771,
+        "tags": [
+            "java",
+            "generics",
+            "arraylist"
+        ],
+        "score": 3,
+        "accepted_answer_id": 60638093,
+        "is_answered": true,
+        "view_count": 67,
+        "last_edit_date": 1583935158
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/441a8e45c455f1297926f21586a8f1a1?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15847779,
+            "user_type": "registered",
+            "user_id": 11434552,
+            "link": "https://stackoverflow.com/users/11434552/nexevis",
+            "reputation": 4717,
+            "display_name": "Nexevis"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1583936060,
+        "creation_date": 1583936060,
+        "body": "<p>You are getting this error because <code>this.get(numEntries - 1)<\/code> will return a generic, and the program will not be able to use <code>getHScore()<\/code> with it unless you cast it to <code>GameEntry<\/code>.<\/p>\n\n<p>You can do this by checking to see if it <em>is<\/em> a <code>GameEntry<\/code> object with <code>instanceof<\/code> and then casting it:<\/p>\n\n<pre><code>public void addInOrder(GameEntry e) {\n    int newScore = e.getHScore();\n\n    // is the new entry e really a high score?\n    if (this.get(numEntries - 1) instanceof GameEntry) {\n\n        GameEntry ge = (GameEntry) this.get(numEntries - 1); //Cast to GameEntry\n        if(numEntries&lt;this.size() || newScore &gt; ge.getHScore()) {\n            //Do whatever\n        }\n    }\n   //Add behavior for when it is NOT an instance of GameEntry\n}\n<\/code><\/pre>\n\n<p>There are probably better ways to implement the behavior you want for <code>addInOrder<\/code>, but I thought I'd answer your literal question on why <code>getHScore()<\/code> is not working for you correctly.<\/p>\n",
+        "answer_id": 60638093,
+        "question_id": 60637771
+    }],
+    "answer_comments": {}
+}

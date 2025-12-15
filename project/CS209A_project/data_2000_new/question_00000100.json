@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/702332071aab47194b06d48390ffdbd2?s=256&d=identicon&r=PG",
+            "account_id": 35657,
+            "user_type": "registered",
+            "user_id": 101061,
+            "link": "https://stackoverflow.com/users/101061/peter-anthony",
+            "reputation": 487,
+            "display_name": "Peter Anthony",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/6834802/java-restful-web-services-jax-rs-authentication-pattern",
+        "last_activity_date": 1311709163,
+        "creation_date": 1311705313,
+        "answer_count": 1,
+        "title": "Java Restful Web Services (jax rs) authentication pattern",
+        "body": "<p>I have started using JAX-RS to created a simple restful interface to my web application. Currently, it is only being used (read only) by one internal client which has access to all application data, and I am using http basic authentication for access. I would like to start using it as part of the view layer of my app, and certain operations will only be allowed if a user is logged in via the web app. I am struggling to find a pattern that allows me to use both forms of authentication in an elegant way, without repeating a lot of code. Here is roughly what I have come up with:<\/p>\n\n<p>First a util class for loading an application session, which is stored in the database.<\/p>\n\n<pre><code>public class RestUtil {\n    public static AppSession getAuthenticatedSession(HttpServletRequest request) {\n        AppSession session;\n        String remoteUser = request.getRemoteUser();\n        if (remoteUser != null) {\n            session = SessionRepository.loadSessionByRemoteUser(remoteUser);\n        } else {\n            session = SessionRepository.loadSessionById(request.getSession().getId());\n        }\n        return session;\n    }\n}\n<\/code><\/pre>\n\n<p>Here's our resource, with one method that is only accessible to an authenticated user, or our http basic auth client:<\/p>\n\n<pre><code>@Path(\"/protected/resource\")\npublic class ProtectedResource {\n    @GET\n    @Produces(MediaType.TEXT_JSON)\n    @Path(\"{userId}\")\n    public String getProtectedResourceJson(@Context HttpServletRequest request, @PathParam(\"userId\") Integer userId) {\n        // Return Charity List XML\n        AppSession session = RestUtil.getAuthenticatedSession(request);\n\n        if (session.canAccessUser(userId))  //get Json...\n    }\n}\n<\/code><\/pre>\n\n<p>Here's the most basic view of the AppSession, for the purpose of this question:<\/p>\n\n<pre><code>public class AppSession {\n    User authenticatedUser;\n    String remoteUser;\n\n    public boolean canAccessUser(Integer userId) {\n        if (remoteUser != null) {\n            //this client has access to all users\n            return true;\n        } else if (authenticatedUser.getId().equals(userId)) {\n            //this is local client, calling the service from a view\n            //only has access to authenticatedUser\n            return true;\n        } else {\n            return false;\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Furthermore, for services that do not require any sort of authentication, how do I prevent unauthorized third parties from just pointing at the url, and grabbing the data at their leisure?<\/p>\n",
+        "question_id": 6834802,
+        "tags": [
+            "java",
+            "design-patterns",
+            "jax-rs",
+            "restful-authentication"
+        ],
+        "score": 9,
+        "is_answered": true,
+        "view_count": 3871
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/965220a70d38e6a29466f44cdb4f804e?s=256&d=identicon&r=PG",
+            "account_id": 114848,
+            "user_type": "registered",
+            "user_id": 301832,
+            "link": "https://stackoverflow.com/users/301832/donal-fellows",
+            "reputation": 138922,
+            "display_name": "Donal Fellows",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 5,
+        "is_accepted": false,
+        "last_activity_date": 1311709163,
+        "creation_date": 1311709163,
+        "body": "<p>You're getting to the point when it is worth looking into using aspect-oriented programming to split the security side of things from your business logic. If you're already using Spring to assemble the pieces of your app (which I recommend for complex servers) then it's just a matter of adding in Spring AOP to inject the security logic. Otherwise, use AspectJ directly. The actual logic to handle the multiple login modes will probably have to be custom, but at least you can keep it quarantined.<\/p>\n\n<p>If using Spring, consider using Spring Security; that builds on top of Spring AOP and supplies you with much more of the solution.<\/p>\n",
+        "answer_id": 6835549,
+        "question_id": 6834802
+    }],
+    "answer_comments": {"6835549": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/702332071aab47194b06d48390ffdbd2?s=256&d=identicon&r=PG",
+            "account_id": 35657,
+            "user_type": "registered",
+            "user_id": 101061,
+            "link": "https://stackoverflow.com/users/101061/peter-anthony",
+            "reputation": 487,
+            "display_name": "Peter Anthony",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 6835549,
+        "edited": false,
+        "creation_date": 1311723339,
+        "comment_id": 8127195
+    }]}
+}

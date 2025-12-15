@@ -1,0 +1,97 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/17abbdb431c46eeb813febb66268a16f?s=256&d=identicon&r=PG",
+            "account_id": 467528,
+            "user_type": "registered",
+            "user_id": 872975,
+            "link": "https://stackoverflow.com/users/872975/pete",
+            "reputation": 10938,
+            "display_name": "Pete",
+            "accept_rate": 91
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/71160049/how-to-convert-amqp-message-sent-as-buffer-from-to-java-string",
+        "last_activity_date": 1645162937,
+        "creation_date": 1645108308,
+        "answer_count": 0,
+        "title": "How to convert amqp message sent as Buffer.from to Java String",
+        "body": "<p>I have 2 services communicating via AMQP. One uses Javascript with amqplib to send a messageObject <code>{&quot;message&quot;:&quot;Success&quot;}<\/code> like this:<\/p>\n<pre><code>channel.sendToQueue(queueName, Buffer.from(JSON.stringify(messageObject)));\n<\/code><\/pre>\n<p>The Java Service consumes the message using spring rabbit like this:<\/p>\n<pre><code>  @RabbitListener(queues = QUEUE_NAME)\n  public void receiveMessageQueue(String message) {\n<\/code><\/pre>\n<p>the content of that message is string representing an array of bytes. I tried to convert it using the answer posted <a href=\"https://stackoverflow.com/questions/6684665/java-byte-array-to-string-to-byte-array\">here<\/a> It works for 95% of the message But my result still contains some unintelligble characters. Seems like it cannot translate the <code>{<\/code> and <code>}<\/code><\/p>\n<pre><code>\\u0017 &quot;message&quot;:&quot;Success&quot; \\f\n<\/code><\/pre>\n<p>So I am wondering, should I change something on the sender side or the receiver side. I'd much rather change the sender side since I have a lot of Java services that expect a ready to use JSON String to be parsed into objects and I don't want to have to update all of them and convert the messages.<\/p>\n<p><strong>EDIT<\/strong>\n<a href=\"https://stackoverflow.com/questions/17354891/java-bytebuffer-to-string\">This SO post<\/a> as mentioned by SMA did not help. Resulting String is exactly the same as the input:<\/p>\n<pre><code>&quot;123,34,106,111,98,73,100,34,58,34,52,54,99,51,101,100,53,54,45,49,101,52,99,45,52,101,49,101,45,97,56,55,55,45,50,55,100,54,53,102,56,50,55,48,51,48,34,44,34,109,101,115,115,97,103,101,34,58,34,83,117,99,99,101,115,115,102,117,108,108,121,32,115,117,98,109,105,116,116,101,100,32,116,111,32,112,46,118,100,115,105,116,116,64,100,105,97,108,111,103,119,111,114,107,115,46,100,101,34,125&quot;\n<\/code><\/pre>\n<p>All I can do right now is:<\/p>\n<pre><code>private String convert(String byteString) {\n    String[] byteValues = byteString.substring(1, byteString.length() - 1).split(&quot;,&quot;);\n    byte[] bytes = new byte[byteValues.length];\n    for (int i=0, len=bytes.length; i&lt;len; i++) {\n      bytes[i] = Byte.parseByte(byteValues[i].trim());\n    }\n    return new String(bytes).replace('\\u0017','{').replace('\\f','}');\n  }\n<\/code><\/pre>\n<p>but that seems too hackish. It feels like there should be an easy solition to communicte a JSON string between javascript and java using amqp.<\/p>\n<p><strong>SOLUTION<\/strong><\/p>\n<p>I found a way to send the message in a way that spring rabbit will understand:<\/p>\n<pre><code>channel.sendToQueue(queueName, Buffer.from(JSON.stringify(messageObject),'utf8'), {contentType:'text/plain', contentEncoding: 'UTF-8'});\n<\/code><\/pre>\n<p>Appearently the properties contentType and contentEncoding are a convention, used by the Spring Rabbit message consumer. Now the Java service gets the correct JSON string.<\/p>\n",
+        "question_id": 71160049,
+        "tags": [
+            "javascript",
+            "java",
+            "encoding",
+            "amqp"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 609,
+        "last_edit_date": 1645162937
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Q17Fg.png?s=256",
+                "account_id": 9504657,
+                "user_type": "registered",
+                "user_id": 7064617,
+                "link": "https://stackoverflow.com/users/7064617/jcompetence",
+                "reputation": 8623,
+                "display_name": "jcompetence"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 71160049,
+            "edited": false,
+            "creation_date": 1645169116,
+            "comment_id": 125804267
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/17abbdb431c46eeb813febb66268a16f?s=256&d=identicon&r=PG",
+                "account_id": 467528,
+                "user_type": "registered",
+                "user_id": 872975,
+                "link": "https://stackoverflow.com/users/872975/pete",
+                "reputation": 10938,
+                "display_name": "Pete",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 71160049,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/Q17Fg.png?s=256",
+                "account_id": 9504657,
+                "user_type": "registered",
+                "user_id": 7064617,
+                "link": "https://stackoverflow.com/users/7064617/jcompetence",
+                "reputation": 8623,
+                "display_name": "jcompetence"
+            },
+            "edited": false,
+            "creation_date": 1645160872,
+            "comment_id": 125802456
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Q17Fg.png?s=256",
+                "account_id": 9504657,
+                "user_type": "registered",
+                "user_id": 7064617,
+                "link": "https://stackoverflow.com/users/7064617/jcompetence",
+                "reputation": 8623,
+                "display_name": "jcompetence"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 71160049,
+            "edited": false,
+            "creation_date": 1645109978,
+            "comment_id": 125788186
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

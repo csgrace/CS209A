@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/213899124be78f62307b81c6059e386d?s=256&d=identicon&r=PG",
+            "account_id": 1574741,
+            "user_type": "registered",
+            "user_id": 1461517,
+            "link": "https://stackoverflow.com/users/1461517/steerpike",
+            "reputation": 1863,
+            "display_name": "Steerpike",
+            "accept_rate": 47
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/66242115/run-testng-test-sequentially-with-invocationcount",
+        "last_activity_date": 1613939164,
+        "creation_date": 1613565390,
+        "answer_count": 1,
+        "title": "Run TestNG test sequentially with invocationCount",
+        "body": "<p>I have a long-running @test annotated method that I need to run repeatedly and I achieve this with <code>invocationCount<\/code>.<\/p>\n<p>When I hard code the value e.g. <code>invocationCount=10<\/code> then it runs succesfully, running tests 1 - 10 sequentially, i.e. it waits for the method to complete and then starts the next invocation.<\/p>\n<p>However, I need to be able to alter the <code>invocationCount<\/code> value at runtime so have implemented the <code>IAnnotationTransformer<\/code> interface to achieve this, passing in the key, value pair at runtime. However, this has the effect of running the tests in parallel.  I've provided a simplified version here:<\/p>\n<p>TestNG.xml:\n<\/p>\n<pre><code>&lt;suite name=&quot;Run tests sequentially&quot; verbose=&quot;1&quot; thread-count=&quot;1&quot; configfailurepolicy=&quot;continue&quot;&gt;\n\n    &lt;listeners&gt;\n        &lt;listener\n                class-name=&quot;com.tests.utils.AnnotationTransformerImpl&quot;/&gt;\n    &lt;/listeners&gt;\n\n    &lt;test name=&quot;invocation-test-synchronised&quot; parallel=&quot;false&quot;&gt;\n\n        &lt;classes&gt;\n            &lt;class name=&quot;com.tests.journeys.InvocationTest&quot;/&gt;\n        &lt;/classes&gt;\n    &lt;/test&gt;\n&lt;/suite&gt;\n<\/code><\/pre>\n<p>AnnotationTransformer:\npublic class AnnotationTransformerImpl implements IAnnotationTransformer {<\/p>\n<pre><code>    private String invocation_key = System.getProperty(&quot;invKey&quot;);\n    private String invocation_count = System.getProperty(&quot;invCount&quot;);\n    //value passed from JVM is -Dkvp=invocationTest=5\n\n    @Override\n    public void transform(\n         ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {\n        String kvp = System.getProperty(invocation_key,invocation_count);\n        String keyValue[] = kvp.split(&quot;=&quot;);\n        if (keyValue.length != 2) {\n            return;\n        }\n        if (!testMethod.getName().equalsIgnoreCase(keyValue[0])) {\n            return;\n        }\n        annotation.setInvocationCount(Integer.parseInt(keyValue[1]));\n        annotation.setThreadPoolSize(5);\n    }\n}\n<\/code><\/pre>\n<p>Test class:\npublic class InvocationTest {<\/p>\n<pre><code>    @Test(invocationCount = 5)\n    public void invocationTest() {\n\n        ITestResult r = Reporter.getCurrentTestResult();\n        String methodname = r.getMethod().getMethodName();\n        System.err.println(\n                &quot;Running &quot; + methodname + &quot;() on Thread [&quot; + Thread.currentThread().getId() + &quot;]&quot;);\n\n        Thread.sleep(5000);\n    }\n\n}\n<\/code><\/pre>\n<p>The resulting test output runs the test method in parallel, on separate threads:<\/p>\n<p><a href=\"https://i.sstatic.net/3SU8F.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/3SU8F.png\" alt=\"IntelliJ_run\" /><\/a><\/p>\n<p>How can I achieve running a method to completion before starting the next invocation? I know it will be in the documentation somewhere, just struggling.<\/p>\n",
+        "question_id": 66242115,
+        "tags": [
+            "java",
+            "testng",
+            "method-invocation"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 560,
+        "last_edit_date": 1613565824
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/7y6Z8.jpg?s=256",
+            "account_id": 16557745,
+            "user_type": "registered",
+            "user_id": 11964458,
+            "link": "https://stackoverflow.com/users/11964458/villa-7",
+            "reputation": 547,
+            "display_name": "Villa_7"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1613939164,
+        "creation_date": 1613939164,
+        "body": "<p>Try to google: Java multithreading.\nIt will give you a solution. Probably with using <code>Thread.join();<\/code> and other stuff.<\/p>\n",
+        "answer_id": 66306782,
+        "question_id": 66242115
+    }],
+    "answer_comments": {}
+}

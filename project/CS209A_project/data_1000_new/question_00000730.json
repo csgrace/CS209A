@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/939b4028a2c1398c0f3cdf91df4eed53?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 29863770,
+            "user_type": "registered",
+            "user_id": 22886892,
+            "link": "https://stackoverflow.com/users/22886892/jathurshan",
+            "reputation": 3,
+            "display_name": "Jathurshan "
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/77773462/junit5-expectedvalue-test-method-is-failing-when-run-the-program-with-null-check",
+        "last_activity_date": 1704638695,
+        "creation_date": 1704637970,
+        "answer_count": 1,
+        "title": "JUnit5 ExpectedValue test method is failing when run the program with Null-check test method",
+        "body": "<p>I have two unit test case methods: TestUserEventExpectedResult(), TestUserEventNullCheck(). My problem is when I run the program only with TestUserEventExpectedResult() method, I can get the expected result and the test is passed for TestUserEventExpectedResult() method. When I run the program with both TestUserEventExpectedResult(), TestUserEventNullCheck() methods the TestUserEventExpectedResult() method fails and TestUserEventNullCheck() is passed.<\/p>\n<p>For a better understanding:<\/p>\n<p><strong>case1:<\/strong><\/p>\n<ul>\n<li><strong>Existing Methods:<\/strong> TestUserEventExpectedResult() only<\/li>\n<li><strong>Result:<\/strong> Test case passed<\/li>\n<\/ul>\n<p><strong>case2:<\/strong><\/p>\n<ul>\n<li><strong>Existing Methods:<\/strong> TestUserEventExpectedResult() &amp; TestUserEventNullCheck()<\/li>\n<li><strong>Result:<\/strong>\n<ul>\n<li>TestUserEventExpectedResult() - Test fails<\/li>\n<li>TestUserEventNullCheck() - Test Pass<\/li>\n<\/ul>\n<\/li>\n<\/ul>\n<p>When I have the <strong>TestUserEventNullCheck()<\/strong> with <strong>TestUserEventExpectedResult()<\/strong> the test case fails for TestUserEventExpectedResult() method. Following are my implementations. I need a working solution to pass both test cases in a single file at the same run.<\/p>\n<p><strong>Repo Interface<\/strong> - need to write test case for this repository<\/p>\n<pre><code>@Repository\npublic interface UserRepository extends JpaRepository&lt;User, Integer&gt; {\n\n    @Query(&quot;select u from User u join fetch u.venues uv where uv.event.id = :eventId and u.id = :userId and u.firstName = :firstName&quot;)\n    User findUserByEventId(String eventId, int userId, String firstName);\n......\n}\n<\/code><\/pre>\n<p><strong>User Entity<\/strong><\/p>\n<pre><code>public class User{\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private int id;\n    \n    private String firstName;\n    \n    private String lastName;\n    \n    @OneToMany(targetEntity = UserVenues.class, mappedBy = &quot;user&quot;, fetch = FetchType.LAZY, cascade = CascadeType.ALL)\n    private List&lt;UserVenues&gt; venues;\n      \n    ......\n}\n<\/code><\/pre>\n<p><strong>Event entity<\/strong><\/p>\n<pre><code>public class Event{\n    @Id\n    private int id;\n    \n    @OneToMany(................)\n    private List&lt;UserVenues&gt; user;\n    ......  \n} \n<\/code><\/pre>\n<p><strong>UserVenue Entity<\/strong><\/p>\n<pre><code>public class UserVenues{\n    @Id\n    private int Id;\n    \n    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)\n    @JoinColumn(name = &quot;user_Id&quot;,  referencedColumnName = &quot;id&quot;)\n    private User user;\n    \n    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)\n    @JoinColumn(name = &quot;event_Id&quot;,  referencedColumnName = &quot;id&quot;)\n    private Event event;\n    ......  \n}   \n<\/code><\/pre>\n<p><strong>Both test cases<\/strong><\/p>\n<pre><code>//fails when having the other test method only without the other method it passes fine.\n@Test\npublic void TestUserEventExpectedResult() {\n    User user = new User();\n    user.setUserId(1);\n    user.setFirstName(&quot;Alex&quot;);\n    user.setFirstName(&quot;Aron&quot;);\n    userRepo.save(user);\n    testEntityManager.flush();\n    testEntityManager.clear();\n    \n    Event event = new Event();\n    event.setEventId(1);\n    event.setName(&quot;Wedding Party&quot;);\n    eventRepo.save(event);\n    testEntityManager.flush();\n    testEntityManager.clear();\n\n    UserVenues userVenue = new UserVenues();\n    userVenue.setEventId(1);\n    userVenue.setUser(user);\n    userVenueRepo.save(userVenue);\n    testEntityManager.flush();\n    testEntityManager.clear();\n    \n    User expectedUser = userRepo.findUserByEventId(1, 1, &quot;Alex&quot;);\n    assertNotNull(expectedUser); //test fails but the object exists with the parameters\n}\n<\/code><\/pre>\n<pre><code>//Always pass the correct test\n@Test\npublic void TestUserEventNullCheck() {\n    User user = new User();\n    user.setUserId(1);\n    user.setFirstName(&quot;Alex&quot;);\n    user.setFirstName(&quot;Aron&quot;);\n    userRepo.save(user);\n    testEntityManager.flush();\n    testEntityManager.clear();\n    \n    Event event = new Event();\n    event.setEventId(1);\n    event.setName(&quot;Wedding Party&quot;);\n    eventRepo.save(event);\n    \n    UserVenues userVenue = new UserVenues();\n    userVenue.setEventId(1);\n    userVenue.setUser(user);\n    userVenueRepo.save(userVenue);\n    testEntityManager.flush();\n    testEntityManager.clear();\n    \n    User expectedUser = userRepo.findUserByEventId(2, 3, &quot;Tony&quot;);\n    assertNull(expectedUser); //test passed\n}\n<\/code><\/pre>\n<p>If anyone knows the proper reason why it is happening and the proper solution please help me.!\nThank you<\/p>\n",
+        "question_id": 77773462,
+        "tags": [
+            "java",
+            "spring-boot",
+            "jpa",
+            "junit",
+            "junit5"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 44,
+        "last_edit_date": 1704638123
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a/AATXAJzN82ZMrPVcs3AjhCZeNg373jl0a6eMnaV4D7Wh=k-s256",
+            "account_id": 21590694,
+            "user_type": "registered",
+            "user_id": 15920362,
+            "link": "https://stackoverflow.com/users/15920362/bakang-monei",
+            "reputation": 1,
+            "display_name": "Bakang Monei"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": -1,
+        "is_accepted": false,
+        "last_activity_date": 1704638695,
+        "creation_date": 1704638648,
+        "body": "<p>The problem you're having appears to be connected to the data state between your test cases. When both test cases are performed concurrently, there may be some interaction or reliance between them that causes the TestUserEventExpectedResult() to fail.<\/p>\n<p>Here are various solutions to this problem:<\/p>\n<p>Isolation of test cases: Ensure that each test case is independent of the status of the data generated or updated by other test cases. To set up and clean up the test environment, use the setup and teardown methods or annotations supplied by your testing framework (e.g., @BeforeEach, @AfterEach in JUnit 5).<\/p>\n<p>Use alternative data:It appears that you are using the same data (e.g. eventId = 1, userId = 1, firstName = &quot;Alex&quot;) for both test cases in your test methods. Interference between tests may result as a result of this. To establish independence, try utilizing distinct sets of data for each test.<\/p>\n<p>Check for any transactions or database commits that may have affected the data state between tests. Consider utilizing transactional annotations or explicitly managing transactions to isolate the changes performed by each test case.<\/p>\n<pre><code>import org.junit.jupiter.api.*;\n<\/code><\/pre>\n<p>@TestInstance(TestInstance.Lifecycle.PER_CLASS)<\/p>\n<p>public class UserRepositoryTests {<\/p>\n<pre><code>@Autowired\nprivate UserRepository userRepo;\n\n@Autowired\nprivate EventRepository eventRepo;\n\n@Autowired\nprivate UserVenuesRepository userVenueRepo;\n\n@BeforeEach\npublic void setUp() {\n    // Perform setup actions here before each test\n    // Clear relevant data or set up the initial state\n}\n\n@AfterEach\npublic void tearDown() {\n    // Perform cleanup actions here after each test\n    // Rollback transactions, reset state, or clear data\n}\n\n@Test\npublic void testUserEventExpectedResult() {\n    // Test logic for expected result\n}\n\n@Test\npublic void testUserEventNullCheck() {\n    // Test logic for null check\n}\n<\/code><\/pre>\n<p>}<\/p>\n",
+        "answer_id": 77773509,
+        "question_id": 77773462,
+        "last_edit_date": 1704638695
+    }],
+    "answer_comments": {}
+}

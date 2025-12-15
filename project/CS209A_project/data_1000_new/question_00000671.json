@@ -1,0 +1,92 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/eee6caecf51b6fa3f0b730c0ece178ee?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6083419,
+            "user_type": "registered",
+            "user_id": 4748352,
+            "link": "https://stackoverflow.com/users/4748352/ndsfd-ddsfd",
+            "reputation": 235,
+            "display_name": "ndsfd ddsfd",
+            "accept_rate": 4
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/30379803/getting-error-in-xslt-transformation-through-java",
+        "last_activity_date": 1432231663,
+        "creation_date": 1432226976,
+        "answer_count": 1,
+        "title": "getting error in xslt transformation through java",
+        "body": "<p>I am trying to an xsl transformation that right now by a java object I am generating an intermediary XML and that XML is again passed to generate a new XML finally right now while in xsl transformation I am getting the error, let me show you below my piece of code that I have tried.<\/p>\n\n<p>Below is my class in which first I am creating objects and then through xstream generating the intermediary XML <\/p>\n\n<pre><code>InvoiceReferenceNotificationMessage invoiceReferenceNotificationMessage = new InvoiceReferenceNotificationMessage();\n        invoiceReferenceNotificationMessage.setInvoiceReference(\"SM/8315\");\n        invoiceReferenceNotificationMessage.setABSReference(\"IRMA5456R157311\");\n        invoiceReferenceNotificationMessage.setCurrency(\"GBP\");\n        invoiceReferenceNotificationMessage.setInvoiceAmount(255646);\n        invoiceReferenceNotificationMessage.setPaidAmount(1246565);\n        invoiceReferenceNotificationMessage.setBalanceAmount(0);\n        invoiceReferenceNotificationMessage.setValueDate(new Date());\n        invoiceReferenceNotificationMessage.setRemarks(\"abc\");\n\n\n        InvoiceReferenceNotificationMessage invoiceReferenceNotificationMessage1 = new InvoiceReferenceNotificationMessage();\n        invoiceReferenceNotificationMessage1.setInvoiceReference(\"SM/1655\");\n        invoiceReferenceNotificationMessage1.setABSReference(\"I1575656311\");\n        invoiceReferenceNotificationMessage1.setCurrency(\"EUR\");\n        invoiceReferenceNotificationMessage1.setInvoiceAmount(25655546);\n        invoiceReferenceNotificationMessage1.setPaidAmount(1255565645);\n        invoiceReferenceNotificationMessage1.setBalanceAmount(0);\n        invoiceReferenceNotificationMessage1.setValueDate(new Date());\n        invoiceReferenceNotificationMessage1.setRemarks(\"abERRc\");\n\n  Transformer xsltTransformer = null;\n        Mail m = new Mail();\n\n        m.setInvoiceReferenceNotificationMessage(invoiceReferenceNotificationMessage);\n\n        XStream xstream = new XStream();\n        xstream.alias(\"brokermail\",Mail.class);\n        String abc = xstream.toXML(m);\n        //System.out.println(abc);\n\n        m.setInvoiceReferenceNotificationMessage(invoiceReferenceNotificationMessage1);\n        xstream.alias(\"brokermail\",Mail.class);\n        String def = xstream.toXML(m);\n        //System.out.println(def);\n\n        String t =abc+def;\n        System.out.println(t);\n<\/code><\/pre>\n\n<p>The above code generates the following below XML<\/p>\n\n<pre><code> &lt;brokermail&gt;\n  &lt;invoiceReferenceNotificationMessage&gt;\n    &lt;InvoiceReference&gt;SM/82973409/0315&lt;/InvoiceReference&gt;\n    &lt;ABSReference&gt;IRMAR43157311&lt;/ABSReference&gt;\n    &lt;Currency&gt;GBP&lt;/Currency&gt;\n    &lt;InvoiceAmount&gt;25446.0&lt;/InvoiceAmount&gt;\n    &lt;PaidAmount&gt;12435.0&lt;/PaidAmount&gt;\n    &lt;BalanceAmount&gt;0.0&lt;/BalanceAmount&gt;\n    &lt;ValueDate&gt;2015-05-21 21:58:04.439 IST&lt;/ValueDate&gt;\n    &lt;Remarks&gt;abc&lt;/Remarks&gt;\n  &lt;/invoiceReferenceNotificationMessage&gt;\n&lt;/brokermail&gt;&lt;brokermail&gt;\n  &lt;invoiceReferenceNotificationMessage&gt;\n    &lt;InvoiceReference&gt;SM/13435&lt;/InvoiceReference&gt;\n    &lt;ABSReference&gt;I157343411&lt;/ABSReference&gt;\n    &lt;Currency&gt;EUR&lt;/Currency&gt;\n    &lt;InvoiceAmount&gt;2554546.0&lt;/InvoiceAmount&gt;\n    &lt;PaidAmount&gt;12534545.0&lt;/PaidAmount&gt;\n    &lt;BalanceAmount&gt;0.0&lt;/BalanceAmount&gt;\n    &lt;ValueDate&gt;2015-05-21 21:58:04.439 IST&lt;/ValueDate&gt;\n    &lt;Remarks&gt;abERRc&lt;/Remarks&gt;\n  &lt;/invoiceReferenceNotificationMessage&gt;\n&lt;/brokermail&gt;\n<\/code><\/pre>\n\n<p>Now I have to do xsl transformation that is by passing the above generated XML and then generating a new XML which I am doing through xalan. Below\nis what I have tried but my final XML is not generated as I am getting the error please advise how to overcome this, I am using xalan api<\/p>\n\n<pre><code>System.out.println(\"******%%%%%%%%%%%%%*************\");\n        String t =abc+def;\n        System.out.println(t);\n        Source msgStreamSource = null;\n\n        ByteArrayInputStream byteStream = new ByteArrayInputStream(t.getBytes());\n        BufferedInputStream buffMsg = new BufferedInputStream(byteStream);\n        msgStreamSource = new StreamSource(buffMsg);\n\n             Transformer xsltTransformer1 = null;\n\n            StringWriter strWriter = new StringWriter();\n            // Result stream\n            Result xmlOutput = new StreamResult(strWriter);\n            // String to hold transformed xml\n            String transformedMessage = null;\n            TransformerFactory transFact = TransformerFactory.newInstance();\n            try\n            {\n            //*******#########****** error is on this below line ********###########***********\n                xsltTransformer1 = transFact.newTransformer(msgStreamSource);\n            //*******#########****** error is on this below line ********###########***********\n                // perform XSL transformation\n                xsltTransformer1.transform(msgStreamSource, xmlOutput);\n                // get the transformed xml\n                transformedMessage = strWriter.toString();\n            }\n            finally\n            {\n                strWriter.close();\n            }\n\n            System.out.println(transformedMessage);\n        }\n<\/code><\/pre>\n\n<p>the err that i am getting is please advise how to overcome from this<\/p>\n\n<pre><code>[Fatal Error] :12:15: The markup in the document following the root element must be well-formed.\nERROR:  'The markup in the document following the root element must be well-formed.'\nFATAL ERROR:  'Could not compile stylesheet'\nException in thread \"main\" javax.xml.transform.TransformerConfigurationException: Could not compile stylesheet\n    at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl.newTemplates(Unknown Source)\n    at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl.newTransformer(Unknown Source)\n<\/code><\/pre>\n",
+        "question_id": 30379803,
+        "tags": [
+            "java",
+            "xml",
+            "xslt",
+            "xstream",
+            "xalan"
+        ],
+        "score": -2,
+        "is_answered": false,
+        "view_count": 920,
+        "last_edit_date": 1432230230
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/904e3f5b74c1bbe9abaeba243b73ad0a?s=256&d=identicon&r=PG",
+            "account_id": 556979,
+            "user_type": "registered",
+            "user_id": 919264,
+            "link": "https://stackoverflow.com/users/919264/florent-georges",
+            "reputation": 2327,
+            "display_name": "Florent Georges",
+            "accept_rate": 62
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1432231663,
+        "creation_date": 1432231663,
+        "body": "<p>You pass the XML (not a valid document, with 2 root elements) to <code>newTransformer<\/code>, instead of passing the XSLT stylesheet.  The compiler does not even complain about the document not to be a valid stylesheet, it complains it is ill-formed XML (an XSLT stylesheet is itself an XML document).  You have to read <code>TransformerFactory<\/code> <a href=\"http://docs.oracle.com/javase/7/docs/api/javax/xml/transform/TransformerFactory.html\" rel=\"nofollow\">documentation<\/a>, I am afraid.<\/p>\n",
+        "answer_id": 30381249,
+        "question_id": 30379803
+    }],
+    "answer_comments": {"30381249": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/eee6caecf51b6fa3f0b730c0ece178ee?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6083419,
+                "user_type": "registered",
+                "user_id": 4748352,
+                "link": "https://stackoverflow.com/users/4748352/ndsfd-ddsfd",
+                "reputation": 235,
+                "display_name": "ndsfd ddsfd",
+                "accept_rate": 4
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30381249,
+            "edited": false,
+            "creation_date": 1432232306,
+            "comment_id": 48852033
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/eee6caecf51b6fa3f0b730c0ece178ee?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6083419,
+                "user_type": "registered",
+                "user_id": 4748352,
+                "link": "https://stackoverflow.com/users/4748352/ndsfd-ddsfd",
+                "reputation": 235,
+                "display_name": "ndsfd ddsfd",
+                "accept_rate": 4
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30381249,
+            "edited": false,
+            "creation_date": 1432232208,
+            "comment_id": 48851974
+        }
+    ]}
+}

@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1334e95f0913f785419db5204231db86?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 17743996,
+            "user_type": "registered",
+            "user_id": 12883648,
+            "link": "https://stackoverflow.com/users/12883648/tafli",
+            "reputation": 162,
+            "display_name": "tafli"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60208770/cannot-enqeue-lobs-bigger-than-2000-bytes-as-buffered-message-into-oracle-aq",
+        "last_activity_date": 1581602829,
+        "creation_date": 1581599783,
+        "answer_count": 1,
+        "title": "Cannot enqeue LOBs bigger than 2000 bytes as buffered message into Oracle AQ",
+        "body": "<p>I'm trying to enqueue a JMS-Bytes-Message (<code>AQ$_JMS_BYTES_MESSAGE<\/code>) as buffered message into a Oracle AQ and reading it with Java JMS. To send messages, I'm using following PL/SQL code:<\/p>\n\n<pre><code>declare\n    L_JmsMessage        sys.AQ$_JMS_BYTES_MESSAGE;\n    L_EnqueueOptions    DBMS_AQ.ENQUEUE_OPTIONS_T;\n    L_MessageProperties DBMS_AQ.MESSAGE_PROPERTIES_T;\n    L_MsgId             raw(16);\n    L_Queue             varchar2(80) := 'MYQUEUE';\n    L_Payload           blob;\n    L_CorrId            varchar2(100);\n\n    dest_offset         integer := 1;\n    src_offset          integer := 1;\n    lang_context        integer := 0;\n    l_warning           integer;\nbegin\n    L_EnqueueOptions.VISIBILITY := DBMS_AQ.IMMEDIATE;\n    L_EnqueueOptions.DELIVERY_MODE := DBMS_AQ.BUFFERED;\n\n    L_MessageProperties.CORRELATION := L_CorrId;\n    L_MessageProperties.PRIORITY    := 90;\n    L_MessageProperties.DELAY       := DBMS_AQ.NO_DELAY;\n\n\n    DBMS_LOB.createTemporary(L_Payload, true);\n    DBMS_LOB.ConvertToBlob(L_Payload, createCLOB(2001), DBMS_LOB.LOBMAXSIZE, dest_offset, src_offset, 0, lang_context, l_warning);\n\n    dbms_output.put_line('L_Payload length: '|| DBMS_LOB.GETLENGTH(L_Payload));\n\n    L_jmsMessage := sys.aq$_jms_bytes_message.construct;\n    L_jmsMessage.set_type('HttpResponse');\n    L_jmsMessage.set_bytes(L_Payload);\n    L_jmsMessage.set_string_property('COMPRESSED', 'false');\n\n    DBMS_AQ.ENQUEUE(\n      queue_name         =&gt; L_Queue\n     ,enqueue_options    =&gt; L_EnqueueOptions\n     ,message_properties =&gt; L_MessageProperties\n     ,payload            =&gt; L_jmsMessage\n     ,msgid              =&gt; L_MsgId\n    );\n\n    dbms_lob.freeTemporary(L_Payload);\nend;\n/\n<\/code><\/pre>\n\n<p>It works fine as long the paylod is not bigger than 2000 characters. As soon the payload is bigger than 2000 chars (like 2001) I receive following SQL error:\n<code>ORA-25293: Lob attributes must be null for buffered operations<\/code>.<\/p>\n\n<p>When setting the AQ delivery mode from <code>DBMS_AQ.BUFFERED<\/code> to <code>DBMS_AQ.PERSISTENT<\/code> it works fine with any size.<\/p>\n\n<p>According to Oracle documentation (<a href=\"https://docs.oracle.com/database/121/ADQUE/aq_intro.htm#CHDFICID\" rel=\"nofollow noreferrer\">Enqueuing Buffered Messages<\/a>) it is stated:<\/p>\n\n<blockquote>\n  <p>The queue type for buffered messaging can be ADT, XML, ANYDATA, or RAW. For ADT types with LOB attributes, only buffered messages with null LOB attributes can be enqueued.<\/p>\n<\/blockquote>\n\n<p>The used type is obviously a ADT (<a href=\"https://docs.oracle.com/cd/E18283_01/appdev.112/e16760/t_jms.htm\" rel=\"nofollow noreferrer\">JMS types<\/a>). <\/p>\n\n<p>Does anyone know a solution for sending buffered JMS messages over Oracle AQ?<\/p>\n",
+        "question_id": 60208770,
+        "tags": [
+            "java",
+            "oracle-database",
+            "plsql",
+            "advanced-queuing"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 415
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1334e95f0913f785419db5204231db86?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 17743996,
+            "user_type": "registered",
+            "user_id": 12883648,
+            "link": "https://stackoverflow.com/users/12883648/tafli",
+            "reputation": 162,
+            "display_name": "tafli"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1581602829,
+        "creation_date": 1581602829,
+        "body": "<p>I just had a look at the spec of <code>aq$_jms_bytes_message<\/code>. In there it is stated that<\/p>\n\n<blockquote>\n  <p>set_bytes sets payload in RAW into bytes_raw if the length of payload is &lt;= 2000, otherwise into bytes_lob.<\/p>\n<\/blockquote>\n\n<p>According to this comment, it is <strong>not<\/strong> possible to send JMS messages larger than 2000 bytes as buffered AQ message.<\/p>\n\n<p>Together with the documentation quote mentioned in my question and this comment, it is clear, why I receive a ORA-25293 exception.<\/p>\n",
+        "answer_id": 60209741,
+        "question_id": 60208770
+    }],
+    "answer_comments": {}
+}

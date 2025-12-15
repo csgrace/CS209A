@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c584f660b4a8dd96d5a92b7fa5060b55?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5574637,
+            "user_type": "registered",
+            "user_id": 4418481,
+            "link": "https://stackoverflow.com/users/4418481/ben",
+            "reputation": 1859,
+            "display_name": "Ben",
+            "accept_rate": 55
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58281097/creating-adapter-based-on-location-condition",
+        "last_activity_date": 1570525395,
+        "creation_date": 1570515880,
+        "answer_count": 1,
+        "title": "Creating Adapter based on location condition",
+        "body": "<p>I'm trying to make something as follows:<\/p>\n\n<p><a href=\"https://i.sstatic.net/mMazj.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/mMazj.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>I have an app and I know my location (let's say it is number 4 for the example). I have a defined radius also. I had liked it to show in an adapter below the map all the results that are inside the radius (for example it should show only 1 and 5 - 4 is my location so I don't need it to show).<\/p>\n\n<p>Now, image that the numbers that im trying to show are users that I have in my Cloud Firestore database. In order to show them on the map, I need to perform a query to check for some condition and then also to check if they are inside the defined radius. If they both have the condition and inside the radius I had like them to be added to the adapter.<\/p>\n\n<p>I use the following code to implement it:              <\/p>\n\n<pre><code>db.collection(\"Users\").document(document.getData().get( \"UserID\" ).toString()).collection( \"Location\" ).get()\n                                .addOnCompleteListener(new OnCompleteListener&lt;QuerySnapshot&gt;() {\n                                    @Override\n                                    public void onComplete(@NonNull Task&lt;QuerySnapshot&gt; task) {\n                                        if (task.isSuccessful()) {\n                                            for (QueryDocumentSnapshot document2 : task.getResult()) {\n\n                                                Object BookLat = document2.getData().get( \"Lat\" );\n                                                Object BookLon = document2.getData().get( \"Lon\" );\n\n                                                float distance = CalculateDistance(Lat, Lon, BookLat, BookLon);\n\n                                                if (distance &lt;=Radius){\n                                                    MapPersonAdapter mapPersonAdapter = new MapPersonAdapter( LocationsActivity.this,document.getData().get( \"UserID\" ).toString(), distance );\n                                                    lvPerson.setAdapter( mapPersonAdapter );\n                                                    MapPerson mapPerson = MapPerson.Result(document.getData().get( \"UserID\" ).toString(), distance);\n                                                    mapPersonAdapter.add( mapPerson );\n                                                    mapPersonAdapter.notifyDataSetChanged();\n                                                }\n\n                                            }\n                                        } else {\n                                            Log.d(\"ERROR\", \"Error getting documents: \", task.getException());\n                                        }\n                                    }\n                                });\n<\/code><\/pre>\n\n<p>Here the problems start.<\/p>\n\n<p>1) Since I need to check every query for distance, I need to add one-by-one to my adapter. This results that I cant save all results in some array and then insert to adapter (due to <code>void<\/code> class of <code>async task<\/code>).<\/p>\n\n<p>2) I need to make the adapter MapPersonAdapter with variables in it (<code>UserID,distance<\/code>) since inside the <code>viewHolder<\/code> of the adapter I need to use:<\/p>\n\n<pre><code>viewHolder.tvPersonName.setText(person.getPersonName( personID )); \n<\/code><\/pre>\n\n<p>Which is defined in:<\/p>\n\n<pre><code>public static String getPersonName(String personID) {\n    // PART FOR DISPLAYING PROFILE NAME//\n    FirebaseFirestore db = FirebaseFirestore.getInstance();\n    CollectionReference username = db.collection( \"Users\" ).document(personID).collection( \"UserData\" );\n    username.get().addOnCompleteListener(new OnCompleteListener&lt;QuerySnapshot&gt;() {\n        @Override\n        public void onComplete(@NonNull Task&lt;QuerySnapshot&gt; task) {\n            if (task.isSuccessful()) {\n                for (QueryDocumentSnapshot document : task.getResult()) {\n                    personname = document.getString( \"username\" );\n                }\n            } else {\n                Log.d(TAG, \"Error getting documents: \", task.getException());\n            }\n        }\n    });\n    return personname;\n}\n<\/code><\/pre>\n\n<p>It causes that I have to initialize the adapter inside the query.<\/p>\n\n<p>These two problems force me to Initialize the adapter inside the query itself which eventually leads to the main problem that the adapter only shows the last result since it overwrites the views (always returns position 0).<\/p>\n\n<p>Is there any way to create such an adapter that is called inside a for-loop and yet saves all the results? (Please remember that it is inside async task and it is very complicated to get results outside of the query).<\/p>\n\n<p>Thank you<\/p>\n",
+        "question_id": 58281097,
+        "tags": [
+            "java",
+            "android",
+            "firebase",
+            "google-cloud-firestore",
+            "android-adapter"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 56,
+        "last_edit_date": 1570525395
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/269fpDhM.jpg?s=256",
+            "account_id": 6819231,
+            "user_type": "registered",
+            "user_id": 5246885,
+            "link": "https://stackoverflow.com/users/5246885/alex-mamo",
+            "reputation": 139485,
+            "display_name": "Alex Mamo",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1570525354,
+        "creation_date": 1570525354,
+        "body": "<blockquote>\n  <p>I had liked it to show in an adapter below the map all the results that are inside the radius (for example it should show only 1 and 5 - 4 is my location so I don't need it to show).<\/p>\n<\/blockquote>\n\n<p>There is currently no way you can query a Cloud Firestore database using geolocation. Firestore does not support GeoPoint queries. The only way you can solve this is to use <a href=\"https://en.wikipedia.org/wiki/Geohash\" rel=\"nofollow noreferrer\">geohashes<\/a>. There is also a very useful <a href=\"https://www.youtube.com/watch?v=mx1mMdHBi5Q\" rel=\"nofollow noreferrer\">video<\/a> where Frank van Puffelen explains in details the same topic.<\/p>\n\n<p>Beside that, if you are using Android, there is also a library named <a href=\"https://github.com/imperiumlabs/GeoFirestore-Android\" rel=\"nofollow noreferrer\">GeoFirestore library for Android<\/a> that can help you get nearby location within a specific radius.<\/p>\n\n<p>Furthermore, Firebase APIs are asynchronous so you cannot return the data that you are getting from the database as a reusult of a method. A quick solve for this problem would be to use the value of the <code>personname<\/code> only inside the <code>onComplete()<\/code> method, otherwise I recommend you see the last part of my anwser from this <strong><a href=\"https://stackoverflow.com/questions/48499310/firestore-object-with-inner-object/48500679\">post<\/a><\/strong> in which I have explained how it can be done using a custom callback. You can also take a look at this <strong><a href=\"https://www.youtube.com/watch?v=0ofkvm97i0s\" rel=\"nofollow noreferrer\">video<\/a><\/strong> for a better understanding.<\/p>\n",
+        "answer_id": 58283193,
+        "question_id": 58281097
+    }],
+    "answer_comments": {}
+}

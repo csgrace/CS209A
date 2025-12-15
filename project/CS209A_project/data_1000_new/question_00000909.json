@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cc9a6e57aae4955ae9b18f8904153bab?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11963038,
+            "user_type": "registered",
+            "user_id": 8753583,
+            "link": "https://stackoverflow.com/users/8753583/eixcs",
+            "reputation": 1989,
+            "display_name": "eixcs"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/54742515/springboot-filtering-at-least-one-property-must-be-given",
+        "last_activity_date": 1550496559,
+        "creation_date": 1550475871,
+        "answer_count": 1,
+        "title": "SpringBoot filtering: At least one property must be given",
+        "body": "<p>I'm trying to implement filtering and pagination to my spring boot application and I've ran into an issue.<\/p>\n\n<p>This is my controller: page and size have a default value and every other parameter should be optional like below.<\/p>\n\n<pre><code>@PreAuthorize(\"hasAuthority('service_manager')\")\n@RequestMapping(path = \"/clients\", method = RequestMethod.GET)\npublic Page&lt;ClientResponse&gt; getClients(\n            @RequestParam(defaultValue = \"0\") int page,\n            @RequestParam(defaultValue = \"10\") int size,\n            @RequestParam(required = false) String companyName,\n            @RequestParam(required = false) BigInteger firmRegNo,\n            @RequestParam(required = false) String address,\n            @RequestParam(required = false) BigInteger contractNo,\n            @RequestParam(required = false) BigInteger monthlyPay,\n            @RequestParam(required = false) User.UserStatus status\n            ) {\n    ClientListRequest request = new ClientListRequest(companyName, firmRegNo, address, contractNo, monthlyPay, status);\n    return clientService.getAllClients(request, of(page, size, Sort.Direction.DESC))\n            .map(ClientResponse::new);\n}\n<\/code><\/pre>\n\n<p>When making a GET request to \"<a href=\"http://localhost:8080/clients?companyName=Selver\" rel=\"nofollow noreferrer\">http://localhost:8080/clients?companyName=Selver<\/a>\" I'm getting this response:<\/p>\n\n<pre><code>{\n    \"timestamp\": \"2019-02-18T07:40:44.182+0000\",\n    \"status\": 500,\n    \"error\": \"Internal Server Error\",\n    \"message\": \"At least one property must be given!\",\n    \"path\": \"/clients\"\n}\n<\/code><\/pre>\n\n<p>The same response comes without the parameters too. Any ideas?<\/p>\n",
+        "question_id": 54742515,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot"
+        ],
+        "score": 3,
+        "accepted_answer_id": 54742839,
+        "is_answered": true,
+        "view_count": 6561,
+        "last_edit_date": 1550476907
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cc9a6e57aae4955ae9b18f8904153bab?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11963038,
+                "user_type": "registered",
+                "user_id": 8753583,
+                "link": "https://stackoverflow.com/users/8753583/eixcs",
+                "reputation": 1989,
+                "display_name": "eixcs"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 54742515,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/f27a15d051e753e8afaf28b863db3df7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5889708,
+                "user_type": "registered",
+                "user_id": 4636715,
+                "link": "https://stackoverflow.com/users/4636715/vahdet",
+                "reputation": 6789,
+                "display_name": "vahdet",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1550476315,
+            "comment_id": 96267412
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f27a15d051e753e8afaf28b863db3df7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5889708,
+                "user_type": "registered",
+                "user_id": 4636715,
+                "link": "https://stackoverflow.com/users/4636715/vahdet",
+                "reputation": 6789,
+                "display_name": "vahdet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 54742515,
+            "edited": false,
+            "creation_date": 1550476138,
+            "comment_id": 96267334
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cc9a6e57aae4955ae9b18f8904153bab?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11963038,
+            "user_type": "registered",
+            "user_id": 8753583,
+            "link": "https://stackoverflow.com/users/8753583/eixcs",
+            "reputation": 1989,
+            "display_name": "eixcs"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 10,
+        "is_accepted": true,
+        "last_activity_date": 1550496559,
+        "creation_date": 1550477318,
+        "body": "<p>Found the mistake:<\/p>\n\n<pre><code>return clientService.getAllClients(request, of(page, size, Sort.Direction.DESC))\n                .map(ClientResponse::new);\n<\/code><\/pre>\n\n<p>needs at least one property after <code>Sort.Direction.DESC<\/code>, which to sort by by default. I used \"createTime\" of a client to do so and got it to work!<\/p>\n\n<pre><code>return clientService.getAllClients(request, of(page, size, Sort.Direction.DESC, \"createTime\"))\n                .map(ClientResponse::new);\n<\/code><\/pre>\n",
+        "answer_id": 54742839,
+        "question_id": 54742515,
+        "last_edit_date": 1550496559
+    }],
+    "answer_comments": {}
+}

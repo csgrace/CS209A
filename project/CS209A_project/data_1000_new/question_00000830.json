@@ -1,0 +1,269 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+            "account_id": 110260,
+            "user_type": "registered",
+            "user_id": 291827,
+            "link": "https://stackoverflow.com/users/291827/jason-robinson",
+            "reputation": 31344,
+            "display_name": "Jason Robinson",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/41883611/how-do-you-attach-a-reverb-effect-to-audiorecord-pcm-data-and-save-it-to-a-file",
+        "last_activity_date": 1486667187,
+        "creation_date": 1485467428,
+        "answer_count": 1,
+        "title": "How do you attach a reverb effect to AudioRecord/PCM data and save it to a file?",
+        "body": "<p>I want to record input from the microphone, attach a reverb effect, and persist the result to a file. My use-case is an app that lets you sing a song and select different preset reverb options after recording, and then save your performance and store it on a backend server. The file that I send to the server needs to have a reverb effect applied to it.<\/p>\n\n<p>So far I've been able to record input using <code>AudioRecord<\/code>, and I can add a reverb effect to <code>AudioTrack<\/code> to hear the reverb effect, but I'm stuck on figuring out how to save the audio <em>with<\/em> the reverb effect embedded. Here's what I have so far:<\/p>\n\n<pre><code>private void startRecording() {\n    final int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);\n    mRecorder = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize);\n    if(NoiseSuppressor.isAvailable()) {\n        NoiseSuppressor ns = NoiseSuppressor.create(mRecorder.getAudioSessionId());\n        ns.setEnabled(true);\n    }\n\n    if(AcousticEchoCanceler.isAvailable()) {\n        AcousticEchoCanceler aec = AcousticEchoCanceler.create(mRecorder.getAudioSessionId());\n        aec.setEnabled(true);\n    }\n\n    mPlayer = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AUDIO_FORMAT, bufferSize, AudioTrack.MODE_STREAM);\n    PresetReverb reverb = new PresetReverb(1, mPlayer.getAudioSessionId());\n    reverb.setPreset(PresetReverb.PRESET_LARGEHALL);\n    reverb.setEnabled(true);\n\n    mPlayer.setAuxEffectSendLevel(1.f);\n\n    mRecorder.startRecording();\n    mPlayer.play();\n\n    new RecordingThread(mRecorder, mPlayer, bufferSize) {\n\n        @Override\n        public void onReleased() {\n            mRecorder = null;\n            mPlayer = null;\n        }\n    }.start();\n}\n\npublic class RecordingThread extends Thread {\n\n    private static final String TAG = RecordingThread.class.getSimpleName();\n\n    private final AudioRecord mRecorder;\n    private final AudioTrack mPlayer;\n    private final int mBufferSize;\n\n    public RecordingThread(AudioRecord recorder, AudioTrack player, int bufferSize) {\n        mRecorder = recorder;\n        mPlayer = player;\n        mBufferSize = bufferSize;\n    }\n\n    @Override\n    public void run() {\n        byte[] buffer = new byte[mBufferSize];\n\n        int read;\n        while ((read = mRecorder.read(buffer, 0, buffer.length)) &gt; 0) {\n            mPlayer.write(buffer, 0, buffer.length);\n        }\n\n        mRecorder.release();\n        mPlayer.release();\n\n        onReleased();\n\n        Timber.tag(TAG);\n        Timber.i(\"Exited with code %s\", read);\n    }\n\n    public void onReleased() {\n    }\n}\n<\/code><\/pre>\n\n<p>So ideally, it'd be nice to be able to attach the <code>PresetReverb<\/code> on the <code>AudioRecord<\/code> instead of the <code>AudioTrack<\/code>, but when I do I get:<\/p>\n\n<pre><code>java.lang.RuntimeException: Cannot initialize effect engine for type: 47382d60-ddd8-11db-bf3a-0002a5d5c51b Error: -3\n<\/code><\/pre>\n\n<p>So now I'm thinking I need to pipe the PCM data from <code>AudioRecord<\/code> to some external service/library, or to modify the buffer with whatever a reverb algorithm would look like.<\/p>\n",
+        "question_id": 41883611,
+        "tags": [
+            "java",
+            "android",
+            "pcm",
+            "android-audiorecord"
+        ],
+        "score": 12,
+        "is_answered": true,
+        "view_count": 3186,
+        "last_edit_date": 1486081006
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+            "account_id": 5018118,
+            "user_type": "registered",
+            "user_id": 4032392,
+            "link": "https://stackoverflow.com/users/4032392/manishg",
+            "reputation": 9898,
+            "display_name": "manishg"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 5,
+        "is_accepted": false,
+        "last_activity_date": 1486667187,
+        "creation_date": 1486092655,
+        "body": "<p>As per <a href=\"https://developer.android.com/reference/android/media/audiofx/PresetReverb.html\" rel=\"nofollow noreferrer\">https://developer.android.com/reference/android/media/audiofx/PresetReverb.html<\/a><\/p>\n\n<p><em>The PresetReverb is an output mix auxiliary effect and should be created on Audio session 0. In order for a MediaPlayer or AudioTrack to be fed into this effect, they must be explicitely attached to it and a send level must be specified. Use the effect ID returned by getId() method to designate this particular effect when attaching it to the MediaPlayer or AudioTrack.<\/em><\/p>\n\n<p>Since this is designed to be used with audiotrack, this cannot be attached to AudioRecord. I think you have a similar conclusion. <\/p>\n\n<p>I would suggest you to use this SDK <a href=\"https://github.com/superpoweredSDK/Low-Latency-Android-Audio-iOS-Audio-Engine\" rel=\"nofollow noreferrer\">https://github.com/superpoweredSDK/Low-Latency-Android-Audio-iOS-Audio-Engine<\/a>. It supports android and following effects:<\/p>\n\n<p>Effects: <em>echo, flanger, gate, <strong>reverb<\/strong>, rool, whoosh, 3 band equalizer, biquad IIR filters (low-pass, high-pass, bandpass, high-shelf, low-shelf, parametric, notch)<\/em><\/p>\n\n<p>You can also consider <a href=\"https://github.com/ClearVolume/ClearAudio\" rel=\"nofollow noreferrer\">https://github.com/ClearVolume/ClearAudio<\/a>. You can use this file to apply reverb effect <a href=\"https://github.com/ClearVolume/ClearAudio/blob/master/src/java/clearaudio/synthesizer/filters/ReverbFilter.java\" rel=\"nofollow noreferrer\">https://github.com/ClearVolume/ClearAudio/blob/master/src/java/clearaudio/synthesizer/filters/ReverbFilter.java<\/a><\/p>\n\n<p>All the best !<\/p>\n\n<hr>\n\n<p>Adding some more details on how this can be done using superpoweredSDK. The superpowered SDK has a filter called SuperpoweredReverb. The way this works is the following :<\/p>\n\n<p><a href=\"https://i.sstatic.net/LAMH0.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/LAMH0.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>Let's see this through some code:<\/p>\n\n<pre><code>reverb = new SuperpoweredReverb(samplerate);\nreverb-&gt;enable(true);\n\nreverb-&gt;setMix(floatValue); //  Limited to &gt;= 0.0f and &lt;= 1.0f.\nreverb-&gt;setRoomSize(floatValue); // Limited to &gt;= 0.0f and &lt;= 1.0f.\n\nSuperpoweredShortIntToFloat(intBuffer, floatBuffer, numberOfSamples);\n\nbool res = reverb-&gt;process(floatBuffer, floatBuffer, numberOfSamples);\n\nSuperpoweredFloatToShortInt(floatBuffer, intBuffer, numberOfSamples);\n<\/code><\/pre>\n\n<p>Let me try my best to explain what's happening here:<\/p>\n\n<p>Create filter<\/p>\n\n<pre><code>reverb = new SuperpoweredReverb(samplerate);\nreverb-&gt;enable(true);\n<\/code><\/pre>\n\n<p>Optional: Apply additional options to this filter such as <\/p>\n\n<pre><code>reverb-&gt;setMix(floatValue); //  Limited to &gt;= 0.0f and &lt;= 1.0f.\nreverb-&gt;setRoomSize(floatValue); // Limited to &gt;= 0.0f and &lt;= 1.0f.\n<\/code><\/pre>\n\n<p>Get the source samples ; If the sample are in Integer use <code>SuperpoweredShortIntToFloat<\/code> to convert. Here <code>intBuffer<\/code> has the input audio samples and <code>numberOfSamples<\/code> is the number of samples. <code>floatBuffer<\/code> will contain float converted buffer<\/p>\n\n<pre><code>SuperpoweredShortIntToFloat(intBuffer, floatBuffer, numberOfSamples);\n<\/code><\/pre>\n\n<p>Call process to apply reverb effect. This method will apply reverb effect and copy the output to floatBuffer again<\/p>\n\n<pre><code>bool res = reverb-&gt;process(floatBuffer, floatBuffer, numberOfSamples);\n<\/code><\/pre>\n\n<p>To convert it back to Int use the following method<\/p>\n\n<pre><code>SuperpoweredFloatToShortInt(floatBuffer, intBuffer, numberOfSamples);\n<\/code><\/pre>\n\n<p>Then you can store this reverb applied audio sample anywhere you want, either in file or play it<\/p>\n\n<hr>\n\n<p>Some more findings from superpoweredSDK, it also has recording functionality. See <a href=\"http://superpowered.com/docs/class_superpowered_recorder.html\" rel=\"nofollow noreferrer\">http://superpowered.com/docs/class_superpowered_recorder.html<\/a><\/p>\n\n<p>An example:<\/p>\n\n<pre><code>recorder = new SuperpoweredRecorder(temporaryPath, samplerate);\nrecorder-&gt;start(destinationPath);\n\n// With input samples\nSuperpoweredShortIntToFloat(intBuffer, floatBuffer, numberOfSamples);\n\nbool res = recorder-&gt;process(floatBuffer, NULL, numberOfSamples);\n\nSuperpoweredFloatToShortInt(floatBuffer, intBuffer, numberOfSamples);\n<\/code><\/pre>\n",
+        "answer_id": 42016289,
+        "question_id": 41883611,
+        "last_edit_date": 1486667187
+    }],
+    "answer_comments": {"42016289": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 5018118,
+                "user_type": "registered",
+                "user_id": 4032392,
+                "link": "https://stackoverflow.com/users/4032392/manishg",
+                "reputation": 9898,
+                "display_name": "manishg"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "edited": false,
+            "creation_date": 1493071390,
+            "comment_id": 74247107
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9283f8a83069a41e487f0daddab642e7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8680083,
+                "user_type": "registered",
+                "user_id": 6496288,
+                "link": "https://stackoverflow.com/users/6496288/acakgul",
+                "reputation": 188,
+                "display_name": "ACAkgul",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "edited": false,
+            "creation_date": 1492950844,
+            "comment_id": 74191955
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/93f44e8673d3ea2294cce085ebc96e13?s=256&d=identicon&r=PG",
+                "account_id": 550108,
+                "user_type": "registered",
+                "user_id": 3618166,
+                "link": "https://stackoverflow.com/users/3618166/patrick-vlaskovits",
+                "reputation": 194,
+                "display_name": "Patrick Vlaskovits"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "edited": false,
+            "creation_date": 1487390697,
+            "comment_id": 71776527
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 5018118,
+                "user_type": "registered",
+                "user_id": 4032392,
+                "link": "https://stackoverflow.com/users/4032392/manishg",
+                "reputation": 9898,
+                "display_name": "manishg"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 42016289,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+                "account_id": 110260,
+                "user_type": "registered",
+                "user_id": 291827,
+                "link": "https://stackoverflow.com/users/291827/jason-robinson",
+                "reputation": 31344,
+                "display_name": "Jason Robinson",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1486666840,
+            "comment_id": 71455750
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 5018118,
+                "user_type": "registered",
+                "user_id": 4032392,
+                "link": "https://stackoverflow.com/users/4032392/manishg",
+                "reputation": 9898,
+                "display_name": "manishg"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+                "account_id": 110260,
+                "user_type": "registered",
+                "user_id": 291827,
+                "link": "https://stackoverflow.com/users/291827/jason-robinson",
+                "reputation": 31344,
+                "display_name": "Jason Robinson",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1486666801,
+            "comment_id": 71455731
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+                "account_id": 110260,
+                "user_type": "registered",
+                "user_id": 291827,
+                "link": "https://stackoverflow.com/users/291827/jason-robinson",
+                "reputation": 31344,
+                "display_name": "Jason Robinson",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "edited": false,
+            "creation_date": 1486630871,
+            "comment_id": 71431172
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 5018118,
+                "user_type": "registered",
+                "user_id": 4032392,
+                "link": "https://stackoverflow.com/users/4032392/manishg",
+                "reputation": 9898,
+                "display_name": "manishg"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+                "account_id": 110260,
+                "user_type": "registered",
+                "user_id": 291827,
+                "link": "https://stackoverflow.com/users/291827/jason-robinson",
+                "reputation": 31344,
+                "display_name": "Jason Robinson",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1486602538,
+            "comment_id": 71421028
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+                "account_id": 110260,
+                "user_type": "registered",
+                "user_id": 291827,
+                "link": "https://stackoverflow.com/users/291827/jason-robinson",
+                "reputation": 31344,
+                "display_name": "Jason Robinson",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "edited": false,
+            "creation_date": 1486418239,
+            "comment_id": 71327547
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 5018118,
+                "user_type": "registered",
+                "user_id": 4032392,
+                "link": "https://stackoverflow.com/users/4032392/manishg",
+                "reputation": 9898,
+                "display_name": "manishg"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 42016289,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+                "account_id": 110260,
+                "user_type": "registered",
+                "user_id": 291827,
+                "link": "https://stackoverflow.com/users/291827/jason-robinson",
+                "reputation": 31344,
+                "display_name": "Jason Robinson",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1486134052,
+            "comment_id": 71228197
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/tc3GM.jpg?s=256",
+                "account_id": 110260,
+                "user_type": "registered",
+                "user_id": 291827,
+                "link": "https://stackoverflow.com/users/291827/jason-robinson",
+                "reputation": 31344,
+                "display_name": "Jason Robinson",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42016289,
+            "edited": false,
+            "creation_date": 1486112879,
+            "comment_id": 71215105
+        }
+    ]}
+}

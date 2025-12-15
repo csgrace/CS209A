@@ -1,0 +1,327 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+            "account_id": 2312360,
+            "user_type": "registered",
+            "user_id": 2030210,
+            "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+            "reputation": 119,
+            "display_name": "WassiM ZgheiB",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15192282/displaying-an-image-from-an-inputstream",
+        "last_activity_date": 1362358674,
+        "creation_date": 1362353905,
+        "answer_count": 2,
+        "title": "Displaying an image from an InputStream",
+        "body": "<p>I am able to send strings from my Android mobile phone to my computer, and vice versa. However, I want to send an image from my computer and display it to the mobile phone. In my case, the computer is the server and the mobile phone is the client.<\/p>\n\n<p>This is part of my code on the server side:<\/p>\n\n<pre><code>socket = serverSocket.accept();\ndataOutputStream = new DataOutputStream(socket.getOutputStream());\ncaptureScreen(\"C:\\\\Users\\\\HP\\\\Desktop\\\\capture.png\");\n\nFile f = new File(\"C:\\\\Users\\\\HP\\\\Desktop\\\\capture.png\");\nbyte [] buffer = new byte[(int)f.length()];\ndataOutputStream.write(buffer,0,buffer.length);\ndataOutputStream.flush(); \n<\/code><\/pre>\n\n<p>Note that <code>captureScreen()<\/code> is a method that successfully takes a screenshot of the server and save it as a .PNG image in the above path.<\/p>\n\n<p>Now, on the client side which is the Android mobile phone, if I have an <code>ImageView<\/code> control, how to read the image sent from the computer as an <code>InputStream<\/code> and display it on the <code>ImageView<\/code>?<\/p>\n\n<p>Furthermore, did I write successfully the image to the <code>dataOutputStream<\/code>? I would be glad if any one helps me !<\/p>\n",
+        "question_id": 15192282,
+        "tags": [
+            "java",
+            "android",
+            "sockets",
+            "android-imageview"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 11565,
+        "last_edit_date": 1362358674
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/iZoA9.jpg?s=256",
+                "account_id": 2130230,
+                "user_type": "registered",
+                "user_id": 1891219,
+                "link": "https://stackoverflow.com/users/1891219/gaborsch",
+                "reputation": 15758,
+                "display_name": "gaborsch"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": false,
+            "last_activity_date": 1362356263,
+            "creation_date": 1362354338,
+            "body": "<p>You can call the <code>setImageBitmap(Bitmap bm)<\/code> of your ImageView.<\/p>\n\n<p><a href=\"http://developer.android.com/reference/android/widget/ImageView.html\" rel=\"noreferrer\">http://developer.android.com/reference/android/widget/ImageView.html<\/a><\/p>\n\n<p>How you get the image data to your client: it depends on the solution you have chosen, but technically you can use the same libraries that you would use for pure Java.<\/p>\n\n<p>You can use <code>android.graphics.BitmapFactory<\/code> to create the <code>Bitmap<\/code> from your stream.<\/p>\n\n<p><a href=\"http://developer.android.com/reference/android/graphics/BitmapFactory.html\" rel=\"noreferrer\">http://developer.android.com/reference/android/graphics/BitmapFactory.html<\/a><\/p>\n\n<pre><code>Bitmap bitmap1 = BitmapFactory.decodeStream(inputStream);\nBitmap bitmap2 = BitmapFactory.decodeFile(filename);\n<\/code><\/pre>\n",
+            "answer_id": 15192340,
+            "question_id": 15192282,
+            "last_edit_date": 1362356263
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/M6UlG.jpg?s=256",
+                "account_id": 2124019,
+                "user_type": "registered",
+                "user_id": 1886665,
+                "link": "https://stackoverflow.com/users/1886665/overrided",
+                "reputation": 157,
+                "display_name": "Overrided",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1362356144,
+            "creation_date": 1362354582,
+            "body": "<p>what is this ? <\/p>\n\n<pre><code>    byte [] buffer = new byte[(int)f.length()];\n    dataOutputStream.write(buffer,0,buffer.length);\n<\/code><\/pre>\n\n<p>You just declared size of a buffer byte array , but it`s empty!\nYou should to convert your file to byte and than transfer it to OutputStream , smth like this:<\/p>\n\n<pre><code>    byte[] buffer = System.IO.File.ReadAllBytes(\"C:\\\\Users\\\\HP\\\\Desktop\\\\capture.png\");\n<\/code><\/pre>\n\n<p>(code for c#)\nAnd than you will send it like you did:<\/p>\n\n<pre><code>     dataOutputStream.write(buffer,0,buffer.length);\n     dataOutputStream.flush();\n<\/code><\/pre>\n\n<p>try this for file receiving :<\/p>\n\n<pre><code>    public void fileReceived(InputStream is)\nthrows FileNotFoundException, IOException {\nLog.i(\"IMSERVICE\", \"FILERECCC-1\");\n\n\nif (is!= null) {\n    FileOutputStream fos = null;\n    BufferedOutputStream bos = null;\n    try {\n        fos = new FileOutputStream(\"/sdcard/chats/gas1.jpg/\");\n        bos = new BufferedOutputStream(fos);\n        byte[] aByte = new byte[1024];\n        int bytesRead;\n\n        while ((bytesRead = is.read(aByte)) != -1) {\n            bos.write(aByte, 0, bytesRead);\n        }\n        bos.flush();\n        bos.close();\n        Log.i(\"IMSERVICE\", \"FILERECCC-2\");\n\n    } catch (IOException ex) {\n        // Do exception handling\n    }\n}\n}\n}\n<\/code><\/pre>\n\n<p>So you`ll got new file in your sd-card on Android.<\/p>\n",
+            "answer_id": 15192379,
+            "question_id": 15192282,
+            "last_edit_date": 1362356144
+        }
+    ],
+    "answer_comments": {
+        "15192379": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192379,
+                "edited": false,
+                "creation_date": 1362358843,
+                "comment_id": 21406671
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/M6UlG.jpg?s=256",
+                    "account_id": 2124019,
+                    "user_type": "registered",
+                    "user_id": 1886665,
+                    "link": "https://stackoverflow.com/users/1886665/overrided",
+                    "reputation": 157,
+                    "display_name": "Overrided",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192379,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "edited": false,
+                "creation_date": 1362356274,
+                "comment_id": 21406107
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192379,
+                "edited": false,
+                "creation_date": 1362355449,
+                "comment_id": 21405906
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/M6UlG.jpg?s=256",
+                    "account_id": 2124019,
+                    "user_type": "registered",
+                    "user_id": 1886665,
+                    "link": "https://stackoverflow.com/users/1886665/overrided",
+                    "reputation": 157,
+                    "display_name": "Overrided",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192379,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "edited": false,
+                "creation_date": 1362355145,
+                "comment_id": 21405820
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192379,
+                "edited": false,
+                "creation_date": 1362355011,
+                "comment_id": 21405789
+            }
+        ],
+        "15192340": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/iZoA9.jpg?s=256",
+                    "account_id": 2130230,
+                    "user_type": "registered",
+                    "user_id": 1891219,
+                    "link": "https://stackoverflow.com/users/1891219/gaborsch",
+                    "reputation": 15758,
+                    "display_name": "gaborsch"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192340,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "edited": false,
+                "creation_date": 1362390583,
+                "comment_id": 21416275
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/iZoA9.jpg?s=256",
+                    "account_id": 2130230,
+                    "user_type": "registered",
+                    "user_id": 1891219,
+                    "link": "https://stackoverflow.com/users/1891219/gaborsch",
+                    "reputation": 15758,
+                    "display_name": "gaborsch"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192340,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "edited": false,
+                "creation_date": 1362360682,
+                "comment_id": 21407101
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192340,
+                "edited": false,
+                "creation_date": 1362360283,
+                "comment_id": 21407004
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/iZoA9.jpg?s=256",
+                    "account_id": 2130230,
+                    "user_type": "registered",
+                    "user_id": 1891219,
+                    "link": "https://stackoverflow.com/users/1891219/gaborsch",
+                    "reputation": 15758,
+                    "display_name": "gaborsch"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192340,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "edited": false,
+                "creation_date": 1362358539,
+                "comment_id": 21406590
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 15192340,
+                "edited": false,
+                "creation_date": 1362357238,
+                "comment_id": 21406306
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/beb94fcf13e55a2741da1e2dd2050881?s=256&d=identicon&r=PG",
+                    "account_id": 2312360,
+                    "user_type": "registered",
+                    "user_id": 2030210,
+                    "link": "https://stackoverflow.com/users/2030210/wassim-zgheib",
+                    "reputation": 119,
+                    "display_name": "WassiM ZgheiB",
+                    "accept_rate": 0
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15192340,
+                "edited": false,
+                "creation_date": 1362355681,
+                "comment_id": 21405973
+            }
+        ]
+    }
+}

@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7cdbbd3038e896ca85c41bce9630d60f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 276599,
+            "user_type": "registered",
+            "user_id": 3605564,
+            "link": "https://stackoverflow.com/users/3605564/tunichgud",
+            "reputation": 41,
+            "display_name": "tunichgud"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/63315492/using-custom-kafka-state-stores-in-kstreams-application",
+        "last_activity_date": 1597834853,
+        "creation_date": 1596890199,
+        "answer_count": 1,
+        "title": "Using Custom Kafka State Stores in kstreams application",
+        "body": "<p>We are using Kafka-streams included within the spring cloud stream Hoxton RC7 project (and therefore use the Kafka-streams and Kafka-client versions provided [2.3.1])<\/p>\n<pre><code>\next {\n    set('springCloudVersion', 'Hoxton.SR7')\n}\n...\n\ndependencies {\n    // spring cloud stream\n    implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka-streams'\n    implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'\n    implementation(&quot;org.springframework.cloud:spring-cloud-stream&quot;)\n    // redis \n    implementation 'io.lettuce:lettuce-core'\n    implementation 'org.springframework.data:spring-data-redis'\n    testCompile 'it.ozimov:embedded-redis:0.7.2'\n    ...\n\n<\/code><\/pre>\n<p>We have implemented a kstreams application<\/p>\n<pre><code>@Bean\npublic Consumer&lt;KStream&lt;String, IncomingEvent&gt;&gt; process() {\n\n    return input -&gt; {\n\n<\/code><\/pre>\n<p>Where we do some aggregation within like:<\/p>\n<pre><code>.aggregate(Foo::new, (key, value1, aggregate) -&gt;\n                (aggregate == null || aggregate.getLastModified() == null || this.mustProcess(key, value1))\n                        ? value1\n                        : aggregate,\n        materialized\n\n)\n<\/code><\/pre>\n<p>Now materialized should be a custom external state store (Redis):<\/p>\n<pre><code>Materialized&lt;String, Foo, KeyValueStore&lt;Bytes, byte[]&gt;&gt; materialized =\n        Materialized.as(&quot;redis-store&quot;);\n<\/code><\/pre>\n<p>Which is provided by a StoreBuilder Bean:<\/p>\n<pre><code>@Bean\npublic StoreBuilder&lt;KeyValueStore&lt;String, Foo&gt;&gt; builder(RedisKeyValueStoreBytes redisKeyValueStoreBytes){\n    return Stores.keyValueStoreBuilder(supplier(redisKeyValueStoreBytes),\n            new Serdes.StringSerde(),\n            new SomeFooSerde());\n}\n\n\npublic static KeyValueBytesStoreSupplier supplier(RedisKeyValueStoreBytes redisKeyValueStoreBytes) {\n\n    return new KeyValueBytesStoreSupplier() {\n        @Override\n        public String name() {\n            return &quot;redis-store&quot;;\n        }\n\n        @Override\n        public KeyValueStore&lt;Bytes, byte[]&gt; get() {\n            return redisKeyValueStoreBytes;\n        }\n\n        @Override\n        public String metricsScope() {\n            return &quot;redis-session-state&quot;;\n        }\n    };\n}\n<\/code><\/pre>\n<p>I now test the application with an EmbeddedKafka:<\/p>\n<pre><code>@ActiveProfiles(&quot;test&quot;)\n@RunWith(SpringRunner.class)\n@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)\n@SpringBootTest(classes = {TestConfigurationTests.class})\n@EmbeddedKafka(count = 3, ports = {29901, 29902, 29903}, zookeeperPort = 33991)\npublic class TestKafkaIntegration {\n<\/code><\/pre>\n<p>Where I try to access the state store and query the items added:<\/p>\n<pre><code>ReadOnlyKeyValueStore&lt;String, Foo&gt; queryableStore = interactiveQueryService.getQueryableStore(\n        &quot;redis-store&quot;, QueryableStoreTypes.keyValueStore());\nreturn queryableStore;\n<\/code><\/pre>\n<p>But when I run my test I receive an error:<\/p>\n<pre><code>Caused by: org.springframework.kafka.KafkaException: Could not start stream: ; nested exception is org.springframework.kafka.KafkaException: Could not start stream: ; nested exception is org.apache.kafka.streams.errors.TopologyException: Invalid topology: StateStore redis-store is already added.\n<\/code><\/pre>\n<p>Several questions:<\/p>\n<ul>\n<li>The examples for using custom state stores explained by [1] use it within a Processor. Does this automatically mean, I am not able to use a custom state store in an aggregation?<\/li>\n<li>When it is not possible to use it within an aggregation, what is the point of using custom state stores anyway?<\/li>\n<li>When I slightly change the code above for the kstreams and define a processor instead of using materialized in the aggregate method, the error changes, it then complains about a missing state &quot;redis-store&quot; store while trying to execute getQueryableStore. But indeed i can see, that the addStateStoreBeans registers the 'redis-store'. How can this happen?<\/li>\n<\/ul>\n<p>The reason why I want to use a custom state store is, that I am not (really easily) able to have a dedicated hard disk for the application instance. To have a fast startup for the application I want to avoid processing of the complete changelog on each startup of the application (which should preferably take place several times a day and currently takes more than an hour). So now the last question:<\/p>\n<ul>\n<li>When a custom external state store is used, am I able to resume to the last state on application restart?<\/li>\n<\/ul>\n<p>[1] <a href=\"https://spring.io/blog/2019/12/09/stream-processing-with-spring-cloud-stream-and-apache-kafka-streams-part-6-state-stores-and-interactive-queries\" rel=\"nofollow noreferrer\">https://spring.io/blog/2019/12/09/stream-processing-with-spring-cloud-stream-and-apache-kafka-streams-part-6-state-stores-and-interactive-queries<\/a><\/p>\n",
+        "question_id": 63315492,
+        "tags": [
+            "java",
+            "apache-kafka",
+            "apache-kafka-streams",
+            "spring-cloud-stream",
+            "spring-cloud-stream-binder-kafka"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 2365,
+        "last_edit_date": 1597006404
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/0pmOC.png?s=256",
+            "account_id": 5954045,
+            "user_type": "registered",
+            "user_id": 4681265,
+            "link": "https://stackoverflow.com/users/4681265/adrian",
+            "reputation": 3801,
+            "display_name": "Adrian"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1597834853,
+        "creation_date": 1597737855,
+        "body": "<p>You are using <a href=\"https://javadoc.io/doc/org.apache.kafka/kafka-streams/latest/org/apache/kafka/streams/kstream/Materialized.html\" rel=\"nofollow noreferrer\">Materialized.as(java.lang.String storeName)<\/a> which will create (materialize) a <code>StateStore<\/code> with the given name (&quot;redis-store&quot; here). On the other hand,  with <code>builder(RedisKeyValueStoreBytes redisKeyValueStoreBytes)<\/code> you are creating <em>another<\/em> <code>StateStore<\/code> having the same name, which springframework is probably automatically adding it to the topology, such that you get &quot;store is already added&quot; error.<\/p>\n<p>q1: you can use a custom state store in an aggregation; use it with <a href=\"https://javadoc.io/doc/org.apache.kafka/kafka-streams/latest/org/apache/kafka/streams/kstream/Materialized.html\" rel=\"nofollow noreferrer\">Materialized.as(KeyValueBytesStoreSupplier supplier)<\/a><\/p>\n<p>q2: one could also use a <code>StateStore<\/code> with a transformer or a custom processor for interactive queries; also with a <em>global<\/em> <code>StateStore<\/code> one could access the entire topic instead of <a href=\"https://javadoc.io/doc/org.apache.kafka/kafka-streams/latest/org/apache/kafka/streams/KafkaStreams.html\" rel=\"nofollow noreferrer\">KafkaStreams<\/a> instance only allocated partitions (see <a href=\"https://javadoc.io/static/org.apache.kafka/kafka-streams/2.6.0/org/apache/kafka/streams/StreamsBuilder.html#addGlobalStore-org.apache.kafka.streams.state.StoreBuilder-java.lang.String-org.apache.kafka.streams.kstream.Consumed-org.apache.kafka.streams.processor.ProcessorSupplier-\" rel=\"nofollow noreferrer\">addGlobalStore<\/a> and <a href=\"https://javadoc.io/static/org.apache.kafka/kafka-streams/2.6.0/org/apache/kafka/streams/StreamsBuilder.html#globalTable-java.lang.String-\" rel=\"nofollow noreferrer\">globalTable<\/a>)<\/p>\n<p>q3: I guess you didn't (manually) register the state store with the topology; see <a href=\"https://javadoc.io/static/org.apache.kafka/kafka-streams/2.6.0/org/apache/kafka/streams/Topology.html#addStateStore-org.apache.kafka.streams.state.StoreBuilder-java.lang.String...-\" rel=\"nofollow noreferrer\">Topology.addStateStore(StoreBuilder&lt;?&gt; storeBuilder, java.lang.String... processorNames)<\/a> and <a href=\"https://kafka.apache.org/26/documentation/streams/developer-guide/processor-api.html#connecting-processors-and-state-stores\" rel=\"nofollow noreferrer\">Connecting Processors and State Stores<\/a><\/p>\n<p>q4: yes, the state store <a href=\"https://kafka.apache.org/26/documentation/streams/architecture#streams_architecture_recovery\" rel=\"nofollow noreferrer\">is loaded from a changelog topic<\/a> (could be the original topic when using <a href=\"https://docs.confluent.io/current/streams/developer-guide/optimizing-streams.html#optimization-details\" rel=\"nofollow noreferrer\">optimizations<\/a>)<\/p>\n",
+        "answer_id": 63464324,
+        "question_id": 63315492,
+        "last_edit_date": 1597834853
+    }],
+    "answer_comments": {}
+}

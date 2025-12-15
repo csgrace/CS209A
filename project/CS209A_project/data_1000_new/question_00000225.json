@@ -1,0 +1,208 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/aa80ec558b4a4c33bc00769d77520ee3?s=256&d=identicon&r=PG",
+            "account_id": 2453633,
+            "user_type": "registered",
+            "user_id": 2139325,
+            "link": "https://stackoverflow.com/users/2139325/cloud",
+            "reputation": 478,
+            "display_name": "Cloud",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49190827/keycloak-logout-does-not-end-session",
+        "last_activity_date": 1712837453,
+        "creation_date": 1520588691,
+        "answer_count": 4,
+        "title": "Keycloak logout does not end session",
+        "body": "<p>I am using Keycloak 3.4 in a Java Application using Spring Framework and Jetty 8.1 with Keycloak Jetty-81-Adapter 3.4.<\/p>\n\n<p>According to the Keycloak documentation I should be able to use the HttpServletRequest in a Java EE application to logout from Keycloak. However, this does not work in my case, even though Jetty supports HttpServletRequests.<\/p>\n\n<blockquote>\n  <p>You can log out of a web application in multiple ways. For Java EE servlet containers, you can call HttpServletRequest.logout()..<\/p>\n<\/blockquote>\n\n<p>If I try to logout this way, I get redirected to keycloak (login screen with option to choose from multiple realm logins). When I choose my preferred realm however, I am immediately logged in to the webapplication again, without having to provide any credentials.<\/p>\n\n<p>I tried the alternative approach, by redirecting to Keycloak:<\/p>\n\n<blockquote>\n  <p>For other browser applications, you can redirect the browser to<br>\n  <a href=\"http://auth-server/auth/realms/\" rel=\"noreferrer\">http://auth-server/auth/realms/<\/a>{realm-name}/protocol/openid-connect/logout?redirect_uri=encodedRedirectUri<\/p>\n<\/blockquote>\n\n<p>but it throws a connection refused error in the Keycloak log, because Keycloak tries to call my webapp in a direct way. It has no effect on the Keycloak session, which stays active. I strongly prefer no serverside calls necessary from Keycloak to the webapp directly.<\/p>\n\n<p>Any suggestions why the <code>HttpServletRequest.logout()<\/code> does not destroy the keycloak session in my case? \nIs the Jetty implementation of the HttpServletRequest so different from the Java EE implementation that it could not work at all?<\/p>\n",
+        "question_id": 49190827,
+        "tags": [
+            "java",
+            "logout",
+            "embedded-jetty",
+            "keycloak"
+        ],
+        "score": 10,
+        "accepted_answer_id": 49190913,
+        "is_answered": true,
+        "view_count": 40860
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/186f36b0a1b1fe14e690cd2bfab8a324?s=256&d=identicon&r=PG",
+                "account_id": 1049814,
+                "user_type": "registered",
+                "user_id": 1054021,
+                "link": "https://stackoverflow.com/users/1054021/tobb",
+                "reputation": 12325,
+                "display_name": "Tobb",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 11,
+            "is_accepted": true,
+            "last_activity_date": 1520588972,
+            "creation_date": 1520588972,
+            "body": "<p>I have had a similar experience when using a remote (OIDC) identity provider. What I found was that the <code>HttpServletRequest.logout<\/code> did actually destroy the session in <code>Keycloak<\/code>, but did not propagate to the logout url of my remote identity provider. When going to the remote login-site, it just immediatly redirected me back, seeing that I had an active session. This looked a lot like the keycloak session wasn't actually invalidated, but I checked and it was. Using a browser redirect to the url did logout on both places. Might be a bug in <code>Keycloak<\/code>.<\/p>\n\n<p>Could it be that you are facing the same problem? To verify, try logging out, then select your client in keycloak and list sessions, to see whether it still exists in Keycloak.<\/p>\n",
+            "answer_id": 49190913,
+            "question_id": 49190827
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-IGb7_z9manI/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rfr-cL4soq_LjazAK_1b3lv7gTflA/s256-rj/photo.jpg",
+                "account_id": 17096515,
+                "user_type": "registered",
+                "user_id": 12371378,
+                "link": "https://stackoverflow.com/users/12371378/eshlone-sythe",
+                "reputation": 51,
+                "display_name": "Eshlone Sythe"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 5,
+            "is_accepted": false,
+            "last_activity_date": 1603903818,
+            "creation_date": 1603903818,
+            "body": "<p>If the method (logout) is executed from an unprotected page (a page that does not check for a valid token) the refresh token can be unavailable and, in that case, the adapter skips the call. For this reason, using a protected page to execute HttpServletRequest.logout() is recommended so that current tokens are always taken into account and an interaction with the Keycloak server is performed if needed.\n<a href=\"https://www.keycloak.org/docs/latest/securing_apps/index.html#logout\" rel=\"noreferrer\">https://www.keycloak.org/docs/latest/securing_apps/index.html#logout<\/a><\/p>\n<p>This worked for me in an protected page, but dont work in an unprotected page<\/p>\n<pre><code>public ExternalContext currentExternalContext() {\n        if (FacesContext.getCurrentInstance() == null) {\n            throw new RuntimeException(&quot;message here &quot;);\n        } else {\n            return FacesContext.getCurrentInstance().getExternalContext();\n         }\n    }\n\npublic void logout() throws IOException, ServletException {\n    HttpServletRequest request = (HttpServletRequest) currentExternalContext().getRequest();\n    ExternalContext externalContext = currentExternalContext();\n    request.logout();\n    externalContext.redirect(externalContext.getRequestContextPath());\n}\n<\/code><\/pre>\n",
+            "answer_id": 64577603,
+            "question_id": 49190827
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0394befa220b3583aedd7a22c70b9093?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7709400,
+                "user_type": "registered",
+                "user_id": 5839280,
+                "link": "https://stackoverflow.com/users/5839280/jalal-kiswani",
+                "reputation": 765,
+                "display_name": "Jalal Kiswani"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1587137383,
+            "creation_date": 1585770169,
+            "body": "<p>You need to put the Servlet or the Rest that contains the \"request.logout()\" action as a protected resource, so that the token would be available:<\/p>\n\n<p>Check out the below documentation: \n\"<\/p>\n\n<blockquote>\n  <p>server passing the refresh token. If the method is executed from an\n  unprotected page (a page that does not check for a valid token) the\n  refresh token can be unavailable and, in that case, the adapter skips\n  the call. For this reason, using a protected page to execute\n  HttpServletRequest.logout() is recommended so that current tokens are\n  always taken into account and an interaction with the {project_name}\n  server is performed if needed.<\/p>\n<\/blockquote>\n\n<p>\"<\/p>\n",
+            "answer_id": 60979060,
+            "question_id": 49190827,
+            "last_edit_date": 1587137383
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kNITz.jpg?s=256",
+                "account_id": 21396925,
+                "user_type": "registered",
+                "user_id": 15759841,
+                "link": "https://stackoverflow.com/users/15759841/amr-h-rimawi",
+                "reputation": 41,
+                "display_name": "Amr H. Rimawi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1674382035,
+            "creation_date": 1674381507,
+            "body": "<p>you can add 'User Session Count Limiter' extension to the Browser flow:\n<a href=\"https://i.sstatic.net/DIgYj.png\" rel=\"nofollow noreferrer\">User Session Count Limiter screenshot<\/a><\/p>\n<p>and configure it to one session and terminate the oldest one:\n<a href=\"https://i.sstatic.net/84fv5.png\" rel=\"nofollow noreferrer\">configure it to one session screenshot<\/a><\/p>\n<p>you can check the <a href=\"https://www.keycloak.org/docs/latest/server_admin/#_user_session_limits\" rel=\"nofollow noreferrer\">Keycloak docs<\/a><\/p>\n",
+            "answer_id": 75199523,
+            "question_id": 49190827,
+            "last_edit_date": 1674382035
+        }
+    ],
+    "answer_comments": {"49190913": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Co2uW.jpg?s=256",
+                "account_id": 3696024,
+                "user_type": "registered",
+                "user_id": 3077349,
+                "link": "https://stackoverflow.com/users/3077349/chris",
+                "reputation": 1825,
+                "display_name": "chris",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 49190913,
+            "edited": false,
+            "creation_date": 1525598975,
+            "comment_id": 87413128
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/186f36b0a1b1fe14e690cd2bfab8a324?s=256&d=identicon&r=PG",
+                "account_id": 1049814,
+                "user_type": "registered",
+                "user_id": 1054021,
+                "link": "https://stackoverflow.com/users/1054021/tobb",
+                "reputation": 12325,
+                "display_name": "Tobb",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 49190913,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/aa80ec558b4a4c33bc00769d77520ee3?s=256&d=identicon&r=PG",
+                "account_id": 2453633,
+                "user_type": "registered",
+                "user_id": 2139325,
+                "link": "https://stackoverflow.com/users/2139325/cloud",
+                "reputation": 478,
+                "display_name": "Cloud",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1520590346,
+            "comment_id": 85387626
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/186f36b0a1b1fe14e690cd2bfab8a324?s=256&d=identicon&r=PG",
+                "account_id": 1049814,
+                "user_type": "registered",
+                "user_id": 1054021,
+                "link": "https://stackoverflow.com/users/1054021/tobb",
+                "reputation": 12325,
+                "display_name": "Tobb",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 49190913,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/aa80ec558b4a4c33bc00769d77520ee3?s=256&d=identicon&r=PG",
+                "account_id": 2453633,
+                "user_type": "registered",
+                "user_id": 2139325,
+                "link": "https://stackoverflow.com/users/2139325/cloud",
+                "reputation": 478,
+                "display_name": "Cloud",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1520590170,
+            "comment_id": 85387509
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aa80ec558b4a4c33bc00769d77520ee3?s=256&d=identicon&r=PG",
+                "account_id": 2453633,
+                "user_type": "registered",
+                "user_id": 2139325,
+                "link": "https://stackoverflow.com/users/2139325/cloud",
+                "reputation": 478,
+                "display_name": "Cloud",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49190913,
+            "edited": false,
+            "creation_date": 1520589652,
+            "comment_id": 85387171
+        }
+    ]}
+}

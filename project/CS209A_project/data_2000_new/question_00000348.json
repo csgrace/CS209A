@@ -1,0 +1,306 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+            "account_id": 346626,
+            "user_type": "registered",
+            "user_id": 680268,
+            "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+            "reputation": 10382,
+            "display_name": "Stealth Rabbi",
+            "accept_rate": 66
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/37186017/using-a-jmslistener-to-handle-sendandreceive-and-just-send",
+        "last_activity_date": 1696811601,
+        "creation_date": 1463053798,
+        "answer_count": 1,
+        "title": "Using a @JmsListener to handle sendAndReceive and just send",
+        "body": "<p>I have a spring service that has @JmsListener method. It gets invoked by a client send out a message via JmsMessagingTemplate.convertSendAndReceive(). This works fine.<\/p>\n<pre><code>@Service\npublic class JmsMessageProcessor {\n    @JmsListener(destination = &quot;myDestination&quot;)\n    protected Message&lt;MyResponseObj&gt; handleRequest(final MyInputObj myObj) {\n        return MessageBuilder.withPayload(processObj(myObj)).build();\n    }\n\n}\n<\/code><\/pre>\n<p>.<\/p>\n<pre><code>// client\n MyResponseObj response = jmsMessagingTemplate.convertSendAndReceive(myDestination, myObj,\n                MyResponseObj.class);\n<\/code><\/pre>\n<p>I'm attemptign to implement on the client, functionality for just doing a <code>convertSend<\/code> call. That is, the client will send and forget, and not wait for a response. I have made such a call, and it does get processed on the server side<\/p>\n<pre><code> jmsMessagingTemplate.convertAndSend(myDestination, myObj);\n<\/code><\/pre>\n<p>But, I get an error on the server side indicating that the request message does not contain a reply-to destination. This makes some sense to me, because i'm not doing a &quot;receive&quot; method call via the jmsMessageTemplate. But, I'm not sure what to do about this. Is it possible to have another JmsListener method for the same destination, but handle specificaly the &quot;send without reply&quot; requests, or do i have to create a seperate destination and JMS queue? Basically, I want my server / jms listener to be able to not send back a response if it doesn't need to.<\/p>\n<pre><code>javax.jms.InvalidDestinationException: Cannot determine response destination: Request message does not contain reply-to destination, and no default response destination set.\norg.springframework.jms.listener.adapter.ReplyFailureException: Failed to send reply with payload [GenericMessage [payload=MyResponseObj@51c082ec, headers={timestamp=1462996638601, id=41877e45-b220-a320-f07a-64f9d50d98ae}]]; nested exception is javax.jms.InvalidDestinationException: Cannot determine response destination: Request message does not contain reply-to destination, and no default response destination set.\n        at org.springframework.jms.listener.adapter.AbstractAdaptableMessageListener.handleResult(AbstractAdaptableMessageListener.java:249) ~[spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter.onMessage(MessagingMessageListenerAdapter.java:68) ~[spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.AbstractMessageListenerContainer.doInvokeListener(AbstractMessageListenerContainer.java:721) ~[spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.AbstractMessageListenerContainer.invokeListener(AbstractMessageListenerContainer.java:681) [spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.AbstractMessageListenerContainer.doExecuteListener(AbstractMessageListenerContainer.java:651) [spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.AbstractPollingMessageListenerContainer.doReceiveAndExecute(AbstractPollingMessageListenerContainer.java:315) [spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.AbstractPollingMessageListenerContainer.receiveAndExecute(AbstractPollingMessageListenerContainer.java:253) [spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.invokeListener(DefaultMessageListenerContainer.java:1150) [spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.executeOngoingLoop(DefaultMessageListenerContainer.java:1142) [spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.run(DefaultMessageListenerContainer.java:1039) [spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at java.lang.Thread.run(Thread.java:745) [?:1.7.0_99]\nCaused by: javax.jms.InvalidDestinationException: Cannot determine response destination: Request message does not contain reply-to destination, and no default response destination set.\n        at org.springframework.jms.listener.adapter.AbstractAdaptableMessageListener.getResponseDestination(AbstractAdaptableMessageListener.java:343) ~[spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.adapter.AbstractAdaptableMessageListener.getResponseDestination(AbstractAdaptableMessageListener.java:316) ~[spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        at org.springframework.jms.listener.adapter.AbstractAdaptableMessageListener.handleResult(AbstractAdaptableMessageListener.java:245) ~[spring-jms-4.2.3.RELEASE.jar:4.2.3.RELEASE]\n        ... 10 more\n<\/code><\/pre>\n",
+        "question_id": 37186017,
+        "tags": [
+            "java",
+            "jms",
+            "spring-jms"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 10428,
+        "last_edit_date": 1696811601
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+            "account_id": 1288095,
+            "user_type": "registered",
+            "user_id": 1240763,
+            "link": "https://stackoverflow.com/users/1240763/gary-russell",
+            "reputation": 175842,
+            "display_name": "Gary Russell"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 4,
+        "is_accepted": false,
+        "last_activity_date": 1463060080,
+        "creation_date": 1463057533,
+        "body": "<p>You can use two <code>@JmsListener<\/code>s and the <code>selector<\/code> property to direct the different message types to each listener.<\/p>\n\n<p>This requires the sender to set a message property that is then used in the selector expression.<\/p>\n\n<p>It's a bit more complicated when using the messaging template because you have to build a new message but with the basic <code>JmsTemplate<\/code>:<\/p>\n\n<pre><code>jmsTemplate.convertSendAndReceive(dest, object, messagePostProcessor);\n<\/code><\/pre>\n\n<p>where <code>messagePostProcessor<\/code> has a method<\/p>\n\n<pre><code>public Message postProcessMessage(Message message) {\n    message.setStringProperty(\"requiresReply\", \"yes\");\n    return message;\n}\n<\/code><\/pre>\n\n<p>Then use <code>requiresReply=yes/no<\/code> in the selector.<\/p>\n\n<p>If you want to avoid the cast and use the messaging template, you need to use <code>MessageBuilder.fromMessage(message).setHeader(...).build()<\/code> in the (different) <code>MessagePostProcessor<\/code>). In this case it's a spring-messaging <code>Message<\/code> not a JMS <code>Message<\/code>.<\/p>\n\n<p><strong>EDIT<\/strong><\/p>\n\n<p>You really don't need any of this, though, if your listener can tell from the data whether a reply is expected and simply returns <code>null<\/code> for messages that don't need a reply.<\/p>\n",
+        "answer_id": 37187487,
+        "question_id": 37186017,
+        "last_edit_date": 1463060080
+    }],
+    "answer_comments": {"37187487": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "edited": false,
+            "creation_date": 1463060589,
+            "comment_id": 61910100
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "edited": false,
+            "creation_date": 1463060536,
+            "comment_id": 61910043
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "edited": false,
+            "creation_date": 1463060483,
+            "comment_id": 61909984
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "edited": false,
+            "creation_date": 1463060118,
+            "comment_id": 61909694
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "edited": false,
+            "creation_date": 1463060015,
+            "comment_id": 61909612
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "edited": false,
+            "creation_date": 1463058944,
+            "comment_id": 61908749
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "edited": false,
+            "creation_date": 1463058595,
+            "comment_id": 61908471
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "edited": false,
+            "creation_date": 1463058234,
+            "comment_id": 61908183
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "edited": false,
+            "creation_date": 1463058002,
+            "comment_id": 61907984
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "edited": false,
+            "creation_date": 1463057969,
+            "comment_id": 61907958
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4694129cb36beeeeab3615b21e947708?s=256&d=identicon&r=PG",
+                "account_id": 346626,
+                "user_type": "registered",
+                "user_id": 680268,
+                "link": "https://stackoverflow.com/users/680268/stealth-rabbi",
+                "reputation": 10382,
+                "display_name": "Stealth Rabbi",
+                "accept_rate": 66
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37187487,
+            "edited": false,
+            "creation_date": 1463057738,
+            "comment_id": 61907782
+        }
+    ]}
+}

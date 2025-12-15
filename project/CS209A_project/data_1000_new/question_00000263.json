@@ -1,0 +1,50 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9cb4fad68745e3d726e45fc1f574d0a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7530193,
+            "user_type": "registered",
+            "user_id": 5718727,
+            "link": "https://stackoverflow.com/users/5718727/arnaud",
+            "reputation": 21,
+            "display_name": "Arnaud"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34481222/java-google-calendar-contacts-oauth-2-0-must-sign-me-again",
+        "last_activity_date": 1451225351,
+        "creation_date": 1451225351,
+        "answer_count": 0,
+        "title": "Java / Google Calendar, Contacts / OAuth 2.0 / must sign me again",
+        "body": "<p>I\u2019m trying to write a Java daemon who works with Google calendar and Google contacts. Problem : regulary, I must delete my credential file from filesystem and I have to identify myself again through the web page provided by my local Jetty server.<\/p>\n\n<p>My Maven pom:<\/p>\n\n<pre><code>&lt;dependency&gt;\n    &lt;groupId&gt;com.google.gdata&lt;/groupId&gt;\n    &lt;artifactId&gt;core&lt;/artifactId&gt;\n    &lt;version&gt;1.47.1&lt;/version&gt;\n&lt;/dependency&gt;\n&lt;dependency&gt;\n    &lt;groupId&gt;com.google.api-client&lt;/groupId&gt;\n    &lt;artifactId&gt;google-api-client&lt;/artifactId&gt;\n    &lt;version&gt;1.19.1&lt;/version&gt;\n    &lt;exclusions&gt;\n        &lt;exclusion&gt;\n            &lt;artifactId&gt;guava-jdk5&lt;/artifactId&gt;\n            &lt;groupId&gt;com.google.guava&lt;/groupId&gt;\n        &lt;/exclusion&gt;\n    &lt;/exclusions&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n\n<p>and my Credential factory:<\/p>\n\n<pre><code>import java.io.File;\nimport java.io.IOException;\nimport java.io.InputStreamReader;\nimport java.util.Collection;\nimport java.util.Collections;\n\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;\n\nimport com.google.api.client.auth.oauth2.Credential;\nimport com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;\nimport com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;\nimport com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;\nimport com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;\nimport com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;\nimport com.google.api.client.http.HttpTransport;\nimport com.google.api.client.json.JsonFactory;\nimport com.google.api.client.json.jackson2.JacksonFactory;\nimport com.google.api.client.util.store.FileDataStoreFactory;\n\nimport xxx.io.ResourceOrFileAccessor;\n\npublic class GoogleConnectivityHelper\n{\n    private static final Logger             LOGGER                  = LoggerFactory.getLogger(GoogleConnectivityHelper.class);\n\n    public static final String              DEFAULT_CONTACTS_FEED   = \"https://www.google.com/m8/feeds/\";\n    public static final Collection&lt;String&gt;  DEFAULT_CONTACTS_SCOPE  = Collections.singleton(DEFAULT_CONTACTS_FEED);\n\n    public static final String              DEFAULT_CLIENT_SECRET   = \"/client_secret.json\";\n\n    /** Global instance of the HTTP transport. */\n    private static HttpTransport            httpTransport;\n\n    static\n    {\n        try\n        {\n            httpTransport = GoogleNetHttpTransport.newTrustedTransport();\n        }\n        catch (Exception e)\n        {\n            LOGGER.error(\"\", e);\n        }\n    }\n\n    /** Global instance of the JSON factory. */\n    public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();\n\n    private GoogleConnectivityHelper()\n    {}\n\n    public static Credential authorize(Collection&lt;String&gt; scopes, String clientSecret) throws IOException\n    {\n        return authorize(scopes, clientSecret, (File) null);\n    }\n\n    public static Credential authorize(Collection&lt;String&gt; scopes, String clientSecret, String dataStorePath) throws IOException\n    {\n        if (dataStorePath == null) return authorize(scopes, clientSecret);\n        return authorize(scopes, clientSecret, new File(dataStorePath));\n    }\n\n    public static Credential authorize(Collection&lt;String&gt; scopes, String clientSecret, File dataStorePath) throws IOException\n    {\n        if (dataStorePath == null) dataStorePath = new File(\".\");\n\n        // load client secrets\n        LOGGER.debug(\"Credential creation with clientSecret={} and dataStorePath={}\", clientSecret, dataStorePath.getAbsolutePath());\n        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(ResourceOrFileAccessor.getAsStream(clientSecret)));\n        if (clientSecrets.getDetails().getClientId().startsWith(\"Enter\") || clientSecrets.getDetails().getClientSecret().startsWith(\"Enter \"))\n        {\n            System.out.println(\"Enter Client ID and Secret from https://code.google.com/apis/console/\");\n            System.exit(1);\n        }\n\n        // initialize the data store factory\n        FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(dataStorePath);\n\n        // initialize the transport\n\n        // set up authorization code flow\n        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, scopes).setDataStoreFactory(dataStoreFactory).build();\n        // authorize\n        return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize(\"user\");\n    }\n\n    public static HttpTransport getHttpTransport()\n    {\n        return httpTransport;\n    }\n\n}\n<\/code><\/pre>\n\n<p>Does anyone have a working example? Or maybe corrected my mistake?<\/p>\n\n<p>Thanks in advance !<\/p>\n",
+        "question_id": 34481222,
+        "tags": [
+            "java",
+            "maven",
+            "oauth-2.0",
+            "google-calendar-api",
+            "google-contacts-api"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 233
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/74328b4d10e8f89f4faae644bd380931?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7409480,
+            "user_type": "registered",
+            "user_id": 5637321,
+            "link": "https://stackoverflow.com/users/5637321/adjuremods",
+            "reputation": 3038,
+            "display_name": "adjuremods"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 34481222,
+        "edited": false,
+        "creation_date": 1451267754,
+        "comment_id": 56715585
+    }],
+    "answers": [],
+    "answer_comments": {}
+}

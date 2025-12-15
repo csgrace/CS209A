@@ -1,0 +1,158 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bc77bbeb9b3a632bf963c481f56177c3?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4342356,
+            "user_type": "registered",
+            "user_id": 3545298,
+            "link": "https://stackoverflow.com/users/3545298/adi-neag",
+            "reputation": 643,
+            "display_name": "adi.neag",
+            "accept_rate": 43
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48463429/close-swt-shell-by-clicking-outside-of-it",
+        "last_activity_date": 1563442415,
+        "creation_date": 1516977144,
+        "answer_count": 2,
+        "title": "Close SWT shell by clicking outside of it",
+        "body": "<p>I have this JFace dialog:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>setShellStyle(SWT.APPLICATION_MODAL | SWT.CLOSE);\nsetBlockOnOpen(false);\n<\/code><\/pre>\n\n<p>Is there a way to make it close by clicking somewhere outside the dialog?\nMaybe something like listening for a click event on the whole screen and detecting if it's outside the dialog, and then closing.<\/p>\n",
+        "question_id": 48463429,
+        "tags": [
+            "java",
+            "dialog",
+            "swt",
+            "jface"
+        ],
+        "score": 7,
+        "is_answered": true,
+        "view_count": 1512,
+        "last_edit_date": 1516988852
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/aef53d9fbec6c5d4c16a045de77c4e04?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 9571720,
+            "user_type": "registered",
+            "user_id": 7109162,
+            "link": "https://stackoverflow.com/users/7109162/xtremebaumer",
+            "reputation": 6455,
+            "display_name": "XtremeBaumer",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "post_id": 48463429,
+        "edited": false,
+        "creation_date": 1516977403,
+        "comment_id": 83919914
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xvBTj.jpg?s=256",
+                "account_id": 549364,
+                "user_type": "registered",
+                "user_id": 2986905,
+                "link": "https://stackoverflow.com/users/2986905/r%c3%bcdiger-herrmann",
+                "reputation": 21105,
+                "display_name": "R&#252;diger Herrmann",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1563442415,
+            "creation_date": 1516988767,
+            "body": "<p>You can attach an <code>SWT.Deactivate<\/code> listener to the underlying <code>Shell<\/code> of the dialog.<\/p>\n\n<p>To attach the listener, you could override <code>Window::configureShell<\/code> like this:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>@Override\nprotected void configureShell(Shell shell) {\n  super.configureShell(shell);\n  shell.addListener(SWT.Deactivate, event -&gt; shell.close());\n}\n<\/code><\/pre>\n\n<p>And here a standalone SWT example to illustrate the bare mechanism:<\/p>\n\n<pre><code>Display display = new Display();\nShell parentShell = new Shell(display);\nparentShell.setSize(500, 500);\nparentShell.open();\nShell shell = new Shell(parentShell);\nshell.addListener(SWT.Deactivate, event -&gt; shell.close());\nshell.setSize(300, 300);\nshell.setText(\"Closes on Deactivate\");\nshell.open();\nwhile (!parentShell.isDisposed()) {\n  if (!display.readAndDispatch())\n    display.sleep();\n}\ndisplay.dispose();\n<\/code><\/pre>\n",
+            "answer_id": 48466797,
+            "question_id": 48463429,
+            "last_edit_date": 1563442415
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4dfa9066e794647fdedf323ecab85333?s=256&d=identicon&r=PG",
+                "account_id": 1014342,
+                "user_type": "registered",
+                "user_id": 3300205,
+                "link": "https://stackoverflow.com/users/3300205/avojak",
+                "reputation": 2350,
+                "display_name": "avojak"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1516989690,
+            "creation_date": 1516989690,
+            "body": "<p>With the <code>Dialog<\/code> being modal I believe that causes some challenges using the <code>Shell<\/code> of the base application to listen for <code>MouseEvent<\/code>s because the <code>Dialog<\/code> intercepts them.<\/p>\n\n<p>If you're not opposed to using an additional library you could consider using <a href=\"https://github.com/kwhat/jnativehook\" rel=\"nofollow noreferrer\">JNativeHook<\/a> to listen for global mouse click events. This would allow you to listen for a click <em>anywhere<\/em> on the computer and close the dialog if the click occurred outside the dialog bounds, if that's what you're looking for.<\/p>\n\n<p>For example:<\/p>\n\n<pre><code>GlobalScreen.addNativeMouseListener(new NativeMouseInputAdapter() {\n    public void nativeMouseClicked(final NativeMouseEvent nativeMouseEvent) {\n        display.syncExec(new Runnable() {\n            public void run() {\n                if (dialog.getShell() == null || dialog.getShell().isDisposed()) {\n                    return;\n                }\n                // Close the dialog if there is a mouse click outside the bounds of the dialog\n                if (!dialog.getShell().getBounds().contains(awtToSwtPoint(nativeMouseEvent.getPoint()))) {\n                    dialog.close();\n                }\n            }\n        });\n    }\n});\n<\/code><\/pre>\n\n<p>Other than that, I'm not aware of a way to listen to mouse clicks that are outside of the base application / anywhere on the screen.<\/p>\n\n<hr>\n\n<p>Full example:<\/p>\n\n<pre><code>import org.eclipse.jface.dialogs.Dialog;\nimport org.eclipse.swt.SWT;\nimport org.eclipse.swt.widgets.Display;\nimport org.eclipse.swt.widgets.Shell;\nimport org.jnativehook.GlobalScreen;\nimport org.jnativehook.NativeHookException;\nimport org.jnativehook.mouse.NativeMouseEvent;\nimport org.jnativehook.mouse.NativeMouseInputAdapter;\n\npublic class DialogCloseTest {\n\n    private final Display display;\n    private final Shell shell;\n\n    public DialogCloseTest() {\n        display = new Display();\n        shell = new Shell(display);\n        shell.setSize(450, 450);\n\n        final Dialog dialog = new MyDialog(shell);\n        dialog.open();\n\n        registerNativeHook();\n\n        GlobalScreen.addNativeMouseListener(new NativeMouseInputAdapter() {\n            public void nativeMouseClicked(final NativeMouseEvent nativeMouseEvent) {\n                display.syncExec(new Runnable() {\n                    public void run() {\n                        if (dialog.getShell() == null || dialog.getShell().isDisposed()) {\n                            return;\n                        }\n                        // Close the dialog if there is a mouse click outside the bounds of the dialog\n                        if (!dialog.getShell().getBounds().contains(awtToSwtPoint(nativeMouseEvent.getPoint()))) {\n                            dialog.close();\n                        }\n                    }\n                });\n            }\n        });\n    }\n\n    private org.eclipse.swt.graphics.Point awtToSwtPoint(final java.awt.Point point) {\n        return new org.eclipse.swt.graphics.Point(point.x, point.y);\n    }\n\n    private static void registerNativeHook() {\n        try {\n            GlobalScreen.registerNativeHook();\n        } catch (NativeHookException ex) {\n            System.err.println(\"There was a problem registering the native hook.\");\n            System.err.println(ex.getMessage());\n            System.exit(1);\n        }\n    }\n\n    private static void unregisterNativeHook() {\n        try {\n            GlobalScreen.unregisterNativeHook();\n        } catch (NativeHookException e) {\n            System.err.println(\"There was a problem unregistering the native hook.\");\n            System.err.println(e.getMessage());\n        }\n    }\n\n    private static class MyDialog extends Dialog {\n\n        MyDialog(final Shell parent) {\n            super(parent);\n        }\n\n        @Override\n        protected void configureShell(final Shell shell) {\n            super.configureShell(shell);\n            setShellStyle(SWT.APPLICATION_MODAL | SWT.CLOSE);\n            setBlockOnOpen(false);\n        }    \n\n    }\n\n    public void run() {\n        shell.open();\n        while (!shell.isDisposed()) {\n            if (!display.readAndDispatch()) {\n                display.sleep();\n            }\n        }\n        display.dispose();\n        unregisterNativeHook();\n    }\n\n    public static void main(String... args) {\n        new DialogCloseTest().run();\n    }\n\n}\n<\/code><\/pre>\n\n<p><em>Note: This will close the <code>Dialog<\/code> even if it is not visible (eg. if you alt-tab away), so you could add some logic to check whether the dialog is visible as well, if you would like)<\/em><\/p>\n",
+            "answer_id": 48467033,
+            "question_id": 48463429
+        }
+    ],
+    "answer_comments": {"48466797": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/93145a87728ef7b2303f06706992424f?s=256&d=identicon&r=PG",
+                "account_id": 1192089,
+                "user_type": "registered",
+                "user_id": 1329340,
+                "link": "https://stackoverflow.com/users/1329340/campa",
+                "reputation": 4535,
+                "display_name": "Campa",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 48466797,
+            "edited": false,
+            "creation_date": 1563972294,
+            "comment_id": 100877227
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xvBTj.jpg?s=256",
+                "account_id": 549364,
+                "user_type": "registered",
+                "user_id": 2986905,
+                "link": "https://stackoverflow.com/users/2986905/r%c3%bcdiger-herrmann",
+                "reputation": 21105,
+                "display_name": "R&#252;diger Herrmann",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48466797,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/bc77bbeb9b3a632bf963c481f56177c3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4342356,
+                "user_type": "registered",
+                "user_id": 3545298,
+                "link": "https://stackoverflow.com/users/3545298/adi-neag",
+                "reputation": 643,
+                "display_name": "adi.neag",
+                "accept_rate": 43
+            },
+            "edited": false,
+            "creation_date": 1517342569,
+            "comment_id": 84054545
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bc77bbeb9b3a632bf963c481f56177c3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4342356,
+                "user_type": "registered",
+                "user_id": 3545298,
+                "link": "https://stackoverflow.com/users/3545298/adi-neag",
+                "reputation": 643,
+                "display_name": "adi.neag",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 48466797,
+            "edited": false,
+            "creation_date": 1517213204,
+            "comment_id": 83986536
+        }
+    ]}
+}

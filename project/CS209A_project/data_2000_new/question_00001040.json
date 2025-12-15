@@ -1,0 +1,190 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-SA9RukM9c20/AAAAAAAAAAI/AAAAAAAAABo/B7hATp5SEl8/s256-rj/photo.jpg",
+            "account_id": 12178411,
+            "user_type": "registered",
+            "user_id": 8891108,
+            "link": "https://stackoverflow.com/users/8891108/%d0%94%d0%b0%d0%bd%d0%b8%d0%b8%d0%bb-%d0%90%d0%b3%d0%b5%d0%b5%d0%b2",
+            "reputation": 87,
+            "display_name": "Даниил Агеев"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49263161/how-to-create-3-thread-that-will-work-one-by-one",
+        "last_activity_date": 1520970220,
+        "creation_date": 1520964934,
+        "answer_count": 1,
+        "title": "How to create 3 thread that will work one by one",
+        "body": "<p>Is that possible to do without flags? I can use only notify/wait/synchronized.\nI want to print: worker1 worker2 worker3 worker1 worker2... But I have a race condition for the wait()/notify() methods.<\/p>\n\n<pre><code>class ThirdWorker implements Runnable {\n        @Override\n        public void run(){\n            for (int i = 0; i &lt; a; i++) {\n                synchronized (mutex3) {\n                    System.out.println(Thread.currentThread().getName() + \" worker3 \" + (i + 1));\n                    try {\n                        mutex3.wait();\n                    } catch (InterruptedException e) {\n                        e.printStackTrace();\n                    }\n                    synchronized (mutex) {\n                        mutex.notify();\n                    }\n                }\n            }\n        }\n    }\n\n    class SecondWorker implements Runnable{\n        @Override\n        public void run() {\n            synchronized (mutex) {\n                new Thread(new ThirdWorker()).start();\n            }\n                for (int i = 0; i &lt; a; i++) {\n                    synchronized (mutex2) {\n                        System.out.println(Thread.currentThread().getName() + \" worker2 \" + (i + 1));\n                        synchronized (mutex3){\n                            mutex3.notify();\n                        }\n                        try {\n                            mutex2.wait();\n                        } catch (InterruptedException e) {\n                            e.printStackTrace();\n                        }\n                    }\n\n            }\n        }\n    }\n\n    class FirstWorker implements Runnable{ \n        @Override\n        public void run() {\n            synchronized (mutex) {\n                new Thread(new SecondWorker()).start();\n                for (int i = 0; i &lt; a; i++) {\n                    System.out.println(Thread.currentThread().getName() + \" worker 1 \" + (i+1));\n                    try {\n                        mutex.wait();\n                    } catch (InterruptedException e) {\n                        e.printStackTrace();\n                    }\n                    synchronized (mutex2){\n                        mutex2.notify();\n                    }\n                }\n            }\n        }\n    }\n    new Thread(new FirstWorker()).start();  \n<\/code><\/pre>\n\n<p>I know that it would be easy to do it with flags, but I can't.<\/p>\n",
+        "question_id": 49263161,
+        "tags": [
+            "java",
+            "multithreading"
+        ],
+        "score": 2,
+        "accepted_answer_id": 49264142,
+        "is_answered": true,
+        "view_count": 226
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/67f2ccd17aa6fd622152ad88fc2ae784?s=256&d=identicon&r=PG",
+                "account_id": 422870,
+                "user_type": "registered",
+                "user_id": 801894,
+                "link": "https://stackoverflow.com/users/801894/solomon-slow",
+                "reputation": 27582,
+                "display_name": "Solomon Slow"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49263161,
+            "edited": false,
+            "creation_date": 1520977847,
+            "comment_id": 85536211
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d59ed667a85bb54bc9c044635b6bc958?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2565865,
+                "user_type": "registered",
+                "user_id": 2225960,
+                "link": "https://stackoverflow.com/users/2225960/juan",
+                "reputation": 5611,
+                "display_name": "Juan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49263161,
+            "edited": false,
+            "creation_date": 1520971476,
+            "comment_id": 85533273
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-SA9RukM9c20/AAAAAAAAAAI/AAAAAAAAABo/B7hATp5SEl8/s256-rj/photo.jpg",
+                "account_id": 12178411,
+                "user_type": "registered",
+                "user_id": 8891108,
+                "link": "https://stackoverflow.com/users/8891108/%d0%94%d0%b0%d0%bd%d0%b8%d0%b8%d0%bb-%d0%90%d0%b3%d0%b5%d0%b5%d0%b2",
+                "reputation": 87,
+                "display_name": "Даниил Агеев"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49263161,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d59ed667a85bb54bc9c044635b6bc958?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2565865,
+                "user_type": "registered",
+                "user_id": 2225960,
+                "link": "https://stackoverflow.com/users/2225960/juan",
+                "reputation": 5611,
+                "display_name": "Juan"
+            },
+            "edited": false,
+            "creation_date": 1520966557,
+            "comment_id": 85530714
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d59ed667a85bb54bc9c044635b6bc958?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2565865,
+                "user_type": "registered",
+                "user_id": 2225960,
+                "link": "https://stackoverflow.com/users/2225960/juan",
+                "reputation": 5611,
+                "display_name": "Juan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49263161,
+            "edited": false,
+            "creation_date": 1520965175,
+            "comment_id": 85529971
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d59ed667a85bb54bc9c044635b6bc958?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 2565865,
+            "user_type": "registered",
+            "user_id": 2225960,
+            "link": "https://stackoverflow.com/users/2225960/juan",
+            "reputation": 5611,
+            "display_name": "Juan"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1520970220,
+        "creation_date": 1520968265,
+        "body": "<p>Here there is an example of how you can do it.<\/p>\n\n<p><strong>Note:<\/strong><br>\nThe property <code>turnIsFor<\/code> is the protected resource.<br>\nThe threads are created as siblings.<br>\nThe object used as a monitor (<code>lock<\/code>) is not used for anything else but that.<br>\nThere is a <code>while<\/code> wrapping the <code>lock.wait()<\/code> with the condition that should enable the thread to run.<br>\nBoth, <code>lock<\/code> and <code>notify<\/code> have to be inside the <code>synchronized<\/code> block.<br>\nAlso note that on purpose I started the threads in a random order and still they go one at a time in the expected order given by the shared property <code>nextTurnIsFor<\/code>.<\/p>\n\n<pre><code>public class ThreeThreads {\n\n    Thread t1, t2, t3;\n    Lock lock = new Lock();\n    int turnIsFor = 1;\n    public static void main(String ... args) {\n        ThreeThreads threeThreads = new ThreeThreads();\n        threeThreads.run();\n    }\n\n    public ThreeThreads() {\n\n\n        Runnable printName1 = new Runnable() {\n\n            int turn = 1;\n\n            @Override\n            public void run() {\n                while(true){\n                    try {\n                        synchronized(lock) {\n                            while(turnIsFor != turn){\n                                lock.wait();;\n                            }\n                            System.out.println( Thread.currentThread().getName());  \n                            turnIsFor = 2;\n                            lock.notifyAll();\n                        }\n                    }catch(Exception e) {\n                        e.printStackTrace();\n                    }\n                }\n            }\n        };\n\n        Runnable printName2 = new Runnable() {\n\n            int turn = 2;\n\n            @Override\n            public void run() {\n                while(true) {\n                    try {\n                        synchronized(lock) {\n                            while(turnIsFor != turn){\n                                lock.wait();;\n                            }\n                            System.out.println( Thread.currentThread().getName());  \n                            turnIsFor = 3;\n                            lock.notifyAll();\n                        }\n                    }catch(Exception e) {\n                        e.printStackTrace();\n                    }\n                }\n            }\n        };\n\n        Runnable printName3 = new Runnable() {\n\n            int turn = 3;\n\n            @Override\n            public void run() {\n                while(true) {\n                    try {\n                        synchronized(lock) {\n                            while(turnIsFor != turn){\n                                lock.wait();;\n                            }\n                            System.out.println( Thread.currentThread().getName());  \n                            turnIsFor = 1;\n                            lock.notifyAll();\n                        }\n                    }catch(Exception e) {\n                        e.printStackTrace();\n                    }\n                }\n            }\n        };\n\n        t1 = new Thread(printName1, \"Thread 1\");\n        t2 = new Thread(printName2, \"Thread 2\");\n        t3 = new Thread(printName3, \"Thread 3\");\n\n    }\n\n    public void run() {\n        t3.start();\n        t1.start();\n        t2.start();\n    }\n\n\n    private static final class Lock{};\n\n}\n<\/code><\/pre>\n",
+        "answer_id": 49264142,
+        "question_id": 49263161,
+        "last_edit_date": 1520970220
+    }],
+    "answer_comments": {"49264142": [
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-SA9RukM9c20/AAAAAAAAAAI/AAAAAAAAABo/B7hATp5SEl8/s256-rj/photo.jpg",
+                "account_id": 12178411,
+                "user_type": "registered",
+                "user_id": 8891108,
+                "link": "https://stackoverflow.com/users/8891108/%d0%94%d0%b0%d0%bd%d0%b8%d0%b8%d0%bb-%d0%90%d0%b3%d0%b5%d0%b5%d0%b2",
+                "reputation": 87,
+                "display_name": "Даниил Агеев"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49264142,
+            "edited": false,
+            "creation_date": 1520971533,
+            "comment_id": 85533304
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d59ed667a85bb54bc9c044635b6bc958?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2565865,
+                "user_type": "registered",
+                "user_id": 2225960,
+                "link": "https://stackoverflow.com/users/2225960/juan",
+                "reputation": 5611,
+                "display_name": "Juan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49264142,
+            "reply_to_user": {
+                "profile_image": "https://lh6.googleusercontent.com/-SA9RukM9c20/AAAAAAAAAAI/AAAAAAAAABo/B7hATp5SEl8/s256-rj/photo.jpg",
+                "account_id": 12178411,
+                "user_type": "registered",
+                "user_id": 8891108,
+                "link": "https://stackoverflow.com/users/8891108/%d0%94%d0%b0%d0%bd%d0%b8%d0%b8%d0%bb-%d0%90%d0%b3%d0%b5%d0%b5%d0%b2",
+                "reputation": 87,
+                "display_name": "Даниил Агеев"
+            },
+            "edited": false,
+            "creation_date": 1520971218,
+            "comment_id": 85533141
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-SA9RukM9c20/AAAAAAAAAAI/AAAAAAAAABo/B7hATp5SEl8/s256-rj/photo.jpg",
+                "account_id": 12178411,
+                "user_type": "registered",
+                "user_id": 8891108,
+                "link": "https://stackoverflow.com/users/8891108/%d0%94%d0%b0%d0%bd%d0%b8%d0%b8%d0%bb-%d0%90%d0%b3%d0%b5%d0%b5%d0%b2",
+                "reputation": 87,
+                "display_name": "Даниил Агеев"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49264142,
+            "edited": false,
+            "creation_date": 1520970655,
+            "comment_id": 85532849
+        }
+    ]}
+}

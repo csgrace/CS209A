@@ -1,0 +1,110 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4b33bdfc6a1381dddad90d247fce452c?s=256&d=identicon&r=PG",
+            "account_id": 100972,
+            "user_type": "registered",
+            "user_id": 271887,
+            "link": "https://stackoverflow.com/users/271887/damien",
+            "reputation": 2254,
+            "display_name": "Damien",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/3660797/urisyntaxexception-illegal-character-when-deploying-war-file-in-weblogic",
+        "last_activity_date": 1283898738,
+        "creation_date": 1283878378,
+        "answer_count": 2,
+        "title": "URISyntaxException Illegal character when deploying WAR file in Weblogic",
+        "body": "<p>We're deploying the same web application multiple times on the same weblogic domain, for multiple test environments. <\/p>\n\n<p>Even though we use different servers and ports, we find it convenient to use different names to easily identify the deployed application. So far, we've put the environment name in the application name, between brackets, like this:<\/p>\n\n<pre><code>Applic[DEV]\nApplic[SIT1]\nApplic[SIT2]\n<\/code><\/pre>\n\n<p>Until today, it worked like a charm. But now we're facing an issue when redeploying an application. I'm not sure what we could have changed that causes this problem.<\/p>\n\n<p>The exception we get is:<\/p>\n\n<pre><code>java.net.URISyntaxException: Illegal character in path at index 65: file:/APPLICdev1/applicDomain/servers/SIT2/tmp/_WL_user/ApplicWeb[Sit2]/gp8nae/war/WEB-INF/lib/applicCommons-RELEASE.jar\n<\/code><\/pre>\n\n<p>According to the W3C (<a href=\"http://www.ietf.org/rfc/rfc3986.txt\" rel=\"nofollow noreferrer\">here<\/a>) the character in question \"[\" is supposed to be a valid character, reserved but valid. We solved the issue by removing the brackets but I'm curious to understand the cause of this problem.<\/p>\n\n<p>Thanks<\/p>\n",
+        "question_id": 3660797,
+        "tags": [
+            "java",
+            "deployment"
+        ],
+        "score": 2,
+        "accepted_answer_id": 3660994,
+        "is_answered": true,
+        "view_count": 1127,
+        "last_edit_date": 1283898738
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2a48823f3303f6c34f30574b9cb68e48?s=256&d=identicon&r=PG",
+                "account_id": 36208,
+                "user_type": "registered",
+                "user_id": 103154,
+                "link": "https://stackoverflow.com/users/103154/axtavt",
+                "reputation": 243354,
+                "display_name": "axtavt"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1283879860,
+            "creation_date": 1283879860,
+            "body": "<p>As stated in <a href=\"http://www.ietf.org/rfc/rfc3986.txt\" rel=\"nofollow noreferrer\">RFC3986<\/a>, <code>[<\/code> and <code>]<\/code> are reserved characters which are valid only in IPv6 address representation:<\/p>\n\n<blockquote>\n  <p>3.2.2. Host<br>\n  ...<br>\n  A host identified by an Internet Protocol literal address,\n  version 6 [RFC3513] or later, is\n  distinguished by enclosing the IP\n  literal within square brackets (\"[\"\n  and \"]\").  This is the only place\n  where square bracket characters are\n  allowed in the URI syntax.<\/p>\n<\/blockquote>\n\n<p>So, in other places they should be escaped. <\/p>\n\n<p>However, it doesn't explain behaviour of Weblogic regarding file names.\nPerhaps it's a bug caused by using <code>new URI(...)<\/code> instead of <code>new File(...).toURI()<\/code> for creating <code>file:/<\/code> URIs.<\/p>\n",
+            "answer_id": 3660994,
+            "question_id": 3660797
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/28d048fac5e3ee385b01370382a6e987?s=256&d=identicon&r=PG",
+                "account_id": 185700,
+                "user_type": "registered",
+                "user_id": 422597,
+                "link": "https://stackoverflow.com/users/422597/colin-hebert",
+                "reputation": 93531,
+                "display_name": "Colin Hebert"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1283880545,
+            "creation_date": 1283880216,
+            "body": "<p>Your content doesn't match the required content of a '[' ']' bloc.<\/p>\n<blockquote>\n<p>IPv6 addresses are permitted for the host component. An IPv6 address must be enclosed in square brackets ('[' and ']') as specified by <a href=\"http://www.ietf.org/rfc/rfc2732.txt\" rel=\"nofollow noreferrer\">RFC 2732<\/a>. The IPv6 address itself must parse according to <a href=\"http://www.ietf.org/rfc/rfc2373.txt\" rel=\"nofollow noreferrer\">RFC 2373<\/a>. IPv6 addresses are further constrained to describe no more than sixteen bytes of address information, a constraint implicit in RFC 2373 but not expressible in the grammar.<\/p>\n<\/blockquote>\n<p>And as the RFC states :<\/p>\n<blockquote>\n<p>A host identified by an Internet Protocol literal address, version 6 [<a href=\"https://www.rfc-editor.org/rfc/rfc3513\" rel=\"nofollow noreferrer\">RFC3513<\/a>] or later, is distinguished by enclosing the IP literal within square brackets (&quot;[&quot; and &quot;]&quot;).  This is the only place where square bracket characters are allowed in the URI syntax.  In anticipation of future, as-yet-undefined IP literal address formats, an implementation may use an optional version flag to indicate such a format explicitly rather than rely on heuristic determination.<\/p>\n<pre><code>IP-literal = &quot;[&quot; ( IPv6address / IPvFuture  ) &quot;]&quot;\nIPvFuture  = &quot;v&quot; 1*HEXDIG &quot;.&quot; 1*( unreserved / sub-delims / &quot;:&quot; )\n<\/code><\/pre>\n<\/blockquote>\n<p>The java.net.URI implementation considers &quot;[]&quot; valid for IPV6 only.<\/p>\n<hr />\n<p><strong>Resources :<\/strong><\/p>\n<ul>\n<li><a href=\"http://www.ietf.org/rfc/rfc3986.txt\" rel=\"nofollow noreferrer\">Current URI RFC<\/a><\/li>\n<li><a href=\"http://download.oracle.com/javase/6/docs/api/java/net/URI.html\" rel=\"nofollow noreferrer\">Javadoc URI<\/a><\/li>\n<\/ul>\n",
+            "answer_id": 3661044,
+            "question_id": 3660797,
+            "last_edit_date": 1633588304
+        }
+    ],
+    "answer_comments": {
+        "3661044": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/83f43538eda811067b33ac7a6cff3bbd?s=256&d=identicon&r=PG",
+                "account_id": 2423336,
+                "user_type": "registered",
+                "user_id": 2115825,
+                "link": "https://stackoverflow.com/users/2115825/tono-wiedermann",
+                "reputation": 608,
+                "display_name": "Tono Wiedermann",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 3661044,
+            "edited": false,
+            "creation_date": 1612859527,
+            "comment_id": 116891179
+        }],
+        "3660994": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/28d048fac5e3ee385b01370382a6e987?s=256&d=identicon&r=PG",
+                "account_id": 185700,
+                "user_type": "registered",
+                "user_id": 422597,
+                "link": "https://stackoverflow.com/users/422597/colin-hebert",
+                "reputation": 93531,
+                "display_name": "Colin Hebert"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 3660994,
+            "edited": false,
+            "creation_date": 1283881496,
+            "comment_id": 3851708
+        }]
+    }
+}

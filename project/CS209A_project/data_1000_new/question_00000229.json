@@ -1,0 +1,80 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-sHXnYyOXmSI/AAAAAAAAAAI/AAAAAAAAAxw/Qf-aqoTtXYs/s256-rj/photo.jpg",
+            "account_id": 11022810,
+            "user_type": "registered",
+            "user_id": 8096540,
+            "link": "https://stackoverflow.com/users/8096540/thomas-ponzo",
+            "reputation": 87,
+            "display_name": "Thomas Ponzo"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/49190751/how-to-set-menu-items-in-custom-toolbar-with-a-activity-and-a-fragment",
+        "last_activity_date": 1591800802,
+        "creation_date": 1520588441,
+        "answer_count": 1,
+        "title": "How to set Menu Items in Custom Toolbar with a activity and a fragment?",
+        "body": "<p>before I only used activity's and that worked but when I added the fragments to the activity's the menu icon disappeared and I could find a fix for it<\/p>\n\n<p>my custom toolbar<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;android.support.v7.widget.Toolbar xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"wrap_content\"\n    android:background=\"@color/apptheme\"\n    app:theme=\"@style/AlertDialog.AppCompat.Light\"&gt;\n\n    &lt;LinearLayout\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"50dp\"\n        android:orientation=\"horizontal\"\n        android:weightSum=\"100\"&gt;\n\n        &lt;FrameLayout\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"match_parent\"\n            android:id=\"@+id/actionbar_logo_click\"\n            android:paddingLeft=\"3dp\"\n            android:layout_weight=\"5\"&gt;\n\n            &lt;ImageView\n                android:id=\"@+id/actionbar_logo\"\n                android:layout_width=\"wrap_content\"\n                android:layout_height=\"match_parent\"\n                android:paddingRight=\"10dp\" /&gt;\n        &lt;/FrameLayout&gt;\n\n        &lt;TextView\n            android:id=\"@+id/actionbar_titel\"\n            style=\"@style/AudioFileInfoOverlayText\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"match_parent\"\n            android:paddingTop=\"7dp\"\n            android:textColor=\"@color/white\"\n            android:textSize=\"27dp\" /&gt;\n    &lt;/LinearLayout&gt;\n&lt;/android.support.v7.widget.Toolbar&gt;\n<\/code><\/pre>\n\n<p>my menu items<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;menu xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    android:icon=\"@drawable/ic_more_vert_white_24dp\"\n    app:showAsAction=\"always\"&gt;\n    &lt;item\n        android:id=\"@+id/menu_rate\"\n        android:title=\"@string/menu_rate\"\n        /&gt;\n    &lt;item\n        android:id=\"@+id/menu_about\"\n        android:title=\"@string/menu_about\" /&gt;\n\n&lt;/menu&gt;\n<\/code><\/pre>\n\n<p>my activity xml layout where I add the custom toolbar with the id<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;FrameLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"&gt;\n\n    &lt;LinearLayout\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"match_parent\"\n        android:orientation=\"vertical\"&gt;\n\n        &lt;include layout=\"@layout/app_bar\"&gt;&lt;/include&gt;\n\n    &lt;!-- Container for loading and the actual fragment--&gt;\n    &lt;FrameLayout\n        android:id=\"@+id/container\"\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"match_parent\" /&gt;\n\n\n\n    &lt;ProgressBar\n        android:id=\"@+id/loading\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_gravity=\"center\"\n        android:visibility=\"gone\"\n        android:indeterminate=\"true\" /&gt;\n&lt;/LinearLayout&gt;\n&lt;/FrameLayout&gt;\n<\/code><\/pre>\n\n<p>my java activity where I call the toolbar and also inflate the menu items<\/p>\n\n<pre><code>@EActivity(R.layout.activity_main_layout)\npublic class MainActivity extends BaseActivity {\n\n\n    @ViewById(R.id.adview)\n    MoPubView mMoPubView;\n\n    @ViewById(R.id.app_bar)\n    Toolbar toolbar;\n\n    @ViewById(R.id.actionbar_logo)\n    ImageView mAactionbarImage;\n\n    @ViewById(R.id.actionbar_titel)\n    TextView mActionbarTitel;\n\n\n    @Override\n    public void onCreate(@Nullable Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setSupportActionBar(toolbar);\n    }\n\n    @AfterViews\n    protected void onViewsInitialized() {\n        gotoFragment(MainFragment_.builder().build(), false);\n\n        mAactionbarImage.setImageResource(R.mipmap.ic_launcher);\n\n        //Set the titel of the actionbar\n        mActionbarTitel.setText(\"How To Twitch\");\n    }\n\n\n    @Override\n    public void onBackPressed() {\n\n    }\n\n    @Override\n    public boolean onCreateOptionsMenu(Menu menu) {\n        getMenuInflater().inflate(R.menu.main_menu, menu);\n        menu.getItem(0).setIcon(R.drawable.ic_more_vert_white_24dp);\n        return super.onCreateOptionsMenu(menu);\n\n    }\n\n    public boolean onOptionsItemSelected(MenuItem item) {\n        switch (item.getItemId()) {\n            case R.id.menu_rate:\n                final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object\n                try {\n                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(\"market://details?id=\" + appPackageName)));\n                } catch (android.content.ActivityNotFoundException anfe) {\n                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(\"http://play.google.com/store/apps/details?id=\" + appPackageName)));\n                }\n                break;\n            case R.id.menu_about:\n                Intent aboutIntent = new Intent(MainActivity.this, AboutActivity_.class);\n                startActivity(aboutIntent);\n                break;\n            default:\n                break;\n        }\n        return super.onOptionsItemSelected(item);\n    }\n}\n<\/code><\/pre>\n\n<p>for some reason my menu Icon is not showing up in the toolbar so if someone knows what I am doing wrong that would help me alot<\/p>\n",
+        "question_id": 49190751,
+        "tags": [
+            "java",
+            "android",
+            "android-activity",
+            "toolbar"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 1901,
+        "last_edit_date": 1591800802
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/43fe0f06db15e69fc8cb6e65d7f21958?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6838679,
+            "user_type": "registered",
+            "user_id": 5259757,
+            "link": "https://stackoverflow.com/users/5259757/archana",
+            "reputation": 637,
+            "display_name": "Archana",
+            "accept_rate": 44
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1520605009,
+        "creation_date": 1520589278,
+        "body": "<p>I think you are missing an overridden method <code>onPrepareOptionsMenu<\/code><\/p>\n\n<p>Try to add this overridden method and check:<\/p>\n\n<pre><code>@Override\npublic void onPrepareOptionsMenu(Menu menu) {\n    menu.findItem(R.id. menu_rate).setVisible(true);\n    menu.findItem(R.id. menu_about).setVisible(true);\n    super.onPrepareOptionsMenu(menu);\n}\n<\/code><\/pre>\n\n<p>And add <code>setHasOptionsMenu(true);<\/code> within <code>onCreateView()<\/code> of your fragment.<\/p>\n",
+        "answer_id": 49191017,
+        "question_id": 49190751,
+        "last_edit_date": 1520605009
+    }],
+    "answer_comments": {"49191017": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/43fe0f06db15e69fc8cb6e65d7f21958?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6838679,
+            "user_type": "registered",
+            "user_id": 5259757,
+            "link": "https://stackoverflow.com/users/5259757/archana",
+            "reputation": 637,
+            "display_name": "Archana",
+            "accept_rate": 44
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 49191017,
+        "reply_to_user": {
+            "profile_image": "https://lh6.googleusercontent.com/-sHXnYyOXmSI/AAAAAAAAAAI/AAAAAAAAAxw/Qf-aqoTtXYs/s256-rj/photo.jpg",
+            "account_id": 11022810,
+            "user_type": "registered",
+            "user_id": 8096540,
+            "link": "https://stackoverflow.com/users/8096540/thomas-ponzo",
+            "reputation": 87,
+            "display_name": "Thomas Ponzo"
+        },
+        "edited": false,
+        "creation_date": 1520603856,
+        "comment_id": 85395500
+    }]}
+}

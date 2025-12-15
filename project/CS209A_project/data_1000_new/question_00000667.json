@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/20d8296d5217c0aedc583779504d1c2a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 19620197,
+            "user_type": "registered",
+            "user_id": 14360829,
+            "link": "https://stackoverflow.com/users/14360829/user14360829",
+            "reputation": 1,
+            "display_name": "user14360829"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/65773285/unable-to-write-in-an-empty-row-in-excel-using-apache-poi",
+        "last_activity_date": 1619082406,
+        "creation_date": 1610967842,
+        "answer_count": 1,
+        "title": "Unable to write in an empty row in Excel using Apache POI",
+        "body": "<p>Excel Format - .xls<\/p>\n<p>I am trying to copy/Paste the values from one Excel sheet to another existing Excel sheet. I am unable to write values in empty rows. If the Excel rows have some values, then it is updating. Please check the code below.<\/p>\n<p>My code:<\/p>\n<pre><code>FileInputStream file = new FileInputStream(new File(strWorkBookName));\nHSSFWorkbook strWorkBook = new HSSFWorkbook(file);\nHSSFSheet sheet = strWorkBook.getSheet(sheetName);\n\n// Retrieve the row and check for null\nHSSFRow sheetrow = sheet.getRow(rowNo);\nif(sheetrow == null){\n    logger.info(&quot;CREATING ROW&quot;+rowNo);\n    sheetrow = sheet.createRow(rowNo);\n}\n// Update the value of a cell\nHSSFCell cell = sheetrow.getCell(columnNo);\n\nif(cell == null){\n    logger.info(&quot;CREATING COLUMN &quot; + columnNo);\n    cell = sheetrow.createCell(columnNo); }\n\ncell.setCellValue(valueToUpdate);\n\nFileOutputStream outFile = new FileOutputStream(new File(strWorkBookName));\nstrWorkBook.write(outFile);\noutFile.close();\n<\/code><\/pre>\n",
+        "question_id": 65773285,
+        "tags": [
+            "java",
+            "excel",
+            "apache-poi",
+            "xls",
+            "hssfworkbook"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 954,
+        "last_edit_date": 1619082313
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/UrB0H.png?s=256",
+            "account_id": 5320558,
+            "user_type": "registered",
+            "user_id": 4244130,
+            "link": "https://stackoverflow.com/users/4244130/vincelomba",
+            "reputation": 438,
+            "display_name": "VinceLomba",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1619082406,
+        "creation_date": 1611920605,
+        "body": "<p>Are you sure you're verifying properly if the existing Excel file is updating?<\/p>\n<p>You forgot to close the <code>Workbook<\/code> object, but still your code is working like a charm for me. Here is the working code I've tested (working both for full and empty rows):<\/p>\n<pre><code>public static void main(String[] args) throws IOException {\n\n    int sheetPosition = 0;\n    int rowPosition = 100;\n    int cellPosition = 100;\n    String excelFilePath = &quot;D:\\\\Desktop\\\\testExcel.xls&quot;;\n\n    FileInputStream fileInputStream = new FileInputStream(new File(excelFilePath));\n    HSSFWorkbook workbook = new HSSFWorkbook(fileInputStream);\n    HSSFSheet sheet = workbook.getSheetAt(sheetPosition);\n\n    HSSFRow sheetrow = sheet.getRow(rowPosition);\n    if (sheetrow == null){\n       System.out.println(&quot;new row at position &quot; + rowPosition);\n       sheetrow = sheet.createRow(rowPosition);\n    }\n\n    HSSFCell cell = sheetrow.getCell(cellPosition);\n    if(cell == null){\n        System.out.println(&quot;new cell (for row &quot; + rowPosition + &quot;) at position &quot; + cellPosition);\n        cell = sheetrow.createCell(cellPosition);\n    }\n\n    cell.setCellValue(&quot;New Amazing Value!&quot;);\n\n    FileOutputStream outFile = new FileOutputStream(new File(excelFilePath));\n    workbook.write(outFile);\n    outFile.close();\n    workbook.close(); // &lt;-- Do not forget that!\n}\n<\/code><\/pre>\n",
+        "answer_id": 65953800,
+        "question_id": 65773285,
+        "last_edit_date": 1619082406
+    }],
+    "answer_comments": {}
+}

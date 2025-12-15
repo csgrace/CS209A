@@ -1,0 +1,112 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1ada385074bb6366c0e3b18d15c6a296?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4247506,
+            "user_type": "registered",
+            "user_id": 3475722,
+            "link": "https://stackoverflow.com/users/3475722/greg",
+            "reputation": 1710,
+            "display_name": "Greg",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/37772538/slow-unit-testing-in-spring-boot-application",
+        "last_activity_date": 1677523559,
+        "creation_date": 1465722749,
+        "answer_count": 2,
+        "title": "Slow unit testing in spring-boot application",
+        "body": "<p>I'm still new to unit testing. I started to read a book about it. But one of the most important thing is that a test hast to be FIRST (Fast, Isolated, Repeatable, Self-validating, Timely).<\/p>\n<p>Okay, now I was ready for a bit of practice. But when I was building unit test in spring boot. I like to keep them separated.<\/p>\n<pre><code>@RunWith(SpringJUnit4ClassRunner.class)\n@ContextConfiguration(classes = UnitTestApplication.class, loader = SpringApplicationContextLoader.class)\n@WebIntegrationTest(&quot;server.port:9000&quot;)\npublic class FirstTestClassTest{\n\n    ...\n\n}\n\n\n@RunWith(SpringJUnit4ClassRunner.class)\n@ContextConfiguration(classes = UnitTestApplication.class, loader = SpringApplicationContextLoader.class)\n@WebIntegrationTest(&quot;server.port:9001&quot;)\npublic class SecondTestClassTest{\n\n    ...\n\n}\n<\/code><\/pre>\n<p>This gives me the problem that for every test class there is a new instance started of the application.<\/p>\n<p>So let's say I introduce a new feature and want to test for bugs. I use <code>mvn test<\/code> from the command line. Then all the test are run but i think it will take ages for a real application with a lot of tests.<\/p>\n<p>I there a way that there is only one instance started and keep the test fast but where i can keep the test in separate classes?<\/p>\n",
+        "question_id": 37772538,
+        "tags": [
+            "java",
+            "spring",
+            "maven",
+            "unit-testing"
+        ],
+        "score": 14,
+        "accepted_answer_id": 37773971,
+        "is_answered": true,
+        "view_count": 14422,
+        "last_edit_date": 1677523559
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2cd9e0d0246e9fad7a7d9b5f950a007f?s=256&d=identicon&r=PG",
+            "account_id": 212417,
+            "user_type": "registered",
+            "user_id": 465223,
+            "link": "https://stackoverflow.com/users/465223/dunni",
+            "reputation": 44724,
+            "display_name": "dunni",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 37772538,
+        "edited": false,
+        "creation_date": 1465725693,
+        "comment_id": 63013711
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/771f1c4e90ceeec0060c62ff0dbb762e?s=256&d=identicon&r=PG",
+                "account_id": 298886,
+                "user_type": "registered",
+                "user_id": 605153,
+                "link": "https://stackoverflow.com/users/605153/mark-bramnik",
+                "reputation": 42992,
+                "display_name": "Mark Bramnik",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 20,
+            "is_accepted": true,
+            "last_activity_date": 1530553731,
+            "creation_date": 1465732775,
+            "body": "<p>I'll refer your sentence:<\/p>\n\n<blockquote>\n  <p>So let's say I introduce a new feature and want to test for bugs. I\n  use mvn test form the command line. Then all the test are run but i\n  think it will take ages for a real application with a lot of tests.<\/p>\n<\/blockquote>\n\n<p>This question you raise here is very important, so I'll try to provide an architectural point of view here without delving into technical implementation.<\/p>\n\n<p>There are many different kinds of tests. What you're referring to is called an integration test, and not a unit test. The difference between those two that in unit tests you're testing one class and all the rest should be mocked (there are frameworks like EasyMock or Mockito for this).<\/p>\n\n<p>Unit test has a lot of restrictions:<\/p>\n\n<ul>\n<li>You cannot access any external components (web servers, db and so forth)<\/li>\n<li>Unit tests run only in memory <\/li>\n<li>They are extremely fast (particle of second).<\/li>\n<\/ul>\n\n<p>These tests are very helpful when it comes to testing the functionality of your classes<\/p>\n\n<p>Now when the development of the feature is done, its time to test that the feature works in \"semi-real\" environment. Usually when running those, there is a database available as well as spring container. For running this kind of tests you can use spring tests extensions and use different techniques (for example, substitute one the whole application spring context with a \"partial\" context or override some beans with stubs or something.<\/p>\n\n<p>Now, this difference is interesting in the context of your question because there should be many unit tests and substantially less integration tests in the application. So if you can cover something you've written with unit tests - write unit tests. It's incredibly fast by nature and you can run a lot of those (thousands) in no-time. Only if you (rarely) cannot cover your functionality in unit tests - write the integration test. This will typically relevant for code that runs against the DB for example and you would like to test whether the queries produced by the component are really valid. <\/p>\n\n<p>So generally if you have both types of tests you should be covered and there should be not so many integration tests, so running those shouldn't be a real hassle.<\/p>\n",
+            "answer_id": 37773971,
+            "question_id": 37772538,
+            "last_edit_date": 1530553731
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1e144a59e3fff7bca13b5aa1e75de093?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8616058,
+                "user_type": "registered",
+                "user_id": 6452852,
+                "link": "https://stackoverflow.com/users/6452852/andrei-bardyshev",
+                "reputation": 816,
+                "display_name": "Andrei Bardyshev"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1465734134,
+            "creation_date": 1465726087,
+            "body": "<p>One of the ways to make spring mvc tests much faster is to use <code>MockMvcBuilders.standaloneSetup<\/code> With this setup you use not a real but a mocked application context. This setup has a very <a href=\"http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/test/web/servlet/setup/StandaloneMockMvcBuilder.html\" rel=\"nofollow\">reach configuration options<\/a> and in my experience, it is sufficient for most of controller tests. <\/p>\n\n<p>That way you need to create your controller instances and inject them with mocked dependencies by hand. Here is an example of MockMvc unit test with standalone setup.<\/p>\n\n<pre><code>// setup beans and mockMvc\nUserDAO userDAO = mock(UserDAO.class);\nUserController userController = new UserController(userDAO);\nMockMvc mockMvc = standaloneSetup(userController)\n             .setViewResolvers(new WebConfig().viewResolver())\n             .build();\n...\n\n// do test\nmockMvc.perform(get(USERS))\n            .andExpect(view().name(USERS_VIEW_NAME))\n            .andExpect(model().attribute(TOTAL, 20))\n<\/code><\/pre>\n",
+            "answer_id": 37773001,
+            "question_id": 37772538,
+            "last_edit_date": 1465734134
+        }
+    ],
+    "answer_comments": {"37773001": [{
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-zolc90p2grA/AAAAAAAAAAI/AAAAAAAAOBU/TloVnogHxWU/s256-rj/photo.jpg",
+            "account_id": 7856677,
+            "user_type": "registered",
+            "user_id": 5938276,
+            "link": "https://stackoverflow.com/users/5938276/al-grant",
+            "reputation": 2456,
+            "display_name": "Al Grant",
+            "accept_rate": 38
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 37773001,
+        "edited": false,
+        "creation_date": 1695286807,
+        "comment_id": 136005139
+    }]}
+}

@@ -1,0 +1,156 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rm9Tx.png?s=256",
+            "account_id": 4928521,
+            "user_type": "registered",
+            "user_id": 3969081,
+            "link": "https://stackoverflow.com/users/3969081/dgofactory",
+            "reputation": 348,
+            "display_name": "dgofactory"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/31122168/transaction-boundaries-on-spring-integration-with-activemq-and-an-a-channel-back",
+        "last_activity_date": 1476362724,
+        "creation_date": 1435599769,
+        "answer_count": 1,
+        "title": "Transaction boundaries on Spring Integration with ActiveMQ and an a channel backed with an Message Store",
+        "body": "<p>I'am working on an application using spring-integration and ActiveMQ to integrate a main server and several \"client\" applications.<\/p>\n\n<p>The main goal is to develop and small client  with an embedded ActiveMQ broker, the embedded broker is started by this client application\nin order to receive JMS messages from several third parties applications on the same site. The client application is connected to the server through an JMS connection with a\nmain installation of an ActiveMQ Server(this already exists). \nI need to provide the client with an off-line capability, it means that if the client is disconnected it\nshould store the messages received from the third clients on the same site and send them when the server is online again. \nAll seems to work right when there is no transactionality involved, but I'am having problems about the transaction boundaries of the channels configured in spring-integration.<\/p>\n\n<p>The main flow is :<\/p>\n\n<p>Third Clients on same site -> Our Client on Site Application -> Reformat Message and add information on the <code>messageTranslator<\/code> -> Store on the <code>remoteChannel<\/code> -> Send to the Main Server<\/p>\n\n<p>This is my on Site Client configuration:<\/p>\n\n<p>The embedded ActiveMQ broker in the client app:<\/p>\n\n<pre><code>&lt;bean id=\"broker1\" class=\"org.apache.activemq.xbean.BrokerFactoryBean\"&gt;\n    &lt;property name=\"config\" value=\"classpath:activemq/activemq.xml\" /&gt;\n    &lt;property name=\"start\" value=\"true\" /&gt;\n&lt;/bean&gt;\n<\/code><\/pre>\n\n<p>The connection Factories; <code>remoteConnectionFactory<\/code> is the connection to the main server and Queue definitions :<\/p>\n\n<pre><code>&lt;!-- Local queue definitions  --&gt;\n&lt;bean id=\"localConnectionFactory\" class=\"org.springframework.jms.connection.CachingConnectionFactory\"&gt;\n    &lt;property name=\"targetConnectionFactory\"&gt;\n        &lt;bean class=\"org.apache.activemq.ActiveMQConnectionFactory\"&gt;\n            &lt;property name=\"brokerURL\" value=\"vm://localhost\"/&gt;\n        &lt;/bean&gt;\n    &lt;/property&gt;\n    &lt;property name=\"sessionCacheSize\" value=\"10\"/&gt;\n&lt;/bean&gt;\n&lt;bean id=\"localEventQueue\" class=\"org.apache.activemq.command.ActiveMQQueue\"  &gt;\n    &lt;constructor-arg value=\"event.client\"/&gt;\n&lt;/bean&gt;\n\n&lt;!-- Remote(Server) queue definitions  --&gt;\n&lt;bean id=\"remoteConnectionFactory\" class=\"org.springframework.jms.connection.CachingConnectionFactory\"&gt;\n    &lt;property name=\"targetConnectionFactory\"&gt;\n        &lt;bean class=\"org.apache.activemq.ActiveMQConnectionFactory\"&gt;\n            &lt;property name=\"brokerURL\" value=\"tcp://192.168.0.125:62626\"/&gt;\n        &lt;/bean&gt;\n    &lt;/property&gt;\n    &lt;property name=\"sessionCacheSize\" value=\"10\"/&gt;\n&lt;/bean&gt;\n&lt;bean id=\"remoteQueue\" class=\"org.apache.activemq.command.ActiveMQQueue\"&gt;\n    &lt;constructor-arg value=\"remote.event\"/&gt;\n&lt;/bean&gt;\n<\/code><\/pre>\n\n<p>Local Process, on same remote site:<\/p>\n\n<pre><code>&lt;!-- local process --&gt;\n&lt;int:channel id=\"transformChannel\" &gt;\n    &lt;int:queue /&gt;\n&lt;/int:channel&gt;\n\n&lt;int-jms:message-driven-channel-adapter\n        id=\"jmsEventsFromClient\"\n         connection-factory=\"localConnectionFactory\"\n         destination=\"localEventQueue\"\n         channel=\"transformChannel\"\n        concurrent-consumers=\"4\"\n        auto-startup=\"true\"/&gt;\n\n&lt;!-- Transforms the message from clients to a standard messages that server knows--&gt;\n&lt;int:service-activator input-channel=\"transformChannel\"\n                       ref=\"messageTranslator\"\n                       output-channel=\"remoteChannel\"  &gt;\n    &lt;int:poller  fixed-delay=\"500\"&gt;\n    &lt;/int:poller&gt;\n&lt;/int:service-activator&gt;\n\n\n&lt;int:transaction-synchronization-factory id=\"syncFactory\"&gt;\n    &lt;int:after-commit expression=\"@store.removeFromIdCache(headers.id.toString())\" /&gt;\n    &lt;int:after-rollback expression=\"@store.removeFromIdCache(headers.id.toString())\"/&gt;\n&lt;/int:transaction-synchronization-factory&gt;\n\n&lt;int:channel id=\"remoteChannel\" &gt;\n     &lt;int:queue message-store=\"store\" /&gt;\n&lt;/int:channel&gt;\n\n&lt;!-- local file database with HSQL store of the remotechannel --&gt;\n&lt;bean id=\"store\" class=\"org.springframework.integration.jdbc.store.JdbcChannelMessageStore\"&gt;\n    &lt;property name=\"dataSource\" ref=\"dataSource\"/&gt;\n    &lt;property name=\"channelMessageStoreQueryProvider\"&gt;\n        &lt;bean id=\"queryProvider\" class=\"org.springframework.integration.jdbc.store.channel.HsqlChannelMessageStoreQueryProvider\"/&gt;\n    &lt;/property&gt;\n    &lt;property name=\"usingIdCache\" value=\"true\"/&gt;\n&lt;/bean&gt;\n<\/code><\/pre>\n\n<p>Send to the remote Queue:<\/p>\n\n<pre><code>&lt;!-- the message is send to the remote server --&gt;\n&lt;int-jms:outbound-channel-adapter id=\"remoteJms\"\n                                  connection-factory=\"remoteConnectionFactory\"\n                                  destination=\"remoteQueue\"\n                                  channel=\"remoteChannel\"\n                                  session-transacted=\"true\"\n                                  auto-startup=\"true\"&gt;\n\n    &lt;int:poller  fixed-delay=\"500\"&gt;\n        &lt;int:transactional propagation=\"REQUIRED\"\n                           isolation=\"DEFAULT\"\n                           synchronization-factory=\"syncFactory\"\n                           transaction-manager=\"transactionManager\"/&gt;\n    &lt;/int:poller&gt;\n\n&lt;/int-jms:outbound-channel-adapter&gt;\n<\/code><\/pre>\n\n<p>When there is not a JTA transaction manager configured and the <code>remoteJms<\/code> is not <code>session-transacted<\/code>  all works just fine, even when I simulate an offline situation the messages are correctly stored on the <code>store<\/code>, and when the connection with the server comes alive again (<code>remoteJms<\/code>) the messages are send them correctly.\nBut when a JTA transaction manager is configured (atomikos) and the ActiveMQ main server goes down the messages are not been stored on the <code>store<\/code>. I thought as soon as the pooler in <code>remoteJms<\/code> receive the message it starts a new  transaction, but this is not happening, it seams like the whole way from <code>jmsEventsFromClient<\/code> to the <code>jmsOut<\/code> looks like a single transaction and is failed because the <code>remoteJms<\/code> is down.<\/p>\n\n<p>What I want is to have 2 transactions, the first should started when a message is receive on the <code>eventQueue<\/code> and finished when the message is leave it in the <code>remoteChannel<\/code> and the second should start when the message is take it from the <code>remoteChannel<\/code> and leave it on the <code>remoteJms<\/code>.\nThanks for your comments and help.<\/p>\n\n<p><strong>EDIT<\/strong> <br/>\nThis is happening only when the remote server is down, and the message is removed from the <code>store<\/code>, but that is what I don't want. <\/p>\n\n<p>Add the log error.<\/p>\n\n<pre><code>2015-06-29 16:39:16.859  INFO 4982 --- [ask-scheduler-4] c.atomikos.jdbc.AbstractDataSourceBean   : AtomikosDataSoureBean 'dataSource': getConnection ( null )...\n2015-06-29 16:39:16.859  INFO 4982 --- [ask-scheduler-4] c.atomikos.jdbc.AbstractDataSourceBean   : AtomikosDataSoureBean 'dataSource': init...\n2015-06-29 16:39:16.859  INFO 4982 --- [ask-scheduler-4] c.a.icatch.imp.CompositeTransactionImp   : addParticipant ( XAResourceTransaction: 7472616E73616374696F6E4D616E6167657230303038303030303430:7472616E73616374696F6E4D616E616765723830 ) for transaction transactionManager0008000040\n2015-06-29 16:39:16.859  INFO 4982 --- [ask-scheduler-4] c.a.datasource.xa.XAResourceTransaction  : XAResource.start ( 7472616E73616374696F6E4D616E6167657230303038303030303430:7472616E73616374696F6E4D616E616765723830 , XAResource.TMNOFLAGS ) on resource dataSource represented by XAResource instance org.hsqldb.jdbc.pool.JDBCXAResource@55f823a3\n2015-06-29 16:39:16.859  INFO 4982 --- [ask-scheduler-4] c.a.icatch.imp.CompositeTransactionImp   : registerSynchronization ( com.atomikos.jdbc.AtomikosConnectionProxy$JdbcRequeueSynchronization@c85d8b3 ) for transaction transactionManager0008000040\n2015-06-29 16:39:16.859  INFO 4982 --- [ask-scheduler-4] c.atomikos.jdbc.AtomikosConnectionProxy  : atomikos connection proxy for org.hsqldb.jdbc.pool.JDBCXAConnectionWrapper@731d1112: calling prepareStatement(SELECT COUNT(MESSAGE_ID) from INT_CHANNEL_MESSAGE where GROUP_KEY=? and REGION=?)...\nhi message: una cadena \n2015-06-29 16:39:17.820  INFO 4982 --- [ask-scheduler-9] c.atomikos.jdbc.AbstractDataSourceBean   : AtomikosDataSoureBean 'dataSource': getConnection ( null )...\n2015-06-29 16:39:17.820  INFO 4982 --- [ask-scheduler-9] c.atomikos.jdbc.AbstractDataSourceBean   : AtomikosDataSoureBean 'dataSource': init...\n2015-06-29 16:39:25.093  WARN 4982 --- [0.1:57663@61616] o.a.a.b.TransportConnection.Transport    : Transport Connection to: tcp://192.168.0.125:57663 failed: java.io.EOFException\n2015-06-29 16:39:27.145  WARN 4982 --- [     Atomikos:1] c.a.icatch.imp.ActiveStateHandler        : Timeout/setRollbackOnly of ACTIVE coordinator !\n2015-06-29 16:39:47.821  WARN 4982 --- [ask-scheduler-9] com.atomikos.jdbc.AtomikosSQLException   : Connection pool exhausted - try increasing 'maxPoolSize' and/or 'borrowConnectionTimeout' on the DataSourceBean.\n2015-06-29 16:39:47.822  INFO 4982 --- [ask-scheduler-4] c.a.icatch.imp.CompositeTransactionImp   : registerSynchronization ( com.atomikos.jdbc.AtomikosConnectionProxy$JdbcRequeueSynchronization@c85d8b3 ) for transaction transactionManager0008000040\n2015-06-29 16:39:47.822  INFO 4982 --- [ask-scheduler-4] c.atomikos.jdbc.AtomikosConnectionProxy  : atomikos connection proxy for org.hsqldb.jdbc.pool.JDBCXAConnectionWrapper@731d1112: calling prepareStatement(SELECT COUNT(MESSAGE_ID) from INT_CHANNEL_MESSAGE where GROUP_KEY=? and REGION=?)...\n2015-06-29 16:39:47.823  INFO 4982 --- [ask-scheduler-4] c.a.icatch.imp.CompositeTransactionImp   : registerSynchronization ( com.atomikos.jdbc.AtomikosConnectionProxy$JdbcRequeueSynchronization@c85d8b3 ) for transaction transactionManager0008000040\n2015-06-29 16:39:47.823  INFO 4982 --- [ask-scheduler-4] c.atomikos.jdbc.AtomikosConnectionProxy  : atomikos connection proxy for org.hsqldb.jdbc.pool.JDBCXAConnectionWrapper@731d1112: calling prepareStatement(SELECT INT_CHANNEL_MESSAGE.MESSAGE_ID, INT_CHANNEL_MESSAGE.MESSAGE_BYTES from INT_CHANNEL_MESSAGE where INT_CHANNEL_MESSAGE.GROUP_KEY = ? and INT_CHANNEL_MESSAGE.REGION = ? order by CREATED_DATE, MESSAGE_SEQUENCE LIMIT 1)...\n2015-06-29 16:39:47.823  INFO 4982 --- [ask-scheduler-4] c.atomikos.jdbc.AtomikosConnectionProxy  : atomikos connection proxy for org.hsqldb.jdbc.pool.JDBCXAConnectionWrapper@731d1112: close()...\n2015-06-29 16:39:47.823  INFO 4982 --- [ask-scheduler-4] c.a.datasource.xa.XAResourceTransaction  : XAResource.end ( 7472616E73616374696F6E4D616E6167657230303038303030303430:7472616E73616374696F6E4D616E616765723830 , XAResource.TMSUCCESS ) on resource dataSource represented by XAResource instance org.hsqldb.jdbc.pool.JDBCXAResource@55f823a3\n2015-06-29 16:39:47.823  INFO 4982 --- [ask-scheduler-4] c.a.icatch.imp.CompositeTransactionImp   : commit() done (by application) of transaction transactionManager0008000040\n2015-06-29 16:39:47.824  INFO 4982 --- [ask-scheduler-4] c.a.datasource.xa.XAResourceTransaction  : XAResource.prepare ( 7472616E73616374696F6E4D616E6167657230303038303030303430:7472616E73616374696F6E4D616E616765723830 ) returning OK on resource dataSource represented by XAResource instance org.hsqldb.jdbc.pool.JDBCXAResource@55f823a3\n2015-06-29 16:39:47.824  INFO 4982 --- [ask-scheduler-4] c.a.datasource.xa.XAResourceTransaction  : XAResource.rollback ( 7472616E73616374696F6E4D616E6167657230303038303030303430:7472616E73616374696F6E4D616E616765723830 ) on resource dataSource represented by XAResource instance org.hsqldb.jdbc.pool.JDBCXAResource@55f823a3\n2015-06-29 16:39:47.825 ERROR 4982 --- [ask-scheduler-4] o.s.integration.handler.LoggingHandler   : org.springframework.transaction.UnexpectedRollbackException: JTA transaction unexpectedly rolled back (maybe due to a timeout); nested exception is javax.transaction.RollbackException: Prepare: NO vote\n    at org.springframework.transaction.jta.JtaTransactionManager.doCommit(JtaTransactionManager.java:1024)\n    at org.springframework.transaction.support.AbstractPlatformTransactionManager.processCommit(AbstractPlatformTransactionManager.java:757)\n    at org.springframework.transaction.support.AbstractPlatformTransactionManager.commit(AbstractPlatformTransactionManager.java:726)\n    at org.springframework.transaction.interceptor.TransactionAspectSupport.commitTransactionAfterReturning(TransactionAspectSupport.java:521)\n    at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:291)\n    at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:96)\n    at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:179)\n    at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:207)\n    at com.sun.proxy.$Proxy85.call(Unknown Source)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint$Poller$1.run(AbstractPollingEndpoint.java:298)\n    at org.springframework.integration.util.ErrorHandlingTaskExecutor$1.run(ErrorHandlingTaskExecutor.java:52)\n    at org.springframework.core.task.SyncTaskExecutor.execute(SyncTaskExecutor.java:50)\n    at org.springframework.integration.util.ErrorHandlingTaskExecutor.execute(ErrorHandlingTaskExecutor.java:49)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint$Poller.run(AbstractPollingEndpoint.java:292)\n    at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)\n    at org.springframework.scheduling.concurrent.ReschedulingRunnable.run(ReschedulingRunnable.java:81)\n    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)\n    at java.util.concurrent.FutureTask.run(FutureTask.java:266)\n    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180)\n    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293)\n    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\n    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\n    at java.lang.Thread.run(Thread.java:745)\nCaused by: javax.transaction.RollbackException: Prepare: NO vote\n    at com.atomikos.icatch.jta.TransactionImp.rethrowAsJtaRollbackException(TransactionImp.java:66)\n    at com.atomikos.icatch.jta.TransactionImp.commit(TransactionImp.java:206)\n    at com.atomikos.icatch.jta.TransactionManagerImp.commit(TransactionManagerImp.java:436)\n    at com.atomikos.icatch.jta.UserTransactionManager.commit(UserTransactionManager.java:177)\n    at org.springframework.transaction.jta.JtaTransactionManager.doCommit(JtaTransactionManager.java:1021)\n    ... 22 more\nCaused by: com.atomikos.icatch.RollbackException: Prepare: NO vote\n    at com.atomikos.icatch.imp.ActiveStateHandler.prepare(ActiveStateHandler.java:231)\n    at com.atomikos.icatch.imp.CoordinatorImp.prepare(CoordinatorImp.java:681)\n    at com.atomikos.icatch.imp.CoordinatorImp.terminate(CoordinatorImp.java:970)\n    at com.atomikos.icatch.imp.CompositeTerminatorImp.commit(CompositeTerminatorImp.java:82)\n    at com.atomikos.icatch.imp.CompositeTransactionImp.commit(CompositeTransactionImp.java:336)\n    at com.atomikos.icatch.jta.TransactionImp.commit(TransactionImp.java:190)\n    ... 25 more\n\n2015-06-29 16:39:47.825 ERROR 4982 --- [ask-scheduler-9] o.s.integration.handler.LoggingHandler   : org.springframework.messaging.MessageDeliveryException: failed to send Message to channel 'remoteChannel'; nested exception is org.springframework.jdbc.CannotGetJdbcConnectionException: Could not get JDBC Connection; nested exception is com.atomikos.jdbc.AtomikosSQLException: Connection pool exhausted - try increasing 'maxPoolSize' and/or 'borrowConnectionTimeout' on the DataSourceBean.\n    at org.springframework.integration.channel.AbstractMessageChannel.send(AbstractMessageChannel.java:292)\n    at org.springframework.integration.channel.AbstractMessageChannel.send(AbstractMessageChannel.java:239)\n    at org.springframework.messaging.core.GenericMessagingTemplate.doSend(GenericMessagingTemplate.java:115)\n    at org.springframework.messaging.core.GenericMessagingTemplate.doSend(GenericMessagingTemplate.java:45)\n    at org.springframework.messaging.core.AbstractMessageSendingTemplate.send(AbstractMessageSendingTemplate.java:95)\n    at org.springframework.integration.handler.AbstractMessageProducingHandler.sendOutput(AbstractMessageProducingHandler.java:248)\n    at org.springframework.integration.handler.AbstractMessageProducingHandler.produceOutput(AbstractMessageProducingHandler.java:171)\n    at org.springframework.integration.handler.AbstractMessageProducingHandler.sendOutputs(AbstractMessageProducingHandler.java:119)\n    at org.springframework.integration.handler.AbstractReplyProducingMessageHandler.handleMessageInternal(AbstractReplyProducingMessageHandler.java:105)\n    at org.springframework.integration.handler.AbstractMessageHandler.handleMessage(AbstractMessageHandler.java:78)\n    at org.springframework.integration.endpoint.PollingConsumer.handleMessage(PollingConsumer.java:74)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint.doPoll(AbstractPollingEndpoint.java:219)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint.access$000(AbstractPollingEndpoint.java:55)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint$1.call(AbstractPollingEndpoint.java:149)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint$1.call(AbstractPollingEndpoint.java:146)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint$Poller$1.run(AbstractPollingEndpoint.java:298)\n    at org.springframework.integration.util.ErrorHandlingTaskExecutor$1.run(ErrorHandlingTaskExecutor.java:52)\n    at org.springframework.core.task.SyncTaskExecutor.execute(SyncTaskExecutor.java:50)\n    at org.springframework.integration.util.ErrorHandlingTaskExecutor.execute(ErrorHandlingTaskExecutor.java:49)\n    at org.springframework.integration.endpoint.AbstractPollingEndpoint$Poller.run(AbstractPollingEndpoint.java:292)\n    at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)\n    at org.springframework.scheduling.concurrent.ReschedulingRunnable.run(ReschedulingRunnable.java:81)\n    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)\n    at java.util.concurrent.FutureTask.run(FutureTask.java:266)\n    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180)\n    at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293)\n    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\n    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\n    at java.lang.Thread.run(Thread.java:745)\nCaused by: org.springframework.jdbc.CannotGetJdbcConnectionException: Could not get JDBC Connection; nested exception is com.atomikos.jdbc.AtomikosSQLException: Connection pool exhausted - try increasing 'maxPoolSize' and/or 'borrowConnectionTimeout' on the DataSourceBean.\n    at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:80)\n    at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:630)\n    at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:909)\n    at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:970)\n    at org.springframework.integration.jdbc.store.JdbcChannelMessageStore.addMessageToGroup(JdbcChannelMessageStore.java:422)\n    at org.springframework.integration.store.MessageGroupQueue.doOffer(MessageGroupQueue.java:329)\n    at org.springframework.integration.store.MessageGroupQueue.put(MessageGroupQueue.java:274)\n    at org.springframework.integration.store.MessageGroupQueue.put(MessageGroupQueue.java:48)\n    at org.springframework.integration.channel.QueueChannel.doSend(QueueChannel.java:92)\n    at org.springframework.integration.channel.AbstractMessageChannel.send(AbstractMessageChannel.java:277)\n    ... 28 more\nCaused by: com.atomikos.jdbc.AtomikosSQLException: Connection pool exhausted - try increasing 'maxPoolSize' and/or 'borrowConnectionTimeout' on the DataSourceBean.\n    at com.atomikos.jdbc.AtomikosSQLException.throwAtomikosSQLException(AtomikosSQLException.java:46)\n    at com.atomikos.jdbc.AbstractDataSourceBean.throwAtomikosSQLException(AbstractDataSourceBean.java:90)\n    at com.atomikos.jdbc.AbstractDataSourceBean.throwAtomikosSQLException(AbstractDataSourceBean.java:85)\n    at com.atomikos.jdbc.AbstractDataSourceBean.getConnection(AbstractDataSourceBean.java:347)\n    at com.atomikos.jdbc.AbstractDataSourceBean.getConnection(AbstractDataSourceBean.java:394)\n    at org.springframework.jdbc.datasource.DataSourceUtils.doGetConnection(DataSourceUtils.java:111)\n    at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:77)\n    ... 37 more\n<\/code><\/pre>\n",
+        "question_id": 31122168,
+        "tags": [
+            "java",
+            "spring",
+            "transactions",
+            "spring-integration"
+        ],
+        "score": 2,
+        "accepted_answer_id": 31169734,
+        "is_answered": true,
+        "view_count": 2454,
+        "last_edit_date": 1435614775
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31122168,
+            "edited": false,
+            "creation_date": 1435758694,
+            "comment_id": 50335008
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/rm9Tx.png?s=256",
+                "account_id": 4928521,
+                "user_type": "registered",
+                "user_id": 3969081,
+                "link": "https://stackoverflow.com/users/3969081/dgofactory",
+                "reputation": 348,
+                "display_name": "dgofactory"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31122168,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "edited": false,
+            "creation_date": 1435708379,
+            "comment_id": 50310893
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/rm9Tx.png?s=256",
+                "account_id": 4928521,
+                "user_type": "registered",
+                "user_id": 3969081,
+                "link": "https://stackoverflow.com/users/3969081/dgofactory",
+                "reputation": 348,
+                "display_name": "dgofactory"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31122168,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "edited": false,
+            "creation_date": 1435607007,
+            "comment_id": 50260809
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31122168,
+            "edited": false,
+            "creation_date": 1435603745,
+            "comment_id": 50258989
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+            "account_id": 1288095,
+            "user_type": "registered",
+            "user_id": 1240763,
+            "link": "https://stackoverflow.com/users/1240763/gary-russell",
+            "reputation": 175842,
+            "display_name": "Gary Russell"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1435777902,
+        "creation_date": 1435777902,
+        "body": "<p>I think I figured it out - try setting <code>receive-timeout=\"0\"<\/code> on the poller that's pulling from the store-backed <code>QueueChannel<\/code>.<\/p>\n",
+        "answer_id": 31169734,
+        "question_id": 31122168
+    }],
+    "answer_comments": {"31169734": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rm9Tx.png?s=256",
+            "account_id": 4928521,
+            "user_type": "registered",
+            "user_id": 3969081,
+            "link": "https://stackoverflow.com/users/3969081/dgofactory",
+            "reputation": 348,
+            "display_name": "dgofactory"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 31169734,
+        "edited": false,
+        "creation_date": 1435850701,
+        "comment_id": 50382331
+    }]}
+}

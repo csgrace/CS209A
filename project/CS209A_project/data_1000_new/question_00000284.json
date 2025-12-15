@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/10213455549482673/picture?type=large",
+            "account_id": 10830882,
+            "user_type": "registered",
+            "user_id": 7965319,
+            "link": "https://stackoverflow.com/users/7965319/eric-guti%c3%a9rrez-llopis",
+            "reputation": 117,
+            "display_name": "Eric Guti&#233;rrez Llopis"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58447861/hibernate-unnest-function-not-found",
+        "last_activity_date": 1615901040,
+        "creation_date": 1571390703,
+        "answer_count": 1,
+        "title": "Hibernate: unnest function not found",
+        "body": "<p>I'm trying to make a query and using postgresql (pgadmin) it works correctly, but not since hibernate (Java Spring JPA). Skips the error that unnset doesn't know<\/p>\n\n<p>The query I make is the following:<\/p>\n\n<p><code>@Query(\"select w from Work w where array_length(w.groups, 1) is null or exists (select 1 from unnest(w.groups) n where n = :group)\")<\/code><\/p>\n\n<p>And the error is as follows:<\/p>\n\n<p><code>Caused by: org.hibernate.hql.internal.ast.QuerySyntaxException: unexpected token: unnest near line 1, column 123 [select w from org.vin.ns.core.domain.model.Work w where array_length(w.groups, 1) is null or exists (select 1 from unnest(w.groups) n where n = :group)]<\/code><\/p>\n\n<p>Does anyone know how I can use the unnest function in hibernate?<\/p>\n\n<p>The groups field in the database is of type text[]<\/p>\n\n<p>Thanks.<\/p>\n",
+        "question_id": 58447861,
+        "tags": [
+            "java",
+            "postgresql",
+            "hibernate",
+            "spring-data-jpa"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 2778
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/RlQK3.jpg?s=256",
+                "account_id": 3521854,
+                "user_type": "registered",
+                "user_id": 2943913,
+                "link": "https://stackoverflow.com/users/2943913/pratik-bhajankar",
+                "reputation": 1154,
+                "display_name": "Pratik Bhajankar"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447861,
+            "edited": false,
+            "creation_date": 1571397212,
+            "comment_id": 103237095
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/10213455549482673/picture?type=large",
+                "account_id": 10830882,
+                "user_type": "registered",
+                "user_id": 7965319,
+                "link": "https://stackoverflow.com/users/7965319/eric-guti%c3%a9rrez-llopis",
+                "reputation": 117,
+                "display_name": "Eric Guti&#233;rrez Llopis"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447861,
+            "edited": false,
+            "creation_date": 1571393375,
+            "comment_id": 103235142
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user330315"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 58447861,
+            "edited": false,
+            "creation_date": 1571392994,
+            "comment_id": 103234936
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1ead1a3bc7c24feed59130b393689e23?s=256&d=identicon&r=PG",
+            "account_id": 2188125,
+            "user_type": "registered",
+            "user_id": 1936000,
+            "link": "https://stackoverflow.com/users/1936000/artyom-dmitriev",
+            "reputation": 363,
+            "display_name": "Artyom Dmitriev",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1615901040,
+        "creation_date": 1615901040,
+        "body": "<p><code>unnest<\/code> is a postgresql function that can be called just like any other function. For example:<\/p>\n<pre><code>@Query(&quot;select function('unnest', w.groups) from Work w&quot;)\n<\/code><\/pre>\n<p>Although in the query posted by OP <code>unnest<\/code> is not needed at all. This is how it could be transformed into a valid JPQL.<\/p>\n<pre><code>@Query(&quot;select w from Work w where w.groups is null or function('in_array', :group, w.groups) = true&quot;)\n<\/code><\/pre>\n<p>Where function <code>in_array<\/code> may be defined as<\/p>\n<pre><code>public class MyPostgresqlDialect extends PostgisPG95Dialect {\n    public MyPostgresqlDialect() {\n        ...\n        registerFunction(&quot;in_array&quot;, new SQLFunctionTemplate(StandardBasicTypes.BOOLEAN, &quot;(?1 = ANY(?2))&quot;));\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 66656115,
+        "question_id": 58447861
+    }],
+    "answer_comments": {}
+}

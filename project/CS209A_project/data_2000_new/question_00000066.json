@@ -1,0 +1,153 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ggg4qc76nDzfCOBZH9cTv3-FtYAuTOqruklztls=k-s256",
+            "account_id": 21145076,
+            "user_type": "registered",
+            "user_id": 15546588,
+            "link": "https://stackoverflow.com/users/15546588/h4wk",
+            "reputation": 1,
+            "display_name": "H4wk"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/67047999/android-popup-window-back-button",
+        "last_activity_date": 1618163283,
+        "creation_date": 1618161313,
+        "answer_count": 0,
+        "title": "Android popup window - back button",
+        "body": "<p>I'm making application where I'm trying to add custom popup window with ability to close it when I click back button. The problem is I don't know how to add this back button. I'm attaching a file which shows what I have now and want I want to achieve.<\/p>\n<p>I'm making application where I'm trying to add custom popup window with ability to close it when I click back button. The problem is I don't know how to add this back button. I'm attaching a file which shows what I have now and want I want to achieve.<\/p>\n<p><a href=\"https://i.sstatic.net/TfjDr.jpg\" rel=\"nofollow noreferrer\">image<\/a><\/p>\n<pre><code>            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);\n            popupView = inflater.inflate(R.layout.activity_transaction, null);\n\n            final PopupWindow popupWindow = new PopupWindow(popupView, 565, 760, true);\n\n            popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);\n\n            Toolbar toolbar = popupView.findViewById(R.id.tool_bar);\n            toolbar.setTitleTextColor(Color.WHITE);\n            toolbar.setTitle(&quot;New transaction&quot;);\n\n            int currentDay = 1;\n            int currentMonth = Integer.parseInt(actualChosenMonth.getText().toString().substring(0, 2)) - 1;\n            int currentYear = Integer.parseInt(actualChosenMonth.getText().toString().substring(3, 7));\n            SimpleDateFormat simpledateformat = new SimpleDateFormat(&quot;EE&quot;);\n            Date date = new Date(currentYear, currentMonth, currentDay - 1);\n            String currentDayOfWeek = simpledateformat.format(date);\n            String currentDateAsString = convertDateToString(currentDay, currentMonth, currentYear, currentDayOfWeek);\n\n            chooseTransactionDate = popupView.findViewById(R.id.chooseTransactionDate);\n            chooseTransactionDate.setText(currentDateAsString);\n            chooseTransactionDate.setOnClickListener(this);\n\n            chooseTodayTomorrow = popupView.findViewById(R.id.chooseTodayTommorow);\n            chooseTodayTomorrow.setOnClickListener(this);\n\n            chooseTransactionType = popupView.findViewById(R.id.chooseTransactionType);\n            chooseTransactionType.setOnCheckedChangeListener(this);\n            chosenTransactionExpense = popupView.findViewById(R.id.chosenTransactionExpense);\n            chosenTransactionIncome = popupView.findViewById(R.id.chosenTransactionIncome);\n\n            transactionCategoryImage = popupView.findViewById(R.id.transactionCategoryImage);\n\n            chooseTransactionCategory = popupView.findViewById(R.id.chooseTransactionCategory);\n            ArrayAdapter&lt;String&gt; chooseCategoryAdapter = new ArrayAdapter&lt;&gt;(this.getActivity(), R.layout.popup_spinner_layout, getResources().getStringArray(R.array.list_of_expenses));\n            chooseTransactionCategory.setAdapter(chooseCategoryAdapter);\n            chooseTransactionCategory.setOnItemSelectedListener(this);\n\n            chooseTransactionAmount = popupView.findViewById(R.id.chooseTransactionAmount);\n            chooseTransactionAmount.requestFocus();\n            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);\n            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);\n\n            chooseTransactionName = popupView.findViewById(R.id.chooseTransactionName);\n\n            saveTransactionButton = popupView.findViewById(R.id.saveTransactionButton);\n            saveTransactionButton.setOnClickListener(this);\n<\/code><\/pre>\n<p>LAYOUT<\/p>\n<pre><code>    &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;\n&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;\n    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;\n    xmlns:tools=&quot;http://schemas.android.com/tools&quot;\n    android:layout_width=&quot;match_parent&quot;\n    android:layout_height=&quot;wrap_content&quot;\n    android:background=&quot;@color/bacgroundColorPopup&quot;\n    tools:context=&quot;.TransactionActivity&quot;&gt;\n    \n    &lt;Button\n        android:id=&quot;@+id/saveTransactionButton&quot;\n        android:layout_width=&quot;match_parent&quot;\n        android:layout_height=&quot;45dp&quot;\n        android:layout_below=&quot;@+id/chooseTransactionName&quot;\n        android:layout_centerInParent=&quot;true&quot;\n        android:layout_marginTop=&quot;10dp&quot;\n        android:layout_marginLeft=&quot;10dp&quot;\n        android:layout_marginRight=&quot;10dp&quot;\n        android:background=&quot;@drawable/rounded_button&quot;\n        android:text=&quot;@string/save_transaction&quot;\n        android:textSize=&quot;15sp&quot; /&gt;\n\n    &lt;EditText\n        android:id=&quot;@+id/chooseTransactionAmount&quot;\n        android:layout_width=&quot;match_parent&quot;\n        android:layout_height=&quot;45dp&quot;\n        android:layout_below=&quot;@id/transactionCategoryImage&quot;\n        android:layout_alignParentLeft=&quot;true&quot;\n        android:textColor=&quot;@color/BrownGrey&quot;\n        android:paddingLeft=&quot;10dp&quot;\n        android:hint=&quot;Amount&quot;\n        android:maxLength=&quot;5&quot;\n        android:textColorHint=&quot;@color/BrownGreyBrighter&quot;\n        android:inputType=&quot;numberDecimal&quot;\n        android:layout_marginLeft=&quot;10dp&quot;\n        android:layout_marginRight=&quot;10dp&quot;\n        android:background=&quot;@drawable/custom_edit_text&quot;\n        android:drawableRight=&quot;@drawable/calculator&quot;\n        android:textSize=&quot;20sp&quot; /&gt;\n\n    &lt;EditText\n        android:id=&quot;@+id/chooseTransactionName&quot;\n        android:layout_width=&quot;match_parent&quot;\n        android:layout_height=&quot;45dp&quot;\n        android:layout_below=&quot;@id/chooseTransactionAmount&quot;\n        android:layout_alignParentLeft=&quot;true&quot;\n        android:textColor=&quot;@color/BrownGrey&quot;\n        android:layout_marginTop=&quot;6dp&quot;\n        android:layout_marginLeft=&quot;10dp&quot;\n        android:paddingLeft=&quot;10dp&quot;\n        android:hint=&quot;Notes&quot;\n        android:textColorHint=&quot;@color/BrownGreyBrighter&quot;\n        android:layout_marginRight=&quot;10dp&quot;\n        android:background=&quot;@drawable/custom_edit_text&quot;\n        android:drawableRight=&quot;@drawable/calculator&quot;\n        android:textSize=&quot;20sp&quot; /&gt;\n\n    &lt;ImageView\n        android:id=&quot;@+id/transactionCategoryImage&quot;\n        android:layout_margin=&quot;6dp&quot;\n        android:layout_width=&quot;50dp&quot;\n        android:layout_height=&quot;50dp&quot;\n        android:layout_below=&quot;@id/chooseTransactionType&quot;\n        android:layout_alignParentLeft=&quot;true&quot;\n        android:layout_marginLeft=&quot;10dp&quot; /&gt;\n\n    &lt;LinearLayout\n        android:id=&quot;@+id/dateButtons&quot;\n        android:layout_width=&quot;fill_parent&quot;\n        android:layout_height=&quot;wrap_content&quot;\n        android:layout_alignParentTop=&quot;true&quot;&gt;\n\n        &lt;Button\n            android:id=&quot;@+id/chooseTransactionDate&quot;\n            android:layout_width=&quot;0dp&quot;\n            android:layout_height=&quot;45dp&quot;\n            android:layout_alignParentLeft=&quot;true&quot;\n            android:layout_marginLeft=&quot;10dp&quot;\n            android:layout_marginTop=&quot;62dp&quot;\n            android:layout_marginRight=&quot;2dp&quot;\n            android:layout_weight=&quot;1.6&quot;\n            android:background=&quot;@drawable/rounded_button&quot;\n            android:elevation=&quot;4dp&quot;\n            android:padding=&quot;7dp&quot;\n            android:text=&quot;&quot;\n            android:textAllCaps=&quot;false&quot;\n            android:textSize=&quot;16sp&quot;\n            android:textStyle=&quot;bold&quot; /&gt;\n\n        &lt;Button\n            android:id=&quot;@+id/chooseTodayTommorow&quot;\n            android:layout_width=&quot;0dp&quot;\n            android:layout_height=&quot;45dp&quot;\n            android:layout_alignParentTop=&quot;true&quot;\n            android:layout_alignParentRight=&quot;true&quot;\n            android:layout_marginLeft=&quot;2dp&quot;\n            android:layout_marginTop=&quot;62dp&quot;\n            android:layout_marginRight=&quot;10dp&quot;\n            android:layout_weight=&quot;1&quot;\n            android:background=&quot;@drawable/rounded_button&quot;\n            android:elevation=&quot;4dp&quot;\n            android:padding=&quot;10dp&quot;\n            android:text=&quot;@string/yesterday&quot;\n            android:textAllCaps=&quot;false&quot;\n            android:textSize=&quot;16sp&quot;\n            android:textStyle=&quot;bold&quot; /&gt;\n\n    &lt;/LinearLayout&gt;\n\n    &lt;RadioGroup\n        android:id=&quot;@+id/chooseTransactionType&quot;\n        android:layout_width=&quot;match_parent&quot;\n        android:layout_height=&quot;wrap_content&quot;\n        android:layout_below=&quot;@id/dateButtons&quot;\n        android:orientation=&quot;horizontal&quot;&gt;\n\n        &lt;RadioButton\n            android:id=&quot;@+id/chosenTransactionExpense&quot;\n            android:layout_width=&quot;match_parent&quot;\n            android:layout_height=&quot;45dp&quot;\n            android:layout_marginLeft=&quot;10dp&quot;\n            android:layout_marginTop=&quot;5dp&quot;\n            android:layout_marginRight=&quot;1dp&quot;\n            android:layout_weight=&quot;1&quot;\n            android:background=&quot;@drawable/radio_selector&quot;\n            android:button=&quot;@android:color/transparent&quot;\n            android:checked=&quot;true&quot;\n            android:elevation=&quot;4dp&quot;\n            android:gravity=&quot;center&quot;\n            android:padding=&quot;7dp&quot;\n            android:text=&quot;@string/expense&quot;\n            android:textColor=&quot;@drawable/text_color&quot;\n            android:textSize=&quot;16sp&quot; /&gt;\n\n        &lt;RadioButton\n            android:id=&quot;@+id/chosenTransactionIncome&quot;\n            android:layout_width=&quot;match_parent&quot;\n            android:layout_height=&quot;45dp&quot;\n            android:layout_marginLeft=&quot;1dp&quot;\n            android:layout_marginTop=&quot;5dp&quot;\n            android:layout_marginRight=&quot;10dp&quot;\n            android:layout_weight=&quot;1&quot;\n            android:background=&quot;@drawable/radio_selector&quot;\n            android:button=&quot;@android:color/transparent&quot;\n            android:elevation=&quot;4dp&quot;\n            android:gravity=&quot;center&quot;\n            android:padding=&quot;7dp&quot;\n            android:text=&quot;@string/income&quot;\n            android:textColor=&quot;@drawable/text_color&quot;\n            android:textSize=&quot;16sp&quot; /&gt;\n    &lt;/RadioGroup&gt;\n\n    &lt;Spinner\n        android:id=&quot;@+id/chooseTransactionCategory&quot;\n        android:popupBackground=&quot;@color/bacgroundColorPopup&quot;\n        android:layout_margin=&quot;6dp&quot;\n        android:layout_width=&quot;wrap_content&quot;\n        android:layout_height=&quot;50dp&quot;\n        android:layout_below=&quot;@+id/chooseTransactionType&quot;\n        android:layout_alignParentRight=&quot;true&quot;\n        android:textAlignment=&quot;textEnd&quot; /&gt;\n\n    &lt;include\n        android:id=&quot;@+id/tool_bar&quot;\n        layout=&quot;@layout/tool_bar&quot; /&gt;\n    \n&lt;/RelativeLayout&gt;\n<\/code><\/pre>\n",
+        "question_id": 67047999,
+        "tags": [
+            "java",
+            "android",
+            "fragment",
+            "popupwindow",
+            "android-listfragment"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 266,
+        "last_edit_date": 1618163283
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ggg4qc76nDzfCOBZH9cTv3-FtYAuTOqruklztls=k-s256",
+                "account_id": 21145076,
+                "user_type": "registered",
+                "user_id": 15546588,
+                "link": "https://stackoverflow.com/users/15546588/h4wk",
+                "reputation": 1,
+                "display_name": "H4wk"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 67047999,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e849b5a5573429b79d9aa9fd7d545e5a?s=256&d=identicon&r=PG",
+                "account_id": 5404339,
+                "user_type": "registered",
+                "user_id": 4303296,
+                "link": "https://stackoverflow.com/users/4303296/beko",
+                "reputation": 1003,
+                "display_name": "Beko",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1618163949,
+            "comment_id": 118513558
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ggg4qc76nDzfCOBZH9cTv3-FtYAuTOqruklztls=k-s256",
+                "account_id": 21145076,
+                "user_type": "registered",
+                "user_id": 15546588,
+                "link": "https://stackoverflow.com/users/15546588/h4wk",
+                "reputation": 1,
+                "display_name": "H4wk"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 67047999,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e849b5a5573429b79d9aa9fd7d545e5a?s=256&d=identicon&r=PG",
+                "account_id": 5404339,
+                "user_type": "registered",
+                "user_id": 4303296,
+                "link": "https://stackoverflow.com/users/4303296/beko",
+                "reputation": 1003,
+                "display_name": "Beko",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1618163413,
+            "comment_id": 118513403
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e849b5a5573429b79d9aa9fd7d545e5a?s=256&d=identicon&r=PG",
+                "account_id": 5404339,
+                "user_type": "registered",
+                "user_id": 4303296,
+                "link": "https://stackoverflow.com/users/4303296/beko",
+                "reputation": 1003,
+                "display_name": "Beko",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 67047999,
+            "edited": false,
+            "creation_date": 1618162726,
+            "comment_id": 118513209
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ggg4qc76nDzfCOBZH9cTv3-FtYAuTOqruklztls=k-s256",
+                "account_id": 21145076,
+                "user_type": "registered",
+                "user_id": 15546588,
+                "link": "https://stackoverflow.com/users/15546588/h4wk",
+                "reputation": 1,
+                "display_name": "H4wk"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 67047999,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/e849b5a5573429b79d9aa9fd7d545e5a?s=256&d=identicon&r=PG",
+                "account_id": 5404339,
+                "user_type": "registered",
+                "user_id": 4303296,
+                "link": "https://stackoverflow.com/users/4303296/beko",
+                "reputation": 1003,
+                "display_name": "Beko",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1618162058,
+            "comment_id": 118513003
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e849b5a5573429b79d9aa9fd7d545e5a?s=256&d=identicon&r=PG",
+                "account_id": 5404339,
+                "user_type": "registered",
+                "user_id": 4303296,
+                "link": "https://stackoverflow.com/users/4303296/beko",
+                "reputation": 1003,
+                "display_name": "Beko",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 67047999,
+            "edited": false,
+            "creation_date": 1618161651,
+            "comment_id": 118512893
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

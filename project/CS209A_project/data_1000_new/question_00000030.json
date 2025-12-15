@@ -1,0 +1,140 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/t4eGE.jpg?s=256",
+            "account_id": 1478219,
+            "user_type": "registered",
+            "user_id": 1388116,
+            "link": "https://stackoverflow.com/users/1388116/dumazy",
+            "reputation": 14465,
+            "display_name": "dumazy",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13709130/java-read-file-from-directory-for-jar",
+        "last_activity_date": 1354647113,
+        "creation_date": 1354644280,
+        "answer_count": 3,
+        "title": "Java - read file from directory for jar",
+        "body": "<p>I have an application that creates a temporary mp3-file and puts it in a directory like <code>C:\\<\/code><\/p>\n\n<pre><code>File tempfile = File.createTempFile(\"something\", \".mp3\", new File(\"C:\\\\));\n<\/code><\/pre>\n\n<p>I'm able to read it by just using that same <code>tempfile<\/code> again.\nEverything works fine in the Eclipse IDE.<\/p>\n\n<p>But when I export my project for as a <code>Runnable jar<\/code>, my files are still being made correctly (I can play them with some normal music player like iTunes) but I can't seem to read them anymore in my application.<\/p>\n\n<p>I found out that I need to use something like <code>getClass().getResource(\"/relative/path/in/jar.mp3\")<\/code> for using resource files that are in the <code>jar.<\/code> But this doesn't seem to work if I want to select a file from a certain location in my file system like <code>C:\\something.mp3<\/code><\/p>\n\n<p>Can somebody help me on this one?<\/p>\n",
+        "question_id": 13709130,
+        "tags": [
+            "java",
+            "file",
+            "file-io",
+            "jar"
+        ],
+        "score": 0,
+        "accepted_answer_id": 13709804,
+        "is_answered": true,
+        "view_count": 1229
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f61e274870428f5a44f2e2d60fb11300?s=256&d=identicon&r=PG",
+                "account_id": 1769479,
+                "user_type": "registered",
+                "user_id": 1614606,
+                "link": "https://stackoverflow.com/users/1614606/amir-qayyum-khan",
+                "reputation": 477,
+                "display_name": "Amir Qayyum Khan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1354647113,
+            "creation_date": 1354646811,
+            "body": "<p>It seems you dont have file name of the temp files . When you was running your program in eclipse that instance was creating a processing files, but after you made a runable you are not able to read those file that instance in eclipse created, You runable file can create its own temp file and can process them,\nTo make temp files globe put there (path + name ) entries in some db or property file<\/p>\n\n<p>For example of you will create a temp file from the blow code<\/p>\n\n<pre><code>File tempfile = File.createTempFile(\"out\", \".txt\", new File(\"D:\\\\\"));           \nFileWriter fstream = new FileWriter(tempfile);//write in file\nout = new BufferedWriter(fstream);\n<\/code><\/pre>\n\n<p>the out will not be out.txt file it will be <\/p>\n\n<pre><code>out6654748541383250156.txt // it mean a randum number will be append with file\n<\/code><\/pre>\n\n<p>and you code in runable jar is no able to find these temp files<\/p>\n",
+            "answer_id": 13709804,
+            "question_id": 13709130,
+            "last_edit_date": 1354647113
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8fd7f0e50ff644a87144feff4fbe2101?s=256&d=identicon&r=PG",
+                "account_id": 1306942,
+                "user_type": "registered",
+                "user_id": 1255737,
+                "link": "https://stackoverflow.com/users/1255737/rmlan",
+                "reputation": 4677,
+                "display_name": "rmlan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1354644857,
+            "creation_date": 1354644857,
+            "body": "<p><code>getClass().getResource()<\/code> only reads resources that are on your classpath. The path that is passed to <code>getResource()<\/code> is, in fact, a path relative to any paths on your current classpath. This sounds a bit confusing, so I'll give an example:<\/p>\n\n<p>If your classpath includes a directory <code>C:\\development\\resources<\/code>, you would be able to load any file under this directory using <code>getResource()<\/code>. For example, there is a file  <code>C:\\development\\resources\\mp3\\song.mp3<\/code>. You could load this file by calling<\/p>\n\n<pre><code>getClass().getResource(\"mp3/song.mp3\");\n<\/code><\/pre>\n\n<p>Bottom line: if you want to read files using <code>getResource()<\/code>, you will need those files to be on your classpath.<\/p>\n",
+            "answer_id": 13709271,
+            "question_id": 13709130
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3f71e3a17e43f60dcc1d06fc88d34273?s=256&d=identicon&r=PG",
+                "account_id": 995076,
+                "user_type": "registered",
+                "user_id": 1011250,
+                "link": "https://stackoverflow.com/users/1011250/justin",
+                "reputation": 705,
+                "display_name": "Justin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1354645323,
+            "creation_date": 1354645323,
+            "body": "<p>For loading from both privileged JARs and the file system, I have had to use two different mechanisms: <\/p>\n\n<ul>\n<li><code>getClass().getClassLoader().getResource(path)<\/code>, and if that returns null,<\/li>\n<li><code>new File(path).toURI().toURL();<\/code><\/li>\n<\/ul>\n\n<p>You could turn this into a ResourceResolver strategy that uses the classpath method and one or more file methods (perhaps using different base paths).<\/p>\n",
+            "answer_id": 13709396,
+            "question_id": 13709130
+        }
+    ],
+    "answer_comments": {"13709271": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8fd7f0e50ff644a87144feff4fbe2101?s=256&d=identicon&r=PG",
+                "account_id": 1306942,
+                "user_type": "registered",
+                "user_id": 1255737,
+                "link": "https://stackoverflow.com/users/1255737/rmlan",
+                "reputation": 4677,
+                "display_name": "rmlan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13709271,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/t4eGE.jpg?s=256",
+                "account_id": 1478219,
+                "user_type": "registered",
+                "user_id": 1388116,
+                "link": "https://stackoverflow.com/users/1388116/dumazy",
+                "reputation": 14465,
+                "display_name": "dumazy",
+                "accept_rate": 85
+            },
+            "edited": false,
+            "creation_date": 1354646021,
+            "comment_id": 18828797
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/t4eGE.jpg?s=256",
+                "account_id": 1478219,
+                "user_type": "registered",
+                "user_id": 1388116,
+                "link": "https://stackoverflow.com/users/1388116/dumazy",
+                "reputation": 14465,
+                "display_name": "dumazy",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13709271,
+            "edited": false,
+            "creation_date": 1354645283,
+            "comment_id": 18828473
+        }
+    ]}
+}

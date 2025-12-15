@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user9007096"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47772717/expose-rest-and-soap-for-one-endpoint-simultaneously-by-spring-and-cxf",
+        "last_activity_date": 1513261942,
+        "creation_date": 1513081830,
+        "answer_count": 1,
+        "title": "Expose Rest and Soap for one endpoint simultaneously by Spring and CXF",
+        "body": "<p>I have a very simple service which has to be exposed as two way: REST and SOAP\nI wrote following code:<\/p>\n\n<pre><code>@WebService(name = \"Base\")\n@Path(\"/Base\")\n@Produces(\"application/json\")\npublic class BaseService\n{\n    @POST\n    @Path(\"/Hello\")\n    public String sayHello()\n    {\n        return  \"Hello\";\n    }\n}\n<\/code><\/pre>\n\n<p>That was my endpoint and I configure it as follows:<\/p>\n\n<pre><code>import org.apache.cxf.bus.spring.SpringBus;\nimport org.apache.cxf.endpoint.Server;\nimport org.apache.cxf.jaxrs.JAXRSServerFactoryBean;\nimport org.apache.cxf.jaxws.JaxWsServerFactoryBean;\nimport org.codehaus.jackson.jaxrs.JacksonJsonProvider;\nimport org.springframework.context.ApplicationContext;\nimport org.springframework.context.annotation.Bean;\nimport org.springframework.context.annotation.Configuration;\nimport org.springframework.context.annotation.DependsOn;\nimport org.springframework.context.support.ClassPathXmlApplicationContext;\nimport java.util.ArrayList;\n\n@Configuration\npublic class CxfConfiguration {\n    @Bean( destroyMethod = \"shutdown\" )\n    public SpringBus cxf() {\n        return new SpringBus();\n    }\n\n    @Bean @DependsOn( \"cxf\" )\n    public Server getServer() \n    {\n        JaxWsServerFactoryBean wsFactory = new JaxWsServerFactoryBean();\n        wsFactory.setServiceBean(getBaseService());\n        return wsFactory.create();\n    }\n\n    @Bean(name = \"RestWS\") @DependsOn( \"cxf\" )\n    public Server getServerRest()\n    {\n        JAXRSServerFactoryBean restFactory = new JAXRSServerFactoryBean();\n        ArrayList&lt;Object&gt; objectArrayList = new ArrayList&lt;&gt;();\n        restFactory.setServiceBean(getBaseService());\n        restFactory.setProvider(new JacksonJsonProvider());\n\n        return restFactory.create();\n    }\n\n    ApplicationContext applicationContext = new ClassPathXmlApplicationContext(\"facade.xml\");\n\n    @Bean\n    public BaseService getBaseService()\n    {\n        return (BaseService)applicationContext.getBean(\"base_service\");\n    }\n}\n<\/code><\/pre>\n\n<p>and finally <code>facade.xml<\/code> is :<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\n       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n       xsi:schemaLocation=\"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd\"&gt;\n\n    &lt;bean id=\"base_service\" class=\"BaseService\"/&gt;\n\n&lt;/beans&gt;\n<\/code><\/pre>\n\n<p>When I run my applicatiopn I get   <code>NullPointerException<\/code> :<\/p>\n\n<pre><code>org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'RestWS' defined in CxfConfiguration: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.apache.cxf.endpoint.Server]: Factory method 'getServerRest' threw exception; nested exception is org.apache.cxf.service.factory.ServiceConstructionException\n    at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:583)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1249)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1098)\n<\/code><\/pre>\n\n<p>The bottom line is that I would like to have both forms of service together and simultaneously but I get the above exception. When I comment one of the <code>getServer<\/code> or <code>getServerRest<\/code> method, everything will be OK.<\/p>\n",
+        "question_id": 47772717,
+        "tags": [
+            "java",
+            "spring",
+            "rest",
+            "soap",
+            "cxf"
+        ],
+        "score": 0,
+        "accepted_answer_id": 47815621,
+        "is_answered": true,
+        "view_count": 1691
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user9007258"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1513261942,
+        "creation_date": 1513261376,
+        "body": "<p>When you want to represent a service in both of <strong>SOAP<\/strong> and <strong>REST<\/strong> standard you have to define a server for <strong>REST<\/strong> and an endpoint for <strong>SOAP<\/strong>.\nFor your question, you have to change <code>CxfConfiguration<\/code>  class by the following code:<\/p>\n\n<pre><code>import org.apache.cxf.bus.spring.SpringBus;\nimport org.apache.cxf.endpoint.Server;\nimport org.apache.cxf.jaxrs.JAXRSServerFactoryBean;\nimport org.apache.cxf.jaxws.JaxWsServerFactoryBean;\nimport org.codehaus.jackson.jaxrs.JacksonJsonProvider;\nimport org.springframework.context.ApplicationContext;\nimport org.springframework.context.annotation.Bean;\nimport org.springframework.context.annotation.Configuration;\nimport org.springframework.context.annotation.DependsOn;\nimport org.springframework.context.support.ClassPathXmlApplicationContext;\nimport java.util.ArrayList;\n\n@Configuration\npublic class CxfConfiguration \n{\n    @Autowired\n    private ApplicationContext applicationContext;\n\n    @Bean( destroyMethod = \"shutdown\" )\n    public SpringBus cxf() {\n        return new SpringBus();\n    }\n\n    @Bean(name = \"RestWS\") \n    public Server getServerRest()\n    {\n        JAXRSServerFactoryBean restFactory = new JAXRSServerFactoryBean();\n        ArrayList&lt;Object&gt; objectArrayList = new ArrayList&lt;&gt;();\n        restFactory.setServiceBean(getBaseService());\n        restFactory.setProvider(new JacksonJsonProvider());\n\n        return restFactory.create();\n    }\n   @Bean \n    public Server getServer() \n    {\n        Bus bus = (Bus) applicationContext.getBean(Bus.DEFAULT_BUS_ID);\n        Object implementor = getBaseService();\n        EndpointImpl endpoint = new EndpointImpl(bus, implementor);\n        endpoint.publish(\"/Base\");\n        return endpoint ;\n    }\n\n    ApplicationContext applicationContext = new ClassPathXmlApplicationContext(\"facade.xml\");\n\n    @Bean\n    public BaseService getBaseService()\n    {\n        return (BaseService)applicationContext.getBean(\"base_service\");\n    }\n}\n<\/code><\/pre>\n\n<p>That can solve your problem but I believe that it's better you have a difference paths or addresses for each <strong>REST<\/strong> and <strong>SOAP<\/strong> service.<\/p>\n",
+        "answer_id": 47815621,
+        "question_id": 47772717,
+        "last_edit_date": 1513261942
+    }],
+    "answer_comments": {"47815621": [{
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user9007096"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 47815621,
+        "edited": false,
+        "creation_date": 1513268230,
+        "comment_id": 82597306
+    }]}
+}

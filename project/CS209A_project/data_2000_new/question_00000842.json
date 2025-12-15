@@ -1,0 +1,92 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e31d9d39e9fb0ec4cc5573a5e5b01ce7?s=256&d=identicon&r=PG",
+            "account_id": 110463,
+            "user_type": "registered",
+            "user_id": 292291,
+            "link": "https://stackoverflow.com/users/292291/jiew-meng",
+            "reputation": 89209,
+            "display_name": "Jiew Meng",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8066215/hashing-a-string-for-use-in-hash-table-double-hashing",
+        "last_activity_date": 1479933016,
+        "creation_date": 1320847689,
+        "answer_count": 1,
+        "title": "Hashing a string for use in hash table (Double Hashing)",
+        "body": "<p>I am trying to use Double Hashing to hash a String key into a hash table. I did something like: <\/p>\n\n<pre><code>protected int getIndex(String key) {\n  int itr = 0,\n      size = this.values.length,\n      index1,\n      index2,\n      index = 0;\n\n  do {\n    // do double hashing to get index for curr [itr] (iteration)\n    index1 = Math.abs(key.hashCode()) % size;\n    index2 = size - ((key + key + \"#!@\").hashCode() % size); # trying very hard to eliminate clash, but still fails ... TA and AT gets index 2 when size = 5\n    index = (index1 + (itr * index2)) % size;\n\n    // if itr &gt; set threshold, exit\n    itr++;\n    if (itr &gt; 200) {\n      index = -1;\n      break;\n    }\n\n    // once index found, exit loop\n  } while (index &gt; 0 &amp;&amp; this.keys[index] != null &amp;&amp; !this.keys[index].equals(key));\n\n  return index;\n}\n<\/code><\/pre>\n\n<p>Main part is the 1st 3 lines after the <code>do<\/code>. Can I say if I use Double Hashing, it should eliminate the probability of collision? <code>size<\/code> is total possible values of unique keys for my hash table<\/p>\n",
+        "question_id": 8066215,
+        "tags": [
+            "java",
+            "hash",
+            "hashtable",
+            "double-hashing"
+        ],
+        "score": 1,
+        "accepted_answer_id": 8102118,
+        "is_answered": true,
+        "view_count": 2542,
+        "last_edit_date": 1479933016
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/53ee9941b3fefef67175daf212e62d41?s=256&d=identicon&r=PG",
+                "account_id": 23121,
+                "user_type": "registered",
+                "user_id": 57695,
+                "link": "https://stackoverflow.com/users/57695/peter-lawrey",
+                "reputation": 535107,
+                "display_name": "Peter Lawrey",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8066215,
+            "edited": false,
+            "creation_date": 1320849724,
+            "comment_id": 9882667
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c13d63caf5f8c0f483b6b09a814696c7?s=256&d=identicon&r=PG",
+                "account_id": 770804,
+                "user_type": "registered",
+                "user_id": 936569,
+                "link": "https://stackoverflow.com/users/936569/s-nair",
+                "reputation": 800,
+                "display_name": "s_nair",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8066215,
+            "edited": false,
+            "creation_date": 1320848307,
+            "comment_id": 9882185
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b6808d688be0b16423475b28ddc4c016?s=256&d=identicon&r=PG",
+            "account_id": 471315,
+            "user_type": "registered",
+            "user_id": 879034,
+            "link": "https://stackoverflow.com/users/879034/heneryville",
+            "reputation": 2939,
+            "display_name": "heneryville",
+            "accept_rate": 73
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1321065215,
+        "creation_date": 1321065215,
+        "body": "<p>So I see two things going on here<\/p>\n\n<ol>\n<li>Using two different hashes and combining them in attempt to get a more distributed hash<\/li>\n<li>If a hash fails, trying a new spot a little farther along<\/li>\n<\/ol>\n\n<p>At first blush, it looks like both of these are a good way to reduce hash collisions. However, on closer inspection, both of these fall into real algorithmic trouble.<\/p>\n\n<p><strong>Combining two hashes<\/strong><br/>\nHashing algorithms are designed to be fairly well distributed across the integer spectrum. Just like how adding two random numbers together doesn't give you anything more randomer, adding two hashes together doesn't get you something more distributed. In fact, adding two idential distributions together will ALWAYS give you something less evenly distributed. Thus any kind of double hashing strategy, using the same underlying algorithm, is worse than a single hashing strategy.<\/p>\n\n<p><strong>Trying a new spot<\/strong><br/>\nIt's tempting to try an algorithm that tries a new hash if the first one collides. However, this causes problems with the retrieval part of the algorithm. When you put something in the hash, and it bumps to the another spot. Then when you go to retrieve the value, it's not there. Worse yet, whether or not you even find it depends on if the first element is still there or not. If it's been removed, then it's impossible to tell if item you're looking for is further along, or if it just isn't there. Ultimately a .contains test would have to go through all 200 iterations before it could be sure that the hash it's looking for isn't there.<\/p>\n\n<p>The best solution is to use the out of the box hash provided by Java. If you're getting a lot of collisions, the best thing to use a lower load factor in the hash. This increases the number of buckets, and causes collisions to be less likely.<\/p>\n",
+        "answer_id": 8102118,
+        "question_id": 8066215
+    }],
+    "answer_comments": {}
+}

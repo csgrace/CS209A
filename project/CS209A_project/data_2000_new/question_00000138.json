@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-HsO8hyYqKcE/AAAAAAAAAAI/AAAAAAAAOTM/-s2zQrqIzbs/s256-rj/photo.jpg",
+            "account_id": 14527161,
+            "user_type": "registered",
+            "user_id": 10493035,
+            "link": "https://stackoverflow.com/users/10493035/tarun-kumar143",
+            "reputation": 461,
+            "display_name": "tarun kumar143"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53260372/how-to-upload-a-excel-file-by-using-spring-mvc",
+        "last_activity_date": 1542026838,
+        "creation_date": 1542019056,
+        "answer_count": 1,
+        "title": "How to upload a Excel File By Using Spring MVC?",
+        "body": "<p>Need a code for database Integration(CRUD Operations)<\/p>\n\n<p>How to upload an Excel File By Using Spring MVC?\nThe MultipartFile class provides access to details about the uploaded file, including file name, file type, and so on. We can use a simple HTML page to display this information:<\/p>\n\n<p>We can also send additional information to the server along with the file being uploaded. We just have to include the required fields in the form:<\/p>\n\n<p><strong>FileUploadService.java<\/strong><\/p>\n\n<pre><code>public class FileUploadService {\n\n@Autowired\nFileUploadDao fileUploadDao;\n\npublic String uploadFileData(String inputFilePath){\n    Workbook workbook = null;\n        Sheet sheet = null;\n        try \n        {\n\n            workbook = getWorkBook(new File(inputFilePath));\n            sheet = workbook.getSheetAt(0);\n\n            /*Build the header portion of the Output File*/\n            String headerDetails= \"EmployeeId,EmployeeName,Address,Country\";\n            String headerNames[] = headerDetails.split(\",\");\n\n             /*Read and process each Row*/\n             ArrayList&lt;ExcelTemplateVO&gt; employeeList = new ArrayList&lt;&gt;();\n             Iterator&lt;Row&gt; rowIterator = sheet.iterator();\n\n             while(rowIterator.hasNext()) \n             {\n                    Row row = rowIterator.next();\n                    //Read and process each column in row\n                    ExcelTemplateVO excelTemplateVO = new ExcelTemplateVO();\n                    int count=0;\n                    while(count&lt;headerNames.length){\n                        String methodName = \"set\"+headerNames[count];\n                        String inputCellValue = getCellValueBasedOnCellType(row,count++);\n                        setValueIntoObject(excelTemplateVO, ExcelTemplateVO.class, methodName, \"java.lang.String\", inputCellValue);\n                    }\n\n                    employeeList.add(excelTemplateVO);\n             }\n             fileUploadDao.saveFileDataInDB(employeeList);\n\n        }\n        catch(Exception ex){\n            ex.printStackTrace();\n        }\n\n\n    return \"Success\";\n}\n<\/code><\/pre>\n",
+        "question_id": 53260372,
+        "tags": [
+            "java",
+            "excel",
+            "spring-mvc",
+            "file-upload"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 5704,
+        "last_edit_date": 1542022824
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/19f37b96a0cc267357361a002b85e9b3?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8683516,
+            "user_type": "registered",
+            "user_id": 6498654,
+            "link": "https://stackoverflow.com/users/6498654/vishal-lakhyani",
+            "reputation": 99,
+            "display_name": "vishal lakhyani"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1542026838,
+        "creation_date": 1542026838,
+        "body": "<p>To upload xls file using spring mvc you can write spring controller like below,<\/p>\n\n<pre><code>package com.journaldev.spring.controller;\n\nimport java.io.BufferedOutputStream;\nimport java.io.File;\nimport java.io.FileOutputStream;\n\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;\nimport org.springframework.stereotype.Controller;\nimport org.springframework.web.bind.annotation.RequestMapping;\nimport org.springframework.web.bind.annotation.RequestMethod;\nimport org.springframework.web.bind.annotation.RequestParam;\nimport org.springframework.web.bind.annotation.ResponseBody;\nimport org.springframework.web.multipart.MultipartFile;\n\n/**\n * Handles requests for the application file upload requests\n */\n@Controller\npublic class FileUploadController {\n\n    private static final Logger logger = LoggerFactory\n            .getLogger(FileUploadController.class);\n\n    /**\n     * Upload single file using Spring Controller\n     */\n    @RequestMapping(value = \"/uploadFile\", method = RequestMethod.POST)\n    public @ResponseBody\n    String uploadFileHandler(@RequestParam(\"name\") String name,\n            @RequestParam(\"file\") MultipartFile file) {\n\n        if (!file.isEmpty()) {\n            try {\n                byte[] bytes = file.getBytes();\n\n                // Creating the directory to store file\n                String rootPath = System.getProperty(\"catalina.home\");\n                File dir = new File(rootPath + File.separator + \"tmpFiles\");\n                if (!dir.exists())\n                    dir.mkdirs();\n\n                // Create the file on server\n                File serverFile = new File(dir.getAbsolutePath()\n                        + File.separator + name);\n                BufferedOutputStream stream = new BufferedOutputStream(\n                        new FileOutputStream(serverFile));\n                stream.write(bytes);\n                stream.close();\n\n                logger.info(\"Server File Location=\"\n                        + serverFile.getAbsolutePath());\n\n                return \"You successfully uploaded file=\" + name;\n            } catch (Exception e) {\n                return \"You failed to upload \" + name + \" =&gt; \" + e.getMessage();\n            }\n        } else {\n            return \"You failed to upload \" + name\n                    + \" because the file was empty.\";\n        }\n    }\n\n    /**\n     * Upload multiple file using Spring Controller\n     */\n    @RequestMapping(value = \"/uploadMultipleFile\", method = RequestMethod.POST)\n    public @ResponseBody\n    String uploadMultipleFileHandler(@RequestParam(\"name\") String[] names,\n            @RequestParam(\"file\") MultipartFile[] files) {\n\n        if (files.length != names.length)\n            return \"Mandatory information missing\";\n\n        String message = \"\";\n        for (int i = 0; i &lt; files.length; i++) {\n            MultipartFile file = files[i];\n            String name = names[i];\n            try {\n                byte[] bytes = file.getBytes();\n\n                // Creating the directory to store file\n                String rootPath = System.getProperty(\"catalina.home\");\n                File dir = new File(rootPath + File.separator + \"tmpFiles\");\n                if (!dir.exists())\n                    dir.mkdirs();\n\n                // Create the file on server\n                File serverFile = new File(dir.getAbsolutePath()\n                        + File.separator + name);\n                BufferedOutputStream stream = new BufferedOutputStream(\n                        new FileOutputStream(serverFile));\n                stream.write(bytes);\n                stream.close();\n\n                logger.info(\"Server File Location=\"\n                        + serverFile.getAbsolutePath());\n\n                message = message + \"You successfully uploaded file=\" + name\n                        + \"&lt;br /&gt;\";\n            } catch (Exception e) {\n                return \"You failed to upload \" + name + \" =&gt; \" + e.getMessage();\n            }\n        }\n        return message;\n    }\n}\n<\/code><\/pre>\n\n<p>You can put all required validation like file size, file type etc as required.<\/p>\n\n<p>Your jsp file could be like,<\/p>\n\n<pre><code>&lt;%@ taglib uri=\"http://java.sun.com/jsp/jstl/core\" prefix=\"c\" %&gt;\n&lt;%@ page session=\"false\" %&gt;\n&lt;html&gt;\n&lt;head&gt;\n&lt;title&gt;Upload Multiple File Request Page&lt;/title&gt;\n&lt;/head&gt;\n&lt;body&gt;\n    &lt;form method=\"POST\" action=\"uploadMultipleFile\" enctype=\"multipart/form-data\"&gt;\n        File1 to upload: &lt;input type=\"file\" name=\"file\"&gt;&lt;br /&gt; \n        Name1: &lt;input type=\"text\" name=\"name\"&gt;&lt;br /&gt; &lt;br /&gt; \n        File2 to upload: &lt;input type=\"file\" name=\"file\"&gt;&lt;br /&gt; \n        Name2: &lt;input type=\"text\" name=\"name\"&gt;&lt;br /&gt; &lt;br /&gt;\n        &lt;input type=\"submit\" value=\"Upload\"&gt; Press here to upload the file!\n    &lt;/form&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n<\/code><\/pre>\n",
+        "answer_id": 53262511,
+        "question_id": 53260372
+    }],
+    "answer_comments": {}
+}

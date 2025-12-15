@@ -1,0 +1,211 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/WyYdj.jpg?s=256",
+            "account_id": 8186308,
+            "user_type": "registered",
+            "user_id": 6162027,
+            "link": "https://stackoverflow.com/users/6162027/anthonydev220",
+            "reputation": 719,
+            "display_name": "AnthonyDev220"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/36430125/how-to-put-my-background-image-at-the-bottom",
+        "last_activity_date": 1459871155,
+        "creation_date": 1459868629,
+        "answer_count": 2,
+        "title": "how to put my background image at the bottom",
+        "body": "<p>I want to put my background image at the very bottom in this frame, and the button on top. However the code I wrote below doesn't work. Can anyone see where the problems are?<\/p>\n\n<p>Another thing is that even though I set the location for my button, it keep showing at the top center on the frame.<\/p>\n\n<p>Please ignore the comment lines. (I was just guessing, and hoping them will work, but they don't apparently.)<\/p>\n\n<pre><code>public class Menu extends JFrame{\nprivate JLayeredPane pane;\nprivate JLayeredPane pane2;\n\npublic Menu(){\n    final JFrame f = new JFrame(\"Chinese Chess\");\n\n\n    JButton play = new JButton(\"Play vs. AI\");\n\n    f.setLayout(new FlowLayout());\n    f.setLocationRelativeTo(null);\n    f.setSize(800, 800);\n    f.setVisible(true);\n    f.setResizable(false);\n    //f.pack(); \n\n    pane = new JLayeredPane();\n    pane2 = new JLayeredPane();\n    f.add(pane);\n    f.add(pane2);\n\n\n    //background image\n    JLabel background = new JLabel(new ImageIcon(\"res/img/background.png\"));\n    background.setLocation(0, 0);\n    background.setSize(800, 800);\n    pane.add(background, JLayeredPane.FRAME_CONTENT_LAYER);\n    pane2.add(play, JLayeredPane.DEFAULT_LAYER);\n    //pane.moveToBack();\n\n    //button PlayAI\n    play.setLocation(500,500);\n    play.setPreferredSize(new Dimension(100,50));\n    //f.setLayout(new FlowLayout());\n\n    //frame menu\n    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n    //f.getContentPane().add(play);\n\n\n    play.addActionListener(new ActionListener() {\n        public void actionPerformed(ActionEvent ae) {\n            new PlayAI();\n        }\n    });\n}\n\npublic static void main(String[] args){\n    new Menu();\n}\n<\/code><\/pre>\n",
+        "question_id": 36430125,
+        "tags": [
+            "java",
+            "swing",
+            "frame",
+            "layer"
+        ],
+        "score": 2,
+        "accepted_answer_id": 36430234,
+        "is_answered": true,
+        "view_count": 981
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+                "account_id": 247613,
+                "user_type": "registered",
+                "user_id": 522444,
+                "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+                "reputation": 285766,
+                "display_name": "Hovercraft Full Of Eels",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1459871155,
+            "creation_date": 1459868934,
+            "body": "<p>Problems/Solutions:<\/p>\n\n<ul>\n<li><code>setLocation(...)<\/code> and <code>setBounds(...)<\/code> types of calls are ignored by most layout managers. The only way to use them is to set the layout of the container to null via <code>.setLayout(null);<\/code><\/li>\n<li>But having said that, while null layouts and <code>setBounds()<\/code> might seem to Swing newbies like the easiest and best way to create complex GUI's, the more Swing GUI'S you create the more serious difficulties you will run into when using them. They won't resize your components when the GUI resizes, they are a royal witch to enhance or maintain, they fail completely when placed in scrollpanes, they look gawd-awful when viewed on all platforms or screen resolutions that are different from the original one.<\/li>\n<li>So in sum -- don't do this, don't use null layouts or setBounds, but rather nest JPanels, each using its own layout manager, and thereby create easy to maintain and decent GUI's.<\/li>\n<li>If you want an image to be in the background, then draw it in a JPanel that you use as a container for your GUI components by drawing it in the JPanel's <code>paintComponent(Graphics g)<\/code> method as has been demonstrated in many many similar questions on this site -- I'll find you some of mine in a second.<\/li>\n<li>If you add any JPanels on top of this image drawing JPanel, be sure that you can see through them by calling <code>setOpaque(false)<\/code> on these overlying JPanels. Otherwise you'll cover up the image.<\/li>\n<li>Your code has two JFrames when only one is needed. Get rid of the one you don't use.<\/li>\n<li>You call <code>setVisible(true)<\/code> too early on the JFrame, before components have been added to the GUI -- don't. Call it only after adding everything to the GUI so all display OK.<\/li>\n<li>You're creating two JLayedPanes, and completely covering one by the other by adding them to the JFrame without understanding how the JFrame's BorderLayout handles added components.<\/li>\n<li>I suggest that you not even use one JLayeredPane but instead draw in the JPanel as noted above, and use that as your container.<\/li>\n<li>Your code looks to be opening a completely new GUI window when the play button is pressed, and if so, this can get annoying to the user fast. Consider swapping views instead with a <a href=\"https://docs.oracle.com/javase/tutorial/uiswing/layout/card.html\" rel=\"nofollow\">CardLayout<\/a>.<\/li>\n<\/ul>\n\n<p>For example:<\/p>\n\n<pre><code>import java.awt.Dimension;\nimport java.awt.Graphics;\nimport java.awt.GridBagLayout;\nimport java.awt.event.ActionEvent;\nimport java.awt.event.KeyEvent;\nimport java.awt.image.BufferedImage;\nimport java.io.File;\nimport java.io.IOException;\n\nimport javax.imageio.ImageIO;\nimport javax.swing.*;\n\n// extend JPanel so you can draw to its background\n@SuppressWarnings(\"serial\")\npublic class Menu2 extends JPanel {\n    private BufferedImage bgImage = null; // our background image\n    private JButton playButton = new JButton(new PlayVsAiAction(\"Play Vs. AI\", KeyEvent.VK_P));\n\n    public Menu2(BufferedImage bgImage) {\n        this.bgImage = bgImage;\n\n        setLayout(new GridBagLayout());  // center our button\n        add(playButton);\n    }\n\n    @Override\n    protected void paintComponent(Graphics g) {\n        super.paintComponent(g);\n        if (bgImage != null) {\n            g.drawImage(bgImage, 0, 0, this);\n        }\n    }\n\n    // to size our GUI to match a constant or the image.\n    @Override\n    public Dimension getPreferredSize() {\n        if (isPreferredSizeSet()) {\n            return super.getPreferredSize();\n        }\n\n        // if you want to size it based on the image\n        if (bgImage != null) {\n            int width = bgImage.getWidth();\n            int height = bgImage.getHeight();\n            return new Dimension(width, height);            \n        } else {\n            return super.getPreferredSize();\n        }\n\n        // if you want to size the GUI with constants:\n        // return new Dimension(PREF_W, PREF_H);\n    }\n\n    private class PlayVsAiAction extends AbstractAction {\n        public PlayVsAiAction(String name, int mnemonic) {\n            super(name); // have our button display this name\n            putValue(MNEMONIC_KEY, mnemonic); // alt-key to press button\n        }\n\n        @Override\n        public void actionPerformed(ActionEvent e) {\n            // TODO code to start program\n\n        }\n    }\n\n    private static void createAndShowGui() {\n        BufferedImage img = null;\n        String imagePath = \"res/img/background.png\";\n        try {\n            // TODO: fix this -- use class resources to get image, not File \n            img = ImageIO.read(new File(imagePath));\n        } catch (IOException e) {\n            e.printStackTrace();\n            System.exit(-1);\n        }\n        Menu2 mainPanel = new Menu2(img);\n\n        JFrame frame = new JFrame(\"Chinese Chess\");\n        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);\n        frame.getContentPane().add(mainPanel);\n        frame.pack();\n        frame.setLocationByPlatform(true);\n        frame.setVisible(true);\n    }\n\n    public static void main(String[] args) {\n        SwingUtilities.invokeLater(() -&gt; {\n            createAndShowGui();\n        });\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 36430234,
+            "question_id": 36430125,
+            "last_edit_date": 1459871155
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-DNnQDbUkHEo/AAAAAAAAAAI/AAAAAAAAAp8/taAmCIsZcA8/s256-rj/photo.jpg",
+                "account_id": 5369445,
+                "user_type": "registered",
+                "user_id": 4278394,
+                "link": "https://stackoverflow.com/users/4278394/jorge",
+                "reputation": 1186,
+                "display_name": "Jorge"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1459869659,
+            "creation_date": 1459869659,
+            "body": "<p>Apart from the solution above... you should create and launch your swing application this way:<\/p>\n\n<pre><code>public static void main(String[] args) {\n    //Schedule a job for the event-dispatching thread:\n    //creating and showing this application's GUI.\n    javax.swing.SwingUtilities.invokeLater(new Runnable() {\n        public void run() {\n            createAndShowGUI();\n        }\n    });\n}\n\nprivate static void createAndShowGUI() {\n    // Instantiate your JFrame and show it \n}\n<\/code><\/pre>\n",
+            "answer_id": 36430533,
+            "question_id": 36430125
+        }
+    ],
+    "answer_comments": {
+        "36430234": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+                    "account_id": 247613,
+                    "user_type": "registered",
+                    "user_id": 522444,
+                    "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+                    "reputation": 285766,
+                    "display_name": "Hovercraft Full Of Eels",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36430234,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/WyYdj.jpg?s=256",
+                    "account_id": 8186308,
+                    "user_type": "registered",
+                    "user_id": 6162027,
+                    "link": "https://stackoverflow.com/users/6162027/anthonydev220",
+                    "reputation": 719,
+                    "display_name": "AnthonyDev220"
+                },
+                "edited": false,
+                "creation_date": 1459958318,
+                "comment_id": 60525108
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/WyYdj.jpg?s=256",
+                    "account_id": 8186308,
+                    "user_type": "registered",
+                    "user_id": 6162027,
+                    "link": "https://stackoverflow.com/users/6162027/anthonydev220",
+                    "reputation": 719,
+                    "display_name": "AnthonyDev220"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36430234,
+                "edited": false,
+                "creation_date": 1459950865,
+                "comment_id": 60519140
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/WyYdj.jpg?s=256",
+                    "account_id": 8186308,
+                    "user_type": "registered",
+                    "user_id": 6162027,
+                    "link": "https://stackoverflow.com/users/6162027/anthonydev220",
+                    "reputation": 719,
+                    "display_name": "AnthonyDev220"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36430234,
+                "edited": false,
+                "creation_date": 1459950794,
+                "comment_id": 60519079
+            }
+        ],
+        "36430533": [
+            {
+                "owner": {
+                    "profile_image": "https://lh3.googleusercontent.com/-DNnQDbUkHEo/AAAAAAAAAAI/AAAAAAAAAp8/taAmCIsZcA8/s256-rj/photo.jpg",
+                    "account_id": 5369445,
+                    "user_type": "registered",
+                    "user_id": 4278394,
+                    "link": "https://stackoverflow.com/users/4278394/jorge",
+                    "reputation": 1186,
+                    "display_name": "Jorge"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36430533,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/WyYdj.jpg?s=256",
+                    "account_id": 8186308,
+                    "user_type": "registered",
+                    "user_id": 6162027,
+                    "link": "https://stackoverflow.com/users/6162027/anthonydev220",
+                    "reputation": 719,
+                    "display_name": "AnthonyDev220"
+                },
+                "edited": false,
+                "creation_date": 1459956193,
+                "comment_id": 60523467
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/WyYdj.jpg?s=256",
+                    "account_id": 8186308,
+                    "user_type": "registered",
+                    "user_id": 6162027,
+                    "link": "https://stackoverflow.com/users/6162027/anthonydev220",
+                    "reputation": 719,
+                    "display_name": "AnthonyDev220"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36430533,
+                "edited": false,
+                "creation_date": 1459950692,
+                "comment_id": 60518986
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh3.googleusercontent.com/-DNnQDbUkHEo/AAAAAAAAAAI/AAAAAAAAAp8/taAmCIsZcA8/s256-rj/photo.jpg",
+                    "account_id": 5369445,
+                    "user_type": "registered",
+                    "user_id": 4278394,
+                    "link": "https://stackoverflow.com/users/4278394/jorge",
+                    "reputation": 1186,
+                    "display_name": "Jorge"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 36430533,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+                    "account_id": 247613,
+                    "user_type": "registered",
+                    "user_id": 522444,
+                    "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+                    "reputation": 285766,
+                    "display_name": "Hovercraft Full Of Eels",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1459869940,
+                "comment_id": 60475525
+            }
+        ]
+    }
+}

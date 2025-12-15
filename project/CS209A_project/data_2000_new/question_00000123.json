@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3f75d1aecbf76e5eb762c80cee5bcd9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 13282175,
+            "user_type": "registered",
+            "user_id": 9589386,
+            "link": "https://stackoverflow.com/users/9589386/ayush",
+            "reputation": 284,
+            "display_name": "Ayush"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49652526/list-complete-hierarchy-of-a-directories-at-sftp-server-using-jsch-in-java",
+        "last_activity_date": 1630046119,
+        "creation_date": 1522849134,
+        "answer_count": 1,
+        "title": "List complete hierarchy of a directories at SFTP server using JSch in Java",
+        "body": "<p>I want to display complete hierarchy of a directory at a remote location using JSch. The location has multiple folders and a folder may or may not have files.<\/p>\n\n<p>Code written by me (taken reference from <a href=\"https://stackoverflow.com/questions/24625182/sftp-read-all-files-in-directory\">SFTP Read all files in directory<\/a>):<\/p>\n\n<pre><code>sftpChannel.cd(remotePath);\nVector&lt;String&gt; files = sftpChannel.ls(\"*\");\nList&lt;String&gt; ret=new ArrayList&lt;&gt;();\nfor (int i = 0; i &lt; files.size(); i++)\n{\n    Object obj = files.elementAt(i);\n    if (obj instanceof com.jcraft.jsch.ChannelSftp.LsEntry)\n    {\n        LsEntry entry = (LsEntry) obj;\n        if (true &amp;&amp; !entry.getAttrs().isDir())\n        {\n            ret.add(entry.getFilename()+\"file\");\n        }\n        if (true &amp;&amp; entry.getAttrs().isDir())\n        {\n            if (!entry.getFilename().equals(\".\") &amp;&amp; !entry.getFilename().equals(\"..\"))\n            {\n                ret.add(entry.getFilename()+\"folder\");\n            }\n        }\n    }\n}\nSystem.out.println(ret);\n<\/code><\/pre>\n\n<p>This code is only showing top-level folder names, files in those folders are not read.<\/p>\n\n<p>I am using jsch-0.1.54.<\/p>\n\n<p>Thanks<\/p>\n",
+        "question_id": 49652526,
+        "tags": [
+            "java",
+            "ssh",
+            "sftp",
+            "jsch"
+        ],
+        "score": 2,
+        "accepted_answer_id": 49653215,
+        "is_answered": true,
+        "view_count": 5534,
+        "last_edit_date": 1522850993
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c287735beca76400cb9b6d08bf591cb9?s=256&d=identicon&r=PG",
+            "account_id": 453710,
+            "user_type": "registered",
+            "user_id": 850848,
+            "link": "https://stackoverflow.com/users/850848/martin-prikryl",
+            "reputation": 205063,
+            "display_name": "Martin Prikryl",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 9,
+        "is_accepted": true,
+        "last_activity_date": 1630046119,
+        "creation_date": 1522850900,
+        "body": "<p>Just implement a recursive function that iterates into subdirectories, like:<\/p>\n<pre><code>public static void listDirectory(\n    ChannelSftp channelSftp, String path, List&lt;String&gt; list) throws SftpException\n{\n    Vector&lt;LsEntry&gt; files = channelSftp.ls(path);\n    for (LsEntry entry : files)\n    {\n        if (!entry.getAttrs().isDir())\n        {\n            list.add(path + &quot;/&quot; + entry.getFilename());\n        }\n        else\n        {\n            if (!entry.getFilename().equals(&quot;.&quot;) &amp;&amp;\n                !entry.getFilename().equals(&quot;..&quot;))\n            {\n                listDirectory(channelSftp, path + &quot;/&quot; + entry.getFilename(), list);\n            }\n        }\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 49653215,
+        "question_id": 49652526,
+        "last_edit_date": 1630046119
+    }],
+    "answer_comments": {}
+}

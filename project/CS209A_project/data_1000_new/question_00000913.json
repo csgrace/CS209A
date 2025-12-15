@@ -1,0 +1,122 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/08a434ac231c0ed79ba1130327c610d1?s=256&d=identicon&r=PG",
+            "account_id": 2131631,
+            "user_type": "registered",
+            "user_id": 1892348,
+            "link": "https://stackoverflow.com/users/1892348/sonu-mishra",
+            "reputation": 1789,
+            "display_name": "Sonu Mishra",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/44937484/parallelize-a-network-bound-for-loop-in-java",
+        "last_activity_date": 1499299476,
+        "creation_date": 1499297087,
+        "answer_count": 1,
+        "title": "Parallelize a network bound for-loop in Java",
+        "body": "<p>I have a list of 1 million filenames that I have to download from <code>S3<\/code>. Currently I am downloading each file one-by-one (for-loop below) and it takes around 4 days for the download to complete. <\/p>\n\n<pre><code>    for (String fileName : Files) {\n        InputStream is = null;\n        try {\n            is = m_S3.downloadFile(fileName); // m_s3 is a wrapper around AmazonS3 client\n            m_localDisk.createFile(fileName, is); // m_localDisk is an interface for local disk storage.\n        } \n        catch (Exception e) {\n            System.out.println(\"Exception happened\");\n        }\n        finally {\n            is.close();\n        }\n    }\n<\/code><\/pre>\n\n<p>As <code>S3<\/code> allows parallel connections, I am planning to paralleize the downloads. How can I do that in <code>Java<\/code>? I have done similar thing in <code>C<\/code> using <code>Pthread<\/code> where I just divided the input and delegated threads with different parts of inputs in their context. I can do that in <code>Java<\/code>, but I am sure there are better, more high level, ways of doing this.<\/p>\n\n<p>I have considered things like using <code>parallelStreams<\/code>, but as that just uses a pipeline mechanism, I do not think it would give me much improvement -- only one network connection to <code>S3<\/code> will be open at a time.<\/p>\n",
+        "question_id": 44937484,
+        "tags": [
+            "java",
+            "multithreading"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 106
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/08a434ac231c0ed79ba1130327c610d1?s=256&d=identicon&r=PG",
+                "account_id": 2131631,
+                "user_type": "registered",
+                "user_id": 1892348,
+                "link": "https://stackoverflow.com/users/1892348/sonu-mishra",
+                "reputation": 1789,
+                "display_name": "Sonu Mishra",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937484,
+            "edited": false,
+            "creation_date": 1499310869,
+            "comment_id": 76854617
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311880,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937484,
+            "edited": false,
+            "creation_date": 1499309605,
+            "comment_id": 76854295
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 44937484,
+            "edited": false,
+            "creation_date": 1499297191,
+            "comment_id": 76851367
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/be85f7bc23d6fa1addc8d35e39870579?s=256&d=identicon&r=PG",
+            "account_id": 1680363,
+            "user_type": "registered",
+            "user_id": 1544715,
+            "link": "https://stackoverflow.com/users/1544715/magnus",
+            "reputation": 8318,
+            "display_name": "Magnus",
+            "accept_rate": 71
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1499299476,
+        "creation_date": 1499299476,
+        "body": "<p>Using <code>parallelStream<\/code> is probably the simplest way to approach this.<br>\nThe default AmazonS3Client handles up to 50 concurrent connections, but you can configure it differently.<\/p>\n\n<p>By default, <code>parallelStream()<\/code> uses a shared system thread pool, with <code>numOfProcessors -1<\/code> threads, the below approach creates your own thread pool which you can adjust the size of to your own desires, plus the long running blocking tasks wont interfere with other things running on the system pool.<\/p>\n\n<pre><code>List&lt;String&gt; fileNames = ...\nForkJoinPool forkJoinPool = new ForkJoinPool(4);\nforkJoinPool.submit(()-&gt; {\n    fileNames.parallelStream().forEach(fileName -&gt; {\n        try(InputStream is = m_S3.downloadFile(fileName)) {\n            m_localDisk.createFile(fileName, is);\n        } catch (IOException e) {\n            e.printStackTrace();\n        }\n    });\n}).get();\n<\/code><\/pre>\n",
+        "answer_id": 44937799,
+        "question_id": 44937484
+    }],
+    "answer_comments": {"44937799": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/PO7Uz.jpg?s=256",
+            "account_id": 2673407,
+            "user_type": "registered",
+            "user_id": 2310289,
+            "link": "https://stackoverflow.com/users/2310289/scary-wombat",
+            "reputation": 44872,
+            "display_name": "Scary Wombat"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 44937799,
+        "edited": false,
+        "creation_date": 1499300669,
+        "comment_id": 76852169
+    }]}
+}

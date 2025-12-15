@@ -1,0 +1,110 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/23dc9fa6435c2ae96156d28e28436654?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11152625,
+            "user_type": "registered",
+            "user_id": 8185351,
+            "link": "https://stackoverflow.com/users/8185351/therealjoewilson",
+            "reputation": 19,
+            "display_name": "TheRealJoeWilson"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47283759/java-sockets-cant-initialise-a-second-connection-in-the-same-program-life-cyc",
+        "last_activity_date": 1510656529,
+        "creation_date": 1510656529,
+        "answer_count": 0,
+        "title": "Java sockets - can&#39;t initialise a second connection in the same program life cycle",
+        "body": "<p>I am developing a program that makes use of java sockets. When a button is pressed (either one saying server or client), it calls a method in which initialises a connection, sends and recieves a message and then closes a connection. This works fine the first time around. However, if the connection is closed and then the user wishes to establish another connection by pressing the button, it simply just doesn't work - the connection doesn't establish. Here is the relevent code:<\/p>\n\n<p>Relevent methods from the class in which allows the users to press the buttons that let them choose to be server or client and then initialises the connection:<\/p>\n\n<pre><code>public static void server() {\n\n    JButton server = new JButton();\n    server.setText(\"Server\");\n\n    server.addActionListener(new ActionListener() {\n        @Override\n        public void actionPerformed(ActionEvent e) {\n\n            String name = nameChoice;\n            String ip = ipChoice;\n            String port = portChoice;\n            System.out.println(port);\n\n            try {\n                server2(port);\n            } catch (IOException e1) {\n                e1.printStackTrace();\n            } catch (Exception e1) {\n                e1.printStackTrace();\n            }\n\n\n        }\n    });\n\n    panel.add(server);\n\n}\n\npublic static void client() {\n\n    JButton client = new JButton();\n    client.setText(\"Client\");\n\n    client.addActionListener(new ActionListener() {\n        @Override\n        public void actionPerformed(ActionEvent e) {\n\n            String name = nameChoice;\n            String ip = ipChoice;\n            String port = portChoice;\n\n            try {\n                client2(port, ip);\n            } catch (IOException e1) {\n                e1.printStackTrace();\n            } catch (Exception e1) {\n                e1.printStackTrace();\n            }\n\n        }\n    });\n\n    panel.add(client);\n\n}\n\n\npublic static void server2(String port) throws Exception {\n\n    chatWindowScreen gui = new chatWindowScreen();\n\n    gui.frame();\n\n    System.out.println(port);\n\n    network sockets = new network();\n\n    SwingWorker worker = new SwingWorker() {\n        @Override\n        protected Object doInBackground() throws Exception {\n\n            sockets.serverSetup(port);\n            sockets.sendMsg(\"Hi\");\n            sockets.receiveMsg();\n            sockets.closeConnection();\n\n            return null;\n        }\n    };\n    worker.execute();\n\n}\n\npublic static void client2(String port, String ip) throws Exception {\n\n    chatWindowScreen gui = new chatWindowScreen();\n\n    gui.frame();\n\n    network sockets = new network();\n\n    SwingWorker worker = new SwingWorker() {\n        @Override\n        protected Object doInBackground() throws Exception {\n\n            sockets.clientSetup(port,ip);\n            sockets.receiveMsg();\n            sockets.sendMsg(\"Hi\");\n            sockets.closeConnection();\n\n            return null;\n        }\n    };\n    worker.execute();\n\n}\n<\/code><\/pre>\n\n<p>Class that deals with the sockets and connections:<\/p>\n\n<pre><code>package com.company;\n\nimport java.io.*;\nimport java.net.ServerSocket;\nimport java.net.Socket;\nimport java.text.SimpleDateFormat;\nimport java.util.Calendar;\nimport java.util.Vector;\n\npublic class network {\n\n    static ServerSocket s;\n    static Socket s1;\n    static OutputStream s1out;\n    static DataOutputStream dos;\n    static InputStream s1in;\n\n    static chatWindowScreen gui = new chatWindowScreen();\n\n    static String st;\n\n    public static Vector sentVec = new Vector();\n    public static Vector receivedVec = new Vector();\n\n    public static Vector messages = new Vector();\n\n    public static void serverSetup(String port) throws IOException {\n\n        System.out.println(\"Server\");\n        int portInt = Integer.parseInt(port);\n        s = new ServerSocket(portInt);\n        s1 = s.accept();\n        System.out.println(\"Server set up\");\n\n    }\n\n    public static void clientSetup(String port, String ip) throws IOException {\n\n        System.out.println(\"Client\");\n        int portInt = Integer.parseInt(port);\n        s1 = new Socket(ip, portInt);\n        System.out.println(\"Client set up\");\n\n    }\n\n    public static void closeConnection() throws IOException {\n\n        System.out.println(\"Closing\");\n        dos.close();\n        s1out.close();\n        s1.close();\n        System.out.println(\"Connection closed\");\n\n    }\n\n    public static void sendMsg(String message) throws IOException {\n\n        System.out.println(\"Send MSG\");\n\n        s1out = s1.getOutputStream();\n        dos = new DataOutputStream(s1out);\n        dos.writeUTF(message);\n\n        Calendar cal = Calendar.getInstance();\n        SimpleDateFormat sdf = new SimpleDateFormat(\"HH:mm:ss\");\n        String t1 = sdf.format(cal.getTime());\n\n        message = t1 + \" - \" + message;\n\n        sentVec.add(message);\n        receivedVec.add(\"\");\n\n        messages.add(message);\n\n        gui.sent.setText(\"Sent \\n\");\n\n        for (int i = 0; i &lt; sentVec.size(); i++) {\n\n            gui.sent.append(sentVec.get(i) + \"\\n\");\n\n        }\n\n        gui.received.setText(\"Received \\n\");\n\n        for (int i = 0; i &lt; receivedVec.size(); i++) {\n\n            gui.received.append(receivedVec.get(i) + \"\\n\");\n\n        }\n\n        System.out.println(\"Message sent\");\n\n    }\n\n    public static void receiveMsg() throws IOException {\n\n        System.out.println(\"Receive message\");\n\n        s1.setSoTimeout(10000);\n\n        s1in = s1.getInputStream();\n        DataInputStream dis = new DataInputStream(s1in);\n        st = (dis.readUTF());\n\n\n        Calendar cal = Calendar.getInstance();\n        SimpleDateFormat sdf = new SimpleDateFormat(\"HH:mm:ss\");\n        String t1 = sdf.format(cal.getTime());\n        st = t1 + \" - \" + st;\n\n        receivedVec.add(st);\n        sentVec.add(\"\");\n\n        messages.add(st);\n\n        gui.received.setText(\"Received \\n\");\n\n        for (int i = 0; i &lt; receivedVec.size(); i++) {\n\n            gui.received.append((String) receivedVec.get(i) + \"\\n\");\n\n        }\n\n        gui.sent.setText(\"Sent \\n\");\n\n        for (int i = 0; i &lt; sentVec.size(); i++) {\n\n            gui.sent.append((String) sentVec.get(i) + \"\\n\");\n\n        }\n\n        System.out.println(\"Message received\");\n\n    }\n\n    public static Vector getSentVec() {\n\n        return sentVec;\n\n    }\n\n    public static Vector getReceivedVec() {\n\n        return receivedVec;\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>I added in some temporary lines of code to see what's happening in the code, and this is what i got when attempting to establish a connection, close it and then open it again:<\/p>\n\n<pre><code>GUI opened\nServer\nServer set up\nSend MSG\nMessage sent\nReceive message\nMessage received\nClosing\nConnection closed\nGUI opened\nServer\n\n\nGUI opened\nClient\nClient set up\nReceive message\nMessage received\nSend MSG\nMessage sent\nClosing\nConnection closed\nGUI opened\nClient\nClient set up\nReceive message\n<\/code><\/pre>\n\n<p>As you can see from the sequence of events, the server isn't properly initialising a connection the second time.<\/p>\n\n<p>Any help would be greatly appreciated.<\/p>\n",
+        "question_id": 47283759,
+        "tags": [
+            "java",
+            "swing",
+            "sockets"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 29
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23dc9fa6435c2ae96156d28e28436654?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11152625,
+                "user_type": "registered",
+                "user_id": 8185351,
+                "link": "https://stackoverflow.com/users/8185351/therealjoewilson",
+                "reputation": 19,
+                "display_name": "TheRealJoeWilson"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47283759,
+            "edited": false,
+            "creation_date": 1510666223,
+            "comment_id": 81524133
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b8838b740a8c26535020a06d2a6d4735?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10108456,
+                "user_type": "registered",
+                "user_id": 7470253,
+                "link": "https://stackoverflow.com/users/7470253/m-prokhorov",
+                "reputation": 4013,
+                "display_name": "M. Prokhorov"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47283759,
+            "edited": false,
+            "creation_date": 1510660547,
+            "comment_id": 81520251
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23dc9fa6435c2ae96156d28e28436654?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11152625,
+                "user_type": "registered",
+                "user_id": 8185351,
+                "link": "https://stackoverflow.com/users/8185351/therealjoewilson",
+                "reputation": 19,
+                "display_name": "TheRealJoeWilson"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47283759,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/57bb0cdb81d4ca0edf2aba81da46b89e?s=256&d=identicon&r=PG",
+                "account_id": 1730559,
+                "user_type": "registered",
+                "user_id": 1584263,
+                "link": "https://stackoverflow.com/users/1584263/blafasel",
+                "reputation": 1129,
+                "display_name": "blafasel"
+            },
+            "edited": false,
+            "creation_date": 1510659395,
+            "comment_id": 81519428
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/57bb0cdb81d4ca0edf2aba81da46b89e?s=256&d=identicon&r=PG",
+                "account_id": 1730559,
+                "user_type": "registered",
+                "user_id": 1584263,
+                "link": "https://stackoverflow.com/users/1584263/blafasel",
+                "reputation": 1129,
+                "display_name": "blafasel"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 47283759,
+            "edited": false,
+            "creation_date": 1510656971,
+            "comment_id": 81517799
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

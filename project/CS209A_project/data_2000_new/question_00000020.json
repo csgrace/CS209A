@@ -1,0 +1,430 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+            "account_id": 4083657,
+            "user_type": "registered",
+            "user_id": 3353497,
+            "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+            "reputation": 51,
+            "display_name": "Ak_Crusader"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22028487/how-do-you-parse-a-difficult-txt-file",
+        "last_activity_date": 1393892995,
+        "creation_date": 1393370912,
+        "answer_count": 2,
+        "title": "How do you parse a difficult .txt file?",
+        "body": "<p>I'm fairly new to java and have been attempting to read a very difficult .txt file and input it into my MySQL DB.<\/p>\n\n<p>To me, the file has some very weird delimiting rules. the delimiting seems to be all commas but other parts just do not make any sense. here is a few examples:<\/p>\n\n<pre><code>\" \",\" \",\" \",\" \",\" \"\n\n\" \",,,,,,,\" \"\n\n\" \",0.00,\" \"\n\n\" \",,\" \",,\" \",,\" \"\n<\/code><\/pre>\n\n<p>What I do know is that all fields containing letters will be the normal <code>,\"text\",<\/code> format.<\/p>\n\n<p>all columns that only have numerals will follow this format: <code>,0.00,<\/code> except for the first column which follows the normal format <code>\"123456789\",<\/code><\/p>\n\n<p>Then anything with no data will alternate between <code>,,<\/code> or <code>,\" \",<\/code><\/p>\n\n<p>I have been able to get the program to read correctly with java.sql.Statement but I need it to work with java.sql.PreparedStatement<\/p>\n\n<p>I can get it to work with only a few columns selected but I need this to work with 100+ columns and some fields contain commas e.g. <code>\"Some Company, LLC\"<\/code><\/p>\n\n<p>Here is the code I currently have but I am at a loss as to where to go next. <\/p>\n\n<pre><code>import java.io.BufferedReader;\nimport java.io.FileReader;\nimport java.sql.*;\n\n\npublic class AccountTest {\n\n  public static void main(String[] args) throws Exception {\n\n\n        //Declare DB settings\n    String dbName = \"jdbc:mysql://localhost:3306/local\";\n    String userName = \"root\";\n    String password = \"\";\n    String fileName = \"file.txt\";\n    String psQuery = \"insert into accounttest\"\n                     + \"(account,account_name,address_1,address_2,address_3) values\"\n                     + \"(?,?,?,?,?)\";\n    Connection connect = null;\n    PreparedStatement statement = null;\n    String account = null;\n    String accountName = null;\n    String address1 = null;\n    String address2 =null;\n    String address3 = null;\n\n\n        //Load JDBC Driver\n    try {\n        Class.forName(\"com.mysql.jdbc.Driver\");\n    }\n    catch (ClassNotFoundException e) {\n        System.out.println(\"JDBC driver not found.\");\n        e.printStackTrace();\n        return;\n    }\n\n\n        //Attempt connection\n    try {\n    connect = DriverManager.getConnection(dbName,userName,password);\n    }\n    catch (SQLException e) {\n        System.out.println(\"E1: Connection Failed.\");\n        e.printStackTrace();\n        return;         \n    }\n\n\n        //Verify connection\n    if (connect != null) {\n        System.out.println(\"Connection successful.\");\n    }   \n    else {\n        System.out.println(\"E2: Connection Failed.\");\n    }\n\n\n      BufferedReader bReader = new BufferedReader(new FileReader(fileName));\n        String line;\n\n        //import file into mysql DB\n    try {\n\n        //Looping the read block until all lines in the file are read.\n    while ((line = bReader.readLine()) != null) {\n\n            //Splitting the content of comma delimited file\n        String data[] = line.split(\"\\\",\\\"\");\n\n            //Renaming array items for ease of use\n        account = data[0];\n        accountName = data[1];\n        address1 = data[2];\n        address2 = data[3];\n        address3 = data[4];\n\n            // removing double quotes so they do not get put into the db\n        account = account.replaceAll(\"\\\"\", \"\");\n        accountName = accountName.replaceAll(\"\\\"\", \"\");\n        address1 = address1.replaceAll(\"\\\"\", \"\");\n        address2 = address2.replaceAll(\"\\\"\", \"\");\n        address3 = address3.replaceAll(\"\\\"\", \"\");\n\n            //putting data into database\n        statement = connect.prepareStatement(psQuery);\n        statement.setString(1, account);\n        statement.setString(2, accountName);\n        statement.setString(3, address1);\n        statement.setString(4, address2);\n        statement.setString(5, address3);\n        statement.executeUpdate();\n    }\n    }\n    catch (Exception e) {\n        e.printStackTrace();\n        statement = null;\n    }\n    finally {\n        bReader.close();\n    }\n}   \n}\n<\/code><\/pre>\n\n<p>Sorry if it's not formatted correctly, I am still learning and after being flustered for several days trying to figure this out, I didn't bother making it look nice. <\/p>\n\n<p>My question is would something like this be possible with such a jumbled up file? if so, how do I go about making this a possibility? Also, I am not entirely familiar with prepared statements, do I have to declare every single column or is there a simpler way?<\/p>\n\n<p>Thanks in advance for your help.<\/p>\n\n<p><strong>EDIT :<\/strong> To clarify what I need is I need to upload a txt file to a MySQL database, I need a way to read and split(unless there is a better way) the data based on either <code>\",\"<\/code>, <code>,,,,<\/code>, <code>,0.00,<\/code> and still keep fields together that have commas in the field <code>Some Company, LLC<\/code>. I need to do this with 100+ columns and the file varies from 3000 to 6000 rows. Doing this as a prepared statement is required. I'm not sure if this is possible but I appreciate any input anyone might have on the matter.<\/p>\n\n<p><strong>EDIT2 :<\/strong> I was able to figure out how to get the messy file sorted out thanks to rpc1. instead of <code>String data[] = line.split(\"\\\",\\\"\");<\/code> I used <code>String data[] = line.split(\",(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)\");<\/code> I still had to write out each variable to link it to the <code>data[]<\/code> then write out each <code>statement.setString<\/code> for each column as well as write the <code>replaceALL(\"\\\"\", \"\");<\/code> for each column but I got it working and I couldn't find another way to use prepared statements. Thank you for all your help!<\/p>\n",
+        "question_id": 22028487,
+        "tags": [
+            "java",
+            "mysql",
+            "sql",
+            "jdbc"
+        ],
+        "score": 4,
+        "accepted_answer_id": 22154813,
+        "is_answered": true,
+        "view_count": 761,
+        "last_edit_date": 1393892995
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393948397,
+            "comment_id": 33659346
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393892970,
+            "comment_id": 33630885
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2l9uC.jpg?s=256",
+                "account_id": 429767,
+                "user_type": "registered",
+                "user_id": 812837,
+                "link": "https://stackoverflow.com/users/812837/clockwork-muse",
+                "reputation": 13166,
+                "display_name": "Clockwork-Muse",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393501078,
+            "comment_id": 33462493
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393443466,
+            "comment_id": 33435256
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/3x0IE.jpg?s=256",
+                "account_id": 2005516,
+                "user_type": "registered",
+                "user_id": 1795530,
+                "link": "https://stackoverflow.com/users/1795530/dic19",
+                "reputation": 17981,
+                "display_name": "dic19",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393434115,
+            "comment_id": 33429510
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393430481,
+            "comment_id": 33426589
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393429730,
+            "comment_id": 33425936
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/fz5Rwyk6.jpg?s=256",
+                "account_id": 60096,
+                "user_type": "registered",
+                "user_id": 179630,
+                "link": "https://stackoverflow.com/users/179630/gerrytan",
+                "reputation": 41213,
+                "display_name": "gerrytan",
+                "accept_rate": 64
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393374202,
+            "comment_id": 33396064
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/3x0IE.jpg?s=256",
+                "account_id": 2005516,
+                "user_type": "registered",
+                "user_id": 1795530,
+                "link": "https://stackoverflow.com/users/1795530/dic19",
+                "reputation": 17981,
+                "display_name": "dic19",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393373148,
+            "comment_id": 33395711
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 22028487,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/3x0IE.jpg?s=256",
+                "account_id": 2005516,
+                "user_type": "registered",
+                "user_id": 1795530,
+                "link": "https://stackoverflow.com/users/1795530/dic19",
+                "reputation": 17981,
+                "display_name": "dic19",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1393371852,
+            "comment_id": 33395218
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/3x0IE.jpg?s=256",
+                "account_id": 2005516,
+                "user_type": "registered",
+                "user_id": 1795530,
+                "link": "https://stackoverflow.com/users/1795530/dic19",
+                "reputation": 17981,
+                "display_name": "dic19",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22028487,
+            "edited": false,
+            "creation_date": 1393371551,
+            "comment_id": 33395112
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5aaeee96de5a548a213602fab50d31c7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4059939,
+                "user_type": "registered",
+                "user_id": 3336750,
+                "link": "https://stackoverflow.com/users/3336750/rpc1",
+                "reputation": 688,
+                "display_name": "rpc1",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1393492383,
+            "creation_date": 1393422596,
+            "body": "<p>You can cycles\nfor  example:<\/p>\n\n<pre><code>    String psQuery = \"insert into accounttest\"\n                         + \"(account,account_name,address_1,address_2,address_3,..,adrress_n) values\"\n                         + \"(?,?,?,?,?,?,..,?)\";  //you have to put m=n+2 values\n\n.....\n\n     //you can change separator \n            String data[] = line.replace(\"\\\",\\\"\",\";\").replace(\"\\\"\",\"\").split(\";\");\n\n              for(int i=0;i&lt;m;i++)\n              { \n                  if(i&lt;data.length) //if index smaller then array siz\n                      statement.setString(i+1, data[i]);\n                  else\n                      statement.setString(i+1, \"\"); //put null\n              }\n              statement.executeUpdate();\n<\/code><\/pre>\n\n<p>P.S. if your csv file large use batch insert  (addBatch()) \nand use Pattern  to split string<\/p>\n\n<pre><code>Pattern p = Pattern.compile(\";\",\"\"); \np.split(st);\n<\/code><\/pre>\n\n<p><strong>EDIT<\/strong>\nTry this split function<\/p>\n\n<pre><code>private static Pattern pSplit = Pattern.compile(\"[^,\\\"']+|\\\"([^\\\"]*)\\\"|'([^']*)'\"); //set pattern as global var\nprivate static Pattern pReplace = Pattern.compile(\"\\\"\");\npublic static Object[] split(String st)\n{\n   List&lt;String&gt; list = new ArrayList&lt;String&gt;();\n   Matcher m = pSplit.matcher(st);\n   while (m.find())\n   list.add( pReplace.matcher(m.group(0)).replaceAll(\"\")); // Add .replace(\"\\\"\", \"\") to remove surrounding quotes.\n   return list.toArray();\n}\n<\/code><\/pre>\n\n<p>for example\nintput string: <code>st=\"\\\"1212\\\",\\\"LL C ,DDD \\\",\\\"CA, SPRINGFIELD\\\",232.11,3232.00\";<\/code>\nsplit on 5 item array:<\/p>\n\n<pre><code>1212\nLL C ,DDD\nCA, SPRINGFIELD\n232.11\n3232.00\n<\/code><\/pre>\n\n<p><strong>EDIT2<\/strong><\/p>\n\n<pre><code>this example solves all your problems (even empty values)\n\n\nprivate static Pattern pSplit = Pattern.compile(\",(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)\");\npublic static String[] split2(String st)\n{\n    String[] tokens = pSplit.split(st);       \n    return tokens;\n}\n<\/code><\/pre>\n",
+            "answer_id": 22043375,
+            "question_id": 22028487,
+            "last_edit_date": 1393492383
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1393872597,
+            "creation_date": 1393872597,
+            "body": "<p>I was able to figure out both issues that I was having by this little bit of code. Again, thanks for all of your help!<\/p>\n\n<pre><code>for (String line = bReader.readLine(); line != null; line = bReader.readLine()) {   \n\n          //Splitting the content of comma delimited file\n    String data[] = line.split(\",(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)\");\n\n         //Iterating through the file and updating the table.\n    statement = connect.prepareStatement(psQuery);\n    for (int i =0; i &lt; data.length;i++) {\n        temp =  data[i];\n        temp = temp.replaceAll(\"\\\"\", \"\");\n        statement.setString(i+1, temp);\n    }\n    statement.executeUpdate();\n}\n<\/code><\/pre>\n",
+            "answer_id": 22154813,
+            "question_id": 22028487
+        }
+    ],
+    "answer_comments": {"22043375": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22043375,
+            "edited": false,
+            "creation_date": 1393529560,
+            "comment_id": 33483577
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5aaeee96de5a548a213602fab50d31c7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4059939,
+                "user_type": "registered",
+                "user_id": 3336750,
+                "link": "https://stackoverflow.com/users/3336750/rpc1",
+                "reputation": 688,
+                "display_name": "rpc1",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22043375,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "edited": false,
+            "creation_date": 1393518326,
+            "comment_id": 33475648
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22043375,
+            "edited": false,
+            "creation_date": 1393516874,
+            "comment_id": 33474522
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5aaeee96de5a548a213602fab50d31c7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4059939,
+                "user_type": "registered",
+                "user_id": 3336750,
+                "link": "https://stackoverflow.com/users/3336750/rpc1",
+                "reputation": 688,
+                "display_name": "rpc1",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22043375,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "edited": false,
+            "creation_date": 1393483600,
+            "comment_id": 33451938
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22043375,
+            "edited": false,
+            "creation_date": 1393443629,
+            "comment_id": 33435349
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5aaeee96de5a548a213602fab50d31c7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4059939,
+                "user_type": "registered",
+                "user_id": 3336750,
+                "link": "https://stackoverflow.com/users/3336750/rpc1",
+                "reputation": 688,
+                "display_name": "rpc1",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22043375,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "edited": false,
+            "creation_date": 1393438683,
+            "comment_id": 33432390
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MH0zk.jpg?s=256",
+                "account_id": 4083657,
+                "user_type": "registered",
+                "user_id": 3353497,
+                "link": "https://stackoverflow.com/users/3353497/ak-crusader",
+                "reputation": 51,
+                "display_name": "Ak_Crusader"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22043375,
+            "edited": false,
+            "creation_date": 1393430183,
+            "comment_id": 33426316
+        }
+    ]}
+}

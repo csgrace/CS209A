@@ -1,0 +1,114 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f8aaeab7463e7932968954e0624b332d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3359483,
+            "user_type": "registered",
+            "user_id": 2821620,
+            "link": "https://stackoverflow.com/users/2821620/user2821620",
+            "reputation": 11,
+            "display_name": "user2821620"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20436200/multiple-values-with-same-key-tree-set",
+        "last_activity_date": 1386380593,
+        "creation_date": 1386377905,
+        "answer_count": 1,
+        "title": "multiple values with same key tree set",
+        "body": "<p>I have a text file with some data like this<\/p>\n\n<pre><code>A+,John,James,Henry\nB+,Andrew,Chris,Andy\nO,Grant,Celina,Claudia\n<\/code><\/pre>\n\n<p>I use buffered reader to load the text into a <code>Treeset<\/code> of string, and print the set.\nNext I want to separate the names followed by the key i.e.<\/p>\n\n<pre><code>John A+\nJames A+\nHenry A+\nAndrew B+ \netc.\n<\/code><\/pre>\n\n<p>How can I assign the key to each of the names separately? I tried using split to separate the strings by commas, but I couldn't get it to work. I tried doing:<\/p>\n\n<pre><code>TreeSet&lt;String&gt; set1 = loadSetFromFile( infile2 ); \n<\/code><\/pre>\n\n<p>and then making a new list and using split to separate the commas with this line  <\/p>\n\n<pre><code>List&lt;String&gt; splitlist = Arrays.asList(set1.split(\",\"));//dont work\n<\/code><\/pre>\n\n<p>Obviously not the correct thing to do. I was thinking that maybe I would have to do it in my set loading method   <\/p>\n\n<pre><code>  static TreeSet&lt;String&gt; loadSet( BufferedReader infile ) throws Exception\n     {TreeSet&lt;String&gt; set = new TreeSet&lt;String&gt;();\n      while( infile.ready() )\n        set.add(infile.readLine());//split(\",\") lol\n      infile.close();\n      return set;\n     }\n<\/code><\/pre>\n\n<p>I would then have to somehow associate the first letter of the line with all of the following. Don't know how to do that either. Any help would be greatly appreciated.<\/p>\n",
+        "question_id": 20436200,
+        "tags": [
+            "java",
+            "treeset"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 2121,
+        "last_edit_date": 1386379014
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/351903c00c50bac0611117c1a6b82848?s=256&d=identicon&r=PG",
+            "account_id": 740820,
+            "user_type": "registered",
+            "user_id": 2353911,
+            "link": "https://stackoverflow.com/users/2353911/mena",
+            "reputation": 48632,
+            "display_name": "Mena",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1386380593,
+        "creation_date": 1386378567,
+        "body": "<p>I think you're over-complicating this. <\/p>\n\n<p>Presuming you have a file in <code>my/path<\/code> named <code>foo.txt<\/code> containing the text in your example, here's a way to process your data, with a simple <code>Map<\/code> and <code>String.split<\/code>, Java 6 style:<\/p>\n\n<pre><code>BufferedReader br = null;\ntry {\n     br = new BufferedReader(new InputStreamReader(new FileInputStream(\n            new File(\"/my/path/foo.txt\"))));\n     String line = null;\n     Map&lt;String, String&gt; input = new HashMap&lt;String, String&gt;();\n     while ((line = br.readLine()) != null) {\n         // splitting each line of the file by commas\n         String[] splitted = line.split(\",\");\n         // iterating over splitted Strings\n         for (int i = 1; i &lt; splitted.length; i++) {\n             // putting each value into map as key (starting at 2nd value), \n             // with value as first element of the splitted String\n             input.put(splitted[i], splitted[0]);\n         }\n     }\n     // printing the map\n     System.out.println(input);\n     // printing the map \"nicely\"\n     for (String key: input.keySet()) {\n         System.out.println(key.concat(\" \").concat(input.get(key)));\n     }\n}\n// your typical exception \"handling\"\ncatch (FileNotFoundException fnfe) {\n    fnfe.printStackTrace();\n}\ncatch (IOException ioe) {\n    ioe.printStackTrace();\n}\n// Java 6 style resource closing\nfinally {\n    if (br != null) {\n        try {\n            br.close();\n        }\n        catch (IOException ioe) {\n            ioe.printStackTrace();\n        }\n    }\n}\n<\/code><\/pre>\n\n<p><strong>Output<\/strong><\/p>\n\n<pre><code>{Henry=A+, Celina=O, Grant=O, James=A+, Claudia=O, Andrew=B+, John=A+, Andy=B+, Chris=B+}\n\nHenry A+\nCelina O\nGrant O\nJames A+\nClaudia O\nAndrew B+\nJohn A+\nAndy B+\nChris B+\n<\/code><\/pre>\n",
+        "answer_id": 20436297,
+        "question_id": 20436200,
+        "last_edit_date": 1386380593
+    }],
+    "answer_comments": {"20436297": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f8aaeab7463e7932968954e0624b332d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3359483,
+                "user_type": "registered",
+                "user_id": 2821620,
+                "link": "https://stackoverflow.com/users/2821620/user2821620",
+                "reputation": 11,
+                "display_name": "user2821620"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20436297,
+            "edited": false,
+            "creation_date": 1386380137,
+            "comment_id": 30529081
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/351903c00c50bac0611117c1a6b82848?s=256&d=identicon&r=PG",
+                "account_id": 740820,
+                "user_type": "registered",
+                "user_id": 2353911,
+                "link": "https://stackoverflow.com/users/2353911/mena",
+                "reputation": 48632,
+                "display_name": "Mena",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20436297,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/f8aaeab7463e7932968954e0624b332d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3359483,
+                "user_type": "registered",
+                "user_id": 2821620,
+                "link": "https://stackoverflow.com/users/2821620/user2821620",
+                "reputation": 11,
+                "display_name": "user2821620"
+            },
+            "edited": false,
+            "creation_date": 1386379597,
+            "comment_id": 30528970
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f8aaeab7463e7932968954e0624b332d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3359483,
+                "user_type": "registered",
+                "user_id": 2821620,
+                "link": "https://stackoverflow.com/users/2821620/user2821620",
+                "reputation": 11,
+                "display_name": "user2821620"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20436297,
+            "edited": false,
+            "creation_date": 1386379130,
+            "comment_id": 30528897
+        }
+    ]}
+}

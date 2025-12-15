@@ -1,0 +1,131 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0a809780f2ca5a4c0d63404d5cfcc786?s=256&d=identicon&r=PG",
+            "account_id": 2227609,
+            "user_type": "registered",
+            "user_id": 1965994,
+            "link": "https://stackoverflow.com/users/1965994/g0c00l-g33k",
+            "reputation": 2638,
+            "display_name": "g0c00l.g33k",
+            "accept_rate": 44
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37906875/exception-handling-in-rxjava",
+        "last_activity_date": 1466413548,
+        "creation_date": 1466336690,
+        "answer_count": 3,
+        "title": "Exception handling in rxjava",
+        "body": "<p>I am trying to get accustomed to <code>rxjava<\/code> and I am trying to call the below <code>QuoteReader<\/code> in an Observable. I am not sure how to handle the exception thrown,<\/p>\n\n<pre><code>public class QuoteReader {\n   public Map&lt;String, Object&gt; getQuote() throws IOException{\n       OkHttpClient okHttpClient = new OkHttpClient();\n       Request request = new Request.Builder().url(\"http://quotes.rest/qod.json\").build();\n       Gson gson = new Gson();\n       Map&lt;String, Object&gt; responseMap = null;\n\n       try(Response response = okHttpClient.newCall(request).execute()) {\n         responseMap = gson.fromJson(response.body().string(), Map.class);\n         System.out.println(\"response map : \"+responseMap);\n       } catch(IOException ioe) {\n         ioe.printStackTrace();\n         throw ioe;\n       } finally {\n         okHttpClient = null;\n         request = null;\n       }\n    return responseMap;\n  }\n}\n<\/code><\/pre>\n\n<p>The following is the rx code I am trying to write,<\/p>\n\n<pre><code>rx.Observable.just(new QuoteReader().getQuote()) //compile time error saying unhandled exception\n              .subscribe(System.out::println);\n<\/code><\/pre>\n\n<p>How should I update the code to handle the exception. Thanks!<\/p>\n",
+        "question_id": 37906875,
+        "tags": [
+            "java",
+            "lambda",
+            "exception",
+            "rx-java",
+            "reactive-programming"
+        ],
+        "score": 3,
+        "accepted_answer_id": 37918498,
+        "is_answered": true,
+        "view_count": 4541
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d584a2d5e6acd4b2e2e928fe5f90d480?s=256&d=identicon&r=PG",
+            "account_id": 3114531,
+            "user_type": "registered",
+            "user_id": 2635612,
+            "link": "https://stackoverflow.com/users/2635612/ankit-tripathi",
+            "reputation": 405,
+            "display_name": "Ankit Tripathi"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 37906875,
+        "edited": false,
+        "creation_date": 1466338523,
+        "comment_id": 63266365
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/db0a0198951e15aadcb42b40452c29f7?s=256&d=identicon&r=PG",
+                "account_id": 24127,
+                "user_type": "registered",
+                "user_id": 61158,
+                "link": "https://stackoverflow.com/users/61158/akarnokd",
+                "reputation": 70130,
+                "display_name": "akarnokd",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": true,
+            "last_activity_date": 1466413548,
+            "creation_date": 1466413548,
+            "body": "<p>Use <code>fromCallable<\/code> that allows your method to throw (plus, it gets evaluated lazily and not before you even get into the Observable world):<\/p>\n\n<pre><code>rx.Observable.fromCallable(() -&gt; new QuoteReader().getQuote())\n          .subscribe(System.out::println, Throwable::printStackTrace);\n<\/code><\/pre>\n",
+            "answer_id": 37918498,
+            "question_id": 37906875
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/12t9F.jpg?s=256",
+                "account_id": 2775794,
+                "user_type": "registered",
+                "user_id": 2389405,
+                "link": "https://stackoverflow.com/users/2389405/rvanheest",
+                "reputation": 869,
+                "display_name": "RvanHeest",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1466358283,
+            "creation_date": 1466358283,
+            "body": "<p>There is another factory method for an <code>Observable<\/code>, which is called <a href=\"http://reactivex.io/RxJava/javadoc/rx/Observable.html#create(rx.Observable.OnSubscribe)\" rel=\"nofollow\"><code>create<\/code><\/a>. This gives you an <code>Observer<\/code> as input of a lambda expression. <code>Observer<\/code> is a kind of callback object with three methods: <code>onNext(T t)<\/code>, <code>onError(Throwable e)<\/code> and <code>onCompleted<\/code>. I read you're new to RxJava, so here is a little extra as a sidenote: the Rx contract specifies that an <code>Observer<\/code> can receive zero or more <code>onNext<\/code> calls, followed by <strong>maybe<\/strong> either an <code>onError<\/code> or <code>onCompleted<\/code> call. In regular expression for this looks like: <code>onNext* (onError|onCompleted)?<\/code>.<\/p>\n\n<p>Now that you know this, you can implement your operation using <code>Observable.create<\/code>:<\/p>\n\n<pre><code>Observable.create(observer -&gt; {\n  try {\n    observer.onNext(new QuoteReader.getQuote());\n    observer.onCompleted();\n  }\n  catch (Throwable e) {\n    observer.onError(e);\n  }\n}\n<\/code><\/pre>\n\n<p>Notice that this code doesn't do anything until you subscribe to this <code>Observable<\/code> as you already did in your question!<\/p>\n",
+            "answer_id": 37910071,
+            "question_id": 37906875
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/R6DhK.jpg?s=256",
+                "account_id": 455809,
+                "user_type": "registered",
+                "user_id": 854207,
+                "link": "https://stackoverflow.com/users/854207/paul",
+                "reputation": 13619,
+                "display_name": "paul",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1466409729,
+            "creation_date": 1466361344,
+            "body": "<p>Observable pipeline does not allow you throw Exceptions. You must use runtimeExceptions. So changing your code it should looks like.<\/p>\n\n<pre><code>     try(Response response = okHttpClient.newCall(request).execute()) {\n        responseMap = gson.fromJson(response.body().string(), Map.class);\n        System.out.println(\"response map : \"+responseMap);\n   } catch(IOException ioe) {\n     ioe.printStackTrace();\n     new RuntimeException(ioe);\n<\/code><\/pre>\n\n<p>You can see a practical example here <a href=\"https://github.com/politrons/reactive/blob/master/src/test/java/rx/observables/errors/ObservableExceptions.java\" rel=\"nofollow\">https://github.com/politrons/reactive/blob/master/src/test/java/rx/observables/errors/ObservableExceptions.java<\/a><\/p>\n",
+            "answer_id": 37910543,
+            "question_id": 37906875,
+            "last_edit_date": 1466409729
+        }
+    ],
+    "answer_comments": {"37910543": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0a809780f2ca5a4c0d63404d5cfcc786?s=256&d=identicon&r=PG",
+            "account_id": 2227609,
+            "user_type": "registered",
+            "user_id": 1965994,
+            "link": "https://stackoverflow.com/users/1965994/g0c00l-g33k",
+            "reputation": 2638,
+            "display_name": "g0c00l.g33k",
+            "accept_rate": 44
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 37910543,
+        "edited": false,
+        "creation_date": 1466390770,
+        "comment_id": 63279463
+    }]}
+}

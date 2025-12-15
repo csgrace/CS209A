@@ -1,0 +1,50 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9b57ad94b18dd5a86c914c3f14e1c918?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15358199,
+            "user_type": "registered",
+            "user_id": 11079905,
+            "link": "https://stackoverflow.com/users/11079905/carlosu",
+            "reputation": 41,
+            "display_name": "carlosU"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/65773472/apache-airflow-2-0-0-trigger-a-dag-run-via-the-stable-rest-api-fails-with-forbid",
+        "last_activity_date": 1611047399,
+        "creation_date": 1610968524,
+        "answer_count": 1,
+        "title": "Apache Airflow 2.0.0 Trigger a DAG Run via the Stable REST API fails with FORBIDDEN",
+        "body": "<p><strong>Apache Airflow version<\/strong>:<\/p>\n<p>2.0.0<\/p>\n<p><strong>Environment<\/strong>:<\/p>\n<ul>\n<li><strong>Cloud provider or hardware configuration<\/strong>: OpenStack -&gt; VM -&gt; Docker container<\/li>\n<li><strong>OS<\/strong> (e.g. from /etc/os-release): Debian GNU/Linux 10 (buster)<\/li>\n<li><strong>Kernel<\/strong> (e.g. <code>uname -a<\/code>): Linux 77f8efd77516 4.4.0-193-generic #224-Ubuntu<\/li>\n<\/ul>\n<p><strong>What happened<\/strong>:<\/p>\n<p>I am trying to trigger a DAG run via the new stable REST-API <code>1.0.0<\/code> by using a Java-based client. The Java client is generated from the Airflow OpenAPI specification with OpenAPI generator version <code>5.0.0<\/code> .<\/p>\n<p>Custom configurations in my <code>airflow.cfg<\/code>:<\/p>\n<pre><code>web_server_host = 0.0.0.0\nweb_server_port = 8080\nauth_backend = airflow.api.auth.backend.default\n\n<\/code><\/pre>\n<p>In addition I have created one admin user:<\/p>\n<pre><code>airflow users create \\\n    --username admin \\\n    --password secret \\\n    --firstname john \\\n    --lastname doe \\\n    --role Admin \\\n    --email john.doe@example.com\n<\/code><\/pre>\n<p>In Airflow  I have one active DAG <code>demo<\/code><\/p>\n<p>I trigger the DAG execution via the java client with the following code snippet:<\/p>\n<pre><code>ApiClient defaultClient = Configuration.getDefaultApiClient();\ndefaultClient.setBasePath(&quot;http://1.2.3.4:8080/api/v1);\nDagRunApi dagRunApi = new DagRunApi(defaultClient);\nDAGRun dagRun = new DAGRun();\ntry {\n      DAGRun result = dagRunApi.postDagRun(&quot;demo&quot;, dagRun);\n\n      LOGGER.debug(result);\n\n    } catch (ApiException e) {\n      e.printStackTrace();\n    }\n\n<\/code><\/pre>\n<p>However, I receive the following exception:<\/p>\n<pre><code>org.openapitools.client.ApiException: FORBIDDEN\n    at org.openapitools.client.ApiClient.handleResponse(ApiClient.java:1012)\n    at org.openapitools.client.ApiClient.execute(ApiClient.java:925)\n    at org.openapitools.client.api.DagRunApi.postDagRunWithHttpInfo(DagRunApi.java:740)\n    at org.openapitools.client.api.DagRunApi.postDagRun(DagRunApi.java:715)\n    at de.baas.evaluation.scheduler.airflow.ExternalTrigger.triggerDAGRun(ExternalTrigger.java:46)\n    at de.baas.evaluation.scheduler.service.BaaSScheduler$1.message(BaaSScheduler.java:60)\n    at de.baas.evaluation.scheduler.service.BaaSScheduler$1.message(BaaSScheduler.java:53)\n    at io.lettuce.core.pubsub.PubSubEndpoint.notifyListeners(PubSubEndpoint.java:217)\n    at io.lettuce.core.pubsub.PubSubEndpoint.notifyMessage(PubSubEndpoint.java:206)\n    at io.lettuce.core.pubsub.PubSubCommandHandler.doNotifyMessage(PubSubCommandHandler.java:292)\n    at io.lettuce.core.pubsub.PubSubCommandHandler.notifyPushListeners(PubSubCommandHandler.java:223)\n    at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:606)\n    at io.lettuce.core.pubsub.PubSubCommandHandler.decode(PubSubCommandHandler.java:112)\n    at io.lettuce.core.protocol.CommandHandler.channelRead(CommandHandler.java:560)\n    at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)\n    at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)\n    at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)\n    at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)\n    at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)\n    at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)\n    at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)\n    at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)\n    at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:714)\n    at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:650)\n    at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:576)\n    at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)\n    at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)\n    at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)\n    at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n    at java.lang.Thread.run(Thread.java:748)\n<\/code><\/pre>\n<p>The Airflow logs do not show any error message.<\/p>\n<p><strong>What you expected to happen<\/strong>:<\/p>\n<p>Previously, I also the outdated experimental REST-API to trigger tasks externally (without a client but using custom REST calls) and it worked without issues.<\/p>\n<p>With the new stable API it seems that my client does not have sufficient permissions even if the authentication is deactivated via <code>airflow.api.auth.backend.default<\/code><\/p>\n<p>But also adding username and password to the client creation via<\/p>\n<pre><code>defaultClient.setUsername(&quot;admin&quot;);\ndefaultClient.setPassword(&quot;secret&quot;);\n<\/code><\/pre>\n<p>results in the same error: <code>FORBIDDEN<\/code><\/p>\n<p>Do I need to create a dedicated REST-API user and if yes is there any documentation on this topic?<\/p>\n<p><strong>How to reproduce it<\/strong>:<\/p>\n<p>Create the Java client (probably any client will produce this error) via OpenAPI generator:<\/p>\n<ol>\n<li><code>java -jar codegen/openapi-generator-cli-5.0.0.jar generate -i openapi.yaml -g java  -o .<\/code><\/li>\n<li>create a simple java class and apply the code snippets from above<\/li>\n<\/ol>\n",
+        "question_id": 65773472,
+        "tags": [
+            "java",
+            "airflow",
+            "openapi"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 1810
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9b57ad94b18dd5a86c914c3f14e1c918?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15358199,
+            "user_type": "registered",
+            "user_id": 11079905,
+            "link": "https://stackoverflow.com/users/11079905/carlosu",
+            "reputation": 41,
+            "display_name": "carlosU"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1611047399,
+        "creation_date": 1611047399,
+        "body": "<p>In case anyone else runs into the issue, I was able to resolve it as follows:<\/p>\n<ol>\n<li><p>change the auth backend to <code>auth_backend = airflow.api.auth.backend.basic_auth<\/code> because <code>airflow.api.auth.backend.default<\/code> does not work with the new REST-API<\/p>\n<\/li>\n<li><p>apply the following change to the Airflow <code>openapi.yaml<\/code> which is required to generate the client code corretly (otherwise username/password) are not transmitted corretly, see also:  <a href=\"https://github.com/apache/airflow/issues/13739\" rel=\"nofollow noreferrer\">https://github.com/apache/airflow/issues/13739<\/a><\/p>\n<\/li>\n<\/ol>\n<pre><code># The API will provide support for plugins to support various authorization mechanisms.\n# Detailed information will be available in the plugin specification.\nsecurity:\n  - Basic: []\n<\/code><\/pre>\n<ol start=\"3\">\n<li>Set the username/password in the java code as follows:<\/li>\n<\/ol>\n<pre><code>// Configure HTTP basic authorization: Basic\n    HttpBasicAuth Basic = (HttpBasicAuth) defaultClient.getAuthentication(&quot;Basic&quot;);\n    Basic.setUsername(&quot;admin&quot;);\n    Basic.setPassword(&quot;secret&quot;);\n<\/code><\/pre>\n",
+        "answer_id": 65788385,
+        "question_id": 65773472
+    }],
+    "answer_comments": {}
+}

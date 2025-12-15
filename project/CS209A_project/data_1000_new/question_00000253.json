@@ -1,0 +1,135 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a/ALm5wu39GunpK-Oj8KtlvZgisKK4N77PjSCNeE8ZUATNhA=k-s256",
+            "account_id": 26955208,
+            "user_type": "registered",
+            "user_id": 20523711,
+            "link": "https://stackoverflow.com/users/20523711/pastel-dark-blue",
+            "reputation": 1,
+            "display_name": "Pastel-dark-blue"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/74466996/apply-xslt-to-xml-in-android-java",
+        "last_activity_date": 1668717141,
+        "creation_date": 1668631530,
+        "answer_count": 1,
+        "title": "Apply XSLT to XML in android (Java)",
+        "body": "<p>I need to transform XML in txt with the help of XSLT. While transforming tasks should be group by categories.\nI've tried an online transformer, and everything worked, but Android doesn't.\n<img src=\"https://i.sstatic.net/2V8ZN.png\" alt=\"online transformer\" /><\/p>\n<p>I've got an XML file:<\/p>\n<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;\n&lt;TaskInfo&gt;\n    &lt;TaskList&gt;\n        &lt;Task date=&quot;12.11.2022&quot; taskText=&quot;1&quot; category=&quot;Нет категории&quot;/&gt;\n        &lt;Task date=&quot;12.11.2022&quot; taskText=&quot;2&quot; category=&quot;joblnlnl&quot;/&gt;\n    &lt;/TaskList&gt;\n    &lt;CategoryList&gt;\n        &lt;Category value=&quot;Нет категории&quot;/&gt;\n        &lt;Category value=&quot;joblnlnl&quot;/&gt;\n    &lt;/CategoryList&gt;\n&lt;/TaskInfo&gt;\n<\/code><\/pre>\n<p>I need to transform it to text with xslt. Also I need to <strong>group tasks by category<\/strong>, and now (with the xslt below) I'm just trying to print categories, but even this doesn't work.\nMy xslt:<\/p>\n<pre><code>&lt;xsl:stylesheet version=&quot;2.0&quot;\n   xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;&gt;\n   \n    &lt;xsl:output method=&quot;text&quot; \n        omit-xml-declaration=&quot;yes&quot;\n        encoding=&quot;UTF-8&quot;/&gt;\n        \n    &lt;xsl:template match=&quot;/TaskInfo/TaskList&quot;&gt;\n        &lt;xsl:for-each-group select=&quot;Task&quot; group-by=&quot;@category&quot;&gt;\n            &lt;xsl:value-of select=&quot;current-grouping-key()&quot; /&gt;\n            &lt;xsl:text&gt;&amp;#xa;&lt;/xsl:text&gt;\n        &lt;/xsl:for-each-group&gt;\n    &lt;/xsl:template&gt;\n\n&lt;/xsl:stylesheet&gt;\n<\/code><\/pre>\n<p>In java code I am using a method:<\/p>\n<pre><code>public static boolean createTxtFromXml(String xmlFileName, String xsltFileName,\nString resultFileName, String date,\nActivity activity)\n{\ntry{\n// создание xslt файла\nString xslt =\n&quot;\\&lt;xsl:stylesheet version=&quot;2.0&quot;\\\\n&quot; +\n&quot;   xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform%5C%22%3E%5Cn%22 +\n&quot;   \\\\n&quot; +\n&quot;\\\\t\\&lt;xsl:output method=&quot;text&quot; \\\\n&quot; +\n&quot;\\\\t\\\\tomit-xml-declaration=&quot;yes&quot;\\\\n&quot; +\n&quot;\\\\t\\\\tencoding=&quot;UTF-8&quot;/\\&gt;\\\\n&quot; +\n&quot;\\\\t\\\\t\\\\n&quot; +\n&quot;\\\\t\\&lt;xsl:template match=&quot;/TaskInfo/TaskList&quot;\\&gt;\\\\n&quot; +\n&quot;\\\\t\\\\t\\&lt;xsl:for-each-group select=&quot;Task&quot; group-by=&quot;@category&quot;\\&gt;\\\\n&quot; +\n&quot;\\\\t\\\\t\\\\t\\&lt;xsl:value-of select=&quot;current-grouping-key()&quot; /\\&gt;\\\\n&quot; +\n&quot;\\\\t\\\\t\\\\t\\&lt;xsl:text\\&gt;\n\\&lt;/xsl:text\\&gt;\\\\n&quot; +\n&quot;\\\\t\\\\t\\&lt;/xsl:for-each-group\\&gt;\\\\n&quot; +\n&quot;\\\\t\\&lt;/xsl:template\\&gt;\\\\n&quot; +\n&quot;\\\\n&quot; +\n&quot;\\&lt;/xsl:stylesheet\\&gt;\\\\n&quot;;\n\n        File xslt_file = new File(activity.getFilesDir(), xsltFileName);\n        FileWriter fw = new FileWriter(xslt_file, false);\n        fw.write(xslt);\n        fw.close();\n    \n        //\n        FileInputStream xml_file_istream = activity.openFileInput(xmlFileName);\n        FileInputStream xslt_file_istream = activity.openFileInput(xsltFileName);\n        FileOutputStream result_file_ostream = activity.openFileOutput(resultFileName, MODE_PRIVATE);\n    \n        TransformerFactory factory = TransformerFactory.newInstance();\n    \n        Source xml_source = new StreamSource(xml_file_istream);\n        Source xslt_source = new StreamSource(xslt_file_istream);\n    \n        Transformer transformer = factory.newTransformer(xslt_source);\n        transformer.transform(xml_source, new StreamResult(result_file_ostream));\n    \n        return true;\n    }\n    catch(Exception e){\n        Log.d(&quot;Lab_8_bd&quot;, e.getMessage());\n        return false;\n    }\n\n}\n<\/code><\/pre>\n<p>Expected result in my txt file:<\/p>\n<pre><code>Нет категории\njoblnlnl\n<\/code><\/pre>\n<p>But on this string null pointer is returning, so file isn't created:\nTransformer transformer = factory.newTransformer(xslt_source);<\/p>\n<p><img src=\"https://i.sstatic.net/aoOil.png\" alt=\"debugger\" /><\/p>\n",
+        "question_id": 74466996,
+        "tags": [
+            "java",
+            "android",
+            "xml",
+            "xslt"
+        ],
+        "score": 0,
+        "accepted_answer_id": 74481750,
+        "is_answered": true,
+        "view_count": 85,
+        "last_edit_date": 1668653852
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3ea75023c3c487f36257090d420b7c50?s=256&d=identicon&r=PG",
+                "account_id": 91947,
+                "user_type": "registered",
+                "user_id": 252228,
+                "link": "https://stackoverflow.com/users/252228/martin-honnen",
+                "reputation": 168833,
+                "display_name": "Martin Honnen",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 74466996,
+            "edited": false,
+            "creation_date": 1668690055,
+            "comment_id": 131470340
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a/ALm5wu39GunpK-Oj8KtlvZgisKK4N77PjSCNeE8ZUATNhA=k-s256",
+                "account_id": 26955208,
+                "user_type": "registered",
+                "user_id": 20523711,
+                "link": "https://stackoverflow.com/users/20523711/pastel-dark-blue",
+                "reputation": 1,
+                "display_name": "Pastel-dark-blue"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 74466996,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/3ea75023c3c487f36257090d420b7c50?s=256&d=identicon&r=PG",
+                "account_id": 91947,
+                "user_type": "registered",
+                "user_id": 252228,
+                "link": "https://stackoverflow.com/users/252228/martin-honnen",
+                "reputation": 168833,
+                "display_name": "Martin Honnen",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1668658544,
+            "comment_id": 131460929
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3ea75023c3c487f36257090d420b7c50?s=256&d=identicon&r=PG",
+                "account_id": 91947,
+                "user_type": "registered",
+                "user_id": 252228,
+                "link": "https://stackoverflow.com/users/252228/martin-honnen",
+                "reputation": 168833,
+                "display_name": "Martin Honnen",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 74466996,
+            "edited": false,
+            "creation_date": 1668632718,
+            "comment_id": 131456002
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3ea75023c3c487f36257090d420b7c50?s=256&d=identicon&r=PG",
+                "account_id": 91947,
+                "user_type": "registered",
+                "user_id": 252228,
+                "link": "https://stackoverflow.com/users/252228/martin-honnen",
+                "reputation": 168833,
+                "display_name": "Martin Honnen",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 74466996,
+            "edited": false,
+            "creation_date": 1668632574,
+            "comment_id": 131455963
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a/ALm5wu39GunpK-Oj8KtlvZgisKK4N77PjSCNeE8ZUATNhA=k-s256",
+            "account_id": 26955208,
+            "user_type": "registered",
+            "user_id": 20523711,
+            "link": "https://stackoverflow.com/users/20523711/pastel-dark-blue",
+            "reputation": 1,
+            "display_name": "Pastel-dark-blue"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1668717141,
+        "creation_date": 1668717141,
+        "body": "<p>As a result I changed TXT format to XML. So now I have an XSLT file that groups tasks with a selected date into categories.:<\/p>\n<pre><code>&lt;?xml version=&quot;1.0&quot;?&gt; \n&lt;xsl:stylesheet version=&quot;1.0&quot; exclude-result-prefixes=&quot;xsl&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;&gt; \n&lt;xsl:output method=&quot;xml&quot; encoding=&quot;utf-8&quot; indent=&quot;yes&quot;&quot; \n             xslt:indent-amount=&quot;3&quot; xmlns:xslt=&quot;http://xml.apache.org/xslt&quot;/&gt; \n             \n&lt;xsl:key name=&quot;group&quot; match=&quot;Task&quot; use=&quot;@category&quot;/&gt; \n \n&lt;xsl:template match=&quot;TaskInfo/TaskList&quot;&gt; \n&lt;xsl:text&gt;&amp;#xa;&lt;/xsl:text&gt;\n    &lt;Tasks&gt; \n        &lt;xsl:attribute name=&quot;date&quot;&gt; \n            &lt;xsl:text&gt;17.11.2022&lt;/xsl:text&gt;\n        &lt;/xsl:attribute&gt; \n        &lt;xsl:apply-templates select=&quot;Task[generate-id(.) = generate-id(key('group',@category))]&quot; /&gt; \n    &lt;/Tasks&gt; \n&lt;/xsl:template&gt; \n\n&lt;xsl:template match=&quot;Task&quot;&gt; \n    &lt;Category&gt; \n       &lt;xsl:attribute name=&quot;value&quot;&gt; \n           &lt;xsl:value-of select = &quot;@category&quot;/&gt; \n       &lt;/xsl:attribute&gt; \n        &lt;xsl:for-each select=&quot;key('group',@category)&quot;&gt; \n            &lt;xsl:if test=&quot;@date='17.11.2022'&quot;&gt;\n                &lt;TaskText&gt;&lt;xsl:value-of select=&quot;@taskText&quot;/&gt;&lt;/TaskText&gt; \n            &lt;/xsl:if&gt; \n        &lt;/xsl:for-each&gt;\n    &lt;/Category&gt; \n&lt;/xsl:template&gt; \n\n&lt;/xsl:stylesheet&gt;\n<\/code><\/pre>\n<p>Where 17.11.2022 date can be changed to the selected one.<\/p>\n",
+        "answer_id": 74481750,
+        "question_id": 74466996
+    }],
+    "answer_comments": {}
+}

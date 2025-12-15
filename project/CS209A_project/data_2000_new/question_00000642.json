@@ -1,0 +1,138 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-cAccWZLBsGk/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rcJyzWW8aqlLPbxXorAEUuUiLaakA/s256-rj/photo.jpg",
+            "account_id": 16300051,
+            "user_type": "registered",
+            "user_id": 11771398,
+            "link": "https://stackoverflow.com/users/11771398/surendra-kumar-a-m",
+            "reputation": 13,
+            "display_name": "surendra kumar A M"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59070200/how-to-run-a-desktop-applicationtpt-from-java-api",
+        "last_activity_date": 1574860239,
+        "creation_date": 1574857528,
+        "answer_count": 0,
+        "title": "How to run a Desktop application(TPT) from JAVA API?",
+        "body": "<p>I have a java code to run an application using Java API. API plug-in is installed and activated in the application. But When I run the java code in Command Prompt, it is showing error, without opening the TPT application. Not getting even .class file also.<\/p>\n\n<p>Could anyone help me with this?<\/p>\n\n<p>Here is the code:<\/p>\n\n<pre><code>package com.piketec.tpt.api.example;\n\nimport java.io.File;\nimport java.rmi.RemoteException;\nimport java.rmi.registry.LocateRegistry;\nimport java.rmi.registry.Registry;\nimport java.util.Collection;\nimport java.util.List;\n\nimport com.piketec.tpt.api.ApiException;\nimport com.piketec.tpt.api.ExecutionConfiguration;\nimport com.piketec.tpt.api.ExecutionStatus;\nimport com.piketec.tpt.api.OpenResult;\nimport com.piketec.tpt.api.PlatformConfiguration;\nimport com.piketec.tpt.api.Project;\nimport com.piketec.tpt.api.RemoteCollection;\nimport com.piketec.tpt.api.TestCaseExecutionStatus;\nimport com.piketec.tpt.api.TestCaseExecutionStatus.TestCaseStatus;\nimport com.piketec.tpt.api.TptApi;\nimport com.piketec.tpt.api.properties.PropertyMap;\n\n/**\n * This example will open the given TPT-File in TPT. Then it will try to execute every execution\n * configuration. It will print the current status to System.out and if error occure it will print\n * the logs as well. Further it will cancel each execution, if the the number of pendig tests is &lt;=\n * 2.\n *\n * @author Joachim Kuhnert, PikeTec GmbH\n *\n */\npublic class ExampleTestExecution {\n\n  // TODO: Adjust the file path\n  /**\n   * The TPT-File to load. Adjust this to an valid one!\n   */\n  private static final File TPT_FILE = new File(\"VRT_CPC_nG_v1.13_167_M274.tpt\");\n\n  private static final String HOST = \"localhost\";\n\n  private static final int PORT = 1099;\n\n  private static final String BINDING_NAME = \"TptApi\";\n\n  public static void main(String[] args) {\n    if (!(TPT_FILE.exists() &amp;&amp; TPT_FILE.isFile())) {\n      System.out.println(\"Please check that the field TPT_FILE points to a valid file\");\n      return;\n    }\n    try {\n      Registry registry = LocateRegistry.getRegistry(HOST, PORT); // get Server/RMI-Registry\n      TptApi remoteApi = (TptApi)registry.lookup(BINDING_NAME); // get TPT-API\n      OpenResult openResult = remoteApi.openProject(TPT_FILE.getAbsoluteFile()); // open attached\n                                                                                 // tpt-File\n      Project project = openResult.getProject(); // recieve the now open project\n\n      RemoteCollection&lt;ExecutionConfiguration&gt; executionConfigurations =\n          project.getExecutionConfigurations();\n      for (PlatformConfiguration pCfg : project.getPlatformConfigurations().getItems()) {\n        PropertyMap properties = pCfg.getProperties();\n        System.out.println(properties);\n        System.out.println(\"------------------------------------------------\");\n      }\n      for (ExecutionConfiguration execCfg : executionConfigurations.getItems()) {\n        System.out.println(\"//// Running execution configuration \" + execCfg.getName() + \" ////\");\n        ExecutionStatus execStatus = remoteApi.run(execCfg); // execute the execution configuration\n\n        while (execStatus.isPending()) { // wait so the execution has a chance to start\n          Thread.sleep(1000);\n        }\n\n        int pending;\n        int size = execStatus.getAllTestCases().size();\n        while (execStatus.isRunning()) {\n          pending = execStatus.getNumberOfPendingTestCases();\n          // print some status information\n          System.out.println(size - pending + \" von \" + execStatus.getNumberOfAllTestCases());\n          System.out.println(testCasesToStatusString(execStatus.getAllTestCases()));\n          System.out.println(\"Total Status: \" + execStatus.getTotalExecutionStatus().name());\n          if (pending &lt;= 2) { // cacel showcase: don't execute last 2 testcases (3rd last execution\n            // is likely to be interrupted and fails in this case)\n            System.out.println();\n            System.out.println(\"//////////////////////////\");\n            System.out.println(\"//// CANCEL EXECUTION ////\");\n            System.out.println(\"//////////////////////////\");\n            System.out.println();\n            execStatus.cancel();\n          } else {\n            Thread.sleep(1000);\n          }\n        }\n\n        // print the logs for failed testcases\n        System.out.println();\n        System.out.println(\"//// Printing logs of failed Testcases ////\");\n        for (TestCaseExecutionStatus testCaseExecutionStatus : execStatus.getAllTestCases()) {\n          if (testCaseExecutionStatus.getStatus() == TestCaseStatus.ResultError\n              || testCaseExecutionStatus.getStatus() == TestCaseStatus.ResultFailed) {\n            System.out.println();\n            System.out.println(\n                \"[FAILED] test case: \\\"\" + testCaseExecutionStatus.getTestcase().getName() + \"\\\"\");\n            printStringList(testCaseExecutionStatus.getStatusLog());\n          }\n        }\n        System.out.println();\n      }\n\n      project.closeProject(); // close the project\n\n    } catch (Exception e) {\n      System.err.println(e);\n      e.printStackTrace();\n    }\n  }\n\n  private static String testCasesToStatusString(Collection&lt;TestCaseExecutionStatus&gt; stati) {\n    StringBuilder sb = new StringBuilder();\n    for (TestCaseExecutionStatus status : stati) {\n      if (sb.length() &gt; 0) {\n        sb.append(\", \");\n      }\n      try {\n        sb.append(status.getStatus().toString());\n      } catch (ApiException | RemoteException e) {\n        sb.append(\"&lt;error&gt;\");\n      }\n    }\n    return sb.toString();\n  }\n\n  private static void printStringList(List&lt;String&gt; list) {\n    for (String str : list) {\n      System.out.println(\"   \" + str);\n    }\n  }\n\n}\n<\/code><\/pre>\n\n<p>Here is the error in the command prompt:<\/p>\n\n<pre><code>                                              ^\n  symbol:   variable TestCaseStatus\n  location: class ExampleTestExecution\nExampleTestExecution.java:98: error: cannot find symbol\n              || testCaseExecutionStatus.getStatus() == TestCaseStatus.ResultFailed) {\n                                                        ^\n  symbol:   variable TestCaseStatus\n  location: class ExampleTestExecution\nExampleTestExecution.java:118: error: cannot find symbol\n    for (TestCaseExecutionStatus status : stati) {\n         ^\n  symbol:   class TestCaseExecutionStatus\n  location: class ExampleTestExecution\nExampleTestExecution.java:124: error: cannot find symbol\n      } catch (ApiException | RemoteException e) {\n               ^\n  symbol:   class ApiException\n  location: class ExampleTestExecution\n27 errors\n<\/code><\/pre>\n\n<p>The above error is just a part of the error.<\/p>\n\n<p>How can I open a application using Java API in command prompt?<\/p>\n",
+        "question_id": 59070200,
+        "tags": ["java"],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 302,
+        "last_edit_date": 1574860239
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a8f86800ac12de3897d00d7b265eb93?s=256&d=identicon&r=PG",
+                "account_id": 1195619,
+                "user_type": "registered",
+                "user_id": 1167428,
+                "link": "https://stackoverflow.com/users/1167428/lupz",
+                "reputation": 3648,
+                "display_name": "lupz",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070200,
+            "edited": false,
+            "creation_date": 1574862549,
+            "comment_id": 104381168
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-cAccWZLBsGk/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rcJyzWW8aqlLPbxXorAEUuUiLaakA/s256-rj/photo.jpg",
+                "account_id": 16300051,
+                "user_type": "registered",
+                "user_id": 11771398,
+                "link": "https://stackoverflow.com/users/11771398/surendra-kumar-a-m",
+                "reputation": 13,
+                "display_name": "surendra kumar A M"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070200,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6a8f86800ac12de3897d00d7b265eb93?s=256&d=identicon&r=PG",
+                "account_id": 1195619,
+                "user_type": "registered",
+                "user_id": 1167428,
+                "link": "https://stackoverflow.com/users/1167428/lupz",
+                "reputation": 3648,
+                "display_name": "lupz",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1574861763,
+            "comment_id": 104380743
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a8f86800ac12de3897d00d7b265eb93?s=256&d=identicon&r=PG",
+                "account_id": 1195619,
+                "user_type": "registered",
+                "user_id": 1167428,
+                "link": "https://stackoverflow.com/users/1167428/lupz",
+                "reputation": 3648,
+                "display_name": "lupz",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070200,
+            "edited": false,
+            "creation_date": 1574861552,
+            "comment_id": 104380617
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-cAccWZLBsGk/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rcJyzWW8aqlLPbxXorAEUuUiLaakA/s256-rj/photo.jpg",
+                "account_id": 16300051,
+                "user_type": "registered",
+                "user_id": 11771398,
+                "link": "https://stackoverflow.com/users/11771398/surendra-kumar-a-m",
+                "reputation": 13,
+                "display_name": "surendra kumar A M"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070200,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/a648ccb47bbbe9497c073315aac4d33e?s=256&d=identicon&r=PG",
+                "account_id": 17835,
+                "user_type": "registered",
+                "user_id": 40342,
+                "link": "https://stackoverflow.com/users/40342/joachim-sauer",
+                "reputation": 309298,
+                "display_name": "Joachim Sauer",
+                "accept_rate": 62
+            },
+            "edited": false,
+            "creation_date": 1574859871,
+            "comment_id": 104379667
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a648ccb47bbbe9497c073315aac4d33e?s=256&d=identicon&r=PG",
+                "account_id": 17835,
+                "user_type": "registered",
+                "user_id": 40342,
+                "link": "https://stackoverflow.com/users/40342/joachim-sauer",
+                "reputation": 309298,
+                "display_name": "Joachim Sauer",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070200,
+            "edited": false,
+            "creation_date": 1574858330,
+            "comment_id": 104378824
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

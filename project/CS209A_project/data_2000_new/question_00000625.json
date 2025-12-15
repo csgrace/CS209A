@@ -1,0 +1,171 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e98c6cbf384ef03ecc020d584e9e6a74?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 145145,
+            "user_type": "registered",
+            "user_id": 354742,
+            "link": "https://stackoverflow.com/users/354742/dan",
+            "reputation": 16356,
+            "display_name": "Dan",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/4183646/java-md5-the-php-way",
+        "last_activity_date": 1414052139,
+        "creation_date": 1289818832,
+        "answer_count": 5,
+        "title": "Java md5, the PHP way",
+        "body": "<p>I have been working on this for hours, but I can't get it to work.<\/p>\n\n<p>Basically I am developing a REST client in Java for a REST server in PHP. Both the client and the server have to compute the md5 of a string and the server will compare them for authentication (kinda).<\/p>\n\n<p>On the server, the PHP code is:<\/p>\n\n<pre><code>md5(\"getTokenapi_keybf8ddfs845jhre980543jhsjfro93fd8capi_ver1tokeniud9ER£jdfff\");\n<\/code><\/pre>\n\n<p>that generates:<\/p>\n\n<pre><code>4d7b2e42c3dfd11de3e77b9fe2211b87\n<\/code><\/pre>\n\n<p>Nice!<\/p>\n\n<p>Here is the code for the client:<\/p>\n\n<pre><code>import java.security.*;\n....\nString s = \"getTokenapi_keybf8ddfs845jhre980543jhsjfro93fd8capi_ver1tokeniud9ER£jdfff\";\nbyte[] bytesOfMessage = s.getBytes(\"UTF-8\");\nMessageDigest md = MessageDigest.getInstance(\"MD5\");\nbyte[] thedigest = md.digest(bytesOfMessage);    \n\nSystem.out.println(\"String2: \" + thedigest);        \nSystem.out.println(\"String3: \" + new String(thedigest));\n<\/code><\/pre>\n\n<p>That generates:<\/p>\n\n<pre><code>String2: [B@42e816\nString3: M{.B�����{��!�\n<\/code><\/pre>\n\n<p>How can I get Java to compute the md5 sum the same way PHP does, please?<\/p>\n\n<p>Thanks, \nDan<\/p>\n",
+        "question_id": 4183646,
+        "tags": [
+            "java",
+            "md5"
+        ],
+        "score": 9,
+        "accepted_answer_id": 4183677,
+        "is_answered": true,
+        "view_count": 11437
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c5383375813365fd284d1f4d3d6d57a7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 160478,
+                "user_type": "registered",
+                "user_id": 380579,
+                "link": "https://stackoverflow.com/users/380579/xil3",
+                "reputation": 16479,
+                "display_name": "xil3",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 24,
+            "is_accepted": true,
+            "last_activity_date": 1405335508,
+            "creation_date": 1289819034,
+            "body": "<p>Give this a try:<\/p>\n\n<pre><code>public static String md5(String input) throws NoSuchAlgorithmException {\n    String result = input;\n    if(input != null) {\n        MessageDigest md = MessageDigest.getInstance(\"MD5\"); //or \"SHA-1\"\n        md.update(input.getBytes());\n        BigInteger hash = new BigInteger(1, md.digest());\n        result = hash.toString(16);\n        while(result.length() &lt; 32) { //40 for SHA-1\n            result = \"0\" + result;\n        }\n    }\n    return result;\n}\n<\/code><\/pre>\n\n<p>code from <a href=\"http://web.archive.org/web/20140209230440/http://www.sergiy.ca/how-to-make-java-md5-and-sha-1-hashes-compatible-with-php-or-mysql/\" rel=\"noreferrer\">http://web.archive.org/web/20140209230440/http://www.sergiy.ca/how-to-make-java-md5-and-sha-1-hashes-compatible-with-php-or-mysql/<\/a><\/p>\n",
+            "answer_id": 4183677,
+            "question_id": 4183646,
+            "last_edit_date": 1405335508
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e98c6cbf384ef03ecc020d584e9e6a74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 145145,
+                "user_type": "registered",
+                "user_id": 354742,
+                "link": "https://stackoverflow.com/users/354742/dan",
+                "reputation": 16356,
+                "display_name": "Dan",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1289819235,
+            "creation_date": 1289819235,
+            "body": "<p>Found myself:<\/p>\n\n<pre><code>import java.math.BigInteger;\n..\npublic static String md5(String input) throws NoSuchAlgorithmException {\n        String result = input;\n        if(input != null) {\n            MessageDigest md = MessageDigest.getInstance(\"MD5\"); //or \"SHA-1\"\n            md.update(input.getBytes());\n            BigInteger hash = new BigInteger(1, md.digest());\n            result = hash.toString(16);\n            if ((result.length() % 2) != 0) {\n                result = \"0\" + result;\n            }\n        }\n        return result;\n    }\n<\/code><\/pre>\n\n<p>Source: <a href=\"http://www.sergiy.ca/how-to-make-java-md5-and-sha-1-hashes-compatible-with-php-or-mysql/\" rel=\"nofollow\">http://www.sergiy.ca/how-to-make-java-md5-and-sha-1-hashes-compatible-with-php-or-mysql/<\/a><\/p>\n",
+            "answer_id": 4183709,
+            "question_id": 4183646
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/436c5d2986a9ecea71a83edec6bc075d?s=256&d=identicon&r=PG",
+                "account_id": 125129,
+                "user_type": "registered",
+                "user_id": 320702,
+                "link": "https://stackoverflow.com/users/320702/decko",
+                "reputation": 19465,
+                "display_name": "Decko",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1289819410,
+            "creation_date": 1289819410,
+            "body": "<p>You are outputting the raw md5 output, which is just a bunch of bytes. You would get the same result in php if you said md5(\"some string\", true).<\/p>\n\n<p>You need to convert the bytes to ascii characters instead.<\/p>\n",
+            "answer_id": 4183726,
+            "question_id": 4183646
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/1n6YR.png?s=256",
+                "account_id": 126734,
+                "user_type": "registered",
+                "user_id": 323421,
+                "link": "https://stackoverflow.com/users/323421/sergii-pozharov",
+                "reputation": 17913,
+                "display_name": "Sergii Pozharov"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1289819873,
+            "creation_date": 1289819873,
+            "body": "<p>You need to <strong>convert<\/strong> the result into the HEX representation. This is how it is done in <a href=\"http://www.twmacinta.com/myjava/fast_md5.php\" rel=\"nofollow\">Fast MD5 library<\/a>:<\/p>\n\n<pre><code>    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5',\n            '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', };\n\n    /**\n     * Turns array of bytes into string representing each byte as unsigned hex\n     * number.\n     * \n     * @param hash\n     *            Array of bytes to convert to hex-string\n     * @return Generated hex string\n     */\n    public static String asHex(byte hash[]) {\n        char buf[] = new char[hash.length * 2];\n        for (int i = 0, x = 0; i &lt; hash.length; i++) {\n            buf[x++] = HEX_CHARS[(hash[i] &gt;&gt;&gt; 4) &amp; 0xf];\n            buf[x++] = HEX_CHARS[hash[i] &amp; 0xf];\n        }\n        return new String(buf);\n    }\n<\/code><\/pre>\n\n<p>So you will need to call <code>System.out.println(\"String3: \" + asHex(thedigest));<\/code><\/p>\n",
+            "answer_id": 4183787,
+            "question_id": 4183646
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Zq3Qi.jpg?s=256",
+                "account_id": 388570,
+                "user_type": "registered",
+                "user_id": 747579,
+                "link": "https://stackoverflow.com/users/747579/abdennour-toumi",
+                "reputation": 94610,
+                "display_name": "Abdennour TOUMI",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1414052139,
+            "creation_date": 1414052139,
+            "body": "<p>if you use spring security framework , just do : <\/p>\n\n<pre><code>import org.springframework.security.authentication.encoding.*\n\nnew Md5PasswordEncoder().encodePassword(\"myWord\",null)\n<\/code><\/pre>\n\n<p>The same result as <code>PHP::md5()<\/code>. <strong>I confirm<\/strong><\/p>\n\n<p><a href=\"https://github.com/spring-projects/spring-security/blob/9654817fd85c5081c3874060ea30b9bec9a7934e/core/src/test/java/org/springframework/security/authentication/encoding/Md5PasswordEncoderTests.java\" rel=\"nofollow\">See more examples<\/a><\/p>\n",
+            "answer_id": 26523861,
+            "question_id": 4183646
+        }
+    ],
+    "answer_comments": {
+        "4183677": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e98c6cbf384ef03ecc020d584e9e6a74?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 145145,
+                "user_type": "registered",
+                "user_id": 354742,
+                "link": "https://stackoverflow.com/users/354742/dan",
+                "reputation": 16356,
+                "display_name": "Dan",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 4183677,
+            "edited": false,
+            "creation_date": 1289819307,
+            "comment_id": 4520419
+        }],
+        "4183709": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gpz6T.png?s=256",
+                "account_id": 174120,
+                "user_type": "registered",
+                "user_id": 403290,
+                "link": "https://stackoverflow.com/users/403290/thecodeassassin",
+                "reputation": 836,
+                "display_name": "thecodeassassin",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 2,
+            "post_id": 4183709,
+            "edited": false,
+            "creation_date": 1289819367,
+            "comment_id": 4520432
+        }]
+    }
+}

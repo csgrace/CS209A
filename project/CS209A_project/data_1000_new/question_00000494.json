@@ -1,0 +1,76 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/be0344d04cbf61c25cc7536ca90a7304?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 356260,
+            "user_type": "registered",
+            "user_id": 695657,
+            "link": "https://stackoverflow.com/users/695657/sai-upadhyayula",
+            "reputation": 2516,
+            "display_name": "Sai Upadhyayula",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34134797/spring-testing-java-lang-illegalargumentexception-not-enough-variable-values",
+        "last_activity_date": 1603840592,
+        "creation_date": 1449495074,
+        "answer_count": 2,
+        "title": "Spring Testing - java.lang.IllegalArgumentException: Not enough variable values available to expand",
+        "body": "<p>I am writing Unit Tests for the below REST Controller which takes a UserID and grants a List of Authorities to that user.<\/p>\n\n<pre><code>    @RestController\n    @RequestMapping(\"/user\")\n    @Api(value = \"User\", description = \"User API\")\n    public class UserController{\n\n    // some code\n\n        @RequestMapping(method = RequestMethod.POST, value = \"/{userId}/grantAuthz\")\n        @ApiOperation(value = \"GrantAuthz\", notes = \"Grant Authorization\")\n        public Collection&lt;UserEntity.UserAuthz&gt; grantAuthz(@PathVariable(\"userId\") String userId,\n                                                           @RequestBody ArrayList&lt;String&gt; authorities) {\n            UserEntity userEntity = userRepository.findOne(userId);\n            if(userEntity == null) {\n                //TODO: throw and send resource not found\n                return null;\n            }\n            log.debug(\"Authorities to be granted to user \" + userId + \" are : \" + authorities);\n            for(String authz : authorities) {\n                log.debug(\"Adding Authorization \" + authz);\n                userEntity.addUserAuthz(authz);\n            }\n            userRepository.save(userEntity);\n            return userEntity.getAuthorities();\n        }\n}\n<\/code><\/pre>\n\n<p>I wrote the below Unit Test for the UserController <\/p>\n\n<pre><code>@RunWith(SpringJUnit4ClassRunner.class)\n@SpringApplicationConfiguration(classes = Application.class)\n@WebAppConfiguration\npublic class UserControllerTest {\n    private final Log log = LogFactory.getLog(getClass());\n    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),\n            MediaType.APPLICATION_JSON.getSubtype(),\n            Charset.forName(\"utf8\"));\n\n    private MockMvc mockMvc;\n    private HttpMessageConverter mappingJackson2HttpMessageConverter;\n    private final String USER_URL = \"/{userId}/grantAuthz\";\n    private final String USER_ID = \"111\";\n    private final String USER_NAME = \"MockUser\";\n\n    @Autowired\n    private WebApplicationContext webApplicationContext;\n    @Autowired\n    private UserRepository userRepository;\n\n    private String createdToken = null;\n\n    @Autowired\n    void setConverters(HttpMessageConverter&lt;?&gt;[] converters) {\n        this.mappingJackson2HttpMessageConverter = Arrays.asList(converters).stream().filter(\n                hmc -&gt; hmc instanceof MappingJackson2HttpMessageConverter).findAny().get();\n\n        Assert.assertNotNull(\"the JSON message converter must not be null\",\n                this.mappingJackson2HttpMessageConverter);\n    }\n\n    @Before\n    public void setup() throws Exception {\n        this.mockMvc = webAppContextSetup(webApplicationContext).build();\n    }\n\n    @Test\n    public void testGrantAuthorizationForUser() throws Exception{\n        Optional&lt;UserEntity&gt; userEntityAuthz = userRepository.findOneByUsername(USER_NAME);\n        Set&lt;String&gt; expectedAuthzList = (LinkedHashSet)userEntityAuthz.get().getAuthorizations();\n\n        List&lt;String&gt; grantList = new ArrayList&lt;&gt;();\n        grantList.add(\"ABC\");\n        grantList.add(\"DEF\");\n        grantList.add(\"GHI\");\n        grantList.add(\"JKL\");\n        grantList.add(\"MNO\");\n        grantList.add(\"PQR\");\n        grantList.add(\"STU\");\n        grantList.add(\"VWX\");\n        grantList.add(\"YZA\");\n\n        JSONObject json = new JSONObject();\n        json.put(\"grantList\",grantList);\n\n        MvcResult grantAuthzResult = mockMvc.perform(MockMvcRequestBuilders.post(USER_URL)\n                .contentType(contentType)\n                .param(\"userId\",USER_ID)\n                .param(\"authorities\",json.toString()))\n                .andExpect(status().isOk())\n                .andDo(print())\n                .andReturn();\n    }\n}\n<\/code><\/pre>\n\n<p>When executed, my test is throwing an Illegal Argument Exception:<\/p>\n\n<blockquote>\n  <p>\"Not enough variable values available to expand 'userId'\"<\/p>\n<\/blockquote>\n\n<p>I am sending the required URL Parameters using the .param() method in the test, what am I doing wrong ? I reffered this possible duplicate question but did not find it much useful. <a href=\"http://Using%20RestTemplate%20in%20Spring.%20Exception-%20Not%20enough%20variables%20available%20to%20expand\" rel=\"noreferrer\">Using RestTemplate in Spring. Exception- Not enough variables available to expand<\/a><\/p>\n",
+        "question_id": 34134797,
+        "tags": [
+            "java",
+            "spring",
+            "junit",
+            "spring-test"
+        ],
+        "score": 10,
+        "accepted_answer_id": 34137378,
+        "is_answered": true,
+        "view_count": 27350
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/be0344d04cbf61c25cc7536ca90a7304?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 356260,
+                "user_type": "registered",
+                "user_id": 695657,
+                "link": "https://stackoverflow.com/users/695657/sai-upadhyayula",
+                "reputation": 2516,
+                "display_name": "Sai Upadhyayula",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 12,
+            "is_accepted": true,
+            "last_activity_date": 1449502559,
+            "creation_date": 1449502559,
+            "body": "<p>I found out what I am doing wrong, using param() method is not the right way here as I have <code>@PathVariable<\/code> and <code>@RequestBody<\/code> in my Controller Methods as the parameters. <\/p>\n\n<pre><code>public Collection&lt;UserEntity.UserAuthz&gt; grantAuthz(@PathVariable(\"userId\") String userId,\n                                                           @RequestBody ArrayList&lt;String&gt; authorities) {\n<\/code><\/pre>\n\n<p>So I passed the <code>@PathVariable<\/code> in the <code>post()<\/code> method of the test.<\/p>\n\n<pre><code>MockMvcRequestBuilders.post(USER_URL,USER_ID)\n<\/code><\/pre>\n\n<p>As the required type is <code>@RequestBody ArrayList&lt;String&gt;<\/code> instead of using the <code>JSONObject<\/code> I used <code>JSONArray<\/code>and used the content() method to send the JSONArray as the string.<\/p>\n\n<p>Here are the changes I have made to the Test Method.<\/p>\n\n<pre><code>   @Test\n    public void testGrantAuthorizationForUser() throws Exception{\n        Optional&lt;UserEntity&gt; userEntityAuthz = userRepository.findOneByUsername(USER_NAME);\n        Set&lt;String&gt; expectedAuthzList = (LinkedHashSet)userEntityAuthz.get().getAuthorizations();\n\n        List&lt;String&gt; grantList = new ArrayList&lt;&gt;();\n        grantList.add(\"ABC\");\n        grantList.add(\"DEF\");\n        grantList.add(\"GHI\");\n        grantList.add(\"JKL\");\n        grantList.add(\"MNO\");\n        grantList.add(\"PQR\");\n        grantList.add(\"STU\");\n        grantList.add(\"VWX\");\n        grantList.add(\"YZA\");\n\n        JSONArray json = new JSONArray();\n\n        MvcResult grantAuthzResult = mockMvc.perform(MockMvcRequestBuilders.post(USER_URL,USER_ID)\n                .contentType(contentType)\n                .content(json.toString()))\n                .andExpect(status().isOk())\n                .andDo(print())\n                .andReturn();\n    }\n<\/code><\/pre>\n",
+            "answer_id": 34137378,
+            "question_id": 34134797
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1fdc4adcaa204b6ffc561de2a24fcf62?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2294955,
+                "user_type": "registered",
+                "user_id": 2016625,
+                "link": "https://stackoverflow.com/users/2016625/richard-k-campion",
+                "reputation": 81,
+                "display_name": "Richard K. Campion"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1603840592,
+            "creation_date": 1603840243,
+            "body": "<pre><code>        @Test\npublic void getOneContactAPI() throws Exception {\n    String id = &quot;8&quot;;\n    mvc.perform(MockMvcRequestBuilders.get(&quot;/api/contact/{id}&quot;,id).accept(MediaType.APPLICATION_JSON))\n    .andDo(MockMvcResultHandlers.print())\n    .andExpect(status().isOk())\n    .andExpect(MockMvcResultMatchers.jsonPath(&quot;id&quot;).exists());\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 64564234,
+            "question_id": 34134797,
+            "last_edit_date": 1603840592
+        }
+    ],
+    "answer_comments": {}
+}

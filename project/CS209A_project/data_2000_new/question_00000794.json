@@ -1,0 +1,119 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/55fc6844de81bc1332c6ff7d0c38ee94?s=256&d=identicon&r=PG",
+            "account_id": 61688,
+            "user_type": "registered",
+            "user_id": 183717,
+            "link": "https://stackoverflow.com/users/183717/name-masked",
+            "reputation": 9853,
+            "display_name": "name_masked",
+            "accept_rate": 95
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/9268651/cannot-intrepret-antlrworks-output",
+        "last_activity_date": 1329332270,
+        "creation_date": 1329170271,
+        "answer_count": 1,
+        "title": "Cannot intrepret ANTLRWorks output",
+        "body": "<p>I am using the following simple grammar to get an understanding of ANTLR. <\/p>\n\n<pre><code>grammar Example;\noptions {\nlanguage=Java;\n}\n\nID  : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*\n    ;\n\nINT : '0'..'9'+\n    ;\nPLUS    :   '+';\n\n\nADDNUM  :   \n    INT PLUS INT;\n\nprog    :    ADDNUM;\n<\/code><\/pre>\n\n<p>When I try running the grammar in ANTLRWorks for the input <code>1+2<\/code>, I get the following error in the console:<\/p>\n\n<blockquote>\n  <p>[16:54:08] Interpreting... [16:54:08] problem matching token at 2:0<br>\n  NoViableAltException(' '@[1:1: Tokens : ( ID | INT | PLUS | ADDNUM);])<\/p>\n<\/blockquote>\n\n<p>Can anyone please help me understand where I am going wrong.<\/p>\n",
+        "question_id": 9268651,
+        "tags": [
+            "java",
+            "antlr",
+            "antlrworks"
+        ],
+        "score": 0,
+        "accepted_answer_id": 9268821,
+        "is_answered": true,
+        "view_count": 166
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6326af218d1a113fd9a8fd9668b2d7c8?s=256&d=identicon&r=PG",
+            "account_id": 20937,
+            "user_type": "registered",
+            "user_id": 50476,
+            "link": "https://stackoverflow.com/users/50476/bart-kiers",
+            "reputation": 170929,
+            "display_name": "Bart Kiers",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1329332270,
+        "creation_date": 1329171082,
+        "body": "<p>You probably didn't indicate <code>prog<\/code> as the starting rule in ANTLRWorks. If you do, it all goes okay. <\/p>\n\n<p>But you really shouldn't create a lexer rule that matches an expression like you do in <code>ADDNUM<\/code>: this should be a parser rule:<\/p>\n\n<pre><code>grammar Example;\n\nprog    : addExpr EOF;\naddExpr : INT PLUS INT;\nID      : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;\nINT     : '0'..'9'+;\nPLUS    : '+';\n<\/code><\/pre>\n\n<hr>\n\n<h2>ANTLR rules<\/h2>\n\n<p>There are no strict rules when to use parser-, lexer- or fragment rules, but here's what they're usually used for: <\/p>\n\n<h3>lexer rules<\/h3>\n\n<p>A lexer rule is usually the smallest part of a language (a string, a numbers, an identifier, a comment, etc.). Trying to create a lexer rule from input like <code>1+2<\/code> causes problems because:<\/p>\n\n<ul>\n<li>if you ever want to extract something meaningful from that token (evaluate it, for example), you need to split the contents of that token because after creating 1 token from it, the text from the entire expression is \"glued\" together;<\/li>\n<li>you run into problems when there are white-space in between it: <code>1 + &nbsp; 2<\/code>.<\/li>\n<\/ul>\n\n<p>The expression <code>1+2<\/code> are three tokens: <code>INT<\/code>, <code>PLUS<\/code> and another <code>INT<\/code>.<\/p>\n\n<h3>fragment rules<\/h3>\n\n<p>A fragment rule is used when you don't want this rule to ever because a \"real\" token. For example, take the following lexer rules:<\/p>\n\n<pre><code>ID    : ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*\nFLOAT : '0'..'9'+ '.' '0'..'9'+; \nINT   : '0'..'9'+;\n<\/code><\/pre>\n\n<p>In the rules above, you're using <code>'0'..'9'<\/code> four times, so you could place that in a separate rule <\/p>\n\n<pre><code>ID    : ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | DIGIT)*\nFLOAT : DIGIT+ '.' DIGIT+; \nINT   : DIGIT+;\nDIGIT : '0'..'9';\n<\/code><\/pre>\n\n<p>But you don't want to ever create a <code>DIGIT<\/code> token: you only want the <code>DIGIT<\/code> to be used by other lexer rules. In that case, you can create a <code>fragment<\/code> rule:<\/p>\n\n<pre><code>ID    : ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | DIGIT)*\nFLOAT : DIGIT+ '.' DIGIT+; \nINT   : DIGIT+;\nfragment DIGIT : '0'..'9';\n<\/code><\/pre>\n\n<p>This will make sure there will never be a <code>DIGIT<\/code> token: and can therefor never use this in your parser  rule(s)!<\/p>\n\n<h3>parser rules<\/h3>\n\n<p>Parser rules glue the tokens together: they make sure the language is <a href=\"http://en.wikipedia.org/wiki/Parsing\" rel=\"nofollow noreferrer\">syntactic valid (a.k.a. parsing)<\/a>. To emphasize, parser rules can use other parser rules or lexer rules, but <strong>not<\/strong> fragment rules.<\/p>\n\n<hr>\n\n<p>Also see: <a href=\"https://stackoverflow.com/questions/1931307/antlr-is-there-a-simple-example\">ANTLR: Is there a simple example?<\/a><\/p>\n",
+        "answer_id": 9268821,
+        "question_id": 9268651,
+        "last_edit_date": 1495542450
+    }],
+    "answer_comments": {"9268821": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6326af218d1a113fd9a8fd9668b2d7c8?s=256&d=identicon&r=PG",
+                "account_id": 20937,
+                "user_type": "registered",
+                "user_id": 50476,
+                "link": "https://stackoverflow.com/users/50476/bart-kiers",
+                "reputation": 170929,
+                "display_name": "Bart Kiers",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9268821,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/55fc6844de81bc1332c6ff7d0c38ee94?s=256&d=identicon&r=PG",
+                "account_id": 61688,
+                "user_type": "registered",
+                "user_id": 183717,
+                "link": "https://stackoverflow.com/users/183717/name-masked",
+                "reputation": 9853,
+                "display_name": "name_masked",
+                "accept_rate": 95
+            },
+            "edited": false,
+            "creation_date": 1329332293,
+            "comment_id": 11728801
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/55fc6844de81bc1332c6ff7d0c38ee94?s=256&d=identicon&r=PG",
+                "account_id": 61688,
+                "user_type": "registered",
+                "user_id": 183717,
+                "link": "https://stackoverflow.com/users/183717/name-masked",
+                "reputation": 9853,
+                "display_name": "name_masked",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9268821,
+            "edited": false,
+            "creation_date": 1329327900,
+            "comment_id": 11727193
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/55fc6844de81bc1332c6ff7d0c38ee94?s=256&d=identicon&r=PG",
+                "account_id": 61688,
+                "user_type": "registered",
+                "user_id": 183717,
+                "link": "https://stackoverflow.com/users/183717/name-masked",
+                "reputation": 9853,
+                "display_name": "name_masked",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9268821,
+            "edited": false,
+            "creation_date": 1329260503,
+            "comment_id": 11708865
+        }
+    ]}
+}

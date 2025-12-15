@@ -1,0 +1,75 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7ff17f4cc5df0927f6a86c8d51d6f3c9?s=256&d=identicon&r=PG",
+            "account_id": 249229,
+            "user_type": "registered",
+            "user_id": 525146,
+            "link": "https://stackoverflow.com/users/525146/user525146",
+            "reputation": 4008,
+            "display_name": "user525146",
+            "accept_rate": 53
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/8981823/bubble-sort-algorithm-for-a-linked-list",
+        "last_activity_date": 1617809546,
+        "creation_date": 1327377370,
+        "answer_count": 2,
+        "title": "Bubble sort algorithm for a linked list",
+        "body": "<p>I have written a bubble sort algorithm to sort a linked list. I am a Java beginner and trying to learn data structures. I am confused why my second element is not sorted properly.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>class SListNode {\n    Object item;\n    SListNode next;\n\n    SListNode(Object obj) {\n        item = obj;\n        next = null;\n    }\n\n    SListNode(Object obj, SListNode next) {\n        item = obj;\n        this.next = next;\n    }\n}\n<\/code><\/pre>\n<pre class=\"lang-java prettyprint-override\"><code>public class SList {\n    private SListNode head;\n    private SListNode temp;\n\n    public void sortList() {\n        SListNode node = head, i, j;\n        head = node;\n        i = node;\n        j = node.next;\n        while (i.next != null) {\n            while (j.next != null) {\n                if ((Integer) i.item &lt; (Integer) j.item) {\n                    temp = i.next;\n                    i.next = j.next;\n                    j.next = temp;\n                }\n                j = j.next;\n            }\n            i = i.next;\n        }\n    }\n}\n<\/code><\/pre>\n<p>This is the output I am getting<\/p>\n<pre><code>List after construction: [  3  6  9  4  12  15  ]\nAfter sorting: [  3  4  9  12  6  15  ]\n<\/code><\/pre>\n<p>Besides I know the worst case scenario of a bubble sort is O(n<sup>2<\/sup>). Can I use mergesort on a linked list to have a better time complexity?<\/p>\n",
+        "question_id": 8981823,
+        "tags": [
+            "java",
+            "sorting",
+            "linked-list",
+            "mergesort",
+            "bubble-sort"
+        ],
+        "score": 13,
+        "accepted_answer_id": 8981876,
+        "is_answered": true,
+        "view_count": 34506,
+        "last_edit_date": 1617778252
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4bac7ebd5f5a06c716f508af656e24b?s=256&d=identicon&r=PG",
+                "account_id": 235018,
+                "user_type": "registered",
+                "user_id": 501557,
+                "link": "https://stackoverflow.com/users/501557/templatetypedef",
+                "reputation": 375759,
+                "display_name": "templatetypedef",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1327378699,
+            "creation_date": 1327377940,
+            "body": "<p>There are many sorting algorithms that work on linked lists and mergesort works excellently in this case.  I wrote <strong><a href=\"https://stackoverflow.com/a/7168300/501557\">an earlier answer to a question about sorting linked lists<\/a><\/strong> that explores many classic sorting algorithms on linked lists, along with their time and space complexities.  You can use insertion sort, selection sort, mergesort, and quicksort on linked lists.  With a bit of fudging, you can also get heapsort working.  My older answer has details on how to do this.<\/p>\n\n<p>With regards to your code, notice that in your inner loop you advance <code>j<\/code> forward until the <code>next<\/code> pointer becomes <code>null<\/code>.  At this point, you never reset <code>j<\/code> to be anything else, so on each future iteration of the outer loop the inner loop never executes.  You should probably set <code>j = i.next<\/code> at the start of each iteration.  Moreover, you probably don't want to have the loop stop when <code>j.next<\/code> is null, but rather when <code>j<\/code> is null, since otherwise you skip the last element of the array.<\/p>\n\n<p>Additionally, the sorting algorithm you've written here is <strong><a href=\"http://en.wikipedia.org/wiki/Selection_sort\" rel=\"nofollow noreferrer\">selection sort<\/a><\/strong> rather than bubble sort, because you're making many passes over the linked list looking for the smallest element that you haven't positioned yet.  I don't know if this is a problem or not, but I wasn't sure if you were aware of this.  That said, I think that's probably a good thing, since bubble sort is less efficient than selection sort in most cases (unless the list is already close to being sorted).<\/p>\n\n<p>Hope this helps!<\/p>\n",
+            "answer_id": 8981876,
+            "question_id": 8981823,
+            "last_edit_date": 1495541305
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user15553668"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1617809546,
+            "creation_date": 1617752758,
+            "body": "<p>If you have a <a href=\"https://docs.oracle.com/javase/7/docs/api/java/util/List.html\" rel=\"nofollow noreferrer\"><code>List<\/code><\/a> of <a href=\"https://docs.oracle.com/javase/7/docs/api/java/lang/Comparable.html\" rel=\"nofollow noreferrer\"><code>Comparable<\/code><\/a> items, then you can use <a href=\"https://docs.oracle.com/javase/7/docs/api/java/util/Collections.html#sort(java.util.List)\" rel=\"nofollow noreferrer\"><code>Collections.sort<\/code><\/a> method that uses a kind of <em>merge sort<\/em> algorithm with <code>O(n log n)<\/code> worst-case time complexity. Anyway, it is faster then <em>bubble sort<\/em> with <code>O(n²)<\/code>.<\/p>\n<p>If you want to use <em>bubble sort<\/em> algorithm, you can do it like this:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public static void bubbleSort(List&lt;Integer&gt; list) {\n    boolean swapped;\n    // repeat the passes through the list until\n    // all the elements are in the correct order\n    do {\n        swapped = false;\n        // pass through the list and\n        // compare adjacent elements\n        for (int i = 0; i &lt; list.size() - 1; i++) {\n            // if this element is greater than\n            // the next one, then swap them\n            if (list.get(i) &gt; list.get(i + 1)) {\n                Collections.swap(list, i, i + 1);\n                swapped = true;\n            }\n        }\n        // if there are no swapped elements at the\n        // current pass, then this is the last pass\n    } while (swapped);\n}\n<\/code><\/pre>\n<pre class=\"lang-java prettyprint-override\"><code>public static void main(String[] args) {\n    LinkedList&lt;Integer&gt; list = new LinkedList&lt;&gt;();\n    Collections.addAll(list, 6, 1, 5, 8, 4, 3, 9, 2, 0, 7);\n    bubbleSort(list);\n    System.out.println(list); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]\n}\n<\/code><\/pre>\n<hr />\n<p><sup>See also:\n<br>\u2022 <a href=\"https://stackoverflow.com/a/66970037/15553668\">Bubble sort output is incorrect<\/a>\n<br>\u2022 <a href=\"https://stackoverflow.com/a/66978872/15553668\">Bubble sort with step-by-step output Java 8<\/a><\/sup><\/p>\n",
+            "answer_id": 66977868,
+            "question_id": 8981823,
+            "community_owned_date": 1618083101,
+            "last_edit_date": 1617809546
+        }
+    ],
+    "answer_comments": {}
+}

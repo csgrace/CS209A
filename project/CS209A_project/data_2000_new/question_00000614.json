@@ -1,0 +1,79 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fad9ddd36cacffc55b4d3277c674601f?s=256&d=identicon&r=PG",
+            "account_id": 25950167,
+            "user_type": "registered",
+            "user_id": 19668333,
+            "link": "https://stackoverflow.com/users/19668333/vimal-a",
+            "reputation": 1,
+            "display_name": "Vimal A"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73198096/error-while-generating-dll-files-in-visual-studio-2022-login-authentication-us",
+        "last_activity_date": 1659390504,
+        "creation_date": 1659378610,
+        "answer_count": 0,
+        "title": "Error while generating .dll files in Visual Studio 2022. Login authentication using ADSI Api in C++",
+        "body": "<p>I want to make a login authentication to my web application(Java). Username and password are created in windows server 2016 active directory. Using that username and password I have to login to my web app using ADSI(Active Directory Service Interface) API in C++ language to connect to the windows server. To do this I have to create the .dll file from the C++ code in Visual Studio 2022. Here I have to add Activeds.lib, adsiid.lib to make the API work. After generating the .dll file to load this in Java System.load() using JNI Concept.<\/p>\n<p>This is the C++ code I used in Visual Studio 2022...<\/p>\n<pre><code>#include &lt;iostream&gt;\n#include &lt;jni.h&gt;\n#include&lt;string.h&gt;\n#include &quot;com_library_ldap_JNIHelper.h&quot;\n#include &lt;Iads.h&gt;\n#include &lt;adshlp.h&gt;\n#include &quot;activeds.h&quot;\n#include &lt;windows.h&gt;\n#include &lt;stdlib.h&gt;\nusing namespace std;\n\nJNIEXPORT jstring JNICALL Java_com_library_ldap_JNIHelper_authenticateUser\n(JNIEnv* env, jclass, jstring uname, jstring pwd) {\n\nconst char* uName = env-&gt;GetStringUTFChars(uname, NULL);\nstd::string username = std::string(uName);\n\nconst char* pwd1 = env-&gt;GetStringUTFChars(pwd, NULL);\nstd::string password = std::string(pwd1);\n\nenv-&gt;ReleaseStringUTFChars(uname, uName);\nenv-&gt;ReleaseStringUTFChars(pwd, pwd1);\n\nIADs* pObject;\n\nwchar_t wname[20];\nmbstowcs(wname, username.c_str(), username.length());\nLPWSTR szUsername = wname;\nwchar_t wpwd[20];\nmbstowcs(wpwd, password.c_str(), password.length());\nLPWSTR szPassword = wpwd;\n\nHRESULT hr;\n\nstring uAdmin = &quot;Admin&quot;;\nstring uUser = &quot;User&quot;;\nstring uType;\nbool res = false;\nif (uAdmin == &quot;Admin&quot;) {\n    hr = ADsOpenObject(L&quot;LDAP://test.local/CN=Users,DC=test,DC=local&quot;,\n        szUsername,\n        szPassword,\n        ADS_SECURE_AUTHENTICATION,\n        IID_IADs,\n        (void**)&amp;pObject);\n    if (SUCCEEDED(hr))\n    {\n        // Use the object.\n        res = true;\n        // Release the object.\n        pObject-&gt;Release();\n    }\n    if (res == true) {\n        uType = &quot;Admin&quot;;\n        //return env-&gt;NewStringUTF(uType.c_str());\n    }\n    else\n        uType = &quot;NotFound!!!&quot;;\n}\nelse if (uUser == &quot;User&quot;) {\n    hr = ADsOpenObject(L&quot;LDAP://test.local     /CN=Vimaluser,OU=Users,OU=Vimal,DC=test,DC=local&quot;,\n        szUsername,\n        szPassword,\n        ADS_SECURE_AUTHENTICATION,\n        IID_IADs,\n        (void**)&amp;pObject);\n    if (SUCCEEDED(hr))\n    {\n        // Use the object.\n        res = true;\n        // Release the object.\n        pObject-&gt;Release();\n    }\n    if (res == true) {\n        uType = &quot;User&quot;;\n    }\n    else {\n        uType = &quot;NotFound!!!&quot;;\n    }\n}\nreturn env-&gt;NewStringUTF(uType.c_str());\n}   \n<\/code><\/pre>\n<p>below is the error I'm getting...<\/p>\n<pre><code>Build started...\n1&gt;------ Build started: Project: Adsi-JNI, Configuration: Release x64 ------\n1&gt;Adsi-JNI.cpp\n1&gt;   Creating library C:\\Users\\Vimal\\Desktop\\VS Code\\Adsi-JNI\\x64\\Release\\Adsi-JNI.lib and object C:\\Users\\Vimal\\Desktop\\VS Code\\Adsi-JNI\\x64\\Release\\Adsi-JNI.exp\n1&gt;Adsi-JNI.obj : error LNK2019: unresolved external symbol ADsOpenObject referenced in function Java_com_library_ldap_JNIHelper_authenticateUser\n1&gt;Adsi-JNI.obj : error LNK2001: unresolved external symbol IID_IADs\n1&gt;E:\\Java Program\\Library System\\src\\main\\java\\com\\library\\ldap\\lib\\ActiveDS.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'\n1&gt;E:\\Java Program\\Library System\\src\\main\\java\\com\\library\\ldap\\lib\\adsiid.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'\n1&gt;C:\\Users\\Vimal\\Desktop\\VS Code\\Adsi-JNI\\x64\\Release\\Adsi-JNI.dll : fatal error LNK1120: 2 unresolved externals\n1&gt;Done building project &quot;Adsi-JNI.vcxproj&quot; -- FAILED.\n========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========\n<\/code><\/pre>\n<p>And I wrote a code for server connection, but i don't know whether the code is correct for server connection or not. Please help me to solve this problem and also share what are all the things related to this. Thanks in advance.<\/p>\n",
+        "question_id": 73198096,
+        "tags": [
+            "java",
+            "c++",
+            "active-directory",
+            "java-native-interface",
+            "visual-studio-2022"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 295,
+        "last_edit_date": 1659390504
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fad9ddd36cacffc55b4d3277c674601f?s=256&d=identicon&r=PG",
+                "account_id": 25950167,
+                "user_type": "registered",
+                "user_id": 19668333,
+                "link": "https://stackoverflow.com/users/19668333/vimal-a",
+                "reputation": 1,
+                "display_name": "Vimal A"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198096,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/yk4pvIP0.jpg?s=256",
+                "account_id": 23319990,
+                "user_type": "registered",
+                "user_id": 17398063,
+                "link": "https://stackoverflow.com/users/17398063/bop",
+                "reputation": 3490,
+                "display_name": "BoP"
+            },
+            "edited": false,
+            "creation_date": 1659412095,
+            "comment_id": 129282568
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/yk4pvIP0.jpg?s=256",
+                "account_id": 23319990,
+                "user_type": "registered",
+                "user_id": 17398063,
+                "link": "https://stackoverflow.com/users/17398063/bop",
+                "reputation": 3490,
+                "display_name": "BoP"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 73198096,
+            "edited": false,
+            "creation_date": 1659379573,
+            "comment_id": 129276157
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

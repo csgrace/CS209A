@@ -1,0 +1,153 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/hlNWz.jpg?s=256",
+            "account_id": 2093164,
+            "user_type": "registered",
+            "user_id": 1862502,
+            "link": "https://stackoverflow.com/users/1862502/vignesh-vino",
+            "reputation": 1238,
+            "display_name": "Vignesh Vino",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15335033/how-to-revise-wtpartdescribelink",
+        "last_activity_date": 1363776262,
+        "creation_date": 1362994091,
+        "answer_count": 2,
+        "title": "How to revise WTPartDescribeLink?",
+        "body": "<p>I have a WTPart object and it have some Describe link(as WTDocument) associated with it.Now I need to revise the describe link through code.<\/p>\n\n<p>Following is the code I have tried so far<\/p>\n\n<pre><code>Vector localVector=new Vector();\n   QueryResult localQueryResult=WTPartHelper.service.getDescribedByWTDocuments(part,false);\n    System.out.println(\"size is \"+localQueryResult.size());\n    if((localQueryResult!=null)&amp;&amp;(localQueryResult.hasMoreElements()))\n    {\n        while(localQueryResult.hasMoreElements())\n        {\n               WTObject localObject=(WTObject) localQueryResult.nextElement();\n           localVector.addElement(localObject);\n        }\n    }\n    if((localVector!=null)&amp;&amp;(localVector.size()&gt;0))\n    {\n        for(int i=0;i&lt;localVector.size();i++)\n        {\n            WTPartDescribeLink localPartlink=(WTPartDescribeLink) localVector.elementAt(i);\n            WTDocument localWTDocument=localPartlink.getDescribedBy();\n            System.out.println(\"values are \"+localWTDocument.getNumber());\n            RevisionControlled localRevisionControlled=null;\n            localRevisionControlled=(RevisionControlled) VersionControlHelper.service.newVersion(localWTDocument);\n            localRevisionControlled=(RevisionControlled) PersistenceHelper.manager.save(localRevisionControlled);\n\n        }\n    }\n<\/code><\/pre>\n\n<p>This code is revising only the WTDocument object which is linked as Describelink but not revising the Describelink.\nIf I pass the Describe link object directly like this<\/p>\n\n<pre><code>localRevisionControlled=(RevisionControlled) VersionControlHelper.service.newVersion((Versioned)localPartlink);\n<\/code><\/pre>\n\n<p>means I'm getting error message like following<\/p>\n\n<pre><code>Exception in thread \"main\" java.lang.ClassCastException: wt.part.WTPartDescribeLink cannot be cast to wt.vc.Versioned\n    at ext.gt.test.CheckLink.getPartlink(CheckLink.java:100)\n    at ext.gt.test.CheckLink.searchPart(CheckLink.java:52)\n    at ext.gt.test.CheckLink.main(CheckLink.java:32)\n<\/code><\/pre>\n\n<p>I don't know how to solve this issue but I need to revise the Part describelink by code.Suggest me the API which is needed for this or some example code snippet would be useful for me.<\/p>\n",
+        "question_id": 15335033,
+        "tags": [
+            "java",
+            "ptc-windchill"
+        ],
+        "score": 2,
+        "accepted_answer_id": 15521301,
+        "is_answered": true,
+        "view_count": 1842
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2b4c7ffd8373064b3aa69ba399965fb3?s=256&d=identicon&r=PG",
+            "account_id": 2232790,
+            "user_type": "registered",
+            "user_id": 1969987,
+            "link": "https://stackoverflow.com/users/1969987/julien-boulay",
+            "reputation": 1214,
+            "display_name": "Julien Boulay"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 15335033,
+        "edited": false,
+        "creation_date": 1363073866,
+        "comment_id": 21693216
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2b4c7ffd8373064b3aa69ba399965fb3?s=256&d=identicon&r=PG",
+                "account_id": 2232790,
+                "user_type": "registered",
+                "user_id": 1969987,
+                "link": "https://stackoverflow.com/users/1969987/julien-boulay",
+                "reputation": 1214,
+                "display_name": "Julien Boulay"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1363074772,
+            "creation_date": 1363074772,
+            "body": "<p>If you need to update some properties on WTPartDescribeLink, then you should create a new version of WTPart (and not WTDocument).<br>\nIt can be done with the following code :<\/p>\n\n<pre><code>part = VersionControlHelper.service.newVersion(part);\nQueryResult qr =WTPartHelper.service.getDescribedByWTDocuments(part,false);\n\nif(qr!=null)\n{\n    while(qr.hasMoreElements())\n    {\n       WTPartDescribeLink link =(WTPartDescribeLink) localQueryResult.nextElement();\n       /** ...\n       Update some attributes on the link\n       ... **/\n       link= PersistenceServerHelper.manager.save(link);\n    }\n}\n<\/code><\/pre>\n\n<p>It might also be better to do a check-out/check-in in order to create a new iteration of the WTPart and to surround the operation with windchill transaction      <\/p>\n",
+            "answer_id": 15355907,
+            "question_id": 15335033
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hlNWz.jpg?s=256",
+                "account_id": 2093164,
+                "user_type": "registered",
+                "user_id": 1862502,
+                "link": "https://stackoverflow.com/users/1862502/vignesh-vino",
+                "reputation": 1238,
+                "display_name": "Vignesh Vino",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1363776262,
+            "creation_date": 1363776262,
+            "body": "<p>According to the answer given above by @Julien Boulay ,I have created a method which query the the document object and then revise that document after I have created a new link with my part.<\/p>\n\n<pre><code>private WTPartDescribeLink getPartlink(WTPart target) throws WTException, WTPropertyVetoException {\n        WTDocument localWTDocument=null;\n        if(target==null)\n            return null;\n        QueryResult localQueryResult=WTPartHelper.service.getDescribedByWTDocuments(target, false);\n        ilogger.info(\"size of query result is \"+localQueryResult.size());\n        if((localQueryResult!=null)&amp;&amp;(localQueryResult.hasMoreElements()))\n        {\n            while(localQueryResult.hasMoreElements())\n            {\n\n                 WTObject localObject=(WTObject) localQueryResult.nextElement();\n                 WTPartDescribeLink localPartlink=(WTPartDescribeLink) localObject;\n                 localWTDocument=localPartlink.getDescribedBy();\n            }\n        }\n\n        WTDocument docm=(WTDocument) VersionControlHelper.service.allVersionsOf(localWTDocument).nextElement();\n        ilogger.info(\"values are \"+docm.getNumber());\n        String version=docm.getVersionIdentifier().getValue();\n        String iteration=docm.getIterationIdentifier().getValue();\n        ilogger.info(\"Object passing with version and iteration of\"+version+\".\"+iteration);\n        RevisionControlled localRevisionControlled=null;\n        localRevisionControlled=(RevisionControlled) VersionControlHelper.service.newVersion(docm);\n        localRevisionControlled=(RevisionControlled) PersistenceHelper.manager.save(localRevisionControlled);\n        createLink(target,docm);\n        return null;\n    }\n\n    private void createLink(WTPart spart, WTDocument localWTDocument) throws WTException {\n\n                WTPartDescribeLink link=WTPartDescribeLink.newWTPartDescribeLink(spart, localWTDocument);\n                PersistenceServerHelper.manager.insert(link);\n                ilogger.info(\"Link saved \");\n\n        }\n<\/code><\/pre>\n\n<p>The above code is now works fine.<\/p>\n",
+            "answer_id": 15521301,
+            "question_id": 15335033
+        }
+    ],
+    "answer_comments": {"15355907": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2b4c7ffd8373064b3aa69ba399965fb3?s=256&d=identicon&r=PG",
+                "account_id": 2232790,
+                "user_type": "registered",
+                "user_id": 1969987,
+                "link": "https://stackoverflow.com/users/1969987/julien-boulay",
+                "reputation": 1214,
+                "display_name": "Julien Boulay"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 15355907,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/hlNWz.jpg?s=256",
+                "account_id": 2093164,
+                "user_type": "registered",
+                "user_id": 1862502,
+                "link": "https://stackoverflow.com/users/1862502/vignesh-vino",
+                "reputation": 1238,
+                "display_name": "Vignesh Vino",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1363272552,
+            "comment_id": 21792090
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hlNWz.jpg?s=256",
+                "account_id": 2093164,
+                "user_type": "registered",
+                "user_id": 1862502,
+                "link": "https://stackoverflow.com/users/1862502/vignesh-vino",
+                "reputation": 1238,
+                "display_name": "Vignesh Vino",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15355907,
+            "edited": false,
+            "creation_date": 1363081525,
+            "comment_id": 21696787
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hlNWz.jpg?s=256",
+                "account_id": 2093164,
+                "user_type": "registered",
+                "user_id": 1862502,
+                "link": "https://stackoverflow.com/users/1862502/vignesh-vino",
+                "reputation": 1238,
+                "display_name": "Vignesh Vino",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15355907,
+            "edited": false,
+            "creation_date": 1363080969,
+            "comment_id": 21696457
+        }
+    ]}
+}

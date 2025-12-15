@@ -1,0 +1,298 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-5gl2lt4Wtoc/AAAAAAAAAAI/AAAAAAAAAL8/IIqYUPg-zaQ/s256-rj/photo.jpg",
+            "account_id": 12484453,
+            "user_type": "registered",
+            "user_id": 9088121,
+            "link": "https://stackoverflow.com/users/9088121/dennisv",
+            "reputation": 128,
+            "display_name": "DennisV"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47772692/delegate-builder-null-when-injecting-authentication-manager-in-spring-security",
+        "last_activity_date": 1628607902,
+        "creation_date": 1513081763,
+        "answer_count": 3,
+        "title": "delegate builder null when injecting authentication manager in spring security",
+        "body": "<p>I am in the process of converting an existing and working Spring Security (version 3.2.10) XML-configuration to a Java-based configuration.\nThe XML-configuration I am replacing has an authentication manager configured:<\/p>\n\n<pre><code>&lt;authentication-manager alias=\"authenticationManager\"&gt;  \n    &lt;authentication-provider ref=\"kerberosServiceAuthenticationProvider\"/&gt;\n    &lt;authentication-provider ref=\"samlAuthenticationProvider\"/&gt;\n    &lt;authentication-provider ref=\"pkiAuthenticationProvider\"/&gt;\n    &lt;authentication-provider ref=\"openIdConnectAuthenticationProvider\"/&gt;\n&lt;/authentication-manager&gt;\n<\/code><\/pre>\n\n<p>My Java configuration equivalent is:<\/p>\n\n<pre><code>@Configuration\n@EnableWebSecurity\npublic class SecurityConfiguration extends WebSecurityConfigurerAdapter\n{\n    @Autowired\n    public void configure(AuthenticationManagerBuilder auth) throws Exception\n    {\n        auth.authenticationProvider(kerberosServiceAuthenticationProvider())\n        .authenticationProvider(samlAuthenticationProvider())\n        .authenticationProvider(pkiAuthenticationProvider())\n        .authenticationProvider(openIdConnectAuthenticationProvider());\n    }\n}\n<\/code><\/pre>\n\n<p>As the authentication manager is referred to by its alias in constructing other beans, I have overridden the authenticationmanagerbean like this:<\/p>\n\n<pre><code>@Override\n@Bean(name = \"authenticationManager\")\npublic AuthenticationManager authenticationManagerBean() throws  Exception\n{\n        return super.authenticationManagerBean();\n}\n<\/code><\/pre>\n\n<p>As suggested e.g. in <a href=\"https://stackoverflow.com/questions/21633555/how-to-inject-authenticationmanager-using-java-configuration-in-a-custom-filter\">How To Inject AuthenticationManager using Java Configuration in a Custom Filter<\/a>\nHowever, on creating of this bean, the following exception is thrown:<\/p>\n\n<pre><code>Caused by: java.lang.IllegalArgumentException: delegateBuilder cannot be null\nat org.springframework.util.Assert.notNull(Assert.java:112)\nat org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter$AuthenticationManagerDelegator.&lt;init&gt;(WebSecurityConfigurerAdapter.java:426)\nat org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter.authenticationManagerBean(WebSecurityConfigurerAdapter.java:220)\n<\/code><\/pre>\n\n<p>The delegate builder is the authentication builder that is being used as first argument when overriding the bean (snippet is the implementation of super.authenticationManagerBean()), which is null.<\/p>\n\n<pre><code>public AuthenticationManager authenticationManagerBean() throws Exception {\n        return new AuthenticationManagerDelegator(authenticationBuilder,   context);\n}\n<\/code><\/pre>\n\n<p>So it seems something is missing when this bean is created. This delegate builder is only set by this method in the WebSecurityConfigurerAdapter:<\/p>\n\n<pre><code>@Autowired\npublic void setObjectPostProcessor(ObjectPostProcessor&lt;Object&gt; objectPostProcessor) \n{...}\n<\/code><\/pre>\n\n<p>But it doesn't get called (and does not seem to be meant to override).\nI also noticed the configure method has not been called yet.\nI am obviously missing something but have no idea what it is.<\/p>\n",
+        "question_id": 47772692,
+        "tags": [
+            "java",
+            "spring-security"
+        ],
+        "score": 4,
+        "accepted_answer_id": 48531210,
+        "is_answered": true,
+        "view_count": 4948,
+        "last_edit_date": 1513151330
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "edited": false,
+            "creation_date": 1513104217,
+            "comment_id": 82520105
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-5gl2lt4Wtoc/AAAAAAAAAAI/AAAAAAAAAL8/IIqYUPg-zaQ/s256-rj/photo.jpg",
+                "account_id": 12484453,
+                "user_type": "registered",
+                "user_id": 9088121,
+                "link": "https://stackoverflow.com/users/9088121/dennisv",
+                "reputation": 128,
+                "display_name": "DennisV"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "edited": false,
+            "creation_date": 1513097113,
+            "comment_id": 82516220
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "edited": false,
+            "creation_date": 1513090172,
+            "comment_id": 82511781
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "edited": false,
+            "creation_date": 1513089984,
+            "comment_id": 82511645
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-5gl2lt4Wtoc/AAAAAAAAAAI/AAAAAAAAAL8/IIqYUPg-zaQ/s256-rj/photo.jpg",
+                "account_id": 12484453,
+                "user_type": "registered",
+                "user_id": 9088121,
+                "link": "https://stackoverflow.com/users/9088121/dennisv",
+                "reputation": 128,
+                "display_name": "DennisV"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "edited": false,
+            "creation_date": 1513089500,
+            "comment_id": 82511280
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "edited": false,
+            "creation_date": 1513088581,
+            "comment_id": 82510673
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-5gl2lt4Wtoc/AAAAAAAAAAI/AAAAAAAAAL8/IIqYUPg-zaQ/s256-rj/photo.jpg",
+                "account_id": 12484453,
+                "user_type": "registered",
+                "user_id": 9088121,
+                "link": "https://stackoverflow.com/users/9088121/dennisv",
+                "reputation": 128,
+                "display_name": "DennisV"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "edited": false,
+            "creation_date": 1513086526,
+            "comment_id": 82509301
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6992b2117ccaf3d82f79a2062d0e93a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6463892,
+                "user_type": "registered",
+                "user_id": 5277820,
+                "link": "https://stackoverflow.com/users/5277820/dur",
+                "reputation": 17313,
+                "display_name": "dur",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772692,
+            "edited": false,
+            "creation_date": 1513084987,
+            "comment_id": 82508262
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/658a389c56056eef2c721b6b365f02c7?s=256&d=identicon&r=PG",
+                "account_id": 365948,
+                "user_type": "registered",
+                "user_id": 1087605,
+                "link": "https://stackoverflow.com/users/1087605/nimai",
+                "reputation": 2382,
+                "display_name": "nimai"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1517335531,
+            "creation_date": 1517335531,
+            "body": "<p>I have had the exact same error while migrating to Spring Boot 2 (in the process, I hade to migrate from Spring Security 4 to Spring Security 5.0.0 and converting my XML configuration to JavaConfig). \nSo I'm not sure this applies to you. In Spring Security 5, that <code>authenticationBuilder<\/code> is initialized in WebSecurityConfigurerAdapter's method: <\/p>\n\n<pre><code>@Autowired\npublic void setApplicationContext(ApplicationContext context) {..}\n<\/code><\/pre>\n\n<p>It should therefore try to inject the context. However, my @Bean-annotated method which defines the AuthenticationManager bean is always invoked before that method and results in the same error than you have.\nI fixed that by simply implementing the ApplicationContextAware interface, which force the invocation of the method before everything else:<\/p>\n\n<pre><code>public class MySecurityConfigurerAdapter extends WebSecurityConfigurerAdapter implements ApplicationContextAware {\n /*...*/\n @Override\n protected void configure(AuthenticationManagerBuilder auth) throws Exception {\n    auth\n            .authenticationProvider(dbAuthenticationProvider)\n            .authenticationProvider(otherAuthProvider);\n}\n\n@Bean(name = BeanIds.AUTHENTICATION_MANAGER)\n@Override\npublic AuthenticationManager authenticationManagerBean() throws Exception {\n    return super.authenticationManagerBean();\n}\n}\n<\/code><\/pre>\n\n<p>I can't explain the exact reason behind, I couldn't find a new \"right\" way to do it in the documentation, but at least it worked for me.<\/p>\n",
+            "answer_id": 48527833,
+            "question_id": 47772692
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2ed901e1f7e084b1a46d854f64142aad?s=256&d=identicon&r=PG",
+                "account_id": 307015,
+                "user_type": "registered",
+                "user_id": 618087,
+                "link": "https://stackoverflow.com/users/618087/rob-winch",
+                "reputation": 21760,
+                "display_name": "Rob Winch"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1517349516,
+            "creation_date": 1517349516,
+            "body": "<p>If you are having problems with <code>AuthenticationManagerBuilder<\/code> giving you an error that states <code>IllegalArgumentException: delegateBuilder cannot be null<\/code> you likely have a circular bean dependency that is not able to be resolved. This is easy to do with <code>AuthenticationManagerBuilder<\/code>. Instead, I'd recommend exposing an <code>AuthenticationManager<\/code> as a Bean and do not use <code>AuthenticationManagerBuilder<\/code> at all.<\/p>\n\n<p>For example:<\/p>\n\n\n\n<pre><code>@Bean\npublic ProviderManager authenticationManager() {\n    return new ProviderManager(Arrays.asList(\n        kerberosServiceAuthenticationProvider(),\n        samlAuthenticationProvider(),\n        pkiAuthenticationProvider(),\n        openIdConnectAuthenticationProvider());\n}\n<\/code><\/pre>\n\n<p>If you are still having issues, you can also try making the methods defining Spring Security's authentication (i.e. <code>AuthenticationManager<\/code> and <code>AuthenticationProvider<\/code>, <code>PasswordEncoder<\/code>, etc) static which allows the definition to be loaded without initializing the entire class. If problems persist, I'd recommend moving all of your <code>AuthenticationManager<\/code> and <code>AuthenticationProvider<\/code> configuration to a separate configuration class. <\/p>\n",
+            "answer_id": 48531210,
+            "question_id": 47772692
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bc3e7f7ece96f6e322543a0f6e3f2f83?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 22418075,
+                "user_type": "registered",
+                "user_id": 16625827,
+                "link": "https://stackoverflow.com/users/16625827/geniusli",
+                "reputation": 1,
+                "display_name": "GeniusLi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1628607902,
+            "creation_date": 1628607902,
+            "body": "<p>I also encountered this problem and submitted a bug in GitHub. But they asked me to stack overflow.<\/p>\n<p>The reason for the problem is the bean loading order.<\/p>\n<p>Fortunately, the solution I found requires adding an additional configuration class to create the AuthenticationManager bean separately.<\/p>\n<p>Examples are as follows:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>/**\n* Original configuration\n*/\n@Configuration\n@EnableWebSecurity\n@ConfigurationProperties(prefix =&quot;security&quot;)\npublic class SecurityConfig extends WebSecurityConfigurerAdapter {\n\n    ......\n\n    @Override\n    protected void configure(HttpSecurity http) throws Exception {\n        http.exceptionHandling()\n                .authenticationEntryPoint(new UnAuthenticationEntryPoint())\n          ......\n    }\n    ......\n}\n<\/code><\/pre>\n<pre class=\"lang-java prettyprint-override\"><code>/**\n* New configuration class\n* Use only to create AuthenticationManager bean\n*/\n@Order\n@Configuration\npublic class AuthenticationManagerConfig extends WebSecurityConfigurerAdapter {\n\n    @Bean(name = &quot;authenticationManager&quot;)\n    @Override\n    public AuthenticationManager authenticationManagerBean() throws Exception {\n        return super.authenticationManagerBean();\n    }\n}\n<\/code><\/pre>\n<p>But this solution is not perfect. If there is a better way, please share it with me.<\/p>\n",
+            "answer_id": 68729223,
+            "question_id": 47772692
+        }
+    ],
+    "answer_comments": {
+        "48531210": [{
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-5gl2lt4Wtoc/AAAAAAAAAAI/AAAAAAAAAL8/IIqYUPg-zaQ/s256-rj/photo.jpg",
+                "account_id": 12484453,
+                "user_type": "registered",
+                "user_id": 9088121,
+                "link": "https://stackoverflow.com/users/9088121/dennisv",
+                "reputation": 128,
+                "display_name": "DennisV"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48531210,
+            "edited": false,
+            "creation_date": 1517562599,
+            "comment_id": 84154568
+        }],
+        "48527833": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7fdae5a8a8a590c093a4eb0bfac3c830?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8891376,
+                "user_type": "registered",
+                "user_id": 6637798,
+                "link": "https://stackoverflow.com/users/6637798/howard",
+                "reputation": 458,
+                "display_name": "howard"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 48527833,
+            "edited": false,
+            "creation_date": 1596572502,
+            "comment_id": 111853191
+        }]
+    }
+}

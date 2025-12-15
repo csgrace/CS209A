@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/84cea2df5455fab19a915ec582cab9f6?s=256&d=identicon&r=PG",
+            "account_id": 1096046,
+            "user_type": "registered",
+            "user_id": 1089623,
+            "link": "https://stackoverflow.com/users/1089623/klausos-klausos",
+            "reputation": 16098,
+            "display_name": "Klausos Klausos",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20093977/define-input-data-for-clustering-using-weka-api",
+        "last_activity_date": 1384990942,
+        "creation_date": 1384944975,
+        "answer_count": 1,
+        "title": "Define input data for clustering using WEKA API",
+        "body": "<p>I want to cluster points specified by latitude and longitude. I am using <a href=\"http://weka.wikispaces.com/Use+WEKA+in+your+Java+code\" rel=\"nofollow\">WEKA API<\/a>\nThe problem is with <code>Instances instances = new Instances(40.01,1.02);<\/code> \nSo, how to specify input data without using ARFF file? I would like just to read an array into <code>Instances<\/code>.<\/p>\n\n<pre><code>import java.io.Reader;\n\nimport weka.clusterers.ClusterEvaluation;\nimport weka.clusterers.SimpleKMeans;\nimport weka.core.Instances;\n\n\npublic class test {\n\n    /**\n     * @param args\n     */\n    public static void main(String[] args) {\n        Instances instances = new Instances(40.01,1.02);\n\n        SimpleKMeans simpleKMeans = new SimpleKMeans();\n        simpleKMeans.buildClusterer(instances);\n\n        ClusterEvaluation eval = new ClusterEvaluation();\n        eval.setClusterer(simpleKMeans);\n        eval.evaluateClusterer(new Instances(instances));\n\n        eval.clusterResultsToString();\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 20093977,
+        "tags": [
+            "java",
+            "cluster-analysis",
+            "weka"
+        ],
+        "score": 3,
+        "accepted_answer_id": 20109536,
+        "is_answered": true,
+        "view_count": 2747
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/363c509d697e90cfb88b8be2aa75e7ab?s=256&d=identicon&r=PG",
+            "account_id": 313716,
+            "user_type": "registered",
+            "user_id": 628499,
+            "link": "https://stackoverflow.com/users/628499/walter",
+            "reputation": 2811,
+            "display_name": "Walter",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1384990942,
+        "creation_date": 1384990942,
+        "body": "<p>I believe you have to create your own instances.  Below I show creating a new instances from an array with two attributes, latitude and longitude.<\/p>\n\n<pre><code>\nimport weka.core.Attribute;\nimport weka.core.DenseInstance;\nimport weka.core.FastVector;\nimport weka.core.Instances;\n\npublic class AttTest {\n\n    public static void main(String[] args) throws Exception\n    {\n        double[] one={0,1,2,3};\n        double[] two={3,2,1,0};\n        double[][] both=new double[2][4];\n        both[0]=one;\n        both[1]=two;\n\n        Instances to_use=AttTest.buildArff(both);\n        System.out.println(to_use.toString());\n    }\n\n  public static Instances buildArff(double[][] array) throws Exception\n  {\n         FastVector      atts = new FastVector();\n         atts.addElement(new Attribute(\"lat\")); //latitude\n         atts.addElement(new Attribute(\"lon\")); //longitude\n\n         // 2. create Instances object\n         Instances test = new Instances(\"location\", atts, 0);\n\n         // 3. fill with data\n         for(int s1=0; s1 &lt; array[0].length; s1=s1+1)\n         {\n             double vals[] = new double[test.numAttributes()];\n             vals[0] = array[0][s1];\n             vals[1] = array[1][s1];\n             test.add(new DenseInstance(1.0, vals));\n         }\n\n         return(test);\n  }\n}<\/code><\/pre>\n",
+        "answer_id": 20109536,
+        "question_id": 20093977
+    }],
+    "answer_comments": {}
+}

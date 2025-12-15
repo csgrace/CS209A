@@ -1,0 +1,132 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a/AGNmyxbELzmahMcBQ9w4V0yAwR-rClATvJawd2HNj2cmqQ=k-s256",
+            "account_id": 28161479,
+            "user_type": "registered",
+            "user_id": 21521340,
+            "link": "https://stackoverflow.com/users/21521340/stepback3",
+            "reputation": 13,
+            "display_name": "stepback3"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75881095/java-app-keeps-stopping-in-android-studio",
+        "last_activity_date": 1680124200,
+        "creation_date": 1680115870,
+        "answer_count": 2,
+        "title": "Java App keeps stopping in Android Studio",
+        "body": "<p>I'm new to android app development and am following a weather app made in a textbook, and the app opens in the emulator, but when I input a city to display the weather the app closes and gives me the following error:<\/p>\n<p>&quot; java.lang.NullPointerException: Attempt to invoke virtual method 'org.json.JSONArray org.json.JSONObject.getJSONArray(java.lang.String)' on a null object reference&quot;<\/p>\n<pre><code>public class MainActivity extends AppCompatActivity {\n\n    private final List&lt;Weather&gt; weatherList = new ArrayList&lt;&gt;();\n\n    private WeatherArrayAdapter weatherArrayAdapter;\n    private ListView weatherListView;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n\n        setContentView(R.layout.activity_main);\n        findViewById(R.id.toolbar);\n        setSupportActionBar();\n\n        weatherListView = findViewById(R.id.weatherListView);\n        weatherArrayAdapter = new WeatherArrayAdapter(this,weatherList);\n        weatherListView.setAdapter(weatherArrayAdapter);\n\n        FloatingActionButton fab =\n                findViewById(R.id.fab);\n        fab.setOnClickListener((view) -&gt; {\n            EditText locationEditText =\n                    findViewById(R.id.locationEditText);\n            URL url = createURL(locationEditText.getText().toString());\n\n            if (url != null) {\n                dismissKeyboard(locationEditText);\n                GetWeatherTask getLocalWeatherTask = new GetWeatherTask();\n                getLocalWeatherTask.execute(url);\n            }\n            else {\n                Snackbar.make(findViewById(R.id.coordinatorLayout),\n                        &quot;Invalid URL&quot;, Snackbar.LENGTH_LONG).show();\n            }\n\n        });\n    }\n\n    private void setSupportActionBar() {\n    }\n\n    private void dismissKeyboard(View view) {\n        InputMethodManager imm = (InputMethodManager)  getSystemService(\n                Context.INPUT_METHOD_SERVICE);\n        imm.hideSoftInputFromWindow(view.getWindowToken(),0);\n\n    }\n\n    private URL createURL(String city) {\n        String apiKey = &quot;()&quot;;\n        String baseURL = &quot;http://api.openweathermap.org/data/2.5/forecast/daily?q=&quot;;\n\n\n        try {\n\n            String urlString = baseURL + URLEncoder.encode(city,&quot;UTF-8&quot;) +\n                    &quot;()&quot; + apiKey;\n            return new URL(urlString);\n        }\n        catch (Exception e) {\n            e.printStackTrace();\n        }\n        return null;\n    }\n\n    /**\n     * \n     */\n    @SuppressWarnings(&quot;deprecation&quot;)\n    @SuppressLint(&quot;StaticFieldLeak&quot;)\n    private class GetWeatherTask\n        extends AsyncTask&lt;URL, Void, JSONObject&gt; {\n\n        @Override\n        protected JSONObject doInBackground(URL... params) {\n            HttpURLConnection connection = null;\n\n\n            try {\n                connection = (HttpURLConnection) params[0].openConnection();\n                int response = connection.getResponseCode();\n\n                if (response == HttpURLConnection.HTTP_OK) {\n                    StringBuilder builder = new StringBuilder();\n\n                    try (BufferedReader reader = new BufferedReader(\n                            new InputStreamReader(connection.getInputStream()))) {\n\n                        String line;\n\n                        while ((line = reader.readLine()) != null) {\n                            builder.append(line);\n                        }\n                    }\n                    catch (IOException e) {\n                        Snackbar.make(findViewById(R.id.coordinatorLayout),\n                                &quot;Unable to read weather data&quot;, Snackbar.LENGTH_LONG).show();\n                        e.printStackTrace();\n                    }\n                    return new JSONObject(builder.toString());\n                }\n                else {\n                    Snackbar.make(findViewById(R.id.coordinatorLayout),\n                            &quot;Unable to connect to OpenWeatherMap.org&quot;, Snackbar.LENGTH_LONG).show();\n\n\n            }\n        }\n        catch (Exception e) {\n            Snackbar.make(findViewById(R.id.coordinatorLayout),\n                    &quot;Unable to connect to OpenWeather.org&quot;, Snackbar.LENGTH_LONG).show();\n            e.printStackTrace();\n        }\n        finally {\n                assert connection != null;\n                connection.disconnect();\n        }\n        return null;\n    }\n\n\n    @Override\n    protected void onPostExecute(JSONObject weather) {\n        convertJSONtoArrayList(weather);\n        weatherArrayAdapter.notifyDataSetChanged();\n        weatherListView.smoothScrollToPosition(0);\n    }\n}\n\nprivate void convertJSONtoArrayList(JSONObject forecast) {\n    weatherList.clear();\n\n    try {\n        JSONArray list = forecast.getJSONArray(&quot;list&quot;);\n\n        for (int i = 0; i &lt; list.length(); ++i) {\n            JSONObject day = list.getJSONObject(i);\n\n            JSONObject temperatures = day.getJSONObject(&quot;temp&quot;);\n\n            JSONObject weather =\n                    day.getJSONArray(&quot;weather&quot;).getJSONObject(0);\n\n            weatherList.add(new Weather(\n                    day.getLong(&quot;dt&quot;),\n                    temperatures.getDouble(&quot;min&quot;),\n                    temperatures.getDouble(&quot;max&quot;),\n                    day.getDouble(&quot;humidity&quot;),\n                    weather.getString(&quot;description&quot;),\n                    weather.getString(&quot;icon&quot;)));\n        }\n    }\n    catch (JSONException e) {\n        e.printStackTrace();\n    }\n }\n\n}\n<\/code><\/pre>\n<p>I tried some of the recommended fixes that appear as the yellow lines in the editor but it still doesn't work. Any help is appreciated.<\/p>\n",
+        "question_id": 75881095,
+        "tags": [
+            "java",
+            "android",
+            "android-studio"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 119
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6a6909762e756d3ba9c521f334824e79?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 22450291,
+            "user_type": "registered",
+            "user_id": 16653700,
+            "link": "https://stackoverflow.com/users/16653700/alias-cartellano",
+            "reputation": 362,
+            "display_name": "Alias Cartellano"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 75881095,
+        "edited": false,
+        "creation_date": 1680117643,
+        "comment_id": 133845064
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Hy8Jx.jpg?s=256",
+                "account_id": 18603122,
+                "user_type": "registered",
+                "user_id": 13557471,
+                "link": "https://stackoverflow.com/users/13557471/mubbashir",
+                "reputation": 36,
+                "display_name": "mubbashir"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1680124200,
+            "creation_date": 1680124200,
+            "body": "<p>inside your convertJSONtoArrayList(JSONObject forecast) method, add a null check like this<\/p>\n<pre><code>if (forecast == null) {\n    return;\n}\nweatherList.clear();\n<\/code><\/pre>\n<p>this will immediately return null and prevent app from crashing.<\/p>\n",
+            "answer_id": 75882200,
+            "question_id": 75881095
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ee26d2d71e312833d701cc6309dcee71?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 28160829,
+                "user_type": "registered",
+                "user_id": 21520802,
+                "link": "https://stackoverflow.com/users/21520802/cna",
+                "reputation": 1,
+                "display_name": "cna"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1680117876,
+            "creation_date": 1680117513,
+            "body": "<p>You are calling getJSONArray(java.lang.String) on a null object. It means that one of these two objects is null:<\/p>\n<pre><code>JSONArray list = forecast.getJSONArray(&quot;list&quot;);\nday.getJSONArray(&quot;weather&quot;).getJSONObject(0);\n<\/code><\/pre>\n<p>Can you double check them?<\/p>\n",
+            "answer_id": 75881329,
+            "question_id": 75881095,
+            "last_edit_date": 1680117876
+        }
+    ],
+    "answer_comments": {"75882200": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Hy8Jx.jpg?s=256",
+                "account_id": 18603122,
+                "user_type": "registered",
+                "user_id": 13557471,
+                "link": "https://stackoverflow.com/users/13557471/mubbashir",
+                "reputation": 36,
+                "display_name": "mubbashir"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75882200,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/a/AGNmyxbELzmahMcBQ9w4V0yAwR-rClATvJawd2HNj2cmqQ=k-s256",
+                "account_id": 28161479,
+                "user_type": "registered",
+                "user_id": 21521340,
+                "link": "https://stackoverflow.com/users/21521340/stepback3",
+                "reputation": 13,
+                "display_name": "stepback3"
+            },
+            "edited": false,
+            "creation_date": 1680651225,
+            "comment_id": 133933702
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a/AGNmyxbELzmahMcBQ9w4V0yAwR-rClATvJawd2HNj2cmqQ=k-s256",
+                "account_id": 28161479,
+                "user_type": "registered",
+                "user_id": 21521340,
+                "link": "https://stackoverflow.com/users/21521340/stepback3",
+                "reputation": 13,
+                "display_name": "stepback3"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75882200,
+            "edited": false,
+            "creation_date": 1680555253,
+            "comment_id": 133915436
+        }
+    ]}
+}

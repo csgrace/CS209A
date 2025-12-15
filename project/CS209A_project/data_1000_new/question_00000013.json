@@ -1,0 +1,122 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/DYbAP.jpg?s=256",
+            "account_id": 4910238,
+            "user_type": "registered",
+            "user_id": 3955724,
+            "link": "https://stackoverflow.com/users/3955724/west",
+            "reputation": 2708,
+            "display_name": "WeSt",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28303968/java-find-classes-with-certain-base-type-on-program-startup",
+        "last_activity_date": 1422982307,
+        "creation_date": 1422981122,
+        "answer_count": 1,
+        "title": "Java: find classes with certain base type on program startup",
+        "body": "<p>I have a <code>Java<\/code> program (an <code>Eclipse plug-in<\/code> to be specific), which is using several <code>JAR<\/code> files (which I can control). One of the core <code>JAR<\/code> files defines an <code>abstract class<\/code> called <strong>Strategy<\/strong>. When the user starts the program, the program needs to know all sub classes of <strong>Strategy<\/strong>, that are on the program <code>ClassPath<\/code>.<\/p>\n\n<p>As I described in <a href=\"https://stackoverflow.com/questions/28287749/java-use-static-initializer-blocks-to-register-classes-to-global-static-registr\">this StackOverflow question<\/a>, I tried to use static initializer blocks on the sub classes, so that they auto-register themselves in a registry. This approach is not working since the static initalizers are not executed before I explicitly use the class. <\/p>\n\n<p>Is there any other way to find all classes with a certain base type that are on the current <code>ClassPath<\/code>?<\/p>\n\n<p>I can think of the following solutions:<\/p>\n\n<ul>\n<li>traverse all <code>JAR<\/code>s in a specific directory and check the classes they contain<\/li>\n<li>create a file which is loaded on program start-up and read the class names from that<\/li>\n<\/ul>\n\n<p>I can implement both of them myself (so I do not ask for any code samples here). I merely want to know if there is another option I am missing. Any in-class solution (like the one I tried with static initializers) would be greatly appreciated.<\/p>\n",
+        "question_id": 28303968,
+        "tags": [
+            "java",
+            "eclipse",
+            "classloader"
+        ],
+        "score": 1,
+        "accepted_answer_id": 28304282,
+        "is_answered": true,
+        "view_count": 96,
+        "last_edit_date": 1495541190
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d1d6ffdc1ab45fd54bfc812f6133ba1c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5395475,
+                "user_type": "registered",
+                "user_id": 4296831,
+                "link": "https://stackoverflow.com/users/4296831/gren",
+                "reputation": 1864,
+                "display_name": "Gren"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28303968,
+            "edited": false,
+            "creation_date": 1422981978,
+            "comment_id": 44959664
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2s35X.png?s=256",
+                "account_id": 3093821,
+                "user_type": "registered",
+                "user_id": 3182664,
+                "link": "https://stackoverflow.com/users/3182664/marco13",
+                "reputation": 54835,
+                "display_name": "Marco13",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 28303968,
+            "edited": false,
+            "creation_date": 1422981911,
+            "comment_id": 44959622
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/df9a3ef1f08691faecc742897b575a04?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5667881,
+                "user_type": "registered",
+                "user_id": 4483548,
+                "link": "https://stackoverflow.com/users/4483548/bretc",
+                "reputation": 4219,
+                "display_name": "BretC"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28303968,
+            "edited": false,
+            "creation_date": 1422981747,
+            "comment_id": 44959516
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bac72cf6bd20e9e3e1b7a78089fa6141?s=256&d=identicon&r=PG",
+            "account_id": 1283501,
+            "user_type": "registered",
+            "user_id": 1237040,
+            "link": "https://stackoverflow.com/users/1237040/ravi-k-thapliyal",
+            "reputation": 51861,
+            "display_name": "Ravi K Thapliyal"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1422982107,
+        "creation_date": 1422982107,
+        "body": "<p>If you're open to using a third-party library, <a href=\"https://code.google.com/p/reflections/\" rel=\"nofollow\">Reflections<\/a> seems to be the best fit here. It's a Java runtime metadata analysis library and is like geared to do this. From their website:<\/p>\n\n<blockquote>\n  <p>Using Reflections you can query your metadata such as:<\/p>\n  \n  <ul>\n  <li>get all subtypes of some type<\/li>\n  <li>get all types/constructos/methods/fields annotated with some annotation, optionally with annotation parameters matching<\/li>\n  <li>get all resources matching matching a regular expression<\/li>\n  <li>get all methods with specific signature including parameters, parameter annotations and return type<\/li>\n  <\/ul>\n<\/blockquote>\n\n<p>All you need is to create a configured instance of <code>Reflections<\/code> in your <code>StrategyRegistrar<\/code> class as<\/p>\n\n<pre><code>Reflections reflections = new Reflections(\n            new ConfigurationBuilder()\n           .setUrls(ClasspathHelper.forPackage(\"com.your.app.strategies.pkg\"))\n           .setScanners(new SubTypesScanner())\n       );\n<\/code><\/pre>\n\n<p>And, then simply fire a query like<\/p>\n\n<pre><code>Set&lt;Class&lt;? extends Strategy&gt;&gt; strategies =\n    reflections.getSubTypesOf(com.your.app.strategies.pkg.Strategy.class);\n<\/code><\/pre>\n",
+        "answer_id": 28304282,
+        "question_id": 28303968
+    }],
+    "answer_comments": {"28304282": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8ac60bdd548be8a4938310f19555b91f?s=256&d=identicon&r=PG",
+            "account_id": 318211,
+            "user_type": "registered",
+            "user_id": 635306,
+            "link": "https://stackoverflow.com/users/635306/pavan",
+            "reputation": 1247,
+            "display_name": "Pavan"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 28304282,
+        "edited": false,
+        "creation_date": 1423086710,
+        "comment_id": 45011394
+    }]}
+}

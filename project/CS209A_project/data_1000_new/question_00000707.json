@@ -1,0 +1,176 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f8f3e04a73fb0ba8feff905928a3894?s=256&d=identicon&r=PG",
+            "account_id": 507554,
+            "user_type": "registered",
+            "user_id": 1718727,
+            "link": "https://stackoverflow.com/users/1718727/daemon",
+            "reputation": 147,
+            "display_name": "Daemon",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/12719132/java-combining-jspinners-event-listeners-and-text-fields",
+        "last_activity_date": 1349384122,
+        "creation_date": 1349313628,
+        "answer_count": 2,
+        "title": "Java: Combining JSpinners, Event Listeners, and Text Fields",
+        "body": "<pre><code>import java.awt.*;\nimport java.awt.event.ActionEvent;\nimport java.awt.event.ActionListener;\n\nimport javax.swing.*;\nimport javax.swing.event.*;\npublic class guiStatDistribution2 extends JFrame {\n\nint str = 1;\nint dex = 1;\nint intel = 1;\nint con = 1;\nint cha = 1;\nint remainingPoints = 45;\n\nJTextField remainingDisplay = new JTextField(\"You have \" + remainingPoints + \" points left to distribute.\");\n\nSpinnerNumberModel strPoints = new SpinnerNumberModel(1,1,46,1);\nSpinnerNumberModel dexPoints = new SpinnerNumberModel(1,1,46,1);\nSpinnerNumberModel intPoints = new SpinnerNumberModel(1,1,46,1);\nSpinnerNumberModel conPoints = new SpinnerNumberModel(1,1,46,1);\nSpinnerNumberModel chaPoints = new SpinnerNumberModel(1,1,46,1);\n\n\n\npublic guiStatDistribution2() {\n\n    JSpinner strSpin = new JSpinner(strPoints);\n    JSpinner dexSpin = new JSpinner(dexPoints);\n    JSpinner intSpin = new JSpinner(intPoints);\n    JSpinner conSpin = new JSpinner(conPoints);\n    JSpinner chaSpin = new JSpinner(chaPoints);\n    //instance for strength\n    strSpin.addChangeListener(new ChangeListener() {\n        @Override\n        public void stateChanged(ChangeEvent e) {\n            if (remainingPoints != 0) {\n                str = strPoints.getNumber().intValue();\n                remainingPoints = (remainingPoints - (str-1) - (dex-1) - (intel-1) - (con-1) - (cha-1));\n                remainingDisplay.revalidate();\n            }\n            if (remainingPoints == 0) {\n                JOptionPane.showMessageDialog(null, \"No points left. Lower another score to add more.\");\n            }\n        }\n    });\n    //instance for dexterity\n    dexSpin.addChangeListener(new ChangeListener() {\n        @Override\n        public void stateChanged(ChangeEvent f) {\n            if (remainingPoints != 0) {\n                dex = dexPoints.getNumber().intValue();\n                remainingPoints = (remainingPoints - (str-1) - (dex-1) - (intel-1) - (con-1) - (cha-1));\n                remainingDisplay.revalidate();\n            }\n            if (remainingPoints == 0) {\n                JOptionPane.showMessageDialog(null, \"No points left. Lower another score to add more.\");\n            }\n        }\n    });\n    //instance for intelligence\n    intSpin.addChangeListener(new ChangeListener() {\n        @Override\n        public void stateChanged(ChangeEvent g) {\n            if (remainingPoints != 0) {\n                intel = intPoints.getNumber().intValue();\n                remainingPoints = (remainingPoints - (str-1) - (dex-1) - (intel-1) - (con-1) - (cha-1));\n                remainingDisplay.revalidate();\n            }\n            if (remainingPoints == 0) {\n                JOptionPane.showMessageDialog(null, \"No points left. Lower another score to add more.\");\n            }\n        }\n    });\n    //instance for constitution\n    conSpin.addChangeListener(new ChangeListener() {\n        @Override\n        public void stateChanged(ChangeEvent h) {\n            if (remainingPoints != 0) {\n                con = conPoints.getNumber().intValue();\n                remainingPoints = (remainingPoints - (str-1) - (dex-1) - (intel-1) - (con-1) - (cha-1));\n                remainingDisplay.revalidate();\n            }\n            if (remainingPoints == 0) {\n                JOptionPane.showMessageDialog(null, \"No points left. Lower another score to add more.\");\n            }\n        }\n    });\n    //instance for charisma\n    chaSpin.addChangeListener(new ChangeListener() {\n        @Override\n        public void stateChanged(ChangeEvent i) {\n            if (remainingPoints != 0) {\n                cha = chaPoints.getNumber().intValue();\n                remainingPoints = (remainingPoints - (str-1) - (dex-1) - (intel-1) - (con-1) - (cha-1));\n                remainingDisplay.revalidate();\n            }\n            if (remainingPoints == 0) {\n                JOptionPane.showMessageDialog(null, \"No points left. Lower another score to add more.\");\n            }\n        }\n    });\n\n    JPanel p1 = new JPanel();\n    p1.setLayout(new GridLayout(1,2,0,5));\n    p1.add(new JTextField(\"Strength: \"));\n    p1.add(strSpin);\n\n    JPanel p2 = new JPanel();\n    p2.setLayout(new GridLayout(1,2,0,5));\n    p2.add(new JTextField(\"Dexterity: \"));\n    p2.add(dexSpin);\n\n    JPanel p3 = new JPanel();\n    p3.setLayout(new GridLayout(1,2,0,5));\n    p3.add(new JTextField(\"Intelligence: \"));\n    p3.add(intSpin);\n\n    JPanel p4 = new JPanel();\n    p4.setLayout(new GridLayout(1,2,0,5));\n    p4.add(new JTextField(\"Constitution: \"));\n    p4.add(conSpin);\n\n    JPanel p5 = new JPanel();\n    p5.setLayout(new GridLayout(1,2,0,5));\n    p5.add(new JTextField(\"Charisma: \"));\n    p5.add(chaSpin);\n\n    JPanel p6 = new JPanel();\n    p6.add(remainingDisplay);\n\n    JButton confirm = new JButton(\"Confirm\");\n    confirm.addActionListener(new ActionListener() {\n        public void actionPerformed(ActionEvent e) {\n            int confirmed = JOptionPane.showOptionDialog(null, \"Is this okay?\\nStrength: \" + str + \"\\nDexterity: \" + dex + \"\\nIntelligence: \" + intel + \"\\nConstitution: \" + con + \"\\nCharisma: \" + cha, \"Confirm distribution\", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);\n            if (confirmed == JOptionPane.YES_OPTION) {\n                System.exit(0);\n            }\n        }\n    });\n    JPanel p7 = new JPanel();\n    p7.add(confirm);\n\n    setLayout(new GridLayout(7,1,0,5));\n    add(p6);\n    add(p1);\n    add(p2);\n    add(p3);\n    add(p4);\n    add(p5);\n    add(p7);\n\n}\npublic static void main(String[] args) {\n    guiStatDistribution2 frame = new guiStatDistribution2();\n    frame.setTitle(\"Distribute your skill points\");\n    frame.pack();\n    frame.setLocationRelativeTo(null);\n    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n    frame.setVisible(true);\n}\n}\n<\/code><\/pre>\n\n<p>Okay, this is the updated code with spinners in place of buttons. I've just run into two more problems, but after they are resolved the program will be 100% complete. I greatly appreciate the help you've given me so far.<\/p>\n",
+        "question_id": 12719132,
+        "tags": [
+            "java",
+            "swing"
+        ],
+        "score": 2,
+        "accepted_answer_id": 12719156,
+        "is_answered": true,
+        "view_count": 575,
+        "last_edit_date": 1349384122
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2f8f3e04a73fb0ba8feff905928a3894?s=256&d=identicon&r=PG",
+            "account_id": 507554,
+            "user_type": "registered",
+            "user_id": 1718727,
+            "link": "https://stackoverflow.com/users/1718727/daemon",
+            "reputation": 147,
+            "display_name": "Daemon",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 12719132,
+        "edited": false,
+        "creation_date": 1349368475,
+        "comment_id": 17196465
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/18dce39f2ea886a36a135b57af6d3787?s=256&d=identicon&r=PG",
+                "account_id": 1795265,
+                "user_type": "registered",
+                "user_id": 1664580,
+                "link": "https://stackoverflow.com/users/1664580/lotophage",
+                "reputation": 173,
+                "display_name": "lotophage"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1349316563,
+            "creation_date": 1349313893,
+            "body": "<p>I'd suggest using <code>JSpinners<\/code> instead of a <code>JTextfield<\/code> and two <code>JButtons<\/code> for each attribute. This <a href=\"http://docs.oracle.com/javase/tutorial/uiswing/components/spinner.html\" rel=\"nofollow\">trail<\/a> will tell you everything you need to know. The basic steps are first you need to create number models for each of your spinners, e.g:<\/p>\n\n<pre><code>SpinnerNumberModel strNumberModel = SpinnerNumberModel(1, 1, 20, 1); // value, min, max, step\n<\/code><\/pre>\n\n<p>Create the spinner:<\/p>\n\n<pre><code>JSpinner strSpinner = new JSpinner(strNumberModel);\n<\/code><\/pre>\n\n<p>Then you need to implement a <a href=\"http://docs.oracle.com/javase/7/docs/api/javax/swing/event/ChangeListener.html\" rel=\"nofollow\">ChangeListener<\/a>, something like:<\/p>\n\n<pre><code>strSpinner.addChangeListener(new ChangeListener() {\n\n    @Override\n    public void stateChanged(ChangeEvent e) {\n        str = strNumberModel.getNumber().intValue();\n        remainingPoints = remainingPoints - (str + dex + intel + con + cha);\n        if (remainingPoints &lt;= 0) {\n            // do something\n        }\n    }\n});\n<\/code><\/pre>\n",
+            "answer_id": 12719156,
+            "question_id": 12719132,
+            "last_edit_date": 1349316563
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+                "account_id": 969721,
+                "user_type": "registered",
+                "user_id": 992484,
+                "link": "https://stackoverflow.com/users/992484/madprogrammer",
+                "reputation": 347645,
+                "display_name": "MadProgrammer",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1349314746,
+            "creation_date": 1349314746,
+            "body": "<p>I agree with llya, I'd use <code>JSpinners<\/code>.<\/p>\n\n<p>However, if you like the challange, I'd create an <code>AttributeAction<\/code> that extends from an <code>AbstractAction<\/code> that could take a <code>JTextField<\/code> a modifier and possibly a range<\/p>\n\n<pre><code>public class AttributeAction extends AbstractAction {\n    private JTextField field;\n    private int modifier;\n    private int min;\n    private int max;\n\n    public AbstractAttributeAction(String text, JTextField field, int modifier, int max, int min) {\n        this.field = field;\n        this.modifier = modifier;\n        this.max = max;\n        this.min = min;\n        putValue(NAME, text);\n    }\n\n    public void actionPerfomed(ActionEvent evt) {\n        try {\n            int value = Integer.parseInt(fld.getText());\n            value += modifier;\n            if (value &gt;= min &amp;&amp; value &lt;= max) {\n                fld.setText(Integer.toString(value));\n            }\n        } catch (NumberFormatException exp) {\n            // Value was bad\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Then for each button, you simply need to create an appropriate action...<\/p>\n\n<pre><code>JTextField strengthField = new JTextField();\nJButton btnPlus = new JButton(\"+\", strengthField, 1, 0, 100);\nJButton btnMinus = new JButton(\"-\", strengthField, -1, 0, 100);\n<\/code><\/pre>\n\n<p>This, of course, opens up a whole can of worms, like how do you prevent the user from entering non-numeric values, but that's another question ;)<\/p>\n",
+            "answer_id": 12719237,
+            "question_id": 12719132
+        }
+    ],
+    "answer_comments": {
+        "12719237": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f8f3e04a73fb0ba8feff905928a3894?s=256&d=identicon&r=PG",
+                "account_id": 507554,
+                "user_type": "registered",
+                "user_id": 1718727,
+                "link": "https://stackoverflow.com/users/1718727/daemon",
+                "reputation": 147,
+                "display_name": "Daemon",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 12719237,
+            "edited": false,
+            "creation_date": 1349317145,
+            "comment_id": 17176897
+        }],
+        "12719156": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/18dce39f2ea886a36a135b57af6d3787?s=256&d=identicon&r=PG",
+                    "account_id": 1795265,
+                    "user_type": "registered",
+                    "user_id": 1664580,
+                    "link": "https://stackoverflow.com/users/1664580/lotophage",
+                    "reputation": 173,
+                    "display_name": "lotophage"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 12719156,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f8f3e04a73fb0ba8feff905928a3894?s=256&d=identicon&r=PG",
+                    "account_id": 507554,
+                    "user_type": "registered",
+                    "user_id": 1718727,
+                    "link": "https://stackoverflow.com/users/1718727/daemon",
+                    "reputation": 147,
+                    "display_name": "Daemon",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1349323990,
+                "comment_id": 17178102
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f8f3e04a73fb0ba8feff905928a3894?s=256&d=identicon&r=PG",
+                    "account_id": 507554,
+                    "user_type": "registered",
+                    "user_id": 1718727,
+                    "link": "https://stackoverflow.com/users/1718727/daemon",
+                    "reputation": 147,
+                    "display_name": "Daemon",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 12719156,
+                "edited": false,
+                "creation_date": 1349321463,
+                "comment_id": 17177582
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2f8f3e04a73fb0ba8feff905928a3894?s=256&d=identicon&r=PG",
+                    "account_id": 507554,
+                    "user_type": "registered",
+                    "user_id": 1718727,
+                    "link": "https://stackoverflow.com/users/1718727/daemon",
+                    "reputation": 147,
+                    "display_name": "Daemon",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 12719156,
+                "edited": false,
+                "creation_date": 1349314939,
+                "comment_id": 17176592
+            }
+        ]
+    }
+}

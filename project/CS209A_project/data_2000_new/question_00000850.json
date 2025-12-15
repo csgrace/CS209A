@@ -1,0 +1,250 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/54eb7c8493f58335f04282b073607cd1?s=256&d=identicon&r=PG",
+            "account_id": 932671,
+            "user_type": "registered",
+            "user_id": 962206,
+            "link": "https://stackoverflow.com/users/962206/user962206",
+            "reputation": 16197,
+            "display_name": "user962206",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13670528/error-creating-bean-with-name-sessionfactory",
+        "last_activity_date": 1457368759,
+        "creation_date": 1354460847,
+        "answer_count": 2,
+        "title": "Error creating bean with name &#39;sessionFactory&#39;",
+        "body": "<p>Here is my web.xml and applicationContext.xml<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\n    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:aop=\"http://www.springframework.org/schema/aop\"\n    xmlns:tx=\"http://www.springframework.org/schema/tx\"\n    xsi:schemaLocation=\"\n       http://www.springframework.org/schema/beans \n       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd\n       http://www.springframework.org/schema/tx \n       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd\n       http://www.springframework.org/schema/aop \n       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd\"&gt;\n\n\n    &lt;bean id=\"sessionFactory\" scope=\"singleton\"\n        class=\"org.springframework.orm.hibernate4.LocalSessionFactoryBean\"&gt;\n        &lt;property name=\"configLocation\" value=\"classpath:hibernate.cfg.xml\"&gt;&lt;/property&gt;\n    &lt;/bean&gt;\n\n    &lt;!-- Springs Hibernate Transaction Manager --&gt;\n    &lt;bean id =\"transactionManager\" class = \"org.springframework.orm.hibernate4.HibernateTransactionManager\"&gt;\n        &lt;property name = \"sessionFactory\" ref = \"sessionFactory\"/&gt;\n    &lt;/bean&gt;\n\n    &lt;tx:annotation-driven/&gt;\n\n    &lt;!-- Inject my business services class to the action --&gt;\n    &lt;bean id=\"services\" class =\"services.Services\" scope =\"singleton\"&gt;\n        &lt;property name = \"sessionFactory\" ref = \"sessionFactory\"/&gt;\n    &lt;/bean&gt;\n\n\n\n&lt;/beans&gt;\n<\/code><\/pre>\n\n<p>web.xml<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;web-app xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n    xmlns=\"http://java.sun.com/xml/ns/javaee\" xmlns:web=\"http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\"\n    xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd\"\n    version=\"3.0\"&gt;\n    &lt;display-name&gt;Events&lt;/display-name&gt;\n    &lt;welcome-file-list&gt;\n        &lt;welcome-file&gt;index.html&lt;/welcome-file&gt;\n        &lt;welcome-file&gt;index.htm&lt;/welcome-file&gt;\n        &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;\n        &lt;welcome-file&gt;default.html&lt;/welcome-file&gt;\n        &lt;welcome-file&gt;default.htm&lt;/welcome-file&gt;\n        &lt;welcome-file&gt;default.jsp&lt;/welcome-file&gt;\n    &lt;/welcome-file-list&gt;\n\n\n    &lt;listener&gt;\n        &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;\n    &lt;/listener&gt;\n\n\n    &lt;!-- Sitemesh (needs to be before struts) --&gt;\n    &lt;filter&gt;\n        &lt;filter-name&gt;sitemesh&lt;/filter-name&gt;\n        &lt;filter-class&gt;com.opensymphony.sitemesh.webapp.SiteMeshFilter&lt;/filter-class&gt;\n    &lt;/filter&gt;\n    &lt;filter-mapping&gt;\n        &lt;filter-name&gt;sitemesh&lt;/filter-name&gt;\n        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;\n    &lt;/filter-mapping&gt;\n\n    &lt;!-- Struts2 config (needs to be after sitemesh) --&gt;\n    &lt;filter&gt;\n        &lt;filter-name&gt;struts2&lt;/filter-name&gt;\n        &lt;filter-class&gt;org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter&lt;/filter-class&gt;\n    &lt;/filter&gt;\n    &lt;filter-mapping&gt;\n        &lt;filter-name&gt;struts2&lt;/filter-name&gt;\n        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;\n    &lt;/filter-mapping&gt;\n\n\n&lt;/web-app&gt;\n<\/code><\/pre>\n\n<p>Upon starting tomcat this error showed up on the loggings<\/p>\n\n<pre><code>org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]: Instantiation of bean failed; nested exception is java.lang.NoClassDefFoundError: org/hibernate/cfg/Configuration\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:997)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:943)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:485)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:456)\n    at org.springframework.beans.factory.support.AbstractBeanFactory$1.getObject(AbstractBeanFactory.java:294)\n    at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:225)\n    at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:291)\n    at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:193)\n    at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:587)\n    at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:925)\n    at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:472)\n    at org.springframework.web.context.ContextLoader.configureAndRefreshWebApplicationContext(ContextLoader.java:383)\n    at org.springframework.web.context.ContextLoader.initWebApplicationContext(ContextLoader.java:283)\n    at org.springframework.web.context.ContextLoaderListener.contextInitialized(ContextLoaderListener.java:111)\n    at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4779)\n    at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5273)\n    at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150)\n    at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1566)\n    at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1556)\n    at java.util.concurrent.FutureTask$Sync.innerRun(Unknown Source)\n    at java.util.concurrent.FutureTask.run(Unknown Source)\n    at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)\n    at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)\n    at java.lang.Thread.run(Unknown Source)\nCaused by: java.lang.NoClassDefFoundError: org/hibernate/cfg/Configuration\n    at java.lang.Class.getDeclaredConstructors0(Native Method)\n    at java.lang.Class.privateGetDeclaredConstructors(Unknown Source)\n    at java.lang.Class.getConstructor0(Unknown Source)\n    at java.lang.Class.getDeclaredConstructor(Unknown Source)\n    at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:78)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:990)\n    ... 23 more\nCaused by: java.lang.ClassNotFoundException: org.hibernate.cfg.Configuration\n    at org.apache.catalina.loader.WebappClassLoader.loadClass(WebappClassLoader.java:1711)\n    at org.apache.catalina.loader.WebappClassLoader.loadClass(WebappClassLoader.java:1556)\n    ... 29 more\n<\/code><\/pre>\n",
+        "question_id": 13670528,
+        "tags": [
+            "java",
+            "spring",
+            "hibernate",
+            "struts2"
+        ],
+        "score": 0,
+        "accepted_answer_id": 14315221,
+        "is_answered": true,
+        "view_count": 7562
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54eb7c8493f58335f04282b073607cd1?s=256&d=identicon&r=PG",
+                "account_id": 932671,
+                "user_type": "registered",
+                "user_id": 962206,
+                "link": "https://stackoverflow.com/users/962206/user962206",
+                "reputation": 16197,
+                "display_name": "user962206",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13670528,
+            "edited": false,
+            "creation_date": 1354464148,
+            "comment_id": 18764400
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e5ad0c49fb5ca6d763187ee73f16a077?s=256&d=identicon&r=PG",
+                "account_id": 424494,
+                "user_type": "registered",
+                "user_id": 804521,
+                "link": "https://stackoverflow.com/users/804521/yevgeniy",
+                "reputation": 2694,
+                "display_name": "Yevgeniy",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13670528,
+            "edited": false,
+            "creation_date": 1354463541,
+            "comment_id": 18764271
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54eb7c8493f58335f04282b073607cd1?s=256&d=identicon&r=PG",
+                "account_id": 932671,
+                "user_type": "registered",
+                "user_id": 962206,
+                "link": "https://stackoverflow.com/users/962206/user962206",
+                "reputation": 16197,
+                "display_name": "user962206",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13670528,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/bxf7r.jpg?s=256",
+                "account_id": 938015,
+                "user_type": "registered",
+                "user_id": 966590,
+                "link": "https://stackoverflow.com/users/966590/andrew-logvinov",
+                "reputation": 21971,
+                "display_name": "Andrew Logvinov",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1354461467,
+            "comment_id": 18763784
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/bxf7r.jpg?s=256",
+                "account_id": 938015,
+                "user_type": "registered",
+                "user_id": 966590,
+                "link": "https://stackoverflow.com/users/966590/andrew-logvinov",
+                "reputation": 21971,
+                "display_name": "Andrew Logvinov",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13670528,
+            "edited": false,
+            "creation_date": 1354461169,
+            "comment_id": 18763725
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54eb7c8493f58335f04282b073607cd1?s=256&d=identicon&r=PG",
+                "account_id": 932671,
+                "user_type": "registered",
+                "user_id": 962206,
+                "link": "https://stackoverflow.com/users/962206/user962206",
+                "reputation": 16197,
+                "display_name": "user962206",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13670528,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/bxf7r.jpg?s=256",
+                "account_id": 938015,
+                "user_type": "registered",
+                "user_id": 966590,
+                "link": "https://stackoverflow.com/users/966590/andrew-logvinov",
+                "reputation": 21971,
+                "display_name": "Andrew Logvinov",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1354461148,
+            "comment_id": 18763719
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/bxf7r.jpg?s=256",
+                "account_id": 938015,
+                "user_type": "registered",
+                "user_id": 966590,
+                "link": "https://stackoverflow.com/users/966590/andrew-logvinov",
+                "reputation": 21971,
+                "display_name": "Andrew Logvinov",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13670528,
+            "edited": false,
+            "creation_date": 1354461080,
+            "comment_id": 18763703
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54eb7c8493f58335f04282b073607cd1?s=256&d=identicon&r=PG",
+                "account_id": 932671,
+                "user_type": "registered",
+                "user_id": 962206,
+                "link": "https://stackoverflow.com/users/962206/user962206",
+                "reputation": 16197,
+                "display_name": "user962206",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13670528,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/bxf7r.jpg?s=256",
+                "account_id": 938015,
+                "user_type": "registered",
+                "user_id": 966590,
+                "link": "https://stackoverflow.com/users/966590/andrew-logvinov",
+                "reputation": 21971,
+                "display_name": "Andrew Logvinov",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1354461015,
+            "comment_id": 18763677
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/bxf7r.jpg?s=256",
+                "account_id": 938015,
+                "user_type": "registered",
+                "user_id": 966590,
+                "link": "https://stackoverflow.com/users/966590/andrew-logvinov",
+                "reputation": 21971,
+                "display_name": "Andrew Logvinov",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 13670528,
+            "edited": false,
+            "creation_date": 1354460972,
+            "comment_id": 18763664
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hCOqW.jpg?s=256",
+                "account_id": 1010361,
+                "user_type": "registered",
+                "user_id": 1023060,
+                "link": "https://stackoverflow.com/users/1023060/kyeljmd",
+                "reputation": 4712,
+                "display_name": "KyelJmD",
+                "accept_rate": 99
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1358152732,
+            "creation_date": 1358152732,
+            "body": "<p>Based from the comments that I have read looks your <code>hibernate-core<\/code> jar is not being noticed by Eclipse. Rebuild your classpath.<\/p>\n",
+            "answer_id": 14315221,
+            "question_id": 13670528
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/NvGbe.jpg?s=256",
+                "account_id": 4148170,
+                "user_type": "registered",
+                "user_id": 3401332,
+                "link": "https://stackoverflow.com/users/3401332/vrajendra-singh-mandloi",
+                "reputation": 79,
+                "display_name": "Vrajendra Singh Mandloi"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1457368759,
+            "creation_date": 1457368759,
+            "body": "<p>That is some really good advice.. I was missing Hibernate-core Jar that's y it was not getting session factory startup...<\/p>\n\n<p>below is my POM.XML for reference.<\/p>\n\n<p>http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n    4.0.0\n    HibernateReverseEng\n    HibernateReverseEng\n    0.0.1-SNAPSHOT\n    \n        src\n        \n            \n                maven-compiler-plugin\n                3.3\n                \n                    1.8\n                    1.8\n                \n            \n        \n    \n    \n        \n            JBoss repository\n            <a href=\"http://repository.jboss.com/maven2/\" rel=\"nofollow\">http://repository.jboss.com/maven2/<\/a>\n        \n    <\/p>\n\n<pre><code>&lt;properties&gt;\n    &lt;springframework.version&gt;4.0.6.RELEASE&lt;/springframework.version&gt;\n&lt;/properties&gt;\n\n&lt;dependencies&gt;\n\n    &lt;!-- Spring Core and framework dependencies --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;artifactId&gt;spring-core&lt;/artifactId&gt;\n        &lt;version&gt;${springframework.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;artifactId&gt;spring-context&lt;/artifactId&gt;\n        &lt;version&gt;${springframework.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;!-- JUnit testing framework --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;junit&lt;/groupId&gt;\n        &lt;artifactId&gt;junit&lt;/artifactId&gt;\n        &lt;version&gt;3.8.1&lt;/version&gt;\n        &lt;scope&gt;test&lt;/scope&gt;\n    &lt;/dependency&gt;\n\n    &lt;!-- Spring framework --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;artifactId&gt;spring&lt;/artifactId&gt;\n        &lt;version&gt;2.5.6&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;!-- Spring AOP dependency --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;cglib&lt;/groupId&gt;\n        &lt;artifactId&gt;cglib&lt;/artifactId&gt;\n        &lt;version&gt;2.2&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;!-- MySQL database driver --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;mysql&lt;/groupId&gt;\n        &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;\n        &lt;version&gt;5.1.9&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;!-- Hibernate framework --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;hibernate&lt;/groupId&gt;\n        &lt;artifactId&gt;hibernate3&lt;/artifactId&gt;\n        &lt;version&gt;3.2.3.GA&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.hibernate&lt;/groupId&gt;\n        &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;\n        &lt;version&gt;3.3.0.GA&lt;/version&gt;\n    &lt;/dependency&gt;\n\n\n    &lt;!-- Hibernate annotation --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;hibernate-annotations&lt;/groupId&gt;\n        &lt;artifactId&gt;hibernate-annotations&lt;/artifactId&gt;\n        &lt;version&gt;3.3.0.GA&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;hibernate-commons-annotations&lt;/groupId&gt;\n        &lt;artifactId&gt;hibernate-commons-annotations&lt;/artifactId&gt;\n        &lt;version&gt;3.0.0.GA&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;!-- Hibernate library dependecy start --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;dom4j&lt;/groupId&gt;\n        &lt;artifactId&gt;dom4j&lt;/artifactId&gt;\n        &lt;version&gt;1.6.1&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;commons-logging&lt;/groupId&gt;\n        &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;\n        &lt;version&gt;1.1.1&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;commons-collections&lt;/groupId&gt;\n        &lt;artifactId&gt;commons-collections&lt;/artifactId&gt;\n        &lt;version&gt;3.2.1&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;antlr&lt;/groupId&gt;\n        &lt;artifactId&gt;antlr&lt;/artifactId&gt;\n        &lt;version&gt;2.7.7&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- Hibernate library dependecy end --&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;commons-dbcp&lt;/groupId&gt;\n        &lt;artifactId&gt;commons-dbcp&lt;/artifactId&gt;\n        &lt;version&gt;1.4&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.eclipse.persistence&lt;/groupId&gt;\n        &lt;artifactId&gt;javax.persistence&lt;/artifactId&gt;\n        &lt;version&gt;2.0.0&lt;/version&gt;\n    &lt;/dependency&gt;\n\n&lt;/dependencies&gt;\n<\/code><\/pre>\n\n<p><\/p>\n",
+            "answer_id": 35849143,
+            "question_id": 13670528
+        }
+    ],
+    "answer_comments": {}
+}

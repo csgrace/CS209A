@@ -1,0 +1,240 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user1166232"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8981886/constructor-is-not-initializing-a-scanner-object",
+        "last_activity_date": 1327379138,
+        "creation_date": 1327378081,
+        "answer_count": 5,
+        "title": "Constructor is not initializing a Scanner object",
+        "body": "<p>In the following code the constructor is not initializing the numFile Scanner. I added the contents of the constructor to the main method to make it work. If I do not do this a java.lang.NullPointerException is thrown. Would someone mind explaining why? Also, do I need to throw an IOException on the constructor?<\/p>\n\n<p>Thanks for any helpful advice.<\/p>\n\n<p>Tony<\/p>\n\n<pre><code>import java.io.*;\nimport java.util.Scanner;\n\npublic class CountPositiveIntegers {\n\n    static Scanner numFile;\n    static String fileName;     // the name of the file in which the integers are stored\n    static int number;          // holds the current number being read\n    static int counter;         // a counter used to sum the number of positive integers\n\n\n    public CountPositiveIntegers() throws IOException { \n        fileName =\"D:\\\\Java\\\\Source\\\\numFile.dat\"; \n        System.out.println(\"File Name: \" + fileName);   \n        numFile = new Scanner(new FileReader(fileName)); \n        number = 0; \n        counter = 0; \n    }\n\n\n    public static void main(String[] args) throws FileNotFoundException {\n        // numFile is not being initializing in the constructor\n        fileName = \"D:\\\\Java\\\\Source\\\\numFile.dat\";\n        numFile = new Scanner(new FileReader(fileName));\n        number = 0;\n        counter = 0;\n\n        if (numFile.hasNext()) {                    // check to see if there are any values in the file\n            while (numFile.hasNextInt()) {      // reads in integers\n                number = numFile.nextInt();\n                if (number % 2 == 0 &amp; number != 0) {\n                    counter++;                  \n                }\n            }\n            numFile.close();                            // close the file           \n\n            // print to screen the number of even integers stored in the file\n            System.out.println(\"There are \" + counter\n                    + \" even numbers in this file\");\n        } else {\n            System.out.println(\"The file is empty.\");\n        }   \n\n        System.exit(0); // cleanly exit the program\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 8981886,
+        "tags": ["java"],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 3217,
+        "last_edit_date": 1327378439
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3fa6c233a1d109660622819caf68c3d6?s=256&d=identicon&r=PG",
+            "account_id": 406517,
+            "user_type": "registered",
+            "user_id": 776084,
+            "link": "https://stackoverflow.com/users/776084/ranrag",
+            "reputation": 49847,
+            "display_name": "RanRag",
+            "accept_rate": 79
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 8981886,
+        "edited": false,
+        "creation_date": 1327378548,
+        "comment_id": 11253827
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0f72a37ab8103ebfa12561218367ec3a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 395357,
+                "user_type": "registered",
+                "user_id": 758280,
+                "link": "https://stackoverflow.com/users/758280/jeffrey",
+                "reputation": 44906,
+                "display_name": "Jeffrey",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1327378527,
+            "creation_date": 1327378527,
+            "body": "<p>You must explicitly call the constructor to have it work. (You never create a <code>new CountPositiveIntegers()<\/code>).<\/p>\n",
+            "answer_id": 8981934,
+            "question_id": 8981886
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Z2KYN.jpg?s=256",
+                "account_id": 960307,
+                "user_type": "registered",
+                "user_id": 984823,
+                "link": "https://stackoverflow.com/users/984823/joop-eggen",
+                "reputation": 110397,
+                "display_name": "Joop Eggen"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1327379138,
+            "creation_date": 1327379138,
+            "body": "<p>In fact you use only static variables, the constructor is not called, and such an object would have no non-static fields. An example of Object Oriented programming:<\/p>\n\n<pre><code>public class CountPositiveIntegers {\n\n    Scanner numFile;\n    String fileName;     // the name of the file in which the integers are stored\n\n\n    public CountPositiveIntegers(String fname) throws IOException { \n        fileName = fname; \n        System.out.println(\"File Name: \" + fileName);   \n        numFile = new Scanner(new FileReader(fileName)); \n    }\n\n\n    public static void main(String[] args) throws FileNotFoundException {\n        try {\n            CountPositiveIntegers obj = new CountPositiveIntegers(\"D:\\\\Java\\\\Source\\\\numFile.dat\");\n            int number = 0;          // holds the current number being read\n            int counter = 0;         // a counter used to sum the number of positive integers\n\n            if (obj.numFile.hasNext()) {                    // check to see if there are any values in the file\n                while (obj.numFile.hasNextInt()) {      // reads in integers\n                    number = obj.numFile.nextInt();\n                    if (number % 2 == 0 &amp; number != 0) {\n                        counter++;                  \n                    }\n                }\n                obj.numFile.close();                            // close the file           \n\n                // print to screen the number of even integers stored in the file\n                System.out.println(\"There are \" + counter\n                        + \" even numbers in this file\");\n            } else {\n                System.out.println(\"The file is empty.\");\n            }   \n\n            System.exit(0); // cleanly exit the program\n        } catch (IOException ex) {\n            Logger.getLogger(CountPositiveIntegers.class.getName()).log(Level.SEVERE, null, ex);\n        }\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 8982003,
+            "question_id": 8981886
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e4bac7ebd5f5a06c716f508af656e24b?s=256&d=identicon&r=PG",
+                "account_id": 235018,
+                "user_type": "registered",
+                "user_id": 501557,
+                "link": "https://stackoverflow.com/users/501557/templatetypedef",
+                "reputation": 375759,
+                "display_name": "templatetypedef",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1327378576,
+            "creation_date": 1327378576,
+            "body": "<p>I believe that the problem is that when your program starts up, it does <em>not<\/em> create a new instance of the class in which <code>main<\/code> is executed and instead just runs the code in <code>main<\/code>.  Since your initialization code is in your constructor, it's never actually run, because you don't create an instance of the main class.<\/p>\n\n<p>To fix this, I would strongly suggest having <code>main<\/code> create a new instance of the class that <code>main<\/code> resides in, then perform all your operations on that object, rather than making everything <code>static<\/code> and just performing the operations in <code>main<\/code> directly.  Your current approach is not particularly good design.<\/p>\n\n<p>Hope this helps!<\/p>\n",
+            "answer_id": 8981939,
+            "question_id": 8981886
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3fa6c233a1d109660622819caf68c3d6?s=256&d=identicon&r=PG",
+                "account_id": 406517,
+                "user_type": "registered",
+                "user_id": 776084,
+                "link": "https://stackoverflow.com/users/776084/ranrag",
+                "reputation": 49847,
+                "display_name": "RanRag",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1327378581,
+            "creation_date": 1327378581,
+            "body": "<p>Where is your CountPositiveIntegers class object.<\/p>\n\n<p>You need to call your constructor explicitly otherwise a default constructor will be called by the compiler. <\/p>\n\n<pre><code>new CountPositiveIntegers();\n<\/code><\/pre>\n",
+            "answer_id": 8981941,
+            "question_id": 8981886
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b2ee5980501f21314923f751e4740446?s=256&d=identicon&r=PG",
+                "account_id": 95764,
+                "user_type": "registered",
+                "user_id": 260633,
+                "link": "https://stackoverflow.com/users/260633/dev",
+                "reputation": 12266,
+                "display_name": "Dev",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1327378591,
+            "creation_date": 1327378591,
+            "body": "<p>The constructor will not be invoked unless you actually call it. The main method does not call the constructor implicitly because it is a <code>static<\/code> method.<\/p>\n",
+            "answer_id": 8981944,
+            "question_id": 8981886
+        }
+    ],
+    "answer_comments": {
+        "8981941": [{
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1166232"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8981941,
+            "edited": false,
+            "creation_date": 1327380729,
+            "comment_id": 11254145
+        }],
+        "8981944": [{
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1166232"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8981944,
+            "edited": false,
+            "creation_date": 1327380349,
+            "comment_id": 11254085
+        }],
+        "8982003": [{
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1166232"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8982003,
+            "edited": false,
+            "creation_date": 1327380288,
+            "comment_id": 11254079
+        }],
+        "8981939": [{
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1166232"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8981939,
+            "edited": false,
+            "creation_date": 1327380653,
+            "comment_id": 11254132
+        }],
+        "8981934": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/coddh.png?s=256",
+                    "account_id": 22194,
+                    "user_type": "registered",
+                    "user_id": 54506,
+                    "link": "https://stackoverflow.com/users/54506/jayan",
+                    "reputation": 18566,
+                    "display_name": "Jayan",
+                    "accept_rate": 78
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8981934,
+                "edited": false,
+                "creation_date": 1327382298,
+                "comment_id": 11254402
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8d317269ebd8265bc109887f2fc0c213?s=256&d=identicon&r=PG",
+                    "account_id": 1040836,
+                    "user_type": "registered",
+                    "user_id": 1046894,
+                    "link": "https://stackoverflow.com/users/1046894/jimmt",
+                    "reputation": 912,
+                    "display_name": "Jimmt",
+                    "accept_rate": 71
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8981934,
+                "edited": false,
+                "creation_date": 1327380695,
+                "comment_id": 11254139
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user1166232"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8981934,
+                "edited": false,
+                "creation_date": 1327378867,
+                "comment_id": 11253861
+            }
+        ]
+    }
+}

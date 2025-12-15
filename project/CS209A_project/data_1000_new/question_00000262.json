@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/47cd2ba980c400b4f3577b6b64472119?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7490342,
+            "user_type": "registered",
+            "user_id": 5692285,
+            "link": "https://stackoverflow.com/users/5692285/naveen-reddy",
+            "reputation": 15,
+            "display_name": "naveen reddy",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34481260/im-using-custom-list-have-two-buttons-one-for-and-second-one-for-whatsaap",
+        "last_activity_date": 1451227190,
+        "creation_date": 1451225606,
+        "answer_count": 1,
+        "title": "i&quot;m using custom list have two buttons, one for and second one for whatsaap",
+        "body": "<p>i\"m using custom list have two buttons, one for and second one for whatsaap. my problem is when i\"m click first button then make a phone call its not working for me... please help me <\/p>\n\n<p>custom list :<\/p>\n\n<pre><code>import java.util.List;\nimport android.app.Activity;\nimport android.content.Context;\nimport android.content.Intent;\nimport android.net.Uri;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.View.OnClickListener;\nimport android.view.ViewGroup;\nimport android.widget.BaseAdapter;\nimport android.widget.Button;\nimport android.widget.TextView;\nimport android.widget.Toast;\n\nimport com.android.volley.toolbox.ImageLoader;\nimport com.android.volley.toolbox.NetworkImageView;\n\npublic class CustomListAdapter extends BaseAdapter {\n    private Activity activity;\n    private LayoutInflater inflater;\n    private List&lt;Movie&gt; movieItems;\n    ImageLoader imageLoader = AppController.getInstance().getImageLoader();\n\n    public CustomListAdapter(Activity activity, List&lt;Movie&gt; movieItems) {\n        this.activity = activity;\n        this.movieItems = movieItems;\n    }\n\n    @Override\n    public int getCount() {\n        return movieItems.size();\n    }\n\n    @Override\n    public Object getItem(int location) {\n        return movieItems.get(location);\n    }\n\n    @Override\n    public long getItemId(int position) {\n        return position;\n    }\n\n    @Override\n    public View getView(int position, View convertView, ViewGroup parent) {\n\n        if (inflater == null)\n            inflater = (LayoutInflater) activity\n                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);\n        if (convertView == null)\n            convertView = inflater.inflate(R.layout.list_row, null);\n\n        if (imageLoader == null)\n            imageLoader = AppController.getInstance().getImageLoader();\n        NetworkImageView thumbNail = (NetworkImageView) convertView\n                .findViewById(R.id.thumbnail);\n        TextView title = (TextView) convertView.findViewById(R.id.title);\n        TextView rating = (TextView) convertView.findViewById(R.id.rating);\n        TextView genre = (TextView) convertView.findViewById(R.id.genre);\n        Button year = (Button) convertView.findViewById(R.id.releaseYear);\n\n\n        year.setOnClickListener(new OnClickListener() {\n            @Override\n            public void onClick(View v) {\n                Toast.makeText(activity,  \"ramu...\", Toast.LENGTH_LONG).show();\n                 Intent callIntent = new Intent(Intent.ACTION_CALL);\n                    callIntent.setData(Uri.parse(\"tel:123456789\"));\n                    startActivity(callIntent);\n            }\n        });\n\n        // getting movie data for the row\n        Movie m = movieItems.get(position);\n\n        // thumbnail image\n        thumbNail.setImageUrl(m.getThumbnailUrl(), imageLoader);\n        System.out.println(\"thumbNail===============&gt;\"+thumbNail);\n\n        // title\n        title.setText(m.getTitle());\n\n        // rating\n        rating.setText(\"Rating: \" + String.valueOf(m.getRating()));\n\n\n\n        // release year\n        year.setText(String.valueOf(m.getYear()));\n        return convertView;\n    }\n\n    private void startActivity(Intent callIntent) {\n        // TODO Auto-generated method stub\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>`<\/p>\n",
+        "question_id": 34481260,
+        "tags": [
+            "java",
+            "android",
+            "android-intent",
+            "android-activity"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 51,
+        "last_edit_date": 1451225733
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/SIVLd.jpg?s=256",
+            "account_id": 3772737,
+            "user_type": "registered",
+            "user_id": 3134462,
+            "link": "https://stackoverflow.com/users/3134462/shahzeb",
+            "reputation": 3754,
+            "display_name": "Shahzeb",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1451227190,
+        "creation_date": 1451227190,
+        "body": "<p>You are committing few mistakes which cannot be ignored.\nListview recycles views on scroll, so it is very important that you handle this check. Not doing so will cause views inflation at wrong positions. Use ViewHolder<\/p>\n\n<p><strong>Solution:<\/strong><\/p>\n\n<pre><code>public View getView(int position, View convertView, ViewGroup parent) {\n\n    if (convertView == null) {\n        /* This is where you initialize new rows, by:\n         *  - Inflating the layout,\n         *  - Instantiating the ViewHolder,\n         *  - And defining any characteristics that are consistent for every row */\n    } else {\n        /* Fetch data already in the row layout, \n         *    primarily you only use this to get a copy of the ViewHolder */\n    }\n\n    /* Set the data that changes in each row, like `title` and `size`\n     *    This is where you give rows there unique values. */\n\n    return convertView;\n}\n<\/code><\/pre>\n\n<p>You need to implement <code>OnClickListener<\/code> outside of checks like:<\/p>\n\n<pre><code>@Override\n   public View getView(int position, View convertView, ViewGroup parent) {\n\n    if (convertView == null) {\n        inflater = (LayoutInflater) activity\n                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);\n        convertView = inflater.inflate(R.layout.list_row, null);\n\n        NetworkImageView thumbNail = (NetworkImageView) convertView\n                .findViewById(R.id.thumbnail);\n        TextView title = (TextView) convertView.findViewById(R.id.title);\n        TextView rating = (TextView) convertView.findViewById(R.id.rating);\n        TextView genre = (TextView) convertView.findViewById(R.id.genre);\n        Button year = (Button) convertView.findViewById(R.id.releaseYear);\n\n        }else {\n\n        }        \n\n    year.setOnClickListener(new OnClickListener() {\n    @Override\n        public void onClick(View v) {\n            Toast.makeText(activity,  \"ramu...\", Toast.LENGTH_LONG).show();\n            Intent callIntent = new Intent(Intent.ACTION_CALL);\n            callIntent.setData(Uri.parse(\"tel:123456789\"));\n            startActivity(callIntent);\n        }\n    });\n\n        // getting movie data for the row\n        Movie m = movieItems.get(position);\n\n        // thumbnail image\n        thumbNail.setImageUrl(m.getThumbnailUrl(), imageLoader);\n        System.out.println(\"thumbNail===============&gt;\"+thumbNail);\n\n        // title\n        title.setText(m.getTitle());\n\n        // rating\n        rating.setText(\"Rating: \" + String.valueOf(m.getRating()));\n\n        // release year\n        year.setText(String.valueOf(m.getYear()));\n        return convertView;\n    }\n<\/code><\/pre>\n\n<p>Initialize <code>ImageLoader<\/code> in adapter constructor:<\/p>\n",
+        "answer_id": 34481462,
+        "question_id": 34481260
+    }],
+    "answer_comments": {}
+}

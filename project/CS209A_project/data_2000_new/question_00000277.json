@@ -1,0 +1,116 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cd9eecc82292f962efcbb1b4cdd29fd8?s=256&d=identicon&r=PG",
+            "account_id": 1483722,
+            "user_type": "registered",
+            "user_id": 1392426,
+            "link": "https://stackoverflow.com/users/1392426/hitesh",
+            "reputation": 499,
+            "display_name": "hitesh",
+            "accept_rate": 42
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53139374/kafka-stream-api-not-generating-messages-into-new-topic",
+        "last_activity_date": 1541347991,
+        "creation_date": 1541323813,
+        "answer_count": 0,
+        "title": "kafka stream api not generating messages into new topic",
+        "body": "<p>I am running Pipe.java as given in the stream api example here <a href=\"https://kafka.apache.org/20/documentation/streams/tutorial\" rel=\"nofollow noreferrer\">https://kafka.apache.org/20/documentation/streams/tutorial<\/a> . I am doing exactly as given in the link. Kafka broker is also running on localhost and port 9092. <\/p>\n\n<p>I have created topics streams-plaintext-input and streams-pipe-output. While I send some messages into topic streams-plaintext-input using kafka-console-producer.sh utility, I do not see any messages coming into topic streams-pipe-output. <\/p>\n\n<p>Can someone tell me what wrong I am doing?<\/p>\n\n<pre><code>package myapps;\n\nimport java.util.Properties;\nimport java.util.concurrent.CountDownLatch;\n\nimport org.apache.kafka.common.serialization.Serdes;\nimport org.apache.kafka.streams.KafkaStreams;\nimport org.apache.kafka.streams.StreamsBuilder;\nimport org.apache.kafka.streams.StreamsConfig;\nimport org.apache.kafka.streams.Topology;\nimport org.apache.kafka.streams.kstream.KStream;\n\npublic class MyPipe {\n\n    public static void main(String[] args) {\n        Properties props = new Properties();\n        props.put(StreamsConfig.APPLICATION_ID_CONFIG, \"mystreams-pipe\");\n        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, \"localhost:9092\");\n        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());\n        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());\n        final StreamsBuilder builder = new StreamsBuilder();\n        builder.stream(\"streams-plaintext-input\").to(\"streams-pipe-output\");\n        final Topology topology = builder.build();\n        System.out.println(topology.describe());\n        final KafkaStreams streams = new KafkaStreams(topology, props);\n        final CountDownLatch latch = new CountDownLatch(1);\n\n        // attach shutdown handler to catch control-c\n        Runtime.getRuntime().addShutdownHook(new Thread(\"streams-shutdown-hook\") {\n            @Override\n            public void run() {\n                streams.close();\n                System.out.println(\"closing\");\n                latch.countDown();\n            }\n        });\n\n        try {\n            System.out.println(\"starting stream application.\");\n            streams.start();\n\n            System.out.println(\"started\");\n            latch.await();\n        } catch (Throwable e) {\n            e.printStackTrace();\n            System.exit(1);\n        }\n\n        System.out.println(\"exiting\");\n        System.exit(0);\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 53139374,
+        "tags": [
+            "java",
+            "apache-kafka",
+            "apache-kafka-streams"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 334,
+        "last_edit_date": 1541347991
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/HwySN.jpg?s=256",
+                "account_id": 6384814,
+                "user_type": "registered",
+                "user_id": 4953079,
+                "link": "https://stackoverflow.com/users/4953079/matthias-j-sax",
+                "reputation": 62820,
+                "display_name": "Matthias J. Sax"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53139374,
+            "edited": false,
+            "creation_date": 1541355426,
+            "comment_id": 93179314
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fb8f5877d244f223b4b6d29e0afb3a4e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2671330,
+                "user_type": "registered",
+                "user_id": 2308683,
+                "link": "https://stackoverflow.com/users/2308683/onecricketeer",
+                "reputation": 193048,
+                "display_name": "OneCricketeer",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53139374,
+            "edited": false,
+            "creation_date": 1541348107,
+            "comment_id": 93177034
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cd9eecc82292f962efcbb1b4cdd29fd8?s=256&d=identicon&r=PG",
+                "account_id": 1483722,
+                "user_type": "registered",
+                "user_id": 1392426,
+                "link": "https://stackoverflow.com/users/1392426/hitesh",
+                "reputation": 499,
+                "display_name": "hitesh",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53139374,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7c2c319164270c5afc9291ef66107c43?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4498797,
+                "user_type": "registered",
+                "user_id": 3657919,
+                "link": "https://stackoverflow.com/users/3657919/iammehrabalam",
+                "reputation": 1355,
+                "display_name": "iammehrabalam",
+                "accept_rate": 0
+            },
+            "edited": false,
+            "creation_date": 1541342952,
+            "comment_id": 93175617
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7c2c319164270c5afc9291ef66107c43?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4498797,
+                "user_type": "registered",
+                "user_id": 3657919,
+                "link": "https://stackoverflow.com/users/3657919/iammehrabalam",
+                "reputation": 1355,
+                "display_name": "iammehrabalam",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 53139374,
+            "edited": false,
+            "creation_date": 1541333888,
+            "comment_id": 93173301
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

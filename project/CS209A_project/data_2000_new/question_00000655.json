@@ -1,0 +1,229 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5f4389b462408f1e198c2955f93710f8?s=256&d=identicon&r=PG",
+            "account_id": 40085,
+            "user_type": "registered",
+            "user_id": 115988,
+            "link": "https://stackoverflow.com/users/115988/lydon-ch",
+            "reputation": 8835,
+            "display_name": "Lydon Ch",
+            "accept_rate": 56
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2532798/final-enum-in-threads-run-method",
+        "last_activity_date": 1269779362,
+        "creation_date": 1269777939,
+        "answer_count": 3,
+        "title": "Final enum in Thread&#39;s run() method",
+        "body": "<p>Why is the Elvis elvis definition has to be final to be used inside the Thread run() method?<\/p>\n\n<pre><code> Elvis elvis = Elvis.INSTANCE; // ----&gt; should be final Elvis elvis = Elvis.INSTANCE\n elvis.sing(4);\n\n Thread t1 = new Thread(\n   new Runnable() {\n   @Override\n   public void run() {\n   elvis.sing(6); // --------&gt; elvis has to be final to compile\n  }\n}\n);\n\n\n public enum Elvis {\n   INSTANCE(2);\n\n   Elvis() {\n     this.x = new AtomicInteger(0);\n   }\n\n   Elvis(int x){\n     this.x = new AtomicInteger(x);\n   }\n\n   private AtomicInteger x = new AtomicInteger(0);\n\n   public int getX() { return x.get(); }\n\n   public void setX(int x) {this.x = new AtomicInteger(x);}\n\n   public void sing(int x) {\n      this.x = new AtomicInteger(x);\n      System.out.println(\"Elvis singing..\" + x);\n   }\n }\n<\/code><\/pre>\n",
+        "question_id": 2532798,
+        "tags": [
+            "java",
+            "multithreading",
+            "enums",
+            "final"
+        ],
+        "score": 2,
+        "accepted_answer_id": 2532821,
+        "is_answered": true,
+        "view_count": 665
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521070,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1269778265,
+            "creation_date": 1269778265,
+            "body": "<p>The value of the <code>elvis<\/code> variable is being captured by the anonymous inner class.<\/p>\n\n<p>Java only (currently) captures variables <em>by value<\/em>. The compiler requires that the variable is final so that there can be no confusion about what will actually be used when the <code>run<\/code> method is called in the new thread: if you changed the value of <code>elvis<\/code> after creating the new thread but before starting it, what would you expect it to do?<\/p>\n\n<p>This is a difference between the way that closures are effectively available in C# and Java. See my <a href=\"http://csharpindepth.com/Articles/Chapter5/Closures.aspx\" rel=\"nofollow noreferrer\">closures article<\/a> for more details of this. Java 7 will make closures more concise - I haven't been following along to know whether there will be any way of capturing the variable itself rather than a particular value.<\/p>\n",
+            "answer_id": 2532821,
+            "question_id": 2532798
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a4d5888f021e337d09be5b3109c11e72?s=256&d=identicon&r=PG",
+                "account_id": 46249,
+                "user_type": "registered",
+                "user_id": 136540,
+                "link": "https://stackoverflow.com/users/136540/michael-aaron-safyan",
+                "reputation": 96071,
+                "display_name": "Michael Aaron Safyan",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1269778656,
+            "creation_date": 1269778656,
+            "body": "<p>This has nothing to do with threads and everything to do with constructing anonymous classes. The issue is that you are referencing a local variable from within the anonymous class. Now consider the following:<\/p>\n\n<pre>\nint c = 5;\nRunnable r = new Runnable(){ public void run(){ System.out.println(c); } };\nc = 6;\nr.run();\n<\/pre>\n\n<p>In the snippet above, should the code print 5 or should it print 6? If r were to hold onto a reference to the current stack frame in order to resolve c, it  is conceivable that it could print 6. It is also conceivable that it could bind/capture the value of c earlier and print a 5. Java forces you to make c final so as to make this completely clear and also to absolve Java of the need to hang onto the current stack frame.<\/p>\n",
+            "answer_id": 2532836,
+            "question_id": 2532798
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dd5a7ef1476fb01998a215b1642dfd07?s=256&d=identicon&r=PG",
+                "account_id": 19061,
+                "user_type": "registered",
+                "user_id": 44330,
+                "link": "https://stackoverflow.com/users/44330/jason-s",
+                "reputation": 190586,
+                "display_name": "Jason S",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1269779362,
+            "creation_date": 1269779362,
+            "body": "<p>this isn't part of your question but i'm just curious: why are you reassigning Elvis.x if it's an AtomicInteger? that kind of misses the point of AtomicInteger's thread-safety. Consider rewriting:<\/p>\n\n<pre><code>public Elvis {\n\n   final static private Elvis INSTANCE = new Elvis(2);\n   static public Elvis getInstance() { return INSTANCE; }\n\n   final private AtomicInteger x; \n\n\n   Elvis() { this(0); }\n\n   Elvis(int x){ \n      this.x = new AtomicInteger(x);\n   }\n\n   public int getX() { return this.x.get(); }\n\n   public void setX(int x) {this.x.set(x); }\n\n   public void sing(int x) {\n      setX(x);\n      System.out.println(\"Elvis singing..\" + x);\n   }\n }\n<\/code><\/pre>\n\n<p>also since this has mutable content, it shouldn't be an enum.<\/p>\n",
+            "answer_id": 2532873,
+            "question_id": 2532798
+        }
+    ],
+    "answer_comments": {
+        "2532836": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a4d5888f021e337d09be5b3109c11e72?s=256&d=identicon&r=PG",
+                    "account_id": 46249,
+                    "user_type": "registered",
+                    "user_id": 136540,
+                    "link": "https://stackoverflow.com/users/136540/michael-aaron-safyan",
+                    "reputation": 96071,
+                    "display_name": "Michael Aaron Safyan",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 2532836,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5f4389b462408f1e198c2955f93710f8?s=256&d=identicon&r=PG",
+                    "account_id": 40085,
+                    "user_type": "registered",
+                    "user_id": 115988,
+                    "link": "https://stackoverflow.com/users/115988/lydon-ch",
+                    "reputation": 8835,
+                    "display_name": "Lydon Ch",
+                    "accept_rate": 56
+                },
+                "edited": false,
+                "creation_date": 1269780216,
+                "comment_id": 2532166
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5f4389b462408f1e198c2955f93710f8?s=256&d=identicon&r=PG",
+                    "account_id": 40085,
+                    "user_type": "registered",
+                    "user_id": 115988,
+                    "link": "https://stackoverflow.com/users/115988/lydon-ch",
+                    "reputation": 8835,
+                    "display_name": "Lydon Ch",
+                    "accept_rate": 56
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 2532836,
+                "edited": false,
+                "creation_date": 1269779247,
+                "comment_id": 2532109
+            }
+        ],
+        "2532821": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                    "account_id": 11683,
+                    "user_type": "registered",
+                    "user_id": 22656,
+                    "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                    "reputation": 1521070,
+                    "display_name": "Jon Skeet",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 2,
+                "post_id": 2532821,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5f4389b462408f1e198c2955f93710f8?s=256&d=identicon&r=PG",
+                    "account_id": 40085,
+                    "user_type": "registered",
+                    "user_id": 115988,
+                    "link": "https://stackoverflow.com/users/115988/lydon-ch",
+                    "reputation": 8835,
+                    "display_name": "Lydon Ch",
+                    "accept_rate": 56
+                },
+                "edited": false,
+                "creation_date": 1269779987,
+                "comment_id": 2532149
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5f4389b462408f1e198c2955f93710f8?s=256&d=identicon&r=PG",
+                    "account_id": 40085,
+                    "user_type": "registered",
+                    "user_id": 115988,
+                    "link": "https://stackoverflow.com/users/115988/lydon-ch",
+                    "reputation": 8835,
+                    "display_name": "Lydon Ch",
+                    "accept_rate": 56
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 2532821,
+                "edited": false,
+                "creation_date": 1269779216,
+                "comment_id": 2532108
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/965220a70d38e6a29466f44cdb4f804e?s=256&d=identicon&r=PG",
+                    "account_id": 114848,
+                    "user_type": "registered",
+                    "user_id": 301832,
+                    "link": "https://stackoverflow.com/users/301832/donal-fellows",
+                    "reputation": 138922,
+                    "display_name": "Donal Fellows",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 2532821,
+                "edited": false,
+                "creation_date": 1269778645,
+                "comment_id": 2532076
+            }
+        ],
+        "2532873": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5f4389b462408f1e198c2955f93710f8?s=256&d=identicon&r=PG",
+                "account_id": 40085,
+                "user_type": "registered",
+                "user_id": 115988,
+                "link": "https://stackoverflow.com/users/115988/lydon-ch",
+                "reputation": 8835,
+                "display_name": "Lydon Ch",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2532873,
+            "edited": false,
+            "creation_date": 1269829146,
+            "comment_id": 2535250
+        }]
+    }
+}

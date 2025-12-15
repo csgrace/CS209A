@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6ded774300eae12527248741f9ad62f6?s=256&d=identicon&r=PG",
+            "account_id": 788725,
+            "user_type": "registered",
+            "user_id": 856951,
+            "link": "https://stackoverflow.com/users/856951/vjk",
+            "reputation": 2293,
+            "display_name": "vjk",
+            "accept_rate": 56
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8302230/set-different-socket-timeout-for-same-httpclient-using-multithreadedhttpconnecti",
+        "last_activity_date": 1337357122,
+        "creation_date": 1322513981,
+        "answer_count": 1,
+        "title": "set different socket timeout for same httpclient using MultiThreadedHttpConnectionManager",
+        "body": "<p>i have two threads using the same instance of the HTTPClientTest. two threads call the send method on the same HTTPClientTest. how should i set a different socket timeout for each of those threads that call the send method. if i do something like this within the send method then both threads executing the send method would have same socket timeout.<br>\nmanagerParams.setSoTimeout(60);connectionManager.setParams(managerParams);<\/p>\n\n<p>how should i create a different socket timeout for multiple threads executing the send method on the same instance of HTTPClientTest.<\/p>\n\n<pre><code>public class HTTPClientTest implements Runnable{\nprivate HttpClient httpClient;\nprivate MultiThreadedHttpConnectionManager connectionManager;\nprivate HttpConnectionManagerParams managerParams;\nprivate HttpClientTest()\n{\n     connectionManager = new MultiThreadedHttpConnectionManager();\n     httpClient = new HttpClient(connectionManager);\n}\npublic static synchronized HTTPClientTest getInstance()\n{\n    if(instance == null)\n        instance = new HTTPClientTest();\n    return instance;\n}\n\npublic void send(String message, String url)\n{\n    PostMethod post = new PostMethod(url);\n    String reply = \"\";\n    String length = message.length() + \"\";\n    post.setRequestHeader(\"Content-Length\", length);\n    try \n    {\n        System.out.println(\"HTTP request: \" + message);\n        StringRequestEntity postBody = new StringRequestEntity(message, \"text/xml\", \"UTF-8\");\n        post.setRequestEntity(postBody);\n        int status = httpClient.executeMethod(post);\n        System.out.println(\"HTTP status: \" + status);\n        reply = post.getResponseBodyAsString();\n        System.out.println(\"HTTP Post response code: \" + reply);\n\n    } \n    catch(HttpException e)\n    {\n        e.printStackTrace();\n    }\n    catch(IOException e)\n    {\n        e.printStackTrace();\n    }\n    catch(Exception e)\n    {\n        e.printStackTrace();\n    }\n    finally\n    {\n        post.releaseConnection();\n    }\n\n}\n}\n<\/code><\/pre>\n",
+        "question_id": 8302230,
+        "tags": [
+            "java",
+            "multithreading",
+            "apache-commons-httpclient"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1121,
+        "last_edit_date": 1337357122
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/478e868ab5c6ee502c5f98c9f33ac8ac?s=256&d=identicon&r=PG",
+            "account_id": 1287753,
+            "user_type": "registered",
+            "user_id": 1240501,
+            "link": "https://stackoverflow.com/users/1240501/jacob",
+            "reputation": 609,
+            "display_name": "Jacob",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1330656150,
+        "creation_date": 1330656150,
+        "body": "<p>It's easy:<\/p>\n\n<pre><code>get.getParams().setParameter(\"http.socket.timeout\",20000);\nhttpclient.execute(get);\n<\/code><\/pre>\n\n<p>The mothods aren't shared by the threads,are they?\nModify as what you need.<\/p>\n",
+        "answer_id": 9527262,
+        "question_id": 8302230
+    }],
+    "answer_comments": {}
+}

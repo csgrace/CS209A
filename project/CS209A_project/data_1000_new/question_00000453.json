@@ -1,0 +1,146 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/00a40f04c10fa0e133eda506147962be?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4911129,
+            "user_type": "registered",
+            "user_id": 3956404,
+            "link": "https://stackoverflow.com/users/3956404/marko-kurt",
+            "reputation": 205,
+            "display_name": "marko kurt",
+            "accept_rate": 67
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47895175/broadcastreceiver-in-android-dagger-2-11",
+        "last_activity_date": 1571651237,
+        "creation_date": 1513717485,
+        "answer_count": 1,
+        "title": "BroadcastReceiver in Android dagger 2.11",
+        "body": "<p>I m trying to inject broadcast receiver with dagger in android. I m using dagger 2.11. I have BroadcastReceiver module class, component class, and I implement HasBroadcastReceiverInjector in Application class. Do I have to implement HasBroadcastReceiverInjector in Application class, or I can implement HasBroadcastReceiverInjector in Activity class. Has anybody successed to inject BroadcastReceiver with dagger, or someone knows what am I doing wrong<\/p>\n\n<p>Here is my BroadcastReceiver module class<\/p>\n\n<pre><code>@Subcomponent(modules = LikeBroadcastReceiverModule.class)\npublic interface LikeBroadcastReceiverComponent extends AndroidInjector&lt;LikeBroadcaseReceiver&gt; {\n\n@Subcomponent.Builder\nabstract class Builder extends AndroidInjector.Builder&lt;LikeBroadcaseReceiver&gt;{}}\n<\/code><\/pre>\n\n<p>Here is my BroadcastReceiver module class<\/p>\n\n<pre><code>@Module\npublic class LikeBroadcastReceiverModule {\n\n@Provides\npublic LikeBroadcastReceiverView provideBroadcastView(LikeBroadcaseReceiver likeBroadcaseReceiver){\n    return likeBroadcaseReceiver;\n}\n\n@Provides\npublic BroadcastReceiverPresenter providePresenter(){\n    return new BroadcastReceiverPresenterImpl();\n}}\n<\/code><\/pre>\n\n<p>Here is my Application class<\/p>\n\n<pre><code>public class EasyDriveApplication extends Application implements HasActivityInjector, HasBroadcastReceiverInjector{\n\n@Inject\nDispatchingAndroidInjector&lt;Activity&gt; activityDispatchingAndroidInjector;\n\n@Inject\nDispatchingAndroidInjector&lt;BroadcastReceiver&gt; broadcastReceiverDispatchingAndroidInjector;\n\n@Override\npublic void onCreate() {\n    super.onCreate();\n    //Fabric.with(this, new Crashlytics());\n    DaggerAppComponent.builder().application(this).build().inject(this);\n}\n\n@Override\npublic AndroidInjector&lt;Activity&gt; activityInjector() {\n    return activityDispatchingAndroidInjector;\n}\n\n@Override\npublic AndroidInjector&lt;BroadcastReceiver&gt; broadcastReceiverInjector() {\n    return broadcastReceiverDispatchingAndroidInjector;\n}}\n<\/code><\/pre>\n\n<p>and here is my AppComponent class<\/p>\n\n<pre><code>@Singleton\n@Component(modules = {\n    AndroidInjectionModule.class,\n    AppModule.class,\n    DaoModule.class,\n    MapperModule.class,\n    UseCaseModule.class,\n    ThreadingModule.class,\n    UtilsModule.class,\n    BroadcastReceiverBuilder.class,\n    ActivityBuilder.class\n    })\npublic interface AppComponent {\n\n@Component.Builder\ninterface Builder {\n    @BindsInstance\n    Builder application(Application application);\n    AppComponent build();\n}\n\nvoid inject(EasyDriveApplication app);}\n<\/code><\/pre>\n\n<p>and my BroadcastReceiverBuilder class is looks like<\/p>\n\n<pre><code>@Module\npublic abstract class BroadcastReceiverBuilder {\n\n@Binds\n@IntoMap\n@BroadcastReceiverKey(LikeBroadcaseReceiver.class)\nabstract AndroidInjector.Factory&lt;? extends BroadcastReceiver&gt; bindLikeBroadcastReceiver(LikeBroadcastReceiverComponent.Builder builder);}\n<\/code><\/pre>\n\n<p>This is error I get<\/p>\n\n<blockquote>\n  <p>Error:(46, 10) error: com.presentation.dagger.broadcastReceiver.LikeBroadcastReceiverComponent.Builder cannot be provided without an @Provides-annotated method.\n  com.presentation.dagger.broadcastReceiver.LikeBroadcastReceiverComponent.Builder is injected at\n  com.presentation.dagger.application.module.BroadcastReceiverBuilder.bindLikeBroadcastReceiver(builder)\n  java.util.Map,javax.inject.Provider>> is injected at\n  dagger.android.DispatchingAndroidInjector.(injectorFactories)\n  dagger.android.DispatchingAndroidInjector is injected at\n  com.presentation.dagger.application.EasyDriveApplication.broadcastReceiverDispatchingAndroidInjector\n  com.presentation.dagger.application.EasyDriveApplication is injected at\n  com.presentation.dagger.application.AppComponent.inject(app)<\/p>\n<\/blockquote>\n",
+        "question_id": 47895175,
+        "tags": [
+            "java",
+            "android",
+            "dependency-injection",
+            "broadcastreceiver",
+            "dagger-2"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 2722
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/00a40f04c10fa0e133eda506147962be?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4911129,
+                "user_type": "registered",
+                "user_id": 3956404,
+                "link": "https://stackoverflow.com/users/3956404/marko-kurt",
+                "reputation": 205,
+                "display_name": "marko kurt",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47895175,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/v8XDk.jpg?s=256",
+                "account_id": 2060791,
+                "user_type": "registered",
+                "user_id": 1837367,
+                "link": "https://stackoverflow.com/users/1837367/david-medenjak",
+                "reputation": 34650,
+                "display_name": "David Medenjak",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1513723735,
+            "comment_id": 82759481
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/v8XDk.jpg?s=256",
+                "account_id": 2060791,
+                "user_type": "registered",
+                "user_id": 1837367,
+                "link": "https://stackoverflow.com/users/1837367/david-medenjak",
+                "reputation": 34650,
+                "display_name": "David Medenjak",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47895175,
+            "edited": false,
+            "creation_date": 1513722168,
+            "comment_id": 82758931
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/00a40f04c10fa0e133eda506147962be?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4911129,
+                "user_type": "registered",
+                "user_id": 3956404,
+                "link": "https://stackoverflow.com/users/3956404/marko-kurt",
+                "reputation": 205,
+                "display_name": "marko kurt",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47895175,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/v8XDk.jpg?s=256",
+                "account_id": 2060791,
+                "user_type": "registered",
+                "user_id": 1837367,
+                "link": "https://stackoverflow.com/users/1837367/david-medenjak",
+                "reputation": 34650,
+                "display_name": "David Medenjak",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1513721898,
+            "comment_id": 82758831
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/v8XDk.jpg?s=256",
+                "account_id": 2060791,
+                "user_type": "registered",
+                "user_id": 1837367,
+                "link": "https://stackoverflow.com/users/1837367/david-medenjak",
+                "reputation": 34650,
+                "display_name": "David Medenjak",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 47895175,
+            "edited": false,
+            "creation_date": 1513718886,
+            "comment_id": 82757586
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/eb2c262f9dce9e135edf02496c321899?s=256&d=identicon&r=PG",
+            "account_id": 1250366,
+            "user_type": "registered",
+            "user_id": 1210888,
+            "link": "https://stackoverflow.com/users/1210888/dllewellyn",
+            "reputation": 914,
+            "display_name": "Dllewellyn"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1571651237,
+        "creation_date": 1571651237,
+        "body": "<p>I found this page whilst trying to find a way of dependency injecting into a BroadcastReceiver, for anyone else who hits on an issue here is how to do it<\/p>\n\n<pre><code>@Provides\nfun providesBlah() : Blah = Blah()\n\nclass BlahBroadcastReceiver : BroadcastReceiver() {\n\n@Inject\nlateinit var blah: Blah\n\noverride fun onReceive(context: Context, intent: Intent) {\n    (context.applicationContext as MyApplication).component().inject(this)\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n",
+        "answer_id": 58483721,
+        "question_id": 47895175
+    }],
+    "answer_comments": {}
+}

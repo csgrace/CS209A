@@ -1,0 +1,72 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/VhRUK.jpg?s=256",
+            "account_id": 1438819,
+            "user_type": "registered",
+            "user_id": 1359578,
+            "link": "https://stackoverflow.com/users/1359578/andrew-senner",
+            "reputation": 2519,
+            "display_name": "Andrew Senner",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25589523/imageview-setimageresource-is-not-displaying-correct-drawable",
+        "last_activity_date": 1409468896,
+        "creation_date": 1409466789,
+        "answer_count": 1,
+        "title": "ImageView.setImageResource is not displaying correct drawable",
+        "body": "<p>I have this app, it's basically a 'make fun' app I made with a person's face and the ability to either shoot it with a pistol, automatic rifle, or grenade (more weapons to come :-)).<\/p>\n\n<p>I have a Weapon class, with the following code. (I'm pretty new to java so forgive me if I failed to follow proven ways, or do things as efficiently as I should)<\/p>\n\n<pre><code>public class Weapon {\n    // Parent\n    public static MainActivity ma;\n\n    // Constants\n    public static final int BULLET_WIDTH = 97;\n    public static final int BULLET_HEIGHT = 92;\n    public static final int EXPLOD_WIDTH = 299;\n    public static final int EXPLOD_HEIGHT = 237;\n    public static final int PISTOL = 0;\n    public static final int RIFLE = 1;\n    public static final int GRENADE = 2;\n\n    protected static int[] position = {0, 0};\n    protected static RelativeLayout rl = null;\n    protected static MediaPlayer mp;\n\n    // Protected stuff\n    // Object variables.\n    protected int type;\n    protected int drawableEffect;\n    protected int soundEffect;\n\n    // Functionals\n    protected ImageView effectImage;\n\n    public void equipWeapon() {\n        // Clear any existing listeners and assign a new one.\n        MainActivity.mainImage.setOnTouchListener(null);\n        MainActivity.mainImage.setOnTouchListener(new OnTouchListener() {\n\n            @Override\n            public boolean onTouch(View v, MotionEvent event) {\n            // Which weapon are we using?\n                switch (type) {\n                case Weapon.PISTOL:\n                case Weapon.GRENADE:\n                    if (event.getAction() == MotionEvent.ACTION_DOWN) {\n                    // Fire the weapon.\n                    fireWeapon(v, event);\n                }\n                case Weapon.RIFLE:\n                    switch (event.getAction()) {\n                    case MotionEvent.ACTION_DOWN:\n                    case MotionEvent.ACTION_MOVE: // This doesn't work ???\n                        // Fire the weapon.\n                        fireWeapon(v, event);\n                    }\n                }\n\n                // perfomClick needed.\n                return v.performClick();\n            }\n\n        });\n    }\n\n    public void fireWeapon(View v, MotionEvent event) {\n        // Reference the layout.\n        Weapon.rl = (RelativeLayout)Weapon.ma.findViewById(R.id.relativeLayout);\n\n        // Define properties.\n        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(\n                RelativeLayout.LayoutParams.WRAP_CONTENT,\n                RelativeLayout.LayoutParams.WRAP_CONTENT);      \n\n        // Get the touch position.\n        Weapon.position[0] = (int)event.getX() - ((type == Weapon.PISTOL || type ==     Weapon.RIFLE) ? Weapon.BULLET_WIDTH:Weapon.EXPLOD_WIDTH);\n        Weapon.position[1] = (int)event.getY() - ((type == Weapon.PISTOL || type ==     Weapon.RIFLE) ? Weapon.BULLET_HEIGHT:Weapon.EXPLOD_HEIGHT);\n\n        // Set the position.\n        lp.setMargins(Weapon.position[0], Weapon.position[1], 0, 0);\n        effectImage.setLayoutParams(lp);\n\n        // Add the view to the layout.\n        Weapon.rl.addView(effectImage, lp);\n\n        // Play the sound.\n        Weapon.mp.seekTo(0);\n        Weapon.mp.start();\n\n        // Reload\n        reload();\n    }\n\n    public void reload() {\n        // Create the ImageView\n        this.effectImage = new ImageView(Weapon.ma);\n        this.effectImage.setImageResource(this.drawableEffect);\n    }\n}\n<\/code><\/pre>\n\n<p>And I have a Pistol class which extends Weapon<\/p>\n\n<pre><code>public class Pistol extends Weapon {\n\n    public Pistol() {\n        // First save the type.\n        this.type = Weapon.PISTOL;\n\n        // Fetch the sound effect and image.\n        this.soundEffect = R.raw.gunshot;\n        this.drawableEffect = R.drawable.bullet_hole1;\n\n        // Create the media player and initialize the sound.\n        Weapon.mp = MediaPlayer.create(Weapon.ma, this.soundEffect);\n\n        // Create the ImageView\n        this.effectImage = null;\n        this.effectImage = new ImageView(Weapon.ma);\n        this.effectImage.setImageResource(this.drawableEffect);\n    }\n}\n<\/code><\/pre>\n\n<p>As well as a Rifle class extending Weapon<\/p>\n\n<pre><code>public class Rifle extends Weapon {\n\n    public Rifle() {\n        // First save the type.\n        this.type = Weapon.RIFLE;\n\n        // Fetch the sound effect and image.\n        this.soundEffect = R.raw.gunshot;\n        this.drawableEffect = R.drawable.bullet_hole1;\n\n        // Create the media player and initialize the sound.\n        Weapon.mp = MediaPlayer.create(Weapon.ma, this.soundEffect);\n\n        // Create the ImageView\n        this.effectImage = null;\n        this.effectImage = new ImageView(Weapon.ma);\n        this.effectImage.setImageResource(this.drawableEffect);\n    }\n}   \n<\/code><\/pre>\n\n<p>finally, I have a Grenade class extending, yep you guessed it, Weapon as well.<\/p>\n\n<pre><code>public class Grenade extends Weapon {\n\n    public Grenade() {\n        // First save the type.\n        this.type = Weapon.GRENADE;\n\n        // Fetch the sound effect and image.\n        this.soundEffect = R.raw.grenade;\n        this.drawableEffect = R.drawable.boom;\n\n        // Create the media player and initialize the sound.\n        Weapon.mp = MediaPlayer.create(Weapon.ma, this.soundEffect);\n\n        // Create the ImageView\n        this.effectImage = new ImageView(Weapon.ma);\n        this.effectImage.setImageResource(this.drawableEffect);\n    }\n}\n<\/code><\/pre>\n\n<p>I have buttons in the main view which I have registered onClick listeners to so you can switch weapons to your liking.. Here is one for example:<\/p>\n\n<pre><code>grenadeButton = (ImageButton)findViewById(R.id.grenadeButton);\n    grenadeButton.setOnClickListener(new OnClickListener() {\n        @Override\n        public void onClick(View v) {\n            if (MainActivity.this.weapon != Weapon.GRENADE) {\n                // Change the background color.\n                resetButtons();\n                v.setBackgroundResource(R.drawable.background_selected);\n\n                // Change weapons.\n                MainActivity.this.currentWeapon = equipWeapon(Weapon.GRENADE);\n            }           \n        }\n    });\n<\/code><\/pre>\n\n<p>and the equip weapon method in MainActivity.<\/p>\n\n<pre><code>public Weapon equipWeapon(int type) {\n    Weapon weapon = null;\n    switch (type) {\n    case Weapon.PISTOL:\n        weapon = new Pistol();\n        break;\n    case Weapon.RIFLE:\n        weapon = new Rifle();\n        break;\n    case Weapon.GRENADE:\n        weapon = new Grenade();\n        break;\n    }\n\n    // Play a sound and save changes.\n    MainActivity.this.weapon = type;\n    MainActivity.mp.seekTo(0);\n    MainActivity.mp.start();\n\n    return weapon;\n}\n<\/code><\/pre>\n\n<p>Now, I appreciate you taking the time to review all this code. I know that's a lot to digest for what I'm assuming is a simple issue.  I'm also aware of the rules of this forum and I have attempted to search for this issue already, but I'm not sure if I was using the right queries, as I did not find anything related to this issue.<\/p>\n\n<p>Here we go:<\/p>\n\n<p>When you start the app, the pistol is automatically equipped so you can start shooting immediately.  It shoots fine, I get a bullet noise, and bullet holes all over the picture of the person's face ^_^.  The rifle works fine as well (but it uses the same noise and graphic as the pistol, so it could very well be failing as well. Refer below).<\/p>\n\n<p>When I switch to the grenade, I here a lovely explosion sound, but the image displayed is still a bullet hole and not an explosion.. I have no earthly idea how to fix this and I am stumped..<\/p>\n\n<p>When I create the grenade object I specifically assign the drawable resource to the instance variable...<\/p>\n\n<pre><code>this.drawableEffect = R.drawable.boom;\n<\/code><\/pre>\n\n<p>Yet it still displays R.drawable.bullet_hole1....<\/p>\n\n<p>Please let me know if you need more information and ask any questions you need to..<\/p>\n\n<p>Thank you for your time..<\/p>\n",
+        "question_id": 25589523,
+        "tags": [
+            "java",
+            "android",
+            "view",
+            "imageview",
+            "drawable"
+        ],
+        "score": -1,
+        "accepted_answer_id": 25589727,
+        "is_answered": true,
+        "view_count": 105
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/VhRUK.jpg?s=256",
+            "account_id": 1438819,
+            "user_type": "registered",
+            "user_id": 1359578,
+            "link": "https://stackoverflow.com/users/1359578/andrew-senner",
+            "reputation": 2519,
+            "display_name": "Andrew Senner",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 25589523,
+        "edited": false,
+        "creation_date": 1409801157,
+        "comment_id": 40092479
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/VhRUK.jpg?s=256",
+            "account_id": 1438819,
+            "user_type": "registered",
+            "user_id": 1359578,
+            "link": "https://stackoverflow.com/users/1359578/andrew-senner",
+            "reputation": 2519,
+            "display_name": "Andrew Senner",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1409468896,
+        "creation_date": 1409468896,
+        "body": "<p>I'm so stupid.....<\/p>\n\n<pre><code>MainActivity.equipWeapon \n<\/code><\/pre>\n\n<p>wasn't calling<\/p>\n\n<pre><code>Weapon.equipWeapon.... \n<\/code><\/pre>\n\n<p>So the weapon wasn't changing... Oy' vey...<\/p>\n",
+        "answer_id": 25589727,
+        "question_id": 25589523
+    }],
+    "answer_comments": {}
+}

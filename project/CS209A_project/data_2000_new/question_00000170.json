@@ -1,0 +1,124 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/572a69029f51ac0b75b5195c53495fc9?s=256&d=identicon&r=PG",
+            "account_id": 997312,
+            "user_type": "registered",
+            "user_id": 1012952,
+            "link": "https://stackoverflow.com/users/1012952/killerpixler",
+            "reputation": 4080,
+            "display_name": "Killerpixler",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/12698675/android-getting-resources-in-fragments-from-static-context",
+        "last_activity_date": 1557664348,
+        "creation_date": 1349213601,
+        "answer_count": 2,
+        "title": "Android getting resources in fragments from static context",
+        "body": "<p>I looked <a href=\"https://stackoverflow.com/questions/4391720/android-how-can-i-get-a-resources-object-from-a-static-context\">here<\/a> to try and solve my problem. It is similar but I use fragments so when I need context I usually need to call getActivity().<\/p>\n\n<p>Basically I have App.java as described in the link above, I have <\/p>\n\n<pre><code>android:name=\".App\" inside my &lt;application&gt; tag\n<\/code><\/pre>\n\n<p>added to my AndroidManifest.xml. Now I have this class I use to collect all the things i use frequently:<\/p>\n\n<pre><code>public class MiscMethods{\npublic static void ErrorToast(int errorCode) {\n    String errorString = null;\n    if(errorCode==1){ errorString = App.getContext().getString(R.string.error_tooManyFieldsEmpty);}\n    if(errorCode==2){ errorString = App.getContext().getString(R.string.error_featureComingSoon);}\n    if(errorCode==3){ errorString = App.getContext().getString(R.string.error_SwitchBreak);}\n    else{errorString=\"Wrong Error Code\";}\n    Toast errormsg = Toast.makeText(App.getContext(), errorString, Toast.LENGTH_SHORT);\n    errormsg.setGravity(Gravity.CENTER, 0, 0);\n    errormsg.show();\n}\n}\n<\/code><\/pre>\n\n<p>In one of my fragments I call<\/p>\n\n<pre><code>MiscMethods.ErrorToast(1);\n<\/code><\/pre>\n\n<p>I just get the \"Wrong Error Code\" message from the \"else {}\" part of my  method<\/p>\n\n<p>Can you help me make this right?<\/p>\n",
+        "question_id": 12698675,
+        "tags": [
+            "java",
+            "android",
+            "static",
+            "resources"
+        ],
+        "score": 0,
+        "accepted_answer_id": 12698896,
+        "is_answered": true,
+        "view_count": 3050,
+        "last_edit_date": 1495539792
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/241aa8bb2a154108277e22ed03508ab0?s=256&d=identicon&r=PG",
+                "account_id": 60447,
+                "user_type": "registered",
+                "user_id": 180538,
+                "link": "https://stackoverflow.com/users/180538/warrenfaith",
+                "reputation": 57722,
+                "display_name": "WarrenFaith",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1349214595,
+            "creation_date": 1349214595,
+            "body": "<p>better formatting would have made your issue easier to find:<\/p>\n\n<pre><code>public static void ErrorToast(int errorCode) {\n    String errorString = null;\n    if (errorCode == 1) {\n        errorString = App.getContext().getString(R.string.error_tooManyFieldsEmpty);\n    }\n    if (errorCode == 2) {\n        errorString = App.getContext().getString(R.string.error_featureComingSoon);\n    }\n    if (errorCode == 3) {\n        errorString = App.getContext().getString(R.string.error_SwitchBreak);\n    } else {\n        errorString = \"Wrong Error Code\";\n    }\n    Toast errormsg = Toast.makeText(App.getContext(), errorString, Toast.LENGTH_SHORT);\n    errormsg.setGravity(Gravity.CENTER, 0, 0);\n    errormsg.show();\n}\n<\/code><\/pre>\n\n<p>As you might now see is that your <code>if (errorCode == 1)<\/code> should work but will be overridden as <code>if (errorCode == 3)<\/code> will be false in this case and your else will override your <code>errorString<\/code> variable.<\/p>\n\n<p>A <code>switch(errorCode)<\/code> and the 3 cases are what you are looking for.<\/p>\n\n<p>Final tip: improve your formatting!<\/p>\n",
+            "answer_id": 12698896,
+            "question_id": 12698675
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2Bhov.jpg?s=256",
+                "account_id": 2664641,
+                "user_type": "registered",
+                "user_id": 2303437,
+                "link": "https://stackoverflow.com/users/2303437/aiden",
+                "reputation": 1,
+                "display_name": "aiden"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1557664348,
+            "creation_date": 1557646710,
+            "body": "<p>write under code in Your <strong>CoreApplication.java<\/strong><\/p>\n\n<p>[step1]  <\/p>\n\n<pre><code>public class CoreApplication extends Application {\n\nprivate static CoreApplication instance; \n}\n<\/code><\/pre>\n\n<p>[step2]  <\/p>\n\n<pre><code>onCreate(){\ninstance = this;\n}\n<\/code><\/pre>\n\n<p>[step3]<br>\nadd  <\/p>\n\n<pre><code>public static CoreApplication getGlobalApplicationContext() {\n\nif (instance == null) {\nthrow new IllegalStateException(\"this application does not \ninherit GlobalApplication\"); \" +\n\"}\n\nreturn instance;\n}\n<\/code><\/pre>\n\n<p>[Step4]<br>\nCall <code>getGlobalApplicationContext()<\/code> in your fragment <\/p>\n",
+            "answer_id": 56097129,
+            "question_id": 12698675,
+            "last_edit_date": 1557664348
+        }
+    ],
+    "answer_comments": {"12698896": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/241aa8bb2a154108277e22ed03508ab0?s=256&d=identicon&r=PG",
+                "account_id": 60447,
+                "user_type": "registered",
+                "user_id": 180538,
+                "link": "https://stackoverflow.com/users/180538/warrenfaith",
+                "reputation": 57722,
+                "display_name": "WarrenFaith",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 12698896,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/572a69029f51ac0b75b5195c53495fc9?s=256&d=identicon&r=PG",
+                "account_id": 997312,
+                "user_type": "registered",
+                "user_id": 1012952,
+                "link": "https://stackoverflow.com/users/1012952/killerpixler",
+                "reputation": 4080,
+                "display_name": "Killerpixler",
+                "accept_rate": 81
+            },
+            "edited": false,
+            "creation_date": 1349425872,
+            "comment_id": 17213092
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/572a69029f51ac0b75b5195c53495fc9?s=256&d=identicon&r=PG",
+                "account_id": 997312,
+                "user_type": "registered",
+                "user_id": 1012952,
+                "link": "https://stackoverflow.com/users/1012952/killerpixler",
+                "reputation": 4080,
+                "display_name": "Killerpixler",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 12698896,
+            "edited": false,
+            "creation_date": 1349217360,
+            "comment_id": 17144725
+        }
+    ]}
+}

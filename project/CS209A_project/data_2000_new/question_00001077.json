@@ -1,0 +1,106 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6318f7e9e4289a12d2587cbcdb61adc4?s=256&d=identicon&r=PG",
+            "account_id": 7106639,
+            "user_type": "registered",
+            "user_id": 5436061,
+            "link": "https://stackoverflow.com/users/5436061/gokul",
+            "reputation": 87,
+            "display_name": "gokul"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60637495/java-comparable-vs-comparator-memory-performance",
+        "last_activity_date": 1588340211,
+        "creation_date": 1583934262,
+        "answer_count": 1,
+        "title": "Java: Comparable vs Comparator - Memory &amp; Performance",
+        "body": "<p>During one of my interview, I was asked <\/p>\n\n<blockquote>\n  <p>What is the performance difference between Comparable and\n  Comparator?<\/p>\n<\/blockquote>\n\n<p>I replied that I don't know. The interviewer said, <\/p>\n\n<blockquote>\n  <p>If Comparable is implemented by a class <strong><em>Employee<\/em><\/strong>, when 5000\n  Employee objects are created and added in an ArrayList, there will be\n  5000 objects with <strong><em>compareTo<\/em><\/strong> methods in heap memory. So unless\n  absolutely necessary, don't use Comparable. With Comparator, the\n  above mentioned memory overhead is eliminated.<\/p>\n<\/blockquote>\n\n<p>Was he correct in saying that? <\/p>\n",
+        "question_id": 60637495,
+        "tags": [
+            "java",
+            "performance",
+            "collections",
+            "comparator",
+            "comparable"
+        ],
+        "score": 4,
+        "accepted_answer_id": 60637789,
+        "is_answered": true,
+        "view_count": 934
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/10219503928134076/picture?type=large",
+                "account_id": 15777655,
+                "user_type": "registered",
+                "user_id": 11385052,
+                "link": "https://stackoverflow.com/users/11385052/ryan",
+                "reputation": 1758,
+                "display_name": "Ryan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 60637495,
+            "edited": false,
+            "creation_date": 1583935691,
+            "comment_id": 107279715
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a648ccb47bbbe9497c073315aac4d33e?s=256&d=identicon&r=PG",
+                "account_id": 17835,
+                "user_type": "registered",
+                "user_id": 40342,
+                "link": "https://stackoverflow.com/users/40342/joachim-sauer",
+                "reputation": 309298,
+                "display_name": "Joachim Sauer",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 10,
+            "post_id": 60637495,
+            "edited": false,
+            "creation_date": 1583934484,
+            "comment_id": 107278993
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a648ccb47bbbe9497c073315aac4d33e?s=256&d=identicon&r=PG",
+            "account_id": 17835,
+            "user_type": "registered",
+            "user_id": 40342,
+            "link": "https://stackoverflow.com/users/40342/joachim-sauer",
+            "reputation": 309298,
+            "display_name": "Joachim Sauer",
+            "accept_rate": 62
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 6,
+        "is_accepted": true,
+        "last_activity_date": 1583935126,
+        "creation_date": 1583935126,
+        "body": "<p>That answer is incorrect.<\/p>\n\n<p>Adding implemented interfaces or methods does not influence the memory required for individual instances of a class.<\/p>\n\n<p>First of all, conceptually it doesn't make sense.<\/p>\n\n<p>Implemented interfaces and methods are per-class information. Two instances of the same class will always implement exactly the same interfaces and have the exact same methods. As such, it makes no sense for the JVM to store that information per-object.<\/p>\n\n<p>Second, you can easily verify that with sample code like this:<\/p>\n\n<pre><code>public class MyClass implements Comparable&lt;MyClass&gt; {\n\n  private final long l;\n\n  MyClass(long l) {this.l = l;}\n\n  @Override\n  public int compareTo(MyClass o) {\n    return 0;\n  }\n\n  public static void main(String[] args) {\n    long l = 0;\n    try {\n      var list = new ArrayList&lt;MyClass&gt;();\n      while (true) {\n        list.add(new MyClass(l++));\n      }\n    } catch (OutOfMemoryError e) {\n      System.out.println(\"Created \" + l + \" objects before things went south ...\");\n    }\n  }\n}\n<\/code><\/pre>\n\n<p>Running this with <code>-Xmx32m<\/code> using Java 11 will create about 200000 objects on each run for me (with slight variations, probably due to GC details).<\/p>\n\n<p>Removing the <code>Comparable<\/code> interface and/or the <code>compareTo<\/code> method does not significantly change that value.<\/p>\n\n<p>You can try adding additional fields or removing <code>l<\/code>, which <em>will<\/em> change the number.<\/p>\n",
+        "answer_id": 60637789,
+        "question_id": 60637495
+    }],
+    "answer_comments": {"60637789": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+            "account_id": 3211603,
+            "user_type": "registered",
+            "user_id": 2711488,
+            "link": "https://stackoverflow.com/users/2711488/holger",
+            "reputation": 300991,
+            "display_name": "Holger"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "post_id": 60637789,
+        "edited": false,
+        "creation_date": 1584035521,
+        "comment_id": 107320224
+    }]}
+}

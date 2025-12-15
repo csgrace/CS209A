@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/eeceaf4294117bc81e9d8ae15126cdff?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3587142,
+            "user_type": "registered",
+            "user_id": 2994057,
+            "link": "https://stackoverflow.com/users/2994057/user2994057",
+            "reputation": 91,
+            "display_name": "user2994057",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20436157/writing-a-proxy-using-sockets",
+        "last_activity_date": 1386378672,
+        "creation_date": 1386377561,
+        "answer_count": 1,
+        "title": "Writing a proxy using sockets",
+        "body": "<p>I'm writing a HTTP proxy server using sockets, now the program is receiving the request successfully but I'm not able to get it back again to the browser...   <\/p>\n\n<pre><code>import java.io.*;\nimport java.net.*;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.concurrent.*;\n\n\npublic class Server {\n\n\npublic void startServer() {\n    final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);\n\n    Runnable serverTask = new Runnable() {\n        @Override\n        public void run() {\n            try {\n                @SuppressWarnings(\"resource\")\n                ServerSocket serverSocket = new ServerSocket(80);\n                while (true) {\n                    Socket clientSocket = serverSocket.accept();\n                    clientProcessingPool.submit(new ClientTask(clientSocket));\n                }\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n    };\n    Thread serverThread = new Thread(serverTask);\n    serverThread.start();\n\n}\n\nprivate class ClientTask implements Runnable {\n    private Socket clientSocket;\n\n    private ClientTask(Socket clientSocket) {\n        this.clientSocket = clientSocket;\n    }\n\n\n    @Override\n    public void run() {\n\n        try {\n            // Read request\n            InputStream incommingIS = clientSocket.getInputStream();\n            byte[] b = new byte[8196];\n            int len = incommingIS.read(b);\n\n            if (len &gt; 0) {\n                System.out.println(\"REQUEST\"\n                        + System.getProperty(\"line.separator\") + \"-------\");\n                System.out.println(new String(b, 0, len));\n\n                // Write request\n                Socket socket = new Socket(\"localhost\", 80);\n                OutputStream outgoingOS = socket.getOutputStream();\n                outgoingOS.write(b, 0, len);\n\n                // Copy response\n                OutputStream incommingOS = clientSocket.getOutputStream();\n                InputStream outgoingIS = socket.getInputStream();\n                for (int length; (length = outgoingIS.read(b)) != -1;) {\n                    incommingOS.write(b, 0, length);\n                }\n\n                incommingOS.close();\n                outgoingIS.close();\n                outgoingOS.close();\n                incommingIS.close();\n\n                socket.close();\n            } else {\n                incommingIS.close();\n            }\n        } catch (IOException e) {\n            e.printStackTrace();\n        } finally {\n            try {\n                clientSocket.close();\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n    }\n\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>What I'm doing wrong? Anyone could help me on this?<\/p>\n\n<p>Thanks!<\/p>\n",
+        "question_id": 20436157,
+        "tags": [
+            "java",
+            "sockets",
+            "proxy"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 151
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+            "account_id": 71739,
+            "user_type": "registered",
+            "user_id": 207421,
+            "link": "https://stackoverflow.com/users/207421/user207421",
+            "reputation": 311890,
+            "display_name": "user207421",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1386378672,
+        "creation_date": 1386378672,
+        "body": "<p>You're assuming you got the entire request in a single read, instead of using a loop like your response loop.<\/p>\n\n<p>You're  also assuming that it is terminated by an end of stream, which means the client must have done a shutdownOutput(), which doesn't happen in most protocols.<\/p>\n\n<p>In general this isn't the correct technique for writing a proxy. You need to start two threads per client, to copy data in both directions simultaneously, and defer closing the socket until you've read EOS from both directions.<\/p>\n",
+        "answer_id": 20436312,
+        "question_id": 20436157
+    }],
+    "answer_comments": {"20436312": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20436312,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/eeceaf4294117bc81e9d8ae15126cdff?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3587142,
+                "user_type": "registered",
+                "user_id": 2994057,
+                "link": "https://stackoverflow.com/users/2994057/user2994057",
+                "reputation": 91,
+                "display_name": "user2994057",
+                "accept_rate": 0
+            },
+            "edited": false,
+            "creation_date": 1386379568,
+            "comment_id": 30528966
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/eeceaf4294117bc81e9d8ae15126cdff?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3587142,
+                "user_type": "registered",
+                "user_id": 2994057,
+                "link": "https://stackoverflow.com/users/2994057/user2994057",
+                "reputation": 91,
+                "display_name": "user2994057",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20436312,
+            "edited": false,
+            "creation_date": 1386379083,
+            "comment_id": 30528886
+        }
+    ]}
+}

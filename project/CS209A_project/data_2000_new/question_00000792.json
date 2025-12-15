@@ -1,0 +1,217 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0c4ffffc0b55b0cb37aef9595f3de261?s=256&d=identicon&r=PG",
+            "account_id": 78031,
+            "user_type": "registered",
+            "user_id": 222356,
+            "link": "https://stackoverflow.com/users/222356/ericsoco",
+            "reputation": 26641,
+            "display_name": "ericsoco",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/9268753/how-do-i-perform-atomic-updates-of-fields-of-a-mongodb-document",
+        "last_activity_date": 1501681596,
+        "creation_date": 1329170697,
+        "answer_count": 2,
+        "title": "How do I perform atomic updates of fields of a MongoDB document?",
+        "body": "<p>Disclaimer: I'm a noob to Mongo and to databases in general, so if I'm off on terminology or concepts please let me know.<\/p>\n\n<p>For the purposes of this example, I'd like to store the mouse coordinates together within an object nested within a document. That document would look something like:<\/p>\n\n<pre><code>{ \"_id\" : ObjectId(\"4f39805d35919a2a7c7aba3e\"), \"mouseLoc\" : { \"x\" : 10, \"y\" : 20 } }\n<\/code><\/pre>\n\n<p>It seems like <a href=\"http://www.mongodb.org/display/DOCS/Updating#Updating-ModifierOperations\" rel=\"nofollow\">atomic updating, via modifier operations<\/a>, is the way to go, as I'm only storing values here (retrieving them elsewhere, in other software).  However, I can't figure out the query part.  How do I access this document in order to set the x and y values?<\/p>\n\n<p>I'm using Java, so I'm currently trying:<\/p>\n\n<pre><code>BasicDBObject mouseLoc = new BasicDBObject();\nmouseLoc.put(\"x\", mouseX);\nmouseLoc.put(\"y\", mouseY);\nmyCollection.update(queryObj, new BasicDBObject(\"$set\", mouseLoc), true, false);\n<\/code><\/pre>\n\n<p>However, I don't know how to specify that queryObj to get the document with the mouseLoc key.  Alternatively, if there's a smarter way to store information like this, please school me.<\/p>\n\n<p>I can follow along with Mongo shell/JS tips if that's simpler.<\/p>\n\n<p><br/>\n<strong>UPDATE:<\/strong><br/>\nI can query for this document if I give it a static field like 'name'.  So, to update this document:<\/p>\n\n<pre><code>{ \"_id\" : ObjectId(\"4f39805d35919a2a7c7aba3e\"), \"name\" : \"mouseLoc\", \"mouseLoc\" : { \"x\" : 10, \"y\" : 20 } }\n<\/code><\/pre>\n\n<p>I can use this code:<\/p>\n\n<pre><code>BasicDBObject mouseLoc = new BasicDBObject();\nmouseLoc.put(\"x\", mouseX);\nmouseLoc.put(\"y\", mouseY);\n\nBasicDBObject queryObj = new BasicDBObject(\"name\", \"mouseLoc\");\nBasicDBObject updateObj = new BasicDBObject(\"$set\", new BasicDBObject(\"mouseLoc\", mouseLoc));\n\nmyCollection.update(queryObj, updateObj, true, false);\n<\/code><\/pre>\n\n<p>However, it seems redundant to have to specify that \"name\" field just to be able to retrieve the document with the \"mouseLoc\" key.  Maybe I'm just misunderstanding database / mongo design?<\/p>\n",
+        "question_id": 9268753,
+        "tags": [
+            "java",
+            "mongodb",
+            "atomic",
+            "database"
+        ],
+        "score": 3,
+        "accepted_answer_id": 9269290,
+        "is_answered": true,
+        "view_count": 2065,
+        "last_edit_date": 1506103077
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6c5fe81058fc5a5cd795ec577ed27945?s=256&d=identicon&r=PG",
+                "account_id": 316639,
+                "user_type": "registered",
+                "user_id": 632916,
+                "link": "https://stackoverflow.com/users/632916/sony-santos",
+                "reputation": 5545,
+                "display_name": "Sony Santos",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1329174374,
+            "creation_date": 1329173676,
+            "body": "<p>The query part is where you specify a way to find you document, e.g: the <code>_id<\/code> or another unique field.<\/p>\n\n<p>In your example, it will look like this:<\/p>\n\n<pre><code>ObjectId objectId = new ObjectId(\"4f39805d35919a2a7c7aba3e\");\nBasicDBObject queryObj = new BasicDBObject(\"_id\", objectId);\n<\/code><\/pre>\n\n<p>(Maybe there's something missing about <code>ObjectId<\/code>, since I don't know Java.)<\/p>\n\n<p><strong>UPDATE<\/strong><\/p>\n\n<p>If you are searching for a specific <code>mouseLoc<\/code>, the <code>queryObj<\/code> will be the very <code>mouseLoc<\/code> object. (In JSON it would be <code>{ 'x': mouseX, 'y': mouseY }<\/code>.)<\/p>\n",
+            "answer_id": 9269290,
+            "question_id": 9268753,
+            "last_edit_date": 1329174374
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cafd689acd7039de41403b5e32692ceb?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10378528,
+                "user_type": "registered",
+                "user_id": 7654030,
+                "link": "https://stackoverflow.com/users/7654030/austin-anderson",
+                "reputation": 950,
+                "display_name": "Austin_Anderson",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1501681596,
+            "creation_date": 1501681596,
+            "body": "<p>what about using the <code>.<\/code> specifier?<\/p>\n\n<pre><code>myCollection.updateOne(Document.parse(\"{ \\\"_id\\\" : ObjectId(\\\"4f39805d35919a2a7c7aba3e\\\")}\"),\n    Document.parse(\"{$set:{ \\\"mouseLoc.x\\\" : \"+mouseX+\", \\\"mouseLoc.y\\\" : \"+mouseY+\" }\")\n)\n<\/code><\/pre>\n",
+            "answer_id": 45462718,
+            "question_id": 9268753
+        }
+    ],
+    "answer_comments": {"9269290": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6c5fe81058fc5a5cd795ec577ed27945?s=256&d=identicon&r=PG",
+                "account_id": 316639,
+                "user_type": "registered",
+                "user_id": 632916,
+                "link": "https://stackoverflow.com/users/632916/sony-santos",
+                "reputation": 5545,
+                "display_name": "Sony Santos",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9269290,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0c4ffffc0b55b0cb37aef9595f3de261?s=256&d=identicon&r=PG",
+                "account_id": 78031,
+                "user_type": "registered",
+                "user_id": 222356,
+                "link": "https://stackoverflow.com/users/222356/ericsoco",
+                "reputation": 26641,
+                "display_name": "ericsoco",
+                "accept_rate": 78
+            },
+            "edited": false,
+            "creation_date": 1329215074,
+            "comment_id": 11692563
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0c4ffffc0b55b0cb37aef9595f3de261?s=256&d=identicon&r=PG",
+                "account_id": 78031,
+                "user_type": "registered",
+                "user_id": 222356,
+                "link": "https://stackoverflow.com/users/222356/ericsoco",
+                "reputation": 26641,
+                "display_name": "ericsoco",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9269290,
+            "edited": false,
+            "creation_date": 1329178304,
+            "comment_id": 11685134
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6c5fe81058fc5a5cd795ec577ed27945?s=256&d=identicon&r=PG",
+                "account_id": 316639,
+                "user_type": "registered",
+                "user_id": 632916,
+                "link": "https://stackoverflow.com/users/632916/sony-santos",
+                "reputation": 5545,
+                "display_name": "Sony Santos",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 9269290,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0c4ffffc0b55b0cb37aef9595f3de261?s=256&d=identicon&r=PG",
+                "account_id": 78031,
+                "user_type": "registered",
+                "user_id": 222356,
+                "link": "https://stackoverflow.com/users/222356/ericsoco",
+                "reputation": 26641,
+                "display_name": "ericsoco",
+                "accept_rate": 78
+            },
+            "edited": false,
+            "creation_date": 1329176528,
+            "comment_id": 11684740
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0c4ffffc0b55b0cb37aef9595f3de261?s=256&d=identicon&r=PG",
+                "account_id": 78031,
+                "user_type": "registered",
+                "user_id": 222356,
+                "link": "https://stackoverflow.com/users/222356/ericsoco",
+                "reputation": 26641,
+                "display_name": "ericsoco",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9269290,
+            "edited": false,
+            "creation_date": 1329175432,
+            "comment_id": 11684508
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6c5fe81058fc5a5cd795ec577ed27945?s=256&d=identicon&r=PG",
+                "account_id": 316639,
+                "user_type": "registered",
+                "user_id": 632916,
+                "link": "https://stackoverflow.com/users/632916/sony-santos",
+                "reputation": 5545,
+                "display_name": "Sony Santos",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9269290,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0c4ffffc0b55b0cb37aef9595f3de261?s=256&d=identicon&r=PG",
+                "account_id": 78031,
+                "user_type": "registered",
+                "user_id": 222356,
+                "link": "https://stackoverflow.com/users/222356/ericsoco",
+                "reputation": 26641,
+                "display_name": "ericsoco",
+                "accept_rate": 78
+            },
+            "edited": false,
+            "creation_date": 1329174742,
+            "comment_id": 11684372
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0c4ffffc0b55b0cb37aef9595f3de261?s=256&d=identicon&r=PG",
+                "account_id": 78031,
+                "user_type": "registered",
+                "user_id": 222356,
+                "link": "https://stackoverflow.com/users/222356/ericsoco",
+                "reputation": 26641,
+                "display_name": "ericsoco",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 9269290,
+            "edited": false,
+            "creation_date": 1329173875,
+            "comment_id": 11684132
+        }
+    ]}
+}

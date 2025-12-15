@@ -1,0 +1,130 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/BUmKz.jpg?s=256",
+            "account_id": 4878731,
+            "user_type": "registered",
+            "user_id": 3933089,
+            "link": "https://stackoverflow.com/users/3933089/chiastic-security",
+            "reputation": 20540,
+            "display_name": "chiastic-security",
+            "accept_rate": 67
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26496753/unused-array-of-primitives-what-do-javac-and-the-jit-compiler-do-with-it",
+        "last_activity_date": 1413932243,
+        "creation_date": 1413927236,
+        "answer_count": 2,
+        "title": "Unused array of primitives: what do javac and the JIT compiler do with it?",
+        "body": "<p>Suppose I have a method that declares an array of primitives, but doesn't use it:<\/p>\n\n<pre><code>public void frobnicate() {\n    int[] pointless = new int[1000];\n    System.out.println(\"bored\");\n}\n<\/code><\/pre>\n\n<p>What will happen to my <code>pointless<\/code> array? I think that javac will keep it in (though I'm uncertain). If so, what will the JIT compiler do? Will it get rid of it completely? Will it create the array but not a reference to it?<\/p>\n\n<p>There are murky waters here. It's not quite the same as an unused<\/p>\n\n<pre><code>int pointless = 23;\n<\/code><\/pre>\n\n<p>which could be easily removed. With an array, there's an object instance being created, and it's then being zeroed out too. Can the JIT compiler elide all of this? Or will all the work still be done?<\/p>\n\n<p>The motivation for this, by the way, is that I'm writing a benchmark that looks at the effect of different buffer sizes. I would like to remove the effect of the allocation of space for different sizes of buffer. Internally, the buffer is just a <code>byte[]<\/code>; so the easiest way to remove the effect of the memory allocation would be to start the method by creating an unused array, so that the total amount allocated is the same in each case. In other words, if the maximum buffer size I'll test is 4MB, then when I test with a 1MB buffer, I start by creating an unused <code>byte[3*1024*1024]<\/code>, so that the total allocated is still 4MB. (I'm prepared to ignore the few bytes of extra overhead, which should be insignificant.)<\/p>\n\n<p>But obviously there's no point trying to allocate the unused array if it's never going to make it past the JIT compiler...<\/p>\n",
+        "question_id": 26496753,
+        "tags": [
+            "java",
+            "arrays",
+            "performance",
+            "javac",
+            "jit"
+        ],
+        "score": 4,
+        "accepted_answer_id": 26497778,
+        "is_answered": true,
+        "view_count": 188
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DLHqU.png?s=256",
+                "account_id": 1223835,
+                "user_type": "registered",
+                "user_id": 1189885,
+                "link": "https://stackoverflow.com/users/1189885/chrylis-cautiouslyoptimistic",
+                "reputation": 77469,
+                "display_name": "chrylis -cautiouslyoptimistic-",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 26496753,
+            "edited": false,
+            "creation_date": 1413931700,
+            "comment_id": 41628139
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c70b65184e456ff7e8751a3231b09c7c?s=256&d=identicon&r=PG",
+                "account_id": 1321086,
+                "user_type": "registered",
+                "user_id": 1266906,
+                "link": "https://stackoverflow.com/users/1266906/theconstructor",
+                "reputation": 4495,
+                "display_name": "TheConstructor"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26496753,
+            "edited": false,
+            "creation_date": 1413930187,
+            "comment_id": 41627654
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0d790f2f3688df9e03b0c27a473cb1ac?s=256&d=identicon&r=PG",
+                "account_id": 93208,
+                "user_type": "registered",
+                "user_id": 255139,
+                "link": "https://stackoverflow.com/users/255139/kalpesh-soni",
+                "reputation": 7397,
+                "display_name": "Kalpesh Soni",
+                "accept_rate": 44
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26496753,
+            "edited": false,
+            "creation_date": 1413927428,
+            "comment_id": 41626572
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e9a46cf0cb855b5b591740cfd7b9f81a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 283609,
+                "user_type": "registered",
+                "user_id": 581205,
+                "link": "https://stackoverflow.com/users/581205/maaartinus",
+                "reputation": 46760,
+                "display_name": "maaartinus",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1413929721,
+            "creation_date": 1413929721,
+            "body": "<p>I can't answer the main question, but I can offer a remedy:<\/p>\n\n<blockquote>\n  <p>the easiest way to remove the effect of the memory allocation would be to start the method by creating an unused array<\/p>\n<\/blockquote>\n\n<p>Just \"use\" the array. In case you're using JMH, assign it to a blackhole. If you're using Caliper, then do something like <code>result += myArray.hashCode()<\/code>.<\/p>\n\n<hr>\n\n<p>Looking at the great lengths, JMH goes to avoid the risk of dead code elimination, I would never write a benchmark allowing any dead code. It may or may not work and it may break anytime.<\/p>\n",
+            "answer_id": 26497309,
+            "question_id": 26496753
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b2c2b8044eca80b9a707c716c530d9f5?s=256&d=identicon&r=PG",
+                "account_id": 3989460,
+                "user_type": "registered",
+                "user_id": 3288910,
+                "link": "https://stackoverflow.com/users/3288910/jason",
+                "reputation": 3927,
+                "display_name": "Jason"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1413932243,
+            "creation_date": 1413932243,
+            "body": "<p>Java microbenchmarks are difficult.  However, a quick look through the bytecode for <code>frobincate<\/code> shows that javac (OpenJDK 7) does not elide the array...<\/p>\n\n<pre><code>Compiled from \"Frobincate.java\"\npublic class Frobincate {\n  public Frobincate();\n    Code:\n       0: aload_0       \n       1: invokespecial #1                  // Method java/lang/Object.\"&lt;init&gt;\":()V\n       4: return        \n\n  public static void frobincate();\n    Code:\n       0: sipush        1000\n       3: newarray       int\n       5: astore_0      \n       6: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;\n       9: ldc           #3                  // String bored\n      11: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V\n      14: return        \n}\n<\/code><\/pre>\n\n<p>Digging into the assembly also shows the object (array allocation) is not elided by the jvm...<\/p>\n\n<pre><code>[Disassembling for mach='i386:x86-64']\n[Entry Point]\n[Verified Entry Point]\n[Constants]\n  # {method} 'frobincate' '()V' in 'Foo'\n  #           [sp+0x20]  (sp of caller)\n  0x00007fd335060aa0: mov    %eax,-0x14000(%rsp)\n  0x00007fd335060aa7: push   %rbp\n  0x00007fd335060aa8: sub    $0x10,%rsp         ;*synchronization entry\n                                                ; - Foo::frobincate@-1 (line 4)\n  0x00007fd335060aac: mov    0x60(%r15),%rdi\n  0x00007fd335060ab0: mov    %rdi,%r10\n  0x00007fd335060ab3: add    $0xfb0,%r10\n  0x00007fd335060aba: cmp    0x70(%r15),%r10\n  0x00007fd335060abe: jae    0x00007fd335060b18\n  0x00007fd335060ac0: mov    %r10,0x60(%r15)\n  0x00007fd335060ac4: prefetchnta 0xc0(%r10)\n  0x00007fd335060acc: movq   $0x1,(%rdi)\n  0x00007fd335060ad3: prefetchnta 0x100(%r10)\n  0x00007fd335060adb: movl   $0xe7780204,0x8(%rdi)  ;   {oop({type array int})}\n  0x00007fd335060ae2: prefetchnta 0x140(%r10)\n  0x00007fd335060aea: movl   $0x3e8,0xc(%rdi)\n  0x00007fd335060af1: prefetchnta 0x180(%r10)\n  0x00007fd335060af9: add    $0x10,%rdi\n  0x00007fd335060afd: mov    $0x1f4,%ecx\n  0x00007fd335060b02: xor    %rax,%rax\n  0x00007fd335060b05: shl    $0x3,%rcx\n  0x00007fd335060b09: rex.W rep stos %al,%es:(%rdi)\n  0x00007fd335060b0c: add    $0x10,%rsp\n  0x00007fd335060b10: pop    %rbp\n  0x00007fd335060b11: test   %eax,0xbb954e9(%rip)        # 0x00007fd340bf6000\n                                                ;   {poll_return}\n  0x00007fd335060b17: retq   \n  0x00007fd335060b18: mov    $0x3e8,%edx\n  0x00007fd335060b1d: mov    $0x73bc01020,%rsi  ;   {oop({type array int})}\n  0x00007fd335060b27: callq  0x00007fd33505f260  ; OopMap{off=140}\n                                                ;*newarray\n                                                ; - Foo::frobincate@3 (line 4)\n                                                ;   {runtime_call}\n  0x00007fd335060b2c: jmp    0x00007fd335060b0c  ;*newarray\n                                                ; - Foo::frobincate@3 (line 4)\n  0x00007fd335060b2e: mov    %rax,%rsi\n  0x00007fd335060b31: add    $0x10,%rsp\n  0x00007fd335060b35: pop    %rbp\n  0x00007fd335060b36: jmpq   0x00007fd335062160  ;   {runtime_call}\n  0x00007fd335060b3b: hlt    \n  0x00007fd335060b3c: hlt    \n  0x00007fd335060b3d: hlt    \n  0x00007fd335060b3e: hlt    \n  0x00007fd335060b3f: hlt    \n[Exception Handler]\n[Stub Code]\n  0x00007fd335060b40: jmpq   0x00007fd33505f3e0  ;   {no_reloc}\n[Deopt Handler Code]\n  0x00007fd335060b45: callq  0x00007fd335060b4a\n  0x00007fd335060b4a: subq   $0x5,(%rsp)\n  0x00007fd335060b4f: jmpq   0x00007fd335038f00  ;   {runtime_call}\n  0x00007fd335060b54: hlt    \n  0x00007fd335060b55: hlt    \n  0x00007fd335060b56: hlt    \n  0x00007fd335060b57: hlt\n<\/code><\/pre>\n\n<p>It's an obvious optimization though, and it depends on the compiler/jvm/architecture/platform.  So it's probably safer to parameterize the buffer for the benchmark.  Another option would be making the buffer a <code>public<\/code> <code>static<\/code> member, or store a reference as a <code>public<\/code> <code>static<\/code> member.  It increases the scope beyond something the compiler can effectively optimize.<\/p>\n",
+            "answer_id": 26497778,
+            "question_id": 26496753
+        }
+    ],
+    "answer_comments": {}
+}

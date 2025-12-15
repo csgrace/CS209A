@@ -1,0 +1,308 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-Hh14vzvNh3Y/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DV3tf3XHmmJly-6Fh8aeqoD5ALPyg/mo/s256-rj/photo.jpg",
+            "account_id": 14553481,
+            "user_type": "registered",
+            "user_id": 10511664,
+            "link": "https://stackoverflow.com/users/10511664/manish-thakur",
+            "reputation": 820,
+            "display_name": "manish thakur"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/52941675/if-else-not-working-on-the-basis-of-user-selection",
+        "last_activity_date": 1556958012,
+        "creation_date": 1540272186,
+        "answer_count": 2,
+        "title": "If else not working on the basis of user selection",
+        "body": "<p>I am working on HTML tables. For that I am returning JSON from my Java code. I have a UI as HTML page where there is a form having from date to date and a select tag having 4 options like this<\/p>\n\n<pre><code> &lt;form id=\"formId\" method=\"get\"&gt;\n        &lt;div class=\"container\"&gt;\n            &lt;h4&gt;Start Date:&lt;/h4&gt;\n            &lt;input type=\"text\" id=\"startdate\" name=\"fromdate\" width=\"276\"\n                placeholder=\"dd/mm/yyyy\" required /&gt;\n\n            &lt;h4&gt;End Date:&lt;/h4&gt;\n            &lt;input type=\"text\" id=\"enddate\" name=\"todate\" width=\"276\"\n                placeholder=\"dd/mm/yyyy\" required /&gt;\n\n\n            &lt;h4&gt;Outlets:&lt;/h4&gt;\n            &lt;select name=\"outlet\" id=\"all\"&gt;\n                &lt;option&gt;ALL&lt;/option&gt;\n                &lt;c:forEach var=\"item\" items=\"${obj.outlet}\"&gt;\n                    &lt;option&gt;${item}&lt;/option&gt;\n                &lt;/c:forEach&gt;\n            &lt;/select&gt;\n\n            &lt;br&gt;\n\n            &lt;br&gt;\n            &lt;div&gt;\n\n                &lt;button id=\"button\" class=\"btn btn-default\" type=\"submit\"&gt;Search&lt;/button&gt;\n            &lt;/div&gt;\n\n        &lt;/div&gt;\n&lt;/form&gt;\n<\/code><\/pre>\n\n<p>I am taking that input from the form and  getting values in the servlet in doget method like below:<\/p>\n\n<pre><code>    String fromdate=request.getParameter(\"fromdate\");\n        String todate=request.getParameter(\"todate\");\n        String outlet=request.getParameter(\"outlet\");\n\n//      System.out.println(String.format(\"fromdate: %s, todate: %s, outlet: %s\", new Object[]{fromdate, todate, outlet}));\n        List&lt;String&gt; outletList = Arrays.asList(outlet.split(\"\\\\s*,\\\\s*\"));\n        try {\n            String json = HourlySalesDateOutlet.createJson(outletList, fromdate, todate);\n            response.getWriter().write(json);\n//          System.out.println(\"dheeraj\"+json);\n        }\n        catch (Exception e) {\n\n            e.printStackTrace();\n        }\n\n\n    }\n<\/code><\/pre>\n\n<p>Now here is my Java class where I have written two queries one for if the user selects all and other if user select specific outlet. My problem is the if statement is not executing only else is executing if the user selects one outlet from FORM if the user selects ALL then it's not working. <\/p>\n\n<p>Below is my code: <\/p>\n\n<pre><code>   public static String createJson(List&lt;String&gt; outletList, String startDate, String endDate) throws Exception {\n        Connection con = null;\n        String query1;\n        List&lt;Map&lt;String, String&gt;&gt; mapList = new LinkedList&lt;Map&lt;String, String&gt;&gt;();\n        String outletStr = outletList.stream().collect(Collectors.joining(\"','\", \"('\", \"')\"));\n        if (outletList.equals(\"ALL\")) {\n            query1 = \"SELECT a.OUTLET,b.CUSTOMERDESCRIPTOR,a.BILLDATE,HOUR(a.BILLTIME) AS HOURS, SUM(a.NETAMOUNT) AS AMOUNT FROM SYNCBILL a,ecustomer b WHERE a.OUTLET=b.CUSTOMERIDENTIFIER AND a.CANCELLED&lt;&gt;'Y' AND a.BILLDATE BETWEEN STR_TO_DATE(REPLACE('\"\n                    + startDate + \"','/','.'),GET_FORMAT(DATE,'EUR')) AND STR_TO_DATE(REPLACE('\" + endDate\n                    + \"','/','.'),GET_FORMAT(DATE,'EUR')) GROUP BY OUTLET,BILLDATE,HOUR(BILLTIME)\";\n            System.out.println(\"all\"+query1);\n\n        } else {\n\n            query1 = \"SELECT a.OUTLET,b.CUSTOMERDESCRIPTOR,a.BILLDATE,HOUR(a.BILLTIME) AS HOURS, SUM(a.NETAMOUNT) AS AMOUNT FROM SYNCBILL a,ecustomer b WHERE a.OUTLET=b.CUSTOMERIDENTIFIER AND b.CUSTOMERDESCRIPTOR in \"\n                    + outletStr + \" AND a.CANCELLED&lt;&gt;'Y' AND a.BILLDATE BETWEEN STR_TO_DATE(REPLACE('\" + startDate\n                    + \"','/','.'),GET_FORMAT(DATE,'EUR')) AND STR_TO_DATE(REPLACE('\" + endDate\n                    + \"','/','.'),GET_FORMAT(DATE,'EUR')) GROUP BY OUTLET,BILLDATE,HOUR(BILLTIME)\";\n            System.out.println(\"2\"+query1);\n        }\n\n        try {\n\n\n            con = DBConnection.createConnection();\n\n\n            PreparedStatement ps = con.prepareStatement(query1);\n            ResultSet rs = ps.executeQuery();\n            Map&lt;RecordKey, Long&gt; mapData = getMapList(rs);\n        }\n<\/code><\/pre>\n\n<p>I am not posting the full Java code. What I want is if the user selects all then if statement should execute and the query in it should execute. If the user selects else, then other should work, and here in my code only else is working if is not executing.<\/p>\n\n<p>How can I debug this?<\/p>\n",
+        "question_id": 52941675,
+        "tags": [
+            "java",
+            "servlets",
+            "forms"
+        ],
+        "score": -1,
+        "accepted_answer_id": 52941806,
+        "is_answered": true,
+        "view_count": 76,
+        "last_edit_date": 1556958012
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-Hh14vzvNh3Y/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DV3tf3XHmmJly-6Fh8aeqoD5ALPyg/mo/s256-rj/photo.jpg",
+                "account_id": 14553481,
+                "user_type": "registered",
+                "user_id": 10511664,
+                "link": "https://stackoverflow.com/users/10511664/manish-thakur",
+                "reputation": 820,
+                "display_name": "manish thakur"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941675,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5c12c65e31c12a4ed29b65e50e0b3552?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5444163,
+                "user_type": "registered",
+                "user_id": 4331279,
+                "link": "https://stackoverflow.com/users/4331279/mwb",
+                "reputation": 1899,
+                "display_name": "MWB",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1540272542,
+            "comment_id": 92791859
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5c12c65e31c12a4ed29b65e50e0b3552?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5444163,
+                "user_type": "registered",
+                "user_id": 4331279,
+                "link": "https://stackoverflow.com/users/4331279/mwb",
+                "reputation": 1899,
+                "display_name": "MWB",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941675,
+            "edited": false,
+            "creation_date": 1540272475,
+            "comment_id": 92791841
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-Hh14vzvNh3Y/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DV3tf3XHmmJly-6Fh8aeqoD5ALPyg/mo/s256-rj/photo.jpg",
+                "account_id": 14553481,
+                "user_type": "registered",
+                "user_id": 10511664,
+                "link": "https://stackoverflow.com/users/10511664/manish-thakur",
+                "reputation": 820,
+                "display_name": "manish thakur"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941675,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5c12c65e31c12a4ed29b65e50e0b3552?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5444163,
+                "user_type": "registered",
+                "user_id": 4331279,
+                "link": "https://stackoverflow.com/users/4331279/mwb",
+                "reputation": 1899,
+                "display_name": "MWB",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1540272382,
+            "comment_id": 92791814
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5c12c65e31c12a4ed29b65e50e0b3552?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5444163,
+                "user_type": "registered",
+                "user_id": 4331279,
+                "link": "https://stackoverflow.com/users/4331279/mwb",
+                "reputation": 1899,
+                "display_name": "MWB",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941675,
+            "edited": false,
+            "creation_date": 1540272341,
+            "comment_id": 92791802
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/eT2FU.jpg?s=256",
+                "account_id": 951981,
+                "user_type": "registered",
+                "user_id": 977919,
+                "link": "https://stackoverflow.com/users/977919/sidgate",
+                "reputation": 15334,
+                "display_name": "sidgate",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941675,
+            "edited": false,
+            "creation_date": 1540272312,
+            "comment_id": 92791793
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4b347220471064a3cb72d768ec2314e6?s=256&d=identicon&r=PG",
+                "account_id": 2406691,
+                "user_type": "registered",
+                "user_id": 2102956,
+                "link": "https://stackoverflow.com/users/2102956/pushpesh-kumar-rajwanshi",
+                "reputation": 18377,
+                "display_name": "Pushpesh Kumar Rajwanshi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1540273025,
+            "creation_date": 1540273025,
+            "body": "<p>I have a simple solution for your problem. When user selects all, then in that case pass the empty list and while making the query just put this condition.<\/p>\n\n<pre><code>if (outletList.size()==0) {\n// case for all\n} else {\n// do regular stuff\n}\n<\/code><\/pre>\n",
+            "answer_id": 52941806,
+            "question_id": 52941675
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/XR9JP.png?s=256",
+                "account_id": 1441892,
+                "user_type": "registered",
+                "user_id": 1361787,
+                "link": "https://stackoverflow.com/users/1361787/chieftwopencils",
+                "reputation": 14028,
+                "display_name": "ChiefTwoPencils",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1540394633,
+            "creation_date": 1540347642,
+            "body": "<p>As pointed out in the comments, you're not comparing comparable types. <code>outletList<\/code> is a <code>List<\/code> and it can't be equated to a <code>String<\/code> even though the list may only contain a single element that happens to be a <code>String<\/code>. So, <code>outletList.equals(\"ALL\")<\/code> doesn't do what you think it does.<\/p>\n\n<p>But that raises an interesting point. You have a select list which isn't <code>multiple<\/code> so why return a list of what is <em>always<\/em> a <strong><em>single<\/em><\/strong> value? And why switch to sending back an empty list when <code>ALL<\/code> is selected? That doesn't make sense; there was a single selection made as expected. This adds unnecessary confusion.<\/p>\n\n<p>Try instead sending back the single value as a <code>String<\/code> and letting that value determine the logic so you have flexibility. If it's not possible to avoid the list then accept only a single value (<code>list[0]<\/code> for example) and call equals on <em>that<\/em> <strong><em>not<\/em><\/strong> the <code>List<\/code>.<\/p>\n\n<p><code>if(outletList[0].equals(\"All\")) {...}<\/code><\/p>\n\n<p>If you later find yourself in a situation where you need more than a single <code>if-else<\/code> pair, you can switch to a <code>switch<\/code> like so:<\/p>\n\n<pre><code>switch(outletList[0]) { // or the single value...\n    case \"ALL\":\n        ...\n    ...\n    default:\n        ... \n}\n<\/code><\/pre>\n",
+            "answer_id": 52960217,
+            "question_id": 52941675,
+            "last_edit_date": 1540394633
+        }
+    ],
+    "answer_comments": {"52941806": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4b347220471064a3cb72d768ec2314e6?s=256&d=identicon&r=PG",
+                "account_id": 2406691,
+                "user_type": "registered",
+                "user_id": 2102956,
+                "link": "https://stackoverflow.com/users/2102956/pushpesh-kumar-rajwanshi",
+                "reputation": 18377,
+                "display_name": "Pushpesh Kumar Rajwanshi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941806,
+            "edited": false,
+            "creation_date": 1540280300,
+            "comment_id": 92795341
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/XR9JP.png?s=256",
+                "account_id": 1441892,
+                "user_type": "registered",
+                "user_id": 1361787,
+                "link": "https://stackoverflow.com/users/1361787/chieftwopencils",
+                "reputation": 14028,
+                "display_name": "ChiefTwoPencils",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941806,
+            "edited": false,
+            "creation_date": 1540275978,
+            "comment_id": 92793138
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4b347220471064a3cb72d768ec2314e6?s=256&d=identicon&r=PG",
+                "account_id": 2406691,
+                "user_type": "registered",
+                "user_id": 2102956,
+                "link": "https://stackoverflow.com/users/2102956/pushpesh-kumar-rajwanshi",
+                "reputation": 18377,
+                "display_name": "Pushpesh Kumar Rajwanshi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941806,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/XR9JP.png?s=256",
+                "account_id": 1441892,
+                "user_type": "registered",
+                "user_id": 1361787,
+                "link": "https://stackoverflow.com/users/1361787/chieftwopencils",
+                "reputation": 14028,
+                "display_name": "ChiefTwoPencils",
+                "accept_rate": 68
+            },
+            "edited": false,
+            "creation_date": 1540275663,
+            "comment_id": 92793000
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/XR9JP.png?s=256",
+                "account_id": 1441892,
+                "user_type": "registered",
+                "user_id": 1361787,
+                "link": "https://stackoverflow.com/users/1361787/chieftwopencils",
+                "reputation": 14028,
+                "display_name": "ChiefTwoPencils",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941806,
+            "edited": false,
+            "creation_date": 1540274084,
+            "comment_id": 92792376
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4b347220471064a3cb72d768ec2314e6?s=256&d=identicon&r=PG",
+                "account_id": 2406691,
+                "user_type": "registered",
+                "user_id": 2102956,
+                "link": "https://stackoverflow.com/users/2102956/pushpesh-kumar-rajwanshi",
+                "reputation": 18377,
+                "display_name": "Pushpesh Kumar Rajwanshi"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941806,
+            "reply_to_user": {
+                "profile_image": "https://lh5.googleusercontent.com/-Hh14vzvNh3Y/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DV3tf3XHmmJly-6Fh8aeqoD5ALPyg/mo/s256-rj/photo.jpg",
+                "account_id": 14553481,
+                "user_type": "registered",
+                "user_id": 10511664,
+                "link": "https://stackoverflow.com/users/10511664/manish-thakur",
+                "reputation": 820,
+                "display_name": "manish thakur"
+            },
+            "edited": false,
+            "creation_date": 1540273409,
+            "comment_id": 92792143
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-Hh14vzvNh3Y/AAAAAAAAAAI/AAAAAAAAAAA/AAN31DV3tf3XHmmJly-6Fh8aeqoD5ALPyg/mo/s256-rj/photo.jpg",
+                "account_id": 14553481,
+                "user_type": "registered",
+                "user_id": 10511664,
+                "link": "https://stackoverflow.com/users/10511664/manish-thakur",
+                "reputation": 820,
+                "display_name": "manish thakur"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941806,
+            "edited": false,
+            "creation_date": 1540273304,
+            "comment_id": 92792106
+        }
+    ]}
+}

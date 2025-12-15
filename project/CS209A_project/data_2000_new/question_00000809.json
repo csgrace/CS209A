@@ -1,0 +1,56 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9d8cc43cd4de1e47998587689fc94208?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 13066744,
+            "user_type": "registered",
+            "user_id": 9441817,
+            "link": "https://stackoverflow.com/users/9441817/jakep",
+            "reputation": 3,
+            "display_name": "jakep"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49138662/how-to-read-the-delay-stored-in-the-datagram-packet-in-the-receiver-using-udp",
+        "last_activity_date": 1520383659,
+        "creation_date": 1520364964,
+        "answer_count": 1,
+        "title": "How to read the delay stored in the Datagram packet in the receiver using UDP",
+        "body": "<p>I'm using UDP to send a sequence code to my receiver, and I want to now measure the delay between when the packet is being sent and received. The only problem is I can't figure out how to read my delay from the packet after the sequence number. <\/p>\n\n<p>Sender<\/p>\n\n<pre><code>    byte [] packetToSend = new byte[520];\n    int seqNo = 0;\n\n    while (seqNo &lt; 100) {\n        try {\n\n            //Read in a audio data from the recorder\n            byte[] buffer = recorder.getBlock();\n            ByteBuffer header = ByteBuffer.allocate(524); \n\n            long sentMillis = System.currentTimeMillis();\n\n\n           header.put(buffer); \n           header.putInt(seqNo);\n           header.putLong(sentMillis); \n\n\n\n            //Make a DatagramPacket from it, with client address and port \n            number\n            DatagramPacket packet = new DatagramPacketheader.array(), \n             header.array().length, clientIP, PORT);\n\n            //Send it\n            sending_socket.send(packet);\n<\/code><\/pre>\n\n<p>Receiver: <\/p>\n\n<pre><code>         try {\n\n            byte[] buffer = new byte[520];\n\n            DatagramPacket packet = new DatagramPacket(buffer, 0, 520);\n\n\n\n\n            receiving_socket.receive(packet);\n           // int seqNo = ByteBuffer.wrap(buffer).getInt(512);\n            long sentMillis = ByteBuffer.wrap(buffer).getLong(508); \n            long receivedMillis = System.currentTimeMillis();\n            long delay = receivedMillis - sentMillis; \n            System.out.println(delay); \n<\/code><\/pre>\n\n<p>So far I get numbers like 1498894798102, I'm guessing I'm reading from the wrong index in my ByteBuffer.wrap line. <\/p>\n",
+        "question_id": 49138662,
+        "tags": [
+            "java",
+            "network-programming",
+            "udp",
+            "client-server",
+            "buffer"
+        ],
+        "score": 0,
+        "accepted_answer_id": 49139179,
+        "is_answered": true,
+        "view_count": 167,
+        "last_edit_date": 1520369896
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+            "account_id": 71739,
+            "user_type": "registered",
+            "user_id": 207421,
+            "link": "https://stackoverflow.com/users/207421/user207421",
+            "reputation": 311890,
+            "display_name": "user207421",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1520383659,
+        "creation_date": 1520366982,
+        "body": "<p>Allocate a larger <code>ByteBuffer<\/code> and keep using the various <code>get()<\/code> (and <code>put()<\/code> when sending) methods. Lose all the <code>System.arraycopy()<\/code> calls.<\/p>\n",
+        "answer_id": 49139179,
+        "question_id": 49138662,
+        "last_edit_date": 1520383659
+    }],
+    "answer_comments": {}
+}

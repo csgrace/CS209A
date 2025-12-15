@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/2040576699498724/picture?type=large",
+            "account_id": 11387612,
+            "user_type": "registered",
+            "user_id": 8348819,
+            "link": "https://stackoverflow.com/users/8348819/ronit-nath",
+            "reputation": 61,
+            "display_name": "Ronit Nath"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75880974/send-a-huge-json-as-a-stream-using-spring-webclient",
+        "last_activity_date": 1680240531,
+        "creation_date": 1680115149,
+        "answer_count": 1,
+        "title": "Send a huge json as a stream using Spring WebClient",
+        "body": "<p>I am new to Spring WebFlux and WebClient. I am working on a PoC where I have to send a huge JSON (&gt; 100 MB) as a stream from microservice A to B using a <strong>POST request<\/strong>. The current implementation sends the <strong>entire json as the request body<\/strong> which leads to memory spikes on both the ends. Following is the structure of the JSON:<\/p>\n<pre><code>{\n   &quot;bindings&quot;:  {\n      &quot;entity1&quot;: {\n\n      },\n      &quot;entity2&quot;: {\n\n      }\n   },\n   &quot;artifacts&quot;: {\n      &quot;types&quot;: {\n         &quot;type1&quot;: {\n\n         },\n         &quot;type2&quot;: {\n\n         }\n      },\n      &quot;action&quot;: {\n         &quot;action1&quot;: {\n\n         },\n         &quot;action2&quot;: {\n\n         }\n      }\n   }\n}\n<\/code><\/pre>\n<p>entity1, entity2 have identical structure. Same applies for type1, type2 and action1, action2 respectively. These objects are <strong>huge<\/strong> in size with multiple nestings and there can be hundreds of them.<\/p>\n<p>After going through multiple documentation, I have developed the following algorithm for JSON streaming:<\/p>\n<ol>\n<li>Convert the JSON object to DataBuffer object, since as per the <a href=\"https://www.amitph.com/spring-webclient-large-file-download/\" rel=\"nofollow noreferrer\">link<\/a> conversion to DataBuffer helps in chunking.<\/li>\n<li>Create a flux from the DataBuffer object.<\/li>\n<li>Send the <code>dataBufferFlux<\/code> as the response body in the following way:<\/li>\n<\/ol>\n<pre><code>         WebClient.create(&quot;http://localhost:9002/registry&quot;)\n                    .post()\n                    .uri(&quot;/packages&quot;)\n                    .contentType(MediaType.APPLICATION_JSON)\n                    .body(dataBufferFlux, DataBuffer.class)\n                    .retrieve()\n                    .bodyToMono(Void.class)\n                    .block();\n<\/code><\/pre>\n<p>Using content-type as <code>MediaType.APPLICATION_NDJSON<\/code> since <code>MediaType.APPLICATION_STREAM_JSON<\/code> is deprecated.<\/p>\n<p>I have two questions:<\/p>\n<ol>\n<li>Is the algorithm correct to do JSON streaming using webclient?<\/li>\n<li>If the algorithm is correct, then what is the process of converting a <code>JSONObject<\/code> to <code>Flux&lt;DataBuffer&gt;<\/code> ?<\/li>\n<\/ol>\n",
+        "question_id": 75880974,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "spring-webflux",
+            "spring-webclient"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 2116
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/JXdxm.png?s=256",
+            "account_id": 2064278,
+            "user_type": "registered",
+            "user_id": 1840146,
+            "link": "https://stackoverflow.com/users/1840146/toerktumlare",
+            "reputation": 15092,
+            "display_name": "Toerktumlare",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "post_id": 75880974,
+        "edited": false,
+        "creation_date": 1680119789,
+        "comment_id": 133845598
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/0Qygq.png?s=256",
+            "account_id": 3583455,
+            "user_type": "registered",
+            "user_id": 2991105,
+            "link": "https://stackoverflow.com/users/2991105/erunafailaro",
+            "reputation": 1969,
+            "display_name": "Erunafailaro"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1680240531,
+        "creation_date": 1680162629,
+        "body": "<p>One way to transform the JSON file into a Flux would be:<\/p>\n<pre><code>public Flux&lt;DataBuffer&gt; test(String fileName) {\n    Path p = Paths.get(new File(basePath + fileName).getAbsolutePath());\n    DataBufferFactory dbf = new DefaultDataBufferFactory();\n    Flux&lt;DataBuffer&gt; flux = DataBufferUtils.read(p, dbf, 256 * 256);\n    return flux;\n}\n<\/code><\/pre>\n<p>or another way:<\/p>\n<pre><code>public Flux&lt;DataBuffer&gt; test(final JsonObject jo) {\n    final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();\n    final byte[] bytes = jo.toString().getBytes(StandardCharsets.UTF_8);\n    final DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length);\n    buffer.write(bytes);\n    return Flux.just(buffer);\n}\n\n<\/code><\/pre>\n<p><strong>Alternate approach<\/strong><\/p>\n<p>As a sidenote: I would really encourage you to consider a different approach to sending files of that size over a rest interface. The load you put on rest server, rest client and other components that might be involved (network, api gateways, load balancers, cpu, memory etc) could cause severe problems.<\/p>\n<p>Instead, a better tool to share files of this size would be a blob storage (S3 or similar) or a simple file system that is available to all parties involved.<\/p>\n<p>Instead of sending the whole file you could send an &quot;event message&quot; over the REST api that basically tells the receiver that a new file has arrived for them on the storage at path <code>/some/where/file.json<\/code>.<\/p>\n<p>The receiver could then download the file from the storage (or just read it from a mounted file system), parse it into json again and so on ...<\/p>\n",
+        "answer_id": 75885470,
+        "question_id": 75880974,
+        "last_edit_date": 1680240531
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fae4b2b1f8ae900e8b58cc32f035978d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6735747,
+            "user_type": "registered",
+            "user_id": 5190622,
+            "link": "https://stackoverflow.com/users/5190622/tom-bradshaw",
+            "reputation": 25,
+            "display_name": "Tom Bradshaw"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/31815910/implementation-of-a-step-scoped-in-memory-destination-in-spring-batch",
+        "last_activity_date": 1438871000,
+        "creation_date": 1438710404,
+        "answer_count": 1,
+        "title": "Implementation of a step-scoped in-memory destination in spring batch",
+        "body": "<p>I have a requirement when using spring batch for the creation for a large report, in binary format, which is held in a database. None of the working data can be written directly to files, or to working tables outside the <code>JobExecutionContext<\/code>.<\/p>\n\n<p>I'm aware that normally you would just write to the job execution context, but I'm a little confused as to how I would go about it with such a large report (potentially several hundred megabytes.)<\/p>\n\n<p>At the moment, my <code>Writer<\/code> implementation has a dependency on an aggregator class, which is injected as a bean, then there's a TaskLet that has the aggregator injected in which writes the finished report to the database.<\/p>\n\n<p>The problem is that I cannot scope my aggregator to the <code>step<\/code> context and as such if two jobs are running at the same time they will be writing to the same aggregator.<\/p>\n\n<p>Here is my current implementation<\/p>\n\n<h2>Domain class<\/h2>\n\n<pre><code>public class DataChunk {\n    private int pageNumber;\n    private byte[] data;\n}\n<\/code><\/pre>\n\n<h2>Writer<\/h2>\n\n<pre><code>public class FooWriter implements ItemWriter&lt;DataChunk&gt; {\n\n    private DataChunkAggregator dataChunkAggregator;\n\n    public void write(List&lt;? extends DataChunk&gt; dataChunks) throws Exception {\n        dataChunks.stream().forEach(chunk -&gt; dataChunkAggregator.addChunk(chunk.getPageNumber(), chunk.getData()));\n    }\n}\n<\/code><\/pre>\n\n<h2>Aggregator<\/h2>\n\n<pre><code>public class FooAggregator {\n    private Map&lt;int, byte&gt; pagedData; // Key sorted implementation\n\n    public void addChunk(int pageNumber, byte[] data) {\n        pagedData.put(pageNumber, data)\n    }\n\n    public byte[] aggregate() {\n        ByteArrayOutputStream baos = new ByteArrayOutputStream();\n        pagedData.values.stream().forEach(data -&gt; baos.write(data));\n        return baos.toByteArray();\n    }\n}\n<\/code><\/pre>\n\n<h2>Report Writing Tasklet<\/h2>\n\n<pre><code>public class ReportWritingTasklet implements TaskLet {\n\n    private ReportRepository reportRepository;\n    private FooAggregator fooAggregator;\n\n    public RepeatStatus execute(StepContribution contribution, ChunkContext context) {\n        byte[] data = fooAggregator.aggregate();\n        reportRepository.getOne(reportId).setDataBytes(data);\n    }\n}\n<\/code><\/pre>\n\n<h2>Context<\/h2>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans&gt;\n    &lt;bean id=fooWriter class=\"FooWriter\" scope=\"step\"\n        p:fooAggregator-ref=\"fooAggregator\"/&gt;\n\n    &lt;bean id=\"fooAggregator\" class=\"FooAggregator\"/&gt;\n\n    &lt;bean id=\"reportWritingTasklet\" class=\"ReportWritingTasklet\" scope=\"step\"\n        p:fooAggregator-ref=\"fooAggregator\"/&gt;\n\n    &lt;batch:job id=\"fooJob\"&gt;\n        &lt;batch:step id=\"generateReport\" next=\"assembleReport\"&gt;\n            &lt;batch:chunk reader=\"fooReader\" processor=\"fooProcessor\" writer=\"fooWriter\"/&gt;\n        &lt;/batch:step&gt;\n        &lt;batch:step id=\"assembleReport\"&gt;\n            &lt;batch:tasklet class=\"ReportWritingTasklet\"/&gt;\n        &lt;/batch:step&gt;\n     &lt;/batch:job&gt;\n&lt;/beans&gt;\n<\/code><\/pre>\n\n<p>If I attempt to make the <code>FooAggregator<\/code> step-scoped I get the following exception as a root-cause<\/p>\n\n<pre><code>Caused by: java.lang.IllegalStateException: Cannot convert value of type    [com.sun.proxy.$Proxy98 implementing org.springframework.aop.scope.ScopedObject,java.io.Serializable,org.springframework.aop.framework.AopInfrastructureBean,org.springframework.aop.SpringProxy,org.springframework.aop.framework.Advised] to required type [FooAggregator] for property 'fooAggregator': no matching editors or conversion strategy found\n<\/code><\/pre>\n\n<p>This is because you're only meant to be able to scope certain things to the step.<\/p>\n\n<p>How can I use the Execution context as a sink for my data chunks, bearing in mind there will be a lot of them and they will be very large?<\/p>\n",
+        "question_id": 31815910,
+        "tags": [
+            "java",
+            "spring",
+            "java-8",
+            "spring-batch",
+            "batch-processing"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 1454
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fae4b2b1f8ae900e8b58cc32f035978d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6735747,
+            "user_type": "registered",
+            "user_id": 5190622,
+            "link": "https://stackoverflow.com/users/5190622/tom-bradshaw",
+            "reputation": 25,
+            "display_name": "Tom Bradshaw"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1438871000,
+        "creation_date": 1438871000,
+        "body": "<p>I've managed to solve this. It's not very Spring batch-y, but it meets my requirements.<\/p>\n\n<p>Essentially, there is too much data to push into and out of the context. The solution has been to maintain the state in the writer itself, and to make it a <code>StepExecutionListener<\/code> that will save at the end of the <code>Step<\/code>, via a <code>TransactionCallback<\/code>.<\/p>\n\n<h2>The Updated <code>Writer<\/code><\/h2>\n\n<pre><code>public class FooWriter extends StepExecutionListenerSupport implements ItemWriter&lt;DataChunk&gt; {\n\n    private String reportId;\n    private Map&lt;Integer, byte[]&gt; byteArrayMap = new ConcurrentSkipListMap&lt;&gt;();\n\n    private TransactionTemplate transactionTemplate;\n    private ReportRepository reportRepository;\n\n    @Override\n    public synchronized void write(List&lt;? extends CaseChunk&gt; caseChunks) throws Exception {\n        caseChunks.stream().forEach(chunk -&gt; {\n            byteArrayMap.put(chunk.getPageNumber(), chunk.getBytes());\n        });\n    }\n\n    @Override\n    public void beforeStep(StepExecution stepExecution) {\n        // No-op\n    }\n\n    @Override\n    public ExitStatus afterStep(StepExecution stepExecution) {\n        StringBuilder sb = new StringBuilder();\n        for (byte[] byteArrayOutputStream : byteArrayMap.values()) {\n            sb.append(new String(Base64.decode(byteArrayOutputStream)));\n        }\n        String encodedReportData = new String(Base64.encode(sb.toString().getBytes()));\n\n        TransactionCallback&lt;Report&gt; transactionCallback = transactionStatus -&gt; {\n            Report report = reportRepository.getOne(this.reportId);\n            report.setReportData(encodedReportData);\n            reportRepository.save(report);\n            return report;\n        };\n\n        // TransactionTemplate throws its own declared TransactionException, rethrows encountered RuntimeExceptions\n        // and also Errors. Any problem writing the date kills the job, so it's OK to catch Throwable here instead\n        // of trying to\n        try {\n            transactionTemplate.execute(transactionCallback);\n        } catch (Throwable t) {\n            LOGGER.error(\"Error saving report data ID:[{}]\", reportId);\n            return ExitStatus.FAILED.addExitDescription(t);\n        }\n        return ExitStatus.COMPLETED;\n    }\n\n}\n<\/code><\/pre>\n",
+        "answer_id": 31858321,
+        "question_id": 31815910
+    }],
+    "answer_comments": {}
+}

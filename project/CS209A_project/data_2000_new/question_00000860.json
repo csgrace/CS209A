@@ -1,0 +1,162 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/nHGK8.jpg?s=256",
+            "account_id": 2272972,
+            "user_type": "registered",
+            "user_id": 1999924,
+            "link": "https://stackoverflow.com/users/1999924/ingroxd",
+            "reputation": 1070,
+            "display_name": "ingroxd",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/14983788/thread-issue-program-doesnt-start",
+        "last_activity_date": 1361528760,
+        "creation_date": 1361374530,
+        "answer_count": 2,
+        "title": "Thread issue: program doesn&#39;t start",
+        "body": "<p>Ok guys, here's what I've got: I'm trying to make a thread-based program in Processing.\nWhat the program does is really simple, and I can deal with that, but when I tried to make it run in a thread, it takes fun of me!<\/p>\n\n<p>Long story short, I've tried making something like this:<\/p>\n\n<pre><code>class supportClass{\n   [All the junk.];\n};\nclass threadClass extends Thread{\n   boolean goingThread;\n   [Some other junk.];\n   threadClass(){\n      goingThread = false;\n      [Junk.]\n   }\n   void start(supportClass var){\n      goingThread = true;\n      run(var);\n      goingThread = false;\n   }\n   void run(supportClass var){\n      [Junk which does all the work!]\n   }\n};\n<\/code><\/pre>\n\n<p>And here's the <code>setup()<\/code> method:<\/p>\n\n<pre><code>void setup(){\n   [Some junk init.];\n   supportClass mySupportClass = new supportClass();\n   threadClass myClass = new threadClass();\n   myClass.start(mySupportClass);\n}\n<\/code><\/pre>\n\n<p>So, here's the issues are two:<\/p>\n\n<p>1) The frame doesn't even show itself; I mean: the program seems to not run at all...;<\/p>\n\n<p>2) I'm not sure of the value-giving method that I'm using, because of the changing of data on <code>mySupportClass<\/code>.<\/p>\n\n<p>Searching in StackOverflow I didn't find anything about parsing values at a thread [In processing], so... Here I am!<\/p>\n\n<p>Any tip?<\/p>\n",
+        "question_id": 14983788,
+        "tags": [
+            "java",
+            "multithreading",
+            "processing"
+        ],
+        "score": 0,
+        "accepted_answer_id": 14984181,
+        "is_answered": true,
+        "view_count": 75,
+        "last_edit_date": 1361377929
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/W8X5E.jpg?s=256",
+                "account_id": 395272,
+                "user_type": "registered",
+                "user_id": 758133,
+                "link": "https://stackoverflow.com/users/758133/martin-james",
+                "reputation": 24996,
+                "display_name": "Martin James",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1361375541,
+            "creation_date": 1361375541,
+            "body": "<p>@Override the superclass run() method to add your thread code.  If you want to have your very own start() method with parameters, fine, but do not call run(), call start(). <\/p>\n",
+            "answer_id": 14984181,
+            "question_id": 14983788
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xccIn.jpg?s=256",
+                "account_id": 121626,
+                "user_type": "registered",
+                "user_id": 314862,
+                "link": "https://stackoverflow.com/users/314862/dimitri",
+                "reputation": 8318,
+                "display_name": "Dimitri",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1361528760,
+            "creation_date": 1361379885,
+            "body": "<p>First, your thread will never execute because your overloaded method <code>run(supportClass var)<\/code> will be ignored by the Thread class unless you call it yourself. In fact, the Thread class is expecting a <code>run<\/code> method with no arguments to execute. <\/p>\n\n<p>Secondly, for the start method. In your code, you are providing your own start method. You are not overriding the <code>start<\/code> method of the Thread class. As consequences, your thread will never  be to a runnable state. The <code>start<\/code> method  of the Thread class changes the current thread state from a <code>New<\/code> state (just created) to be a to <code>Runnable<\/code> state (ready to be executed by calling the run method). When the thread is in Runnable state, it can be chosen at any time by the JVM scheduler to be executed.<\/p>\n\n<p>So, you have 2 things to do (without changing your code) : first in the <code>start(supportClass var)<\/code> method, just call <code>super.start()<\/code> to make it in a Runnable state. And also remove the line <code>run(var)<\/code> because as I said it's not the programmer's job to call the Thread but the JVM scheduler. And define a <code>run<\/code> method with no arguments. <\/p>\n\n<p>If you want to pass arguments to your thread class, it depends on your strategy. If you want one thread per instance of SupportClass (which the easiest), you can pass them in the constructor. <\/p>\n\n<p>I would advise you to read those links to have more information about threads : <\/p>\n\n<ol>\n<li><a href=\"http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html\" rel=\"nofollow\">http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html<\/a><\/li>\n<li><a href=\"http://docs.oracle.com/javase/tutorial/essential/concurrency/\" rel=\"nofollow\">http://docs.oracle.com/javase/tutorial/essential/concurrency/<\/a><\/li>\n<\/ol>\n",
+            "answer_id": 14985659,
+            "question_id": 14983788,
+            "last_edit_date": 1361528760
+        }
+    ],
+    "answer_comments": {
+        "14984181": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/nHGK8.jpg?s=256",
+                "account_id": 2272972,
+                "user_type": "registered",
+                "user_id": 1999924,
+                "link": "https://stackoverflow.com/users/1999924/ingroxd",
+                "reputation": 1070,
+                "display_name": "ingroxd",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14984181,
+            "edited": false,
+            "creation_date": 1362063297,
+            "comment_id": 21309895
+        }],
+        "14985659": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/nHGK8.jpg?s=256",
+                    "account_id": 2272972,
+                    "user_type": "registered",
+                    "user_id": 1999924,
+                    "link": "https://stackoverflow.com/users/1999924/ingroxd",
+                    "reputation": 1070,
+                    "display_name": "ingroxd",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 14985659,
+                "edited": false,
+                "creation_date": 1361479927,
+                "comment_id": 21090501
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/xccIn.jpg?s=256",
+                    "account_id": 121626,
+                    "user_type": "registered",
+                    "user_id": 314862,
+                    "link": "https://stackoverflow.com/users/314862/dimitri",
+                    "reputation": 8318,
+                    "display_name": "Dimitri",
+                    "accept_rate": 76
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 14985659,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/W8X5E.jpg?s=256",
+                    "account_id": 395272,
+                    "user_type": "registered",
+                    "user_id": 758133,
+                    "link": "https://stackoverflow.com/users/758133/martin-james",
+                    "reputation": 24996,
+                    "display_name": "Martin James",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1361381515,
+                "comment_id": 21045866
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/W8X5E.jpg?s=256",
+                    "account_id": 395272,
+                    "user_type": "registered",
+                    "user_id": 758133,
+                    "link": "https://stackoverflow.com/users/758133/martin-james",
+                    "reputation": 24996,
+                    "display_name": "Martin James",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 14985659,
+                "edited": false,
+                "creation_date": 1361381015,
+                "comment_id": 21045582
+            }
+        ]
+    }
+}

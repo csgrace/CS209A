@@ -1,0 +1,164 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d76c4c7a3066bc499cfe17bb137a8138?s=256&d=identicon&r=PG",
+            "account_id": 2454231,
+            "user_type": "registered",
+            "user_id": 2139804,
+            "link": "https://stackoverflow.com/users/2139804/tinki",
+            "reputation": 1534,
+            "display_name": "Tinki",
+            "accept_rate": 70
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26532184/intstream-sum-exception-handling",
+        "last_activity_date": 1623821437,
+        "creation_date": 1414079650,
+        "answer_count": 2,
+        "title": "IntStream.sum() exception handling",
+        "body": "<p>Why does <code>IntStream.sum()<\/code> return an int value? Is it some conceptual mistake? When creating a stream from the exemplary array:<\/p>\n\n<pre><code>int A[] = {2^31-5, 2, 2, 2};\n<\/code><\/pre>\n\n<p>Sum of all elements exceeds the maximal integer value, but no exception is thrown. Does anybody know how to prevent such situations?<\/p>\n",
+        "question_id": 26532184,
+        "tags": [
+            "java",
+            "java-8"
+        ],
+        "score": 1,
+        "accepted_answer_id": 26533797,
+        "is_answered": true,
+        "view_count": 1707,
+        "last_edit_date": 1414086982
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/R8AYO.jpg?s=256",
+            "account_id": 2366187,
+            "user_type": "registered",
+            "user_id": 2071828,
+            "link": "https://stackoverflow.com/users/2071828/boris-the-spider",
+            "reputation": 61396,
+            "display_name": "Boris the Spider",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 26532184,
+        "edited": false,
+        "creation_date": 1414079877,
+        "comment_id": 41690783
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/XM5u8.jpg?s=256",
+                "account_id": 1548079,
+                "user_type": "registered",
+                "user_id": 1441122,
+                "link": "https://stackoverflow.com/users/1441122/stuart-marks",
+                "reputation": 133481,
+                "display_name": "Stuart Marks"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 9,
+            "is_accepted": false,
+            "last_activity_date": 1414095406,
+            "creation_date": 1414095406,
+            "body": "<p>By default, integral arithmetic in Java does not throw any exception if overflow occurs. Operations that overflow are truncated to the low order 32 bits for <code>int<\/code> and 64 bits for <code>long<\/code>.<\/p>\n\n<p>If you want an exception to be thrown for overflow conditions, you can use the \"exact\" family of functions in the <a href=\"http://docs.oracle.com/javase/8/docs/api/java/lang/Math.html\"><code>java.lang.Math<\/code><\/a> class:<\/p>\n\n<ul>\n<li><code>addExact<\/code><\/li>\n<li><code>decrementExact<\/code><\/li>\n<li><code>incrementExact<\/code><\/li>\n<li><code>multiplyExact<\/code><\/li>\n<li><code>negateExact<\/code><\/li>\n<li><code>subtractExact<\/code><\/li>\n<li><code>toIntExact<\/code><\/li>\n<\/ul>\n\n<p>These are defined to be the same as ordinary arithmetic operations on <code>int<\/code> and <code>long<\/code> except that they throw <code>ArithmeticException<\/code> on overflow instead of truncating the result.<\/p>\n\n<p>Using streams, your example would look like this:<\/p>\n\n<pre><code>int a[] = { Integer.MAX_VALUE - 5, 2, 2, 2 };\nint sum = Arrays.stream(a).reduce(0, Math::addExact);\n<\/code><\/pre>\n\n<p>This will throw <code>ArithmeticException<\/code>.<\/p>\n\n<p>(Note that your example as written uses <code>2^31-5<\/code> which is a valid expression as <code>^<\/code> is the XOR operator. The result is 24 which of course will not give an overflow.)<\/p>\n",
+            "answer_id": 26536645,
+            "question_id": 26532184
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                "account_id": 3211603,
+                "user_type": "registered",
+                "user_id": 2711488,
+                "link": "https://stackoverflow.com/users/2711488/holger",
+                "reputation": 300991,
+                "display_name": "Holger"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": true,
+            "last_activity_date": 1414138559,
+            "creation_date": 1414085075,
+            "body": "<p>The behavior matches what you get when summing up <code>int<\/code>s in a loop. There are various ways to deal with overflow, all of them being a trade-off between general applicability and performance and since it isn\u2019t obvious which one the API will/should use, the one which is commonly known by Java developers has been chosen.<\/p>\n\n<p>If you want to sum using a bigger data type, you can use either<\/p>\n\n<pre><code>long sumL=IntStream.of(A).asLongStream().sum();// may still overflow\n<\/code><\/pre>\n\n<p>or<\/p>\n\n<pre><code>BigInteger sum = IntStream.of(A).mapToObj(BigInteger::valueOf)\n                          .reduce(BigInteger.ZERO, BigInteger::add);// might be slower\n<\/code><\/pre>\n\n<p>If you want throwing behavior, you can use<\/p>\n\n<pre><code>int sum=IntStream.of(A).reduce(0, (a,b)-&gt;{\n    int c=a+b;\n    if(a&gt;0? b&gt;0 &amp;&amp; c&lt;0: b&lt;0&amp;&amp; c&gt;0)\n        throw new ArithmeticException(\"overflow\");\n    return c;\n});\n<\/code><\/pre>\n\n<p>or, much simpler (integrating Stuart Marks\u2019 solution)<\/p>\n\n<pre><code>int sum=IntStream.of(A).reduce(0, Math::addExact);\n<\/code><\/pre>\n",
+            "answer_id": 26533797,
+            "question_id": 26532184,
+            "last_edit_date": 1414138559
+        }
+    ],
+    "answer_comments": {
+        "26533797": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                "account_id": 3211603,
+                "user_type": "registered",
+                "user_id": 2711488,
+                "link": "https://stackoverflow.com/users/2711488/holger",
+                "reputation": 300991,
+                "display_name": "Holger"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 26533797,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/R8AYO.jpg?s=256",
+                "account_id": 2366187,
+                "user_type": "registered",
+                "user_id": 2071828,
+                "link": "https://stackoverflow.com/users/2071828/boris-the-spider",
+                "reputation": 61396,
+                "display_name": "Boris the Spider",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1414085810,
+            "comment_id": 41694044
+        }],
+        "26536645": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XM5u8.jpg?s=256",
+                    "account_id": 1548079,
+                    "user_type": "registered",
+                    "user_id": 1441122,
+                    "link": "https://stackoverflow.com/users/1441122/stuart-marks",
+                    "reputation": 133481,
+                    "display_name": "Stuart Marks"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26536645,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "edited": false,
+                "creation_date": 1414170835,
+                "comment_id": 41727792
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                    "account_id": 3211603,
+                    "user_type": "registered",
+                    "user_id": 2711488,
+                    "link": "https://stackoverflow.com/users/2711488/holger",
+                    "reputation": 300991,
+                    "display_name": "Holger"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26536645,
+                "edited": false,
+                "creation_date": 1414138838,
+                "comment_id": 41711707
+            }
+        ]
+    }
+}

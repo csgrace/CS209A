@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GjQLsftgG1TdGjMEuP-6HjPbVWeRW2Qs9SxpG-8=k-s256",
+            "account_id": 20913081,
+            "user_type": "registered",
+            "user_id": 15363500,
+            "link": "https://stackoverflow.com/users/15363500/tahar-jaafer",
+            "reputation": 127,
+            "display_name": "Tahar Jaafer"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76691359/running-a-hadoop-streaming-and-mapreduce-job-pipemapred-waitoutputthreads-s",
+        "last_activity_date": 1689692579,
+        "creation_date": 1689372467,
+        "answer_count": 1,
+        "title": "Running a hadoop streaming and mapreduce job: PipeMapRed.waitOutputThreads() : subprocess failed with code 1",
+        "body": "<p>i am using hadoop 3.3.4 and trying to execute a mapreduce program in python that use google page rank algorithm to rank pages.<\/p>\n<p>I'm trying to run this on my own Hadoop cluster. I ran the job using the following command.<\/p>\n<blockquote>\n<p>mapred streaming -files mapper.py,reducer.py   -input /user/hadoop/input/input.txt   -output /user/hadoop/output   -mapper ./mapper.py   -reducer ./reducer.py<\/p>\n<\/blockquote>\n<p>But getting the following error!<\/p>\n<pre><code>2023-07-14 17:19:01,076 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at Master/192.168.1.10:8032\n2023-07-14 17:19:01,343 INFO mapreduce.JobResourceUploader: Disabling Erasure Coding for path: /user/hadoop/.staging/job_1689368595696_0003\n2023-07-14 17:19:01,790 INFO mapred.FileInputFormat: Total input files to process : 1\n2023-07-14 17:19:01,934 INFO mapreduce.JobSubmitter: number of splits:20\n2023-07-14 17:19:02,149 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1689368595696_0003\n2023-07-14 17:19:02,149 INFO mapreduce.JobSubmitter: Executing with tokens: []\n2023-07-14 17:19:02,293 INFO conf.Configuration: resource-types.xml not found\n2023-07-14 17:19:02,294 INFO resource.ResourceUtils: Unable to find 'resource-types.xml'.\n2023-07-14 17:19:02,351 INFO impl.YarnClientImpl: Submitted application application_1689368595696_0003\n2023-07-14 17:19:02,408 INFO mapreduce.Job: The url to track the job: http://Master:8088/proxy/application_1689368595696_0003/\n2023-07-14 17:19:02,410 INFO mapreduce.Job: Running job: job_1689368595696_0003\n2023-07-14 17:19:09,539 INFO mapreduce.Job: Job job_1689368595696_0003 running in uber mode : false\n2023-07-14 17:19:09,540 INFO mapreduce.Job:  map 0% reduce 0%\n2023-07-14 17:19:33,742 INFO mapreduce.Job: Task Id : attempt_1689368595696_0003_m_000002_0, Status : FAILED\n[2023-07-14 17:19:29.868]Container killed on request. Exit code is 137\n[2023-07-14 17:19:30.046]Container exited with a non-zero exit code 137. \n[2023-07-14 17:19:30.080]Killed by external signal\n\n2023-07-14 17:19:33,830 INFO mapreduce.Job: Task Id : attempt_1689368595696_0003_m_000000_0, Status : FAILED\nError: java.lang.RuntimeException: PipeMapRed.waitOutputThreads(): subprocess failed with code 1\n        at org.apache.hadoop.streaming.PipeMapRed.waitOutputThreads(PipeMapRed.java:326)\n        at org.apache.hadoop.streaming.PipeMapRed.mapRedFinished(PipeMapRed.java:539)\n        at org.apache.hadoop.streaming.PipeMapper.close(PipeMapper.java:130)\n        at org.apache.hadoop.mapred.MapRunner.run(MapRunner.java:61)\n        at org.apache.hadoop.streaming.PipeMapRunner.run(PipeMapRunner.java:34)\n        at org.apache.hadoop.mapred.MapTask.runOldMapper(MapTask.java:466)\n        at org.apache.hadoop.mapred.MapTask.run(MapTask.java:350)\n        at org.apache.hadoop.mapred.YarnChild$2.run(YarnChild.java:178)\n        at java.base/java.security.AccessController.doPrivileged(Native Method)\n        at java.base/javax.security.auth.Subject.doAs(Subject.java:423)\n        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1878)\n        at org.apache.hadoop.mapred.YarnChild.main(YarnChild.java:172)\n<\/code><\/pre>\n<p>i have also added\n#! /usr/bin/env python3\nat the beginning of my both files mapper.py and reducer.py<\/p>\n<p>this is my mapper.py:<\/p>\n<pre><code>#!/usr/bin/env python3\n\nimport sys\nimport networkx as nx\n\n# Create a directed graph\nG = nx.DiGraph()\n\n# Dictionary to store the mapping of page_id to page_link\npage_link_dict = {}\n\n# Read the input and store lines in a list\nlines = sys.stdin.readlines()\n\n# Process each line\nfor line in lines:\n    page_infos = line.strip().split('\\t')\n    page_id = int(page_infos[0])\n    page_link = page_infos[2]\n    # Add the node to the graph\n    G.add_node(page_id)\n\n    # Store the mapping of page_id to page_link in the dictionary\n    page_link_dict[page_id] = page_link\n    \nfor line in lines:\n    page_id, page_title, page_link, links = line.strip().split('\\t')\n    # Split the links\n    pages_links = links.split(',')\n    for page_link in pages_links:\n        # Search for the id of the linked page and add an edge to it\n        for linked_page_id, link in page_link_dict.items():\n            if page_link == link:\n                G.add_edge(int(page_id), linked_page_id)\n                \n# Output the graph as adjacency list\nfor node in G.nodes():\n    neighbors = ','.join(map(str, G.neighbors(node)))\n    sys.stdout.write(f'{node}\\t{neighbors}\\n')\n\n<\/code><\/pre>\n<p>and this is my reducer.py:<\/p>\n<pre><code>#!/usr/bin/env python3\n\nimport sys\nimport networkx as nx\n\n# Create a directed graph\nG = nx.DiGraph()\n\n# Read the adjacency list from mapper output and add edges to the graph\nfor line in sys.stdin:\n    page_infos = line.strip().split('\\t')\n    node_id = page_infos[0]\n    node_id = int(node_id)\n    G.add_node(node_id)\n    if len(page_infos) == 2:\n        neighbors = page_infos[1]\n        neighbors = neighbors.split(',')\n        for neighbor_id in neighbors:\n            G.add_edge(node_id, int(neighbor_id))\n\n# Run the PageRank algorithm\npagerank_scores = nx.pagerank(G)\n\n# Write the output to stdout\nfor page_id, rank in pagerank_scores.items():\n    sys.stdout.write(f'{page_id}\\t{rank}\\n')\n<\/code><\/pre>\n<p>i also tried to test the code locally in my computer by running these commands:<\/p>\n<blockquote>\n<p>cat input.txt  | ./mapper.py &gt; file.txt<\/p>\n<\/blockquote>\n<blockquote>\n<p>cat file.txt  | ./reducer.py<\/p>\n<\/blockquote>\n<p>and it worked fine here some result below displaying every page id and its corresponding rank score:<\/p>\n<pre><code>10  8.883661079121364e-05\n9   6.371139303094697e-05\n97  7.724393979460297e-05\n152 0.0002934058532326906\n145 0.00011016393468028126\n11  8.886938479913977e-05\n13  8.887866372994127e-05\n12  6.371139303094697e-05\nmore results after that ...\n<\/code><\/pre>\n<p>finally, I also tested a small wordcount MapReduce program in python to test my Hadoop configuration and this worked as well and i did install all the dependency packages in my master to run the program and i installed them in my 2 slaves too i don't know if that would be necessary.<\/p>\n<p><strong>UPDATE!!:<\/strong> i used apache spark framework with graphframes for this project since it's more compatible with graphs and got the desired resluts thank youu<\/p>\n",
+        "question_id": 76691359,
+        "tags": [
+            "python",
+            "java",
+            "hadoop",
+            "mapreduce"
+        ],
+        "score": 0,
+        "accepted_answer_id": 76694004,
+        "is_answered": true,
+        "view_count": 246,
+        "last_edit_date": 1689689820
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GjQLsftgG1TdGjMEuP-6HjPbVWeRW2Qs9SxpG-8=k-s256",
+            "account_id": 20913081,
+            "user_type": "registered",
+            "user_id": 15363500,
+            "link": "https://stackoverflow.com/users/15363500/tahar-jaafer",
+            "reputation": 127,
+            "display_name": "Tahar Jaafer"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1689692579,
+        "creation_date": 1689428055,
+        "body": "<p>My problem was that i installed dependencies using <code>pip install networkx<\/code> and that will not install the module in the root system instead i added sudo to make that works <code>sudo pip install networkx<\/code>.<\/p>\n<p>after that the job executed successfully.<\/p>\n<p>but still the results i got are not similar to the ones i got locally by running the scripts so my guess is something related to MapReduce logic i missed. so if anyone there can help me with that and i will make another post for that.<\/p>\n<p><strong>UPDATE:<\/strong> The MapReduce paradigm in Hadoop is primarily designed for batch processing and does not naturally support iterative algorithms like PageRank that require multiple iterations and global communication between nodes.<\/p>\n<p>In the case of the PageRank algorithm, where each iteration depends on the results of the previous iteration and requires all the nodes (all my page ids in my input.txt), frameworks like Apache Spark are better suited. Spark provides an in-memory distributed computing model that allows for iterative processing and efficient data sharing across iterations.<\/p>\n",
+        "answer_id": 76694004,
+        "question_id": 76691359,
+        "last_edit_date": 1689692579
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,92 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/bZIJv6Ur.png?s=256",
+            "account_id": 4700927,
+            "user_type": "registered",
+            "user_id": 3804495,
+            "link": "https://stackoverflow.com/users/3804495/heisenberg",
+            "reputation": 1984,
+            "display_name": "heisenberg",
+            "accept_rate": 46
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45069808/removing-dots-in-jinternalframe-title-bar",
+        "last_activity_date": 1499937256,
+        "creation_date": 1499907701,
+        "answer_count": 2,
+        "title": "Removing dots in JInternalFrame title bar",
+        "body": "<p>I recently just tried to use <code>JInternalFrame<\/code> component in my project which I nested inside a <code>JPanel<\/code>. However, I noticed that the <strong>title bar<\/strong> of <code>JInternalFrame<\/code> is dotted and I don't like it to have dots. I want it to look just like any other title bar like <code>JDialog<\/code>'s which is smooth and solid. <\/p>\n\n<p>It looks like this. <\/p>\n\n<p><a href=\"https://i.sstatic.net/irrqC.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/irrqC.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>This is the only component that has dots on <strong>title bar<\/strong>. By the way, the reason I'm asking is because I used that GUI Builder of Netbeans to produce this.<\/p>\n",
+        "question_id": 45069808,
+        "tags": [
+            "java",
+            "swing",
+            "jinternalframe"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 663,
+        "last_edit_date": 1499928279
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a0ced8e21d2a761db718acb6362b9225?s=256&d=identicon&r=PG",
+            "account_id": 44852,
+            "user_type": "registered",
+            "user_id": 131872,
+            "link": "https://stackoverflow.com/users/131872/camickr",
+            "reputation": 324711,
+            "display_name": "camickr",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 45069808,
+        "edited": false,
+        "creation_date": 1499907939,
+        "comment_id": 77112716
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dBKps.png?s=256",
+                "account_id": 59184,
+                "user_type": "registered",
+                "user_id": 177145,
+                "link": "https://stackoverflow.com/users/177145/aterai",
+                "reputation": 9898,
+                "display_name": "aterai"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1499937256,
+            "creation_date": 1499937256,
+            "body": "<p>As camickr has already said, would need to make a customized <code>BasicInternalFrameTitlePane<\/code>:<\/p>\n\n<p><a href=\"https://i.sstatic.net/8tc3L.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/8tc3L.png\" alt=\"screenshot\"><\/a><\/p>\n\n<pre><code>import java.awt.*;\nimport java.util.Arrays;\nimport javax.swing.*;\nimport javax.swing.plaf.basic.*;\nimport javax.swing.plaf.metal.*;\n\npublic class InternalFrameTitlePaneTest {\n  public JInternalFrame makeInternalFrame() {\n    return new JInternalFrame(\"basic\", true, true, true, true) {\n      @Override public void updateUI() {\n        super.updateUI();\n        setUI(new MetalInternalFrameUI(this) {\n          @Override protected JComponent createNorthPane(JInternalFrame w) {\n            BasicInternalFrameTitlePane p = new BasicInternalFrameTitlePane(w) {\n              @Override public Dimension getPreferredSize() {\n                Dimension d = super.getPreferredSize();\n                d.height = 24;\n                return d;\n              }\n              @Override public void createButtons() {\n                super.createButtons();\n                Arrays.asList(closeButton, maxButton, iconButton).forEach(b -&gt; {\n                  b.setContentAreaFilled(false);\n                  b.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));\n                });\n              }\n            };\n            p.setBorder(BorderFactory.createMatteBorder(\n                0, 0, 1, 0, MetalLookAndFeel.getPrimaryControlDarkShadow()));\n            return p;\n          }\n        });\n      }\n    };\n  }\n  public JComponent makeUI() {\n    JInternalFrame f1 = makeInternalFrame();\n    f1.setSize(150, 100);\n    f1.setLocation(0, 0);\n    f1.setVisible(true);\n\n    JInternalFrame f2 = new JInternalFrame(\"metal\", true, true, true, true);\n    f2.setSize(150, 100);\n    f2.setLocation(80, 50);\n    f2.setVisible(true);\n\n    JDesktopPane desktop = new JDesktopPane();\n    desktop.add(f1);\n    desktop.add(f2);\n    return desktop;\n  }\n  public static void main(String[] args) {\n    EventQueue.invokeLater(() -&gt; {\n      JFrame f = new JFrame();\n      f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);\n      f.getContentPane().add(new InternalFrameTitlePaneTest().makeUI());\n      f.setSize(320, 240);\n      f.setLocationRelativeTo(null);\n      f.setVisible(true);\n    });\n  }\n}\n<\/code><\/pre>\n",
+            "answer_id": 45076304,
+            "question_id": 45069808
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IfPnf.jpg?s=256",
+                "account_id": 10738788,
+                "user_type": "registered",
+                "user_id": 7902625,
+                "link": "https://stackoverflow.com/users/7902625/vasyl-lyashkevych",
+                "reputation": 2268,
+                "display_name": "Vasyl Lyashkevych",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1499909861,
+            "creation_date": 1499908715,
+            "body": "<p>One of the way to change a system look &amp; feel, for example:<\/p>\n\n<p><a href=\"https://i.sstatic.net/U7Sja.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/U7Sja.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>For example, code:<\/p>\n\n<pre><code>public static String[] str1LF = {\n    \"javax.swing.plaf.metal.MetalLookAndFeel\",\n    \"javax.swing.plaf.nimbus.NimbusLookAndFeel\",\n    \"com.sun.java.swing.plaf.windows.WindowsLookAndFeel\",\n    \"com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel\",\n    \"com.sun.java.swing.plaf.motif.MotifLookAndFeel\",\n    \"com.sun.java.swing.plaf.gtk.GTKLookAndFeel\"\n};\n\n...// in constructor \n        try {\n            UIManager.setLookAndFeel(str1LF[4]);\n            SwingUtilities.updateComponentTreeUI(this);\n        } catch (Exception e) {\n            e.printStackTrace();\n        }\n        JFrame.setDefaultLookAndFeelDecorated(true);\n<\/code><\/pre>\n",
+            "answer_id": 45069930,
+            "question_id": 45069808,
+            "last_edit_date": 1499909861
+        }
+    ],
+    "answer_comments": {}
+}

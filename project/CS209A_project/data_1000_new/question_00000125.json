@@ -1,0 +1,155 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/889f459accbfe50effd34ebb98bd0e88?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3378866,
+            "user_type": "registered",
+            "user_id": 2836412,
+            "link": "https://stackoverflow.com/users/2836412/gabriel",
+            "reputation": 575,
+            "display_name": "Gabriel",
+            "accept_rate": 29
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22261767/bash-script-to-start-logstash-java-script",
+        "last_activity_date": 1615010800,
+        "creation_date": 1394230565,
+        "answer_count": 1,
+        "title": "Bash script to start logstash java script",
+        "body": "<p>I'm using AWS EC2 and a custom script that needs to run:<\/p>\n\n<pre><code>java -jar logstash-1.3.3-flatjar.jar agent -f shipper.conf\n<\/code><\/pre>\n\n<p>But it only seems to work after I ssh into the server and run it manually.\nI found this link: \"<a href=\"https://stackoverflow.com/questions/11809191/linux-launch-java-program-on-startup-ec2-instance\">Linux Launch java program on startup (EC2 instance)<\/a>\"<\/p>\n\n<p>But that did not help me. How can I get my bash script to run this command? I even tried creating a second shell script that only executes my logstash java script.<\/p>\n",
+        "question_id": 22261767,
+        "tags": [
+            "java",
+            "shell",
+            "amazon-web-services",
+            "boot",
+            "logstash"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 6913,
+        "last_edit_date": 1495542115
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/889f459accbfe50effd34ebb98bd0e88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3378866,
+                "user_type": "registered",
+                "user_id": 2836412,
+                "link": "https://stackoverflow.com/users/2836412/gabriel",
+                "reputation": 575,
+                "display_name": "Gabriel",
+                "accept_rate": 29
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22261767,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/757452f7cd7ba2347c667ef9298ceadb?s=256&d=identicon&r=PG",
+                "account_id": 1912742,
+                "user_type": "registered",
+                "user_id": 1726083,
+                "link": "https://stackoverflow.com/users/1726083/erik258",
+                "reputation": 16477,
+                "display_name": "erik258"
+            },
+            "edited": false,
+            "creation_date": 1394323499,
+            "comment_id": 33840417
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/757452f7cd7ba2347c667ef9298ceadb?s=256&d=identicon&r=PG",
+                "account_id": 1912742,
+                "user_type": "registered",
+                "user_id": 1726083,
+                "link": "https://stackoverflow.com/users/1726083/erik258",
+                "reputation": 16477,
+                "display_name": "erik258"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22261767,
+            "edited": false,
+            "creation_date": 1394230953,
+            "comment_id": 33813796
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ee5f1a84fca3c5ab8d6609c8ed3a879e?s=256&d=identicon&r=PG",
+            "account_id": 165546,
+            "user_type": "registered",
+            "user_id": 389099,
+            "link": "https://stackoverflow.com/users/389099/guido",
+            "reputation": 19305,
+            "display_name": "guido",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1394364239,
+        "creation_date": 1394364239,
+        "body": "<p>There is no need to write your own initscript, logstash website <a href=\"http://cookbook.logstash.net/recipes/using-init/\" rel=\"nofollow\">provides<\/a> the code. Copy the script in <code>/etc/init.d/logstash<\/code>, then run <code>chkconfig --add logstash<\/code> and <code>chkconfig logstash on<\/code> to enable it; then you can control it using the <code>service<\/code> command as usual.\nNote there is an environment variable configuration section you need to edit to adjust to your system.<\/p>\n\n<pre><code>#! /bin/sh\n#\n#   /etc/rc.d/init.d/logstash\n#\n#   Starts Logstash as a daemon\n#\n# chkconfig: 2345 20 80\n# description: Starts Logstash as a daemon\n# pidfile: /var/run/logstash-agent.pid\n\n### BEGIN INIT INFO\n# Provides: logstash\n# Required-Start: $local_fs $remote_fs\n# Required-Stop: $local_fs $remote_fs\n# Default-Start: 2 3 4 5\n# Default-Stop: S 0 1 6\n# Short-Description: Logstash\n# Description: Starts Logstash as a daemon.\n# Modified originally from https://gist.github.com/2228905#file_logstash.sh\n### END INIT INFO\n\n### CONFIGURATION \n# Amount of memory for Java\n#JAVAMEM=256M\n# Location of logstash files\nLOCATION=/opt/logstash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nDESC=\"Logstash Daemon\"\nNAME=java\nDAEMON=$(which java)\nCONFIG_DIR=/opt/logstash/logstash.conf\nLOGFILE=/opt/logstash/logstash.log\nJARNAME=logstash-monolithic.jar\n#ARGS=\"-Xmx$JAVAMEM -Xms$JAVAMEM -jar ${JARNAME} agent --config ${CONFIG_DIR} --log ${LOGFILE} --grok-patterns-path ${PATTERNSPATH}\"\nARGS=\"-jar ${JARNAME} agent --config ${CONFIG_DIR} --log ${LOGFILE}\"\nSCRIPTNAME=/etc/init.d/logstash\nPIDFILE=/var/run/logstash.pid\nbase=logstash\n### END CONFIGURATION    \n\n# Exit if the package is not installed\nif [ ! -x \"$DAEMON\" ]; then\n{\n  echo \"Couldn't find $DAEMON\"\n  exit 99\n}\nfi\n\n. /etc/init.d/functions\n\n#\n# Function that starts the daemon/service\n#\ndo_start()\n{\n  cd $LOCATION &amp;&amp; \\\n  ($DAEMON $ARGS &amp;) \\\n  &amp;&amp; success || failure\n}\n\nset_pidfile()\n{\n  pgrep -f \"$DAEMON[[:space:]]*$ARGS\" &gt; $PIDFILE\n}\n\n#\n# Function that stops the daemon/service\n#\ndo_stop()\n{\n  pid=`cat $PIDFILE`\n  if checkpid $pid 2&gt;&amp;1; then\n       # TERM first, then KILL if not dead\n       kill -TERM $pid &gt;/dev/null 2&gt;&amp;1\n       usleep 100000\n       if checkpid $pid &amp;&amp; sleep 1 &amp;&amp;\n                 checkpid $pid &amp;&amp; sleep $delay &amp;&amp;\n                 checkpid $pid ; then\n            kill -KILL $pid &gt;/dev/null 2&gt;&amp;1\n            usleep 100000\n       fi\n   fi\n   checkpid $pid\n   RC=$?\n   [ \"$RC\" -eq 0 ] &amp;&amp; failure $\"$base shutdown\" || success $\"$base shutdown\"\n\n}\n\ncase \"$1\" in\n  start)\n    echo -n \"Starting $DESC: \"\n    do_start\n    touch /var/lock/subsys/$JARNAME\n    set_pidfile\n    ;;\n  stop)\n    echo -n \"Stopping $DESC: \"\n    do_stop\n    rm /var/lock/subsys/$JARNAME\n    rm $PIDFILE\n    ;;\n  restart|reload)\n    echo -n \"\"Restarting $DESC: \"\n    do_stop\n    do_start\n    touch /var/lock/subsys/$JARNAME\n    set_pidfile\n    ;;\n  status)\n    status -p $PIDFILE\n    ;;\n  *)\n    echo \"Usage: $SCRIPTNAME {start|stop|status|restart}\" &gt;&amp;2\n    exit 3\n    ;;\nesac\n\necho\nexit 0\n<\/code><\/pre>\n",
+        "answer_id": 22281557,
+        "question_id": 22261767
+    }],
+    "answer_comments": {"22281557": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/889f459accbfe50effd34ebb98bd0e88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3378866,
+                "user_type": "registered",
+                "user_id": 2836412,
+                "link": "https://stackoverflow.com/users/2836412/gabriel",
+                "reputation": 575,
+                "display_name": "Gabriel",
+                "accept_rate": 29
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22281557,
+            "edited": false,
+            "creation_date": 1394471750,
+            "comment_id": 33894335
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/889f459accbfe50effd34ebb98bd0e88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3378866,
+                "user_type": "registered",
+                "user_id": 2836412,
+                "link": "https://stackoverflow.com/users/2836412/gabriel",
+                "reputation": 575,
+                "display_name": "Gabriel",
+                "accept_rate": 29
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22281557,
+            "edited": false,
+            "creation_date": 1394465740,
+            "comment_id": 33889949
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/889f459accbfe50effd34ebb98bd0e88?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3378866,
+                "user_type": "registered",
+                "user_id": 2836412,
+                "link": "https://stackoverflow.com/users/2836412/gabriel",
+                "reputation": 575,
+                "display_name": "Gabriel",
+                "accept_rate": 29
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22281557,
+            "edited": false,
+            "creation_date": 1394463709,
+            "comment_id": 33888479
+        }
+    ]}
+}

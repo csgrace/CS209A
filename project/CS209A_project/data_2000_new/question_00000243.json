@@ -1,0 +1,190 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dd1c83e459ca2d1fbd4a00431aeda555?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10038504,
+            "user_type": "registered",
+            "user_id": 7422232,
+            "link": "https://stackoverflow.com/users/7422232/ab21",
+            "reputation": 395,
+            "display_name": "AB21",
+            "accept_rate": 40
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/62780014/fetchtype-lazy-not-working-in-jpa-in-spring-boot",
+        "last_activity_date": 1640215977,
+        "creation_date": 1594140029,
+        "answer_count": 2,
+        "title": "FetchType.Lazy not working in JPA in spring boot",
+        "body": "<p>I have a entity Order.java as:<\/p>\n<pre><code>package in.ashwin.onlinebookstore.entity;\n\nimport java.util.Date;\n\nimport javax.persistence.CascadeType;\nimport javax.persistence.Column;\nimport javax.persistence.Entity;\nimport javax.persistence.FetchType;\nimport javax.persistence.GeneratedValue;\nimport javax.persistence.GenerationType;\nimport javax.persistence.Id;\nimport javax.persistence.JoinColumn;\nimport javax.persistence.OneToOne;\nimport javax.persistence.Table;\n\n@Entity\n@Table(name=&quot;tbl_order&quot;)\npublic class Order {\n    \n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long order_id;\n    \n    @OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY)\n    @JoinColumn(name = &quot;user_id&quot;, nullable = false)\n    private User user;\n    \n    @Column(name=&quot;today_date&quot;)\n    private Date todayDate;\n    \n    @Column(name=&quot;status&quot;)\n    private String status;\n    \n    public Order(User user, Date todayDate) {\n        \n        this.user = user;\n        this.todayDate = todayDate;\n        this.status=&quot;pending&quot;;\n    }\n\n    public Long getOrder_id() {\n        return order_id;\n    }\n\n    public void setOrder_id(Long order_id) {\n        this.order_id = order_id;\n    }\n\n    public String getStatus() {\n        return status;\n    }\n\n    \n\n    public User getUser() {\n        return user;\n    }\n\n    public void setUser(User user) {\n        this.user = user;\n    }\n\n    public Date getTodayDate() {\n        return todayDate;\n    }\n\n    public void setTodayDate(Date todayDate) {\n        this.todayDate = todayDate;\n    }\n    \n    public Order() {\n        \n    }\n\n}\n<\/code><\/pre>\n<p>I have included Fetchtype as lazy between User and Order.Since,I have declared FetchType.LAZY while fetching Order then,I am still seeing user object called when I tested from postman.According to my understanfing,the object of FetchType.LAZY is only called when its needed.If,it is not called then ,it is ignored.<\/p>\n<pre><code> @OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY)\n        @JoinColumn(name = &quot;user_id&quot;, nullable = false)\n        private User user;\n<\/code><\/pre>\n<p>My api to get all the Orders is:<\/p>\n<pre><code>@GetMapping(&quot;/getAllPendingOrders&quot;)\n    @PreAuthorize(&quot;hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')&quot;)\n    public ResponseEntity&lt;?&gt; getOrders(Pageable pageable) {\n        \n        Authentication auth = SecurityContextHolder.getContext().getAuthentication();\n        String user = auth.getName();\n        UserDetailsImpl userDetails=(UserDetailsImpl)userdetailService.loadUserByUsername(user);\n        \n        Page&lt;Order&gt; orderList=orderRep.findByUserId(userDetails.getId(),pageable);\n        if(orderList!=null) {\n             return new ResponseEntity(orderList, HttpStatus.OK);\n        }\n        else {\n             return new ResponseEntity(&quot;Noorders&quot;, HttpStatus.OK);\n        }\n       \n        \n    }\n<\/code><\/pre>\n<p>The Response I am getting back from POSTMAN is:<\/p>\n<pre><code>{\n    &quot;content&quot;: [\n        {\n            &quot;order_id&quot;: 1,\n            &quot;user&quot;: {\n                &quot;id&quot;: 1,\n                &quot;username&quot;: &quot;ashwin&quot;,\n                &quot;email&quot;: &quot;ashwin@gmail.com&quot;,\n                &quot;password&quot;: &quot;$2a$10$GoGUJh0Tzml5egBW5Wzbj.VLzfq4Z7YNCMnsOynLWufpQrWBdVLVi&quot;,\n                &quot;roles&quot;: [\n                    {\n                        &quot;id&quot;: 2,\n                        &quot;name&quot;: &quot;ROLE_MODERATOR&quot;\n                    },\n                    {\n                        &quot;id&quot;: 1,\n                        &quot;name&quot;: &quot;ROLE_USER&quot;\n                    }\n                ]\n            },\n            &quot;todayDate&quot;: &quot;2020-07-02T17:09:45.057+0000&quot;,\n            &quot;status&quot;: &quot;pending&quot;\n        },\n        {\n            &quot;order_id&quot;: 2,\n            &quot;user&quot;: {\n                &quot;id&quot;: 1,\n                &quot;username&quot;: &quot;ashwin&quot;,\n                &quot;email&quot;: &quot;ashwin@gmail.com&quot;,\n                &quot;password&quot;: &quot;$2a$10$GoGUJh0Tzml5egBW5Wzbj.VLzfq4Z7YNCMnsOynLWufpQrWBdVLVi&quot;,\n                &quot;roles&quot;: [\n                    {\n                        &quot;id&quot;: 2,\n                        &quot;name&quot;: &quot;ROLE_MODERATOR&quot;\n                    },\n                    {\n                        &quot;id&quot;: 1,\n                        &quot;name&quot;: &quot;ROLE_USER&quot;\n                    }\n                ]\n            },\n            &quot;todayDate&quot;: &quot;2020-07-02T17:15:06.906+0000&quot;,\n            &quot;status&quot;: &quot;pending&quot;\n        },\n        {\n            &quot;order_id&quot;: 3,\n            &quot;user&quot;: {\n                &quot;id&quot;: 1,\n                &quot;username&quot;: &quot;ashwin&quot;,\n                &quot;email&quot;: &quot;ashwin@gmail.com&quot;,\n                &quot;password&quot;: &quot;$2a$10$GoGUJh0Tzml5egBW5Wzbj.VLzfq4Z7YNCMnsOynLWufpQrWBdVLVi&quot;,\n                &quot;roles&quot;: [\n                    {\n                        &quot;id&quot;: 2,\n                        &quot;name&quot;: &quot;ROLE_MODERATOR&quot;\n                    },\n                    {\n                        &quot;id&quot;: 1,\n                        &quot;name&quot;: &quot;ROLE_USER&quot;\n                    }\n                ]\n            },\n            &quot;todayDate&quot;: &quot;2020-07-02T17:16:36.373+0000&quot;,\n            &quot;status&quot;: &quot;pending&quot;\n        },\n        {\n            &quot;order_id&quot;: 4,\n            &quot;user&quot;: {\n                &quot;id&quot;: 1,\n                &quot;username&quot;: &quot;ashwin&quot;,\n                &quot;email&quot;: &quot;ashwin@gmail.com&quot;,\n                &quot;password&quot;: &quot;$2a$10$GoGUJh0Tzml5egBW5Wzbj.VLzfq4Z7YNCMnsOynLWufpQrWBdVLVi&quot;,\n                &quot;roles&quot;: [\n                    {\n                        &quot;id&quot;: 2,\n                        &quot;name&quot;: &quot;ROLE_MODERATOR&quot;\n                    },\n                    {\n                        &quot;id&quot;: 1,\n                        &quot;name&quot;: &quot;ROLE_USER&quot;\n                    }\n                ]\n            },\n            &quot;todayDate&quot;: &quot;2020-07-02T17:18:56.799+0000&quot;,\n            &quot;status&quot;: &quot;pending&quot;\n        }\n       \n    ],\n    &quot;pageable&quot;: {\n        &quot;sort&quot;: {\n            &quot;sorted&quot;: false,\n            &quot;unsorted&quot;: true,\n            &quot;empty&quot;: true\n        },\n        &quot;offset&quot;: 0,\n        &quot;pageNumber&quot;: 0,\n        &quot;pageSize&quot;: 20,\n        &quot;paged&quot;: true,\n        &quot;unpaged&quot;: false\n    },\n    &quot;totalPages&quot;: 2,\n    &quot;last&quot;: false,\n    &quot;totalElements&quot;: 39,\n    &quot;size&quot;: 20,\n    &quot;number&quot;: 0,\n    &quot;sort&quot;: {\n        &quot;sorted&quot;: false,\n        &quot;unsorted&quot;: true,\n        &quot;empty&quot;: true\n    },\n    &quot;numberOfElements&quot;: 20,\n    &quot;first&quot;: true,\n    &quot;empty&quot;: false\n}\n<\/code><\/pre>\n<p>I am still seeing the user object in my JSON.USing, <code>@JSONIgnore<\/code> works,but since I have declared it as <code>Fetchtype.Lazy<\/code> why the <code>USER<\/code> object is coming when I am fetching <code>Order<\/code> object?I dont want the User object to appear,when I am fetching the Order object.<\/p>\n",
+        "question_id": 62780014,
+        "tags": [
+            "java",
+            "spring-boot",
+            "hibernate",
+            "jpa"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 1097
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-VFJq4K2kUS0/AAAAAAAAAAI/AAAAAAAARp0/DeZ-EnJ5BQA/s256-rj/photo.jpg",
+                "account_id": 8005177,
+                "user_type": "registered",
+                "user_id": 6038682,
+                "link": "https://stackoverflow.com/users/6038682/william-andr%c3%a9s-bernal",
+                "reputation": 344,
+                "display_name": "William Andr&#233;s Bernal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 62780014,
+            "edited": false,
+            "creation_date": 1594140838,
+            "comment_id": 111020151
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dd1c83e459ca2d1fbd4a00431aeda555?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10038504,
+                "user_type": "registered",
+                "user_id": 7422232,
+                "link": "https://stackoverflow.com/users/7422232/ab21",
+                "reputation": 395,
+                "display_name": "AB21",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 62780014,
+            "reply_to_user": {
+                "profile_image": "https://lh6.googleusercontent.com/-VFJq4K2kUS0/AAAAAAAAAAI/AAAAAAAARp0/DeZ-EnJ5BQA/s256-rj/photo.jpg",
+                "account_id": 8005177,
+                "user_type": "registered",
+                "user_id": 6038682,
+                "link": "https://stackoverflow.com/users/6038682/william-andr%c3%a9s-bernal",
+                "reputation": 344,
+                "display_name": "William Andr&#233;s Bernal"
+            },
+            "edited": false,
+            "creation_date": 1594140632,
+            "comment_id": 111020044
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-VFJq4K2kUS0/AAAAAAAAAAI/AAAAAAAARp0/DeZ-EnJ5BQA/s256-rj/photo.jpg",
+                "account_id": 8005177,
+                "user_type": "registered",
+                "user_id": 6038682,
+                "link": "https://stackoverflow.com/users/6038682/william-andr%c3%a9s-bernal",
+                "reputation": 344,
+                "display_name": "William Andr&#233;s Bernal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 62780014,
+            "edited": false,
+            "creation_date": 1594140568,
+            "comment_id": 111020006
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FJ1g9.jpg?s=256",
+                "account_id": 5268074,
+                "user_type": "registered",
+                "user_id": 4207306,
+                "link": "https://stackoverflow.com/users/4207306/eklavya",
+                "reputation": 18640,
+                "display_name": "Eklavya"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1594141856,
+            "creation_date": 1594141856,
+            "body": "<p><code>User<\/code> entity data won't be initialized and loaded into memory until an explicit call is made to it. Your <code>Order<\/code> entity contains <code>user<\/code> field. So when serializing the order data getter of user called and user data fetched using another query.<\/p>\n<p>If you don't want to use @JsonIgnore the create a response class for order without user field and map you data.<\/p>\n",
+            "answer_id": 62780499,
+            "question_id": 62780014
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GijpUyvYvMR3rfbIEU6rh8EGjsJoXSWEUiyyOeh=k-s256",
+                "account_id": 23724252,
+                "user_type": "registered",
+                "user_id": 17744379,
+                "link": "https://stackoverflow.com/users/17744379/med-amine-khaili",
+                "reputation": 1,
+                "display_name": "Med Amine K&#39;haili"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1640215977,
+            "creation_date": 1640215977,
+            "body": "<p>for me Adding <strong>@JsonIgnore<\/strong> annotation helped<\/p>\n",
+            "answer_id": 70456217,
+            "question_id": 62780014
+        }
+    ],
+    "answer_comments": {
+        "70456217": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/0da8e672fe23bfa91b174d0c880b9691?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3558487,
+                    "user_type": "registered",
+                    "user_id": 2971549,
+                    "link": "https://stackoverflow.com/users/2971549/saman-salehi",
+                    "reputation": 1034,
+                    "display_name": "Saman Salehi"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 70456217,
+                "edited": false,
+                "creation_date": 1640265543,
+                "comment_id": 124556741
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a007be5a61f6aa8f3e85ae2fc18dd66e?s=256&d=identicon&r=PG",
+                    "account_id": -1,
+                    "user_type": "moderator",
+                    "user_id": -1,
+                    "link": "https://stackoverflow.com/users/-1/community",
+                    "reputation": 1,
+                    "display_name": "Community"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 70456217,
+                "edited": false,
+                "creation_date": 1640225649,
+                "comment_id": 124547129
+            }
+        ],
+        "62780499": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dd1c83e459ca2d1fbd4a00431aeda555?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10038504,
+                "user_type": "registered",
+                "user_id": 7422232,
+                "link": "https://stackoverflow.com/users/7422232/ab21",
+                "reputation": 395,
+                "display_name": "AB21",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 62780499,
+            "edited": false,
+            "creation_date": 1594223354,
+            "comment_id": 111053061
+        }]
+    }
+}

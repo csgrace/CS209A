@@ -1,0 +1,138 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/FXR8g.jpg?s=256",
+            "account_id": 2407279,
+            "user_type": "registered",
+            "user_id": 2103379,
+            "link": "https://stackoverflow.com/users/2103379/utsav-gupta",
+            "reputation": 3991,
+            "display_name": "Utsav Gupta",
+            "accept_rate": 49
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/31358824/unable-to-use-preparestatement-in-sql",
+        "last_activity_date": 1436922090,
+        "creation_date": 1436629081,
+        "answer_count": 1,
+        "title": "Unable to use prepareStatement in SQL",
+        "body": "<p>I have a peculiar situation where I am unable to use <code>prepareStatement<\/code>.<\/p>\n\n<p>I am writing an update function in Java where in I need to update a set of fields for a row. My problem is I dont know how many fields are there to be updated. I determine this dynamically from a <code>JSONArray<\/code>. In such scenario how I can I use <code>prepareStatement<\/code> to formulate an SQL Query. As for <code>prepareStatement<\/code> the query is predefined and values are suppose to be added later. My non-functional sample code is here:<\/p>\n\n<p>DB:MySQL using mysql driver jar file<\/p>\n\n<pre><code>public static int updateUser(String user) throws SQLException, JSONException{\n    JSONObject jobj= new JSONObject(user) ;\n\n    String pQuery= \" UPDATE Presence SET \"+(jobj.has(\"lat\")?\" lat =?,\":\",\")+(jobj.has(\"lng\")?\" lng = ?,\":\",\")+(jobj.has(\"description\")? \"description = ?,\":\",\")+(jobj.has(\"gcm_id\")?\" gcm_id = ?,\":\",\")+\" WHERE id = ?\";\n    pst = con.prepareStatement(pQuery);\n    pst.setDouble(1, jobj.getDouble(\"lat\"));\n    pst.setDouble(2, jobj.getDouble(\"lng\"));\n    pst.setString(3, jobj.getJSONObject(\"description\").toString());\n    pst.setString(4, jobj.get(\"id\").toString());\n    if(jobj.has(\"gcm_id\"))\n\n    pst.setString(5, jobj.getString(\"gcm_id\"));\n    int rs = pst.executeUpdate();\n    return rs;\n}\n<\/code><\/pre>\n",
+        "question_id": 31358824,
+        "tags": [
+            "java",
+            "sql",
+            "prepared-statement"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 72,
+        "last_edit_date": 1436630015
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FXR8g.jpg?s=256",
+                "account_id": 2407279,
+                "user_type": "registered",
+                "user_id": 2103379,
+                "link": "https://stackoverflow.com/users/2103379/utsav-gupta",
+                "reputation": 3991,
+                "display_name": "Utsav Gupta",
+                "accept_rate": 49
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31358824,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/RAyTX.jpg?s=256",
+                "account_id": 459625,
+                "user_type": "registered",
+                "user_id": 860196,
+                "link": "https://stackoverflow.com/users/860196/rundosrun",
+                "reputation": 11065,
+                "display_name": "runDOSrun",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1436630030,
+            "comment_id": 50699062
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/RAyTX.jpg?s=256",
+                "account_id": 459625,
+                "user_type": "registered",
+                "user_id": 860196,
+                "link": "https://stackoverflow.com/users/860196/rundosrun",
+                "reputation": 11065,
+                "display_name": "runDOSrun",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31358824,
+            "edited": false,
+            "creation_date": 1436629698,
+            "comment_id": 50698946
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4a403ef1d642f62c41600148794fea0d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 997513,
+            "user_type": "registered",
+            "user_id": 3893496,
+            "link": "https://stackoverflow.com/users/3893496/arcy",
+            "reputation": 13213,
+            "display_name": "arcy",
+            "accept_rate": 54
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1436922090,
+        "creation_date": 1436629974,
+        "body": "<p>I don't understand what the problem is.  <\/p>\n\n<p>Go through whatever loop you need to build the names of the fields in the string that will hold your SQL statement, another loop to give it the number of question marks that you need, then a third to fill in those values as you would for any other prepared statement.  There's nothing magic about using a string literal for the prepared statement.<\/p>\n\n<p>--<\/p>\n\n<p>requested code:<\/p>\n\n<pre><code>private enum DataType { DOUBLE, STRING };\n\nString names[] = { \"lat\", \"lng\", \"description\", \"gcm_id\" };\nDataType types[] = { DOUBLE, DOUBLE, STRING, STRING };\n// you could replace these parallel arrays with an array\n// of objects, one per field, with name, type, and whatever else.\n\nStringBuilder setString = new StringBuilder(\" UPDATE Presence SET \");\nboolean       firstNameAdded = false;\n\nfor (String name : names)\n{\n  if (jobj.has(name))\n  {\n    if (!firstNameAdded) { setString.append(\",\"); }\n    firstNameAdded = true;\n    setString.append(String.format(\" %s=?\", name));\n  }\n}\n\nsetString.append(\" where id = ?\");\n\n// if firstNameAdded is still false at this point, you didn't\n// have anything in the json object to add\n\npsmt = con.prepareStatement(setString.toString());\nint i = 0;\n\nwhile (i&lt;names.length)\n{\n  if (jobj.has(name))\n  {\n    switch (types[i])\n    {\n      case DOUBLE: psmt.setDouble( i+1, jobj.getDouble(names[i]) )\n        break;\n      case STRING: psmt.setString( i+1, jobj.getJSONObject(names[i]).toString();\n        break;\n    }\n  }\n  i++;\n}\n\n\npsmt.setString( i+1, jobj.getString(\"gcm_id\").toString();\n\nint sqlResult = psmt.executeUpdate();\n<\/code><\/pre>\n\n<p>I did this with a simple text editor, so there may be syntax things, etc.  This shoudl give you the idea.  The primary complication is the different types, which I've represented here with an enum.<\/p>\n",
+        "answer_id": 31358954,
+        "question_id": 31358824,
+        "last_edit_date": 1436922090
+    }],
+    "answer_comments": {"31358954": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FXR8g.jpg?s=256",
+                "account_id": 2407279,
+                "user_type": "registered",
+                "user_id": 2103379,
+                "link": "https://stackoverflow.com/users/2103379/utsav-gupta",
+                "reputation": 3991,
+                "display_name": "Utsav Gupta",
+                "accept_rate": 49
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31358954,
+            "edited": false,
+            "creation_date": 1436899576,
+            "comment_id": 50802608
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FXR8g.jpg?s=256",
+                "account_id": 2407279,
+                "user_type": "registered",
+                "user_id": 2103379,
+                "link": "https://stackoverflow.com/users/2103379/utsav-gupta",
+                "reputation": 3991,
+                "display_name": "Utsav Gupta",
+                "accept_rate": 49
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31358954,
+            "edited": false,
+            "creation_date": 1436630173,
+            "comment_id": 50699109
+        }
+    ]}
+}

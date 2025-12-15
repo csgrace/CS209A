@@ -1,0 +1,78 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e081ce0890a17e9aa8f4f05207770d68?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4446456,
+            "user_type": "registered",
+            "user_id": 3619598,
+            "link": "https://stackoverflow.com/users/3619598/simo03",
+            "reputation": 273,
+            "display_name": "Simo03",
+            "accept_rate": 29
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/23560063/how-to-render-an-image-to-a-jtable-cell",
+        "last_activity_date": 1399955929,
+        "creation_date": 1399624590,
+        "answer_count": 2,
+        "title": "How to render an image to a JTable cell",
+        "body": "<p>I want to apply a renderer on a cell of my JTable, to do so I created a class named myRenderer :<\/p>\n\n<pre><code>import java.awt.Component;\n\nimport javax.swing.ImageIcon;\nimport javax.swing.JTable;\nimport javax.swing.table.DefaultTableCellRenderer;\n\npublic class MyRenderer extends DefaultTableCellRenderer {\n\npublic Component getTableCellRendererComponent(JTable table, ImageIcon icon) {\n\nsetIcon(icon);\nreturn this;\n}\n}\n<\/code><\/pre>\n\n<p>And I use this piece of code to apply the renderer on the cell :<\/p>\n\n<pre><code>MyRenderer renderer = new MyRenderer();\n\nrenderer.getTableCellRendererComponent(table, icon);\n\ntable.getColumnModel().getColumn(6).setCellRenderer(renderer);\n<\/code><\/pre>\n\n<p>The problem is that the rebderer is applied on all the cells in the column 6, and I want it to be applied on one cell only (row/column) but I don't know how to do so ?<\/p>\n\n<p>Thanks in advance<\/p>\n",
+        "question_id": 23560063,
+        "tags": [
+            "java",
+            "swing",
+            "jtable",
+            "cell",
+            "renderer"
+        ],
+        "score": 3,
+        "accepted_answer_id": 23560542,
+        "is_answered": true,
+        "view_count": 8513,
+        "last_edit_date": 1399955929
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/w9jTN.jpg?s=256",
+                "account_id": 3013228,
+                "user_type": "registered",
+                "user_id": 2587435,
+                "link": "https://stackoverflow.com/users/2587435/paul-samsotha",
+                "reputation": 209749,
+                "display_name": "Paul Samsotha",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1399626057,
+            "creation_date": 1399626057,
+            "body": "<p>Besides the fact that you are not even properly overriding the <code>getTableCellRendererComponent<\/code> method, you don't even need a custom renderer to display an image in a column<\/p>\n\n<p>From <a href=\"http://docs.oracle.com/javase/tutorial/uiswing/components/table.html\" rel=\"noreferrer\">How to Use Tables<\/a>. Here's a list of types with default pre-configured renderers<\/p>\n\n<ul>\n<li><code>Boolean<\/code> \u2014 rendered with a check box.<\/li>\n<li><code>Number<\/code> \u2014 rendered by a right-aligned label.<\/li>\n<li><code>Double, Float<\/code> \u2014 same as Number, but the object-to-text translation is performed by a NumberFormat instance (using the default number format for the current locale).<\/li>\n<li><code>Date<\/code> \u2014 rendered by a label, with the object-to-text translation performed by a DateFormat instance (using a short style for the date and time).<\/li>\n<li><code>ImageIcon<\/code>, Icon \u2014 rendered by a centered label.<\/li>\n<li><code>Object<\/code> \u2014 rendered by a label that displays the object's string value.<\/li>\n<\/ul>\n\n<p>So you can put add an <code>ImageIcon<\/code> to the table and it will be rendered as such, given you properly override the <code>getColumnClass()<\/code><\/p>\n\n<p>Also from tutorial:<\/p>\n\n<blockquote>\n  <p>To choose the renderer that displays the cells in a column, a table first determines whether you specified a renderer for that particular column. If you did not, then the table invokes the table model's <code>getColumnClass<\/code> method, which gets the data type of the column's cells. Next, the table compares the column's data type with a list of data types for which cell renderers are registered<\/p>\n<\/blockquote>\n\n<p>So say you have a <code>DefaultTableModel<\/code> with three columns and you want an <code>ImageIcon<\/code> in the last column. You would do something like this<\/p>\n\n<pre><code>DefaultTableModel model = new DefaultTableModel(...) {\n    @Override\n    public Class&lt;?&gt; getColumnClass(int column) {\n        switch (column) {\n            case 2: return ImageIcon.class;\n            default: return String.class\n        }\n    }\n};\nJTable table = new JTable(model);\n<\/code><\/pre>\n\n<p>Then by just adding an <code>ImageIcon<\/code> to the third column, it will be rendered as such<\/p>\n\n<pre><code>String colOneDate = \"Data\";\nString colTwoData = \"Data\";\nImageIcon colThreeIcon = new ImageIcon(...);\nmodel.addRow(new Object[] { colOneData, colTwoData, colThreeIcon });\n<\/code><\/pre>\n\n<p>You will probably also want to set the column widths and height accordingly, to the size of the image. For that you can see any of <a href=\"https://www.google.com/search?q=how%20to%20set%20column%20with%20and%20height%20of%20jtable#q=site%3astackoverflow.com+how+to+set+column+width+and+height+of+jtable&amp;spell=1\" rel=\"noreferrer\">these questions<\/a><\/p>\n",
+            "answer_id": 23560542,
+            "question_id": 23560063
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fc88744d8a7f44cfd012a310e6d76a92?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3254651,
+                "user_type": "registered",
+                "user_id": 2744095,
+                "link": "https://stackoverflow.com/users/2744095/a-stranger",
+                "reputation": 551,
+                "display_name": "A Stranger",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1399625931,
+            "creation_date": 1399625931,
+            "body": "<p>You can use getTableCellRendererComponent function in as described below. The icon, row and coulmn to display icon, you can set from out side using a setter methode<\/p>\n\n<pre><code>import java.awt.Component;\n\nimport javax.swing.JTable;\nimport javax.swing.table.DefaultTableCellRenderer;\n\n\n  public class MyRenderer extends DefaultTableCellRenderer {\n\npublic MyRenderer() {\n    // TODO Auto-generated constructor stub\n}\n\n@Override\npublic Component getTableCellRendererComponent(JTable table, Object value,\n        boolean isSelected, boolean hasFocus, int row, int column) {\n    super.getTableCellRendererComponent(table, value, isSelected, hasFocus,\n            row, column);\n\n    int neededRow=0; // set the needed row here in which the icon to be dispayed\n    int neededcolumn=0; // set the needed column here in which the icon to be dispayed\n\n    if(row==neededRow &amp;&amp; column==neededcolumn)\n    {\n        setIcon(icon);\n    }\n\n    return this\n}\n}\n<\/code><\/pre>\n",
+            "answer_id": 23560505,
+            "question_id": 23560063
+        }
+    ],
+    "answer_comments": {}
+}

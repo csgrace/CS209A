@@ -1,0 +1,85 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5d56d7f682b4ee8c3fbf810224aafd5b?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10735007,
+            "user_type": "registered",
+            "user_id": 7899893,
+            "link": "https://stackoverflow.com/users/7899893/ricky",
+            "reputation": 57,
+            "display_name": "Ricky"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49190961/eclipse-when-trying-to-run-a-method-form-one-class-to-another-it-crashed-my-app",
+        "last_activity_date": 1520596922,
+        "creation_date": 1520589120,
+        "answer_count": 1,
+        "title": "Eclipse when trying to run a method form one class to another it crashed my app",
+        "body": "<p>I have 2 screens in Eclipse. <code>MainActivity<\/code> and <code>UpdateScreen<\/code>. The method <code>writeToFile<\/code> works perfectly in the <code>MainActivity<\/code> screen. But when I call that method from the <code>UpdateScreen<\/code> it crashes the app. I have been trying for a couple of days to figure out why. (Read a lot or articles). I just cannot get it right. <\/p>\n\n<p>MainActivity.java:<\/p>\n\n<pre><code>import java.io.BufferedReader;\nimport java.io.BufferedWriter;\nimport java.io.FileNotFoundException;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.InputStreamReader;\nimport java.io.OutputStreamWriter;\n\nimport android.os.Bundle;\nimport android.app.Activity;\nimport android.content.Context;\nimport android.content.Intent;\nimport android.view.Menu;\nimport android.view.View;\nimport android.view.View.OnClickListener;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.RadioButton;\nimport android.widget.TextView;\nimport android.widget.Toast;\n\npublic class MainActivity extends Activity {\n// variables for write to file\n    public static final String[] FILENAME = {\"iBuyer.txt\",\"sbuyer.txt\",\"abuyer.txt\"};\n    static int txtindex = 0; // use this to get the correct  txt file to \n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n        //setup widgets for use in app\n        final EditText idBuyer1 = (EditText)findViewById(R.id.idBuyerTxt);\n        Button submit = (Button)findViewById(R.id.submitButton);\n        Button update = (Button)findViewById(R.id.updateButton);\n\n        //Code for Submit Button\n        submit.setOnClickListener(new OnClickListener(){\n        public void onClick(View v){\n\n          //write to file for idbuyer\n            String textToSave = idBuyer1.getText().toString();\n                try {\n                    txtindex = 0;\n                     writeToFile(textToSave);\n                } catch (FileNotFoundException e1) {\n                    e1.printStackTrace();\n                }               \n        }//code ends for Submit Button\n        });\n\n        //Update button code. This will open the update screen\n        update.setOnClickListener(new OnClickListener(){\n            public void onClick(View v){\n                startActivity(new Intent(MainActivity.this, UpdateScreen.class));\n            }\n        });\n    // Write to file method   \n   public void writeToFile(String data) throws FileNotFoundException {\n\n        OutputStreamWriter osw = new     OutputStreamWriter(openFileOutput(FILENAME[txtindex],\n                                                    Context.MODE_PRIVATE));\n        BufferedWriter bw = new BufferedWriter(osw);\n        try {\n            bw.write(data);\n        } catch (IOException e) {\n            e.printStackTrace();\n            Toast.makeText(MainActivity.this, \n                    \"Couldn't write to file\", Toast.LENGTH_LONG).show();\n        }\n        try {\n            bw.newLine();\n        } catch (IOException e) {\n            e.printStackTrace();\n            Toast.makeText(MainActivity.this, \n                    \"Couldn't write to file\", Toast.LENGTH_LONG).show();\n        }\n        try {\n            bw.close();\n        } catch (IOException e1) {\n            e1.printStackTrace();\n            Toast.makeText(MainActivity.this, \n                    \"Couldn't write to file\", Toast.LENGTH_LONG).show();\n        }\n        try {\n            osw.close();\n        } catch (IOException e) {\n            e.printStackTrace();\n            Toast.makeText(MainActivity.this, \n                    \"Couldn't write to file\", Toast.LENGTH_LONG).show();\n\n        }\n\n    }\n\n\n    @Override\n    public boolean onCreateOptionsMenu(Menu menu) {\n        // Inflate the menu; this adds items to the action bar if it is present.\n        getMenuInflater().inflate(R.menu.main, menu);\n        return true;\n    }\n\n}\n<\/code><\/pre>\n\n<p>This is the update screen:<\/p>\n\n<pre><code>import java.io.BufferedWriter;\nimport java.io.FileNotFoundException;\nimport java.io.IOException;\nimport java.io.OutputStreamWriter;\n\nimport android.app.Activity;\nimport android.content.Intent;\nimport android.os.Bundle;\nimport android.view.View;\nimport android.view.View.OnClickListener;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.TextView;\nimport android.widget.Toast;\n\npublic class UpdateScreen extends Activity {\n    @Override\n    protected void onCreate(Bundle savedInstances){\n        super.onCreate(savedInstances);\n        setContentView(R.layout.updatescreen);\n        final EditText updateIdNumBuyer1 = (EditText)findViewById(R.id.updateIdNumBuyer);\n\n    Button updateInfo = (Button)findViewById(R.id.updatInfoButton);\n    Button backButtonUpdate = (Button)findViewById(R.id.backButton);\n\n   //update button write to file\n       updateInfo.setOnClickListener(new OnClickListener(){\n        public void onClick(View v){\n       String sendIdBuyer = updateIdNumBuyer1.getText().toString();\n\n\n      MainActivity sendData = new MainActivity();\n      try {\n        sendData.writeToFile(sendIdBuyer);\n    } catch (FileNotFoundException e1) {\n        e1.printStackTrace();\n        Toast.makeText(UpdateScreen.this, \n                \"bombs on updatescreen\", Toast.LENGTH_LONG).show(); \n    }\n\n    }\n       });// End of update\n\n        //Back to main screen button\n        backButtonUpdate.setOnClickListener(new OnClickListener(){\n            public void onClick(View v){\n                startActivity(new Intent(UpdateScreen.this, MainActivity.class));\n            }\n        });// End back button\n}\n}\n<\/code><\/pre>\n",
+        "question_id": 49190961,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 32,
+        "last_edit_date": 1520591555
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/38a04d0ccf9b761c9373ec9905ca7e92?s=256&d=identicon&r=PG",
+                "account_id": 2414645,
+                "user_type": "registered",
+                "user_id": 2108972,
+                "link": "https://stackoverflow.com/users/2108972/greenapps",
+                "reputation": 11234,
+                "display_name": "greenapps"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49190961,
+            "edited": false,
+            "creation_date": 1520596573,
+            "comment_id": 85391136
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kDMZU.jpg?s=256",
+                "account_id": 6126609,
+                "user_type": "registered",
+                "user_id": 4778343,
+                "link": "https://stackoverflow.com/users/4778343/stefan-golubovi%c4%87",
+                "reputation": 1275,
+                "display_name": "Stefan Golubović"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 49190961,
+            "edited": false,
+            "creation_date": 1520589852,
+            "comment_id": 85387302
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/38a04d0ccf9b761c9373ec9905ca7e92?s=256&d=identicon&r=PG",
+            "account_id": 2414645,
+            "user_type": "registered",
+            "user_id": 2108972,
+            "link": "https://stackoverflow.com/users/2108972/greenapps",
+            "reputation": 11234,
+            "display_name": "greenapps"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1520596922,
+        "creation_date": 1520596922,
+        "body": "<pre><code>MainActivity sendData = new MainActivity(); \n<\/code><\/pre>\n\n<p>It is not possible to create instances of an Activity with the new operator. Activities can only be created using an Intent.<\/p>\n\n<pre><code>public void writeToFile() \n<\/code><\/pre>\n\n<p>change that to <\/p>\n\n<pre><code>public static void writeToFile() \n<\/code><\/pre>\n\n<p>and then call in other activity like <\/p>\n\n<pre><code>MainActivity.writeToFile(....). \n<\/code><\/pre>\n\n<p>Probably you have to add a Context parameter to make it work. <\/p>\n",
+        "answer_id": 49193382,
+        "question_id": 49190961
+    }],
+    "answer_comments": {}
+}

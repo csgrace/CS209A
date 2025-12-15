@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/9XuOT.jpg?s=256",
+            "account_id": 7546947,
+            "user_type": "registered",
+            "user_id": 5729613,
+            "link": "https://stackoverflow.com/users/5729613/i-like",
+            "reputation": 1867,
+            "display_name": "I Like",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/62976645/android-studio-animation-has-the-wrong-number-of-frames",
+        "last_activity_date": 1595831913,
+        "creation_date": 1595136552,
+        "answer_count": 1,
+        "title": "Android Studio Animation has the Wrong Number of Frames",
+        "body": "<p>I managed to play an animation sequence using <code>AnimationDrawable<\/code> object. However, I noticed some strange behavior, which results in the animation looping more than once even when I tell it to play once using <code>setOneShot()<\/code>=true. My goal is to be able to play an animation when a signal is received.<\/p>\n<p>Anyways, every time I get a signal I add some frames to the <code>AnimationDrawable<\/code> in the createAnimation function. After noticing some animations playing more than once, I printed out the number of frames with <code>getNumberOfFrames()<\/code> and saw that AnimationDrawables I added the same number of frames to displayed different numbers of frames eg<\/p>\n<pre><code>System.out: start animation, end frame index is 270\nSystem.out: Number of frames to play: 693\n\nSystem.out: start animation, end frame index is 270\nSystem.out: Number of frames to play: 1242\n<\/code><\/pre>\n<p>What would explain this? I've included the relevant functions below.<\/p>\n<pre><code>void createAnimation(AnimationDrawable animation, int endPixelIdx){\n    int endFrameIdx;\n    endFrameIdx = Math.min(endFrameIdx, 270);\n    print(&quot;start animation, end frame index is &quot; + endFrameIdx);\n    for (int i = 0; i &lt; endFrameIdx; i++) {\n        animation.addFrame(artArr[i], 1); // adding drawables stored in memory\n    }\n} \n\nvoid playAnimationOnce(int stopFrameIdx){ // called from inside Handler in OnCreate()\n    Drawable currentFrame = animation.getCurrent();\n    if (currentFrame == prevFrame){ // we know an animation is over when frames don't change\n        animation.stop(); // reset the animation\n        createAnimation(animation, stopFrameIdx);\n        imageanim.setImageDrawable(animation);\n        animation.setOneShot(true);\n        animation.start();\n        System.out.println(&quot;Number of frames to play: &quot; + animation.getNumberOfFrames());\n    } \n    prevFrame = currentFrame;\n}\n\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n        final Handler handler=new Handler();\n        handler.post(new Runnable(){\n            @Override\n            public void run() {\n                // upadte textView here\n//                print(&quot;set dist text view text&quot;);\n                distTextView.setText(intDistance + &quot; Inches&quot;);\n                int pixel = (int) (intDistance / inchPerPixel);\n                playAnimationOnce(pixel);\n                handler.postDelayed(this,500); // set time here to refresh textView\n            }\n        });\n}\n<\/code><\/pre>\n",
+        "question_id": 62976645,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 0,
+        "accepted_answer_id": 63109902,
+        "is_answered": true,
+        "view_count": 39
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/9XuOT.jpg?s=256",
+            "account_id": 7546947,
+            "user_type": "registered",
+            "user_id": 5729613,
+            "link": "https://stackoverflow.com/users/5729613/i-like",
+            "reputation": 1867,
+            "display_name": "I Like",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1595831913,
+        "creation_date": 1595831913,
+        "body": "<p>My solution was to instantiate a new AnimationdDrawable() to remove the frames. It seems the frame count does not reset on <code>stop()<\/code>.<\/p>\n",
+        "answer_id": 63109902,
+        "question_id": 62976645
+    }],
+    "answer_comments": {}
+}

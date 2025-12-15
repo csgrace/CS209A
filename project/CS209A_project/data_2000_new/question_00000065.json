@@ -1,0 +1,200 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3e70001ca38ab01fefe46ca9da5fc88e?s=256&d=identicon&r=PG",
+            "account_id": 19941048,
+            "user_type": "registered",
+            "user_id": 14911094,
+            "link": "https://stackoverflow.com/users/14911094/jaysmito-mukherjee",
+            "reputation": 1552,
+            "display_name": "Jaysmito Mukherjee"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/67048033/prevent-jpopupmenu-from-closing-on-click",
+        "last_activity_date": 1618206879,
+        "creation_date": 1618161480,
+        "answer_count": 3,
+        "title": "Prevent JPopupMenu from Closing on click",
+        "body": "<p>I have a popup menu but it closes when i click something.<\/p>\n<p>This is ok most of the time but sometimes it is required that it does not close on click!<\/p>\n<p>Here is a piece of code i am working on which would help you to reproduce what i have :<\/p>\n<pre><code>import javax.swing.*;\nimport javax.swing.event.*;\n\nimport java.awt.*;\nimport java.awt.event.*;\n\npublic class Try{\n    public static void main(String[] args) {\n        JFrame frame = new JFrame(&quot;Trial&quot;);\n        JPopupMenu menu = new JPopupMenu();\n        JLabel label = new JLabel(&quot;This is a popup menu!&quot;);\n        menu.add(label);\n        frame.setSize(900, 500);\n        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n        frame.setLocationRelativeTo(null);\n        frame.setVisible(true);\n        menu.show(frame, 450, 250);\n    }\n}\n<\/code><\/pre>\n<p>What i  want it the menu wont close if i click on the frame!<\/p>\n",
+        "question_id": 67048033,
+        "tags": [
+            "java",
+            "swing",
+            "user-interface",
+            "jpopupmenu"
+        ],
+        "score": 0,
+        "accepted_answer_id": 67052326,
+        "is_answered": true,
+        "view_count": 789
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3e70001ca38ab01fefe46ca9da5fc88e?s=256&d=identicon&r=PG",
+                "account_id": 19941048,
+                "user_type": "registered",
+                "user_id": 14911094,
+                "link": "https://stackoverflow.com/users/14911094/jaysmito-mukherjee",
+                "reputation": 1552,
+                "display_name": "Jaysmito Mukherjee"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1618206879,
+            "creation_date": 1618198201,
+            "body": "<p>So this is possible with JPopupMenu itself and there is no need of JDialog.<\/p>\n<p>I had to override the setVisible method and allow to close the popup only after the close method is called!<\/p>\n<p>Here is the code the popupmenu will only close after 5000ms and not on a click!<\/p>\n<pre><code>import javax.swing.*;\nimport javax.swing.event.*;\n\nimport java.awt.*;\nimport java.awt.event.*;\n\npublic class Try{\n    public static void main(String[] args) {\n        JFrame frame = new JFrame(&quot;Trial&quot;);\n        MyPopupMenu menu = new MyPopupMenu();\n        JLabel label = new JLabel(&quot;This is a popup menu!&quot;);\n        menu.add(label);\n        frame.setSize(900, 500);\n        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n        frame.setLocationRelativeTo(null);\n        frame.setVisible(true);\n        menu.show(frame, 450, 250);\n        Timer timer = new Timer(5000, new ActionListener() {\n             public void actionPerformed(ActionEvent evt) {\n                 menu.closePopup();         \n                 ((Timer)evt.getSource()).stop();\n             }\n         });\n         timer.start();\n    }\n}\n\nclass MyPopupMenu extends JPopupMenu{\n    private boolean isHideAllowed;\n\n    public MyPopupMenu(){\n        super();\n        this.isHideAllowed = false;\n    }\n\n    @Override\n    public void setVisible(boolean visibility){\n        if(isHideAllowed &amp;&amp; !visibility)\n            super.setVisible(false);\n        else if(!isHideAllowed &amp;&amp; visibility)\n            super.setVisible(true);\n    }\n\n    public void closePopup(){\n        this.isHideAllowed = true;\n        this.setVisible(false);\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 67052326,
+            "question_id": 67048033,
+            "last_edit_date": 1618206879
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/RKSgV.png?s=256",
+                "account_id": 2485939,
+                "user_type": "registered",
+                "user_id": 2164365,
+                "link": "https://stackoverflow.com/users/2164365/abra",
+                "reputation": 20969,
+                "display_name": "Abra",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1618163810,
+            "creation_date": 1618163810,
+            "body": "<p>The right tool for the right job.<br />\nConsider a non-modal, undecorated <a href=\"https://docs.oracle.com/javase/tutorial/uiswing/misc/modality.html\" rel=\"nofollow noreferrer\">dialog<\/a> (rather than a <code>JPopupMenu<\/code>).<\/p>\n<p>Is this the kind of thing you require?<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>import java.awt.Color;\n\nimport javax.swing.*;\n\npublic class Try{\n    public static void main(String[] args) {\n        JFrame frame = new JFrame(&quot;Trial&quot;);\n        JLabel label = new JLabel(&quot;This is a popup menu!&quot;);\n        label.setBorder(BorderFactory.createLineBorder(Color.red, 2));\n        frame.setSize(900, 500);\n        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n        frame.setLocationRelativeTo(null);\n        frame.setVisible(true);\n        JDialog dlg = new JDialog(frame);\n        dlg.add(label);\n        dlg.setUndecorated(true);\n        dlg.pack();\n        dlg.setLocationRelativeTo(frame);\n        dlg.setVisible(true);\n    }\n}\n<\/code><\/pre>\n<p>This is how it looks on my computer.<\/p>\n<p><a href=\"https://i.sstatic.net/mS1gE.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/mS1gE.png\" alt=\"gui\" /><\/a><\/p>\n<p>If you click on the <code>JFrame<\/code>, the dialog remains visible.<\/p>\n",
+            "answer_id": 67048443,
+            "question_id": 67048033
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bfc2be302a9f286412503eb6d6fd0c0c?s=256&d=identicon&r=PG",
+                "account_id": 1832163,
+                "user_type": "registered",
+                "user_id": 1663340,
+                "link": "https://stackoverflow.com/users/1663340/siavash-renani",
+                "reputation": 11,
+                "display_name": "Siavash Renani"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1618162855,
+            "creation_date": 1618162855,
+            "body": "<p>You need to set correct defaultCloseOperation-<\/p>\n<pre><code>import javax.swing.*;\nimport javax.swing.event.*;\n\nimport java.awt.*;\nimport java.awt.event.*;\n\npublic class Try{\n    public static void main(String[] args) {\n        JFrame frame = new JFrame(&quot;Trial&quot;);\n        JPopupMenu menu = new JPopupMenu();\n        JLabel label = new JLabel(&quot;This is a popup menu!&quot;);\n        menu.add(label);\n        frame.setSize(900, 500);\n        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);\n        frame.setLocationRelativeTo(null);\n        frame.setVisible(true);\n        frame.addWindowsListener(new WindowAdapter(){\n           //Determine whether you should call frame.dispose or hide.\n         });\n        menu.show(frame, 450, 250);\n    }\n}\n<\/code><\/pre>\n<p>See also <a href=\"https://stackoverflow.com/questions/1234912/how-to-programmatically-close-a-jframe/1235994\">How to programmatically close a JFrame<\/a><\/p>\n",
+            "answer_id": 67048270,
+            "question_id": 67048033
+        }
+    ],
+    "answer_comments": {
+        "67052326": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/L1v7b.jpg?s=256",
+                "account_id": 21659086,
+                "user_type": "registered",
+                "user_id": 15978450,
+                "link": "https://stackoverflow.com/users/15978450/damoiskii",
+                "reputation": 1345,
+                "display_name": "Damoiskii"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 67052326,
+            "edited": false,
+            "creation_date": 1685135883,
+            "comment_id": 134624509
+        }],
+        "67048270": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e70001ca38ab01fefe46ca9da5fc88e?s=256&d=identicon&r=PG",
+                    "account_id": 19941048,
+                    "user_type": "registered",
+                    "user_id": 14911094,
+                    "link": "https://stackoverflow.com/users/14911094/jaysmito-mukherjee",
+                    "reputation": 1552,
+                    "display_name": "Jaysmito Mukherjee"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 67048270,
+                "edited": false,
+                "creation_date": 1618198259,
+                "comment_id": 118520472
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/bfc2be302a9f286412503eb6d6fd0c0c?s=256&d=identicon&r=PG",
+                    "account_id": 1832163,
+                    "user_type": "registered",
+                    "user_id": 1663340,
+                    "link": "https://stackoverflow.com/users/1663340/siavash-renani",
+                    "reputation": 11,
+                    "display_name": "Siavash Renani"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 67048270,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e70001ca38ab01fefe46ca9da5fc88e?s=256&d=identicon&r=PG",
+                    "account_id": 19941048,
+                    "user_type": "registered",
+                    "user_id": 14911094,
+                    "link": "https://stackoverflow.com/users/14911094/jaysmito-mukherjee",
+                    "reputation": 1552,
+                    "display_name": "Jaysmito Mukherjee"
+                },
+                "edited": false,
+                "creation_date": 1618166225,
+                "comment_id": 118514141
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e70001ca38ab01fefe46ca9da5fc88e?s=256&d=identicon&r=PG",
+                    "account_id": 19941048,
+                    "user_type": "registered",
+                    "user_id": 14911094,
+                    "link": "https://stackoverflow.com/users/14911094/jaysmito-mukherjee",
+                    "reputation": 1552,
+                    "display_name": "Jaysmito Mukherjee"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 67048270,
+                "edited": false,
+                "creation_date": 1618164681,
+                "comment_id": 118513745
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/bfc2be302a9f286412503eb6d6fd0c0c?s=256&d=identicon&r=PG",
+                    "account_id": 1832163,
+                    "user_type": "registered",
+                    "user_id": 1663340,
+                    "link": "https://stackoverflow.com/users/1663340/siavash-renani",
+                    "reputation": 11,
+                    "display_name": "Siavash Renani"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 67048270,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e70001ca38ab01fefe46ca9da5fc88e?s=256&d=identicon&r=PG",
+                    "account_id": 19941048,
+                    "user_type": "registered",
+                    "user_id": 14911094,
+                    "link": "https://stackoverflow.com/users/14911094/jaysmito-mukherjee",
+                    "reputation": 1552,
+                    "display_name": "Jaysmito Mukherjee"
+                },
+                "edited": false,
+                "creation_date": 1618164201,
+                "comment_id": 118513620
+            }
+        ]
+    }
+}

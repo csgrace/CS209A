@@ -1,0 +1,159 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c5487c45b1ff7d1e4e9092e1ddbd4306?s=256&d=identicon&r=PG",
+            "account_id": 1969239,
+            "user_type": "registered",
+            "user_id": 1768673,
+            "link": "https://stackoverflow.com/users/1768673/martin",
+            "reputation": 123,
+            "display_name": "Martin"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13033116/jain-sip-authentication",
+        "last_activity_date": 1439552420,
+        "creation_date": 1351003526,
+        "answer_count": 3,
+        "title": "Jain-Sip Authentication",
+        "body": "<p>I'm working with the Jain Sip library, trying to create a connection to an asterisk server.  I've been working with the textclient example app from this page:\n<a href=\"http://www.oracle.com/technetwork/articles/entarch/introduction-jain-sip-090386.html\" rel=\"noreferrer\">http://www.oracle.com/technetwork/articles/entarch/introduction-jain-sip-090386.html<\/a> <\/p>\n\n<p>but this doesn't actually authenticate with the server.  I can send messages to users on the server, but I normally require a user/password authentication on the server.  <\/p>\n\n<p>As far as I can tell I have to use the \"javax.sip.OUTBOUND_PROXY\" property, but I can't find any documentation on how to set a username or password.  Has anyone else had any success with this?<\/p>\n",
+        "question_id": 13033116,
+        "tags": [
+            "java",
+            "sip",
+            "jain-sip"
+        ],
+        "score": 8,
+        "accepted_answer_id": 13038826,
+        "is_answered": true,
+        "view_count": 8231
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/978e3aeadd65802b21bcdf0a5c1af3c0?s=256&d=identicon&r=PG",
+                "account_id": 469001,
+                "user_type": "registered",
+                "user_id": 875305,
+                "link": "https://stackoverflow.com/users/875305/11101101b",
+                "reputation": 7789,
+                "display_name": "11101101b",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 9,
+            "is_accepted": false,
+            "last_activity_date": 1439552420,
+            "creation_date": 1379454761,
+            "body": "<p>The best example I have found on registration is found <a href=\"http://vkslabs.com/sip-register-request-using-jain-sip/\" rel=\"nofollow noreferrer\">here<\/a>.\nHere is the gist of if just in case the link dries-up one day:<\/p>\n\n<blockquote>\n  <p>REGISTER request is used to update the current location of a user on\n  the REGISTRAR server. The application sends a REGISTER message\n  informing the server its current location which in turn is stored in\n  location server. When a caller calls a user the proxy server uses this\n  information to find the location of the callee.<\/p>\n  \n  <p>Register request should be sent by the client periodically. The\n  validity of the REGISTER request is determined by the Expires header.<\/p>\n  \n  <p><strong>Flow<\/strong><\/p>\n  \n  <p><img src=\"https://i.sstatic.net/pqtrC.png\" alt=\"image\"><\/p>\n  \n  <p><strong>Sample Request<\/strong><\/p>\n\n<pre><code>REGISTER sip:sip.linphone.org SIP/2.0\nCall-ID: 0a0f14355fa76ae6435b98bfe085baf9@223.1.1.128\nCSeq: 1 REGISTER\nFrom: &lt;sip:vkslabs@sip.linphone.org&gt;;tag=-1427592833\nTo: &lt;sip:vkslabs@sip.linphone.org&gt;\nMax-Forwards: 70\nVia: SIP/2.0/TCP 223.1.1.128:5060;branch=z9hG4bK-323532-2a454f4ec2a4213f6d6928eba479521d\nContact: &lt;sip:vkslabs@223.1.1.128;transport=tcp&gt;\nContent-Length: 0\n<\/code><\/pre>\n  \n  <p>Now lets see how to construct the above request using the NIST SIP\n  Stack.<\/p>\n  \n  <p>First step is to create a class that implements the SIPListener. Make\n  sure your SIP Stack is Initializing NIST JAIN SIP Stack.<\/p>\n  \n  <ol>\n  <li><p>Create Call-ID header<\/p>\n  \n  <p>CallIdHeader callIdHeader = this.sipProvider.getNewCallId(); <\/p><\/li>\n  <li><p>Create CSeq header<\/p>\n  \n  <p>CSeqHeader cSeqHeader = this.headerFactory.createCSeqHeader(cseq,\n  &quot;REGISTER&quot;); <\/p><\/li>\n  <li><p>Create From header<\/p>\n  \n  <p>Address fromAddress = addressFactory.createAddress(\"sip:\" + username + '@' + server); \n  FromHeader fromHeader = this.headerFactory.createFromHeader(fromAddress,\n  String.valueOf(this.tag));<\/p><\/li>\n  <li><p>Create To Header<\/p>\n  \n  <p>ToHeader toHeader = this.headerFactory.createToHeader(fromAddress, null); <\/p><\/li>\n  <li><p>Create Max-Forwards header<\/p>\n  \n  <p>MaxForwardsHeader maxForwardsHeader = this.headerFactory.createMaxForwardsHeader(70); <\/p><\/li>\n  <li><p>Create a Via header<\/p>\n  \n  <p>ArrayList viaHeaders = new ArrayList(); \n  ViaHeader viaHeader = this.headerFactory.createViaHeader(this.ip, this.port, \"tcp\", null);\n  viaHeaders.add(viaHeader);<\/p><\/li>\n  <li><p>Create contact header<\/p>\n  \n  <p>this.contactAddress = this.addressFactory.createAddress(\"sip:\" + this.username + '@' + this.ip + \"transport=tcp\"); <\/p>\n  \n  <p>// Create the contact header used for all SIP messages. \n  this.contactHeader = this.headerFactory.createContactHeader(contactAddress);<\/p><\/li>\n  <\/ol>\n  \n  <p>Once all the headers are created it is time to create the request\n  itself.<\/p>\n\n<pre><code>request = this.messageFactory.createRequest(\"REGISTER sip:\" + server + \"SIP/2.0\\r\\n\\r\\n\"); \nrequest.addHeader(callIdHeader);\nrequest.addHeader(cSeqHeader); \nrequest.addHeader(fromHeader);\nrequest.addHeader(toHeader); \nrequest.addHeader(maxForwardsHeader);\nrequest.addHeader(viaHeader); \nrequest.addHeader(contactHeader);\n<\/code><\/pre>\n  \n  <p>Now that the request object is created with all the necessary headers\n  it is time to send the request.<\/p>\n\n<pre><code>inviteTid = sipProvider.getNewClientTransaction(request); // send the request out. \ninviteTid.sendRequest();\n<\/code><\/pre>\n  \n  <p>Once the request is sent successfully the response will be passed to\n  the application using the processResponse callback in SIPListener.<\/p>\n\n<pre><code>public void processResponse(ResponseEvent responseEvent) { \n  int statusCode = responseEvent.getResponse().getStatusCode(); \n}\n<\/code><\/pre>\n  \n  <p><strong>Code<\/strong><\/p>\n\n<pre><code>public void register(Response response) {\n  try {\n  cseq++;\n  ArrayList viaHeaders = new ArrayList();\n  ViaHeader viaHeader = this.headerFactory.createViaHeader(this.ip,\n  this.port, \"tcp\", null);\n  viaHeaders.add(viaHeader);\n  // The \"Max-Forwards\" header.\n  MaxForwardsHeader maxForwardsHeader = this.headerFactory\n  .createMaxForwardsHeader(70);\n  // The \"Call-Id\" header.\n  CallIdHeader callIdHeader = this.sipProvider.getNewCallId();\n  // The \"CSeq\" header.\n  CSeqHeader cSeqHeader = this.headerFactory.createCSeqHeader(cseq,\n  \"REGISTER\");\n\n  Address fromAddress = addressFactory.createAddress(\"sip:\"\n  + username + '@' + server);\n\n  FromHeader fromHeader = this.headerFactory.createFromHeader(\n  fromAddress, String.valueOf(this.tag));\n  // The \"To\" header.\n  ToHeader toHeader = this.headerFactory.createToHeader(fromAddress,\n  null);\n\n  // this.contactHeader = this.headerFactory\n  // .createContactHeader(contactAddress);\n\n  request = this.messageFactory.createRequest(\"REGISTER sip:\"\n  + server + \" SIP/2.0\\r\\n\\r\\n\");\n  request.addHeader(callIdHeader);\n  request.addHeader(cSeqHeader);\n  request.addHeader(fromHeader);\n  request.addHeader(toHeader);\n  request.addHeader(maxForwardsHeader);\n  request.addHeader(viaHeader);\n  request.addHeader(contactHeader);\n  if (response != null) {\n  retry = true;\n  AuthorizationHeader authHeader = Utils.makeAuthHeader(headerFactory, response,\n  request, username, password);\n  request.addHeader(authHeader);\n  }\n  inviteTid = sipProvider.getNewClientTransaction(request);\n  // send the request out.\n  inviteTid.sendRequest();\n  this.dialog = inviteTid.getDialog();\n  // Send the request statelessly through the SIP provider.\n  //            this.sipProvider.sendRequest(request);\n\n  // Display the message in the text area.\n  logger.debug(\"Request sent:\\n\" + request.toString() + \"\\n\\n\");\n  } catch (Exception e) {\n  // If an error occurred, display the error.\n  e.printStackTrace();\n  logger.debug(\"Request sent failed: \" + e.getMessage() + \"\\n\");\n  }\n}\n<\/code><\/pre>\n<\/blockquote>\n\n<p>You can also view the reference post on authentication <a href=\"http://vkslabs.com/digest-authorization-in-sip-with-md5-challenge\" rel=\"nofollow noreferrer\">here<\/a>.\nHere is the gist of if just in case the link dries-up one day:<\/p>\n\n<blockquote>\n  <p>During a SIP request if the server responds with 401 Proxy\n  Authentication Required or 401 Unauthorized then it means the client\n  has to replay the same request again with MD5 challenge.<\/p>\n  \n  <p>The client should use nonce value from the response header\n  WWW-Authenticate.<\/p>\n  \n  <p>WWW-Authenticate: Digest realm=\"sip.linphone.org\",\n  nonce=\"JbAO1QAAAAA3aDI0AADMobiT7toAAAAA\", opaque=\"+GNywA==\",\n  algorithm=MD5, qop=\"auth\"<\/p>\n  \n  <p>The client should use nonce to generate the MD5 challenge and make the\n  original request again with the Authorization header.<\/p>\n  \n  <p>Steps to create the MD5 Challenge<\/p>\n  \n  <ol>\n  <li><p>Create first MD5 hash using username + \u201c:\u201d + realm + \u201c:\u201d + password<\/p>\n  \n  <p>String a1 = username + \":\" + realm + \":\" + password; \n  String ha1 = toHexString(mdigest.digest(a1.getBytes()));<\/p><\/li>\n  <li><p>Create second MD5 hash using request_method + \u201c:\u201d + request_uri<\/p>\n  \n  <p>String a2 = request_method.toUpperCase() + \":\" + request_uri; \n  String ha2 = toHexString(mdigest.digest(a2.getBytes()));<\/p><\/li>\n  <li><p>If qop in the response header is \u201cauth\u201d then the final MD5 hash is calculated using step 3a else if it is undefined or empty refer step\n  3b.<\/p><\/li>\n  <\/ol>\n  \n  <p>3a. Create the final MD5 string using ha1 + \u201c:\u201d + nonce + \u201c:\u201d + nonceCount + \u201c:\u201d + cNonce + \u201c:\u201d + qop + \u201c:\u201d + ha2<\/p>\n\n<pre><code>String finalStr = ha1 + \":\" + nonce + \":\" + nonceCount + \":\" + cNonce + \":\" + qop + \":\" + ha2; \nString response = toHexString(mdigest.digest(finalStr.getBytes()));\n<\/code><\/pre>\n  \n  <p>3b. Create the final MD5 string using ha1 + \u201c:\u201d + nonce + \u201c:\u201d + ha2<\/p>\n\n<pre><code>String finalStr = ha1 + \":\" + nonce + \":\" + ha2; \nString response = toHexString(mdigest.digest(finalStr.getBytes()));\n<\/code><\/pre>\n<\/blockquote>\n",
+            "answer_id": 18860541,
+            "question_id": 13033116,
+            "last_edit_date": 1439552420
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0898027b1c53bba4065d1a108c736e00?s=256&d=identicon&r=PG",
+                "account_id": 40715,
+                "user_type": "registered",
+                "user_id": 118052,
+                "link": "https://stackoverflow.com/users/118052/jeand",
+                "reputation": 2395,
+                "display_name": "jeand"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1351024497,
+            "creation_date": 1351024497,
+            "body": "<p>Check the example from here <a href=\"http://code.google.com/p/jain-sip/source/browse/#git%2Fsrc%2Fexamples%2Fauthorization\" rel=\"nofollow\">http://code.google.com/p/jain-sip/source/browse/#git%2Fsrc%2Fexamples%2Fauthorization<\/a><\/p>\n\n<p>Why do you need to go this low level, you might be better off with using a SIP Servlets Container such as Mobicents <a href=\"http://code.google.com/p/sipservlets/\" rel=\"nofollow\">http://code.google.com/p/sipservlets/<\/a><\/p>\n",
+            "answer_id": 13038826,
+            "question_id": 13033116
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aed4de86bda84c7b1c5032905775f64d?s=256&d=identicon&r=PG",
+                "account_id": 3507694,
+                "user_type": "registered",
+                "user_id": 2932861,
+                "link": "https://stackoverflow.com/users/2932861/lostinthefrequencydomain",
+                "reputation": 1167,
+                "display_name": "LostInTheFrequencyDomain",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1397233691,
+            "creation_date": 1397233691,
+            "body": "<p>You might also want to take a look at the ClientAuthenticationHelper class which encapsulates the steps above : See the package gov.nist.javax.sip.clientauthutils<\/p>\n\n<p>I believe there's an example of usage in the code base.<\/p>\n",
+            "answer_id": 23017931,
+            "question_id": 13033116
+        }
+    ],
+    "answer_comments": {"18860541": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/255b57de8a766874c58d799748eb96f6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5329016,
+                "user_type": "registered",
+                "user_id": 4250184,
+                "link": "https://stackoverflow.com/users/4250184/bobzone",
+                "reputation": 386,
+                "display_name": "Bobzone",
+                "accept_rate": 12
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18860541,
+            "edited": false,
+            "creation_date": 1510336188,
+            "comment_id": 81407276
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/978e3aeadd65802b21bcdf0a5c1af3c0?s=256&d=identicon&r=PG",
+                "account_id": 469001,
+                "user_type": "registered",
+                "user_id": 875305,
+                "link": "https://stackoverflow.com/users/875305/11101101b",
+                "reputation": 7789,
+                "display_name": "11101101b",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18860541,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/026523183a71f6fc68257a5029d7a663?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2208342,
+                "user_type": "registered",
+                "user_id": 1950962,
+                "link": "https://stackoverflow.com/users/1950962/skywalker",
+                "reputation": 726,
+                "display_name": "skywalker",
+                "accept_rate": 74
+            },
+            "edited": false,
+            "creation_date": 1431525737,
+            "comment_id": 48538139
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/026523183a71f6fc68257a5029d7a663?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2208342,
+                "user_type": "registered",
+                "user_id": 1950962,
+                "link": "https://stackoverflow.com/users/1950962/skywalker",
+                "reputation": 726,
+                "display_name": "skywalker",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18860541,
+            "edited": false,
+            "creation_date": 1431085427,
+            "comment_id": 48355561
+        }
+    ]}
+}

@@ -1,0 +1,109 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/49f0b349f5ece95dc0b323edb795ddd1?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 22050553,
+            "user_type": "registered",
+            "user_id": 16314920,
+            "link": "https://stackoverflow.com/users/16314920/anon",
+            "reputation": 1,
+            "display_name": "Anon"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/68327412/set-up-a-bidirectional-relationship-between-dog-and-owner-java",
+        "last_activity_date": 1641913545,
+        "creation_date": 1625917617,
+        "answer_count": 3,
+        "title": "Set up a bidirectional relationship between dog and owner (Java)",
+        "body": "<p>I am very new to programming and I'm working on an assignment for a dog auction program, where i want to write a method to give a dog to a person.<\/p>\n<p>I have an owner class, where I want to store dog objects in an array (I know using a list is an option, but the assignment specifies the use of an array). I have a dog class, where I want to be able to set an owner.\nThe problem I have is that I want to automatically set the dogs owner variable whenever I add the dog to the owners array of owned dogs, and vice versa, i want to automatically add the dog to the array if i call the setOwner method in the dog class<\/p>\n<p>This is my dog class:<\/p>\n<pre><code>public class Dog{\n    private String name;\n    private String breed;\n    private int age;\n    private int weight;\n    private double tailLength;\n    private Owner owner;\n\n    public Dog(String name, String breed, int age, int weight) {\n            this.name = name;\n            this.breed = breed;\n            this.age = age;\n            this.weight = weight;\n            \n    }\n   \n    public String getName() {\n        return name;\n    }\n    \n    public String getBreed() {\n        return breed;\n    }\n    \n    public void increaseAge() {\n        age++;\n    }\n\n    public int getAge() {\n        return age;\n    }\n\n    public int getWeight() {\n        return weight;\n    }\n\n    public double getTailLength() {\n        if (breed.equalsIgnoreCase(&quot;dachshund&quot;) || breed.equalsIgnoreCase(&quot;tax&quot;)) {\n            return 3.7;\n        } else {\n            return weight * (age / 10.0);\n        }\n    }\n    \n   public Owner setOwner(Owner owner){\n    return this.owner = owner;\n   }\n   \n    public Owner getOwner(){\n        return owner;\n    }\n    \n    public String toString() {\n        return &quot;Name: &quot; + name + &quot; Breed: &quot; + breed + &quot; Age: &quot; + age + &quot; Weight: &quot; + weight + &quot; Tail length: &quot; + getTailLength();\n    }\n\n}\n<\/code><\/pre>\n<p>This is the owner class:<\/p>\n<pre><code>public class Owner {\n        \n        private String ownerName;\n        public Dog[] dogList = new Dog[1];\n        \n        public Owner(String ownerName) {\n            this.ownerName = ownerName;\n        }\n        \n        public String toString(){\n            return &quot;Name: &quot; + ownerName;\n        }\n        \n        public String getName(){\n            return ownerName;\n        }            \n    \n    }\n<\/code><\/pre>\n<p>Finally, this is the giveDog method so far:<\/p>\n<pre><code>public void giveDog(){\n        System.out.print(&quot;Enter the name of the dog?&gt;&quot;);\n        String name = input.nextLine();\n        Dog dog = findDog(name);\n    \n    if (dog == null){\n        System.out.print(&quot;Error: No dog with that name&quot;);\n    return; \n    }\n   \n    if (dog.getOwner() !=null){                    \n        System.out.print(&quot;Error: Dog already has owner&quot;);\n    return; \n    }\n\n         System.out.print(&quot;Enter the name of the new owner?&gt;&quot;);\n         String nameOfOwner = input.nextLine().toUpperCase();\n         Owner o = findOwner(nameOfOwner);\n\n         if (o!= null) {\n            \n            dog.setOwner(o);\n            owner.dogList[0] = dog;\n        \n\n         \n\n\n             System.out.println(owner.getName()+&quot; now owns &quot;+ dog.getName()); \n\n\n         \n\n         } else {\n             System.out.print(&quot;Error: No such owner&quot;);\n\n        } \n     }\n<\/code><\/pre>\n<p>What change(s) could I make to my code so that adding a dog to an owner or vice versa sets the other automatically?<\/p>\n",
+        "question_id": 68327412,
+        "tags": [
+            "java",
+            "arrays"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 935,
+        "last_edit_date": 1625919404
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e442a53d36f9351aee11b5ecb8369691?s=256&d=identicon&r=PG",
+                "account_id": 6520,
+                "user_type": "registered",
+                "user_id": 11002,
+                "link": "https://stackoverflow.com/users/11002/tgdavies",
+                "reputation": 11634,
+                "display_name": "tgdavies",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1625919153,
+            "creation_date": 1625918640,
+            "body": "<p>First I'd suggest using a List instead of an array. It's much simpler to add and remove items.<\/p>\n<p>At present the code for setting the ownership is:<\/p>\n<pre><code>  dog.setOwner(o);\n  owner.dogList[0] = dog;\n<\/code><\/pre>\n<p>What change do you think you could make to <code>Dog.setOwner()<\/code> so that you didn't need to do <code>owner.dogList[0] = dog;<\/code> after calling it? That is, putting some code in <code>setOwner<\/code> so that you could just say <code>dog.setOwner(o)<\/code> and both directions of the relationship would be established?<\/p>\n<p>Setting the relationship the other way is not so easy -- you are giving the Dog to the Owner by directly manipulating a data structure which is inside the Owner object, instead of calling a method. This means that you have nowhere to put code to create the other direction of the relationship. So creating an <code>Owner.addDog<\/code> method is a good idea.<\/p>\n<p>Finally, once you start setting the bidirectional relationship in both places you'll need to think about avoiding an infinite recursion.<\/p>\n",
+            "answer_id": 68327535,
+            "question_id": 68327412,
+            "last_edit_date": 1625919153
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5582e43b05cedffa24a97426c0702e41?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1844999,
+                "user_type": "registered",
+                "user_id": 1673536,
+                "link": "https://stackoverflow.com/users/1673536/hisham",
+                "reputation": 411,
+                "display_name": "Hisham"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1625918721,
+            "creation_date": 1625918721,
+            "body": "<p>I suggest\nChange your <code>Owner.dogList<\/code> to be a list instead of an array.\nChange <code>Dog.setOwner()<\/code> to:<\/p>\n<pre><code>public void setOwner(Owner o) {\n    if(this.owner != o) {\n        this.owner = o;\n        o.getDogList().add(this);\n    }\n}\n<\/code><\/pre>\n<p>And just call <code>dog.setOwner(o);<\/code> in your <code>giveDog()<\/code> method.<\/p>\n",
+            "answer_id": 68327547,
+            "question_id": 68327412
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/HgZr7.jpg?s=256",
+                "account_id": 8561300,
+                "user_type": "registered",
+                "user_id": 6415262,
+                "link": "https://stackoverflow.com/users/6415262/handsomecoder",
+                "reputation": 756,
+                "display_name": "HandsomeCoder"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1625928638,
+            "creation_date": 1625919047,
+            "body": "<p>Can you try this<\/p>\n<p>Firstly, Modify <code>setOwner<\/code> method in that not only sets Owner but all assign dog to the owner<\/p>\n<pre><code>class Dog {\n    private String name;\n    private String breed;\n    private int age;\n    private int weight;\n    private double tailLength;\n    private Owner owner;\n\n    ...\n\n    public Owner setOwner(Owner owner) {\n        owner.assignDog(this);\n        return this.owner = owner;\n    }\n\n    ...\n}\n<\/code><\/pre>\n<p>Secondly, create <code>assignDog<\/code> method in <code>Owner<\/code> class<\/p>\n<pre><code>class Owner {\n\n    private String ownerName;\n    public Dog[] dogList = new Dog[10];\n    private int dogCount = -1;\n\n    ...\n\n    public void assignDog(Dog dog) {\n        this.dogList[++dogCount] = dog;\n    }\n\n    ...\n\n}\n<\/code><\/pre>\n<p>Finally, you can call <code>setOwner<\/code> which will set the bidirectional relationship<\/p>\n<pre><code>public class Solution {\n\n    public static List&lt;Dog&gt; dogs = Arrays.asList(new Dog(&quot;Tom&quot;));\n\n    public static List&lt;Owner&gt; owners = Arrays.asList(new Owner(&quot;ALICE&quot;));\n\n    public static Dog findDog(String name) {\n        for (Dog dog : dogs) {\n            if (dog.getName().equals(name)) {\n                return dog;\n            }\n        }\n        return null;\n    }\n\n    public static Owner findOwner(String name) {\n        for (Owner owner : owners) {\n            if (owner.getName().equals(name)) {\n                return owner;\n            }\n        }\n        return null;\n    }\n\n    public static void main(String[] arg) {\n\n        Scanner sc = new Scanner(System.in);\n\n        System.out.print(&quot;Enter the name of the dog?&gt;&quot;);\n        String name = sc.nextLine();\n        Dog dog = findDog(name);\n\n        if (dog == null) {\n            System.out.print(&quot;Error: No dog with that name&quot;);\n            return;\n        }\n\n        if (dog.getOwner() != null) {\n            System.out.print(&quot;Error: Dog already has owner&quot;);\n            return;\n        }\n\n        System.out.print(&quot;Enter the name of the new owner?&gt;&quot;);\n        String nameOfOwner = sc.nextLine().toUpperCase();\n        Owner o = findOwner(nameOfOwner);\n\n        if (o != null) {\n\n            dog.setOwner(o);\n            System.out.println(o.getName() + &quot; now owns &quot; + dog.getName());\n\n        } else {\n            System.out.print(&quot;Error: No such owner&quot;);\n\n        }\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 68327584,
+            "question_id": 68327412,
+            "last_edit_date": 1625928638
+        }
+    ],
+    "answer_comments": {"68327547": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/49f0b349f5ece95dc0b323edb795ddd1?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 22050553,
+            "user_type": "registered",
+            "user_id": 16314920,
+            "link": "https://stackoverflow.com/users/16314920/anon",
+            "reputation": 1,
+            "display_name": "Anon"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 68327547,
+        "edited": false,
+        "creation_date": 1625919159,
+        "comment_id": 120758323
+    }]}
+}

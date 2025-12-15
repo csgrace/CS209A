@@ -1,0 +1,136 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b61aa56c7f44025ac8bf046befada136?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8703816,
+            "user_type": "registered",
+            "user_id": 6512661,
+            "link": "https://stackoverflow.com/users/6512661/silk0vsky",
+            "reputation": 1081,
+            "display_name": "Silk0vsky",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/44937309/akka-persistance-and-at-least-once-delivery",
+        "last_activity_date": 1606238202,
+        "creation_date": 1499295769,
+        "answer_count": 1,
+        "title": "Akka persistance and at least once delivery",
+        "body": "<p>I have some messaging application which needs at-least-once guaranties.\nAs I understand from documentation: the akka-persistence - is about the actor state. And it uses some layer-by-layer ideology to deal with that state.<\/p>\n\n<p>In the documentation I found some AbstractPersistentActorWithAtLeastOnceDelivery which seems to be proposing this guaranty. But now I have some doubts about the conception in general: <\/p>\n\n<p>My actor is a simple transmitter and all I need - is delivery guaranty. So I don't actually care about the actor state and all that layering which consumes precious memory. Can the extensive journal be the reason of problems?<\/p>\n\n<p>The actor:<\/p>\n\n<pre><code>public class SafeSenderActor extends AbstractPersistentActorWithAtLeastOnceDelivery {\n\n    private String persistenceId;\n    private ActorSelection destination;\n\n    public SafeSenderActor() {\n        System.out.println(\"SafeSenderActor created\");\n        this.persistenceId = \"safe-persistent-actor-id-\" + UUID.randomUUID();\n        destination = context().actorSelection(\"/user/safeReceiverRouter\");\n    }\n\n    @Override\n    public String persistenceId() {\n        return persistenceId;\n    }\n\n    @Override\n    public AbstractActor.Receive createReceive() {\n        return ReceiveBuilder.create()\n                .match(SenderTaskMessage.class, msg -&gt; {\n                    persistAsync(new MsgSentEvent(msg.getTestMessage()), this::updateState);\n                })\n                .match(ConfirmRobustMessageDelivery.class, ack -&gt; {\n                    persistAsync(new MsgConfirmEvent(ack.getMessageId(), ack.getLocalMessageNumber()), this::updateState);\n                })\n                .build();\n    }\n\n    @Override\n    public Receive createReceiveRecover() {\n        return receiveBuilder().match(Object.class, this::updateState).build();\n    }\n\n    private void updateState(Object event) {\n        if (event instanceof MsgSentEvent) {\n            MsgSentEvent ev = (MsgSentEvent) event;\n            deliver(destination, deliveryId -&gt; new RobustTestMessage(deliveryId, ev.getMessage()));\n        } else if (event instanceof MsgConfirmEvent) {\n            MsgConfirmEvent ev = (MsgConfirmEvent) event;\n            confirmDelivery(ev.getDeliveryId());\n        }\n    }\n\n}\n<\/code><\/pre>\n\n<p>After some continuous messaging I get the error:<\/p>\n\n<pre><code>[ERROR] [07/06/2017 01:40:33.446] [sender-system-akka.actor.default-dispatcher-50] [akka://sender-system@127.0.0.1:6666/user/safeSendersRouter/$d] Failed to persist event type [com.test.common.events.MsgSentEvent] with sequence number [358698] for persistenceId [safe-persistent-actor-id-648ec66d-7b7f-4291-b3a2-9bd395d92dc7]. (akka.pattern.CircuitBreaker$$anon$1: Circuit Breaker Timed out.)\n<\/code><\/pre>\n\n<p>I'm using the leveldb as a journal.<\/p>\n",
+        "question_id": 44937309,
+        "tags": [
+            "java",
+            "akka",
+            "akka-persistence"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 560,
+        "last_edit_date": 1581163724
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3a5ab938a6d6a51e0acb1de9ab74255e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6736152,
+                "user_type": "registered",
+                "user_id": 5190890,
+                "link": "https://stackoverflow.com/users/5190890/thwiegan",
+                "reputation": 2173,
+                "display_name": "thwiegan",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937309,
+            "edited": false,
+            "creation_date": 1499353031,
+            "comment_id": 76880060
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b61aa56c7f44025ac8bf046befada136?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8703816,
+                "user_type": "registered",
+                "user_id": 6512661,
+                "link": "https://stackoverflow.com/users/6512661/silk0vsky",
+                "reputation": 1081,
+                "display_name": "Silk0vsky",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937309,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/3a5ab938a6d6a51e0acb1de9ab74255e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6736152,
+                "user_type": "registered",
+                "user_id": 5190890,
+                "link": "https://stackoverflow.com/users/5190890/thwiegan",
+                "reputation": 2173,
+                "display_name": "thwiegan",
+                "accept_rate": 40
+            },
+            "edited": false,
+            "creation_date": 1499352950,
+            "comment_id": 76879997
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3a5ab938a6d6a51e0acb1de9ab74255e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6736152,
+                "user_type": "registered",
+                "user_id": 5190890,
+                "link": "https://stackoverflow.com/users/5190890/thwiegan",
+                "reputation": 2173,
+                "display_name": "thwiegan",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 44937309,
+            "edited": false,
+            "creation_date": 1499351490,
+            "comment_id": 76878844
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3a5ab938a6d6a51e0acb1de9ab74255e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6736152,
+                "user_type": "registered",
+                "user_id": 5190890,
+                "link": "https://stackoverflow.com/users/5190890/thwiegan",
+                "reputation": 2173,
+                "display_name": "thwiegan",
+                "accept_rate": 40
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 44937309,
+            "edited": false,
+            "creation_date": 1499351447,
+            "comment_id": 76878805
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3a02e7c9d317839db7ad17f840320afd?s=256&d=identicon&r=PG",
+            "account_id": 1682782,
+            "user_type": "registered",
+            "user_id": 2096986,
+            "link": "https://stackoverflow.com/users/2096986/felipe",
+            "reputation": 7763,
+            "display_name": "Felipe",
+            "accept_rate": 37
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1606238202,
+        "creation_date": 1606238202,
+        "body": "<p>It might be a long time but maybe it is still useful to answer it. You can override the methods <code>onPersistFailure<\/code> and <code>onPersistRejected<\/code> to investigate the error that you mentioned. The <code>onPersistFailure<\/code> method is called if persisting failed. The actor will be stooped. BEst practice is to start the actor again after a while and use Backoff supervisor. The <code>onPersistRejected<\/code> method is called if the JOURNAl fails to persist the event. The actor is RESUMED.<\/p>\n<pre><code>public class SafeSenderActor extends AbstractPersistentActorWithAtLeastOnceDelivery implements ActorLogging {\n    ...\n    ...\n    ...\n    @Override\n    public void onPersistFailure(Throwable cause, Object event, long seqNr) {\n        log().error(&quot;fail to persist $event because of: {}&quot;, cause);\n        super.onPersistFailure(cause, event, seqNr);\n    }\n\n    @Override\n    public void onPersistRejected(Throwable cause, Object event, long seqNr) {\n        log().error(&quot;persist rejected for {} because of: {}&quot;, event, cause);\n        super.onPersistRejected(cause, event, seqNr);\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 64991567,
+        "question_id": 44937309
+    }],
+    "answer_comments": {}
+}

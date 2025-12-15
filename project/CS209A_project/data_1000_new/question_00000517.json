@@ -1,0 +1,87 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/350ea39dc2a406c5cb39e7c4993b13ff?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5409858,
+            "user_type": "registered",
+            "user_id": 4307049,
+            "link": "https://stackoverflow.com/users/4307049/luke",
+            "reputation": 181,
+            "display_name": "Luke"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75951401/cant-display-field-id-in-java-rest-application-with-spring-boot",
+        "last_activity_date": 1680809505,
+        "creation_date": 1680795945,
+        "answer_count": 2,
+        "title": "Can&#39;t display field id in java rest application with spring boot",
+        "body": "<p>I have a java web application with spring boot version 3.1.0<\/p>\n<p>User class is:<\/p>\n<pre><code>\nimport jakarta.persistence.Column;\nimport jakarta.persistence.Entity;\nimport jakarta.persistence.GeneratedValue;\nimport jakarta.persistence.GenerationType;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.Table;\nimport lombok.Getter;\nimport lombok.Setter;\n\n@Getter\n@Setter\n@Entity\n@Table(name = &quot;user&quot;)\npublic class User {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.AUTO)\n    @Column(name = &quot;user_id&quot;)\n    private Integer id;\n    \n    @Column(name = &quot;username&quot;)\n    private String username;\n\n    public User() {\n    }\n\n    public User(Integer id) {\n        this.id = id;\n    }\n}\n<\/code><\/pre>\n<p>UserController is:<\/p>\n<pre><code>\nimport java.util.List;\nimport java.util.Optional;\n\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.PathVariable;\nimport org.springframework.web.bind.annotation.RequestMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\nimport com.fasterxml.jackson.annotation.JsonInclude;\nimport com.fasterxml.jackson.core.JsonProcessingException;\nimport com.fasterxml.jackson.databind.ObjectMapper;\n\n\n@RestController\n@RequestMapping(&quot;/users&quot;)\npublic class UserController {\n    \n    @Autowired\n    private UserService userService;\n    \n    @GetMapping(&quot;&quot;)\n    public ResponseEntity&lt;List&lt;User&gt;&gt; getUsers() {\n        List&lt;User&gt; users = userService.getAllUsers();\n        return ResponseEntity.ok(users);\n    }\n\n    @GetMapping(&quot;/{id}&quot;)\n    public ResponseEntity&lt;String&gt; getUserById(@PathVariable Integer id)throws JsonProcessingException {\n        Optional&lt;User&gt; userOptional = userService.getUserById(id);\n        \n        if (userOptional.isPresent()) {\n            User user = userOptional.get();\n            return ResponseEntity.ok(user);\n        } else {\n            return ResponseEntity.notFound().build();\n        }\n    }\n\n}\n<\/code><\/pre>\n<p>UserService is:<\/p>\n<pre><code>\nimport java.util.List;\nimport java.util.Optional;\n\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.stereotype.Service;\n\n@Service\npublic class UserService {\n\n   @Autowired\n   private UserRepository userRepository;\n\n   public List&lt;User&gt; getAllUsers() {\n       return userRepository.findAll();\n   }\n\n   public Optional&lt;User&gt; getUserById(Integer id) {\n       return userRepository.findById(id);\n   }\n\n   public void saveOrUpdateUser(User user) {\n       userRepository.save(user);\n   }\n\n   public void deleteUser(Integer id) {\n       userRepository.deleteById(id);\n   }\n\n}\n<\/code><\/pre>\n<p>UserRepository is:<\/p>\n<pre><code>import java.util.Optional;\n\nimport org.springframework.data.jpa.repository.JpaRepository;\nimport org.springframework.stereotype.Repository;\n\n@Repository\npublic interface UserRepository extends JpaRepository&lt;User, Integer&gt; {\n\n    Optional&lt;User&gt; findById(int id);\n    \n}\n<\/code><\/pre>\n<p>When I call http://localhost:8080/xxx/users/1, I get this result:<\/p>\n<pre><code>{\n  &quot;username&quot; : &quot;my-email@gmail.com&quot;,\n  &quot;_links&quot; : {\n    &quot;self&quot; : {\n      &quot;href&quot; : &quot;http://localhost:8080/xxx/users/1&quot;\n    },\n    &quot;user&quot; : {\n      &quot;href&quot; : &quot;http://localhost:8080/xxx/users/1&quot;\n    }\n  }\n}\n<\/code><\/pre>\n<p>Field id of User class is never returned and I don't understand why. I tried also with<\/p>\n<pre><code>@Id\n@GeneratedValue(strategy = GenerationType.AUTO)\n@Column(name = &quot;user_id&quot;)\n@JsonProperty(&quot;id&quot;)\n@JsonInclude(JsonInclude.Include.ALWAYS)\n<\/code><\/pre>\n<p>I use lombok lib for getter and setter. However, I tried also to define getter and setter manually in the classic way but nothing changes.<\/p>\n<p>What's wrong with this?<\/p>\n<p>Thanks<\/p>\n",
+        "question_id": 75951401,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 119
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/JTSuL.jpg?s=256",
+            "account_id": 17520379,
+            "user_type": "registered",
+            "user_id": 12706564,
+            "link": "https://stackoverflow.com/users/12706564/emanuel-trandafir",
+            "reputation": 1683,
+            "display_name": "Emanuel Trandafir"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 75951401,
+        "edited": false,
+        "creation_date": 1680796188,
+        "comment_id": 133961658
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a/AGNmyxZ317JKzVVAe6qwp4tkDgBQ4TavjF7t1zl0fRpn=k-s256",
+                "account_id": 28218549,
+                "user_type": "registered",
+                "user_id": 21569670,
+                "link": "https://stackoverflow.com/users/21569670/omprakash-k",
+                "reputation": 29,
+                "display_name": "omprakash K"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1680804196,
+            "creation_date": 1680804196,
+            "body": "<p>You change return type from string to user object<\/p>\n<pre><code>@GetMapping(&quot;/{id}&quot;)\n    public ResponseEntity&lt;User&gt; getUserById(@PathVariable Integer id)throws JsonProcessingException {\n        Optional&lt;User&gt; userOptional = userService.getUserById(id);\n        \n        if (userOptional.isPresent()) {\n            User user = userOptional.get();\n            return ResponseEntity.ok(user);\n        } else {\n            return ResponseEntity.notFound().build();\n        }\n    }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 75952480,
+            "question_id": 75951401
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/82fc17a102f63bec03ae4e429c9e7978?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5609143,
+                "user_type": "registered",
+                "user_id": 4442612,
+                "link": "https://stackoverflow.com/users/4442612/vijaydeep",
+                "reputation": 395,
+                "display_name": "vijaydeep"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1680809505,
+            "creation_date": 1680809505,
+            "body": "<p>By default the @Id attributes are not rendered. If you want to display the id then you can create a new getter say getId like this :<\/p>\n<pre><code>public Integer getId(){\n        return this.id;\n    }\n<\/code><\/pre>\n<p>Now  it will show id also as part of response.<\/p>\n",
+            "answer_id": 75953135,
+            "question_id": 75951401
+        }
+    ],
+    "answer_comments": {}
+}

@@ -1,0 +1,161 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0f5f97443bdc1acd60990006fb0c946a?s=256&d=identicon&r=PG",
+            "account_id": 201468,
+            "user_type": "registered",
+            "user_id": 447934,
+            "link": "https://stackoverflow.com/users/447934/josh-kovach",
+            "reputation": 7749,
+            "display_name": "Josh Kovach",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/8302229/accessing-attrs-in-attributeset-for-custom-components",
+        "last_activity_date": 1544042822,
+        "creation_date": 1322513980,
+        "answer_count": 2,
+        "title": "Accessing attrs in AttributeSet for custom components",
+        "body": "<p>I've got a custom component containing two TextViews that have a custom size-setting method on (the two text views are proportional by about a 1:2 ratio). Being that this is a subclass of RelativeLayout, it doesn't have a textSize attribute, but I'm wondering if it is possible to still set the <code>android:textSize<\/code> attribute in the XML instantiation for this component, and then grab the <code>textSize<\/code> attribute from the AttributeSet to use with my custom <code>setSize()<\/code> method in the constructor.<\/p>\n\n<p>I've seen the technique to do this with custom attributes, but what if I want to grab an attribute that's already in the android lexicon?<\/p>\n",
+        "question_id": 8302229,
+        "tags": [
+            "java",
+            "android",
+            "textview",
+            "android-relativelayout"
+        ],
+        "score": 19,
+        "accepted_answer_id": 8302871,
+        "is_answered": true,
+        "view_count": 27086,
+        "last_edit_date": 1544042822
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7505ac75125eda92a69b36eeece40d7d?s=256&d=identicon&r=PG",
+                "account_id": 430629,
+                "user_type": "registered",
+                "user_id": 814178,
+                "link": "https://stackoverflow.com/users/814178/serkanozel",
+                "reputation": 2927,
+                "display_name": "serkanozel",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 70,
+            "is_accepted": true,
+            "last_activity_date": 1429130292,
+            "creation_date": 1322517090,
+            "body": "<p>yes it is possible; <\/p>\n\n<p>let's assume your RelativeLayout declaration (in xml) has textSize defined with 14sp:<\/p>\n\n<pre><code>android:textSize=\"14sp\"\n<\/code><\/pre>\n\n<p>In the constructor of your custom view (the one that takes in the AttributeSet), you can retrieve the attributes from Android's namespace as such:<\/p>\n\n<pre><code>String xmlProvidedSize = attrs.getAttributeValue(\"http://schemas.android.com/apk/res/android\", \"textSize\");\n<\/code><\/pre>\n\n<p>The value of the xmlProvidedSize will be something like this \"14.0sp\" and maybe with little bit of String editing you can just extract the numbers.<\/p>\n\n<hr>\n\n<p>Another option to declare your own attribute set would be little lengthy, but it is also possible.<\/p>\n\n<p>So, you have your custom view and your TextViews declared something like this right:<\/p>\n\n<pre><code>public class MyCustomView extends RelativeLayout{\n\n    private TextView myTextView1;\n    private TextView myTextView2;\n\n// rest of your class here\n<\/code><\/pre>\n\n<p>great...<\/p>\n\n<p>Now you need to also make sure your custom view overrides the constructor that takes in the AttributeSet like this:<\/p>\n\n<pre><code>public MyCustomView(Context context, AttributeSet attrs){   \n    super(context, attrs);\n    init(attrs, context);  //nice, clean method to instantiate your TextViews// \n}\n<\/code><\/pre>\n\n<p>ok, let's see that init() method now:<\/p>\n\n<pre><code>private void init(AttributeSet attrs, Context context){\n    // do your other View related stuff here //\n\n\n    TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.MyCustomView);\n    int xmlProvidedText1Size = a.int(R.styleable.MyCustomView_text1Size);\n    int xmlProvidedText2Size = a.int(R.styleable.MyCustomView_text2Size);\n\n    myTextView1.setTextSize(xmlProvidedText1Size);\n    myTextView2.setTextSize(xmlProvidedText2Size);\n\n    // and other stuff here //\n}\n<\/code><\/pre>\n\n<p>You're probably wondering where does R.styleable.MyCustomView, R.styleable.MyCustomView_text1Size and R.styleable.MyCustomView_text2Size are coming from; allow me to elaborate on those.<\/p>\n\n<p>You have to declare the attribute name(s) in your attrs.xml file (under values directory) so that where ever you get to use your custom view, the values gathered from these attributes will be handed in your constructor.<\/p>\n\n<p>So let's see how you declare the these custom attributes like you've asked:\nHere is my whole attrs.xml<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;resources&gt;\n    &lt;declare-styleable name=\"MyCustomView\"&gt;\n        &lt;attr name=\"text1Size\" format=\"integer\"/&gt;\n        &lt;attr name=\"text2Size\" format=\"integer\"/&gt;\n    &lt;/declare-styleable&gt;\n&lt;/resources&gt;\n<\/code><\/pre>\n\n<p>Now you can set your TextViews' size in your XML, but NOT without declaring the namespace in your Layout, here is how:<\/p>\n\n<pre><code>&lt;com.my.app.package.MyCustomView\n    xmlns:josh=\"http://schemas.android.com/apk/res-auto\"\n    android:id=\"@+id/my_custom_view_id\"\n    android:layout_width=\"fill_parent\"\n    android:layout_height=\"wrap_content\"\n    josh:text1Size=\"15\"\n    josh:text2Size=\"30\"     \n    /&gt;\n<\/code><\/pre>\n\n<p>Please pay attention how I declared the namespace to be \"josh\" as the first line in your CustomView's attribute set.<\/p>\n\n<p>I hope this helps Josh,<\/p>\n",
+            "answer_id": 8302871,
+            "question_id": 8302229,
+            "last_edit_date": 1429130292
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3b7ad8915f552cd4e23caf38eee10030?s=256&d=identicon&r=PG",
+                "account_id": 4531600,
+                "user_type": "registered",
+                "user_id": 3681880,
+                "link": "https://stackoverflow.com/users/3681880/suragch",
+                "reputation": 516356,
+                "display_name": "Suragch",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1486547214,
+            "creation_date": 1486547214,
+            "body": "<p>The accepted answer is a little long. Here is a condensed version that I hope will be easy to follow. In order to add a <code>textSize<\/code> attribute (or anything that uses <code>dp<\/code>/<code>sp<\/code>) to your custom view, do the following steps.<\/p>\n\n<h2>1. Create a custom attribute<\/h2>\n\n<p>Create (or add the following section) to <em>attrs.xml<\/em>. Note the <a href=\"https://developer.android.com/guide/topics/resources/more-resources.html#Dimension\" rel=\"nofollow noreferrer\"><code>dimension<\/code><\/a> format.<\/p>\n\n<pre><code>&lt;resources&gt;\n    &lt;declare-styleable name=\"CustomView\"&gt;\n        &lt;attr name=\"textSize\" format=\"dimension\" /&gt;\n    &lt;/declare-styleable&gt;\n&lt;/resources&gt;\n<\/code><\/pre>\n\n<h2>2. Set the attribute in your xml layout.<\/h2>\n\n<p>Note the custom <code>app<\/code> namespace.<\/p>\n\n<pre><code>&lt;RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n                xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"match_parent\"&gt;\n\n    &lt;com.example.myproject.CustomView\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        app:textSize=\"20sp\" /&gt; \n\n&lt;/RelativeLayout&gt;\n<\/code><\/pre>\n\n<h2>3. Get the attribute value in your custom view<\/h2>\n\n<p>Note the use of <code>getDimensionPixelSize<\/code>. Within your custom view just work with pixels. See <a href=\"https://stackoverflow.com/a/42108115/3681880\">this answer<\/a> if you need to convert to a different dimension.<\/p>\n\n<pre><code>public class CustomView extends View {\n\n    private float mTextSize; // pixels\n\n    public CustomView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        TypedArray a = context.getTheme().obtainStyledAttributes(\n                attrs, R.styleable.CustomView, 0, 0);\n        try {\n            mTextSize = a.getDimensionPixelSize(R.styleable.CustomView_textSize, 0);\n        } finally {\n            a.recycle();\n        }\n    }\n\n    /**\n     * @param size in SP units\n     */\n    public void setTextSize(int size) {\n        mTextSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,\n                size, getResources().getDisplayMetrics());\n        mTextPaint.setTextSize(mTextSize);\n        invalidate();\n        requestLayout();\n    }\n\n    // ...\n}\n<\/code><\/pre>\n\n<h2>Notes<\/h2>\n\n<ul>\n<li><a href=\"https://developer.android.com/training/custom-views/create-view.html\" rel=\"nofollow noreferrer\">Custom view documentation<\/a><\/li>\n<\/ul>\n",
+            "answer_id": 42109633,
+            "question_id": 8302229,
+            "last_edit_date": 1495542868
+        }
+    ],
+    "answer_comments": {"8302871": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/64e53a8ec83a5f414014534c30539f14?s=256&d=identicon&r=PG",
+                "account_id": 133349,
+                "user_type": "registered",
+                "user_id": 334649,
+                "link": "https://stackoverflow.com/users/334649/jargetz",
+                "reputation": 624,
+                "display_name": "jargetz"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8302871,
+            "edited": false,
+            "creation_date": 1394651772,
+            "comment_id": 33990030
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0f5f97443bdc1acd60990006fb0c946a?s=256&d=identicon&r=PG",
+                "account_id": 201468,
+                "user_type": "registered",
+                "user_id": 447934,
+                "link": "https://stackoverflow.com/users/447934/josh-kovach",
+                "reputation": 7749,
+                "display_name": "Josh Kovach",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8302871,
+            "edited": false,
+            "creation_date": 1322535883,
+            "comment_id": 10233638
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7505ac75125eda92a69b36eeece40d7d?s=256&d=identicon&r=PG",
+                "account_id": 430629,
+                "user_type": "registered",
+                "user_id": 814178,
+                "link": "https://stackoverflow.com/users/814178/serkanozel",
+                "reputation": 2927,
+                "display_name": "serkanozel",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8302871,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0f5f97443bdc1acd60990006fb0c946a?s=256&d=identicon&r=PG",
+                "account_id": 201468,
+                "user_type": "registered",
+                "user_id": 447934,
+                "link": "https://stackoverflow.com/users/447934/josh-kovach",
+                "reputation": 7749,
+                "display_name": "Josh Kovach",
+                "accept_rate": 74
+            },
+            "edited": false,
+            "creation_date": 1322520112,
+            "comment_id": 10230670
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0f5f97443bdc1acd60990006fb0c946a?s=256&d=identicon&r=PG",
+                "account_id": 201468,
+                "user_type": "registered",
+                "user_id": 447934,
+                "link": "https://stackoverflow.com/users/447934/josh-kovach",
+                "reputation": 7749,
+                "display_name": "Josh Kovach",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8302871,
+            "edited": false,
+            "creation_date": 1322518133,
+            "comment_id": 10230108
+        }
+    ]}
+}

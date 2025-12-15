@@ -1,0 +1,312 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fa2d855b58c41269f0876b99eac9607d?s=256&d=identicon&r=PG",
+            "account_id": 30002,
+            "user_type": "registered",
+            "user_id": 81491,
+            "link": "https://stackoverflow.com/users/81491/brandon-yarbrough",
+            "reputation": 38534,
+            "display_name": "Brandon Yarbrough",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/6834677/jackson-mapper-post-construct",
+        "last_activity_date": 1704626578,
+        "creation_date": 1311704684,
+        "answer_count": 4,
+        "title": "Jackson Mapper post-construct",
+        "body": "<p>I am using the Jackson <code>ObjectMapper<\/code> to deserialize some JSON into a Java class, which we'll call <code>PlayerData<\/code>.  I would like to add a bit of logic to the <code>PlayerData<\/code> class to fix up some data after the fields have been loaded in.  For example, some early JSON files used to use a \"sex\" flag instead of a \"gender\" falg, so if the sex flag is set but the gender flag is not set, I'd like to set the value of the gender field to be the value of the sex field.<\/p>\n\n<p>Is there some sort of @PostConstruct or @AfterLoad annotation that I could affix to a method? Or perhaps an interface that I could implement?  I didn't notice one in the documentation, but it seemed like an obvious feature.<\/p>\n",
+        "question_id": 6834677,
+        "tags": [
+            "java",
+            "mapping",
+            "jackson"
+        ],
+        "score": 48,
+        "is_answered": true,
+        "view_count": 26099
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/61d5f2b174543d691ec26df9751647a6?s=256&d=identicon&r=PG",
+            "account_id": 368939,
+            "user_type": "registered",
+            "user_id": 716027,
+            "link": "https://stackoverflow.com/users/716027/fedor-belov",
+            "reputation": 23603,
+            "display_name": "fedor.belov",
+            "accept_rate": 56
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 4,
+        "post_id": 6834677,
+        "edited": false,
+        "creation_date": 1434049586,
+        "comment_id": 49628254
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/76bfe9645715492707b67ed7d04bc73a?s=256&d=identicon&r=PG",
+                "account_id": 199370,
+                "user_type": "registered",
+                "user_id": 444639,
+                "link": "https://stackoverflow.com/users/444639/rylander",
+                "reputation": 20269,
+                "display_name": "Rylander",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 28,
+            "is_accepted": false,
+            "last_activity_date": 1548687449,
+            "creation_date": 1480365379,
+            "body": "<p>Found this thru a <a href=\"https://github.com/FasterXML/jackson-databind/issues/279#issuecomment-104538715\" rel=\"noreferrer\">link<\/a> in the comments (credit: <a href=\"https://stackoverflow.com/users/716027/fedor-belov\">fedor.belov<\/a>). This appears to allow you to run code post construct. <\/p>\n\n<blockquote>\n  <p>Adding a comment for people who end up here via\n  <a href=\"http://jira.codehaus.org/browse/JACKSON-645\" rel=\"noreferrer\">http://jira.codehaus.org/browse/JACKSON-645<\/a> or\n  <a href=\"http://jira.codehaus.org/browse/JACKSON-538\" rel=\"noreferrer\">http://jira.codehaus.org/browse/JACKSON-538<\/a> and are looking for a\n  method which is called after a deserializer completes. I was able to\n  achieve the desired effect by including an annotation and writing a\n  converter which uses the same class as input and output.<\/p>\n<\/blockquote>\n\n<pre><code>@JsonDeserialize(converter=MyClassSanitizer.class)  // invoked after class is fully deserialized\npublic class MyClass {\n    public String field1;\n}\n\nimport com.fasterxml.jackson.databind.util.StdConverter;\npublic class MyClassSanitizer extends StdConverter&lt;MyClass,MyClass&gt; {\n  @Override\n  public MyClass convert(MyClass var1) {\n    var1.field1 = munge(var1.field1);\n    return var1;\n  }\n}\n<\/code><\/pre>\n",
+            "answer_id": 40852985,
+            "question_id": 6834677,
+            "last_edit_date": 1548687449
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b81bf0b56cb71d5bf83e9b853a268fcf?s=256&d=identicon&r=PG",
+                "account_id": 1653550,
+                "user_type": "registered",
+                "user_id": 1523648,
+                "link": "https://stackoverflow.com/users/1523648/oberlies",
+                "reputation": 11793,
+                "display_name": "oberlies",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 12,
+            "is_accepted": false,
+            "last_activity_date": 1567427735,
+            "creation_date": 1567427735,
+            "body": "<p>This is not supported out of the box, but you can easily create your <code>@JsonPostDeserialize<\/code> annotation for methods to be called after deserialization.<\/p>\n\n<p>First, define the annotation:\n<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>/**\n * Annotation for methods to be called directly after deserialization of the object.\n */\n@Target({ ElementType.METHOD })\n@Retention(RetentionPolicy.RUNTIME)\npublic @interface JsonPostDeserialize {\n}\n<\/code><\/pre>\n\n<p>Then, add the following registration and implementation code to your project:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>public static void addPostDeserializeSupport(ObjectMapper objectMapper) {\n    SimpleModule module = new SimpleModule();\n    module.setDeserializerModifier(new BeanDeserializerModifier() {\n        @Override\n        public JsonDeserializer&lt;?&gt; modifyDeserializer(DeserializationConfig config, BeanDescription beanDescription,\n                JsonDeserializer&lt;?&gt; originalDeserializer) {\n            return new CustomAnnotationsDeserializer(originalDeserializer, beanDescription);\n        }\n    });\n    objectMapper.registerModule(module);\n}\n\n/**\n * Class implementing the functionality of the {@link JsonPostDeserialize} annotation.\n */\npublic class CustomAnnotationsDeserializer extends DelegatingDeserializer {\n    private final BeanDescription beanDescription;\n\n    public CustomAnnotationsDeserializer(JsonDeserializer&lt;?&gt; delegate, BeanDescription beanDescription) {\n        super(delegate);\n        this.beanDescription = beanDescription;\n    }\n\n    @Override\n    protected JsonDeserializer&lt;?&gt; newDelegatingInstance(JsonDeserializer&lt;?&gt; newDelegatee) {\n        return new CustomAnnotationsDeserializer(newDelegatee, beanDescription);\n    }\n\n    @Override\n    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {\n        Object deserializedObject = super.deserialize(p, ctxt);\n\n        callPostDeserializeMethods(deserializedObject);\n        return deserializedObject;\n    }\n\n    private void callPostDeserializeMethods(Object deserializedObject) {\n        for (AnnotatedMethod method : beanDescription.getClassInfo().memberMethods()) {\n            if (method.hasAnnotation(JsonPostDeserialize.class)) {\n                try {\n                    method.callOn(deserializedObject);\n                } catch (Exception e) {\n                    throw new RuntimeException(\"Failed to call @JsonPostDeserialize annotated method in class \"\n                            + beanDescription.getClassInfo().getName(), e);\n                }\n            }\n        }\n    }\n}\n\n<\/code><\/pre>\n\n<p>Finally, modify your <code>ObjectMapper<\/code> instance with <code>addPostDeserializeSupport<\/code>, it will invoke all <code>@JsonPostDeserialize<\/code> annotated method of deserialized objects.<\/p>\n",
+            "answer_id": 57757055,
+            "question_id": 6834677
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bbfbca5273f9d020ef4ccfbadcecccba?s=256&d=identicon&r=PG",
+                "account_id": 77528,
+                "user_type": "registered",
+                "user_id": 221213,
+                "link": "https://stackoverflow.com/users/221213/karaszi-istv%c3%a1n",
+                "reputation": 31547,
+                "display_name": "KARASZI Istv&#225;n",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 11,
+            "is_accepted": false,
+            "last_activity_date": 1704626578,
+            "creation_date": 1311705396,
+            "body": "<p>If you're not using the <code>@JsonCreator<\/code>, then Jackson will use the setter and getter methods to set the fields.<\/p>\n<p>So if you define the following methods assuming that you have <code>TimeOfDay<\/code> and <code>LightLevel<\/code> enums:<\/p>\n<pre><code>@JsonProperty(&quot;timeOfDay&quot;)\npublic void setTimeOfDay(final TimeOfDay timeOfDay) {\n  this.timeOfDay = timeOfDay;\n  if (lightLevel == null) {\n    lightLevel = (timeOfDay == TimeOfDay.DAY) ? LightLevel.LIGHT : LightLevel.DARK;\n  }\n}\n\n@JsonProperty(&quot;lightLevel&quot;)\npublic void setLightLevel(final LightLevel lightLevel) {\n  this.lightLevel = lightLevel;\n  if (timeOfDay == null) {\n    timeOfDay = (lightLevel == LightLevel.LIGHT) ? TimeOfDay.DAY : TimeOfDay.NIGHT;\n  }\n}\n<\/code><\/pre>\n<p>it would work.<\/p>\n<p><em>Update<\/em>: You can find all of the annotations of Jackson library <a href=\"https://github.com/FasterXML/jackson-annotations/wiki/Jackson-Annotations\" rel=\"nofollow noreferrer\">here<\/a>.<\/p>\n<p><em>Update2<\/em>: Other solution:<\/p>\n<pre><code>class Example {\n  private final TimeOfDay timeOfDay;\n  private final LightLevel lightLevel;\n  \n  @JsonCreator\n  public Example(@JsonProperty(&quot;timeOfDay&quot;) final TimeOfDay timeOfDay) {\n    super();\n    this.timeOfDay = timeOfDay;\n    this.lightLevel = getLightLevelByTimeOfDay(timeOfDay)\n  }\n\n  @JsonFactory\n  public static Example createExample(@JsonProperty(&quot;lightLevel&quot;) final LightLevel lightLevel) {\n    return new Example(getTimeOfDayByLightLevel(lightLevel));\n  }\n  \n  private static TimeOfDay getTimeOfDayByLightLevel(final LightLevel) {\n    return (lightLevel == LightLevel.LIGHT) ? TimeOfDay.DAY : TimeOfDay.NIGHT;\n  }\n  \n  private static LightLevel getLightLevelByTimeOfDay(final TimeOfDay) {\n    return (timeOfDay == TimeOfDay.DAY) ? LightLevel.LIGHT : LightLevel.DARK;\n  }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 6834831,
+            "question_id": 6834677,
+            "last_edit_date": 1704626578
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9a657f7990c2dafca9885dee9c647d4e?s=256&d=identicon&r=PG",
+                "account_id": 23674,
+                "user_type": "registered",
+                "user_id": 59501,
+                "link": "https://stackoverflow.com/users/59501/staxman",
+                "reputation": 117032,
+                "display_name": "StaxMan",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1311724535,
+            "creation_date": 1311724535,
+            "body": "<p>This is something that has actually been suggested couple of times earlier. So maybe filing an RFE would make sense; there are multiple ways in which this could work: obvious ones being ability to annotate type (@JsonPostProcess(Processor.class)) and ability to register post-processor through Module API (so that there's basically a callback when Jackson constructs deserializer, to let module specify post-processor to use if any). But perhaps there are even better ways to do this.<\/p>\n",
+            "answer_id": 6838014,
+            "question_id": 6834677
+        }
+    ],
+    "answer_comments": {
+        "6834831": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/bbfbca5273f9d020ef4ccfbadcecccba?s=256&d=identicon&r=PG",
+                    "account_id": 77528,
+                    "user_type": "registered",
+                    "user_id": 221213,
+                    "link": "https://stackoverflow.com/users/221213/karaszi-istv%c3%a1n",
+                    "reputation": 31547,
+                    "display_name": "KARASZI Istv&#225;n",
+                    "accept_rate": 93
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 6834831,
+                "edited": false,
+                "creation_date": 1311748300,
+                "comment_id": 8130520
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9a657f7990c2dafca9885dee9c647d4e?s=256&d=identicon&r=PG",
+                    "account_id": 23674,
+                    "user_type": "registered",
+                    "user_id": 59501,
+                    "link": "https://stackoverflow.com/users/59501/staxman",
+                    "reputation": 117032,
+                    "display_name": "StaxMan",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 6834831,
+                "edited": false,
+                "creation_date": 1311724408,
+                "comment_id": 8127388
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fa2d855b58c41269f0876b99eac9607d?s=256&d=identicon&r=PG",
+                    "account_id": 30002,
+                    "user_type": "registered",
+                    "user_id": 81491,
+                    "link": "https://stackoverflow.com/users/81491/brandon-yarbrough",
+                    "reputation": 38534,
+                    "display_name": "Brandon Yarbrough",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 6834831,
+                "edited": false,
+                "creation_date": 1311720823,
+                "comment_id": 8126749
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/05dddc8770b7d4f438c78a287da1c404?s=256&d=identicon&r=PG",
+                    "account_id": 35397,
+                    "user_type": "registered",
+                    "user_id": 100237,
+                    "link": "https://stackoverflow.com/users/100237/pingw33n",
+                    "reputation": 12550,
+                    "display_name": "pingw33n",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 6834831,
+                "edited": false,
+                "creation_date": 1311714793,
+                "comment_id": 8125449
+            }
+        ],
+        "6838014": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9a657f7990c2dafca9885dee9c647d4e?s=256&d=identicon&r=PG",
+                    "account_id": 23674,
+                    "user_type": "registered",
+                    "user_id": 59501,
+                    "link": "https://stackoverflow.com/users/59501/staxman",
+                    "reputation": 117032,
+                    "display_name": "StaxMan",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 5,
+                "post_id": 6838014,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/JbyYH.png?s=256",
+                    "account_id": 1598918,
+                    "user_type": "registered",
+                    "user_id": 1480391,
+                    "link": "https://stackoverflow.com/users/1480391/yves-m",
+                    "reputation": 31306,
+                    "display_name": "Yves M.",
+                    "accept_rate": 59
+                },
+                "edited": false,
+                "creation_date": 1412791015,
+                "comment_id": 41201506
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/JbyYH.png?s=256",
+                    "account_id": 1598918,
+                    "user_type": "registered",
+                    "user_id": 1480391,
+                    "link": "https://stackoverflow.com/users/1480391/yves-m",
+                    "reputation": 31306,
+                    "display_name": "Yves M.",
+                    "accept_rate": 59
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 6838014,
+                "edited": false,
+                "creation_date": 1412759043,
+                "comment_id": 41182572
+            }
+        ],
+        "40852985": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2971dd5c919991b08f12849961bd4f0a?s=256&d=identicon&r=PG",
+                "account_id": 475533,
+                "user_type": "registered",
+                "user_id": 885922,
+                "link": "https://stackoverflow.com/users/885922/xlm",
+                "reputation": 7724,
+                "display_name": "xlm",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 40852985,
+            "edited": false,
+            "creation_date": 1606710893,
+            "comment_id": 115034112
+        }],
+        "57757055": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/b2169cdaf54073cac232369e7d41eb7a?s=256&d=identicon&r=PG",
+                    "account_id": 1674807,
+                    "user_type": "registered",
+                    "user_id": 1540592,
+                    "link": "https://stackoverflow.com/users/1540592/kekolab",
+                    "reputation": 831,
+                    "display_name": "kekolab",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 57757055,
+                "edited": false,
+                "creation_date": 1669307091,
+                "comment_id": 131619437
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/cb1b770043fff85640782b441a8ccfc8?s=256&d=identicon&r=PG",
+                    "account_id": 56043,
+                    "user_type": "registered",
+                    "user_id": 167889,
+                    "link": "https://stackoverflow.com/users/167889/end-user",
+                    "reputation": 3027,
+                    "display_name": "end-user",
+                    "accept_rate": 45
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 57757055,
+                "edited": false,
+                "creation_date": 1622847161,
+                "comment_id": 119918084
+            }
+        ]
+    }
+}

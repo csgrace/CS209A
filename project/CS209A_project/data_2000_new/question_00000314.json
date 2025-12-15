@@ -1,0 +1,220 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cb6246f05a3c34fd44a7163744925734?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6005409,
+            "user_type": "registered",
+            "user_id": 4717514,
+            "link": "https://stackoverflow.com/users/4717514/xcode-dev",
+            "reputation": 237,
+            "display_name": "xcode_Dev",
+            "accept_rate": 70
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29646914/background-partial-concurrent-mark-sweep-gc-freed-with-bitmap",
+        "last_activity_date": 1429091171,
+        "creation_date": 1429091171,
+        "answer_count": 0,
+        "title": "Background partial concurrent mark sweep GC freed with Bitmap",
+        "body": "<p>My app is parsing JSON Data, and with this JSON Data, I change TextView text, ImageButton image. \nEverything works, but in my Logcat, I have some bugs with \"<em>Background partial concurrent mark sweep GC freed with Bitmap<\/em>\". Is it a garbage-collection problem ? <\/p>\n\n<p>How can I fix it ?\nCheers!<\/p>\n\n<p>Here is my code :<\/p>\n\n<pre><code>public class MainActivity extends ActionBarActivity {\n\n    public static final String TAG = MainActivity.class.getSimpleName();\n    private CurrentReportString mCurrentReportString;\n    @InjectView(R.id.jsonText) TextView mJsonText;\n    @InjectView(R.id.imageReport) ImageButton mImageReport;\n    @InjectView(R.id.imageReport2) ImageButton mImageReport2;\n    @InjectView(R.id.imageReport3) ImageButton mImageReport3;\n\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n        ButterKnife.inject(this);\n\n        String urlWebSite = \"http://www.bundoransurfco.com/surf-report/surf-report/?json=1\";\n\n        if (isNetworkAvailable()) {\n            OkHttpClient client = new OkHttpClient();\n            Request request = new Request.Builder()\n                    .url(urlWebSite)\n                    .build();\n\n            Call call = client.newCall(request);\n            call.enqueue(new Callback() {\n                @Override\n                public void onFailure(Request request, IOException e) {\n\n                }\n\n                @Override\n                public void onResponse(Response response) throws IOException {\n                    try {\n                        String jsonData = response.body().string();\n                        if (response.isSuccessful()) {\n                            mCurrentReportString = getCurrentDetails(jsonData);\n                            new DownloadImageTask(mImageReport)\n                                    .execute(mCurrentReportString.getUrlImages());\n                            ;\n\n                            // Write in the main Thread.\n                            runOnUiThread(new Runnable() {\n                                @Override\n                                public void run() {\n                                    updateReport();\n                                }\n                            });\n\n                        } else {\n                            alertUserAboutError();\n                        }\n                    } catch (IOException e) {\n                        Log.e(TAG, \"Exception caught: \", e);\n                    }\n                      catch (JSONException e){\n                          Log.e(TAG, \"Exception caught: \", e);\n                      }\n                }\n            });\n        }\n        else {\n            Toast.makeText(this, getString(R.string.network_unavailable_message), Toast.LENGTH_LONG).show();\n        }\n\n        Log.d(TAG, \"Main UI code is running!\");\n    }\n\n    private void updateReport() {\n        mJsonText.setText(mCurrentReportString.getJsonContent());\n        if (mCurrentReportString.imageBackground == Boolean.FALSE)\n        {\n            Log.i(TAG, \"No Background1\");\n            mImageReport.setVisibility(View.INVISIBLE);\n        }\n        if (mCurrentReportString.imageBackground2 == Boolean.FALSE)\n        {\n            Log.i(TAG, \"No Background2\");\n            mImageReport2.setVisibility(View.INVISIBLE);\n        }\n        if (mCurrentReportString.imageBackground3 == Boolean.FALSE)\n        {\n            Log.i(TAG, \"No Background3\");\n            mImageReport3.setVisibility(View.INVISIBLE);\n        }\n\n    }\n\n    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)\n    private CurrentReportString getCurrentDetails(String jsonData) throws JSONException {\n        JSONObject report = new JSONObject(jsonData);\n\n        JSONObject postJson = report.getJSONObject(\"post\");\n        CurrentReportString currentReportString = new CurrentReportString();\n        String contentString = postJson.getString(\"content\");\n\n\n        //Report String\n        String contentWithoutWebcam = contentString.replace(\"CLICK HERE FOR LIVE PEAK WEBCAM\", \"\");\n        int lastCharacter = contentWithoutWebcam.indexOf(\"#gallery-1\");\n        String contentFirstPart = contentWithoutWebcam.substring(0, lastCharacter);\n        String jsonText = stripHtml(contentFirstPart);\n        currentReportString.setJsonContent(jsonText);\n\n        //Images\n        Document doc = Jsoup.parse(contentString);\n        Elements relLinks = doc.select(\"a[rel]\");\n//Elements relLinks = doc.select(\"a[rel=prettyPhoto[gallery-113]]\");//\n        System.out.println(\"number of `rel`: \"+relLinks.size());\n        ArrayList&lt;String&gt; urls=new ArrayList&lt;String&gt;();\n        for (Element el : relLinks){\n         //   Log.i(TAG, el.attr(\"href\"));\n            urls.add(el.attr(\"href\"));\n        }\n        if (relLinks.size() == 0){\n            Log.i(TAG, \"0 image\");\n            currentReportString.setImageBackground(Boolean.FALSE);\n            currentReportString.setImageBackground2(Boolean.FALSE);\n            currentReportString.setImageBackground3(Boolean.FALSE);\n        }\n        else if (relLinks.size() == 1) {\n            // Log.i(TAG, String.valueOf(urls));\n            currentReportString.setUrlImages(urls.get(0));\n            Log.i(TAG, \"first URL : \" + currentReportString.getUrlImages());\n            currentReportString.setImageBackground2(Boolean.FALSE);\n            currentReportString.setImageBackground3(Boolean.FALSE);\n        }\n        else if (relLinks.size() == 2){\n            currentReportString.setUrlImages(urls.get(0));\n            currentReportString.setUrlImages2(urls.get(1));\n            currentReportString.setImageBackground3(Boolean.FALSE);\n            Log.i(TAG, \"first URL : \"+currentReportString.getUrlImages());\n            Log.i(TAG, \"second URL : \"+currentReportString.getUrlImages2());\n        }\n        else if (relLinks.size() == 3){\n            currentReportString.setUrlImages(urls.get(0));\n            currentReportString.setUrlImages2(urls.get(1));\n            currentReportString.setUrlImages2(urls.get(2));\n            Log.i(TAG, \"first URL : \"+currentReportString.getUrlImages());\n            Log.i(TAG, \"second URL : \"+currentReportString.getUrlImages2());\n            Log.i(TAG, \"third URL : \"+currentReportString.getUrlImages3());\n        }\n        else if (relLinks.size() &gt; 3){\n            currentReportString.setUrlImages(urls.get(0));\n            currentReportString.setUrlImages2(urls.get(1));\n            currentReportString.setUrlImages2(urls.get(2));\n            Log.i(TAG, \"first URL : \"+currentReportString.getUrlImages());\n            Log.i(TAG, \"second URL : \"+currentReportString.getUrlImages2());\n            Log.i(TAG, \"third URL : \"+currentReportString.getUrlImages3());\n        }\n\n\n        return currentReportString;\n    }\n\n    private boolean isNetworkAvailable() {\n        ConnectivityManager manager = (ConnectivityManager)\n                getSystemService(Context.CONNECTIVITY_SERVICE);\n        NetworkInfo networkInfo = manager.getActiveNetworkInfo();\n        boolean isAvailable = false;\n        if (networkInfo != null &amp;&amp; networkInfo.isConnected()) {\n            isAvailable = true;\n        }\n\n        return isAvailable;\n    }\n    //Delete HTML Markup\n    public String stripHtml(String html) {\n        return Html.fromHtml(html).toString();\n    }\n\n    private void alertUserAboutError() {\n        AlertDialogFragment dialog = new AlertDialogFragment();\n        dialog.show(getFragmentManager(), \"error_dialog\");\n    }\n\n    //Change Image from ImageButton in Asynch with URL.\n    private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {\n        ImageView bmImage;\n        public DownloadImageTask(ImageView bmImage) {\n            this.bmImage = bmImage;\n        }\n        protected Bitmap doInBackground(String... urls) {\n            String urldisplay = urls[0];\n            Bitmap mIcon11 = null;\n            try {\n                InputStream in = new java.net.URL(urldisplay).openStream();\n                mIcon11 = BitmapFactory.decodeStream(in);\n            } catch (Exception e) {\n                Log.e(\"Error\", e.getMessage());\n                e.printStackTrace();\n            }\n            return mIcon11;\n        }\n        protected void onPostExecute(Bitmap result) {\n            bmImage.setImageBitmap(result);\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Here is my Logcat :<\/p>\n\n<pre><code>04-15 10:32:15.203    3008-3020/jardelcompany.bundoransurfco W/art﹕ Suspending all threads took: 15.897ms\n04-15 10:32:15.257    3008-3020/jardelcompany.bundoransurfco I/art﹕ Background partial concurrent mark sweep GC freed 91(16KB) AllocSpace objects, 0(0B) LOS objects, 23% free, 12MB/16MB, paused 36.385ms total 94.446ms\n04-15 10:32:15.373    3008-3024/jardelcompany.bundoransurfco I/OpenGLRenderer﹕ Initialized EGL, version 1.4\n04-15 10:32:15.401    3008-3024/jardelcompany.bundoransurfco W/EGL_emulation﹕ eglSurfaceAttrib not implemented\n04-15 10:32:15.401    3008-3024/jardelcompany.bundoransurfco W/OpenGLRenderer﹕ Failed to set EGL_SWAP_BEHAVIOR on surface 0xa6404200, error=EGL_SUCCESS\n04-15 10:32:18.856    3008-3020/jardelcompany.bundoransurfco I/art﹕ Background partial concurrent mark sweep GC freed 7539(430KB) AllocSpace objects, 7(147KB) LOS objects, 18% free, 17MB/21MB, paused 5.183ms total 26.542ms\n04-15 10:32:18.879    3008-3023/jardelcompany.bundoransurfco I/System.out﹕ number of `rel`: 1\n04-15 10:32:18.879    3008-3023/jardelcompany.bundoransurfco I/MainActivity﹕ first URL : http://www.bundoransurfco.com/wp-content/uploads/2014/11/11110974_10152658294117000_8310999896427501886_n.jpg\n04-15 10:32:18.882    3008-3008/jardelcompany.bundoransurfco I/MainActivity﹕ No Background2\n04-15 10:32:18.882    3008-3008/jardelcompany.bundoransurfco I/MainActivity﹕ No Background3\n<\/code><\/pre>\n",
+        "question_id": 29646914,
+        "tags": [
+            "java",
+            "android",
+            "json",
+            "bitmap",
+            "garbage-collection"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 2931
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb6246f05a3c34fd44a7163744925734?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6005409,
+                "user_type": "registered",
+                "user_id": 4717514,
+                "link": "https://stackoverflow.com/users/4717514/xcode-dev",
+                "reputation": 237,
+                "display_name": "xcode_Dev",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/swQGp.jpg?s=256",
+                "account_id": 2008575,
+                "user_type": "registered",
+                "user_id": 2827591,
+                "link": "https://stackoverflow.com/users/2827591/achin-verma",
+                "reputation": 1252,
+                "display_name": "Achin Verma",
+                "accept_rate": 84
+            },
+            "edited": false,
+            "creation_date": 1431776366,
+            "comment_id": 48649161
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/swQGp.jpg?s=256",
+                "account_id": 2008575,
+                "user_type": "registered",
+                "user_id": 2827591,
+                "link": "https://stackoverflow.com/users/2827591/achin-verma",
+                "reputation": 1252,
+                "display_name": "Achin Verma",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "edited": false,
+            "creation_date": 1431775048,
+            "comment_id": 48648752
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/73Jri.jpg?s=256",
+                "account_id": 2100275,
+                "user_type": "registered",
+                "user_id": 4390557,
+                "link": "https://stackoverflow.com/users/4390557/vvb",
+                "reputation": 7671,
+                "display_name": "VVB",
+                "accept_rate": 27
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "edited": false,
+            "creation_date": 1429094300,
+            "comment_id": 47435917
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb6246f05a3c34fd44a7163744925734?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6005409,
+                "user_type": "registered",
+                "user_id": 4717514,
+                "link": "https://stackoverflow.com/users/4717514/xcode-dev",
+                "reputation": 237,
+                "display_name": "xcode_Dev",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/73Jri.jpg?s=256",
+                "account_id": 2100275,
+                "user_type": "registered",
+                "user_id": 4390557,
+                "link": "https://stackoverflow.com/users/4390557/vvb",
+                "reputation": 7671,
+                "display_name": "VVB",
+                "accept_rate": 27
+            },
+            "edited": false,
+            "creation_date": 1429093759,
+            "comment_id": 47435573
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb6246f05a3c34fd44a7163744925734?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6005409,
+                "user_type": "registered",
+                "user_id": 4717514,
+                "link": "https://stackoverflow.com/users/4717514/xcode-dev",
+                "reputation": 237,
+                "display_name": "xcode_Dev",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/73Jri.jpg?s=256",
+                "account_id": 2100275,
+                "user_type": "registered",
+                "user_id": 4390557,
+                "link": "https://stackoverflow.com/users/4390557/vvb",
+                "reputation": 7671,
+                "display_name": "VVB",
+                "accept_rate": 27
+            },
+            "edited": false,
+            "creation_date": 1429093309,
+            "comment_id": 47435298
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/73Jri.jpg?s=256",
+                "account_id": 2100275,
+                "user_type": "registered",
+                "user_id": 4390557,
+                "link": "https://stackoverflow.com/users/4390557/vvb",
+                "reputation": 7671,
+                "display_name": "VVB",
+                "accept_rate": 27
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "edited": false,
+            "creation_date": 1429091884,
+            "comment_id": 47434344
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cb6246f05a3c34fd44a7163744925734?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6005409,
+                "user_type": "registered",
+                "user_id": 4717514,
+                "link": "https://stackoverflow.com/users/4717514/xcode-dev",
+                "reputation": 237,
+                "display_name": "xcode_Dev",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/73Jri.jpg?s=256",
+                "account_id": 2100275,
+                "user_type": "registered",
+                "user_id": 4390557,
+                "link": "https://stackoverflow.com/users/4390557/vvb",
+                "reputation": 7671,
+                "display_name": "VVB",
+                "accept_rate": 27
+            },
+            "edited": false,
+            "creation_date": 1429091808,
+            "comment_id": 47434274
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/73Jri.jpg?s=256",
+                "account_id": 2100275,
+                "user_type": "registered",
+                "user_id": 4390557,
+                "link": "https://stackoverflow.com/users/4390557/vvb",
+                "reputation": 7671,
+                "display_name": "VVB",
+                "accept_rate": 27
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646914,
+            "edited": false,
+            "creation_date": 1429091639,
+            "comment_id": 47434173
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

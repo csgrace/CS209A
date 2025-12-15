@@ -1,0 +1,79 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/35917d467914e16b1c4a333ff3a559c1?s=256&d=identicon&r=PG",
+            "account_id": 241355,
+            "user_type": "registered",
+            "user_id": 512115,
+            "link": "https://stackoverflow.com/users/512115/gtludwig",
+            "reputation": 5671,
+            "display_name": "gtludwig",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/36430093/error-on-selecting-properties-for-email-agent",
+        "last_activity_date": 1459868537,
+        "creation_date": 1459868537,
+        "answer_count": 0,
+        "title": "Error on selecting properties for email agent",
+        "body": "<p>I'm build an agent that will consume a web service to determine what sort of SMTP security and authentication protocol to be used upon firing up an email.<\/p>\n\n<p>Both authentication and security options are defined in the two Enums bellow:<\/p>\n\n<pre><code>public enum Authentication {\n    NONE(\"None\"),\n    PLAIN(\"Plain\"),\n    MD5(\"MD5\"),\n    POP_BEFORE_SMTP(\"Pop before SMTP\"),\n    CRAM_MD5(\"CRAM-MD5\"),\n    KERBEROS(\"KERBEROS\"),\n    NTLM(\"NTLM\");\n}\n\npublic enum Security {\n    NONE(\"None\"),\n    PLAIN(\"Plain\"),\n    STARTTLS(\"STARTTLS\"),\n    SSLTLS(\"SSL/TLS\");\n}\n<\/code><\/pre>\n\n<p>These falls into respective switch-case structures that will load appropriate properties to the message.<\/p>\n\n<pre><code>protected void init(SmtpConnection smtpConnection) {\n\n    properties.put(\"mail.smtp.host\", smtpConnection.getHost());\n    properties.put(\"mail.smtp.port\", smtpConnection.getPort());\n    properties.put(\"mail.smtp.starttls.enable\",\"true\");\n\n    switch (smtpConnection.getAuthentication()) {\n    case NONE:\n\n        break;\n\n    case PLAIN:\n\n        break;\n    case MD5:\n\n        break;\n    case CRAM_MD5:\n\n        break;\n    case KERBEROS:\n\n        break;\n    case NTLM:\n\n        break;\n    case POP_BEFORE_SMTP:\n\n        break;\n    }\n    switch (smtpConnection.getSecurity()) {\n    case NONE:\n\n        break;\n    case PLAIN:\n\n        break;\n    case SSLTLS:\n        properties.put(\"mail.smtp.ssl.enable\", \"true\");\n        break;\n    case STARTTLS:\n        properties.put(\"mail.smtp.starttls.enable\", \"true\");\n        break;\n    }\n}\n\n\nprotected void sendEmail(SmtpConnection smtpConnection, String recipients, String subject, String htmlBody, String filename, byte[] attachment) {\n    init(smtpConnection); \n\n    final String user = smtpConnection.getUser();\n    final String password = smtpConnection.getPassword();\n\n    Session session = Session.getInstance(properties, \n            new Authenticator() {\n        protected PasswordAuthentication getPasswordAuthentication() {\n            return new PasswordAuthentication(user, password);\n        }\n    });\n\n    List&lt;String&gt; recipientList = Arrays.asList(recipients.split(\",\"));\n\n    InternetAddress[] iAddresses = new InternetAddress[recipientList.size()];\n\n    for (String recipient : recipientList) {\n        try {\n            iAddresses[recipientList.indexOf(recipient)] = new InternetAddress(recipient);\n        } catch (AddressException e) {\n            e.printStackTrace();\n        }\n    }\n\n    try {\n        // Create a default MimeMessage object. \n        Message message = new MimeMessage(session);\n\n        // Set From: header field of the header.\n        message.setFrom(new InternetAddress(smtpConnection.getUser()));\n\n        // Set To: header field of the header.\n        message.setRecipients(Message.RecipientType.TO, iAddresses);\n\n        // Set Subject: header field\n        message.setSubject(subject);\n\n\n        // Create the message part\n        BodyPart messageBodyPart = new MimeBodyPart();\n\n        // Now set the actual message\n        messageBodyPart.setText(htmlBody);\n\n        // Create a multipart message\n        Multipart multipart = new MimeMultipart();\n\n        // Set text message part\n        multipart.addBodyPart(messageBodyPart);\n\n        if (filename != null) {\n            // Part two is attachment\n            messageBodyPart = new MimeBodyPart();\n\n            System.out.println(filename);\n\n            DataSource source = new FileDataSource(filename);\n            messageBodyPart.setDataHandler(new DataHandler(source));\n            messageBodyPart.setFileName(filename);\n            multipart.addBodyPart(messageBodyPart);\n        }\n\n        // Send the complete message parts\n        message.setContent(multipart);\n\n        // Send message\n        Transport.send(message);\n\n        System.out.println(\"Sent message successfully....\");\n\n    } catch (MessagingException e) {\n        throw new RuntimeException(e);\n    }\n}\n<\/code><\/pre>\n\n<p>I'm trying to send an email, using this implementation, but I'm landing on this console output error every time:<\/p>\n\n<pre><code>Exception in thread \"main\" java.lang.RuntimeException: javax.mail.SendFailedException: Invalid Addresses;\nnested exception is:\ncom.sun.mail.smtp.SMTPAddressFailedException: 454 4.7.1 &lt;email@gmail.com&gt;: Relay access denied\n\nat b.c.m.h.agent.utils.Emailer.sendEmail(Emailer.java:182)\nat b.c.m.h.agent.utils.Emailer.sendResultlessEmail(Emailer.java:58)\nat b.c.m.h.agent.service.ProcessAlerts.execute(ProcessAlerts.java:25)\nat b.c.m.h.agent.Agent.main(Agent.java:31)\nCaused by: javax.mail.SendFailedException: Invalid Addresses;\nnested exception is:\ncom.sun.mail.smtp.SMTPAddressFailedException: 454 4.7.1 &lt;email@gmail.com&gt;: Relay access denied\n\nat com.sun.mail.smtp.SMTPTransport.rcptTo(SMTPTransport.java:1862)\nat com.sun.mail.smtp.SMTPTransport.sendMessage(SMTPTransport.java:1118)\nat javax.mail.Transport.send0(Transport.java:254)\nat javax.mail.Transport.send(Transport.java:124)\nat b.c.m.h.a.utils.Emailer.sendEmail(Emailer.java:177)\n... 3 more\nCaused by: com.sun.mail.smtp.SMTPAddressFailedException: 454 4.7.1 &lt;email@gmail.com&gt;: Relay access denied\n\nat com.sun.mail.smtp.SMTPTransport.rcptTo(SMTPTransport.java:1762)\n... 7 more\n<\/code><\/pre>\n\n<p>I'm sure it has something to do with the properties, but I fail to see what.<\/p>\n\n<p>What am I doing wrong here?<\/p>\n",
+        "question_id": 36430093,
+        "tags": [
+            "java",
+            "email"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 443
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/35917d467914e16b1c4a333ff3a559c1?s=256&d=identicon&r=PG",
+                "account_id": 241355,
+                "user_type": "registered",
+                "user_id": 512115,
+                "link": "https://stackoverflow.com/users/512115/gtludwig",
+                "reputation": 5671,
+                "display_name": "gtludwig",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36430093,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/72baa38005eb8de126b2dd2e6fa1d660?s=256&d=identicon&r=PG",
+                "account_id": 319873,
+                "user_type": "registered",
+                "user_id": 637853,
+                "link": "https://stackoverflow.com/users/637853/thomas",
+                "reputation": 88895,
+                "display_name": "Thomas",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1459870251,
+            "comment_id": 60475748
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72baa38005eb8de126b2dd2e6fa1d660?s=256&d=identicon&r=PG",
+                "account_id": 319873,
+                "user_type": "registered",
+                "user_id": 637853,
+                "link": "https://stackoverflow.com/users/637853/thomas",
+                "reputation": 88895,
+                "display_name": "Thomas",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36430093,
+            "edited": false,
+            "creation_date": 1459869473,
+            "comment_id": 60475190
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

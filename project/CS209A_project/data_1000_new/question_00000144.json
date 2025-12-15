@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b257b7eddf83267e923680d25d6e659f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11480424,
+            "user_type": "registered",
+            "user_id": 8414668,
+            "link": "https://stackoverflow.com/users/8414668/deo2000",
+            "reputation": 3,
+            "display_name": "deo2000"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/50549061/javafx-setscale-problems-when-enlarging-group-by-dragging-rectangle-in-the-group",
+        "last_activity_date": 1548439033,
+        "creation_date": 1527396090,
+        "answer_count": 1,
+        "title": "Javafx setscale problems when enlarging group by dragging rectangle in the group",
+        "body": "<p>I am having an issue with scaling a group containing shapes, and dragging the shapes around.<\/p>\n\n<p>In the example below, I have a group containing 2 rectangles, after scaling the group, if I drag one of the rectangles, the other will go negative the distance of the other, i.e., if I drag the rectangle r2 down, the rectangle r will go up, etc<\/p>\n\n<p>I am wondering if this is some sort of bug, or what the issue is here?<\/p>\n\n<p>The code below is a working example of what my issue is.<\/p>\n\n<p>NOTE:  I ran a test on the bounds, and it only changes when the dragged rectangle moves outside the current bounds.<\/p>\n\n<p>if moving to the bottom right the new bounds will be something similar to<\/p>\n\n<pre><code>BoundingBox [minX:250.0, minY:250.0, minZ:0.0, width:301.7606201171875, height:338.6553955078125, depth:0.0, maxX:551.7606201171875, maxY:588.6553955078125, maxZ:0.0]\n<\/code><\/pre>\n\n<p>Even though the other rectangle moves outside of the <code>minX<\/code> and <code>minY<\/code> bounds.  <\/p>\n\n<pre><code>import javafx.scene.shape.Rectangle;\nimport javafx.application.Application;\nimport javafx.scene.Group;\nimport javafx.scene.Scene;\nimport javafx.scene.layout.Pane;\nimport javafx.scene.paint.Color;\nimport javafx.stage.Stage;\n\npublic class SampleScale extends Application {\n\n    @Override\n    public void start(Stage primaryStage) {\n\n        Group g = new Group();\n\n        Rectangle r = new Rectangle(250,250,10,10);\n        Rectangle r2 = new Rectangle(260,260,10,10);\n\n        r2.setFill(Color.RED);\n        r2.setOnMouseDragged(event\n                -&gt;\n        {\n            r2.setTranslateX(r2.getTranslateX() + (event.getX() -r2.getX()));\n            r2.setTranslateY(r2.getTranslateY() + (event.getY() -r2.getY()));\n            g.autosize();\n            event.consume();\n        });\n\n        Pane p = new Pane();\n\n        p.setPrefSize(1000, 1000);\n        g.getChildren().addAll(r,r2);\n        p.getChildren().addAll(g);// comment out to test bottom code;\n\n\n        //default works\n        //g.setScaleX(1);\n        //g.setScaleY(1);\n\n        //causes other node to move negative distance of the other object\n        // i.e., if r2 is dragged down, r will move up, etc.\n        g.setScaleX(2);\n        g.setScaleY(2);\n\n        //-------------------------\n\n        //this works if not placed inside a group\n\n\n        //    p.getChildren().addAll(r,r2);\n        //   r.setScaleX(2);\n        //    r.setScaleY(2);\n        // r2.setScaleX(2);\n        //   r2.setScaleY(2);\n\n\n        Scene scene = new Scene(p, 1300, 1250);\n        primaryStage.setTitle(\"Hello World!\");\n        primaryStage.setScene(scene);\n        primaryStage.show();\n    }\n\n    /**\n    * @param args the command line arguments\n    */\n    public static void main(String[] args) {\n        launch(args);\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 50549061,
+        "tags": [
+            "java",
+            "javafx-8",
+            "grouping",
+            "scaling"
+        ],
+        "score": 0,
+        "accepted_answer_id": 50550664,
+        "is_answered": true,
+        "view_count": 332,
+        "last_edit_date": 1548439033
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d3f3f4320c25d18603de3bb3476fa6fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3583958,
+            "user_type": "registered",
+            "user_id": 2991525,
+            "link": "https://stackoverflow.com/users/2991525/fabian",
+            "reputation": 82886,
+            "display_name": "fabian"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1527412357,
+        "creation_date": 1527412357,
+        "body": "<p>The <code>scaleX<\/code> and <code>scaleY<\/code> properties use the center of a node as pivot point for scaling. Since moving <code>r2<\/code> resizes the <code>Group<\/code>, the other children also move.<\/p>\n\n<p>You could apply a <code>Scale<\/code> transform with pivot point <code>(0, 0)<\/code> instead:<\/p>\n\n<pre><code>// g.setScaleX(2);\n// g.setScaleY(2);\ng.getTransforms().add(new Scale(2, 2, 0, 0));\n<\/code><\/pre>\n",
+        "answer_id": 50550664,
+        "question_id": 50549061
+    }],
+    "answer_comments": {"50550664": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b257b7eddf83267e923680d25d6e659f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11480424,
+            "user_type": "registered",
+            "user_id": 8414668,
+            "link": "https://stackoverflow.com/users/8414668/deo2000",
+            "reputation": 3,
+            "display_name": "deo2000"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 50550664,
+        "edited": false,
+        "creation_date": 1527453212,
+        "comment_id": 88123365
+    }]}
+}

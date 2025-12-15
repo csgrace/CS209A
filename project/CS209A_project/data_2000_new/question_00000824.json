@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1417237bb4f42fbacf0361ed66476833?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4257517,
+            "user_type": "registered",
+            "user_id": 3482793,
+            "link": "https://stackoverflow.com/users/3482793/stefan-s",
+            "reputation": 4133,
+            "display_name": "Stefan S.",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/33433918/spring-entities-not-saved-to-database",
+        "last_activity_date": 1528572192,
+        "creation_date": 1446201277,
+        "answer_count": 1,
+        "title": "Spring Entities Not Saved To Database",
+        "body": "<p>We have set up the Spring Framework like this:<\/p>\n\n<pre><code>@Eager\npublic interface CatalogElementRepository extends PagingAndSortingRepository&lt;CatalogElementEntity, Long&gt; {\n\n}\n\n@Service\npublic class CatalogImpl implements CatalogManager {\n\n    @Inject\n    CatalogElementRepository catalogElementRepository;\n\n    @Override\n    public CatalogElement createCatalogElement(CatalogElementEntity catalogElement) {\n    return this.catalogElementRepository.save(catalogElement);\n    }\n}\n\n@Stateless\n@Remote(CatalogManager.class)\npublic class CatalogManagerBean implements CatalogManager {\n\n    @Inject\n    CatalogManager delegate;\n\n    @Override\n    public CatalogElement createCatalogElement(CatalogElementEntity catalogElement) {\n        return this.delegate.createCatalogElement(catalogElement);\n    }\n}\n<\/code><\/pre>\n\n<p>So whenever someone calls the method on the remote interface <code>createCatalogElement<\/code>, I'd assume the entity gets stored in the database. It does not (weirdly enough, <code>findOne<\/code> still returns the very same entity, but it can't be found via <code>findByProperty<\/code>). <\/p>\n\n<p><a href=\"https://stackoverflow.com/questions/9289798/spring-jpa-entities-not-saving-to-database\">Other<\/a> <a href=\"https://stackoverflow.com/questions/28746460/spring-pagingandsortingrepository-find-by-name\">questions<\/a> said to add <code>@Transactional<\/code>, so I added <code>@javax.transaction.Transactional<\/code> and <code>org.springframework.transaction.annotation.Transactional<\/code> on the methods and classes to be on the safe side, nothing worked.<\/p>\n\n<p>What could be the problem?<\/p>\n\n<p>I don't see any configuration files for the Spring Framework, but it's a legacy project, so they might just be hidden very well.<\/p>\n",
+        "question_id": 33433918,
+        "tags": [
+            "java",
+            "spring",
+            "jpa",
+            "spring-data-jpa"
+        ],
+        "score": 0,
+        "accepted_answer_id": 33496366,
+        "is_answered": true,
+        "view_count": 397,
+        "last_edit_date": 1528572192
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1417237bb4f42fbacf0361ed66476833?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4257517,
+            "user_type": "registered",
+            "user_id": 3482793,
+            "link": "https://stackoverflow.com/users/3482793/stefan-s",
+            "reputation": 4133,
+            "display_name": "Stefan S.",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1446545410,
+        "creation_date": 1446545410,
+        "body": "<p>For some reason using this class as a producer for the <code>EntityManager<\/code> helped:<\/p>\n\n<pre><code>public class SpringConfig {\n\n@PersistenceUnit\nEntityManagerFactory emf;\n\n@PersistenceContext\nEntityManager em;\n\n@Produces\n@ApplicationScoped\npublic EntityManagerFactory createEntityManagerFactory() {\n    return this.emf;\n}\n\n@Produces\npublic EntityManager createEntityManager() {\n    return this.em;\n}\n\npublic void close(@Disposes EntityManagerFactory entityManagerFactory) {\n    entityManagerFactory.close();\n}\n\npublic void close(@Disposes EntityManager entityManager) {\n    entityManager.close();\n}\n}\n<\/code><\/pre>\n",
+        "answer_id": 33496366,
+        "question_id": 33433918
+    }],
+    "answer_comments": {}
+}

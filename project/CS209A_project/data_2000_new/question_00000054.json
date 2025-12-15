@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7574410320ec8760c62d33fe23c2246e?s=256&d=identicon&r=PG",
+            "account_id": 1479591,
+            "user_type": "registered",
+            "user_id": 1389270,
+            "link": "https://stackoverflow.com/users/1389270/aya-senpai",
+            "reputation": 11,
+            "display_name": "Aya Senpai"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20012666/sms-udp-application",
+        "last_activity_date": 1384857745,
+        "creation_date": 1384559395,
+        "answer_count": 1,
+        "title": "SMS UDP application",
+        "body": "<p>I'm devolping an SMS application that uses UDP protocol . My application need to do the following , client send to another client a message doesn't exceed 160 and he/she know the other client IP address . It will send through a server which will save it in case client is offline .<\/p>\n\n<p>I started working on it but then I stopped ! I was having problem with these things . <\/p>\n\n<p>How can multiple clients sends to server ? I searched about and I read about something called mutithreading , can anyone explain or give me example for it ?<\/p>\n\n<p>also , I couldn't imagin the process of taking messages from clients and then saving it . I mean how the server know which message belong to which client ? <\/p>\n\n<p>this is the code which I'm working on it <\/p>\n\n<p><strong>server :<\/strong><\/p>\n\n<pre><code>import java.io.*; \nimport java.net.*; \n\nclass Server { \npublic static void main(String args[]) throws Exception \n{ \n\n  DatagramSocket serverSocket = new DatagramSocket(9876); \n\n  byte[] receiveData = new byte[1024]; \n  byte[] sendData  = new byte[1024]; \n\n  while(true) \n    { \n\n      DatagramPacket receivePacket = \n         new DatagramPacket(receiveData, receiveData.length); \n       serverSocket.receive(receivePacket); \n\n      String sentence = new String(receivePacket.getData()); \n\n      InetAddress IPAddress = receivePacket.getAddress(); \n\n      int port = receivePacket.getPort(); \n\n                  String senderSentence = \"From \"+IPAddress+\" Msg \"+sentence; \n\n      sendData = senderSentence.getBytes(); \n\n      DatagramPacket sendPacket = \n         new DatagramPacket(sendData, sendData.length, IPAddress, \n                           port); \n\n      serverSocket.send(sendPacket); \n    } } } \n<\/code><\/pre>\n\n<p><strong>client :<\/strong> <\/p>\n\n<pre><code>import java.io.*; \nimport java.net.*;\n\npublic class Client {\n\npublic static void main(String args[]) throws Exception \n{ \nString sentence;\n  BufferedReader inFromUser = \n    new BufferedReader(new InputStreamReader(System.in)); \n\n  DatagramSocket clientSocket = new DatagramSocket(); \n\n\n\n  byte[] sendData = new byte[1024]; \n  byte[] receiveData = new byte[1024]; \n  do {\n  System.out.println(\"Enter a msg , NOTE: don't exceed 160 charcter\");\n  sentence = inFromUser.readLine();\n  }\n  while(sentence.length() &gt;= 160);\n  System.out.println(\"Enter the adress of the other user\");\n  String ip=inFromUser.readLine();\n  InetAddress IPAddress = InetAddress.getByName(ip); \n  sendData = sentence.getBytes();         \n        DatagramPacket sendPacket = \n     new DatagramPacket(sendData, sendData.length, IPAddress, 9876); \n\n  clientSocket.send(sendPacket); \n\n  DatagramPacket receivePacket = \n     new DatagramPacket(receiveData, receiveData.length); \n\n  clientSocket.receive(receivePacket); \n\n  String modifiedSentence = \n      new String(receivePacket.getData()); \n\n  System.out.println(\"FROM SERVER:\" + modifiedSentence); \n  clientSocket.close(); \n  } } \n<\/code><\/pre>\n\n<p>Thank you ~ <\/p>\n",
+        "question_id": 20012666,
+        "tags": [
+            "java",
+            "windows",
+            "sockets",
+            "udp",
+            "sms"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 639
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e65d8cf3eb1e258440d3fed53a383e92?s=256&d=identicon&r=PG",
+            "account_id": 354755,
+            "user_type": "registered",
+            "user_id": 693301,
+            "link": "https://stackoverflow.com/users/693301/xmjw",
+            "reputation": 3444,
+            "display_name": "xmjw"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1384857745,
+        "creation_date": 1384857745,
+        "body": "<p>I'm not sure why you need to use UDP - but if this isn't some special requirement you might want to look at using a web server.<\/p>\n\n<p>I quite like the <a href=\"http://www.playframework.com/\" rel=\"nofollow\">Play Framework for Java<\/a>, which is going to handle the threading for you. Every time you send a message to the server it is just like sending a request for a web page, so you can reply with JSON or XML or whatever you think is best.<\/p>\n\n<p>This is going to be a lot easier than handling all the socket communication yourself - but as I say, maybe you have a special requirement.<\/p>\n\n<p>Hope this helps!<\/p>\n",
+        "answer_id": 20069294,
+        "question_id": 20012666
+    }],
+    "answer_comments": {}
+}

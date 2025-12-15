@@ -1,0 +1,142 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-L5f8W0Tvj8s/AAAAAAAAAAI/AAAAAAAAAxQ/xHQ3yknnAqE/s256-rj/photo.jpg",
+            "account_id": 14112171,
+            "user_type": "registered",
+            "user_id": 10194701,
+            "link": "https://stackoverflow.com/users/10194701/timmycode",
+            "reputation": 111,
+            "display_name": "TimmYCode"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60025890/how-to-pixelate-a-bufferedimage-so-it-looks-like-that",
+        "last_activity_date": 1580667459,
+        "creation_date": 1580645004,
+        "answer_count": 1,
+        "title": "How to pixelate a BufferedImage so it looks like that?",
+        "body": "<p>I am doing Image Processing and I want to pixelate an Image which was dithered before but it should still look like the original. Here I show you some examples what Iam doing right now and what I want it to look like:<\/p>\n\n<p><a href=\"https://i.sstatic.net/XAU0H.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/XAU0H.jpg\" alt=\"Michael Jackson - normal\"><\/a><\/p>\n\n<p>That is the Image I want to modify.<\/p>\n\n<p><a href=\"https://i.sstatic.net/uTVks.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/uTVks.png\" alt=\"Michael Jackson - Dithered\"><\/a><\/p>\n\n<p>Thats the image after beeing dithered by the \"floyd steinberg dithering\".<\/p>\n\n<p><a href=\"https://i.sstatic.net/39B2S.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/39B2S.png\" alt=\"Michael Jackson- What I want it to look like\"><\/a> <\/p>\n\n<p>Thats how he should look at the end after beeing pixelated.<\/p>\n\n<p><a href=\"https://i.sstatic.net/XElla.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/XElla.png\" alt=\"Michael Jackson- What my image looks like\"><\/a><\/p>\n\n<p>And thats how my image looks like after pixelating. I dont really know what to do so it looks like the image above.<\/p>\n\n<p>I searched up the whole internet and I tried every pixelating algorithm. Thats the class Iam using at the moment:<\/p>\n\n<pre><code>import java.awt.*;\nimport java.awt.image.BufferedImage;\nimport java.util.*;\nimport java.util.List;\n\npublic final class ImageUtil {\n\npublic static BufferedImage pixelate(BufferedImage imageToPixelate, int pixelSize) {\n    BufferedImage pixelateImage = new BufferedImage(\n        imageToPixelate.getWidth(),\n        imageToPixelate.getHeight(),\n        imageToPixelate.getType());\n\n    for (int y = 0; y &lt; imageToPixelate.getHeight(); y += pixelSize) {\n        for (int x = 0; x &lt; imageToPixelate.getWidth(); x += pixelSize) {\n            BufferedImage croppedImage = getCroppedImage(imageToPixelate, x, y, pixelSize, pixelSize);\n            Color dominantColor = getDominantColor(croppedImage);\n            for (int yd = y; (yd &lt; y + pixelSize) &amp;&amp; (yd &lt; pixelateImage.getHeight()); yd++) {\n                for (int xd = x; (xd &lt; x + pixelSize) &amp;&amp; (xd &lt; pixelateImage.getWidth()); xd++) {\n                    pixelateImage.setRGB(xd, yd, dominantColor.getRGB());\n                }\n            }\n        }\n    }\n\n    return pixelateImage;\n}\n\npublic static BufferedImage getCroppedImage(BufferedImage image, int startx, int starty, int width, int height) {\n    if (startx &lt; 0) startx = 0;\n    if (starty &lt; 0) starty = 0;\n    if (startx &gt; image.getWidth()) startx = image.getWidth();\n    if (starty &gt; image.getHeight()) starty = image.getHeight();\n    if (startx + width &gt; image.getWidth()) width = image.getWidth() - startx;\n    if (starty + height &gt; image.getHeight()) height = image.getHeight() - starty;\n    return image.getSubimage(startx, starty, width, height);\n}\n\npublic static Color getDominantColor(BufferedImage image) {\n    Map&lt;Integer, Integer&gt; colorCounter = new HashMap&lt;&gt;(100);\n    for (int x = 0; x &lt; image.getWidth(); x++) {\n        for (int y = 0; y &lt; image.getHeight(); y++) {\n            int currentRGB = image.getRGB(x, y);\n            int count = colorCounter.getOrDefault(currentRGB, 0);\n            colorCounter.put(currentRGB, count + 1);\n        }\n    }\n    return getDominantColor(colorCounter);\n}\n\nprivate static Color getDominantColor(Map&lt;Integer, Integer&gt; colorCounter) {\n    int dominantRGB = colorCounter.entrySet().stream()\n        .max((entry1, entry2) -&gt; entry1.getValue() &gt; entry2.getValue() ? 1 : -1)\n        .get()\n        .getKey();\n    return new Color(dominantRGB);\n}\n}\n<\/code><\/pre>\n\n<p>And thats how I start it:<\/p>\n\n<pre><code>ImageUtil.pixelate(selectedImage, 3);\n<\/code><\/pre>\n\n<p>I appreciate your help and tell me if something is not clear or I need to add something to my question.<\/p>\n",
+        "question_id": 60025890,
+        "tags": [
+            "java",
+            "image-processing",
+            "pixel",
+            "bufferedimage",
+            "pixelate"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 356
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-jsLBa8e0dT0/AAAAAAAAAAI/AAAAAAAAAEc/YqNqYlsSjrU/s256-rj/photo.jpg",
+            "account_id": 4142240,
+            "user_type": "registered",
+            "user_id": 4926757,
+            "link": "https://stackoverflow.com/users/4926757/rotem",
+            "reputation": 32514,
+            "display_name": "Rotem",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1580667459,
+        "creation_date": 1580667459,
+        "body": "<p>Here are the algorithmic stages you may apply:  <\/p>\n\n<ul>\n<li>Down-sample original image - reduce resolution to about 200x200.  <\/li>\n<li>Apply Palette with 16 colors with dithering.<br>\nCheck <a href=\"https://www.mathworks.com/help/matlab/ref/rgb2ind.html\" rel=\"nofollow noreferrer\">rgb2ind<\/a> MATLAB documentation for details.<br>\nIn the example below, I found the palette using the reference image from your post.  <\/li>\n<li>Resize up by a factor of x3 in each axis using <strong>nearest neighbor<\/strong> method to create the pixelate effect.  <\/li>\n<\/ul>\n\n<p>MATLAB implementation:  <\/p>\n\n<pre class=\"lang-matlab prettyprint-override\"><code>% Palette of 16 colors\nP = [  0     0     0\n     160    80    44\n     210   122   170\n      14    16    83\n     254   254   254\n     255   113     0\n      99    48    13\n       1    86   158\n       4    93    13\n     192   192   192\n      75    75    75\n     233   165     0\n     167    85   115\n      85    15   105\n       1   178   255\n     116    11     7];\n\n%Read original image\nI = imread('I.jpg');\n\n%Resize original image to resolution 200x200\nJ = imresize(I, [200, 200]);\n\n% Convert shrunk RGB image to indexed image using palette P.\n[IND, map] = rgb2ind(J, double(P)/255, 'dither'); %figure;imagesc(IND);colormap(map);axis image\n\n% Convert from indexed image to RGB\nRGB = ind2rgb(IND, map); %figure;imshow(RGB);\n\n% Resize RGB by factor of x3 in each axis, use nearest-neighbor interpolation.\nK = imresize(RGB, 3, 'nearest');\n\nfigure;imshow(K);\n<\/code><\/pre>\n\n<p>Result:<br>\n<a href=\"https://i.sstatic.net/2mxTI.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/2mxTI.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>There are some differences from your reference (probably due to different colors reduction algorithm).  <\/p>\n",
+        "answer_id": 60029156,
+        "question_id": 60025890
+    }],
+    "answer_comments": {"60029156": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-L5f8W0Tvj8s/AAAAAAAAAAI/AAAAAAAAAxQ/xHQ3yknnAqE/s256-rj/photo.jpg",
+                "account_id": 14112171,
+                "user_type": "registered",
+                "user_id": 10194701,
+                "link": "https://stackoverflow.com/users/10194701/timmycode",
+                "reputation": 111,
+                "display_name": "TimmYCode"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60029156,
+            "edited": false,
+            "creation_date": 1580860269,
+            "comment_id": 106234978
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-jsLBa8e0dT0/AAAAAAAAAAI/AAAAAAAAAEc/YqNqYlsSjrU/s256-rj/photo.jpg",
+                "account_id": 4142240,
+                "user_type": "registered",
+                "user_id": 4926757,
+                "link": "https://stackoverflow.com/users/4926757/rotem",
+                "reputation": 32514,
+                "display_name": "Rotem",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60029156,
+            "reply_to_user": {
+                "profile_image": "https://lh5.googleusercontent.com/-L5f8W0Tvj8s/AAAAAAAAAAI/AAAAAAAAAxQ/xHQ3yknnAqE/s256-rj/photo.jpg",
+                "account_id": 14112171,
+                "user_type": "registered",
+                "user_id": 10194701,
+                "link": "https://stackoverflow.com/users/10194701/timmycode",
+                "reputation": 111,
+                "display_name": "TimmYCode"
+            },
+            "edited": false,
+            "creation_date": 1580676895,
+            "comment_id": 106166036
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-jsLBa8e0dT0/AAAAAAAAAAI/AAAAAAAAAEc/YqNqYlsSjrU/s256-rj/photo.jpg",
+                "account_id": 4142240,
+                "user_type": "registered",
+                "user_id": 4926757,
+                "link": "https://stackoverflow.com/users/4926757/rotem",
+                "reputation": 32514,
+                "display_name": "Rotem",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60029156,
+            "reply_to_user": {
+                "profile_image": "https://lh5.googleusercontent.com/-L5f8W0Tvj8s/AAAAAAAAAAI/AAAAAAAAAxQ/xHQ3yknnAqE/s256-rj/photo.jpg",
+                "account_id": 14112171,
+                "user_type": "registered",
+                "user_id": 10194701,
+                "link": "https://stackoverflow.com/users/10194701/timmycode",
+                "reputation": 111,
+                "display_name": "TimmYCode"
+            },
+            "edited": false,
+            "creation_date": 1580676249,
+            "comment_id": 106165877
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-L5f8W0Tvj8s/AAAAAAAAAAI/AAAAAAAAAxQ/xHQ3yknnAqE/s256-rj/photo.jpg",
+                "account_id": 14112171,
+                "user_type": "registered",
+                "user_id": 10194701,
+                "link": "https://stackoverflow.com/users/10194701/timmycode",
+                "reputation": 111,
+                "display_name": "TimmYCode"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60029156,
+            "edited": false,
+            "creation_date": 1580675697,
+            "comment_id": 106165751
+        }
+    ]}
+}

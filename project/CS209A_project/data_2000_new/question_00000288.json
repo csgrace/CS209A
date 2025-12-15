@@ -1,0 +1,133 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/OuUHu.jpg?s=256",
+            "account_id": 1975336,
+            "user_type": "registered",
+            "user_id": 1773233,
+            "link": "https://stackoverflow.com/users/1773233/surfealokesea",
+            "reputation": 5173,
+            "display_name": "surfealokesea",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/43584093/mybatis-cdi-javase-not-injecting-mapper",
+        "last_activity_date": 1493025254,
+        "creation_date": 1493025254,
+        "answer_count": 0,
+        "title": "Mybatis cdi javaSE not injecting @Mapper",
+        "body": "<p>I'm trying to set a stand alone javaSE application (not in a j2ee container) using mybatis-cdi, but using weld.<\/p>\n\n<p>Logs are telling me that @Mapper UserMapper is found:<\/p>\n\n<pre><code>11:04:15.750 TRACE [Thread-1]  o.j.w.Bootstrap - Sending PAT using the fast event resolver: [BackedAnnotatedType] public abstract interface @Mapper class com.XXX.XXX.XXX.persistence.mapper.UserMapper\nApr 24, 2017 11:04:15 AM org.mybatis.cdi.MybatisExtension processAnnotatedType\nINFO: MyBatis CDI Module - Found class with @Mapper-annotation: UserMapper\n<\/code><\/pre>\n\n<p>My mybatis mapper:<\/p>\n\n<pre><code>import org.apache.ibatis.annotations.Param;\nimport org.apache.ibatis.annotations.ResultType;\nimport org.apache.ibatis.annotations.Select;\n\nimport com.consultia.ferrer.socketserver.model.orm.User;\n\n@org.mybatis.cdi.Mapper\n//@org.apache.ibatis.annotations.Mapper\npublic interface UserMapper {\n\n   @ResultType(User.class)\n   @Select(\"SELECT * FROM user WHERE user=#{user}\")\n   User findBy(@Param(\"user\") String user);\n\n}\n<\/code><\/pre>\n\n<p>But in my object injection result is null:<\/p>\n\n<pre><code>public class MainController implements ILogger {\n\n       @Inject\n       private UserMapper userMapper; //TODO INJECTION DON'T WORK\n<\/code><\/pre>\n\n<p>Dependencies used: <\/p>\n\n<p>\nhttp://maven.apache.org/xsd/maven-4.0.0.xsd\">\n    [...]\n    <\/p>\n\n<pre><code>    &lt;!-- CDI ====================================================== --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;javax.inject&lt;/groupId&gt;\n        &lt;artifactId&gt;javax.inject&lt;/artifactId&gt;\n        &lt;version&gt;1&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- https://mvnrepository.com/artifact/org.jboss.weld.se/weld-se-core --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.jboss.weld.se&lt;/groupId&gt;\n        &lt;artifactId&gt;weld-se&lt;/artifactId&gt;\n        &lt;version&gt;2.4.3.Final&lt;/version&gt;\n        &lt;scope&gt;provided&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;!-- https://mvnrepository.com/artifact/javax.enterprise/cdi-api --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;javax.enterprise&lt;/groupId&gt;\n        &lt;artifactId&gt;cdi-api&lt;/artifactId&gt;\n        &lt;version&gt;1.2&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;org.jboss.spec.javax.transaction&lt;/groupId&gt;\n      &lt;artifactId&gt;jboss-transaction-api_1.2_spec&lt;/artifactId&gt;\n      &lt;version&gt;1.0.0.Final&lt;/version&gt;\n      &lt;scope&gt;provided&lt;/scope&gt;\n    &lt;/dependency&gt;       \n    &lt;!-- https://mvnrepository.com/artifact/org.jboss/jandex --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.jboss&lt;/groupId&gt;\n        &lt;artifactId&gt;jandex&lt;/artifactId&gt;\n        &lt;version&gt;2.0.3.Final&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;!-- https://mvnrepository.com/artifact/junit/junit --&gt;\n    &lt;!-- &lt;dependency&gt; &lt;groupId&gt;junit&lt;/groupId&gt; &lt;artifactId&gt;junit&lt;/artifactId&gt; \n        &lt;version&gt;4.11&lt;/version&gt; &lt;scope&gt;test&lt;/scope&gt; &lt;/dependency&gt; --&gt;\n\n    &lt;!-- PERSISTENCE ====================================================== --&gt;\n    &lt;!-- https://mvnrepository.com/artifact/org.mybatis/mybatis --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.mybatis&lt;/groupId&gt;\n        &lt;artifactId&gt;mybatis&lt;/artifactId&gt;\n        &lt;version&gt;3.4.4&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-cdi --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.mybatis&lt;/groupId&gt;\n        &lt;artifactId&gt;mybatis-cdi&lt;/artifactId&gt;\n        &lt;version&gt;1.0.0&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- https://mvnrepository.com/artifact/javax.transaction/jta --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;javax.transaction&lt;/groupId&gt;\n        &lt;artifactId&gt;jta&lt;/artifactId&gt;\n        &lt;version&gt;1.1&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.xerial&lt;/groupId&gt;\n        &lt;artifactId&gt;sqlite-jdbc&lt;/artifactId&gt;\n        &lt;version&gt;3.16.1&lt;/version&gt;\n    &lt;/dependency&gt;\n&lt;/dependencies&gt;\n<\/code><\/pre>\n\n<p><\/p>\n\n<p>Any suggestion please?<\/p>\n",
+        "question_id": 43584093,
+        "tags": [
+            "java",
+            "maven",
+            "cdi",
+            "mybatis",
+            "mybatis-cdi"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 675
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e69593e179a99cb4a3d7823fdfbde625?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 14770977,
+                "user_type": "registered",
+                "user_id": 10667457,
+                "link": "https://stackoverflow.com/users/10667457/konstantin",
+                "reputation": 99,
+                "display_name": "Konstantin"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 43584093,
+            "edited": false,
+            "creation_date": 1603107085,
+            "comment_id": 113922139
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OuUHu.jpg?s=256",
+                "account_id": 1975336,
+                "user_type": "registered",
+                "user_id": 1773233,
+                "link": "https://stackoverflow.com/users/1773233/surfealokesea",
+                "reputation": 5173,
+                "display_name": "surfealokesea",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43584093,
+            "edited": false,
+            "creation_date": 1494488692,
+            "comment_id": 74852137
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7b2cb090693e17fc7aa860b7e809ef1a?s=256&d=identicon&r=PG",
+                "account_id": 3778003,
+                "user_type": "registered",
+                "user_id": 3138238,
+                "link": "https://stackoverflow.com/users/3138238/madx",
+                "reputation": 7319,
+                "display_name": "madx",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43584093,
+            "edited": false,
+            "creation_date": 1494405290,
+            "comment_id": 74808837
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OuUHu.jpg?s=256",
+                "account_id": 1975336,
+                "user_type": "registered",
+                "user_id": 1773233,
+                "link": "https://stackoverflow.com/users/1773233/surfealokesea",
+                "reputation": 5173,
+                "display_name": "surfealokesea",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43584093,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/0847c40a297d3d10a23b437ea1b3b726?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9521240,
+                "user_type": "registered",
+                "user_id": 7076047,
+                "link": "https://stackoverflow.com/users/7076047/blackwizard",
+                "reputation": 2054,
+                "display_name": "blackwizard"
+            },
+            "edited": false,
+            "creation_date": 1493128737,
+            "comment_id": 74274383
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0847c40a297d3d10a23b437ea1b3b726?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9521240,
+                "user_type": "registered",
+                "user_id": 7076047,
+                "link": "https://stackoverflow.com/users/7076047/blackwizard",
+                "reputation": 2054,
+                "display_name": "blackwizard"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43584093,
+            "edited": false,
+            "creation_date": 1493060574,
+            "comment_id": 74241628
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

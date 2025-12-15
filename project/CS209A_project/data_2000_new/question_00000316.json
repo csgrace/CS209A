@@ -1,0 +1,103 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/0rsC3.jpg?s=256",
+            "account_id": 3605417,
+            "user_type": "registered",
+            "user_id": 3007690,
+            "link": "https://stackoverflow.com/users/3007690/kandarp",
+            "reputation": 1121,
+            "display_name": "kandarp",
+            "accept_rate": 64
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29646831/itext-signed-pdf-error-when-executing-program",
+        "last_activity_date": 1617023556,
+        "creation_date": 1429090936,
+        "answer_count": 1,
+        "title": "Itext signed pdf error when executing program",
+        "body": "<p>I want to perform digital signature program and make signed pdf.\nFor that \n1.  I use following source code\n<a href=\"http://examples.itextpdf.com/src/part3/chapter12/Signatures.java\" rel=\"nofollow\">Java Code<\/a>\n2.  For certificate create self signed certificate using this link and export to pfx.\n<a href=\"https://technet.microsoft.com/en-us/library/cc753127(v=ws.10).aspx\" rel=\"nofollow\">How to create self signed certi<\/a>\n3.  Now try to execute following program but still give following error <\/p>\n\n<pre><code>    /*\n * This class is part of the book \"iText in Action - 2nd Edition\"\n * written by Bruno Lowagie (ISBN: 9781935182610)\n * For more info, go to: http://itextpdf.com/examples/\n * This example only works with the AGPL version of iText.\n */\npackage iText;\n\nimport java.io.FileInputStream;\nimport java.io.FileOutputStream;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.PrintWriter;\nimport java.security.GeneralSecurityException;\nimport java.security.KeyStore;\nimport java.security.PrivateKey;\nimport java.security.Security;\nimport java.security.cert.Certificate;\nimport java.security.cert.CertificateFactory;\nimport java.security.cert.X509Certificate;\nimport java.util.ArrayList;\nimport java.util.Calendar;\nimport java.util.List;\nimport java.util.Properties;\n\nimport org.bouncycastle.jce.provider.BouncyCastleProvider;\n\nimport com.itextpdf.text.Document;\nimport com.itextpdf.text.DocumentException;\nimport com.itextpdf.text.Image;\nimport com.itextpdf.text.Paragraph;\nimport com.itextpdf.text.Rectangle;\nimport com.itextpdf.text.pdf.AcroFields;\nimport com.itextpdf.text.pdf.PdfReader;\nimport com.itextpdf.text.pdf.PdfSignatureAppearance;\nimport com.itextpdf.text.pdf.PdfStamper;\nimport com.itextpdf.text.pdf.PdfWriter;\nimport com.itextpdf.text.pdf.security.BouncyCastleDigest;\nimport com.itextpdf.text.pdf.security.CertificateInfo;\nimport com.itextpdf.text.pdf.security.CertificateVerification;\nimport com.itextpdf.text.pdf.security.ExternalDigest;\nimport com.itextpdf.text.pdf.security.ExternalSignature;\nimport com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard;\nimport com.itextpdf.text.pdf.security.PrivateKeySignature;\nimport com.itextpdf.text.pdf.security.MakeSignature;\nimport com.itextpdf.text.pdf.security.PdfPKCS7;\nimport com.itextpdf.text.pdf.security.VerificationException;\n\npublic class Signatures {\n\n    /**\n     * The resulting PDF\n     */\n    public static String ORIGINAL = \"C:\\\\Users\\\\02948\\\\Desktop\\\\hello.pdf\";\n    /**\n     * The resulting PDF\n     */\n    public static String SIGNED1 = \"C:\\\\Users\\\\02948\\\\Desktop\\\\signature_1.pdf\";\n    /**\n     * The resulting PDF\n     */\n    public static String SIGNED2 = \"C:\\\\Users\\\\02948\\\\Desktop\\\\signature_2.pdf\";\n    /**\n     * Info after verification of a signed PDF\n     */\n    public static String VERIFICATION = \"C:\\\\Users\\\\02948\\\\Desktop\\\\verify.txt\";\n    /**\n     * The resulting PDF\n     */\n    public static String REVISION = \"C:\\\\Users\\\\02948\\\\Desktop\\\\revision_1.pdf\";\n\n    /**\n     * A properties file that is PRIVATE. You should make your own properties\n     * file and adapt this line.\n     */\n    public static String PATH = \"C:\\\\Users\\\\02948\\\\Documents\\\\NetBeansProjects\\\\DigiSig\\\\src\\\\digisig\\\\key.properties\";\n    /**\n     * Some properties used when signing.\n     */\n    public static Properties properties = new Properties();\n\n    /**\n     * One of the resources.\n     */\n    //   public static final String RESOURCE = \"resources/img/logo.gif\";\n    /**\n     * Creates a PDF document.\n     *\n     * @param filename the path to the new PDF document\n     * @throws DocumentException\n     * @throws IOException\n     */\n    public void createPdf(String filename) throws IOException, DocumentException {\n        Document document = new Document();\n        PdfWriter.getInstance(document, new FileOutputStream(filename));\n        document.open();\n        document.add(new Paragraph(\"Hello World!\"));\n        document.close();\n    }\n\n    /**\n     * Manipulates a PDF file src with the file dest as result\n     *\n     * @param src the original PDF\n     * @param dest the resulting PDF\n     * @throws IOException\n     * @throws DocumentException\n     * @throws GeneralSecurityException\n     */\n    public void signPdfFirstTime(String src, String dest)\n            throws IOException, DocumentException, GeneralSecurityException {\n//        String path = properties.getProperty(\"PRIVATE\");\n//        String keystore_password = properties.getProperty(\"PASSWORD\");\n//        String key_password = properties.getProperty(\"PASSWORD\");\n        String path = \"C:\\\\Users\\\\02948\\\\Desktop\\\\kandarp.pfx\";\n        String keystore_password = \"kandarp\";\n        String key_password = \"kandarp\";\n\n        KeyStore ks = KeyStore.getInstance(\"pkcs12\", \"BC\");\n        ks.load(new FileInputStream(path), keystore_password.toCharArray());\n        String alias = (String) ks.aliases().nextElement();\n        PrivateKey pk = (PrivateKey) ks.getKey(alias, key_password.toCharArray());\n        Certificate[] chain = ks.getCertificateChain(alias);\n        // reader and stamper\n        PdfReader reader = new PdfReader(src);\n        FileOutputStream os = new FileOutputStream(dest);\n        PdfStamper stamper = PdfStamper.createSignature(reader, os, '\\0');\n        // appearance\n        PdfSignatureAppearance appearance = stamper.getSignatureAppearance();\n//        appearance.setImage(Image.getInstance(RESOURCE));\n        appearance.setReason(\"I've written this.\");\n        appearance.setLocation(\"Foobar\");\n        appearance.setVisibleSignature(new Rectangle(72, 732, 144, 780), 1, \"first\");\n        // digital signature\n        ExternalSignature es = new PrivateKeySignature(pk, \"SHA-256\", \"BC\");\n        ExternalDigest digest = new BouncyCastleDigest();\n        MakeSignature.signDetached(appearance, digest, es, chain, null, null, null, 0, CryptoStandard.CMS);\n    }\n\n    /**\n     * Manipulates a PDF file src with the file dest as result\n     *\n     * @param src the original PDF\n     * @param dest the resulting PDF\n     * @throws IOException\n     * @throws DocumentException\n     * @throws GeneralSecurityException\n     */\n    public void signPdfSecondTime(String src, String dest)\n            throws IOException, DocumentException, GeneralSecurityException {\n        String path = \"resources/encryption/.keystore\";\n        String keystore_password = \"f00b4r\";\n        String key_password = \"f1lmf3st\";\n        String alias = \"foobar\";\n        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());\n        ks.load(new FileInputStream(path), keystore_password.toCharArray());\n        PrivateKey pk = (PrivateKey) ks.getKey(alias, key_password.toCharArray());\n        Certificate[] chain = ks.getCertificateChain(alias);\n        // reader / stamper\n        PdfReader reader = new PdfReader(src);\n        FileOutputStream os = new FileOutputStream(dest);\n        PdfStamper stamper = PdfStamper.createSignature(reader, os, '\\0', null, true);\n        // appearance\n        PdfSignatureAppearance appearance = stamper\n                .getSignatureAppearance();\n        appearance.setReason(\"I'm approving this.\");\n        appearance.setLocation(\"Foobar\");\n        appearance.setVisibleSignature(new Rectangle(160, 732, 232, 780), 1, \"second\");\n        // digital signature\n        ExternalSignature es = new PrivateKeySignature(pk, \"SHA-256\", \"BC\");\n        ExternalDigest digest = new BouncyCastleDigest();\n        MakeSignature.signDetached(appearance, digest, es, chain, null, null, null, 0, CryptoStandard.CMS);\n\n    }\n\n    /**\n     * Verifies the signatures of a PDF we've signed twice.\n     *\n     * @throws GeneralSecurityException\n     * @throws IOException\n     */\n    public void verifySignatures() throws GeneralSecurityException, IOException {\n        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());\n        ks.load(null, null);\n        CertificateFactory cf = CertificateFactory.getInstance(\"X509\");\n        FileInputStream is1 = new FileInputStream(properties.getProperty(\"ROOTCERT\"));\n        X509Certificate cert1 = (X509Certificate) cf.generateCertificate(is1);\n        ks.setCertificateEntry(\"cacert\", cert1);\n        FileInputStream is2 = new FileInputStream(\"resources/encryption/foobar.cer\");\n        X509Certificate cert2 = (X509Certificate) cf.generateCertificate(is2);\n        ks.setCertificateEntry(\"foobar\", cert2);\n\n        PrintWriter out = new PrintWriter(new FileOutputStream(VERIFICATION));\n        PdfReader reader = new PdfReader(SIGNED2);\n        AcroFields af = reader.getAcroFields();\n        ArrayList&lt;String&gt; names = af.getSignatureNames();\n        for (String name : names) {\n            out.println(\"Signature name: \" + name);\n            out.println(\"Signature covers whole document: \" + af.signatureCoversWholeDocument(name));\n            out.println(\"Document revision: \" + af.getRevision(name) + \" of \" + af.getTotalRevisions());\n            PdfPKCS7 pk = af.verifySignature(name);\n            Calendar cal = pk.getSignDate();\n            Certificate[] pkc = pk.getCertificates();\n            out.println(\"Subject: \" + CertificateInfo.getSubjectFields(pk.getSigningCertificate()));\n            out.println(\"Revision modified: \" + !pk.verify());\n            List&lt;VerificationException&gt; errors = CertificateVerification.verifyCertificates(pkc, ks, null, cal);\n            if (errors.size() == 0) {\n                out.println(\"Certificates verified against the KeyStore\");\n            } else {\n                out.println(errors);\n            }\n        }\n        out.flush();\n        out.close();\n    }\n\n    /**\n     * Extracts the first revision of a PDF we've signed twice.\n     *\n     * @throws IOException\n     */\n    public void extractFirstRevision() throws IOException {\n        PdfReader reader = new PdfReader(SIGNED2);\n        AcroFields af = reader.getAcroFields();\n        FileOutputStream os = new FileOutputStream(REVISION);\n        byte bb[] = new byte[1028];\n        InputStream ip = af.extractRevision(\"first\");\n        int n = 0;\n        while ((n = ip.read(bb)) &gt; 0) {\n            os.write(bb, 0, n);\n        }\n        os.close();\n        ip.close();\n    }\n\n    /**\n     * Main method.\n     *\n     * @param args no arguments needed\n     * @throws DocumentException\n     * @throws IOException\n     * @throws GeneralSecurityException\n     */\n    public static void main(String[] args)\n            throws IOException, DocumentException, GeneralSecurityException {\n        Security.addProvider(new BouncyCastleProvider());\n        FileInputStream fis = new FileInputStream(\"C:\\\\Users\\\\02948\\\\Desktop\\\\kandarp.pfx\");\n        String password = \"kandarp\";\n        properties.load(new FileInputStream(PATH));\n        Signatures signatures = new Signatures();\n        signatures.createPdf(ORIGINAL);\n        signatures.signPdfFirstTime(ORIGINAL, SIGNED1);\n        signatures.signPdfSecondTime(SIGNED1, SIGNED2);\n        signatures.verifySignatures();\n        signatures.extractFirstRevision();\n    }\n}\n<\/code><\/pre>\n\n<ol start=\"4\">\n<li><p>Error comes . pl help<\/p>\n\n<pre><code>Exception in thread \"main\" java.lang.NullPointerException\nat com.itextpdf.text.pdf.security.PrivateKeySignature.&lt;init&gt;(PrivateKeySignature.java:77)\nat iText.Signatures.signPdfFirstTime(Signatures.java:135)\nat iText.Signatures.main(Signatures.java:252)\n<\/code><\/pre>\n\n<p>Java Result: 1\nBUILD SUCCESSFUL (total time: 1 second)<\/p><\/li>\n<\/ol>\n",
+        "question_id": 29646831,
+        "tags": [
+            "java",
+            "itext",
+            "digital-signature"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 2090
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/p7S0d.jpg?s=256",
+                "account_id": 1779372,
+                "user_type": "registered",
+                "user_id": 1622493,
+                "link": "https://stackoverflow.com/users/1622493/bruno-lowagie",
+                "reputation": 77813,
+                "display_name": "Bruno Lowagie"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646831,
+            "edited": false,
+            "creation_date": 1429120403,
+            "comment_id": 47454268
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VMMeP.jpg?s=256",
+                "account_id": 1916831,
+                "user_type": "registered",
+                "user_id": 1729265,
+                "link": "https://stackoverflow.com/users/1729265/mkl",
+                "reputation": 97023,
+                "display_name": "mkl"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646831,
+            "edited": false,
+            "creation_date": 1429103960,
+            "comment_id": 47442384
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/p7S0d.jpg?s=256",
+                "account_id": 1779372,
+                "user_type": "registered",
+                "user_id": 1622493,
+                "link": "https://stackoverflow.com/users/1622493/bruno-lowagie",
+                "reputation": 77813,
+                "display_name": "Bruno Lowagie"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29646831,
+            "edited": false,
+            "creation_date": 1429091051,
+            "comment_id": 47433832
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d5201aeea6b786128939a5fc6cf10064?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12082518,
+            "user_type": "registered",
+            "user_id": 8833712,
+            "link": "https://stackoverflow.com/users/8833712/punith-ck-punith",
+            "reputation": 121,
+            "display_name": "punith ck punith"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1617023556,
+        "creation_date": 1617023556,
+        "body": "<p>I also got the same problem. Changing the Security.Provider At the time of creating KeyStore works.\nEither change your code from<\/p>\n<pre><code>KeyStore ks = KeyStore.getInstance(&quot;pkcs12&quot;, &quot;BC&quot;);\n<\/code><\/pre>\n<p>to<\/p>\n<pre><code>KeyStore ks = KeyStore.getInstance(&quot;pkcs12&quot;);\n<\/code><\/pre>\n<p>or use any Other Provider: SunRsaSign, SunEC, SunJSSE, SunJGSS\nMore info about Provider class: <a href=\"https://docs.oracle.com/javase/7/docs/api/java/security/Provider.html\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/7/docs/api/java/security/Provider.html<\/a><\/p>\n",
+        "answer_id": 66854869,
+        "question_id": 29646831
+    }],
+    "answer_comments": {}
+}

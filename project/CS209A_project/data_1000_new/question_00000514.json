@@ -1,0 +1,175 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/wSRJX.jpg?s=256",
+            "account_id": 1159723,
+            "user_type": "registered",
+            "user_id": 1139500,
+            "link": "https://stackoverflow.com/users/1139500/joseph-gagnon",
+            "reputation": 2307,
+            "display_name": "Joseph Gagnon"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75951620/spring-inject-a-value-into-a-statically-accessed-class",
+        "last_activity_date": 1680889958,
+        "creation_date": 1680797609,
+        "answer_count": 1,
+        "title": "Spring: Inject a value into a statically accessed class",
+        "body": "<p>Consider the following class:<\/p>\n<pre><code>public class ExpressionTokenClassifier {\n\n  private static final String       PROMQL_KEYWORDS = &quot;promql-keywords.json&quot;;\n  private static final List&lt;String&gt; KEYWORDS;\n\n  static {\n    List&lt;PromQLKeyword&gt; words = KeywordsExtractor.extractKeywords(PROMQL_KEYWORDS);\n    KEYWORDS = words.stream().map(PromQLKeyword::getName).collect(Collectors.toList());\n  }\n\n  public static void classifyTokens(List&lt;ExpressionToken&gt; tokens) {\n    ... // KEYWORDS is used in here\n  }\n\n}\n<\/code><\/pre>\n<p>Notice the hardwired file name (<code>PROMQL_KEYWORDS<\/code>) specified and used in the static initialization block. This works, but I would like to remove the hardcoded value and instead use dependency injection (Spring) to set the value from <code>application.yaml<\/code>. <strong>This class is intended to only be used statically.<\/strong><\/p>\n<p>My research indicates that the Spring framework does not allow setting a static field with the <code>@Value<\/code> annotation. I have seen some suggestions of a workaround, but do not understand how they would work. Here is an example where I attempted to do this:<\/p>\n<pre><code>@Component\npublic class ExpressionTokenClassifier2 {\n\n  private static final List&lt;String&gt; KEYWORDS;\n\n  private static String             KEYWORDS_FILE;\n\n  @Value(&quot;${app.keywords-file}&quot;)\n  public void setKeywordsFileName(String name) {\n    KEYWORDS_FILE = name;\n  }\n\n  static {\n    List&lt;PromQLKeyword&gt; words = KeywordsExtractor.extractKeywords(KEYWORDS_FILE);\n    KEYWORDS = words.stream().map(PromQLKeyword::getName).collect(Collectors.toList());\n  }\n\n  public static void classifyTokens(List&lt;ExpressionToken&gt; tokens) {\n    ... // KEYWORDS is used in here\n  }\n\n}\n<\/code><\/pre>\n<p>When I tried it, the application fails to start because of NPE (<code>KEYWORDS_FILE<\/code> is null). My immediate question is: <em>Where and when would the <code>setKeywordsFileName()<\/code> method be called?<\/em> Nowhere, as far as I can tell - and the results agree. Am I missing some logic?<\/p>\n<p>Does anyone know of a way to accomplish this? I could change this class so that it's instantiated instead of statically accessed, but the class that uses this class is <strong>also<\/strong> a statically accessed class. I really don't want to have to change a bunch of code to fix this.<\/p>\n<p><strong>UPDATE<\/strong>:<\/p>\n<p>Upon further investigation, it appears that this is essentially not doable, at least not without a lot of extra work that probably defeats the purpose. This link, to me, describes the situation quite well.<\/p>\n<p><a href=\"https://stackoverflow.com/questions/45192373/how-to-assign-a-value-from-application-properties-to-a-static-variable\">How to assign a value from application.properties to a static variable?<\/a><\/p>\n<p>Looks like I'm going to have to think about this for awhile.<\/p>\n",
+        "question_id": 75951620,
+        "tags": [
+            "java",
+            "spring"
+        ],
+        "score": 1,
+        "accepted_answer_id": 75951716,
+        "is_answered": true,
+        "view_count": 1121,
+        "last_edit_date": 1680805207
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fe85994d05ad7aaaa1c47d638b37bc45?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8909811,
+            "user_type": "registered",
+            "user_id": 6650475,
+            "link": "https://stackoverflow.com/users/6650475/andrew-s",
+            "reputation": 2861,
+            "display_name": "Andrew S"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 75951620,
+        "edited": false,
+        "creation_date": 1680798727,
+        "comment_id": 133962280
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5f4cb0d2f97a2f20b9e2d64996164043?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1769203,
+            "user_type": "registered",
+            "user_id": 1614378,
+            "link": "https://stackoverflow.com/users/1614378/devops",
+            "reputation": 9201,
+            "display_name": "devops",
+            "accept_rate": 55
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1680889958,
+        "creation_date": 1680798271,
+        "body": "<p>I would just use a <code>@Component<\/code> and <code>@PostConstruct<\/code> method for init task:<\/p>\n<p>Spring conponent is singleton, so no need for static.<\/p>\n<pre><code>@Component // singleton\npublic class ExpressionTokenClassifier {\n    \n    @Value(&quot;${app.keywords-file}&quot;)\n    private String file;\n\n    private List&lt;String&gt; KEYWORDS;\n\n    @PostConstruct\n    public void init() {\n       [...]\n    }\n\n}\n<\/code><\/pre>\n<p>if static access is essential, you can init your static class as soon as the application is started:<\/p>\n<pre><code>public class ExpressionTokenClassifier {\n    \n    private List&lt;String&gt; KEYWORDS;\n\n    static void init(String file) {\n        List&lt;PromQLKeyword&gt; words = KeywordsExtractor.extractKeywords(file);\n        KEYWORDS = words.stream().map(PromQLKeyword::getName).collect(Collectors.toList());\n    }\n    \n     public static void classifyTokens(List&lt;ExpressionToken&gt; tokens) {\n        // KEYWORDS is used in here\n    }\n\n}\n\n@Component\npublic class ExpressionTokenClassifierInitializer {\n    \n    @Value(&quot;${app.keywords-file}&quot;)\n    private String file;\n\n    @EventListener(ContextRefreshedEvent.class)\n    public void onApplicationStartedEvent() {\n       ExpressionTokenClassifier.init(file);\n    }\n\n}\n<\/code><\/pre>\n",
+        "answer_id": 75951716,
+        "question_id": 75951620,
+        "last_edit_date": 1680889958
+    }],
+    "answer_comments": {"75951716": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5f4cb0d2f97a2f20b9e2d64996164043?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1769203,
+                "user_type": "registered",
+                "user_id": 1614378,
+                "link": "https://stackoverflow.com/users/1614378/devops",
+                "reputation": 9201,
+                "display_name": "devops",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75951716,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/wSRJX.jpg?s=256",
+                "account_id": 1159723,
+                "user_type": "registered",
+                "user_id": 1139500,
+                "link": "https://stackoverflow.com/users/1139500/joseph-gagnon",
+                "reputation": 2307,
+                "display_name": "Joseph Gagnon"
+            },
+            "edited": false,
+            "creation_date": 1680890074,
+            "comment_id": 133976935
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wSRJX.jpg?s=256",
+                "account_id": 1159723,
+                "user_type": "registered",
+                "user_id": 1139500,
+                "link": "https://stackoverflow.com/users/1139500/joseph-gagnon",
+                "reputation": 2307,
+                "display_name": "Joseph Gagnon"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75951716,
+            "edited": false,
+            "creation_date": 1680803361,
+            "comment_id": 133963324
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wSRJX.jpg?s=256",
+                "account_id": 1159723,
+                "user_type": "registered",
+                "user_id": 1139500,
+                "link": "https://stackoverflow.com/users/1139500/joseph-gagnon",
+                "reputation": 2307,
+                "display_name": "Joseph Gagnon"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75951716,
+            "edited": false,
+            "creation_date": 1680800938,
+            "comment_id": 133962793
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5f4cb0d2f97a2f20b9e2d64996164043?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1769203,
+                "user_type": "registered",
+                "user_id": 1614378,
+                "link": "https://stackoverflow.com/users/1614378/devops",
+                "reputation": 9201,
+                "display_name": "devops",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75951716,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/wSRJX.jpg?s=256",
+                "account_id": 1159723,
+                "user_type": "registered",
+                "user_id": 1139500,
+                "link": "https://stackoverflow.com/users/1139500/joseph-gagnon",
+                "reputation": 2307,
+                "display_name": "Joseph Gagnon"
+            },
+            "edited": false,
+            "creation_date": 1680800007,
+            "comment_id": 133962560
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wSRJX.jpg?s=256",
+                "account_id": 1159723,
+                "user_type": "registered",
+                "user_id": 1139500,
+                "link": "https://stackoverflow.com/users/1139500/joseph-gagnon",
+                "reputation": 2307,
+                "display_name": "Joseph Gagnon"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 75951716,
+            "edited": false,
+            "creation_date": 1680799552,
+            "comment_id": 133962465
+        }
+    ]}
+}

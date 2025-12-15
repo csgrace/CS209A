@@ -1,0 +1,144 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e40f6ac8e8d5cb67673bed97e2f4322f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 14781217,
+            "user_type": "registered",
+            "user_id": 10674676,
+            "link": "https://stackoverflow.com/users/10674676/manxdev",
+            "reputation": 108,
+            "display_name": "ManxDev"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59070234/create-csv-file-with-columns-and-values-from-hashmap",
+        "last_activity_date": 1676498109,
+        "creation_date": 1574857640,
+        "answer_count": 2,
+        "title": "Create CSV file with columns and values from HashMap",
+        "body": "<p>Be gentle,\nThis is my first time using Apache Commons CSV 1.7.<\/p>\n\n<p>I am creating a service to process some CSV inputs,\nadd some additional information from exterior sources,\nthen write out this CSV for ingestion into another system.<\/p>\n\n<p>I store the information that I have gathered into a list of \n<code>HashMap&lt;String, String&gt;<\/code> for each row of the final output csv.\nThe Hashmap contains the <code>&lt;ColumnName, Value for column&gt;<\/code>.<\/p>\n\n<p>I have issues using the CSVPrinter to correctly assign the values of the HashMaps into the rows.\nI can concatenate the values into a string with commas between the variables;\nhowever,\nthis just inserts the whole string into the first column.<\/p>\n\n<p>I cannot define or hardcode the headers since they are obtained from a config file and may change depending on which project uses the service.<\/p>\n\n<p>Here is some of my code:<\/p>\n\n<pre><code>try (BufferedWriter writer = Files.newBufferedWriter(\n    Paths.get(OUTPUT + \"/\" + project + \"/\" + project + \".csv\"));)\n{\n    CSVPrinter csvPrinter = new CSVPrinter(writer,\n        CSVFormat.RFC4180.withFirstRecordAsHeader());\n    csvPrinter.printRecord(columnList);\n\nfor (HashMap&lt;String, String&gt; row : rowCollection)\n{\n    //Need to map __record__ to column -&gt; row.key, value -&gt; row.value for whole map.\n\n    csvPrinter.printrecord(__record__);\n}\n\ncsvPrinter.flush();\n\n}\n<\/code><\/pre>\n\n<p>Thanks for your assistance.<\/p>\n",
+        "question_id": 59070234,
+        "tags": [
+            "java",
+            "csv",
+            "apache-commons-csv"
+        ],
+        "score": 1,
+        "accepted_answer_id": 59070846,
+        "is_answered": true,
+        "view_count": 3191,
+        "last_edit_date": 1574858594
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7e2e5c48b01818d2746aa3862968576d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12824901,
+                "user_type": "registered",
+                "user_id": 9278333,
+                "link": "https://stackoverflow.com/users/9278333/trilogy",
+                "reputation": 1827,
+                "display_name": "trilogy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070234,
+            "edited": false,
+            "creation_date": 1659032028,
+            "comment_id": 129205103
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DxOt0.jpg?s=256",
+                "account_id": 240000,
+                "user_type": "registered",
+                "user_id": 509977,
+                "link": "https://stackoverflow.com/users/509977/pitto",
+                "reputation": 8701,
+                "display_name": "Pitto",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070234,
+            "edited": false,
+            "creation_date": 1574858113,
+            "comment_id": 104378686
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-GW5szVKAnaE/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rc5kAxBHxWvy7gz5fnWIEYua6CxVw/s256-rj/photo.jpg",
+                "account_id": 17181007,
+                "user_type": "registered",
+                "user_id": 12436427,
+                "link": "https://stackoverflow.com/users/12436427/b-ghilas",
+                "reputation": 2343,
+                "display_name": "b.GHILAS"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070234,
+            "edited": false,
+            "creation_date": 1574857869,
+            "comment_id": 104378544
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Rjx6y.png?s=256",
+                "account_id": 204659,
+                "user_type": "registered",
+                "user_id": 453005,
+                "link": "https://stackoverflow.com/users/453005/dwb",
+                "reputation": 38566,
+                "display_name": "DwB",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1676498109,
+            "creation_date": 1574859652,
+            "body": "<p>You actually have multiple concerns with your technique;<\/p>\n<ol>\n<li>How do you maintain column order?<\/li>\n<li>How do you print the column names?<\/li>\n<li>How do you print the column values?<\/li>\n<\/ol>\n<p>Here are my suggestions.<\/p>\n<ol>\n<li><p>Maintain column order.\nDo not use <code>HashMap<\/code>,\nbecause it is unordered.\nInstead,\nuse <code>LinkedHashMap<\/code> which has a &quot;predictable iteration order&quot;\n(i.e. maintains order).<\/p>\n<\/li>\n<li><p>Print column names.\nEvery row in your list contains the column names in the form of key values,\nbut you only print the column names as the first row of output.\nThe solution is to print the column names before you loop through the rows.\nGet them from the first element of the list.<\/p>\n<\/li>\n<li><p>Print column values.\nThe &quot;billal GHILAS&quot; answer demonstrates a way to print the values of each row.<\/p>\n<\/li>\n<\/ol>\n<p>Here is some code:<\/p>\n<pre><code>try (BufferedWriter writer = Files.newBufferedWriter(\n     Paths.get(OUTPUT + &quot;/&quot; + project + &quot;/&quot; + project + &quot;.csv&quot;));)\n{\n    CSVPrinter csvPrinter = new CSVPrinter(writer,\n        CSVFormat.RFC4180.withFirstRecordAsHeader());\n\n    // This assumes that the rowCollection will never be empty.\n    // An anonymous scope block just to limit the scope of the variable names.\n    {\n        HashMap&lt;String, String&gt; firstRow = rowCollection.get(0);\n        int valueIndex = 0;\n        String[] valueArray = new String[firstRow.size()];\n        \n        for (String currentValue : firstRow.keySet())\n        {\n            valueArray[valueIndex++] = currentValue;\n        }\n\n        csvPrinter.printrecord(valueArray);\n    }\n\n    for (HashMap&lt;String, String&gt; row : rowCollection)\n    {\n        int valueIndex = 0;\n        String[] valueArray = new String[row.size()];\n        \n        for (String currentValue : row.values())\n        {\n            valueArray[valueIndex++] = currentValue;\n        }\n\n        csvPrinter.printrecord(valueArray);\n    }\n\n    csvPrinter.flush();\n}\n<\/code><\/pre>\n",
+            "answer_id": 59070846,
+            "question_id": 59070234,
+            "last_edit_date": 1676498109
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-GW5szVKAnaE/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rc5kAxBHxWvy7gz5fnWIEYua6CxVw/s256-rj/photo.jpg",
+                "account_id": 17181007,
+                "user_type": "registered",
+                "user_id": 12436427,
+                "link": "https://stackoverflow.com/users/12436427/b-ghilas",
+                "reputation": 2343,
+                "display_name": "b.GHILAS"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1574858483,
+            "creation_date": 1574858483,
+            "body": "<pre><code>for (HashMap&lt;String,String&gt; row : rowCollection) {\n       Object[] record = new Object[row.size()];\n       for (int i = 0; i &lt; columnList.size(); i++) {\n            record[i] = row.get(columnList.get(i));\n       }\n\n       csvPrinter.printRecord(record);\n }\n<\/code><\/pre>\n",
+            "answer_id": 59070491,
+            "question_id": 59070234
+        }
+    ],
+    "answer_comments": {"59070846": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e40f6ac8e8d5cb67673bed97e2f4322f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 14781217,
+            "user_type": "registered",
+            "user_id": 10674676,
+            "link": "https://stackoverflow.com/users/10674676/manxdev",
+            "reputation": 108,
+            "display_name": "ManxDev"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 59070846,
+        "edited": false,
+        "creation_date": 1575365946,
+        "comment_id": 104532566
+    }]}
+}

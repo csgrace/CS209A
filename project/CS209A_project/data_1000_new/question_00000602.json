@@ -1,0 +1,55 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4d1f61c099ecdb560ffc731eb6538895?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4468807,
+            "user_type": "registered",
+            "user_id": 3635629,
+            "link": "https://stackoverflow.com/users/3635629/genzi",
+            "reputation": 83,
+            "display_name": "Genzi",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28341986/nanohttpd-how-to-present-variable-from-app",
+        "last_activity_date": 1423134827,
+        "creation_date": 1423133352,
+        "answer_count": 1,
+        "title": "NanoHTTPD how to present variable from app",
+        "body": "<p>I play NanoHTTPD and WebServer based on it. To update any object in my code (application) I can use GET/POST method. But how can I create dynamic pages? For example I have html page on disc and it should present current temperature:<\/p>\n\n<pre><code>&lt;html&gt;\n  &lt;head&gt;\n    &lt;title&gt;My page&lt;/title&gt;\n  &lt;/head&gt;\n\n  &lt;body&gt;\n\n    &lt;p style=\"text-align: center\"&gt;Temperature: [temperature variable] &lt;/p&gt;\n\n  &lt;/body&gt;\n\n&lt;/html&gt;\n<\/code><\/pre>\n\n<p>How can I pass \"variable temperature\" from my application based on NanoHTTPD to html file and present it in browser?<\/p>\n",
+        "question_id": 28341986,
+        "tags": [
+            "java",
+            "dynamic",
+            "html",
+            "nanohttpd"
+        ],
+        "score": 2,
+        "accepted_answer_id": 28342196,
+        "is_answered": true,
+        "view_count": 706
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/aTFoe.jpg?s=256",
+            "account_id": 1886487,
+            "user_type": "registered",
+            "user_id": 1705598,
+            "link": "https://stackoverflow.com/users/1705598/icza",
+            "reputation": 422929,
+            "display_name": "icza",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1423134827,
+        "creation_date": 1423133944,
+        "body": "<p>You have to read the template from your disk, and replace the <code>[temperature variable]<\/code> substring with the value you want to include.<\/p>\n\n<p>To read the file, you can use the <a href=\"https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html\" rel=\"nofollow\"><code>Files<\/code><\/a> class:<\/p>\n\n<pre><code>byte[] data = Files.readAllBytes(Paths.get(\"mytemplpate.html\"));\nString templ = new String(data, StandardCharsets.UTF_8);\n<\/code><\/pre>\n\n<p>To insert your temperature:<\/p>\n\n<pre><code>double temperature = 22.3;\nString html = templ.replace(\"[temperature variable]\", Double.toString(temperature));\n<\/code><\/pre>\n\n<p>And finally to send this as the response with NanoHTTPD:<\/p>\n\n<pre><code>return new NanoHTTPD.Response(html);\n<\/code><\/pre>\n\n<p><strong>The complete program:<\/strong><\/p>\n\n<p><em>Foreword: Exceptions are not handled, this is just for demonstration purposes.<\/em><\/p>\n\n<pre><code>public class TemperatureServer extends NanoHTTPD {\n    // Loaded and cached html template\n    private static String templ;\n\n    // Value of this variable will be included and sent in the response\n    private static double temperature;\n\n    public TemperatureServer () {\n        super(8080);\n    }\n\n    @Override\n    public Response serve(IHTTPSession session) {\n        String html = templ.replace(\"[temperature variable]\",\n            Double.toString(temperature));\n        return new NanoHTTPD.Response(html);\n    }\n\n    public static void main(String[] args) throws Exception {\n        byte[] data = Files.readAllBytes(Paths.get(\"mytemplpate.html\"));\n        templ = new String(data, StandardCharsets.UTF_8);\n\n        ServerRunner.run(TemperatureServer.class);\n    }\n}\n<\/code><\/pre>\n\n<p>For more advanced examples check out the <a href=\"https://github.com/NanoHttpd/nanohttpd/tree/master/samples/src/main/java/fi/iki/elonen\" rel=\"nofollow\">Samples package<\/a> of the NanoHttpd Github site.<\/p>\n",
+        "answer_id": 28342196,
+        "question_id": 28341986,
+        "last_edit_date": 1423134827
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,204 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/22ea15aa505ee3fdcc5cb40b00a31f63?s=256&d=identicon&r=PG",
+            "account_id": 1394594,
+            "user_type": "registered",
+            "user_id": 1324631,
+            "link": "https://stackoverflow.com/users/1324631/ajmansfield",
+            "reputation": 4222,
+            "display_name": "AJMansfield",
+            "accept_rate": 73
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15621831/why-do-i-need-to-call-find-twice",
+        "last_activity_date": 1410381710,
+        "creation_date": 1364235162,
+        "answer_count": 1,
+        "title": "Why do I need to call find() twice?",
+        "body": "<p>I am writing a program to parse a bunch of data, (you can get an example of the dataset itself here: <a href=\"https://explore.data.gov/Geography-and-Environment/Worldwide-M1-Earthquakes-Past-7-Days/7tag-iwnu\" rel=\"nofollow\">https://explore.data.gov/Geography-and-Environment/Worldwide-M1-Earthquakes-Past-7-Days/7tag-iwnu<\/a>).<\/p>\n\n<p>The following class works perfectly fine, but <strong>I am not sure why I need to call <code>matcher.find()<\/code> an extra time between each item in my <code>parseEarthquake()<\/code> method.  Why is that?  Is that a normal quirk I just have to deal with, or did I set it up my pattern/matcher incorrectly?<\/strong><\/p>\n\n<p>The method takes a string containing one of the lines of data (for example, <code>nc,71958020,1,\"Thursday, March 21, 2013 17:13:34 UTC\",38.8367,-122.8298,1.4,2.60,28,\"Northern California\"<\/code>), and returns an earthquake object for the data.<\/p>\n\n<pre><code>import java.text.DecimalFormat;\nimport java.text.FieldPosition;\nimport java.text.ParseException;\nimport java.text.SimpleDateFormat;\nimport java.util.TimeZone;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\n\n\npublic class Earthquake {\n\n    String src=\"xx\";\n    String eqid=\"00000000\";\n    short version;\n    long dateTime;\n    float lat, lon;\n    float mag, dep;\n    short nst;\n    String region=\"Nowhere\";\n\n    private Earthquake(){\n        date.setTimeZone(TimeZone.getTimeZone(\"UTC\"));\n    }\n\n\n\n    private static DecimalFormat \n            coords      = new DecimalFormat( \"##0.0000\" ),\n            magnitude   = new DecimalFormat( \"###0.0\" ),\n            depth       = new DecimalFormat( \"###0.00\" );\n    private static SimpleDateFormat date = new SimpleDateFormat(\"'\\\"'EEEE', 'MMMM' 'dd', 'yyyy' 'HH':'mm':'ss' 'zzz'\\\"'\");\n\n\n    // Src, Eqid, Version, Datetime, Lat, Lon, Magnitude, Depth, NST, Region;\n\n    public static Earthquake parseEarthquake(String string){\n        Earthquake result = new Earthquake();\n\n        Matcher matcher = Pattern.compile(\"(\\\".*?\\\")|([^,]*)\").matcher(string);\n\n\n        try {\n\n                                matcher.find(); result.src = matcher.group();\n                matcher.find(); matcher.find(); result.eqid = matcher.group();\n                matcher.find(); matcher.find(); result.version = Short.parseShort(matcher.group());\n                matcher.find(); matcher.find(); result.dateTime = date.parse(matcher.group()).getTime();\n                matcher.find(); matcher.find(); result.lat = coords.parse(matcher.group()).floatValue();\n                matcher.find(); matcher.find(); result.lon = coords.parse(matcher.group()).floatValue();\n                matcher.find(); matcher.find(); result.mag = magnitude.parse(matcher.group()).floatValue();\n                matcher.find(); matcher.find(); result.dep = depth.parse(matcher.group()).floatValue();\n                matcher.find(); matcher.find(); result.nst = Short.parseShort(matcher.group());\n                matcher.find(); matcher.find(); result.region = matcher.group();    \n\n        } catch (ParseException e) {\n            e.printStackTrace();\n        } catch (NumberFormatException e) {\n            e.printStackTrace();\n        }\n\n        return result;\n    }\n\n    public String toString(){\n        StringBuffer buf = new StringBuffer();\n\n                            buf.append(src);\n        buf.append(',');    buf.append(eqid);\n        buf.append(',');    buf.append(version);\n        buf.append(',');    date.format(dateTime, buf, new FieldPosition(0));\n        buf.append(',');    coords.format(lat, buf, new FieldPosition(0));\n        buf.append(',');    coords.format(lon, buf, new FieldPosition(0));\n        buf.append(',');    magnitude.format(mag, buf, new FieldPosition(0));\n        buf.append(',');    depth.format(dep, buf, new FieldPosition(0));\n        buf.append(',');    buf.append(nst);\n        buf.append(',');    buf.append('\"'); buf.append(region); buf.append('\"');\n\n        return buf.toString();\n\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 15621831,
+        "tags": [
+            "java",
+            "regex"
+        ],
+        "score": 1,
+        "accepted_answer_id": 15622177,
+        "is_answered": true,
+        "view_count": 280,
+        "last_edit_date": 1410381710
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/KcHmP.jpg?s=256",
+                "account_id": 33547,
+                "user_type": "registered",
+                "user_id": 93988,
+                "link": "https://stackoverflow.com/users/93988/ivan-nevostruev",
+                "reputation": 28863,
+                "display_name": "Ivan Nevostruev"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621831,
+            "edited": false,
+            "creation_date": 1364236389,
+            "comment_id": 22160066
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22ea15aa505ee3fdcc5cb40b00a31f63?s=256&d=identicon&r=PG",
+                "account_id": 1394594,
+                "user_type": "registered",
+                "user_id": 1324631,
+                "link": "https://stackoverflow.com/users/1324631/ajmansfield",
+                "reputation": 4222,
+                "display_name": "AJMansfield",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621831,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/KcHmP.jpg?s=256",
+                "account_id": 33547,
+                "user_type": "registered",
+                "user_id": 93988,
+                "link": "https://stackoverflow.com/users/93988/ivan-nevostruev",
+                "reputation": 28863,
+                "display_name": "Ivan Nevostruev"
+            },
+            "edited": false,
+            "creation_date": 1364236080,
+            "comment_id": 22159897
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22ea15aa505ee3fdcc5cb40b00a31f63?s=256&d=identicon&r=PG",
+                "account_id": 1394594,
+                "user_type": "registered",
+                "user_id": 1324631,
+                "link": "https://stackoverflow.com/users/1324631/ajmansfield",
+                "reputation": 4222,
+                "display_name": "AJMansfield",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621831,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4ec21df1e55febf8deb2e3b24b9cb39b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 195331,
+                "user_type": "registered",
+                "user_id": 438154,
+                "link": "https://stackoverflow.com/users/438154/sotirios-delimanolis",
+                "reputation": 281049,
+                "display_name": "Sotirios Delimanolis",
+                "accept_rate": 98
+            },
+            "edited": false,
+            "creation_date": 1364236019,
+            "comment_id": 22159860
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/KcHmP.jpg?s=256",
+                "account_id": 33547,
+                "user_type": "registered",
+                "user_id": 93988,
+                "link": "https://stackoverflow.com/users/93988/ivan-nevostruev",
+                "reputation": 28863,
+                "display_name": "Ivan Nevostruev"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621831,
+            "edited": false,
+            "creation_date": 1364235658,
+            "comment_id": 22159691
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22ea15aa505ee3fdcc5cb40b00a31f63?s=256&d=identicon&r=PG",
+                "account_id": 1394594,
+                "user_type": "registered",
+                "user_id": 1324631,
+                "link": "https://stackoverflow.com/users/1324631/ajmansfield",
+                "reputation": 4222,
+                "display_name": "AJMansfield",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621831,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/KcHmP.jpg?s=256",
+                "account_id": 33547,
+                "user_type": "registered",
+                "user_id": 93988,
+                "link": "https://stackoverflow.com/users/93988/ivan-nevostruev",
+                "reputation": 28863,
+                "display_name": "Ivan Nevostruev"
+            },
+            "edited": false,
+            "creation_date": 1364235538,
+            "comment_id": 22159638
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/KcHmP.jpg?s=256",
+                "account_id": 33547,
+                "user_type": "registered",
+                "user_id": 93988,
+                "link": "https://stackoverflow.com/users/93988/ivan-nevostruev",
+                "reputation": 28863,
+                "display_name": "Ivan Nevostruev"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 15621831,
+            "edited": false,
+            "creation_date": 1364235347,
+            "comment_id": 22159560
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22ea15aa505ee3fdcc5cb40b00a31f63?s=256&d=identicon&r=PG",
+                "account_id": 1394594,
+                "user_type": "registered",
+                "user_id": 1324631,
+                "link": "https://stackoverflow.com/users/1324631/ajmansfield",
+                "reputation": 4222,
+                "display_name": "AJMansfield",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15621831,
+            "edited": false,
+            "creation_date": 1364235313,
+            "comment_id": 22159540
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fb35a5b79ac6032efc45cc9e2aa81260?s=256&d=identicon&r=PG",
+            "account_id": 1706574,
+            "user_type": "registered",
+            "user_id": 1565512,
+            "link": "https://stackoverflow.com/users/1565512/mikem",
+            "reputation": 13752,
+            "display_name": "MikeM"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1364236387,
+        "creation_date": 1364236387,
+        "body": "<p>Change <code>([^,]*)<\/code> to <code>([^,]+)<\/code>, as the former will always match - even it is only matching nothing.<\/p>\n",
+        "answer_id": 15622177,
+        "question_id": 15621831
+    }],
+    "answer_comments": {}
+}

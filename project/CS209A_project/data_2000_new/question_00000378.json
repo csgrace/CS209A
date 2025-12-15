@@ -1,0 +1,82 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dbcefffaccd0a477f2d371c87ebf1bd2?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 17338152,
+            "user_type": "registered",
+            "user_id": 12559544,
+            "link": "https://stackoverflow.com/users/12559544/anjalishrishrimaleq",
+            "reputation": 21,
+            "display_name": "AnjaliShrishrimalEq"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59403758/is-there-any-way-to-remove-specific-rule-when-building-the-relnode-using-relbuil",
+        "last_activity_date": 1576937466,
+        "creation_date": 1576733403,
+        "answer_count": 1,
+        "title": "Is there any way to remove specific rule when building the RelNode using RelBuilder?",
+        "body": "<p>I am building a RelNode using RelBuilder.<\/p>\n\n<pre><code>FrameworkConfig frameworkConfig = config().build();\n final RelBuilder builder = RelBuilder.create(frameworkConfig);\n  RelNode root =\n                 builder.scan(\"ITEM\", \"TEST\")\n                 .filter(\n                         builder.equals(builder.field(\"ITEM_ID\"), builder.literal(\"AM_TestItem_21Aug17_0614\")))\n                 .filter(\n                        builder.equals(builder.field(\"OBJECT_TYPE\"), builder.literal(\"Item\")))\n                 .build();\n\n PreparedStatement preparedStatement = RelRunners.run(root)\n preparedStatement.executeQuery()\n<\/code><\/pre>\n\n<pre><code>    public static Frameworks.ConfigBuilder config() {\n        CalciteSchema rootSchema1 = CalciteSchema.createRootSchema(true);\n        rootSchema1 = rootSchema1.add(\"ITEM\", new MySchema());\n        // MySchema consists of Map of MyFilterableTable which extends AbstractTable and implements FilterableTable\n        return Frameworks.newConfigBuilder().defaultSchema(rootSchema1.plus());\n    }\n<\/code><\/pre>\n\n<p>scan method in MyFilterableTable <code>\npublic Enumerable&lt;Object[]&gt; scan(DataContext root, List&lt;RexNode&gt; filters)<\/code>\ngets merged filter string as [AND(=($0, 'AM_TestItem_21Aug17_0614'), =($3, 'Item'))]<\/p>\n\n<p>I want separate entries of these filters and not merged one. \nI want planner to ignore the FilterMergeRule.<\/p>\n\n<p>Is there any way to do that?<\/p>\n",
+        "question_id": 59403758,
+        "tags": [
+            "java",
+            "apache-calcite"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 190
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dbcefffaccd0a477f2d371c87ebf1bd2?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 17338152,
+            "user_type": "registered",
+            "user_id": 12559544,
+            "link": "https://stackoverflow.com/users/12559544/anjalishrishrimaleq",
+            "reputation": 21,
+            "display_name": "AnjaliShrishrimalEq"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 59403758,
+        "edited": false,
+        "creation_date": 1577709672,
+        "comment_id": 105231528
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3dc4b5f63d8b52e326369a1c1cd89a67?s=256&d=identicon&r=PG",
+            "account_id": 2481130,
+            "user_type": "registered",
+            "user_id": 2160578,
+            "link": "https://stackoverflow.com/users/2160578/zabetak",
+            "reputation": 467,
+            "display_name": "zabetak",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1576937466,
+        "creation_date": 1576937466,
+        "body": "<p>There is no easy way to selectively enable/disable rules when using the <code>RelBuilder<\/code> API and this is normal given that this API is meant only to create plans. <\/p>\n\n<p>Moreover it is not a good idea to rely on the fact that the filters will not be merged since there is a high chance that in the future the merge that is currently done via <code>FilterMergeRule<\/code> could be done with the RelBuilder when there are two adjacent filter operators.<\/p>\n\n<p>Nevertheless, inside the scan operation you could call <code>RelOptUtil#conjunctions<\/code> method which splits the filter into separate conjunctions which is more or less what you would like to obtain if I understand well your use-case.  <\/p>\n",
+        "answer_id": 59436871,
+        "question_id": 59403758
+    }],
+    "answer_comments": {"59436871": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dbcefffaccd0a477f2d371c87ebf1bd2?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 17338152,
+            "user_type": "registered",
+            "user_id": 12559544,
+            "link": "https://stackoverflow.com/users/12559544/anjalishrishrimaleq",
+            "reputation": 21,
+            "display_name": "AnjaliShrishrimalEq"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 59436871,
+        "edited": false,
+        "creation_date": 1577708762,
+        "comment_id": 105231134
+    }]}
+}

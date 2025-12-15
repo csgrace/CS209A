@@ -1,0 +1,96 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fff6ca2b994e892a9f0043631fddea34?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10346397,
+            "user_type": "registered",
+            "user_id": 7631222,
+            "link": "https://stackoverflow.com/users/7631222/frank-mascia",
+            "reputation": 31,
+            "display_name": "Frank Mascia"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/43815000/android-studio-how-to-set-an-external-filephoto-from-the-camera-to-an-imagev",
+        "last_activity_date": 1494026558,
+        "creation_date": 1494026370,
+        "answer_count": 1,
+        "title": "Android Studio : How to set an external file(photo from the camera) to an imageview",
+        "body": "<p>Having some trouble figuring out how to set the imageview to the picture I just captured with the camera. Would be a bonus if there was some way to display multiple captured pictures at once. Whenever I click the button, a previous image captured appears, then the camera opens, which isn't right. Id like the imageview to be blank, I click the button, take a picture, then that picture is displayed in the imageview. I believe that this line is out of place, but i'm unsure as to how/ where to move it. <code>mimageView.setImageURI(outputFileUri);<\/code><\/p>\n\n<pre><code>public class cameraclass extends Activity {\n    int TAKE_PHOTO_CODE = 0;\n    public static int count = 0;\n\n    /** Called when the activity is first created. */\n    @Override\n    public void onCreate(Bundle savedInstanceState)\n    {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.camera);\n        final ImageView mimageView;\n        mimageView = (ImageView) this.findViewById(R.id.image_from_camera);\n\n\n\n\n        // Here, we are making a folder named picFolder to store\n        // pics taken by the camera using this application.\n        final String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + \"/picFolder/\";\n        File newdir = new File(dir);\n        newdir.mkdirs();\n\n        Button capture = (Button) findViewById(R.id.take_image_from_camera);\n        capture.setOnClickListener(new View.OnClickListener() {\n            public void onClick(View v) {\n\n                // Here, the counter will be incremented each time, and the\n                // picture taken by camera will be stored as 1.jpg,2.jpg\n                // and likewise.\n                count++;\n                String file = dir+count+\".jpg\";\n                File newfile = new File(file);\n                try {\n                    newfile.createNewFile();\n                }\n                catch (IOException e)\n                {\n                }\n\n                //Uri outputFileUri = Uri.fromFile(newfile);\n                Uri outputFileUri = FileProvider.getUriForFile(getApplicationContext() , \"com.example.android.com220finalapp.provider\", newfile);\n\n                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);\n                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);\n\n                startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);\n                mimageView.setImageURI(outputFileUri);\n\n            }\n        });\n    }\n\n    @Override\n    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\n        super.onActivityResult(requestCode, resultCode, data);\n\n        if (requestCode == TAKE_PHOTO_CODE &amp;&amp; resultCode == RESULT_OK) {\n            Log.d(\"CameraDemo\", \"Pic saved\");\n\n        }\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 43815000,
+        "tags": [
+            "java",
+            "android",
+            "xml"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 181
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/wDnd8.png?s=256",
+            "account_id": 39846,
+            "user_type": "registered",
+            "user_id": 115145,
+            "link": "https://stackoverflow.com/users/115145/commonsware",
+            "reputation": 1011235,
+            "display_name": "CommonsWare",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1494026558,
+        "creation_date": 1494026558,
+        "body": "<blockquote>\n  <p>I believe that this line is out of place, but i'm unsure as to how/ where to move it.<\/p>\n<\/blockquote>\n\n<p><code>startActivityForResult()<\/code> is asynchronous. Your photo will not have been taken by the time that method returns. You need to load the image into the <code>ImageView<\/code> in <code>onActivityResult()<\/code>, if you got a <code>RESULT_OK<\/code> response.<\/p>\n\n<p>However, while <code>setImageURI()<\/code> may work, it has never been an especially good idea, as it will freeze your app for a while as it loads the photo. There are many <a href=\"https://android-arsenal.com/tag/46\" rel=\"nofollow noreferrer\">image loading libraries for Android<\/a> that will handle loading your <code>ImageView<\/code> asynchronously.<\/p>\n",
+        "answer_id": 43815017,
+        "question_id": 43815000
+    }],
+    "answer_comments": {"43815017": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wDnd8.png?s=256",
+                "account_id": 39846,
+                "user_type": "registered",
+                "user_id": 115145,
+                "link": "https://stackoverflow.com/users/115145/commonsware",
+                "reputation": 1011235,
+                "display_name": "CommonsWare",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43815017,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/fff6ca2b994e892a9f0043631fddea34?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10346397,
+                "user_type": "registered",
+                "user_id": 7631222,
+                "link": "https://stackoverflow.com/users/7631222/frank-mascia",
+                "reputation": 31,
+                "display_name": "Frank Mascia"
+            },
+            "edited": false,
+            "creation_date": 1494029153,
+            "comment_id": 74669990
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fff6ca2b994e892a9f0043631fddea34?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 10346397,
+                "user_type": "registered",
+                "user_id": 7631222,
+                "link": "https://stackoverflow.com/users/7631222/frank-mascia",
+                "reputation": 31,
+                "display_name": "Frank Mascia"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 43815017,
+            "edited": false,
+            "creation_date": 1494028592,
+            "comment_id": 74669880
+        }
+    ]}
+}

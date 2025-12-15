@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1031b1ce1a38d00e0ac6191f0534d20c?s=256&d=identicon&r=PG",
+            "account_id": 2090481,
+            "user_type": "registered",
+            "user_id": 1860436,
+            "link": "https://stackoverflow.com/users/1860436/adam-short",
+            "reputation": 498,
+            "display_name": "Adam Short",
+            "accept_rate": 70
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/17095144/multiple-paths-in-a-text-game",
+        "last_activity_date": 1371155598,
+        "creation_date": 1371150633,
+        "answer_count": 1,
+        "title": "Multiple Paths in a Text Game",
+        "body": "<p><a href=\"https://github.com/addrum/TextGame\" rel=\"nofollow\">https://github.com/addrum/TextGame<\/a><\/p>\n\n<p>So I have this game. What I have achieved so far is that if the user inputs a correct response it returns the next message for them to then figure out what to do from an array. What I need to achieve now is that the program returns a different message depending on what their input is. i.e go left, you reach a door, go right, you pick up a key. I am so confused about how to do this. I thought about grouping messages together at a particular point. So you reach crossroads - and the outputs for go left, go right and go forward are in an array together but then I don't know how to get the program to get the next group of messages. I also had the idea of making the correct input have the index of [0] so that I can then return the current group of messages index of [0] to match that up but this also confused me. If I can make it any clear just ask because I have no easy way of explaining this. Any help would be appreciated!<\/p>\n",
+        "question_id": 17095144,
+        "tags": [
+            "java",
+            "arrays",
+            "arraylist"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 387
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/22ed67baa24e475226ef327a818e4ffd?s=256&d=identicon&r=PG",
+            "account_id": 915836,
+            "user_type": "registered",
+            "user_id": 948652,
+            "link": "https://stackoverflow.com/users/948652/arynaq",
+            "reputation": 6870,
+            "display_name": "arynaq",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 17095144,
+        "edited": false,
+        "creation_date": 1371150745,
+        "comment_id": 24728956
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/KVjUY.jpg?s=256",
+            "account_id": 1262300,
+            "user_type": "registered",
+            "user_id": 1220269,
+            "link": "https://stackoverflow.com/users/1220269/nathaniel-waisbrot",
+            "reputation": 24683,
+            "display_name": "Nathaniel Waisbrot",
+            "accept_rate": 91
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1371155598,
+        "creation_date": 1371155598,
+        "body": "<p>If you're interested in writing a text adventure game (\"Interactive Fiction\" or \"IF\"), you should consider some of the many tools designed for that.  <\/p>\n\n<ul>\n<li>Compilers for making text adventures with a traditional lineage can be found off of the <a href=\"http://www.ifwiki.org/index.php/Main_Page\" rel=\"nofollow\">IFWiki<\/a>. For example, here's the Parchment interpreter running <a href=\"http://iplayif.com/?story=http://mirror.ifarchive.org/if-archive/games/zcode/Tangle.z5\" rel=\"nofollow\">Spider and Web<\/a> (one of my favorites).  The wiki also has a lot of writing about how to write fun IF.<\/li>\n<li><a href=\"http://www.choiceofgames.com/\" rel=\"nofollow\">Choice of Games<\/a> is a company that makes cross-platform IF, mostly targeting mobile devices.  They have their own scripting language for writing IF and if you wanted to sell your game they offer to manage that, too.<\/li>\n<li><a href=\"http://www.gimcrackd.com/etc/src/\" rel=\"nofollow\">Twine<\/a> is an IDE for building web-based IF.  It looks easy to write, though I haven't tried it myself.<\/li>\n<\/ul>\n\n<p>If this is just a sort of teach-yourself-Java project, then I recommend the following approach:<\/p>\n\n<pre><code>/**\n  * Represents one location or one state in the game.\n  */\npublic class DecisionTreeNode {\n    /** Text that gets printed when the user lands on this node */\n    private final String nodeText;\n\n    /** Maps text that the user can enter to the node that they reach by typing that text */\n    private final Map&lt;String,DecisionTreeNode&gt; choices;\n}\n<\/code><\/pre>\n\n<p>If you fill out that stub, you'll be able to write a very simple subset of IF.  Here's an example of some nodes you might have (using the example game in your question):<\/p>\n\n<ul>\n<li><strong>Start<\/strong>\n<ul>\n<li>nodeText: \"You are in a corridor that branches left and right\"<\/li>\n<li>choices:\n<ol>\n<li>\"left\" -> <strong>Door_no_key<\/strong><\/li>\n<li>\"right\" -> <strong>Dead_end_no_key<\/strong><\/li>\n<\/ol><\/li>\n<\/ul><\/li>\n<li><strong>Door_no_key<\/strong>\n<ul>\n<li>nodeText: \"there is a door here, but you don't have the key\"<\/li>\n<li>choices:\n<ol>\n<li>\"right\" -> <strong>Start<\/strong><\/li>\n<\/ol><\/li>\n<\/ul><\/li>\n<li><strong>Dead_end_no_key<\/strong>\n<ul>\n<li>nodeText: \"This is a dead end. There is a key here!\"<\/li>\n<li>choices:\n<ol>\n<li>\"get key\" -> <strong>Dead_end_key<\/strong><\/li>\n<li>\"left\" -> <strong>Start<\/strong><\/li>\n<\/ol><\/li>\n<\/ul><\/li>\n<li><strong>Dead_end_key<\/strong>\n<ul>\n<li>nodeText: \"This is a dead end. You are carrying a key.\"<\/li>\n<li>choices:\n<ol>\n<li>\"left\" -> <strong>Start_key<\/strong><\/li>\n<\/ol><\/li>\n<\/ul><\/li>\n<\/ul>\n\n<p>And so on.  You can see that tracking the player's state makes the game design get out of hand pretty quickly, which is why I recommend IF tools for a serious IF game.  But this could be a nice way to teach yourself about pointers in programming.<\/p>\n",
+        "answer_id": 17096511,
+        "question_id": 17095144
+    }],
+    "answer_comments": {}
+}

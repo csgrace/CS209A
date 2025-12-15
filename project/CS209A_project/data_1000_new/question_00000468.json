@@ -1,0 +1,268 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/01e269c84d1485960c02df06f2e786b4?s=256&d=identicon&r=PG",
+            "account_id": 113122,
+            "user_type": "registered",
+            "user_id": 298112,
+            "link": "https://stackoverflow.com/users/298112/mithun1538",
+            "reputation": 1497,
+            "display_name": "mithun1538",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2537694/how-to-pause-a-thread-in-java",
+        "last_activity_date": 1711476057,
+        "creation_date": 1269864737,
+        "answer_count": 7,
+        "title": "How to pause a thread in java?",
+        "body": "<p>Consider the following code:<\/p>\n\n<blockquote>\n  <p>while(true) {\n      someFunction();\n      Thread.sleep(1000);\n  }<\/p>\n<\/blockquote>\n\n<p>What I want is that, someFunction() be called once every 10 seconds. But this is not the case. It is being called every second. I tried Thread.wait(1000), but even that doesnt help. I removed of the while part, just kept the body, and at the end wrote :<\/p>\n\n<blockquote>\n  <p>Thread.start();<\/p>\n<\/blockquote>\n\n<p>But it throwed an exception. Is there any other solution to this?<\/p>\n",
+        "question_id": 2537694,
+        "tags": [
+            "java",
+            "multithreading"
+        ],
+        "score": 3,
+        "accepted_answer_id": 2537710,
+        "is_answered": true,
+        "view_count": 19309
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/01e269c84d1485960c02df06f2e786b4?s=256&d=identicon&r=PG",
+                "account_id": 113122,
+                "user_type": "registered",
+                "user_id": 298112,
+                "link": "https://stackoverflow.com/users/298112/mithun1538",
+                "reputation": 1497,
+                "display_name": "mithun1538",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2537694,
+            "edited": false,
+            "creation_date": 1269865322,
+            "comment_id": 2537860
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7d3dac9b66ba5f24a38c09e01830adab?s=256&d=identicon&r=PG",
+                "account_id": 2815,
+                "user_type": "registered",
+                "user_id": 3978,
+                "link": "https://stackoverflow.com/users/3978/douglas-leeder",
+                "reputation": 53491,
+                "display_name": "Douglas Leeder",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 6,
+            "post_id": 2537694,
+            "edited": false,
+            "creation_date": 1269864971,
+            "comment_id": 2537826
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521060,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 16,
+            "is_accepted": true,
+            "last_activity_date": 1269864912,
+            "creation_date": 1269864912,
+            "body": "<p>It's being called every second because you're sleeping for 1000 milliseconds, aka 1 second.<\/p>\n\n<p>Change it to <code>Thread.sleep(10000)<\/code> and that'll be better for you.<\/p>\n\n<p>Alternatively, use<\/p>\n\n<pre><code>Thread.sleep(TimeUnit.SECONDS.toMillis(10));\n<\/code><\/pre>\n\n<p>which means you don't have to do the arithmetic yourself. (Many APIs now take a quantity and a <code>TimeUnit<\/code>, but there doesn't appear to be anything like that for <code>Thread.sleep<\/code> unfortunately.)<\/p>\n\n<p>Note that this will make the thread unresponsive for 10 seconds, with no clean way of telling it to wake up (e.g. because you want to shut it down). I generally prefer to use <code>wait()<\/code> so that I can pulse the same monitor from a different thread to indicate \"I want you to wake up now!\" This is usually from within a while loop of the form<\/p>\n\n<pre><code>while (!shouldStop())\n<\/code><\/pre>\n\n<p>EDIT: tvanfosson's solution of using a <code>Timer<\/code> is also good - and another alternative is to use <a href=\"http://java.sun.com/javase/6/docs/api/java/util/concurrent/ScheduledExecutorService.html\" rel=\"noreferrer\"><code>ScheduledExecutorService<\/code><\/a> which can be a bit more flexible (and easier to test).<\/p>\n",
+            "answer_id": 2537710,
+            "question_id": 2537694
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/df12fb4ea798bee4b932f328e953b82f?s=256&d=identicon&r=PG",
+                "account_id": 2573,
+                "user_type": "registered",
+                "user_id": 3587,
+                "link": "https://stackoverflow.com/users/3587/thomas-l%c3%b6tzer",
+                "reputation": 25491,
+                "display_name": "Thomas L&#246;tzer",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1269864927,
+            "creation_date": 1269864927,
+            "body": "<p><code>Thread.sleep()<\/code> takes the number of miliseconds to sleep. Thus, calling <code>Thread.sleep(1000)<\/code> sleeps 1000 miliseconds, which is 1 second. Make that <code>Thread.sleep(10000)<\/code> and it will sleep 10 seconds.<\/p>\n",
+            "answer_id": 2537711,
+            "question_id": 2537694
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/00aa1356e6f90fca08b36fb3c8d230c5?s=256&d=identicon&r=PG",
+                "account_id": 7448,
+                "user_type": "registered",
+                "user_id": 12950,
+                "link": "https://stackoverflow.com/users/12950/tvanfosson",
+                "reputation": 534241,
+                "display_name": "tvanfosson",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1269865415,
+            "creation_date": 1269865068,
+            "body": "<p>What you probably want to do is use a <code>Timer<\/code> and set up a scheduled invocation of the function rather than sleeping.  If you need more exactness with regard to the interval, you can keep track of how long it has been since the last run and adjust the new timer to keep your interval from drifting.   See an example of a simple timer in this <a href=\"http://www.java2s.com/Code/Java/Development-Class/TimerScheduleataskthatexecutesonceeverysecond.htm\" rel=\"nofollow noreferrer\">tutorial<\/a>.<\/p>\n\n<p>I won't go into detail about the issue with regard to the precision of the argument, since @Jon has already covered that -- you need milliseconds rather than seconds.<\/p>\n",
+            "answer_id": 2537727,
+            "question_id": 2537694,
+            "last_edit_date": 1269865415
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23de335ea2208b179ece18bec0b2597f?s=256&d=identicon&r=PG",
+                "account_id": 91502,
+                "user_type": "registered",
+                "user_id": 251173,
+                "link": "https://stackoverflow.com/users/251173/buhake-sindi",
+                "reputation": 89455,
+                "display_name": "Buhake Sindi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1269865089,
+            "creation_date": 1269865089,
+            "body": "<p>1 second is 1000 milliseconds, so if you want 10 seconds = 10 * 1000 = 10000 milliseconds<\/p>\n\n<p>e.g.<\/p>\n\n<pre><code>try { \n     long numMillisecondsToSleep = 5000; // 5 seconds \n     Thread.sleep(numMillisecondsToSleep); \n} catch (InterruptedException e) { } \n<\/code><\/pre>\n",
+            "answer_id": 2537731,
+            "question_id": 2537694
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/52f2fe68f64f1124246ee4477bce0f73?s=256&d=identicon&r=PG",
+                "account_id": 103658,
+                "user_type": "registered",
+                "user_id": 277516,
+                "link": "https://stackoverflow.com/users/277516/venkat",
+                "reputation": 21588,
+                "display_name": "Venkat",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1269866066,
+            "creation_date": 1269865621,
+            "body": "<p>Consider 1000 milliseconds is 1 second. For that you should use Thread.sleep(10000) for acheiving pause your thread in 10 seconds. You can also use looping with how many seconds to wait your thread.\nEx. suppose you want to pause your thread in half-an-hour( 30 minutes). Then use,<\/p>\n\n<pre><code>for(i=0;i&lt;1800;i++)\n{\n   Thread.sleep(1000);\n}\n<\/code><\/pre>\n\n<p>It will pause your thread in 30 minutes.<\/p>\n",
+            "answer_id": 2537787,
+            "question_id": 2537694,
+            "last_edit_date": 1269866066
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ZWEI3.jpg?s=256",
+                "account_id": 322981,
+                "user_type": "registered",
+                "user_id": 642706,
+                "link": "https://stackoverflow.com/users/642706/basil-bourque",
+                "reputation": 347060,
+                "display_name": "Basil Bourque",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1711476057,
+            "creation_date": 1711476057,
+            "body": "<h1><code>Duration<\/code><\/h1>\n<p>Pass a <a href=\"https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/time/Duration.html\" rel=\"nofollow noreferrer\"><code>Duration<\/code><\/a> object to the <a href=\"https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/Thread.html#sleep(java.time.Duration)\" rel=\"nofollow noreferrer\"><code>sleep<\/code><\/a> method, in Java 19+. More convenient than calculating a number of milliseconds.<\/p>\n<pre><code>Thread.sleep( Duration.ofSeconds( 10 ) )\n<\/code><\/pre>\n",
+            "answer_id": 78227344,
+            "question_id": 2537694
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0382297f273df0a544b0c6c2734de096?s=256&d=identicon&r=PG",
+                "account_id": 9193,
+                "user_type": "registered",
+                "user_id": 16883,
+                "link": "https://stackoverflow.com/users/16883/michael-borgwardt",
+                "reputation": 347302,
+                "display_name": "Michael Borgwardt",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": -2,
+            "is_accepted": false,
+            "last_activity_date": 1269865088,
+            "creation_date": 1269865088,
+            "body": "<blockquote>\n  <p>What I want is that, someFunction() be\n  called once every 10 seconds.<\/p>\n<\/blockquote>\n\n<p>Then why do you call <code>Thread.sleep()<\/code> with 1000 as parameter? That's in milliseconds, so you're explicitly saying \"wait 1 second\".<\/p>\n",
+            "answer_id": 2537730,
+            "question_id": 2537694
+        }
+    ],
+    "answer_comments": {"2537710": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/28d7fc76db803c6757e7cfd2cde20354?s=256&d=identicon&r=PG",
+                "account_id": 31293,
+                "user_type": "registered",
+                "user_id": 85821,
+                "link": "https://stackoverflow.com/users/85821/bart-van-heukelom",
+                "reputation": 44164,
+                "display_name": "Bart van Heukelom",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 2537710,
+            "edited": false,
+            "creation_date": 1329508145,
+            "comment_id": 11780100
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/01e269c84d1485960c02df06f2e786b4?s=256&d=identicon&r=PG",
+                "account_id": 113122,
+                "user_type": "registered",
+                "user_id": 298112,
+                "link": "https://stackoverflow.com/users/298112/mithun1538",
+                "reputation": 1497,
+                "display_name": "mithun1538",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2537710,
+            "edited": false,
+            "creation_date": 1269865649,
+            "comment_id": 2537889
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/23de335ea2208b179ece18bec0b2597f?s=256&d=identicon&r=PG",
+                "account_id": 91502,
+                "user_type": "registered",
+                "user_id": 251173,
+                "link": "https://stackoverflow.com/users/251173/buhake-sindi",
+                "reputation": 89455,
+                "display_name": "Buhake Sindi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2537710,
+            "edited": false,
+            "creation_date": 1269865461,
+            "comment_id": 2537873
+        }
+    ]}
+}

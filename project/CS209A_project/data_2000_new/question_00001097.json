@@ -1,0 +1,94 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8e57fe4b0f7381288a8e1e4c6cd77a8e?s=256&d=identicon&r=PG",
+            "account_id": 137100,
+            "user_type": "registered",
+            "user_id": 341065,
+            "link": "https://stackoverflow.com/users/341065/wilx",
+            "reputation": 18303,
+            "display_name": "wilx",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48226693/what-does-this-getclass-return-during-construction",
+        "last_activity_date": 1515762445,
+        "creation_date": 1515761621,
+        "answer_count": 1,
+        "title": "What does this.getClass() return during construction?",
+        "body": "<p>What does Java <code>this.getClass()<\/code> return during object construction, e.g., when called from a constructor or field initializer expression? Is it safe to expect the most derived class to be returned or not?<\/p>\n",
+        "question_id": 48226693,
+        "tags": ["java"],
+        "score": 2,
+        "accepted_answer_id": 48226928,
+        "is_answered": true,
+        "view_count": 150
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8e57fe4b0f7381288a8e1e4c6cd77a8e?s=256&d=identicon&r=PG",
+                "account_id": 137100,
+                "user_type": "registered",
+                "user_id": 341065,
+                "link": "https://stackoverflow.com/users/341065/wilx",
+                "reputation": 18303,
+                "display_name": "wilx",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48226693,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/hNkgF.png?s=256",
+                "account_id": 4819600,
+                "user_type": "registered",
+                "user_id": 3890632,
+                "link": "https://stackoverflow.com/users/3890632/khelwood",
+                "reputation": 59711,
+                "display_name": "khelwood"
+            },
+            "edited": false,
+            "creation_date": 1515761910,
+            "comment_id": 83435140
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hNkgF.png?s=256",
+                "account_id": 4819600,
+                "user_type": "registered",
+                "user_id": 3890632,
+                "link": "https://stackoverflow.com/users/3890632/khelwood",
+                "reputation": 59711,
+                "display_name": "khelwood"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "post_id": 48226693,
+            "edited": false,
+            "creation_date": 1515761804,
+            "comment_id": 83435078
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/22b05e50077230ba919b240af4bc13cd?s=256&d=identicon&r=PG",
+            "account_id": 43861,
+            "user_type": "registered",
+            "user_id": 128397,
+            "link": "https://stackoverflow.com/users/128397/daniel-pryden",
+            "reputation": 61338,
+            "display_name": "Daniel Pryden",
+            "accept_rate": 82
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1515762445,
+        "creation_date": 1515762445,
+        "body": "<p>This is one of several places where you can observe the difference between how constructing an object works in the Java language versus in the Java virtual machine.<\/p>\n\n<p>In JVM bytecode, constructing an object of a given type is a single instruction and thus atomic. At no time is the object itself an object of a different type, like a supertype. However, this object will not yet have been \"constructed\". At the bytecode level, the constructor is a special method named <code>&lt;init&gt;<\/code>, which can set fields and otherwise manipulate the object which already exists.<\/p>\n\n<p>The compiler assembles any actual constructor, plus the field initializers and instance initializer blocks into the <code>&lt;init&gt;<\/code> method. The first operation of <code>&lt;init&gt;<\/code> is normally to call the corresponding <code>&lt;init&gt;<\/code> method declared on the supertype. So the initializers get run in order from supertypes to subtypes. However, when the supertype <code>&lt;init&gt;<\/code> method is executing, the object itself is already of the type it will be once complete; therefore <code>getClass()<\/code> will return that type, and the value returned by <code>getClass()<\/code> will not change depending on where it is called.<\/p>\n\n<p>From the standpoint of the Java language, this is (mostly) a moot point, since if any of the <code>&lt;init&gt;<\/code> methods involved throws an exception, the object is normally immediately eligible for garbage collection. However, there are a few cases where you can cause a partially-constructed object to become visible to another thread, in which case you can observe objects with inconsistent states. You can also intentionally create an object without running its <code>&lt;init&gt;<\/code> by using the (intentionally undocumented) methods of <code>sun.misc.Unsafe<\/code> on a JVM that exposes that class.<\/p>\n",
+        "answer_id": 48226928,
+        "question_id": 48226693
+    }],
+    "answer_comments": {}
+}

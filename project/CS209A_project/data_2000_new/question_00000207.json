@@ -1,0 +1,131 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/49dabe02fc03f9cbb224cc4d4e7ae67b?s=256&d=identicon&r=PG",
+            "account_id": 155157,
+            "user_type": "registered",
+            "user_id": 371613,
+            "link": "https://stackoverflow.com/users/371613/tex",
+            "reputation": 950,
+            "display_name": "Tex",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13042367/get-the-text-in-anchors-within-text-nodes",
+        "last_activity_date": 1352074016,
+        "creation_date": 1351047472,
+        "answer_count": 3,
+        "title": "Get the text in anchors within text nodes",
+        "body": "<p>I am parsing product reviews on Amazon and I would like to get the complete text of a review, which includes the text in links.<\/p>\n\n<p>I am currently using jSoup and, as good as it is, it would just ignore anchors. Of course I could get all the text from anchors by just using a selector, but I would lose information on the context in which that text was.<\/p>\n\n<p>I think an example is the best way of explaining myself.<\/p>\n\n<p>Sample of the structure:<\/p>\n\n<pre><code>&lt;div class=\"container\"&gt;\n  &lt;div style=\"a\"&gt;Something...&lt;/div&gt;\n  &lt;div style=\"b\"&gt;...Nested spans and divs... &lt;/div&gt;\n  &lt;div class=\"tiny\"&gt;_____ &lt;/div&gt;\n  \" From the makers of the incredible &lt;a href=\"SOMELINK\"&gt;SOMEPRODUCT&lt;/a&gt; we have this other product that blablabla.... Amazing specs, but &lt;a href=\"SOME_OTHER_LINK\"&gt;this other product&lt;/a&gt; is somehow better\".\n<\/code><\/pre>\n\n<p>What I obtain: \" From the makers of the incredible we have this other product that blablabla... Amazing specs, but is somehow better\".<\/p>\n\n<p>What I want: \" From the makers of the incredible SOMEPRODUCT we have this other product that blablabla... Amazing specs, but this other product is somehow better\".<\/p>\n\n<p>My code using jSoup:<\/p>\n\n<pre><code>Elements allContainers = doc.select(\".container\");\nfor (Element container : allContainers) {\n  String reviewText = container.ownText(); // THIS EXCLUDES TEXT FROM LINKS\nStdOut.println(reviewText);\n<\/code><\/pre>\n\n<p>I can't find a way of doing that because it doesn't look like jSoup treats text nodes as actual nodes, and therefore those anchors do not seem to be considered among the children of the next nodes.<\/p>\n\n<p>I am also open to other ideas, like trying to work with the :not selector in order to get them, but I can't believe that jSoup does not allow to keep text from links, this is far too common to believe they ignored this feature.<\/p>\n",
+        "question_id": 13042367,
+        "tags": [
+            "java",
+            "xpath",
+            "jsoup"
+        ],
+        "score": 0,
+        "accepted_answer_id": 13042581,
+        "is_answered": true,
+        "view_count": 1935
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aa5f595e7fe58830574a3094d164a00b?s=256&d=identicon&r=PG",
+                "account_id": 1824055,
+                "user_type": "registered",
+                "user_id": 1657364,
+                "link": "https://stackoverflow.com/users/1657364/guido-simone",
+                "reputation": 7962,
+                "display_name": "Guido Simone"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1351087051,
+            "creation_date": 1351049269,
+            "body": "<blockquote>\n  <p>it doesn't look like jSoup treats text nodes as actual nodes, <\/p>\n<\/blockquote>\n\n<p>No - JSoup text nodes are actual nodes, as are elements.<\/p>\n\n<p>The way you described the problem, you have a very specific requirement and I agree there is no built-in to do exactly what you want in a single call.  However with a simple helper method the problem is solvable.<\/p>\n\n<p>First let's review the problem - the parent div has the following children:<\/p>\n\n<pre><code>div div div #text a #text a # text\n<\/code><\/pre>\n\n<p>And of course each of the <code>div<\/code> and <code>a<\/code> elements have other children, including text nodes.  Based on your example it sounds like you want to iterate through all children, ignoring any that are not text nodes.  When you find the first text node, gather it's text and the text of any following nodes.<\/p>\n\n<p>Certainly doable, but I am not surprised there is no built in method that does this.<\/p>\n\n<p>Here is one implementation to solve the problem:<\/p>\n\n<pre><code>   public static String textPlus(Element elem)\n   {\n      List&lt;TextNode&gt; textNodes = elem.textNodes();\n      if (textNodes.isEmpty())\n         return \"\";\n\n      StringBuilder result = new StringBuilder();\n      // start at the first text node\n      Node currentNode = textNodes.get(0);\n      while (currentNode != null)\n      {\n         // append deep text of all subsequent nodes\n         if (currentNode instanceof TextNode)\n         {\n            TextNode currentText = (TextNode) currentNode;\n            result.append(currentText.text());\n         }\n         else if (currentNode instanceof Element)\n         {\n            Element currentElement = (Element) currentNode;\n            result.append(currentElement.text());\n         }\n         currentNode = currentNode.nextSibling();\n      }\n      return result.toString();\n   }\n<\/code><\/pre>\n\n<p>To call this use:<\/p>\n\n<pre><code>Elements allContainers = doc.select(\".container\");\nfor (Element container : allContainers) {\n  String reviewText = textPlus(container);\n  StdOut.println(reviewText);\n}\n<\/code><\/pre>\n\n<p>Given your sample html text, this code returns:<\/p>\n\n<blockquote>\n  <p>\" From the makers of the incredible SOMEPRODUCT we have this other product that blablabla.... Amazing specs, but this other product is somehow better.\"<\/p>\n<\/blockquote>\n\n<p>Hope this helps.<\/p>\n",
+            "answer_id": 13042581,
+            "question_id": 13042367,
+            "last_edit_date": 1351087051
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa4865ff7c5fc821510ea34e075ace8d?s=256&d=identicon&r=PG",
+                "account_id": 2010307,
+                "user_type": "registered",
+                "user_id": 1798912,
+                "link": "https://stackoverflow.com/users/1798912/mirek",
+                "reputation": 71,
+                "display_name": "mirek"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1352074016,
+            "creation_date": 1352074016,
+            "body": "<p>I have not tested it, but according jsoup API doc of Element class you should use method text instead of ownText<\/p>\n\n<p>text<\/p>\n\n<p>public String text()<\/p>\n\n<pre><code>Gets the combined text of this element and all its children.\n\nFor example, given HTML &lt;p&gt;Hello &lt;b&gt;there&lt;/b&gt; now!&lt;/p&gt;, p.text() returns \"Hello there now!\"\n\nReturns:\n    unencoded text, or empty string if none. \nSee Also:\n    ownText(), textNodes() \n<\/code><\/pre>\n\n<p>ownText<\/p>\n\n<p>public String ownText()<\/p>\n\n<pre><code>Gets the text owned by this element only; does not get the combined text of all children.\n\nFor example, given HTML &lt;p&gt;Hello &lt;b&gt;there&lt;/b&gt; now!&lt;/p&gt;, p.ownText() returns \"Hello now!\", whereas p.text() returns \"Hello there now!\". Note that the text within the b element is not returned, as it is not a direct child of the p element.\n\nReturns:\n    unencoded text, or empty string if none. \nSee Also:\n    text(), textNodes() \n<\/code><\/pre>\n",
+            "answer_id": 13224335,
+            "question_id": 13042367
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49dabe02fc03f9cbb224cc4d4e7ae67b?s=256&d=identicon&r=PG",
+                "account_id": 155157,
+                "user_type": "registered",
+                "user_id": 371613,
+                "link": "https://stackoverflow.com/users/371613/tex",
+                "reputation": 950,
+                "display_name": "Tex",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1351116326,
+            "creation_date": 1351116326,
+            "body": "<p>I accepted Guido's answer because, even if it did not work for me, it definitely put me on the right track.<\/p>\n\n<p>Guido's code gets the text from the first node and then goes on iteratively through the siblings. Unfortunately, my real-world example had two more complications:<\/p>\n\n<p>1 - There was still no requirements on the text coming specifically from anchors, not anything else. I wanted something more robust, so I added that selection in Guido's structure.<\/p>\n\n<p>2 - This would still get text from unwanted links, such as the \"Comment\" and \"Permalink\" links at the end of each Amazon review. The other selectors are there to clear them out.<\/p>\n\n<p>I am posting the code that did work for me for future reference. Hope it helps :-)<\/p>\n\n<pre><code>public static String textPlus(Element elem)\n{\n    List&lt;TextNode&gt; textNodes = elem.textNodes();\n    if (textNodes.isEmpty())\n        return \"\";\n\n    StringBuilder result = new StringBuilder();\n\n    Node currentNode = textNodes.get(0);\n\n    while (currentNode != null)\n    {\n        // append deep text of all subsequent nodes\n        if (currentNode instanceof TextNode)\n        {\n            TextNode currentText = (TextNode) currentNode;\n            String curtext = currentText.text();\n            result.append(\"\\n\\n\" + currentText.text());\n        }\n        else if (currentNode instanceof Element)\n        {\n            Element currentElement = (Element) currentNode;\n            Elements anchorElements = currentElement.select(\"a[href]\").select(\":not(:contains(Comment))\").select(\":not(:contains(Permalink))\");\n            if (!anchorElements.isEmpty()) {\n                for (Element anchorElement : anchorElements)\n                    result.append(\"\\n\\n\" + anchorElement.text());\n            }\n        }\n        currentNode = currentNode.nextSibling();\n    }\n    return result.toString().trim();\n<\/code><\/pre>\n",
+            "answer_id": 13058549,
+            "question_id": 13042367
+        }
+    ],
+    "answer_comments": {
+        "13224335": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49dabe02fc03f9cbb224cc4d4e7ae67b?s=256&d=identicon&r=PG",
+                "account_id": 155157,
+                "user_type": "registered",
+                "user_id": 371613,
+                "link": "https://stackoverflow.com/users/371613/tex",
+                "reputation": 950,
+                "display_name": "Tex",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13224335,
+            "edited": false,
+            "creation_date": 1352422952,
+            "comment_id": 18138155
+        }],
+        "13042581": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49dabe02fc03f9cbb224cc4d4e7ae67b?s=256&d=identicon&r=PG",
+                "account_id": 155157,
+                "user_type": "registered",
+                "user_id": 371613,
+                "link": "https://stackoverflow.com/users/371613/tex",
+                "reputation": 950,
+                "display_name": "Tex",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13042581,
+            "edited": false,
+            "creation_date": 1351052642,
+            "comment_id": 17709296
+        }]
+    }
+}

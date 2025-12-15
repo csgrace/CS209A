@@ -1,0 +1,142 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c012eaa362f1ae38de17f4e4fccaf8de?s=256&d=identicon&r=PG",
+            "account_id": 875888,
+            "user_type": "registered",
+            "user_id": 925544,
+            "link": "https://stackoverflow.com/users/925544/cassidius",
+            "reputation": 118,
+            "display_name": "cassidius",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/17095358/how-do-i-determine-which-version-of-a-class-my-object-is",
+        "last_activity_date": 1401108166,
+        "creation_date": 1371151413,
+        "answer_count": 2,
+        "title": "How do I determine which version of a class my object is?",
+        "body": "<p>I'm trying to write a plugin into a framework application (Joget). My plugin source looks something like this:<\/p>\n\n<pre><code>public class MyPlugin extends ExtDefaultPlugin implements ApplicationPlugin, ParticipantPlugin { \n...\n    public void execute(){\n    ...\n    SecurityContextImpl secContext = (SecurityContextImpl) WorkflowUtil.getHttpServletRequest().getSession().getAttribute(\"SPRING_SECURITY_CONTEXT\");\n\n    }\n}\n<\/code><\/pre>\n\n<p>When I run the plugin, I get the following exception.<\/p>\n\n<pre><code>java.lang.ClassCastException: org.springframework.security.context.SecurityContextImpl cannot be cast to org.springframework.security.context.SecurityContextImpl\n<\/code><\/pre>\n\n<p>I'm using Maven. Now since both have the same package name, I'm assuming I'm accidentally using the wrong package version in my plugin JAR (that contains the SecurityContextImpl class) than the one in the framework. But I've double-checked and it looks like I'm including the correct one in my plugin package. <\/p>\n\n<p>Is there a way to see the classloader or source JAR of my class (e.g. using reflection in some manner)? Any other ideas on how to address this?<\/p>\n",
+        "question_id": 17095358,
+        "tags": [
+            "java",
+            "maven"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 220
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7f136983231a6281fcb14761ef972fa0?s=256&d=identicon&r=PG",
+                "account_id": 2730129,
+                "user_type": "registered",
+                "user_id": 2354099,
+                "link": "https://stackoverflow.com/users/2354099/pinkpanther",
+                "reputation": 4808,
+                "display_name": "pinkpanther",
+                "accept_rate": 74
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 17095358,
+            "edited": false,
+            "creation_date": 1371152206,
+            "comment_id": 24729766
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Rjx6y.png?s=256",
+                "account_id": 204659,
+                "user_type": "registered",
+                "user_id": 453005,
+                "link": "https://stackoverflow.com/users/453005/dwb",
+                "reputation": 38566,
+                "display_name": "DwB",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 17095358,
+            "edited": false,
+            "creation_date": 1371151665,
+            "comment_id": 24729461
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/fe4UP.jpg?s=256",
+                "account_id": 948306,
+                "user_type": "registered",
+                "user_id": 975066,
+                "link": "https://stackoverflow.com/users/975066/justin-jasmann",
+                "reputation": 2353,
+                "display_name": "Justin Jasmann"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 17095358,
+            "edited": false,
+            "creation_date": 1371151661,
+            "comment_id": 24729459
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/fe4UP.jpg?s=256",
+                "account_id": 948306,
+                "user_type": "registered",
+                "user_id": 975066,
+                "link": "https://stackoverflow.com/users/975066/justin-jasmann",
+                "reputation": 2353,
+                "display_name": "Justin Jasmann"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 17095358,
+            "edited": false,
+            "creation_date": 1371151524,
+            "comment_id": 24729377
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/58a6f7a9b62cb94a07e081a086c7b9bc?s=256&d=identicon&r=PG",
+                "account_id": 480771,
+                "user_type": "registered",
+                "user_id": 894194,
+                "link": "https://stackoverflow.com/users/894194/guillaume-darmont",
+                "reputation": 5038,
+                "display_name": "Guillaume Darmont"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1371153289,
+            "creation_date": 1371153289,
+            "body": "<p>This type of <code>java.lang.ClassCastException<\/code>, where both classes names are equals, occur when the same class, or two class with the same name are loaded by 2 different classloaders.<\/p>\n\n<p>I don't know Joget, but you are talking about plugin. Frameworks often load plugins in separate classloaders to ensure a proper isolation between them. <\/p>\n\n<p>Since you say <em>I've double-checked and it looks like I'm including the correct one in my plugin package.<\/em>, you may want to remove <code>spring-security<\/code> from your package, as it's probably already loaded by the framework classloader.<\/p>\n\n<p>You're using <code>Maven<\/code>, so you may simply add <code>&lt;scope&gt;provided&lt;/scope&gt;<\/code> to the <code>spring-security<\/code> dependency (but not sure, since we don't have your pom.xml)<\/p>\n",
+            "answer_id": 17095833,
+            "question_id": 17095358
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/00041806c2dfe45957451cf3fe2dc22c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4523898,
+                "user_type": "registered",
+                "user_id": 3676316,
+                "link": "https://stackoverflow.com/users/3676316/kittiess",
+                "reputation": 1,
+                "display_name": "Kittiess"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1401108166,
+            "creation_date": 1401108166,
+            "body": "<p>I've got the same exception when I was running my plugin. <\/p>\n\n<h1>There are two cases in general:<\/h1>\n\n<h2>1. The class is a local class.<\/h2>\n\n<p>And that is to say, there is no repository(groupId, artificateId, etc) to be deployed in the pom.xml of your plugin. The solution is, go the target folder and open the xxx-0.0.1-snapshot.jar file, then open META-INF/MANIFEST.MF, add the source file of that class /dependency/file.jar, then add the source jar to the dependency folder<\/p>\n\n<p><strong>Remarks<\/strong>: It is better to give a version of the your local file and add it as shown in your pom.xml to let it be found as src in your code.<\/p>\n\n<pre><code>&lt;!-- your source jar need to be renamed as example-1.0.0.jar --&gt;\n&lt;dependency&gt;\n    &lt;groupId&gt;this.should.be.the.prefix.of.your.package&lt;/groupID&gt;\n    &lt;artificateId&gt;file.name&lt;artificateId&gt;\n    &lt;version&gt;1.0.0&lt;/version&gt;\n    &lt;systemPath&gt;${basedir}/lib/stclient_updated-1.0.0.jar&lt;/systemPath&gt;\n    &lt;scope&gt;system&lt;/scope&gt;\n&lt;/dependency&gt; \n<\/code><\/pre>\n\n<h2>2. The class is a remote class with repository<\/h2>\n\n<p>I had this type of problem once because the repository is not correct, see also <a href=\"http://mvnrepository.com/\" rel=\"nofollow\">Maven Repository<\/a> to find the official repository of the source.<\/p>\n\n<p>I hope that it could help =)<\/p>\n\n<p>Cheers<\/p>\n",
+            "answer_id": 23870459,
+            "question_id": 17095358
+        }
+    ],
+    "answer_comments": {}
+}

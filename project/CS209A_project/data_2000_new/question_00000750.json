@@ -1,0 +1,511 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+            "account_id": 3690839,
+            "user_type": "registered",
+            "user_id": 3073447,
+            "link": "https://stackoverflow.com/users/3073447/keshav",
+            "reputation": 58,
+            "display_name": "keshav"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20418528/getting-error-org-springframework-beans-factory-beancreationexception-error-cr",
+        "last_activity_date": 1392102530,
+        "creation_date": 1386315310,
+        "answer_count": 2,
+        "title": "getting error &quot;org.springframework.beans.factory.BeanCreationException: Error creating bean with name &#39;homeController&#39;&quot;",
+        "body": "<p>I am creating spring mvc project in spring tool suite along with using hibernate having following details:<\/p>\n\n<pre><code>HomeController.java\npackage com.FruitStore.fruit;\nimport java.util.Locale;\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.stereotype.Controller;\nimport org.springframework.ui.Model;\nimport org.springframework.web.bind.annotation.ModelAttribute;\nimport org.springframework.web.bind.annotation.RequestMapping;\nimport org.springframework.web.bind.annotation.RequestMethod;\n\nimport com.Fruit.Service.ServiceUser;\nimport com.FruitStore.Vo.VoUser;\n\n/**\n * Handles requests for the application home page.\n */\n@Controller\npublic class HomeController {\n\n    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);\n    @Autowired\n    ServiceUser serviceUser;\n\n    @RequestMapping(value = \"/\", method = RequestMethod.GET)\n    public String home(Locale locale, Model model) {\n        logger.info(\"Welcome home! The client locale is {}.\", locale);\n        return \"body\";\n    }\n    @RequestMapping(value = \"/signup\", method = RequestMethod.GET)\n    public String signup(Model model) {\n\n        VoUser voUser=new VoUser();\n        model.addAttribute(\"user\", voUser);\n        return \"signup\";\n    }\n\n    @RequestMapping(value = \"/save\", method = RequestMethod.POST)\n    public String save(@ModelAttribute(\"user\")VoUser voUser) {\n        System.out.println(serviceUser);\n        serviceUser.save(voUser);\n        return \"new\";\n    }\n}\n<\/code><\/pre>\n\n<p>servlet-context.xml<\/p>\n\n<pre><code>   &lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans:beans xmlns=\"http://www.springframework.org/schema/mvc\"\n    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n    xmlns:beans=\"http://www.springframework.org/schema/beans\"\n    xmlns:context=\"http://www.springframework.org/schema/context\"\n    xsi:schemaLocation=\"http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd\n        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd\n        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd\"&gt;\n\n    &lt;!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure --&gt;\n\n    &lt;!-- Enables the Spring MVC @Controller programming model --&gt;\n    &lt;annotation-driven /&gt;\n\n    &lt;!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory --&gt;\n    &lt;resources mapping=\"/resources/**\" location=\"/resources/\" /&gt;\n\n    &lt;!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory --&gt;\n    &lt;beans:bean class=\"org.springframework.web.servlet.view.InternalResourceViewResolver\"&gt;\n        &lt;beans:property name=\"prefix\" value=\"/WEB-INF/views/\" /&gt;\n        &lt;beans:property name=\"suffix\" value=\".jsp\" /&gt;\n    &lt;/beans:bean&gt;\n\n    &lt;context:component-scan base-package=\"com.FruitStore\" /&gt;\n    &lt;context:annotation-config /&gt;\n\n\n&lt;/beans:beans&gt;\n<\/code><\/pre>\n\n<p>applicationContext.xml<\/p>\n\n<pre><code>    &lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans\n    xmlns=\"http://www.springframework.org/schema/beans\"\n    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n    xmlns:p=\"http://www.springframework.org/schema/p\"\n    xsi:schemaLocation=\"http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd\"&gt;\n\n\n    &lt;bean id=\"dataSource\" class=\"org.springframework.jdbc.datasource.DriverManagerDataSource\"&gt;\n        &lt;property name=\"driverClassName\"  value=\"com.mysql.jdbc.Driver\"&gt;&lt;/property&gt;\n        &lt;property name=\"url\" value=\"jdbc:mysql://localhost:3306/TEST\"&gt;&lt;/property&gt;\n        &lt;property name=\"username\" value=\"root\"&gt;&lt;/property&gt;\n        &lt;property name=\"password\" value=\"\"&gt;&lt;/property&gt;\n    &lt;/bean&gt;\n\n    &lt;bean id=\"mysessionFactory\" class=\"org.springframework.orm.hibernate3.LocalSessionFactoryBean\"&gt;\n        &lt;property name=\"dataSource\"&gt;&lt;ref bean=\"dataSource\" /&gt;&lt;/property&gt;\n\n        &lt;property name=\"mappingResources\"&gt;\n        &lt;list&gt;\n        &lt;value&gt;user.hbm.xml&lt;/value&gt;\n        &lt;/list&gt;\n        &lt;/property&gt;\n\n        &lt;property name=\"hibernateProperties\"&gt;\n            &lt;props&gt;\n                &lt;prop key=\"hibernate.dialect\"&gt;org.hibernate.dialect.MySQLDialect&lt;/prop&gt;\n                &lt;prop key=\"hibernate.hbm2ddl.auto\"&gt;create&lt;/prop&gt;\n                &lt;prop key=\"hibernate.show_sql\"&gt;true&lt;/prop&gt;\n\n            &lt;/props&gt;\n        &lt;/property&gt;\n    &lt;/bean&gt;\n\n    &lt;bean id=\"d\" class=\"com.FruitStore.hibernate.DaoUserImpl\"&gt;\n    &lt;property name=\"sessionFactory\" ref=\"mysessionFactory\"&gt;&lt;/property&gt;\n    &lt;/bean&gt; \n\n\n    &lt;/beans&gt;\n<\/code><\/pre>\n\n<p>ServiceUser.java<\/p>\n\n<pre><code>package com.Fruit.Service;\nimport com.FruitStore.Vo.VoUser;\nimport com.FruitStore.hibernate.User;\n/**\n * \n * @author kaif\n *\n */\npublic interface ServiceUser {\n\n    void save(User user);\n    void update(User user);\n    void delete(User user);\n    void save(VoUser user);\n\n\n}\n<\/code><\/pre>\n\n<p>ServiceUserImpl.java<\/p>\n\n<pre><code>package com.Fruit.Service;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.stereotype.Service;\n\nimport com.FruitStore.Vo.VoUser;\nimport com.FruitStore.hibernate.DaoUser;\nimport com.FruitStore.hibernate.User;\n\n\n@Service\npublic class ServiceUserImpl implements ServiceUser{\n\n    @Autowired\n    private DaoUser daoUser;\n\n    @Override\n    public void save(User user) {\n        daoUser.save(user);\n    }\n\n    @Override\n    public void update(User user) {\n        daoUser.update(user);\n    }\n\n    @Override\n    public void delete(User user) {\n        daoUser.delete(user);\n    }\n\n    @Override\n    public void save(VoUser user) {\n        daoUser.save(user);\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>DaoUser.java<\/p>\n\n<pre><code>package com.FruitStore.hibernate;\nimport com.FruitStore.Vo.VoUser;\n\npublic interface DaoUser {\n    void save(User user);\n    void update(User user);\n    void delete(User user);\n    void save(VoUser user);\n\n}\n<\/code><\/pre>\n\n<p>DaoUserImpl.java<\/p>\n\n<pre><code>package com.FruitStore.hibernate;\nimport org.hibernate.SessionFactory;\nimport org.springframework.orm.hibernate3.HibernateTemplate;\nimport org.springframework.stereotype.Repository;\n\nimport com.FruitStore.Vo.VoUser;\n\n@Repository(\"DaoUser\")\npublic class DaoUserImpl implements DaoUser {\n\n    HibernateTemplate template;\n    public void setSessionFactory(SessionFactory session)\n    {\n        template=new HibernateTemplate(session);\n    }\n    @Override\n    public void save(User user) {\n            template.save(user);\n    }\n\n    @Override\n    public void update(User user) {\n        template.update(user);      \n    }\n\n    @Override\n    public void delete(User user) {\n        template.delete(user);      \n    }\n\n    @Override\n    public void save(VoUser vouser)\n    {\n       User user=new User();\n       user.setUsername(vouser.getUsername());\n       user.setEmail(vouser.getAddress());\n       user.setPassword(vouser.getPassword());\n       user.setAddress(vouser.getAddress()+vouser.getCountry());\n       this.save(user);\n\n    }\n}\n<\/code><\/pre>\n\n<p>pom.xml<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\"&gt;\n    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;\n    &lt;groupId&gt;com.FruitStore&lt;/groupId&gt;\n    &lt;artifactId&gt;fruit&lt;/artifactId&gt;\n    &lt;name&gt;FruitStore&lt;/name&gt;\n    &lt;packaging&gt;war&lt;/packaging&gt;\n    &lt;version&gt;1.0.0-BUILD-SNAPSHOT&lt;/version&gt;\n    &lt;properties&gt;\n        &lt;java-version&gt;1.6&lt;/java-version&gt;\n        &lt;org.springframework-version&gt;3.1.1.RELEASE&lt;/org.springframework-version&gt;\n        &lt;org.aspectj-version&gt;1.6.10&lt;/org.aspectj-version&gt;\n        &lt;org.slf4j-version&gt;1.6.6&lt;/org.slf4j-version&gt;\n    &lt;/properties&gt;\n    &lt;dependencies&gt;\n        &lt;!-- Spring --&gt;\n        &lt;dependency&gt;\n    &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n    &lt;artifactId&gt;spring-context&lt;/artifactId&gt;\n    &lt;version&gt;3.2.5.RELEASE&lt;/version&gt;\n&lt;/dependency&gt;            \n        &lt;dependency&gt;\n    &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n    &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;\n    &lt;version&gt;3.2.5.RELEASE&lt;/version&gt;\n&lt;/dependency&gt;\n&lt;dependency&gt;\n    &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n    &lt;artifactId&gt;spring-beans&lt;/artifactId&gt;\n    &lt;version&gt;3.2.5.RELEASE&lt;/version&gt;\n&lt;/dependency&gt;\n\n        &lt;!-- AspectJ --&gt;\n        &lt;dependency&gt;\n    &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n    &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;\n    &lt;version&gt;3.2.5.RELEASE&lt;/version&gt;\n&lt;/dependency&gt;\n\n\n        &lt;!-- Logging --&gt;\n        &lt;dependency&gt;\n    &lt;groupId&gt;org.slf4j&lt;/groupId&gt;\n    &lt;artifactId&gt;slf4j-jdk14&lt;/artifactId&gt;\n    &lt;version&gt;1.7.5&lt;/version&gt;\n&lt;/dependency&gt;\n\n&lt;dependency&gt;\n    &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n    &lt;artifactId&gt;spring-orm&lt;/artifactId&gt;\n    &lt;version&gt;3.2.5.RELEASE&lt;/version&gt;\n&lt;/dependency&gt;\n\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;\n            &lt;artifactId&gt;jcl-over-slf4j&lt;/artifactId&gt;\n            &lt;version&gt;${org.slf4j-version}&lt;/version&gt;\n            &lt;scope&gt;runtime&lt;/scope&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n    &lt;groupId&gt;org.slf4j&lt;/groupId&gt;\n    &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;\n    &lt;version&gt;1.7.5&lt;/version&gt;\n            &lt;scope&gt;runtime&lt;/scope&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n        &lt;groupId&gt;mysql&lt;/groupId&gt;\n        &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;\n        &lt;version&gt;5.1.9&lt;/version&gt;\n       &lt;/dependency&gt;\n       &lt;!-- Hibernate framework --&gt;\n    &lt;dependency&gt;\n    &lt;groupId&gt;org.hibernate&lt;/groupId&gt;\n    &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;\n    &lt;version&gt;4.2.7.Final&lt;/version&gt;\n&lt;/dependency&gt;\n\n\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;dom4j&lt;/groupId&gt;\n        &lt;artifactId&gt;dom4j&lt;/artifactId&gt;\n        &lt;version&gt;1.6.1&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;commons-collections&lt;/groupId&gt;\n        &lt;artifactId&gt;commons-collections&lt;/artifactId&gt;\n        &lt;version&gt;3.2.1&lt;/version&gt;\n    &lt;/dependency&gt;\n\n    &lt;dependency&gt;\n        &lt;groupId&gt;antlr&lt;/groupId&gt;\n        &lt;artifactId&gt;antlr&lt;/artifactId&gt;\n        &lt;version&gt;2.7.7&lt;/version&gt;\n    &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;log4j&lt;/groupId&gt;\n            &lt;artifactId&gt;log4j&lt;/artifactId&gt;\n            &lt;version&gt;1.2.15&lt;/version&gt;\n            &lt;exclusions&gt;\n                &lt;exclusion&gt;\n                    &lt;groupId&gt;javax.mail&lt;/groupId&gt;\n                    &lt;artifactId&gt;mail&lt;/artifactId&gt;\n                &lt;/exclusion&gt;\n                &lt;exclusion&gt;\n                    &lt;groupId&gt;javax.jms&lt;/groupId&gt;\n                    &lt;artifactId&gt;jms&lt;/artifactId&gt;\n                &lt;/exclusion&gt;\n                &lt;exclusion&gt;\n                    &lt;groupId&gt;com.sun.jdmk&lt;/groupId&gt;\n                    &lt;artifactId&gt;jmxtools&lt;/artifactId&gt;\n                &lt;/exclusion&gt;\n                &lt;exclusion&gt;\n                    &lt;groupId&gt;com.sun.jmx&lt;/groupId&gt;\n                    &lt;artifactId&gt;jmxri&lt;/artifactId&gt;\n                &lt;/exclusion&gt;\n            &lt;/exclusions&gt;\n            &lt;scope&gt;runtime&lt;/scope&gt;\n        &lt;/dependency&gt;\n\n        &lt;!-- @Inject --&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;javax.inject&lt;/groupId&gt;\n            &lt;artifactId&gt;javax.inject&lt;/artifactId&gt;\n            &lt;version&gt;1&lt;/version&gt;\n        &lt;/dependency&gt;\n\n        &lt;!-- Servlet --&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;javax.servlet&lt;/groupId&gt;\n            &lt;artifactId&gt;servlet-api&lt;/artifactId&gt;\n            &lt;version&gt;2.5&lt;/version&gt;\n            &lt;scope&gt;provided&lt;/scope&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;javax.servlet.jsp&lt;/groupId&gt;\n            &lt;artifactId&gt;jsp-api&lt;/artifactId&gt;\n            &lt;version&gt;2.1&lt;/version&gt;\n            &lt;scope&gt;provided&lt;/scope&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;javax.servlet&lt;/groupId&gt;\n            &lt;artifactId&gt;jstl&lt;/artifactId&gt;\n            &lt;version&gt;1.2&lt;/version&gt;\n        &lt;/dependency&gt;\n\n        &lt;!-- Test --&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;junit&lt;/groupId&gt;\n            &lt;artifactId&gt;junit&lt;/artifactId&gt;\n            &lt;version&gt;4.7&lt;/version&gt;\n            &lt;scope&gt;test&lt;/scope&gt;\n        &lt;/dependency&gt;        \n    &lt;/dependencies&gt;\n    &lt;build&gt;\n        &lt;plugins&gt;\n            &lt;plugin&gt;\n                &lt;artifactId&gt;maven-eclipse-plugin&lt;/artifactId&gt;\n                &lt;version&gt;2.9&lt;/version&gt;\n                &lt;configuration&gt;\n                    &lt;additionalProjectnatures&gt;\n                        &lt;projectnature&gt;org.springframework.ide.eclipse.core.springnature&lt;/projectnature&gt;\n                    &lt;/additionalProjectnatures&gt;\n                    &lt;additionalBuildcommands&gt;\n                        &lt;buildcommand&gt;org.springframework.ide.eclipse.core.springbuilder&lt;/buildcommand&gt;\n                    &lt;/additionalBuildcommands&gt;\n                    &lt;downloadSources&gt;true&lt;/downloadSources&gt;\n                    &lt;downloadJavadocs&gt;true&lt;/downloadJavadocs&gt;\n                &lt;/configuration&gt;\n            &lt;/plugin&gt;\n            &lt;plugin&gt;\n                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;\n                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;\n                &lt;version&gt;2.5.1&lt;/version&gt;\n                &lt;configuration&gt;\n                    &lt;source&gt;1.6&lt;/source&gt;\n                    &lt;target&gt;1.6&lt;/target&gt;\n                    &lt;compilerArgument&gt;-Xlint:all&lt;/compilerArgument&gt;\n                    &lt;showWarnings&gt;true&lt;/showWarnings&gt;\n                    &lt;showDeprecation&gt;true&lt;/showDeprecation&gt;\n                &lt;/configuration&gt;\n            &lt;/plugin&gt;\n            &lt;plugin&gt;\n                &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;\n                &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;\n                &lt;version&gt;1.2.1&lt;/version&gt;\n                &lt;configuration&gt;\n                    &lt;mainClass&gt;org.test.int1.Main&lt;/mainClass&gt;\n                &lt;/configuration&gt;\n            &lt;/plugin&gt;\n        &lt;/plugins&gt;\n    &lt;/build&gt;\n&lt;/project&gt;\n<\/code><\/pre>\n\n<p>web.xml<\/p>\n\n<pre><code>    &lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;web-app version=\"2.5\" xmlns=\"http://java.sun.com/xml/ns/javaee\"\n    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n    xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\"&gt;\n\n    &lt;!-- The definition of the Root Spring Container shared by all Servlets and Filters --&gt;\n    &lt;context-param&gt;\n        &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;\n        &lt;param-value&gt;/WEB-INF/spring/root-context.xml&lt;/param-value&gt;\n    &lt;/context-param&gt;\n\n    &lt;!-- Creates the Spring Container shared by all Servlets and Filters --&gt;\n    &lt;listener&gt;\n        &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;\n    &lt;/listener&gt;\n\n    &lt;!-- Processes application requests --&gt;\n    &lt;servlet&gt;\n        &lt;servlet-name&gt;appServlet&lt;/servlet-name&gt;\n        &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;\n        &lt;init-param&gt;\n            &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;\n            &lt;param-value&gt;/WEB-INF/spring/appServlet/servlet-context.xml&lt;/param-value&gt;\n        &lt;/init-param&gt;\n        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;\n    &lt;/servlet&gt;\n\n    &lt;servlet-mapping&gt;\n        &lt;servlet-name&gt;appServlet&lt;/servlet-name&gt;\n        &lt;url-pattern&gt;/&lt;/url-pattern&gt;\n    &lt;/servlet-mapping&gt;\n\n&lt;/web-app&gt;\n<\/code><\/pre>\n\n<p>But when i try to run the project i am getting the error \"org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'homeController'\" however if i don't use the @Autowired annotation in HomeController.java then i get the daoUser value as Null. can you help me to figure this out.<\/p>\n",
+        "question_id": 20418528,
+        "tags": [
+            "java",
+            "spring-mvc"
+        ],
+        "score": 1,
+        "accepted_answer_id": 21695370,
+        "is_answered": true,
+        "view_count": 6667,
+        "last_edit_date": 1388271960
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fb3d737e1ebd4e4dec88267b5b930c2c?s=256&d=identicon&r=PG",
+            "account_id": 1363991,
+            "user_type": "registered",
+            "user_id": 1300817,
+            "link": "https://stackoverflow.com/users/1300817/raul-rene",
+            "reputation": 10330,
+            "display_name": "Raul Rene",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 20418528,
+        "edited": false,
+        "creation_date": 1386315927,
+        "comment_id": 30496081
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/51895167ad732e8d48778cd98fa2a089?s=256&d=identicon&r=PG",
+                "account_id": 2936768,
+                "user_type": "registered",
+                "user_id": 2515501,
+                "link": "https://stackoverflow.com/users/2515501/harpreet-singh-bhullar",
+                "reputation": 24,
+                "display_name": "Harpreet Singh Bhullar"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1392102530,
+            "creation_date": 1392102530,
+            "body": "<p>delete the entire .m2(maven directory) and reinstall all dependencies<\/p>\n",
+            "answer_id": 21695370,
+            "question_id": 20418528
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1386316946,
+            "creation_date": 1386316946,
+            "body": "<p>In your <code>root-context.xml<\/code>/<code>applicationContext.xml<\/code> you need a <code>&lt;context:component-scan /&gt;<\/code> which scans for everything but controllers. You have one but that one doesn't include the packages in which you have defined your services. <\/p>\n\n<p>Add the following<\/p>\n\n<pre><code>&lt;context:component-scan base-package=\"com.FruitStore,com.fruit\"&gt;\n    &lt;context:exclude-filter type=\"annotation\" expression=\"org.springframework.stereotype.Controller\" /&gt;\n&lt;context:component-scan&gt;\n<\/code><\/pre>\n\n<p>This also allows you to remove the definition for your <code>DaoUserImpl<\/code> bean as this will now be picked up by component-scanning. You will need to add an <code>@Autowired<\/code> to the <code>setSessionFactory<\/code> method to make that work.<\/p>\n\n<p>Change the one in your <code>servlet-context.xml<\/code> to the follwoing<\/p>\n\n<pre><code>&lt;context:component-scan base-package=\"com.FruitStore,com.fruit\" use-default-filters=\"false\"&gt;\n    &lt;context:include-filter type=\"annotation\" expression=\"org.springframework.stereotype.Controller\" /&gt;\n&lt;context:component-scan&gt;\n<\/code><\/pre>\n\n<p>Also remove <code>&lt;context:annotation-config /&gt;<\/code> that is already implied by <code>&lt;context:component-scan /&gt;<\/code>. <\/p>\n\n<p>A final note on your <code>DaoUserImpl<\/code> please don't use <code>HibernateTemplate<\/code> that should be considered deprecated as of the release of hibernate 3.0.1 (around in 2006). Use the <code>SessionFactory<\/code> directly and use the <code>getCurrentSession()<\/code> method. See also <a href=\"http://docs.spring.io/spring/docs/current/spring-framework-reference/html/orm.html#orm-hibernate-straight\" rel=\"nofollow\">http://docs.spring.io/spring/docs/current/spring-framework-reference/html/orm.html#orm-hibernate-straight<\/a> for more information. <\/p>\n",
+            "answer_id": 20418928,
+            "question_id": 20418528
+        }
+    ],
+    "answer_comments": {"20418928": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1387039785,
+            "comment_id": 30796381
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386861372,
+            "comment_id": 30725813
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386830302,
+            "comment_id": 30708277
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386759705,
+            "comment_id": 30673022
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386661333,
+            "comment_id": 30622324
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386598113,
+            "comment_id": 30593412
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386597958,
+            "comment_id": 30593320
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386597795,
+            "comment_id": 30593226
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386596031,
+            "comment_id": 30592189
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386595932,
+            "comment_id": 30592126
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386595906,
+            "comment_id": 30592112
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386595749,
+            "comment_id": 30592018
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386595509,
+            "comment_id": 30591887
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386595287,
+            "comment_id": 30591772
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386595052,
+            "comment_id": 30591621
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386594878,
+            "comment_id": 30591523
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386594152,
+            "comment_id": 30591109
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "edited": false,
+            "creation_date": 1386324920,
+            "comment_id": 30500632
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386323410,
+            "comment_id": 30499732
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FMcdV.jpg?s=256",
+                "account_id": 3690839,
+                "user_type": "registered",
+                "user_id": 3073447,
+                "link": "https://stackoverflow.com/users/3073447/keshav",
+                "reputation": 58,
+                "display_name": "keshav"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20418928,
+            "edited": false,
+            "creation_date": 1386323393,
+            "comment_id": 30499724
+        }
+    ]}
+}

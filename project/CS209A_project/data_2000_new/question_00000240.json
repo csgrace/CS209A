@@ -1,0 +1,113 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-1QzhxhhzXHs/AAAAAAAAAAI/AAAAAAAACV4/es2jVfb6sY0/s256-rj/photo.jpg",
+            "account_id": 7856545,
+            "user_type": "registered",
+            "user_id": 5938195,
+            "link": "https://stackoverflow.com/users/5938195/kuldeep-yadav",
+            "reputation": 1824,
+            "display_name": "Kuldeep Yadav",
+            "accept_rate": 73
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/62780211/aws-sqs-how-do-we-consume-message",
+        "last_activity_date": 1739924871,
+        "creation_date": 1594140825,
+        "answer_count": 2,
+        "title": "AWS SQS: how do we consume message",
+        "body": "<p>I want to convert one of my synchronous API into asynchronous. And I believe queue are one way to do this. Like a publisher will push(synchronously) the message into queue which will be consumed by consumer API from the queue.<\/p>\n<p>I was curious to know what is the right way of consuming AWS SimpleQueueService messages. Can queue call an API to deliver the message to it or the only way to do is to poll the queue. But I believe that polling will make our system busy waiting so it is best <strong>the queue deliver the message to API.<\/strong><\/p>\n<p>What is possible way to do this?<\/p>\n",
+        "question_id": 62780211,
+        "tags": [
+            "java",
+            "amazon-web-services",
+            "message-queue",
+            "amazon-sqs",
+            "polling"
+        ],
+        "score": 6,
+        "accepted_answer_id": 62780453,
+        "is_answered": true,
+        "view_count": 15503
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/CqmdI.jpg?s=256",
+                "account_id": 18477889,
+                "user_type": "registered",
+                "user_id": 13460933,
+                "link": "https://stackoverflow.com/users/13460933/chris-williams",
+                "reputation": 35670,
+                "display_name": "Chris Williams"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 7,
+            "is_accepted": true,
+            "last_activity_date": 1594141713,
+            "creation_date": 1594141713,
+            "body": "<p>If you want to consume from SQS you have the following methods:<\/p>\n<ul>\n<li><a href=\"https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-sqs-messages.html#sqs-messages-receive\" rel=\"noreferrer\">Polling using the SDK to consume messages<\/a><\/li>\n<li><a href=\"https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/getting-started.html\" rel=\"noreferrer\">Using the Amazon SQS Java Messaging Library<\/a><\/li>\n<li><a href=\"https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html\" rel=\"noreferrer\">Subscribing to an SNS Topic<\/a><\/li>\n<li><a href=\"https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html\" rel=\"noreferrer\">Using Lambda<\/a>.<\/li>\n<\/ul>\n<p>If you intend to retrieve to get responses back you can also take advantage of <a href=\"https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-temporary-queues.html#request-reply-messaging-pattern\" rel=\"noreferrer\">virtual queues<\/a>.<\/p>\n",
+            "answer_id": 62780453,
+            "question_id": 62780211
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dMlzP.jpg?s=256",
+                "account_id": 3975707,
+                "user_type": "registered",
+                "user_id": 3278943,
+                "link": "https://stackoverflow.com/users/3278943/arun",
+                "reputation": 1125,
+                "display_name": "Arun"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1739924871,
+            "creation_date": 1640695898,
+            "body": "<p>In application.yml<\/p>\n<pre><code>sqs:\nregion: ap-south-1\naccessKeyId: arunsinghgujjar\nsecretAccessKey: jainpurwalearunsingh/saharanpursepauchepuna\ncloud:\naws:\nend-point:\nuri: https://arun-learningsubway-1.amazonaws.com/9876974864/learningsubway_SQS.fifo\nqueue:\nmax-poll-time: 20\nmax-messages: 10\nfetch-wait-on-error: 60\nenabled: true\ncontent: sqs\n<\/code><\/pre>\n<p><strong>Write SQS client<\/strong><\/p>\n<pre><code>public String sendMessage(MessageDistributionEvent messageDistributionEvent) {\n  SendMessageResponse sendMessage = null;\n  try {\n    Map&lt;String, MessageAttributeValue&gt; attributes = new HashMap&lt;&gt;();\n\n    String recepList = &quot;&quot;;\n    for (Integer myInt : messageDistributionEvent.getRecipients()) {\n      recepList = recepList + &quot;_&quot; + myInt;\n    }\n    SendMessageRequest sendMsgRequest = SendMessageRequest.builder()\n      .queueUrl(url)\n      .messageBody(messageDistributionEvent.getChannelId() + &quot;_&quot; + messageDistributionEvent.getMessageId() + &quot;&quot; + recepList)\n      .messageGroupId(&quot;1&quot;)\n      .messageAttributes(attributes)\n      .build();\n    sendMessage = sqsClient.sendMessage(sendMsgRequest);\n  } catch (Exception ex) {\n    log.info(&quot;failed to send message :&quot; + ex);\n  }\n  return sendMessage.sequenceNumber();\n}\n<\/code><\/pre>\n<p><strong>Read Message from Queue<\/strong><\/p>\n<pre><code>ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()\n.queueUrl(url)\n.waitTimeSeconds(maxPollTime)\n.maxNumberOfMessages(maxMessages)\n.messageAttributeNames(&quot;MessageLabel&quot;)\n.build();\nList&lt;Message&gt; sqsMessages = sqsClient.receiveMessage(receiveMessageRequest).messages();\n<\/code><\/pre>\n<p>Reference\n<a href=\"https://learningsubway.com/read-write-data-into-aws-sqs-using-java/\" rel=\"nofollow noreferrer\">https://learningsubway.com/read-write-data-into-aws-sqs-using-java/<\/a><\/p>\n",
+            "answer_id": 70507343,
+            "question_id": 62780211,
+            "last_edit_date": 1739924871
+        }
+    ],
+    "answer_comments": {
+        "62780453": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/3mryV.jpg?s=256",
+                "account_id": 2418909,
+                "user_type": "registered",
+                "user_id": 2112382,
+                "link": "https://stackoverflow.com/users/2112382/vijayraj34",
+                "reputation": 2445,
+                "display_name": "vijayraj34",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 62780453,
+            "edited": false,
+            "creation_date": 1611476809,
+            "comment_id": 116459357
+        }],
+        "70507343": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/690eec685cbdb79b9f6deee401a61558?s=256&d=identicon&r=PG",
+                "account_id": 193707,
+                "user_type": "registered",
+                "user_id": 435605,
+                "link": "https://stackoverflow.com/users/435605/alikelzin-kilaka",
+                "reputation": 36349,
+                "display_name": "AlikElzin-kilaka",
+                "accept_rate": 45
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 70507343,
+            "edited": false,
+            "creation_date": 1710233547,
+            "comment_id": 137768063
+        }]
+    }
+}

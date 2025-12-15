@@ -1,0 +1,248 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/hrS7o.jpg?s=256",
+            "account_id": 238954,
+            "user_type": "registered",
+            "user_id": 508219,
+            "link": "https://stackoverflow.com/users/508219/malejpavouk",
+            "reputation": 4445,
+            "display_name": "malejpavouk",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/38102569/spring-mvc-how-to-get-a-handler-method-for-a-request",
+        "last_activity_date": 1574339602,
+        "creation_date": 1467210396,
+        "answer_count": 2,
+        "title": "Spring MVC: how to get a handler method for a request",
+        "body": "<p>I am trying to implement some logic depending on annotation present on method with Spring <code>@RequestMapping<\/code> annotation. <\/p>\n\n<p>So I have a <code>HttpServletRequest<\/code> instance in my method and I want to ask spring \"give me a method, which will be invoked to handle this request\", so I can use reflection API to ask if my annotation is present or not, so I can alter the processing. <\/p>\n\n<p>Is there any easy way to get this information from Spring MVC?<\/p>\n",
+        "question_id": 38102569,
+        "tags": [
+            "java",
+            "spring",
+            "spring-mvc"
+        ],
+        "score": 4,
+        "accepted_answer_id": 38106829,
+        "is_answered": true,
+        "view_count": 15587,
+        "last_edit_date": 1467221957
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hrS7o.jpg?s=256",
+                "account_id": 238954,
+                "user_type": "registered",
+                "user_id": 508219,
+                "link": "https://stackoverflow.com/users/508219/malejpavouk",
+                "reputation": 4445,
+                "display_name": "malejpavouk",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38102569,
+            "edited": false,
+            "creation_date": 1467643111,
+            "comment_id": 63800121
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/c4jmP.png?s=256",
+                "account_id": 2468965,
+                "user_type": "registered",
+                "user_id": 2151351,
+                "link": "https://stackoverflow.com/users/2151351/a-better-oliver",
+                "reputation": 26948,
+                "display_name": "a better oliver"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38102569,
+            "edited": false,
+            "creation_date": 1467286899,
+            "comment_id": 63675755
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2f0d9dec16bae1e06552af55ddefc11f?s=256&d=identicon&r=PG",
+                "account_id": 277416,
+                "user_type": "registered",
+                "user_id": 571407,
+                "link": "https://stackoverflow.com/users/571407/jb-nizet",
+                "reputation": 694302,
+                "display_name": "JB Nizet",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 38102569,
+            "edited": false,
+            "creation_date": 1467222772,
+            "comment_id": 63647207
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Rjx6y.png?s=256",
+                "account_id": 204659,
+                "user_type": "registered",
+                "user_id": 453005,
+                "link": "https://stackoverflow.com/users/453005/dwb",
+                "reputation": 38566,
+                "display_name": "DwB",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 38102569,
+            "edited": false,
+            "creation_date": 1467219476,
+            "comment_id": 63645196
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/nJ3m0.jpg?s=256",
+                "account_id": 1477692,
+                "user_type": "registered",
+                "user_id": 1393484,
+                "link": "https://stackoverflow.com/users/1393484/ali-dehghani",
+                "reputation": 48429,
+                "display_name": "Ali Dehghani",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 17,
+            "is_accepted": true,
+            "last_activity_date": 1467222793,
+            "creation_date": 1467222793,
+            "body": "<p>I suppose you have a handler method like:<\/p>\n\n<pre><code>@SomeAnnotation\n@RequestMapping(...)\npublic Something doHandle(...) { ... }\n<\/code><\/pre>\n\n<p>And you want to add some pre-processing logic for all handler methods that are annotated with <code>@SomeAnnotation<\/code>. Instead of your proposed approach, you can implement the <code>HandlerInterceptor<\/code> and put your pre-processing logic into the <code>preHandle<\/code> method:<\/p>\n\n<pre><code>public class SomeLogicInterceptor extends HandlerInterceptorAdapter {\n    @Override\n    public boolean preHandle(HttpServletRequest request, \n                             HttpServletResponse response, \n                             Object handler) throws Exception {\n\n        if (handler instanceof HandlerMethod) {\n            HandlerMethod handlerMethod = (HandlerMethod) handler;\n            SomeAnnotation someAnnotation = handlerMethod.getMethodAnnotation(SomeAnnotation.class);\n            if (someAnnotation != null) {\n                // Put your logic here\n            }\n        }\n\n        return true; // return false if you want to abort the execution chain\n    }\n}\n<\/code><\/pre>\n\n<p>Also don't forget to register your interceptor in your web configuration:<\/p>\n\n<pre><code>@Configuration\npublic class WebConfig extends WebMvcConfigurerAdapter {\n    @Override\n    public void addInterceptors(InterceptorRegistry registry) {\n        registry.addInterceptor(new SomeLogicInterceptor());\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 38106829,
+            "question_id": 38102569
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a50fa6d45c5ed5b96235e5eb85b08846?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3253983,
+                "user_type": "registered",
+                "user_id": 2743585,
+                "link": "https://stackoverflow.com/users/2743585/wi2ard",
+                "reputation": 1595,
+                "display_name": "wi2ard"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1574339602,
+            "creation_date": 1574339602,
+            "body": "<p>Helped by @ali-dehgani's answer, I have a more flexible implementation that doesn't need to register an interceptor. You do need to pass the request object that is bound to be mapped to that method.<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>private boolean isHandlerMethodAnnotated(HttpServletRequest request ) {\n        WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());\n        Map&lt;String, HandlerMapping&gt; handlerMappingMap = BeanFactoryUtils.beansOfTypeIncludingAncestors(webApplicationContext, HandlerMapping.class, true, false);\n        try {\n            HandlerMapping handlerMapping = handlerMappingMap.get(RequestMappingHandlerMapping.class.getName());\n            HandlerExecutionChain handlerExecutionChain = handlerMapping.getHandler(request);\n            Object handler = handlerExecutionChain.getHandler();\n            if(handler instanceof HandlerMethod){\n                Annotation methodAnnotation = ((HandlerMethod) handler).getMethodAnnotation(MyAnnotation.class);\n                return methodAnnotation!=null;\n            }\n        } catch (Exception e) {\n            logger.warn(e);\n        }\n        return false;\n    }\n<\/code><\/pre>\n",
+            "answer_id": 58975177,
+            "question_id": 38102569
+        }
+    ],
+    "answer_comments": {
+        "58975177": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VamUw.png?s=256",
+                "account_id": 6278923,
+                "user_type": "registered",
+                "user_id": 4880696,
+                "link": "https://stackoverflow.com/users/4880696/aeloy",
+                "reputation": 148,
+                "display_name": "aeloy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58975177,
+            "edited": false,
+            "creation_date": 1741821893,
+            "comment_id": 140211883
+        }],
+        "38106829": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/db3eb929087bebd6877ba36896c2a6d2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3719550,
+                    "user_type": "registered",
+                    "user_id": 3094906,
+                    "link": "https://stackoverflow.com/users/3094906/martin-h%c3%a4usler",
+                    "reputation": 7398,
+                    "display_name": "Martin H&#228;usler",
+                    "accept_rate": 71
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 38106829,
+                "edited": false,
+                "creation_date": 1700141173,
+                "comment_id": 136619814
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/5bdss.jpg?s=256",
+                    "account_id": 4567941,
+                    "user_type": "registered",
+                    "user_id": 3708472,
+                    "link": "https://stackoverflow.com/users/3708472/peter-s",
+                    "reputation": 652,
+                    "display_name": "Peter S."
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 4,
+                "post_id": 38106829,
+                "edited": false,
+                "creation_date": 1527066536,
+                "comment_id": 87981481
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/nJ3m0.jpg?s=256",
+                    "account_id": 1477692,
+                    "user_type": "registered",
+                    "user_id": 1393484,
+                    "link": "https://stackoverflow.com/users/1393484/ali-dehghani",
+                    "reputation": 48429,
+                    "display_name": "Ali Dehghani",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38106829,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/e59021f2412e79c4b5d5056ef9f712bc?s=256&d=identicon&r=PG",
+                    "account_id": 309363,
+                    "user_type": "registered",
+                    "user_id": 621767,
+                    "link": "https://stackoverflow.com/users/621767/vdeantoni",
+                    "reputation": 1968,
+                    "display_name": "vdeantoni",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1470341795,
+                "comment_id": 64924771
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/e59021f2412e79c4b5d5056ef9f712bc?s=256&d=identicon&r=PG",
+                    "account_id": 309363,
+                    "user_type": "registered",
+                    "user_id": 621767,
+                    "link": "https://stackoverflow.com/users/621767/vdeantoni",
+                    "reputation": 1968,
+                    "display_name": "vdeantoni",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 38106829,
+                "edited": false,
+                "creation_date": 1470087573,
+                "comment_id": 64794620
+            }
+        ]
+    }
+}

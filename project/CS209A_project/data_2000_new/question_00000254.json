@@ -1,0 +1,211 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/17b84311ec2459f677eb88a3e5fd8ee6?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3872865,
+            "user_type": "registered",
+            "user_id": 3207717,
+            "link": "https://stackoverflow.com/users/3207717/user3207717",
+            "reputation": 29,
+            "display_name": "user3207717"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/21192888/how-print-bit-image-tm-t88v",
+        "last_activity_date": 1613380479,
+        "creation_date": 1389982195,
+        "answer_count": 4,
+        "title": "How print bit Image TM-T88V",
+        "body": "<p>I can't print my bit image without white line each 24 lines. I need to print an image, but this image have white lines each 24 lines to bits.<\/p>\n<p>The epson printer print the image to the next format.<\/p>\n<pre><code>&gt;line 23 01010101000010001010\n&gt;line 24 00001000100000000110\n&gt;line 25 --------- white line ------------\n<\/code><\/pre>\n<p>How  can delete this damn white line?<\/p>\n<pre><code>    Image size\n    width:400px\n    height:73px\n        \n    while (offset &lt; height) \n    {\n    //format ESC* Epson printer\n    String modIMG = new String(new byte[]{0x1B, 0x2A, 33, 0, 2});\n        img.append(modIMG);     \n            for (int x = 0; x &lt; width; ++x) {\n                for (int k = 0; k &lt; 3; ++k) {\n                byte slice= 0;\n                    for (int b = 0; b &lt; 8; ++b) {\n                    int y = (((offset / 8) + k) * 8) + b;\n                    int i = (y * width) + x;\n                    boolean v = false;\n                        if (i &lt; bitSet.length()) {\n                            v = bitSet.get(i);}\n                            slice |= (byte) ((v ? 1 : 0) &lt;&lt; (7 - b));\n                        }   \n                        img.slice(new String(new byte[] {slice}));\n                    }\n                }\n                offset += 24;\n                img.append(new String(new String(new byte[]{0x1B,0x33,30}));\n                }\n<\/code><\/pre>\n",
+        "question_id": 21192888,
+        "tags": [
+            "java",
+            "epson"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 5281,
+        "last_edit_date": 1613380479
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/913cf627a209d482cd0a9c3ec7772284?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3330032,
+                "user_type": "registered",
+                "user_id": 2799180,
+                "link": "https://stackoverflow.com/users/2799180/user2799180",
+                "reputation": 749,
+                "display_name": "user2799180",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192888,
+            "edited": false,
+            "creation_date": 1392379344,
+            "comment_id": 32948909
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/17b84311ec2459f677eb88a3e5fd8ee6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3872865,
+                "user_type": "registered",
+                "user_id": 3207717,
+                "link": "https://stackoverflow.com/users/3207717/user3207717",
+                "reputation": 29,
+                "display_name": "user3207717"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 21192888,
+            "edited": false,
+            "creation_date": 1390511790,
+            "comment_id": 32135307
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/irQpr.jpg?s=256",
+                "account_id": 2814779,
+                "user_type": "registered",
+                "user_id": 2420301,
+                "link": "https://stackoverflow.com/users/2420301/marc-balmer",
+                "reputation": 1830,
+                "display_name": "Marc Balmer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1408266338,
+            "creation_date": 1408266338,
+            "body": "<p>So I solved this problem.  It is not enough to set the line spacing to 24 dots using ESC '3' 24, but you have to print the image in page mode.<\/p>\n\n<p>To enter page mode:  ESC 'L'<\/p>\n\n<p>Then you have to set the image area using ESC 'W', here I do it in C:<\/p>\n\n<pre><code>           h2 = h * 2 + 30;\n            /* Set the printing area, h * 2 because of double density */\n            seq[0] = 0x1b;\n            seq[1] = 'W';\n            seq[2] = 0;     /* xl */\n            seq[3] = 0;     /* xh */\n            seq[4] = 0;     /* yl */\n            seq[5] = 0;     /* yh */\n            seq[6] = 0;     /* dxl */\n            seq[7] = 2;     /* dxh */\n            seq[8] = h2 % 256;      /* dyl */\n            seq[9] = h2 / 256;      /* dyh */\n            if (write(fd, seq, 10) != 10)\n                    goto finish;\n<\/code><\/pre>\n\n<p>Now send the image data and finally print with sending 0x0c, this also returns the printer to standard mode.<\/p>\n\n<p>By using page mode, the white stripes on the image went away.<\/p>\n\n<p>BTW, this seems to be an oddity of EPSON TM-T88 printers, I neither see these white lines on the TM-T500A nor on e.g. Aures printers.  On these printers I can use standard mode to print images.<\/p>\n",
+            "answer_id": 25347790,
+            "question_id": 21192888
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/QXR8z.jpg?s=256",
+                "account_id": 4496800,
+                "user_type": "registered",
+                "user_id": 3656419,
+                "link": "https://stackoverflow.com/users/3656419/zeroworks",
+                "reputation": 1638,
+                "display_name": "ZeroWorks"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1485937603,
+            "creation_date": 1485602743,
+            "body": "<p>I solved it setting page mode followin Marc Balmer's example, but have to send feed for 24*2 dots (line height double density) to get it working: So after every slice of data send command <code>ESC J n<\/code> bytes <code>{27, 74, 48}<\/code>. And finally got it!<\/p>\n\n<p>Hope it helps!<\/p>\n\n<p><a href=\"https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=15\" rel=\"nofollow noreferrer\">Reference (must be logged)<\/a><\/p>\n",
+            "answer_id": 41909223,
+            "question_id": 21192888,
+            "last_edit_date": 1485937603
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e0243edcd49f8deaeedcbdd68246e1fe?s=256&d=identicon&r=PG",
+                "account_id": 4217876,
+                "user_type": "unregistered",
+                "user_id": 3453470,
+                "link": "https://stackoverflow.com/users/3453470/kutar",
+                "reputation": 1,
+                "display_name": "kutar"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1396177264,
+            "creation_date": 1395614004,
+            "body": "<p>Try sending ESC/POS command (0x1B, '3', 24) prior to printing. This sets the line spacing to 24 dots rather than the default of 30.<\/p>\n",
+            "answer_id": 22598014,
+            "question_id": 21192888,
+            "last_edit_date": 1396177264
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/99a3ff3c6b18e0956ab91d6ba0f715e7?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12383943,
+                "user_type": "registered",
+                "user_id": 9028184,
+                "link": "https://stackoverflow.com/users/9028184/trandi",
+                "reputation": 41,
+                "display_name": "trandi"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1511994748,
+            "creation_date": 1511994748,
+            "body": "<p>Just to confirm what other people have suggested, I've successfully managed to remove the white lines between the data stripes using \"<strong>ESC30<\/strong>\".\nYou can see the actual code (Haskell) and the <a href=\"https://trandi.wordpress.com/2017/11/29/receipts-printer-photo-booth/\" rel=\"nofollow noreferrer\">results here<\/a>.<\/p>\n",
+            "answer_id": 47562954,
+            "question_id": 21192888
+        }
+    ],
+    "answer_comments": {
+        "25347790": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/irQpr.jpg?s=256",
+                    "account_id": 2814779,
+                    "user_type": "registered",
+                    "user_id": 2420301,
+                    "link": "https://stackoverflow.com/users/2420301/marc-balmer",
+                    "reputation": 1830,
+                    "display_name": "Marc Balmer"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25347790,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9e832026eb8f6c2c708d328c8ae31ba1?s=256&d=identicon&r=PG",
+                    "account_id": 225342,
+                    "user_type": "registered",
+                    "user_id": 485769,
+                    "link": "https://stackoverflow.com/users/485769/lucyk",
+                    "reputation": 51,
+                    "display_name": "Lucyk"
+                },
+                "edited": false,
+                "creation_date": 1483184862,
+                "comment_id": 70018906
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9e832026eb8f6c2c708d328c8ae31ba1?s=256&d=identicon&r=PG",
+                    "account_id": 225342,
+                    "user_type": "registered",
+                    "user_id": 485769,
+                    "link": "https://stackoverflow.com/users/485769/lucyk",
+                    "reputation": 51,
+                    "display_name": "Lucyk"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 25347790,
+                "edited": false,
+                "creation_date": 1473077406,
+                "comment_id": 65992008
+            }
+        ],
+        "47562954": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b8a66bb0d00332deb98a23d1f2dec8ac?s=256&d=identicon&r=PG",
+                "account_id": 3048324,
+                "user_type": "registered",
+                "user_id": 2583445,
+                "link": "https://stackoverflow.com/users/2583445/peter-o",
+                "reputation": 93,
+                "display_name": "Peter O",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 47562954,
+            "edited": false,
+            "creation_date": 1573127028,
+            "comment_id": 103784477
+        }]
+    }
+}

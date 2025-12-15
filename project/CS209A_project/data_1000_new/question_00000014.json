@@ -1,0 +1,166 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4b3650f00a09e5a92a2165de61b20ea3?s=256&d=identicon&r=PG",
+            "account_id": 1412392,
+            "user_type": "registered",
+            "user_id": 1338732,
+            "link": "https://stackoverflow.com/users/1338732/divadpoc",
+            "reputation": 953,
+            "display_name": "divadpoc",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28303928/range-query-in-cassandra",
+        "last_activity_date": 1423136790,
+        "creation_date": 1422981007,
+        "answer_count": 2,
+        "title": "range query in Cassandra",
+        "body": "<p>I'm using Cassandra 2.1.2 with the corresponding DataStax Java driver and the Object mapping provided by DataStax.<\/p>\n\n<p>following table definition:<\/p>\n\n<pre><code>CREATE TABLE IF NOT EXISTS ses.tim (id text PRIMARY KEY, start bigint, cid int);\n<\/code><\/pre>\n\n<p>the mapping: <\/p>\n\n<pre><code>@Table(keyspace = \"ses\", name = \"tim\")\nclass MyObj {\n    @PartitionKey\n    private String id;\n    private Long start;\n    private int cid;\n}\n<\/code><\/pre>\n\n<p>the accessor<\/p>\n\n<pre><code>@Accessor\ninterface MyAccessor {\n    @Query(\"SELECT * FROM ses.tim WHERE id = :iid\")\n    MyObj get(@Param(\"iid\") String id);\n\n    @Query(SELECT * FROM ses.tim WHERE start &lt;= :sstart\")\n    Result&lt;MyObj&gt; get(@Param(\"sstart\") long start);\n}\n<\/code><\/pre>\n\n<p>as indicated within the accessor I want to do a query that returns everything where 'start' is smaller or equal than a specific value. <\/p>\n\n<p>With this definition of the table it's simply not possible. Therefore I tried creating a secondary index:<\/p>\n\n<pre><code>CREATE INDEX IF NOT EXISTS myindex ON ses.tim (start);\n<\/code><\/pre>\n\n<p>this seems to be not working as well (I read a lot of explanations why its decided to not support this, but I still don't understand why somebody would give such restrictions, anyhow..)<\/p>\n\n<p>so, as far as I understandd, we have to have at least one equals in the WHERE clause<\/p>\n\n<pre><code>@Query(SELECT * FROM ses.tim WHERE cid = :ccid AND start &lt;= :sstart\")\n\nCREATE INDEX IF NOT EXISTS myindex2 ON ses.tim (cid);\n<\/code><\/pre>\n\n<p>if this would work I would have to know ALL possible values for cid, and query them separately and do the rest on the client... but the error I get is<\/p>\n\n<pre><code>Cannot execute this query as it might involve data filtering and thus may have unpredictable performance\n<\/code><\/pre>\n\n<p>then I tried <\/p>\n\n<pre><code>id text, start bigint, cid int, PRIMARY KEY (id, start, cid)\n<\/code><\/pre>\n\n<p>with <\/p>\n\n<pre><code>@Table(keyspace = \"ses\", name = \"tim\")\nclass MyObj {\n    @PartitionKey\n    private String id;\n    @ClusteringColumn(0)\n    private Long start;\n    @ClusteringColumn(1)\n    private int cid;\n}\n<\/code><\/pre>\n\n<p>but still without luck.<\/p>\n\n<p>furthermore, I tried to set 'start' as PartitionKey, but it's only possible to query with Equals again...<\/p>\n\n<p>what am I missing? how can I achieve getting results for this type of query?<\/p>\n\n<p>EDIT: version updated to correct one<\/p>\n",
+        "question_id": 28303928,
+        "tags": [
+            "java",
+            "cassandra",
+            "datastax-java-driver"
+        ],
+        "score": 2,
+        "accepted_answer_id": 28308552,
+        "is_answered": true,
+        "view_count": 1420,
+        "last_edit_date": 1423136790
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/l81Aw.png?s=256",
+            "account_id": 4913296,
+            "user_type": "registered",
+            "user_id": 3957972,
+            "link": "https://stackoverflow.com/users/3957972/phact",
+            "reputation": 7315,
+            "display_name": "phact"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 28303928,
+        "edited": false,
+        "creation_date": 1423066608,
+        "comment_id": 44999844
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5dcbc151fab6abfc394bb9f47f1f5aa4?s=256&d=identicon&r=PG",
+                "account_id": 5553836,
+                "user_type": "registered",
+                "user_id": 4406006,
+                "link": "https://stackoverflow.com/users/4406006/andy-tolbert",
+                "reputation": 11658,
+                "display_name": "Andy Tolbert"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1422996930,
+            "creation_date": 1422996930,
+            "body": "<p>You could consider denormalizing your data if you have different query-ability needs for the same set of data.   Based on your question, it sounds like you want the following:<\/p>\n\n<ul>\n<li>Query by <code>id<\/code><\/li>\n<li>Query by <code>start<\/code> &lt; X<\/li>\n<\/ul>\n\n<p>The first query works fine as you indicated with your current schema.  The second query however cannot work as is without a secondary index which will be slow for reasons you have already investigated (I always point to <a href=\"http://www.wentnet.com/blog/?p=77\">this blog post<\/a> with respect to secondary indexes.<\/p>\n\n<p>You indicated that you did not want to partition on <code>cid<\/code> since you would need to know all possible values for <code>cid<\/code>.<\/p>\n\n<p>Three ideas I can think of:<\/p>\n\n<ul>\n<li><p>Create a separate table with a dummy primary key so all of your data is stored in the same partition.  This can be problematic though if you have many entries creating a super-wide partition and hotspots on whatever nodes hold that data.  How many do you plan on having?<\/p>\n\n<pre><code>create table if not exists tim (\n    dummy int, \n    start bigint, \n    id text, \n    cid int, \n    primary key (dummy, start)\n);\n<\/code><\/pre>\n\n<p>You could then make queries like:<\/p>\n\n<pre><code>select * from tim where dummy=0 and start &lt;= 10;\n<\/code><\/pre><\/li>\n<li><p>The other option is to use ALLOW FILTERING on your original table which will still do an expensive range query and filter through the data.<\/p>\n\n<pre><code>select * from tim where start &lt;= 10 ALLOW FILTERING;\n<\/code><\/pre><\/li>\n<li><p>Another option is to use something like the <a href=\"https://github.com/datastax/spark-cassandra-connector\">spark-connector<\/a> to create a spark job that makes the query.  The connector will break up an expensive range query into smaller tasks and map the data to RDDs, allowing you flexibility to make more complex queries with good performance.<\/p><\/li>\n<\/ul>\n",
+            "answer_id": 28308552,
+            "question_id": 28303928
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/D2fkQ.jpg?s=256",
+                "account_id": 60456,
+                "user_type": "registered",
+                "user_id": 1054558,
+                "link": "https://stackoverflow.com/users/1054558/aaron",
+                "reputation": 58040,
+                "display_name": "Aaron",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1422996114,
+            "creation_date": 1422996114,
+            "body": "<blockquote>\n  <p>I'm using Cassandra 2.1.3<\/p>\n<\/blockquote>\n\n<p>I don't think 2.1.3 has been released.  The <a href=\"http://cassandra.apache.org/\" rel=\"nofollow\">project site<\/a> currently shows 2.1.2 as the highest version.<\/p>\n\n<p>From what I can see, your main issue here is that your partitioning key <code>id<\/code> is either unique or has a cardinality that is too high to be useful to you.  Currently, you are taking an RDBMS-style approach with storing your data (by unique ID).  With Cassandra, you want to store your data in a way that makes sense to query it.  And the first step with that, is to pick a good key to partition your data on.<\/p>\n\n<blockquote>\n  <p>Therefore I tried creating a secondary index<\/p>\n<\/blockquote>\n\n<p>Another thing you don't want to do here, is use a secondary index.  I can see that you are tempted to do so, and you should get that idea out of your head right away.  Secondary indexes were created for convenience.  They were not created for performance, nor were they created as a way to take shortcuts on your data model.<\/p>\n\n<pre><code>Cannot execute this query as it might involve data filtering and thus\nmay have unpredictable performance.\n<\/code><\/pre>\n\n<p>Speaking of tempation, when seeing this message, you might think about try adding <code>ALLOW FILTERING<\/code> to your query.  Definitely do not do that.  It flat out warns you that doing so will not perform well, and you should heed that warning.<\/p>\n\n<blockquote>\n  <p>if this would work I would have to know ALL possible values for cid, and query them separately and do the rest on the client.<\/p>\n<\/blockquote>\n\n<p>How unique is <code>cid<\/code>?  If having to obtain and iterate through all of the <code>cid<\/code>s is too cumbersome, then you should consider picking/creating a less-unique value to partition on.  However, assuming that <code>cid<\/code> will work, this is how your table definition should look:<\/p>\n\n<pre><code>CREATE TABLE IF NOT EXISTS ses.tim \n(cid int,\n start bigint,\n id text,\n PRIMARY KEY ((cid),start);\n\n@Table(keyspace = \"ses\", name = \"tim\")\nclass MyObj {\n    @PartitionKey\n    private int cid;\n    @ClusteringColumn(0)\n    private Long start;\n    private String id;\n}\n<\/code><\/pre>\n\n<p>With this underlying table definition, this query should now work.<\/p>\n\n<pre><code>@Query(\"SELECT * FROM ses.tim WHERE cid = :ccid AND start &lt;= :sstart\")\n<\/code><\/pre>\n\n<p>Give your data model another look, and (if <code>cid<\/code> is not very unique) see if you can come up with a better column to group your data by.  For more information, read through Patrick McFadin's article <a href=\"http://patrickmcfadin.com/2014/02/05/getting-started-with-time-series-data-modeling/\" rel=\"nofollow\">Getting Started With Time Series Data Modeling<\/a>.  He discusses a few use cases that are somewhat similar to yours, and might point you in the right direction.<\/p>\n",
+            "answer_id": 28308339,
+            "question_id": 28303928
+        }
+    ],
+    "answer_comments": {"28308552": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4b3650f00a09e5a92a2165de61b20ea3?s=256&d=identicon&r=PG",
+                "account_id": 1412392,
+                "user_type": "registered",
+                "user_id": 1338732,
+                "link": "https://stackoverflow.com/users/1338732/divadpoc",
+                "reputation": 953,
+                "display_name": "divadpoc",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 28308552,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/D2fkQ.jpg?s=256",
+                "account_id": 60456,
+                "user_type": "registered",
+                "user_id": 1054558,
+                "link": "https://stackoverflow.com/users/1054558/aaron",
+                "reputation": 58040,
+                "display_name": "Aaron",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1423818194,
+            "comment_id": 45311356
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/D2fkQ.jpg?s=256",
+                "account_id": 60456,
+                "user_type": "registered",
+                "user_id": 1054558,
+                "link": "https://stackoverflow.com/users/1054558/aaron",
+                "reputation": 58040,
+                "display_name": "Aaron",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28308552,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/4b3650f00a09e5a92a2165de61b20ea3?s=256&d=identicon&r=PG",
+                "account_id": 1412392,
+                "user_type": "registered",
+                "user_id": 1338732,
+                "link": "https://stackoverflow.com/users/1338732/divadpoc",
+                "reputation": 953,
+                "display_name": "divadpoc",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1423154862,
+            "comment_id": 45042784
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4b3650f00a09e5a92a2165de61b20ea3?s=256&d=identicon&r=PG",
+                "account_id": 1412392,
+                "user_type": "registered",
+                "user_id": 1338732,
+                "link": "https://stackoverflow.com/users/1338732/divadpoc",
+                "reputation": 953,
+                "display_name": "divadpoc",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28308552,
+            "edited": false,
+            "creation_date": 1423136858,
+            "comment_id": 45030694
+        }
+    ]}
+}

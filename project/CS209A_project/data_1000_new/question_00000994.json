@@ -1,0 +1,147 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/uR8nm.jpg?s=256",
+            "account_id": 5164011,
+            "user_type": "registered",
+            "user_id": 6952763,
+            "link": "https://stackoverflow.com/users/6952763/john-santos",
+            "reputation": 525,
+            "display_name": "John Santos",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/40642828/objectify-keys-only-query",
+        "last_activity_date": 1481037448,
+        "creation_date": 1479332297,
+        "answer_count": 1,
+        "title": "Objectify Keys-Only Query?",
+        "body": "<p>I want to check if cert entity exist in the database using keys-only queries. So far I'm doing:<\/p>\n\n<pre><code>Iterable&lt;Key&lt;LikeMW&gt;&gt; liked = ofy().load().type(LikeMW.class).filter(\"likedObject\", postKey).filter(\"user\", userKey).keys();\n\npost.setLiked(liked.iterator().hasNext());\n<\/code><\/pre>\n\n<p>So I have 2 questions:<\/p>\n\n<p><strong>1 - If I use \".first().now()\" after \".keys()\", does it switch from \"keys-only\" or it'll still be a \"keys-only\" query?<\/strong><\/p>\n\n<p><strong>2 - Is there a better way to check if cert entity exist using \"keys-only\" queries and filter?<\/strong><\/p>\n\n<p>Thank you guys!<\/p>\n\n<p>UPDATING<\/p>\n\n<pre><code>@Entity\npublic class LikeMW {\n\n    @Id\n    private Long id;\n\n    @JsonIgnore\n    @Index\n    @Load\n    private Ref&lt;UserMW&gt; user;\n\n    @JsonIgnore\n    @Index\n    private Key likedObject;\n\n    ...\n}\n<\/code><\/pre>\n\n<p>And one of possible liked objects...<\/p>\n\n<pre><code>@Entity\npublic class PostMW{\n\n    @Id\n    private Long id;\n\n    @JsonIgnore\n    @Load\n    private Ref&lt;UserMW&gt; owner;\n\n    @JsonIgnore\n    @Load\n    private Ref&lt;MediaMW&gt; media;\n\n    ...\n}\n<\/code><\/pre>\n",
+        "question_id": 40642828,
+        "tags": [
+            "java",
+            "google-cloud-datastore",
+            "objectify"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 707,
+        "last_edit_date": 1481037448
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uR8nm.jpg?s=256",
+                "account_id": 5164011,
+                "user_type": "registered",
+                "user_id": 6952763,
+                "link": "https://stackoverflow.com/users/6952763/john-santos",
+                "reputation": 525,
+                "display_name": "John Santos",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642828,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/16171e0d57d12b30006d90dfb4e43909?s=256&d=identicon&r=PG",
+                "account_id": 1029072,
+                "user_type": "registered",
+                "user_id": 1037753,
+                "link": "https://stackoverflow.com/users/1037753/konqi",
+                "reputation": 5219,
+                "display_name": "konqi",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1479549208,
+            "comment_id": 68612499
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/16171e0d57d12b30006d90dfb4e43909?s=256&d=identicon&r=PG",
+                "account_id": 1029072,
+                "user_type": "registered",
+                "user_id": 1037753,
+                "link": "https://stackoverflow.com/users/1037753/konqi",
+                "reputation": 5219,
+                "display_name": "konqi",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642828,
+            "edited": false,
+            "creation_date": 1479461514,
+            "comment_id": 68577239
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/025ec52ae75ea430b67bf39671132b28?s=256&d=identicon&r=PG",
+            "account_id": 318652,
+            "user_type": "registered",
+            "user_id": 635982,
+            "link": "https://stackoverflow.com/users/635982/stickfigure",
+            "reputation": 13566,
+            "display_name": "stickfigure",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1479504840,
+        "creation_date": 1479504840,
+        "body": "<p>The only way to authoritatively look up whether an entity exists is to load it by key. You can certainly do a keys-only query, but it will be eventually consistent and will not guarantee that you do not create duplicates.<\/p>\n\n<p>Given what you are trying to do, you will almost certainly be better off parenting <code>LikeMW<\/code> with the user and using the stringified likedObject as the string id. That way you can do a strongly consistent lookup and use transactions.<\/p>\n",
+        "answer_id": 40686273,
+        "question_id": 40642828
+    }],
+    "answer_comments": {"40686273": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/025ec52ae75ea430b67bf39671132b28?s=256&d=identicon&r=PG",
+                "account_id": 318652,
+                "user_type": "registered",
+                "user_id": 635982,
+                "link": "https://stackoverflow.com/users/635982/stickfigure",
+                "reputation": 13566,
+                "display_name": "stickfigure",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 40686273,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/uR8nm.jpg?s=256",
+                "account_id": 5164011,
+                "user_type": "registered",
+                "user_id": 6952763,
+                "link": "https://stackoverflow.com/users/6952763/john-santos",
+                "reputation": 525,
+                "display_name": "John Santos",
+                "accept_rate": 92
+            },
+            "edited": false,
+            "creation_date": 1481189175,
+            "comment_id": 69279020
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/uR8nm.jpg?s=256",
+                "account_id": 5164011,
+                "user_type": "registered",
+                "user_id": 6952763,
+                "link": "https://stackoverflow.com/users/6952763/john-santos",
+                "reputation": 525,
+                "display_name": "John Santos",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40686273,
+            "edited": false,
+            "creation_date": 1479549637,
+            "comment_id": 68612625
+        }
+    ]}
+}

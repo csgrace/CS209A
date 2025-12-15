@@ -1,0 +1,119 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/22b1f697024443e41f62396358e62e32?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 14605297,
+            "user_type": "registered",
+            "user_id": 10548376,
+            "link": "https://stackoverflow.com/users/10548376/shannon",
+            "reputation": 63,
+            "display_name": "Shannon"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53533761/how-to-include-a-dependency-from-modulea-in-moduleb-using-dagger2-in-java",
+        "last_activity_date": 1543476139,
+        "creation_date": 1543476139,
+        "answer_count": 0,
+        "title": "How to include a dependency from @ModuleA, in @ModuleB using Dagger2 in Java",
+        "body": "<p>I am using Dagger2 for dependency injection in quite a large project.\nThere are 2 different sections of the app that each use multiple usecases.\nFor each section I have a module that provides the dependencies for that section. I have come across a scenario where I need to use a usecase from  moduleA in ModuleB and I am not sure how to include it or add it to be used for that one scenario.I have looked at other answers on stackoverflow but have not found one that answers my question.<\/p>\n\n<p>For example this answer <a href=\"https://stackoverflow.com/questions/50108369/from-one-dagger2-module-how-to-access-the-sharedpreferences-provided-in-another\">here<\/a><\/p>\n\n<p>does not help me because it's setup is different and I cannot deduce from this solution how to solve my problem.<\/p>\n\n<p>and <a href=\"https://stackoverflow.com/questions/32146077/internal-dependency-injection-using-dagger2\">here<\/a><\/p>\n\n<p>I am not certain that I should make any of these dependencies into Singletons.<\/p>\n\n<p>for example I have ModuleA below that contains <em>AddItem<\/em> that I need in ModuleB <em>PayForItem<\/em><\/p>\n\n<pre><code>@Module\npublic class ModuleA {\n\n    private final FragmentActivity mActivity;\n\n    public ModuleA(FragmentActivity fragmentActivity) {\n        mActivity = fragmentActivity;\n    }\n...\n\n  @Provides\n  AddItem addItemPresenter(DateMapper dataMapper, ItemdetailUseCase itemDetailUsecase){\n        return new AddItem(dataMapper,itemDetailUsecase);\n    }\n\n\n\n@Module\n    public class ModuleB {\n\n        private final FragmentActivity mActivity;\n\n        public ModuleB(FragmentActivity fragmentActivity) {\n            mActivity = fragmentActivity;\n        }\n    ...\n\n      @Provides\n      PayForItem payForItemPresenter(AddItem addItem){\n            return new AddItem(addItem);\n        }\n<\/code><\/pre>\n\n<p>Each module is included in its own subcomponent eg:<\/p>\n\n<pre><code>@Subcomponent(modules = {ModuleA.class})\npublic interface ModuleAPresentationComponent {\n    void inject(Fragment testFragment;\n}\n\n\n@Subcomponent(modules = {ModuleB.class})\npublic interface ModuleBPresentationComponent {\n    void inject(Fragment testFragment;\n}\n<\/code><\/pre>\n\n<p>Both are included in the main component eg:<\/p>\n\n<pre><code>@Singleton\n@Component(modules = {ApplicationModule.class})\npublic interface ApplicationComponent {\n    public ModuleAPresentationComponent newPresentationComponent(ModuleAPresentationModule presentationModule);\n    public ModuleBPresentationComponent newPresentationComponent(ModuleBPresentationModule presentationModule);\n}\n<\/code><\/pre>\n\n<p>I have a BaseFragment that I use to inject eg:<\/p>\n\n<pre><code>public abstract class BaseFragment extends Fragment {\n\n    private boolean mIsInjectorUsed;\n    protected static final String PARAM_USER_ID = \"param_user_id\";\n\n    private ApplicationComponent getApplicationComponent() {\n        return ((AndroidApplication) getActivity().getApplication()).getApplicationComponent();\n    }\n\n    @UiThread\n    protected ModuleAPresentationComponent getModuleAPresentationComponent() {\n        if (mIsInjectorUsed) {\n            throw new RuntimeException(\"there is no need to use injector more than once\");\n        }\n        mIsInjectorUsed = true;\n        return getApplicationComponent()\n                .newPresentationComponent(new ModuleAPresentationModule(getActivity()));\n    }\n\n    @UiThread\n    protected ModuleBPresentationComponent getModuleBPresentationComponent() {\n        if (mIsInjectorUsed) {\n            throw new RuntimeException(\"there is no need to use injector more than once\");\n        }\n        mIsInjectorUsed = true;\n        return getApplicationComponent()\n                .newPresentationComponent(new ModuleBPresentationModule(getActivity()));\n    }\n<\/code><\/pre>\n\n<p>So in my fragment it injects like this:<\/p>\n\n<pre><code>public class testFragment extends BaseFragment{\n\n @Inject AddItem addItemPresenter;\n\n       @Override\n        public void onCreate(Bundle savedInstanceState) {\n            super.onCreate(savedInstanceState);\n\n            getModuleAPresentationComponent().inject(this);\n        }\n}\n<\/code><\/pre>\n\n<p>How would I use <em>AddItem<\/em> from ModuleA in <em>PayForItem<\/em> ModuleB without repeating those dependencies in ModuleB?<\/p>\n",
+        "question_id": 53533761,
+        "tags": [
+            "java",
+            "android",
+            "dagger-2"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 58
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22b1f697024443e41f62396358e62e32?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 14605297,
+                "user_type": "registered",
+                "user_id": 10548376,
+                "link": "https://stackoverflow.com/users/10548376/shannon",
+                "reputation": 63,
+                "display_name": "Shannon"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53533761,
+            "reply_to_user": {
+                "profile_image": "https://graph.facebook.com/100001574200763/picture?type=large",
+                "account_id": 3764955,
+                "user_type": "registered",
+                "user_id": 3128700,
+                "link": "https://stackoverflow.com/users/3128700/jaede",
+                "reputation": 859,
+                "display_name": "jaede"
+            },
+            "edited": false,
+            "creation_date": 1543500912,
+            "comment_id": 93948880
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100001574200763/picture?type=large",
+                "account_id": 3764955,
+                "user_type": "registered",
+                "user_id": 3128700,
+                "link": "https://stackoverflow.com/users/3128700/jaede",
+                "reputation": 859,
+                "display_name": "jaede"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53533761,
+            "edited": false,
+            "creation_date": 1543479011,
+            "comment_id": 93936374
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22b1f697024443e41f62396358e62e32?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 14605297,
+                "user_type": "registered",
+                "user_id": 10548376,
+                "link": "https://stackoverflow.com/users/10548376/shannon",
+                "reputation": 63,
+                "display_name": "Shannon"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53533761,
+            "reply_to_user": {
+                "profile_image": "https://graph.facebook.com/100001574200763/picture?type=large",
+                "account_id": 3764955,
+                "user_type": "registered",
+                "user_id": 3128700,
+                "link": "https://stackoverflow.com/users/3128700/jaede",
+                "reputation": 859,
+                "display_name": "jaede"
+            },
+            "edited": false,
+            "creation_date": 1543477791,
+            "comment_id": 93935837
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100001574200763/picture?type=large",
+                "account_id": 3764955,
+                "user_type": "registered",
+                "user_id": 3128700,
+                "link": "https://stackoverflow.com/users/3128700/jaede",
+                "reputation": 859,
+                "display_name": "jaede"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53533761,
+            "edited": false,
+            "creation_date": 1543477168,
+            "comment_id": 93935584
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

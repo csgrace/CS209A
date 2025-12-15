@@ -1,0 +1,203 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9b1228e7ead73fe2bcb52718ad061daa?s=256&d=identicon&r=PG",
+            "account_id": 6667715,
+            "user_type": "registered",
+            "user_id": 5144855,
+            "link": "https://stackoverflow.com/users/5144855/ruchir-baronia",
+            "reputation": 7587,
+            "display_name": "Ruchir Baronia",
+            "accept_rate": 47
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/33514741/combine-two-services",
+        "last_activity_date": 1446651935,
+        "creation_date": 1446616896,
+        "answer_count": 3,
+        "title": "Combine two services?",
+        "body": "<p>I have a service with a timer in the background. This timer executes a certain task after 20 seconds pass. I want the <strong>same<\/strong> timer to execute <strong>another<\/strong> task, but in a different amount of seconds. This would be easy by launching both services at the same time, but I am trying to learn how I can do it this other way. <\/p>\n\n<p>I tried this, but it isn't showing up:<\/p>\n\n<pre><code> cdt = new CountDownTimer(20000, 1000) {\n\n            @Override\n            public void onTick(long millisUntilFinished) {\n\n                Log.v(TAG, /*\"Time remaining \" +*/ (millisUntilFinished / 1000) + \" seconds left\");\n\n\n                if(millisUntilFinished / 10000 == 0){ //TEN SECONDS\n                    Log.v(TAG, (millisUntilFinished % 1000) + \" seconds left\");\n                }\n\n            }\n\n            @Override\n            public void onFinish() {\n                Log.v(TAG, \"Finished\");\n<\/code><\/pre>\n\n<p>Now, I should be getting two <strong>different<\/strong> log messages at ten seconds. Instead, I only get one. Here is my logCat:<\/p>\n\n<p><a href=\"https://i.sstatic.net/uUNEy.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/uUNEy.png\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>The arrow indicates where there should have been another log message.<\/p>\n\n<p>I am lost. I would really appreciate any feedback (positive or negative)! Thank you so much for all of your help.<\/p>\n",
+        "question_id": 33514741,
+        "tags": [
+            "java",
+            "android",
+            "multithreading",
+            "android-activity",
+            "service"
+        ],
+        "score": 1,
+        "accepted_answer_id": 33514857,
+        "is_answered": true,
+        "view_count": 640,
+        "last_edit_date": 1446617303
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OKYPb.png?s=256",
+                "account_id": 5071927,
+                "user_type": "registered",
+                "user_id": 4070469,
+                "link": "https://stackoverflow.com/users/4070469/mauker",
+                "reputation": 11505,
+                "display_name": "Mauker",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1446618829,
+            "creation_date": 1446617493,
+            "body": "<p>As you said yourself, you could launch both services at the same time. <\/p>\n\n<p>Or inside the first service, you could pass an <code>Intent<\/code> with some parameters to inform the new amount of time and then call <code>startService()<\/code>.<\/p>\n\n<pre><code>Intent it = new Intent(getApplicationContext(), YourService.class);\nit.putExtra(\"Time\", timeInMillis);\nstartService(it);\n<\/code><\/pre>\n\n<p>I mean, modify your <code>Service<\/code> to get an extra from the calling <code>Intent<\/code>, something like this:<\/p>\n\n<pre><code>@Override\npublic int onStartCommand(Intent intent, int flags, int startId) {\n\n    if (intent != null) {\n        long time = intent.getLongExtra(\"Time\",0);\n        // Do your ticking here, based on that variable.\n    }\n    //...\n}\n<\/code><\/pre>\n\n<hr>\n\n<p><strong>Edit:<\/strong> Let's say you want to make your timer run first at 5 seconds, then at 10, 15, and so on.<\/p>\n\n<p>Once you finish your timer, you could pass the <code>Intent<\/code> to the new <code>Service<\/code>/Timer adding the seconds you want. Like:<\/p>\n\n<pre><code>it.putExtra(\"Time\", timeInMillis + 5000);\n<\/code><\/pre>\n",
+            "answer_id": 33514857,
+            "question_id": 33514741,
+            "last_edit_date": 1446618829
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MkTos.png?s=256",
+                "account_id": 6475894,
+                "user_type": "registered",
+                "user_id": 5014497,
+                "link": "https://stackoverflow.com/users/5014497/venkatesh-selvam",
+                "reputation": 1412,
+                "display_name": "Venkatesh Selvam",
+                "accept_rate": 73
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1446617865,
+            "creation_date": 1446617865,
+            "body": "<p>Use this type.<\/p>\n\n<pre><code> cdt = new CountDownTimer(10000, 1000) { //finished on 10 Seconds\n\n            @Override\n            public void onTick(long millisUntilFinished) {\n                Log.v(TAG, /*\"Time remaining \" +*/ (millisUntilFinished / 1000) + \" seconds left\"); \n            }\n\n            @Override\n            public void onFinish() {\n                Log.v(TAG, \"First 10 Seconds Finished\"); \n\n           LoadNextCountdown(); // call the Next Countdown method  \n\n  }\n        }\n                .start();\n\n//Method for Next Countdown\n\npublic void LoadNextCountdown()\n{\n    cdt2=new CountDownTimer(10000,1000) { //finished on 10 Seconds\n\n                @Override\n                public void onTick ( long millisUntilFinished){\n\n                    Log.v(TAG, /*\"Time remaining \" +*/ (millisUntilFinished / 1000) + \" seconds left\");\n                }\n\n                @Override\n                public void onFinish () {\n                    Log.v(TAG, \"Next 10 Seconds Finished\");\n                }\n            } .start();\n\n}\n<\/code><\/pre>\n\n<p>Happy Coding :)<\/p>\n",
+            "answer_id": 33514960,
+            "question_id": 33514741
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8aeb4c2cdfaa374420fed822bd741c5e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6434457,
+                "user_type": "registered",
+                "user_id": 4986469,
+                "link": "https://stackoverflow.com/users/4986469/hughzi",
+                "reputation": 2580,
+                "display_name": "Hughzi",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1446651935,
+            "creation_date": 1446649933,
+            "body": "<p>Your log is not displaying because:<\/p>\n\n<pre><code>            if(millisUntilFinished / 10000 == 0){ //TEN SECONDS\n                Log.v(TAG, (millisUntilFinished % 1000) + \" seconds left\");\n            }\n<\/code><\/pre>\n\n<p>you want it to display when you have 10000 millisUntilFinished but 10000/10000 = 1 not 0.<\/p>\n\n<p>it should be:<\/p>\n\n<pre><code>     if(millisUntilFinished / 10000 == 1) || if(millisUntilFinished % 10000 == 0)\n<\/code><\/pre>\n\n<p>or simply:<\/p>\n\n<pre><code>    if(millisUntilFinished == 10000)\n<\/code><\/pre>\n",
+            "answer_id": 33525303,
+            "question_id": 33514741,
+            "last_edit_date": 1446651935
+        }
+    ],
+    "answer_comments": {
+        "33514857": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b1228e7ead73fe2bcb52718ad061daa?s=256&d=identicon&r=PG",
+                    "account_id": 6667715,
+                    "user_type": "registered",
+                    "user_id": 5144855,
+                    "link": "https://stackoverflow.com/users/5144855/ruchir-baronia",
+                    "reputation": 7587,
+                    "display_name": "Ruchir Baronia",
+                    "accept_rate": 47
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 33514857,
+                "edited": false,
+                "creation_date": 1446948712,
+                "comment_id": 54955906
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/OKYPb.png?s=256",
+                    "account_id": 5071927,
+                    "user_type": "registered",
+                    "user_id": 4070469,
+                    "link": "https://stackoverflow.com/users/4070469/mauker",
+                    "reputation": 11505,
+                    "display_name": "Mauker",
+                    "accept_rate": 79
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 33514857,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b1228e7ead73fe2bcb52718ad061daa?s=256&d=identicon&r=PG",
+                    "account_id": 6667715,
+                    "user_type": "registered",
+                    "user_id": 5144855,
+                    "link": "https://stackoverflow.com/users/5144855/ruchir-baronia",
+                    "reputation": 7587,
+                    "display_name": "Ruchir Baronia",
+                    "accept_rate": 47
+                },
+                "edited": false,
+                "creation_date": 1446618897,
+                "comment_id": 54812799
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9b1228e7ead73fe2bcb52718ad061daa?s=256&d=identicon&r=PG",
+                    "account_id": 6667715,
+                    "user_type": "registered",
+                    "user_id": 5144855,
+                    "link": "https://stackoverflow.com/users/5144855/ruchir-baronia",
+                    "reputation": 7587,
+                    "display_name": "Ruchir Baronia",
+                    "accept_rate": 47
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 33514857,
+                "edited": false,
+                "creation_date": 1446618520,
+                "comment_id": 54812669
+            }
+        ],
+        "33525303": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b1228e7ead73fe2bcb52718ad061daa?s=256&d=identicon&r=PG",
+                "account_id": 6667715,
+                "user_type": "registered",
+                "user_id": 5144855,
+                "link": "https://stackoverflow.com/users/5144855/ruchir-baronia",
+                "reputation": 7587,
+                "display_name": "Ruchir Baronia",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 33525303,
+            "edited": false,
+            "creation_date": 1446676554,
+            "comment_id": 54848385
+        }],
+        "33514960": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b1228e7ead73fe2bcb52718ad061daa?s=256&d=identicon&r=PG",
+                "account_id": 6667715,
+                "user_type": "registered",
+                "user_id": 5144855,
+                "link": "https://stackoverflow.com/users/5144855/ruchir-baronia",
+                "reputation": 7587,
+                "display_name": "Ruchir Baronia",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 33514960,
+            "edited": false,
+            "creation_date": 1446618355,
+            "comment_id": 54812612
+        }]
+    }
+}

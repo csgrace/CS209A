@@ -1,0 +1,190 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100002282371906/picture?type=large",
+            "account_id": 4130747,
+            "user_type": "registered",
+            "user_id": 3388744,
+            "link": "https://stackoverflow.com/users/3388744/user3388744",
+            "reputation": 13,
+            "display_name": "user3388744"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/36892212/spring-junit-test-not-working",
+        "last_activity_date": 1469694423,
+        "creation_date": 1461765924,
+        "answer_count": 2,
+        "title": "Spring junit test not working",
+        "body": "<p>I've got a Spring (4.2.5) project with Java configuration classes. These work when running the project normally, but I can't get my tests to work. In the test below the <code>repo<\/code> is null.\n<\/p>\n\n<pre><code>@ContextConfiguration(classes = { HibernateConfiguration.class })\npublic class TestTest {\n\n    @Autowired\n    private InstituteRepository repo;\n\n    //some test\n}\n<\/code><\/pre>\n\n<p>If I add the <code>@RunWith(SpringJUnit4ClassRunner.class)<\/code> annotation i get an exception<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>java.lang.NoSuchMethodError: org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotationAttributes(Ljava/lang/reflect/AnnotatedElement;Ljava/lang/String;ZZ)Lorg/springframework/core/annotation/AnnotationAttributes;\n    at org.springframework.test.util.MetaAnnotationUtils$AnnotationDescriptor.&lt;init&gt;(MetaAnnotationUtils.java:290)\n    at org.springframework.test.util.MetaAnnotationUtils$UntypedAnnotationDescriptor.&lt;init&gt;(MetaAnnotationUtils.java:365)\n    at org.springframework.test.util.MetaAnnotationUtils$UntypedAnnotationDescriptor.&lt;init&gt;(MetaAnnotationUtils.java:360)\n    at org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptorForTypes(MetaAnnotationUtils.java:191)\n    at org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptorForTypes(MetaAnnotationUtils.java:166)\n    at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildMergedContextConfiguration(AbstractTestContextBootstrapper.java:274)\n    at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildTestContext(AbstractTestContextBootstrapper.java:110)\n    at org.springframework.test.context.TestContextManager.&lt;init&gt;(TestContextManager.java:120)\n    at org.springframework.test.context.TestContextManager.&lt;init&gt;(TestContextManager.java:105)\n    at org.springframework.test.context.junit4.SpringJUnit4ClassRunner.createTestContextManager(SpringJUnit4ClassRunner.java:154)\n    at org.springframework.test.context.junit4.SpringJUnit4ClassRunner.&lt;init&gt;(SpringJUnit4ClassRunner.java:145)\n    at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)\n    at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)\n    at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)\n    at java.lang.reflect.Constructor.newInstance(Constructor.java:422)\n    at org.junit.internal.builders.AnnotatedBuilder.buildRunner(AnnotatedBuilder.java:104)\n    at org.junit.internal.builders.AnnotatedBuilder.runnerForClass(AnnotatedBuilder.java:86)\n    at org.junit.runners.model.RunnerBuilder.safeRunnerForClass(RunnerBuilder.java:59)\n    at org.junit.internal.builders.AllDefaultPossibilitiesBuilder.runnerForClass(AllDefaultPossibilitiesBuilder.java:26)\n    at org.junit.runners.model.RunnerBuilder.safeRunnerForClass(RunnerBuilder.java:59)\n    at org.junit.internal.requests.ClassRequest.getRunner(ClassRequest.java:33)\n    at org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader.createUnfilteredTest(JUnit4TestLoader.java:84)\n    at org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader.createTest(JUnit4TestLoader.java:70)\n    at org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader.loadTests(JUnit4TestLoader.java:43)\n    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:444)\n    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:675)\n    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:382)\n    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:192)\n<\/code><\/pre>\n\n<p>Any help is appreciated.<\/p>\n\n<p>[EDIT]<\/p>\n\n<p>If I change the springframework dependecy version to 4.1.3, the test works. Do I need different configuration for 4.2.5? The <code>HibernateConfiguration<\/code> is the following<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>@Configuration\n@EnableTransactionManagement\n@ComponentScan(basePackages = { \"myapp.services\" })\n@EnableJpaRepositories(\"myapp.repositories\")\n@Import({ HSQLConfiguration.class, MySQLConfiguration.class })\npublic class HibernateConfiguration {\n}\n<\/code><\/pre>\n\n<p>Where the <code>DataSource<\/code> and <code>Properties<\/code> are defined in both <code>HSQLConfiguration<\/code> and <code>MySQLConfiguration<\/code>, which is selected based on active profile.<\/p>\n\n<p>[EDIT 2]<\/p>\n\n<p>After more googling I found <a href=\"https://jira.spring.io/browse/SPR-13708\" rel=\"nofollow\">this issue<\/a>, and after checking my dependencies it appeared I had spring-core-4.1.9 under the maven dependencies and I hadn't included a dependency it in my POM. After adding the dependency I see the jar under the maven dependencies, but I get a build-path error:<\/p>\n\n<pre><code>Project 'myapp' is missing required library: 'C:\\Users\\user\\.m2\\repository\\org\\springframework\\spring-core\\4.1.9.RELEASE\\spring-core-4.1.9.RELEASE.jar' \n<\/code><\/pre>\n\n<p>This is my POM file<\/p>\n\n<pre><code>&lt;dependencies&gt;\n    &lt;!-- spring data --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework.data&lt;/groupId&gt;\n        &lt;artifactId&gt;spring-data-jpa&lt;/artifactId&gt;\n        &lt;version&gt;${springframework.data.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- spring --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;artifactId&gt;spring-core&lt;/artifactId&gt;\n        &lt;version&gt;${springframework.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;artifactId&gt;spring-orm&lt;/artifactId&gt;\n        &lt;version&gt;${springframework.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;artifactId&gt;spring-context&lt;/artifactId&gt;\n        &lt;version&gt;${springframework.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- annotations --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;javax.annotation&lt;/groupId&gt;\n        &lt;artifactId&gt;jsr250-api&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- spring dep --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.hibernate&lt;/groupId&gt;\n        &lt;artifactId&gt;hibernate-entitymanager&lt;/artifactId&gt;\n        &lt;version&gt;${hibernate.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- mysql --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;mysql&lt;/groupId&gt;\n        &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;\n        &lt;version&gt;${mysql.connector.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- hsql --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.hsqldb&lt;/groupId&gt;\n        &lt;artifactId&gt;hsqldb&lt;/artifactId&gt;\n        &lt;version&gt;${hsqldb.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- test --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;junit&lt;/groupId&gt;\n        &lt;artifactId&gt;junit&lt;/artifactId&gt;\n        &lt;version&gt;${junit.version}&lt;/version&gt;\n        &lt;scope&gt;test&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.springframework&lt;/groupId&gt;\n        &lt;artifactId&gt;spring-test&lt;/artifactId&gt;\n        &lt;version&gt;${springframework.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;!-- I added this dependency --&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.hibernate&lt;/groupId&gt;\n        &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;\n        &lt;version&gt;${hibernate.version}&lt;/version&gt;\n    &lt;/dependency&gt;\n&lt;/dependencies&gt;\n<\/code><\/pre>\n\n<p>With the following properties<\/p>\n\n<pre><code>&lt;properties&gt;\n    &lt;project.version&gt;0.1&lt;/project.version&gt; \n    &lt;junit.version&gt;4.12&lt;/junit.version&gt;\n    &lt;springframework.version&gt;4.2.5.RELEASE&lt;/springframework.version&gt;\n    &lt;springframework.data.version&gt;1.10.1.RELEASE&lt;/springframework.data.version&gt;\n    &lt;hibernate.version&gt;5.1.0.Final&lt;/hibernate.version&gt;\n    &lt;mysql.connector.version&gt;5.1.31&lt;/mysql.connector.version&gt;\n    &lt;jdbc.driverClassName&gt;com.mysql.jdbc.Driver&lt;/jdbc.driverClassName&gt;\n    &lt;hsqldb.version&gt;2.3.2&lt;/hsqldb.version&gt;\n&lt;/properties&gt;\n<\/code><\/pre>\n\n<p>[EDIT 3]<\/p>\n\n<p>The build path problem seems to be Eclipse related, running from command line the test works!<\/p>\n",
+        "question_id": 36892212,
+        "tags": [
+            "java",
+            "spring",
+            "junit"
+        ],
+        "score": 1,
+        "accepted_answer_id": 36896874,
+        "is_answered": true,
+        "view_count": 3809,
+        "last_edit_date": 1461777610
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qGc9d.jpg?s=256",
+                "account_id": 1612170,
+                "user_type": "registered",
+                "user_id": 1490806,
+                "link": "https://stackoverflow.com/users/1490806/ignasi",
+                "reputation": 6235,
+                "display_name": "Ignasi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36892212,
+            "edited": false,
+            "creation_date": 1461777758,
+            "comment_id": 61357612
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100002282371906/picture?type=large",
+                "account_id": 4130747,
+                "user_type": "registered",
+                "user_id": 3388744,
+                "link": "https://stackoverflow.com/users/3388744/user3388744",
+                "reputation": 13,
+                "display_name": "user3388744"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36892212,
+            "edited": false,
+            "creation_date": 1461775456,
+            "comment_id": 61356070
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qGc9d.jpg?s=256",
+                "account_id": 1612170,
+                "user_type": "registered",
+                "user_id": 1490806,
+                "link": "https://stackoverflow.com/users/1490806/ignasi",
+                "reputation": 6235,
+                "display_name": "Ignasi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36892212,
+            "edited": false,
+            "creation_date": 1461773477,
+            "comment_id": 61354704
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100002282371906/picture?type=large",
+                "account_id": 4130747,
+                "user_type": "registered",
+                "user_id": 3388744,
+                "link": "https://stackoverflow.com/users/3388744/user3388744",
+                "reputation": 13,
+                "display_name": "user3388744"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36892212,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/KsMYz.jpg?s=256",
+                "account_id": 2925090,
+                "user_type": "registered",
+                "user_id": 2506594,
+                "link": "https://stackoverflow.com/users/2506594/devin-h",
+                "reputation": 1105,
+                "display_name": "Devin H.",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1461772969,
+            "comment_id": 61354316
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/KsMYz.jpg?s=256",
+                "account_id": 2925090,
+                "user_type": "registered",
+                "user_id": 2506594,
+                "link": "https://stackoverflow.com/users/2506594/devin-h",
+                "reputation": 1105,
+                "display_name": "Devin H.",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 36892212,
+            "edited": false,
+            "creation_date": 1461768117,
+            "comment_id": 61350498
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/aTlXt.jpg?s=256",
+                "account_id": 3433285,
+                "user_type": "registered",
+                "user_id": 2877029,
+                "link": "https://stackoverflow.com/users/2877029/viacheslav-shalamov",
+                "reputation": 4497,
+                "display_name": "Viacheslav Shalamov",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1461777904,
+            "creation_date": 1461777904,
+            "body": "<p>Try to use <code>@Runwith<\/code> annotation:<\/p>\n\n<pre><code>@RunWith(SpringJUnit4ClassRunner.class)\n@ContextConfiguration(classes = { HibernateConfiguration.class })\npublic class TestTest {\n\n    @Autowired\n    private InstituteRepository repo;\n\n    //some test\n}\n<\/code><\/pre>\n",
+            "answer_id": 36896778,
+            "question_id": 36892212
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qGc9d.jpg?s=256",
+                "account_id": 1612170,
+                "user_type": "registered",
+                "user_id": 1490806,
+                "link": "https://stackoverflow.com/users/1490806/ignasi",
+                "reputation": 6235,
+                "display_name": "Ignasi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1461778179,
+            "creation_date": 1461778179,
+            "body": "<p>If the problem is only on eclipse, you will fix it doing: Project->Clean right click on project: Maven->Update dependencies<\/p>\n",
+            "answer_id": 36896874,
+            "question_id": 36892212
+        }
+    ],
+    "answer_comments": {"36896778": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100002282371906/picture?type=large",
+            "account_id": 4130747,
+            "user_type": "registered",
+            "user_id": 3388744,
+            "link": "https://stackoverflow.com/users/3388744/user3388744",
+            "reputation": 13,
+            "display_name": "user3388744"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 36896778,
+        "edited": false,
+        "creation_date": 1461780617,
+        "comment_id": 61359446
+    }]}
+}

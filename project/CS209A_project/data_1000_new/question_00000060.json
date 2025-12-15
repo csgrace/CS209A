@@ -1,0 +1,293 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 19904613,
+            "user_type": "registered",
+            "user_id": 14583940,
+            "link": "https://stackoverflow.com/users/14583940/erhan",
+            "reputation": 23,
+            "display_name": "Erhan"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/68327900/org-springframework-web-httprequestmethodnotsupportedexception-request-method-p",
+        "last_activity_date": 1626123161,
+        "creation_date": 1625921710,
+        "answer_count": 2,
+        "title": "org.springframework.web.HttpRequestMethodNotSupportedException Request method &#39;POST&#39; not supported",
+        "body": "<p>I m trying to book a table. But when I pressing the book table button I get an error. Error is Request method 'POST' is not supported. I've done it before in other similar projects, it worked. I think the problem is in the HTML file but I couldn't find it. How can I fix That?\nHere is my Entity Class<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Entity\n@Table(name = &quot;reservation&quot;)\npublic class Reservation {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    @Column(name = &quot;id&quot;)\n    private int id;\n\n    @Column(name = &quot;arrival_date&quot;)\n    private String arrivalDate;\n\n    @Column(name = &quot;arrival_time&quot;)\n    private String arrivalTime;\n\n    @Column(name = &quot;num_of_person&quot;)\n    private String numOfPerson;\n\n    @Column(name = &quot;first_name&quot;)\n    private String firstName;\n\n    @Column(name = &quot;email&quot;)\n    private String email;\n\n    @Column(name = &quot;phone_number&quot;)\n    private String phoneNumber;\n<\/code><\/pre>\n<p>Here is my Controller Class<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Controller\npublic class RestaurantController {\n\n    @Autowired\n    private ReservationService reservationService;\n    \n    @InitBinder\n    public void init(WebDataBinder binder) {\n        StringTrimmerEditor editor = new StringTrimmerEditor(true);\n        binder.registerCustomEditor(StringTrimmerEditor.class, editor);\n    }\n    \n    @GetMapping(&quot;/&quot;)\n    public String home() {\n        return &quot;index&quot;;\n    }\n    \n    @GetMapping(&quot;/reservation&quot;)\n    public String reservation(Model model) {\n        model.addAttribute(&quot;newRes&quot;, new Reservation());\n        return &quot;reservation&quot;;\n        \n    }\n    \n    @PostMapping(&quot;/save-reservation&quot;)\n    public String proceed(@Valid @ModelAttribute(&quot;newRes&quot;) Reservation reservation, BindingResult result, Model model) {\n        reservationService.saveReservation(reservation);\n        return &quot;redirect:/reservation&quot;;\n        \n    }\n}\n\n<\/code><\/pre>\n<p>And here is my HTML File<\/p>\n<pre class=\"lang-html prettyprint-override\"><code>&lt;form id=&quot;contactForm&quot; th:action=&quot;@{/save-reservation}&quot; th:object=&quot;${newRes}&quot; method=&quot;post&quot; &gt;\n    &lt;input type=&quot;hidden&quot; name=&quot;${_csrf.parameterName}&quot; value=&quot;${_csrf.token}&quot;/&gt;\n    &lt;div class=&quot;row&quot;&gt;\n        &lt;div class=&quot;col-md-6&quot;&gt;\n            &lt;h3&gt;Book a table&lt;/h3&gt;\n            &lt;div class=&quot;col-md-12&quot;&gt;\n                &lt;div class=&quot;form-group&quot;&gt;\n                    &lt;input id=&quot;input_date&quot; class=&quot;datepicker picker__input form-control&quot; th:field=&quot;*{arrivalDate}&quot; type=&quot;text&quot; value=&quot;&quot; equired data-error=&quot;Please enter Date&quot;&gt;\n                    &lt;div class=&quot;help-block with-errors&quot;&gt;&lt;/div&gt;\n                &lt;/div&gt;\n            &lt;/div&gt;\n            &lt;div class=&quot;col-md-12&quot;&gt;\n                &lt;div class=&quot;form-group&quot;&gt;\n                    &lt;input id=&quot;input_time&quot; class=&quot;time form-control picker__input&quot; th:field=&quot;*{arrivalTime}&quot; required data-error=&quot;Please enter time&quot;&gt;\n                    &lt;div class=&quot;help-block with-errors&quot;&gt;&lt;/div&gt;\n                &lt;/div&gt;\n            &lt;/div&gt;\n            &lt;div class=&quot;col-md-12&quot;&gt;\n                &lt;div class=&quot;form-group&quot;&gt;\n                    &lt;select class=&quot;custom-select d-block form-control&quot; id=&quot;person&quot; th:field=&quot;*{numOfPerson}&quot; required data-error=&quot;Please select Person&quot;&gt;\n                        &lt;option  value=&quot;0&quot;&gt;Select Person*&lt;/option&gt;\n                        &lt;option value=&quot;1&quot;&gt;1&lt;/option&gt;\n                        &lt;option value=&quot;2&quot;&gt;2&lt;/option&gt;\n                        &lt;option value=&quot;3&quot;&gt;3&lt;/option&gt;\n                        &lt;option value=&quot;4&quot;&gt;4&lt;/option&gt;\n                        &lt;option value=&quot;5&quot;&gt;5&lt;/option&gt;\n                        &lt;option value=&quot;6&quot;&gt;6&lt;/option&gt;\n                        &lt;option value=&quot;7&quot;&gt;7&lt;/option&gt;\n                    &lt;/select&gt;\n                    &lt;div class=&quot;help-block with-errors&quot;&gt;&lt;/div&gt;\n                &lt;/div&gt;\n            &lt;/div&gt;\n        &lt;/div&gt;\n        &lt;div class=&quot;col-md-6&quot;&gt;\n            &lt;h3&gt;Contact Details&lt;/h3&gt;\n            &lt;div class=&quot;col-md-12&quot;&gt;\n                &lt;div class=&quot;form-group&quot;&gt;\n                    &lt;input type=&quot;text&quot; class=&quot;form-control&quot; id=&quot;name&quot; th:field=&quot;*{firstName}&quot; placeholder=&quot;Your Name&quot; required data-error=&quot;Boş Bırakılamaz&quot;&gt;\n                    &lt;div class=&quot;help-block with-errors&quot;&gt;&lt;/div&gt;\n                &lt;/div&gt;\n            &lt;/div&gt;\n            &lt;div class=&quot;col-md-12&quot;&gt;\n                &lt;div class=&quot;form-group&quot;&gt;\n                    &lt;input type=&quot;text&quot; placeholder=&quot;Your Email&quot; id=&quot;email&quot; class=&quot;form-control&quot; th:field=&quot;*{email}&quot; required data-error=&quot;Boş Bırakılamaz&quot;&gt;\n                    &lt;div class=&quot;help-block with-errors&quot;&gt;&lt;/div&gt;\n                &lt;/div&gt;\n            &lt;/div&gt;\n            &lt;div class=&quot;col-md-12&quot;&gt;\n                &lt;div class=&quot;form-group&quot;&gt;\n                    &lt;input type=&quot;text&quot; placeholder=&quot;Your Numbar&quot; id=&quot;phone&quot; class=&quot;form-control&quot; th:field=&quot;*{phoneNumber}&quot; required data-error=&quot;Boş Bırakılamaz&quot;&gt;\n                    &lt;div class=&quot;help-block with-errors&quot;&gt;&lt;/div&gt;\n                &lt;/div&gt;\n            &lt;/div&gt;\n        &lt;/div&gt;\n        &lt;div class=&quot;col-md-12&quot;&gt;\n            &lt;div class=&quot;submit-button text-center&quot;&gt;\n                &lt;button class=&quot;btn btn-common&quot; id=&quot;submit&quot; type=&quot;submit&quot;&gt;Book Table&lt;/button&gt;\n<\/code><\/pre>\n",
+        "question_id": 68327900,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "spring-mvc",
+            "web-applications"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 215,
+        "last_edit_date": 1626092378
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 19904613,
+                "user_type": "registered",
+                "user_id": 14583940,
+                "link": "https://stackoverflow.com/users/14583940/erhan",
+                "reputation": 23,
+                "display_name": "Erhan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68327900,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "edited": false,
+            "creation_date": 1626101143,
+            "comment_id": 120796538
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68327900,
+            "edited": false,
+            "creation_date": 1626094555,
+            "comment_id": 120793392
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 19904613,
+                "user_type": "registered",
+                "user_id": 14583940,
+                "link": "https://stackoverflow.com/users/14583940/erhan",
+                "reputation": 23,
+                "display_name": "Erhan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68327900,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "edited": false,
+            "creation_date": 1626092473,
+            "comment_id": 120792604
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68327900,
+            "edited": false,
+            "creation_date": 1626079504,
+            "comment_id": 120787584
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/55baf0910004449c099b67c605f652e9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 22191049,
+                "user_type": "registered",
+                "user_id": 16433233,
+                "link": "https://stackoverflow.com/users/16433233/s-badal",
+                "reputation": 71,
+                "display_name": "S Badal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1626116873,
+            "creation_date": 1626116873,
+            "body": "<p>Your implementation is correct. try reloading maven or clean your cache<\/p>\n",
+            "answer_id": 68352748,
+            "question_id": 68327900
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/nxltb.jpg?s=256",
+                "account_id": 22191743,
+                "user_type": "registered",
+                "user_id": 16433815,
+                "link": "https://stackoverflow.com/users/16433815/ayush",
+                "reputation": 379,
+                "display_name": "Ayush"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1626123161,
+            "creation_date": 1626123161,
+            "body": "<p>add this dependency in your pom.xml... I ran your code in my system. It running fine most probably the page which you are getting is from cached use this dependency it does not allow to store any value in the cache.<\/p>\n<pre><code>&lt;dependency&gt;\n            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;\n            &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;\n            &lt;scope&gt;runtime&lt;/scope&gt;\n            &lt;optional&gt;true&lt;/optional&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n",
+            "answer_id": 68353757,
+            "question_id": 68327900
+        }
+    ],
+    "answer_comments": {
+        "68352748": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 19904613,
+                "user_type": "registered",
+                "user_id": 14583940,
+                "link": "https://stackoverflow.com/users/14583940/erhan",
+                "reputation": 23,
+                "display_name": "Erhan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 68352748,
+            "edited": false,
+            "creation_date": 1626117511,
+            "comment_id": 120802753
+        }],
+        "68353757": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/nxltb.jpg?s=256",
+                    "account_id": 22191743,
+                    "user_type": "registered",
+                    "user_id": 16433815,
+                    "link": "https://stackoverflow.com/users/16433815/ayush",
+                    "reputation": 379,
+                    "display_name": "Ayush"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 68353757,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 19904613,
+                    "user_type": "registered",
+                    "user_id": 14583940,
+                    "link": "https://stackoverflow.com/users/14583940/erhan",
+                    "reputation": 23,
+                    "display_name": "Erhan"
+                },
+                "edited": false,
+                "creation_date": 1626125375,
+                "comment_id": 120804956
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 19904613,
+                    "user_type": "registered",
+                    "user_id": 14583940,
+                    "link": "https://stackoverflow.com/users/14583940/erhan",
+                    "reputation": 23,
+                    "display_name": "Erhan"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 68353757,
+                "edited": false,
+                "creation_date": 1626125271,
+                "comment_id": 120804927
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/nxltb.jpg?s=256",
+                    "account_id": 22191743,
+                    "user_type": "registered",
+                    "user_id": 16433815,
+                    "link": "https://stackoverflow.com/users/16433815/ayush",
+                    "reputation": 379,
+                    "display_name": "Ayush"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 68353757,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 19904613,
+                    "user_type": "registered",
+                    "user_id": 14583940,
+                    "link": "https://stackoverflow.com/users/14583940/erhan",
+                    "reputation": 23,
+                    "display_name": "Erhan"
+                },
+                "edited": false,
+                "creation_date": 1626124942,
+                "comment_id": 120804853
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/nxltb.jpg?s=256",
+                    "account_id": 22191743,
+                    "user_type": "registered",
+                    "user_id": 16433815,
+                    "link": "https://stackoverflow.com/users/16433815/ayush",
+                    "reputation": 379,
+                    "display_name": "Ayush"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 68353757,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 19904613,
+                    "user_type": "registered",
+                    "user_id": 14583940,
+                    "link": "https://stackoverflow.com/users/14583940/erhan",
+                    "reputation": 23,
+                    "display_name": "Erhan"
+                },
+                "edited": false,
+                "creation_date": 1626124364,
+                "comment_id": 120804732
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49f6def0cfa05664f87e166facc281a9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 19904613,
+                    "user_type": "registered",
+                    "user_id": 14583940,
+                    "link": "https://stackoverflow.com/users/14583940/erhan",
+                    "reputation": 23,
+                    "display_name": "Erhan"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 68353757,
+                "edited": false,
+                "creation_date": 1626123995,
+                "comment_id": 120804653
+            }
+        ]
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/826b0d5f2ae42a48261b1bfe780596d6?s=256&d=identicon&r=PG",
+            "account_id": 40662,
+            "user_type": "registered",
+            "user_id": 117839,
+            "link": "https://stackoverflow.com/users/117839/michael-wiles",
+            "reputation": 21364,
+            "display_name": "Michael Wiles",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/52830192/why-was-the-filter-behaviour-changed-when-the-ftp-java-dsl-config-was-brought-in",
+        "last_activity_date": 1539697763,
+        "creation_date": 1539675312,
+        "answer_count": 1,
+        "title": "Why was the filter behaviour changed when the ftp java dsl config was brought into spring integration core",
+        "body": "<p>At Spring Integration 4 I had code like this using the spring integration java dsl project:<\/p>\n\n<pre><code>      FtpInboundChannelAdapterSpec ftpAdapterSpec = Ftp.inboundAdapter(ftpSessionFactory)\n                .preserveTimestamp(true)\n                .remoteDirectory(remoteFolder)\n                .filter(new FtpPersistentAcceptOnceFileListFilter(metaDataStore, \"ftp-inbound-\" + id + \":\"))\n                .regexFilter(\".*\")                \n                .localDirectory(Paths.get(System.getProperty(\"java.io.tmpdir\"), \"ftp-inbound\", localPath).toFile()).autoCreateLocalDirectory(true)\n                .deleteRemoteFiles(false);\n<\/code><\/pre>\n\n<p>Notice how it includes a regex filter and a FtpPersistentAcceptOnceFilterListFilter. This worked great.<\/p>\n\n<p>The code for <a href=\"https://github.com/spring-projects/spring-integration-java-dsl/blob/master/src/main/java/org/springframework/integration/dsl/file/RemoteFileInboundChannelAdapterSpec.java\" rel=\"nofollow noreferrer\">filter<\/a> (the original java dsl project) which regexFilter wraps is:<\/p>\n\n<pre><code>public S filter(FileListFilter&lt;F&gt; filter) {\n    if (this.filter == null) {\n        if (filter instanceof CompositeFileListFilter) {\n            this.filter = (CompositeFileListFilter&lt;F&gt;) filter;\n        }\n        else {\n            this.filter = new CompositeFileListFilter&lt;F&gt;();\n            this.filter.addFilter(filter);\n        }\n        this.synchronizer.setFilter(this.filter);\n    }\n    else {\n        this.filter.addFilter(filter);\n    }\n    return _this();\n}\n<\/code><\/pre>\n\n<p>So as you can see it builds up a composite filter from the passed in filter (and stacks as you pass in more).<\/p>\n\n<p>But then when java dsl was brought in to core integration the filter method <a href=\"https://github.com/spring-projects/spring-integration/blob/master/spring-integration-file/src/main/java/org/springframework/integration/file/dsl/RemoteFileInboundChannelAdapterSpec.java\" rel=\"nofollow noreferrer\">changed to<\/a>:<\/p>\n\n<pre><code>public S filter(FileListFilter&lt;F&gt; filter) {\n    this.synchronizer.setFilter(filter);\n    return _this();\n}\n<\/code><\/pre>\n\n<p>That's fine by itself but then methods like regexFilter <a href=\"https://github.com/spring-projects/spring-integration/blob/master/spring-integration-ftp/src/main/java/org/springframework/integration/ftp/dsl/FtpInboundChannelAdapterSpec.java\" rel=\"nofollow noreferrer\">became<\/a>:<\/p>\n\n<pre><code>    @Override\n    public FtpInboundChannelAdapterSpec regexFilter(String regex) {\n        return filter(composeFilters(new FtpRegexPatternFileListFilter(regex)));\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private CompositeFileListFilter&lt;FTPFile&gt; composeFilters(FileListFilter&lt;FTPFile&gt; fileListFilter) {\n        CompositeFileListFilter&lt;FTPFile&gt; compositeFileListFilter = new CompositeFileListFilter&lt;&gt;();\n        compositeFileListFilter.addFilters(fileListFilter,\n                new FtpPersistentAcceptOnceFileListFilter(new SimpleMetadataStore(), \"ftpMessageSource\"));\n        return compositeFileListFilter;\n    }\n<\/code><\/pre>\n\n<p>So now the code that I had no does do what I desired as the FtpPersistentAcceptOnceFileListFilter which takes my persistent metadatastore is now replaced by a FtpPersistentAcceptOnceFileListFilter which takes a SimpleMetaDataStore.<\/p>\n\n<p>So now although the code compiles fine when it runs it receives duplicates.<\/p>\n\n<p>So the question is why was it changed and is there a good reason why it was changed? Because as it stands because of the non obvious side effect of the regexFilter method it becomes fairly unusable.<\/p>\n",
+        "question_id": 52830192,
+        "tags": [
+            "java",
+            "spring",
+            "spring-integration",
+            "spring-integration-dsl"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 81
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2158ce6e7c048277890eb64458864c1c?s=256&d=identicon&r=PG",
+            "account_id": 3273937,
+            "user_type": "registered",
+            "user_id": 2756547,
+            "link": "https://stackoverflow.com/users/2756547/artem-bilan",
+            "reputation": 122596,
+            "display_name": "Artem Bilan",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1539697763,
+        "creation_date": 1539697763,
+        "body": "<p>It has been changed the way that <code>filter(FileListFilter&lt;F&gt; filter)<\/code> has a precedence over all other filtering options the way like it is with the XML configuration for consistency. The reason of such a behavior just because we don't know the order you would like to compose those filters. So, to ensure the proper order you need to build a <code>CompositeFileListFilter<\/code>, including a required <code>FtpRegexPatternFileListFilter<\/code>, by yourself and and inject it into this <code>fitler()<\/code> option.<\/p>\n\n<p>The <code>regexFilter()<\/code> and <code>patternFilter()<\/code> are still here for convenience to configure simple common use-cases, when you have only this filter and nothing more.<\/p>\n",
+        "answer_id": 52837044,
+        "question_id": 52830192
+    }],
+    "answer_comments": {}
+}

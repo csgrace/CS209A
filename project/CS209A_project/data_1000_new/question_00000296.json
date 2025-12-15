@@ -1,0 +1,135 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-Pl72LMliMJk/AAAAAAAAAAI/AAAAAAAAAMU/Tqinz07pkks/s256-rj/photo.jpg",
+            "account_id": 9860677,
+            "user_type": "registered",
+            "user_id": 7303800,
+            "link": "https://stackoverflow.com/users/7303800/khadhri-hamza",
+            "reputation": 320,
+            "display_name": "Khadhri Hamza",
+            "accept_rate": 38
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47772494/how-can-i-realize-a-manytoone-relation-using-the-crudrepository-spring-data-and",
+        "last_activity_date": 1513082508,
+        "creation_date": 1513081214,
+        "answer_count": 1,
+        "title": "How can I realize a ManyToOne relation using the CrudRepository (Spring Data and thymeleaf )?",
+        "body": "<p>I am using Spring boot and spring Data (CrudRepository) to persist entity passing by a form, but i have a ManyToOne  relation between Product and StatutProduit (idStatutProduit as a foreign key in Produit entity), the problem that i dont know how to say to the controller  that i have an object that depend to an other object...otherwise i have to create w form with thymeleaf for product class for sure with combo box to load statusProduct.<\/p>\n\n<p>Produit Class (: <\/p>\n\n<pre><code>public class Produits implements Serializable {\n    private static final long serialVersionUID = 1L;\n    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation\n    @Id\n    @Basic(optional = false)\n    @NotNull\n    @Column(name = \"ID_PRODUIT\")\n    private BigDecimal idProduit;\n    @Column(name = \"ID_OPERATEUR\")\n    private BigInteger idOperateur;\n    @Basic(optional = false)\n    @NotNull\n    @Size(min = 1, max = 45)\n    @Column(name = \"CODE\")\n    private String code;\n    @Basic(optional = false)\n    @NotNull\n    @Size(min = 1, max = 45)\n    @Column(name = \"LIBELLE\")\n    private String libelle;\n    @Column(name = \"POIDS\")\n    private BigInteger poids;\n    @Basic(optional = false)\n    @NotNull\n    @Size(min = 1, max = 5)\n    @Column(name = \"INDICE\")\n    private String indice;\n    @Basic(optional = false)\n    @NotNull\n    @Size(min = 1, max = 10)\n    @Column(name = \"CREE_PAR\")\n    private String creePar;\n    @Column(name = \"DATE_CREATION\")\n    @Temporal(TemporalType.TIMESTAMP)\n    private Date dateCreation;\n    @Size(max = 10)\n    @Column(name = \"MAJ_PAR\")\n    private String majPar;\n    @Column(name = \"DATE_MAJ\")\n    @Temporal(TemporalType.TIMESTAMP)\n    private Date dateMaj;\n    @JoinColumn(name = \"ID_STATUT_PRODUIT\", referencedColumnName = \"ID_STATUT_PRODUIT\")\n    @ManyToOne(optional = false)\n    private StatutProduits idStatutProduit;\n    public Produits(BigDecimal idProduit, String code, String libelle, \n    String indice, String creePar) {\n    this.idProduit = idProduit;\n    this.code = code;\n    this.libelle = libelle;\n    this.indice = indice;\n    this.creePar = creePar;\n}\n<\/code><\/pre>\n\n<p>StatusProduct class:<\/p>\n\n<pre><code>public class StatutProduits implements Serializable {\n    private static final long serialVersionUID = 1L;\n   fields consider using these annotations to enforce field validation\n    @Id\n    @Basic(optional = false)\n    @NotNull\n    @Column(name = \"ID_STATUT_PRODUIT\")\n    private BigDecimal idStatutProduit;\n    @Basic(optional = false)\n    @NotNull\n    @Size(min = 1, max = 45)\n    @Column(name = \"CODE\")\n    private String code;\n    @Basic(optional = false)\n    @NotNull\n    @Size(min = 1, max = 45)\n    @Column(name = \"LIBELLE\")\n    private String libelle;\n    @Basic(optional = false)\n    @NotNull\n    @Size(min = 1, max = 10)\n    @Column(name = \"CREE_PAR\")\n    private String creePar;\n    @DateTimeFormat(pattern = \"yyyy-MM-dd\")\n    @Column(name = \"DATE_CREATION\")\n    @Temporal(TemporalType.TIMESTAMP)\n    private Date dateCreation;\n    @Size(max = 10)\n    @Column(name = \"MAJ_PAR\")\n    private String majPar;\n    @DateTimeFormat(pattern = \"yyyy-MM-dd\")\n    @Column(name = \"DATE_MAJ\")\n    @Temporal(TemporalType.TIMESTAMP)\n    private Date dateMaj;\n    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"idStatutProduit\")\n    private List&lt;Produits&gt; produitsList;\n\n    public StatutProduits() {\n    }\n\n    public StatutProduits(BigDecimal idStatutProduit) {\n        this.idStatutProduit = idStatutProduit;\n    }\n\n    public StatutProduits(BigDecimal idStatutProduit, String code, String libelle, String creePar) {\n        this.idStatutProduit = idStatutProduit;\n        this.code = code;\n        this.libelle = libelle;\n        this.creePar = creePar;\n    }\n\n    public BigDecimal getIdStatutProduit() {\n        return idStatutProduit;\n    }\n\n    public void setIdStatutProduit(BigDecimal idStatutProduit) {\n        this.idStatutProduit = idStatutProduit;\n    }\n\n    public String getCode() {\n        return code;\n    }\n\n    public void setCode(String code) {\n        this.code = code;\n    }\n\n    public String getLibelle() {\n        return libelle;\n    }\n\n    public void setLibelle(String libelle) {\n        this.libelle = libelle;\n    }\n\n    public String getCreePar() {\n        return creePar;\n    }\n\n    public void setCreePar(String creePar) {\n        this.creePar = creePar;\n    }\n\n    public Date getDateCreation() {\n        return dateCreation;\n    }\n\n    public void setDateCreation(Date dateCreation) {\n        this.dateCreation = dateCreation;\n    }\n\n    public String getMajPar() {\n        return majPar;\n    }\n\n    public void setMajPar(String majPar) {\n        this.majPar = majPar;\n    }\n\n    public Date getDateMaj() {\n        return dateMaj;\n    }\n\n    public void setDateMaj(Date dateMaj) {\n        this.dateMaj = dateMaj;\n    }\n\n    public List&lt;Produits&gt; getProduitsList() {\n        return produitsList;\n    }\n\n    public void setProduitsList(List&lt;Produits&gt; produitsList) {\n        this.produitsList = produitsList;\n    }\n<\/code><\/pre>\n\n<p>ProduitService class :<\/p>\n\n<pre><code>@Service\npublic class ProduitService {\n\n    @Autowired\n    private ProduitRepository produitrepository ;\n\n    public void addProduit(Produits p ) {\n\n\n\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 47772494,
+        "tags": [
+            "java",
+            "spring",
+            "spring-mvc",
+            "spring-boot",
+            "thymeleaf"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 366
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b74582a807dd159d5412314c8d948077?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3580881,
+                "user_type": "registered",
+                "user_id": 2989136,
+                "link": "https://stackoverflow.com/users/2989136/herr-derb",
+                "reputation": 5567,
+                "display_name": "Herr Derb",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 47772494,
+            "edited": false,
+            "creation_date": 1513081556,
+            "comment_id": 82505973
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-Pl72LMliMJk/AAAAAAAAAAI/AAAAAAAAAMU/Tqinz07pkks/s256-rj/photo.jpg",
+                "account_id": 9860677,
+                "user_type": "registered",
+                "user_id": 7303800,
+                "link": "https://stackoverflow.com/users/7303800/khadhri-hamza",
+                "reputation": 320,
+                "display_name": "Khadhri Hamza",
+                "accept_rate": 38
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772494,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/b74582a807dd159d5412314c8d948077?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3580881,
+                "user_type": "registered",
+                "user_id": 2989136,
+                "link": "https://stackoverflow.com/users/2989136/herr-derb",
+                "reputation": 5567,
+                "display_name": "Herr Derb",
+                "accept_rate": 79
+            },
+            "edited": false,
+            "creation_date": 1513081508,
+            "comment_id": 82505945
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b74582a807dd159d5412314c8d948077?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3580881,
+                "user_type": "registered",
+                "user_id": 2989136,
+                "link": "https://stackoverflow.com/users/2989136/herr-derb",
+                "reputation": 5567,
+                "display_name": "Herr Derb",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47772494,
+            "edited": false,
+            "creation_date": 1513081394,
+            "comment_id": 82505865
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/eynrL.jpg?s=256",
+            "account_id": 2818245,
+            "user_type": "registered",
+            "user_id": 2422715,
+            "link": "https://stackoverflow.com/users/2422715/lorenzo-de-francesco",
+            "reputation": 670,
+            "display_name": "Lorenzo De Francesco",
+            "accept_rate": 31
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": -1,
+        "is_accepted": false,
+        "last_activity_date": 1513081530,
+        "creation_date": 1513081530,
+        "body": "<p>Take a look at this page <a href=\"https://spring.io/guides/gs/accessing-data-rest/\" rel=\"nofollow noreferrer\">https://spring.io/guides/gs/accessing-data-rest/<\/a>. Here you can see this piece of code:<\/p>\n\n<pre><code>package hello;\n\nimport java.util.List;\n\nimport org.springframework.data.repository.PagingAndSortingRepository;\nimport org.springframework.data.repository.query.Param;\nimport org.springframework.data.rest.core.annotation.RepositoryRestResource;\n\n@RepositoryRestResource(collectionResourceRel = \"people\", path = \"people\")\npublic interface PersonRepository extends PagingAndSortingRepository&lt;Person, Long&gt; {\n\n    List&lt;Person&gt; findByLastName(@Param(\"name\") String name);\n\n}\n<\/code><\/pre>\n\n<p>If you make the repository this way Spring will create the controller and the service to fit your <code>@Entity<\/code>.<\/p>\n",
+        "answer_id": 47772626,
+        "question_id": 47772494
+    }],
+    "answer_comments": {"47772626": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/11f71217a16c250ecf4708e8c30df0ba?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7610415,
+            "user_type": "registered",
+            "user_id": 5771446,
+            "link": "https://stackoverflow.com/users/5771446/sync",
+            "reputation": 3817,
+            "display_name": "Sync"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 47772626,
+        "edited": false,
+        "creation_date": 1513081829,
+        "comment_id": 82506170
+    }]}
+}

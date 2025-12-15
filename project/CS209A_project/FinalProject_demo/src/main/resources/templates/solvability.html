@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Solvable vs Hard-to-Solve — Java Analysis</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+        .feature-stat { white-space: nowrap; display: block; }
+        @media (min-width: 1024px) {
+            .detail-grid { grid-template-columns: 1fr 1fr; grid-column-gap: 3.5rem; }
+        }
+        .detail-grid { gap: 2.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+<div class="w-full bg-emerald-100">
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Solvable vs Hard-to-Solve Questions</h1>
+                <p class="text-sm text-slate-700 mt-1">Compare characteristics of Java questions that get timely, high-quality answers vs those that remain hard to solve.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/" class="inline-flex items-center gap-2 px-3 py-1 rounded bg-white border border-slate-200 text-sm shadow-sm hover:shadow transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back
+                </a>
+                <button id="downloadBtn" type="button"
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded bg-white border border-slate-200 text-sm shadow-sm transition opacity-50 cursor-not-allowed"
+                        aria-disabled="true" title="Generate charts first to enable download">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 5v10" /></svg>
+                    Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto p-6">
+    <div class="bg-white p-5 rounded-xl shadow mb-6">
+        <form id="controls" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div class="md:col-span-2 flex flex-col justify-end">
+                <label class="block text-sm text-slate-700">Years back(1~40)</label>
+                <input id="years" type="number" min="1" max="40" step="1" value="10" class="mt-1 p-2 w-full rounded border" />
+            </div>
+
+            <div class="flex flex-col justify-end">
+                <label class="block text-sm text-slate-700">Max samples (n)</label>
+                <input id="n" type="number" min="50" value="1000" class="mt-1 p-2 w-full rounded border" />
+            </div>
+
+            <div class="flex flex-col justify-end">
+                <label class="block text-sm text-slate-700">Max first-answer hours(1~72h)</label>
+                <input id="maxHours" type="number" min="1"  max="72" step="1" value="48" class="mt-1 p-2 w-full rounded border" />
+            </div>
+
+            <div class="flex flex-col justify-end">
+                <label class="block text-sm text-transparent">action</label>
+                <button id="loadBtn" type="button" class="w-full bg-emerald-200 text-emerald-800 py-2 rounded shadow-sm hover:bg-emerald-300 transition">Analyze</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow mb-6">
+        <div class="flex items-start justify-between">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-700">Feature cards</h3>
+                <div id="cardsMeta" class="text-xs text-slate-500 mt-2"></div>
+            </div>
+            <div class="text-xs text-slate-400">Showing top comparisons for selected window</div>
+        </div>
+        <div id="cardsContainer" class="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bg-white p-5 rounded-xl shadow">
+            <h3 class="text-sm font-semibold text-slate-700">Overall solvability</h3>
+            <canvas id="overallChart" height="220" class="mt-4"></canvas>
+            <div id="sampleInfo" class="text-xs text-slate-500 mt-3"></div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-4">
+            <div class="bg-white p-5 rounded-xl shadow">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-700">Feature comparisons</h3>
+                    <div id="selectedFeatureTitle" class="text-xs text-slate-500">Click a factor to view details</div>
+                </div>
+
+                <div id="factorButtons" class="mt-4 grid grid-cols-3 gap-3"></div>
+
+                <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="p-3 border rounded">
+                        <h4 class="text-sm font-medium text-slate-800">Mini chart</h4>
+                        <canvas id="featureChart" height="220" class="mt-3"></canvas>
+                        <div id="featureNote" class="text-xs text-slate-500 mt-2"></div>
+                    </div>
+
+                    <div class="p-3 border rounded">
+                        <h4 class="text-sm font-medium text-slate-800">Feature details</h4>
+                        <div id="featureSummary" class="mt-3 text-sm text-slate-600 detail-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow">
+                <div id="insights" class="mt-2 p-3 bg-emerald-50 rounded text-sm text-slate-700">Summary insights will appear here after analysis.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 z-50">
+    <div class="bg-white rounded-xl w-11/12 md:w-3/4 p-6">
+        <div class="flex justify-between items-start">
+            <h3 id="modalTitle" class="text-lg font-semibold"></h3>
+            <button id="modalClose" class="text-slate-500 hover:text-slate-800">Close</button>
+        </div>
+        <div id="modalBody" class="mt-4 text-sm text-slate-700"></div>
+    </div>
+</div>
+
+<script>
+    function formatNumber(n){ return new Intl.NumberFormat().format(n); }
+    function parsePct(s){ if (!s) return 0; return Number(String(s).replace('%','')) || 0; }
+
+    const loadBtn = document.getElementById('loadBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const yearsInput = document.getElementById('years');
+    const nInput = document.getElementById('n');
+    const maxHoursInput = document.getElementById('maxHours');
+    const sampleInfo = document.getElementById('sampleInfo');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const cardsMeta = document.getElementById('cardsMeta');
+    const insightsEl = document.getElementById('insights');
+    const factorButtons = document.getElementById('factorButtons');
+    const selectedFeatureTitle = document.getElementById('selectedFeatureTitle');
+    const featureSummary = document.getElementById('featureSummary');
+    const featureNote = document.getElementById('featureNote');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalClose = document.getElementById('modalClose');
+
+    let overallChart = null;
+    let featureChart = null;
+    let latestData = null;
+    function enableDownload(){ downloadBtn.classList.remove('opacity-50','cursor-not-allowed'); downloadBtn.setAttribute('aria-disabled','false'); }
+    function disableDownload(){ downloadBtn.classList.add('opacity-50','cursor-not-allowed'); downloadBtn.setAttribute('aria-disabled','true'); }
+    disableDownload();
+
+    const FACTORS = [
+        { key: 'question_length', title: 'Question length', type:'numeric' },
+        { key: 'reputation', title: 'User reputation', type:'numeric' },
+        { key: 'code_snippet', title: 'Has code snippet', type:'pct' },
+        { key: 'tag_count', title: 'Tag count', type:'numeric' },
+        { key: 'question_score', title: 'Question score', type:'numeric' }
+    ];
+    (function(){
+        const yearsInput = document.getElementById('years');
+        const maxHoursInput = document.getElementById('maxHours');
+
+        if (yearsInput) {
+            yearsInput.setAttribute('min', '1');
+            yearsInput.setAttribute('max', '40');
+            yearsInput.setAttribute('step', '1');
+
+            yearsInput.addEventListener('input', () => {
+                const v = parseInt(yearsInput.value, 10);
+                if (Number.isNaN(v)) return;
+                if (v < 1) yearsInput.value = '1';
+                else if (v > 40) yearsInput.value = '40';
+            });
+
+            yearsInput.addEventListener('change', () => {
+                let v = parseInt(yearsInput.value, 10);
+                if (Number.isNaN(v) || v < 1) yearsInput.value = '1';
+                else if (v > 40) yearsInput.value = '40';
+            });
+        }
+
+        if (maxHoursInput) {
+            maxHoursInput.setAttribute('min', '1');
+            maxHoursInput.setAttribute('max', '72');
+            maxHoursInput.setAttribute('step', '1');
+
+            maxHoursInput.addEventListener('input', () => {
+                const v = parseInt(maxHoursInput.value, 10);
+                if (Number.isNaN(v)) return;
+                if (v < 1) maxHoursInput.value = '1';
+                else if (v > 72) maxHoursInput.value = '72';
+            });
+
+            maxHoursInput.addEventListener('change', () => {
+                let v = parseInt(maxHoursInput.value, 10);
+                if (Number.isNaN(v) || v < 1) maxHoursInput.value = '1';
+                else if (v > 72) maxHoursInput.value = '72';
+            });
+        }
+    })();
+    function buildFactorButtons(){
+        factorButtons.innerHTML = '';
+        FACTORS.forEach((f) => {
+            const b = document.createElement('button');
+            b.className = 'factor-btn px-3 py-2 rounded text-sm border transition bg-emerald-50 text-emerald-800 border-emerald-100';
+            b.setAttribute('data-key', f.key);
+            b.textContent = f.title;
+            b.addEventListener('mouseenter', () => b.classList.add('shadow-md','-translate-y-0.5','ring-2','ring-emerald-200'));
+            b.addEventListener('mouseleave', () => b.classList.remove('shadow-md','-translate-y-0.5','ring-2','ring-emerald-200'));
+            b.addEventListener('click', () => {
+                setSelectedFactorButton(f.key);
+                selectedFeatureTitle.textContent = f.title;
+                if (latestData) renderFeatureFromData(f.key, f.title, latestData);
+            });
+            factorButtons.appendChild(b);
+        });
+    }
+    buildFactorButtons();
+
+    function setSelectedFactorButton(key) {
+        document.querySelectorAll('.factor-btn').forEach(btn=>{
+            const k = btn.getAttribute('data-key');
+            if (k === key) {
+                btn.classList.remove('bg-emerald-50','text-emerald-800');
+                btn.classList.add('bg-emerald-700','text-white','border-emerald-700');
+            } else {
+                btn.classList.remove('bg-emerald-700','text-white','border-emerald-700');
+                btn.classList.add('bg-emerald-50','text-emerald-800','border-emerald-100');
+            }
+        });
+    }
+
+    function whiteBackgroundDataUrlFromBase64(base64) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const tmp = document.createElement('canvas');
+                tmp.width = img.width;
+                tmp.height = img.height;
+                const ctx = tmp.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0,0,tmp.width,tmp.height);
+                ctx.drawImage(img,0,0);
+                resolve(tmp.toDataURL('image/png'));
+            };
+            img.onerror = () => resolve(base64);
+            img.src = base64;
+        });
+    }
+
+    async function downloadAllChartsWhiteBackground() {
+        if (!latestData) { alert('No data to download — run analysis first'); return; }
+        const downloads = [];
+        if (overallChart) {
+            const overallBase64 = overallChart.toBase64Image();
+            const overallWhite = await whiteBackgroundDataUrlFromBase64(overallBase64);
+            downloads.push({data: overallWhite, name: `solvability-overall-${Date.now()}.png`});
+        }
+        for (const f of FACTORS) {
+            const wrapped = latestData[f.key] || {};
+            const d = wrapped.data || {};
+            let labels = [], values = [], colors = [];
+            if (f.key === 'code_snippet') {
+                const solvHave = d?.solvable?.have_count ?? 0;
+                const solvNo = d?.solvable?.no_count ?? 0;
+                const hardHave = d?.['hard-to-solve']?.have_count ?? 0;
+                const hardNo = d?.['hard-to-solve']?.no_count ?? 0;
+                labels = ['Solvable — Have','Solvable — No','Hard — Have','Hard — No'];
+                values = [solvHave, solvNo, hardHave, hardNo];
+                colors = ['#10B981','#A7F3D0','#EF4444','#FECACA'];
+            } else {
+                const solvAvg = Number(d?.solvable?.avg ?? 0);
+                const hardAvg = Number(d?.['hard-to-solve']?.avg ?? 0);
+                labels = ['Solvable','Hard-to-solve'];
+                values = [solvAvg, hardAvg];
+                colors = ['#10B981','#EF4444'];
+            }
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = 1200; tmpCanvas.height = 700;
+            const ctx = tmpCanvas.getContext('2d');
+            const tmpChart = new Chart(ctx, {
+                type: (f.key === 'code_snippet') ? 'bar' : 'bar',
+                data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: colors, borderWidth: 1 }] },
+                options: { responsive: false, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero:true } } }
+            });
+            await new Promise(r => setTimeout(r, 50));
+            const base64 = tmpChart.toBase64Image();
+            const white = await whiteBackgroundDataUrlFromBase64(base64);
+            downloads.push({data: white, name: `solvability-${f.key}-${Date.now()}.png`});
+            tmpChart.destroy();
+        }
+        for (let i=0;i<downloads.length;i++){
+            const a = document.createElement('a');
+            a.href = downloads[i].data;
+            a.download = downloads[i].name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            await new Promise(r => setTimeout(r, 150));
+        }
+    }
+    function attachDownloadHandler() { downloadBtn.onclick = downloadAllChartsWhiteBackground; }
+
+    function renderOverall(solvable, hard){
+        const ctx = document.getElementById('overallChart').getContext('2d');
+        if (overallChart) overallChart.destroy();
+        overallChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels:['Solvable','Hard-to-solve'], datasets:[{ data:[solvable, hard], backgroundColor:['#10B981','#EF4444'] }] },
+            options: { plugins:{ legend:{ position:'bottom' } } }
+        });
+    }
+
+    function renderFeatureFromData(key, title, data){
+        if (!data || !data[key]) { featureSummary.innerHTML = '<div class="text-xs text-slate-500">No data for this factor.</div>'; return; }
+        const wrapped = data[key];
+        const meta = wrapped.meta || {};
+        const d = wrapped.data || {};
+
+        let labels = [], values = [], colors = [];
+        if (key === 'code_snippet'){
+            const solvHave = d?.solvable?.have_count ?? 0;
+            const solvNo = d?.solvable?.no_count ?? 0;
+            const hardHave = d?.['hard-to-solve']?.have_count ?? 0;
+            const hardNo = d?.['hard-to-solve']?.no_count ?? 0;
+            labels = ['Solvable — Have','Solvable — No','Hard — Have','Hard — No'];
+            values = [solvHave, solvNo, hardHave, hardNo];
+            colors = ['#10B981','#A7F3D0','#EF4444','#FECACA'];
+        } else {
+            const solvAvg = Number(d?.solvable?.avg ?? 0);
+            const hardAvg = Number(d?.['hard-to-solve']?.avg ?? 0);
+            labels = ['Solvable','Hard-to-solve'];
+            values = [solvAvg, hardAvg];
+            colors = ['#10B981','#EF4444'];
+        }
+
+        const ctx = document.getElementById('featureChart').getContext('2d');
+        if (featureChart) featureChart.destroy();
+        featureChart = new Chart(ctx, {
+            type: (key==='code_snippet') ? 'bar' : 'bar',
+            data: { labels, datasets:[{ data: values, backgroundColor: colors }] },
+            options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+        });
+
+        let html = '<div class="grid grid-cols-2 gap-10">'; // increased gap
+        if (key === 'code_snippet'){
+            const solv = d?.solvable || {};
+            const hard = d?.['hard-to-solve'] || {};
+            html += `<div><div class="text-xs text-slate-500">Solvable</div><div class="mt-2 text-sm"><div>Have: <strong>${formatNumber(solv.have_count ?? 0)}</strong></div><div>No: <strong>${formatNumber(solv.no_count ?? 0)}</strong></div><div class="mt-1 text-xs text-slate-500">(${solv.have_percentage ?? '0%'} / ${solv.no_percentage ?? '0%'})</div></div></div>`;
+            html += `<div><div class="text-xs text-slate-500">Hard-to-solve</div><div class="mt-2 text-sm"><div>Have: <strong>${formatNumber(hard.have_count ?? 0)}</strong></div><div>No: <strong>${formatNumber(hard.no_count ?? 0)}</strong></div><div class="mt-1 text-xs text-slate-500">(${hard.have_percentage ?? '0%'} / ${hard.no_percentage ?? '0%'})</div></div></div>`;
+        } else {
+            const solv = d?.solvable || {};
+            const hard = d?.['hard-to-solve'] || {};
+
+            const solvMedianHTML = (key === 'question_score') ? '' : `<div>Median: <strong>${Number(solv.median ?? 0)}</strong></div>`;
+            const hardMedianHTML = (key === 'question_score') ? '' : `<div>Median: <strong>${Number(hard.median ?? 0)}</strong></div>`;
+
+            html += `<div><div class="text-xs text-slate-500">Solvable</div><div class="mt-2 text-sm"><div class="feature-stat">Sample: <strong>${formatNumber(solv.count ?? 0)}</strong></div><div class="feature-stat">Avg: <strong>${Number(solv.avg ?? 0).toFixed(2)}</strong> ${wrapped.meta?.unit?`<span class="text-xs text-slate-400"> ${wrapped.meta.unit}</span>`:''}</div>${solvMedianHTML}</div></div>`;
+            html += `<div><div class="text-xs text-slate-500">Hard-to-solve</div><div class="mt-2 text-sm"><div class="feature-stat">Sample: <strong>${formatNumber(hard.count ?? 0)}</strong></div><div class="feature-stat">Avg: <strong>${Number(hard.avg ?? 0).toFixed(2)}</strong></div>${hardMedianHTML}</div></div>`;
+        }
+        html += '</div>';
+        featureSummary.innerHTML = html;
+        featureNote.textContent = wrapped.meta?.unit ? `Unit: ${wrapped.meta.unit}` : '';
+    }
+
+    loadBtn.addEventListener('click', async () => {
+        const years = parseInt(yearsInput.value) || 3;
+        const limit = parseInt(nInput.value) || 1000;
+        const maxHours = parseInt(maxHoursInput.value) || 48;
+
+        try {
+            const url = `/api/solvability/all?n=${encodeURIComponent(limit)}&years=${encodeURIComponent(years)}&maxHours=${encodeURIComponent(maxHours)}`;
+            const r = await fetch(url);
+            if (!r.ok) throw new Error('Failed to fetch solvability data');
+            const data = await r.json();
+            latestData = data;
+            if (!data) throw new Error('Empty response');
+
+            const qlenMeta = data.question_length?.meta || {};
+            const solvable = qlenMeta.sample_solvable ?? 0;
+            const hard = qlenMeta.sample_hard_to_solve ?? 0;
+            renderOverall(solvable, hard);
+
+            sampleInfo.innerHTML = `Samples analyzed: <strong>${formatNumber(solvable + hard)}</strong> (solvable: ${formatNumber(solvable)}, hard: ${formatNumber(hard)}), others neutral`;
+            cardsMeta.innerHTML = `samples: solvable <strong>${formatNumber(solvable)}</strong> • hard <strong>${formatNumber(hard)}</strong>`;
+
+            cardsContainer.innerHTML = '';
+            FACTORS.forEach(f => {
+                const wrapped = data[f.key] || {};
+                const d = wrapped.data || {};
+
+                let solvAvgText = 'Avg (solvable): N/A';
+                let hardAvgText = 'Avg (hard): N/A';
+                let deltaText = '';
+
+                if (f.key === 'code_snippet') {
+                    const solvPct = parsePct(d?.solvable?.have_percentage);
+                    const hardPct = parsePct(d?.['hard-to-solve']?.have_percentage);
+                    if (!isNaN(solvPct)) solvAvgText = `Have (solvable): ${solvPct.toFixed(1)}%`;
+                    if (!isNaN(hardPct)) hardAvgText = `Have (hard): ${hardPct.toFixed(1)}%`;
+                    if (!isNaN(solvPct) && !isNaN(hardPct)) {
+                        const pp = (solvPct - hardPct);
+                        deltaText = `Δ ${pp >= 0 ? '+' : ''}${pp.toFixed(1)}%`;
+                    }
+                } else {
+                    const solvAvg = Number(d?.solvable?.avg ?? NaN);
+                    const hardAvg = Number(d?.['hard-to-solve']?.avg ?? NaN);
+                    if (!Number.isNaN(solvAvg)) solvAvgText = `Avg (solvable): ${solvAvg.toFixed(1)}`;
+                    if (!Number.isNaN(hardAvg)) hardAvgText = `Avg (hard): ${hardAvg.toFixed(1)}`;
+                    if (!Number.isNaN(solvAvg) && !Number.isNaN(hardAvg)) {
+                        let relPct;
+                        if (Math.abs(hardAvg) < 1e-12) {
+                            relPct = Math.abs(solvAvg - hardAvg) / (Math.abs(solvAvg) || 1) * 100;
+                            deltaText = `Δ ${solvAvg - hardAvg >= 0 ? '+' : ''}${(solvAvg - hardAvg).toFixed(2)} (${relPct.toFixed(1)}% rel)`;
+                        } else {
+                            relPct = ((solvAvg - hardAvg) / Math.abs(hardAvg)) * 100;
+                            deltaText = `Δ ${relPct >= 0 ? '+' : ''}${relPct.toFixed(1)}%`;
+                        }
+                    }
+                }
+
+                const card = document.createElement('div');
+                card.className = 'p-3 border rounded flex flex-col justify-between';
+                card.innerHTML = `<div>
+                    <div class="text-sm font-semibold text-slate-800">${f.title}</div>
+                    <div class="mt-2 text-xs text-slate-600">${solvAvgText}</div>
+                    <div class="text-xs text-slate-600 mt-1">${hardAvgText}</div>
+                    <div class="text-xs text-emerald-700 mt-2 font-medium">${deltaText}</div>
+                  </div>`;
+                cardsContainer.appendChild(card);
+            });
+
+            setSelectedFactorButton('question_length');
+            selectedFeatureTitle.textContent = 'Question length';
+            renderFeatureFromData('question_length', 'Question length', latestData);
+
+            attachDownloadHandler();
+            enableDownload();
+
+            const effects = [];
+            FACTORS.forEach(f => {
+                const d = (data[f.key] || {}).data || {};
+                if (f.type === 'numeric') {
+                    const s = Number(d?.solvable?.avg ?? NaN);
+                    const h = Number(d?.['hard-to-solve']?.avg ?? NaN);
+                    if (!Number.isNaN(s) && !Number.isNaN(h)) {
+                        let rel = NaN;
+                        if (Math.abs(h) < 1e-12) {
+                            rel = (Math.abs(s - h) / (Math.abs(s) || 1)); // fallback
+                        } else {
+                            rel = Math.abs((s - h) / Math.abs(h));
+                        }
+                        effects.push({key:f.key, title:f.title, type:'numeric', s, h, rel});
+                    }
+                } else {
+                    const s = parsePct(d?.solvable?.have_percentage);
+                    const h = parsePct(d?.['hard-to-solve']?.have_percentage);
+                    if (!isNaN(s) && !isNaN(h)) {
+                        const pp = Math.abs(s - h);
+                        effects.push({key:f.key, title:f.title, type:'pct', s, h, pp});
+                    }
+                }
+            });
+
+            effects.sort((a,b) => (b.rel || b.pp) - (a.rel || a.pp));
+            const sentences = [];
+            if (effects.length === 0) {
+                sentences.push('Insights: No clear signals found with the current window & thresholds.');
+            } else {
+                const top = effects[0];
+                if (top.type === 'numeric') {
+                    const direction = top.s >= top.h ? 'higher' : 'lower';
+                    const pct = ((top.s - top.h) / (Math.abs(top.h) || 1)) * 100;
+                    sentences.push(
+                        `Insights: ${top.title} stands out: solvable questions have an average of ${Number(top.s).toFixed(2)} vs ${Number(top.h).toFixed(2)} for hard ones (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%). ` +
+                        `This sizable difference (in absolute terms and relative to the hard-to-solve group) suggests ${top.title.toLowerCase()} is an important correlate — for example, higher reputation may mean askers provide clearer context or follow-up, while higher question score signals early community endorsement.`
+                    );
+                } else {
+                    const pp = top.s - top.h;
+                    sentences.push(
+                        `Insights: ${top.title} differs by ${pp.toFixed(1)} percentage points (${top.s.toFixed(1)}% vs ${top.h.toFixed(1)}%). ` +
+                        `In practical terms this gap means the presence of this feature (e.g., code snippets) is substantially more common among solvable questions and likely helps answerers reproduce and diagnose the issue faster.`
+                    );
+                }
+
+                for (let i = 1; i < Math.min(effects.length, 4); i++) {
+                    const e = effects[i];
+                    if (e.type === 'numeric') {
+                        const pct = ((e.s - e.h) / (Math.abs(e.h) || 1)) * 100;
+                        sentences.push(
+                            `${e.title}: solvable ${Number(e.s).toFixed(2)} vs hard ${Number(e.h).toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%). ` +
+                            `This supports the idea that ${e.title.toLowerCase()} provides signal about asker expertise or question clarity.`
+                        );
+                    } else {
+                        const pp = e.s - e.h;
+                        sentences.push(
+                            `${e.title}: solvable ${e.s.toFixed(1)}% vs hard ${e.h.toFixed(1)}% (Δ ${pp.toFixed(1)} percentage points). ` +
+                            `A higher share in the solvable group implies this attribute helps route the question to knowledgeable answerers or makes reproduction easier.`
+                        );
+                    }
+                }
+
+                sentences.push(
+                    'Reasonableness: these factors are sensible proxies. Reputation and early question score reflect both asker experience and early community signaling (which attract attention). ' +
+                    'Code snippets and concise, well-scoped text improve reproducibility — answerers can run or inspect a minimal example rather than guessing missing details. ' +
+                    'Tag counts and question length can indicate topical focus and complexity: too many or irrelevant tags reduce visibility while overly long or vague bodies obscure the real issue. '
+                );
+            }
+
+            insightsEl.innerHTML = '<div class="space-y-2">' + sentences.map(s => `<p>${s}</p>`).join('') + '</div>';
+
+        } catch (e) {
+            console.error(e);
+            alert('Failed to load solvability data: ' + (e.message || e));
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => setTimeout(()=> loadBtn.click(), 300) );
+
+    modalClose.addEventListener('click', ()=>{ modal.classList.add('hidden'); modal.classList.remove('flex'); });
+</script>
+</body>
+</html>

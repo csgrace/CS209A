@@ -1,0 +1,356 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d8659e561bb8aa7db911a50c530ea15d?s=256&d=identicon&r=PG",
+            "account_id": 1906675,
+            "user_type": "registered",
+            "user_id": 1721412,
+            "link": "https://stackoverflow.com/users/1721412/doni-andri-cahyono",
+            "reputation": 793,
+            "display_name": "Doni Andri Cahyono",
+            "accept_rate": 65
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13042522/how-to-use-preparedstatement-setobject-on-jsp",
+        "last_activity_date": 1361944429,
+        "creation_date": 1351048769,
+        "answer_count": 3,
+        "title": "How to use preparedstatement.setObject on JSP?",
+        "body": "<p>I'm still newbie on JSP or Java. I am currently using the existing Java code so called <strong>Conn.java<\/strong> as following:<\/p>\n\n<pre><code>  package org.myclass.auth;\n\n  import java.sql.*;\n  import org.myclass.global.Variable;\n  import org.myclass.auth.LoadProps;\n  import org.apache.commons.dbcp.BasicDataSource;\n  import javax.sql.DataSource;\n\n  public class Conn {\n     String success = \"\";\n  public LoadProps app;\n  public Variable var = new Variable();\n  Connection conn = null;\n  Statement st = null;\n  ResultSet rs = null;\n  int x = 0;\n\n  public Conn(String path)  {\n     app = new LoadProps(path);\n  }\n  public Conn()  {\n     app = new LoadProps(var.getPATH());\n  }\n  public boolean open() {\n     boolean success = false;\n\n    try {\n        DataSource dataSource = setupDataSource(app.getUrl(), app.getUser(), app.getPassword());\n        conn = dataSource.getConnection();\n    } catch (SQLException e) {\n        e.printStackTrace();\n    }\n    return success;\n  }\n  public DataSource setupDataSource(String connectURI, String connectUser, String connectPassword) {\n    BasicDataSource ds = new BasicDataSource();\n    ds.setDriverClassName(\"com.mysql.jdbc.Driver\");\n    ds.setUsername(connectUser);\n    ds.setPassword(connectPassword);\n    ds.setUrl(connectURI);\nreturn ds;\n   }\n  public static void printDataSourceStats(DataSource ds) throws SQLException {\n     BasicDataSource bds = (BasicDataSource) ds;\n  }\n\n  public static void shutdownDataSource(DataSource ds) throws SQLException {\n     BasicDataSource bds = (BasicDataSource) ds;\n     bds.close();\n  }\n\n  public String getUrl()  {\n     return app.getUrl();\n  }\n  public String getUser()  {\n     return app.getUser();\n  }\n  public String getPassword()  {\n    return app.getPassword();   \n  }\n\n  public void close() throws SQLException {\n      if(!conn.isClosed())    {\n        conn.close();\n     }\n  }\n  public ResultSet query(String query)    {\n      try {         \n         st = conn.createStatement();  \n         rs = st.executeQuery(query);\n     }\n     catch(SQLException sqle) {\n        sqle.printStackTrace();\n     }\n    return rs;\n   }\n   public boolean queryInsert(String query)    {\n       boolean value = false;\n      try {\n        st = conn.createStatement();\n        value = st.execute(query);            \n        value = true;\n    }\n    catch(SQLException sqle) {\n        sqle.printStackTrace();\n    }\n    return value;\n    }\n   public int queryUpdate(String query)    {\n       int value = 0;\n       try {\n            st = conn.createStatement();\n           value = st.executeUpdate(query);\n       }\n       catch(SQLException sqle) {\n          sqle.printStackTrace();\n     }\n    return value;\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>in order to use PreparedStatement, so later on I only call this on my JSP codes such as:<\/p>\n\n<pre><code>    &lt;%@ page import=\"java.io.*,java.util.*,java.sql.*\"%&gt;\n    &lt;%@ page import=\"javax.servlet.http.*,javax.servlet.*\" %&gt;\n    &lt;%@ page import=\"org.myclass.auth.Conn\" %&gt;\n    &lt;%@ taglib uri=\"http://java.sun.com/jsp/jstl/core\" prefix=\"c\"%&gt;\n    &lt;%@ taglib uri=\"http://java.sun.com/jsp/jstl/sql\" prefix=\"sql\"%&gt;\n\n\n    &lt;%    \n        String query = \"SELECT adminid FROM administrator where username =  '\"+ session.getAttribute(\"username\") +\"'\";\n        Conn conn = new Conn();\n        ResultSet rsQ;\n        conn.open();\n        rsQ = conn.query(query);\n        rsQ.next();\n\n        int adminid = rsQ.getInt(1);\n        conn.close();\n\n\n        Conn conn1 = new Conn();\n        String insert = \"INSERT INTO campaign  (uid,sender_id,content,Starttime,status,lastmodifiedid,creationtime,msisdnfile) VALUES('\"+ adminid +\"','\"+ request.getParameter(\"sender_id\") +\"','\"+request.getParameter(\"message\")+\"','\"+request.getParameter(\"startTime\")+\"','Running','\"+adminid+\"',now(),'file2.txt')\";\n        out.print(insert);\n        conn1.open();\n        conn1.queryInsert(insert);\n        conn1.close();\n    %&gt;\n<\/code><\/pre>\n\n<p>What am i supposed to do to modify the Conn.java since when I ran the JSP it returns NULL when it goes to <strong>conn1.queryInsert(insert)<\/strong>? And one more thing, what if I use PreparedStatement, what should I do then to keep my JSP the same as above?\nThanks in advance<\/p>\n",
+        "question_id": 13042522,
+        "tags": [
+            "java",
+            "mysql",
+            "jsp"
+        ],
+        "score": -1,
+        "is_answered": false,
+        "view_count": 1492,
+        "last_edit_date": 1351049886
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5252d061371ebb5944acc4447b455d87?s=256&d=identicon&r=PG",
+            "account_id": 383107,
+            "user_type": "registered",
+            "user_id": 738746,
+            "link": "https://stackoverflow.com/users/738746/bhesh-gurung",
+            "reputation": 51080,
+            "display_name": "Bhesh Gurung",
+            "accept_rate": 97
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 13042522,
+        "edited": false,
+        "creation_date": 1351049154,
+        "comment_id": 17708619
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2eaa8d9cb8db4f78deb16bb17eec34c1?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1885169,
+                "user_type": "registered",
+                "user_id": 1704529,
+                "link": "https://stackoverflow.com/users/1704529/yogendra-singh",
+                "reputation": 34467,
+                "display_name": "Yogendra Singh"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1351049524,
+            "creation_date": 1351048985,
+            "body": "<p><strong>Please Note:<\/strong> This is <strong>not advised<\/strong> to keep any business or data access logic in JSPs. JSPs are meant for presentation purpose ONLY. Such data access related code should be moved in server side JAVA classes. Please read about <strong>MVC<\/strong>(Model-View-Controller) pattern to learn more.<\/p>\n\n<p>Get a <code>statement<\/code> object using your <code>connection<\/code>, pass your string query and run <code>executeUpdate<\/code> as below:<\/p>\n\n<pre><code>   conn1.open();\n   Statement statement = conn1.createStatement();\n   statement.executeUpdate(insert);\n   conn1.close();\n<\/code><\/pre>\n",
+            "answer_id": 13042551,
+            "question_id": 13042522,
+            "last_edit_date": 1351049524
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                "account_id": 18600,
+                "user_type": "registered",
+                "user_id": 42769,
+                "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                "reputation": 39948,
+                "display_name": "Adeel Ansari",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1351050229,
+            "creation_date": 1351049410,
+            "body": "<p>Don't do that, please. Keep it to your <a href=\"http://en.wikipedia.org/wiki/Data_access_layer\" rel=\"nofollow noreferrer\">Data Access Layer<\/a>. Don't mess up your JSP with SQL related code.<\/p>\n\n<p>Furthermore, don't pollute your JSP with Java code. Therefore, replace the scriplets with  <a href=\"https://stackoverflow.com/tags/jstl/info\">JSTL<\/a>/<a href=\"https://stackoverflow.com/tags/el/info\">EL<\/a> instead.<\/p>\n\n<ul>\n<li>Simple <a href=\"http://simple.souther.us/ar01s05.html\" rel=\"nofollow noreferrer\">MVC Example<\/a>, from Ben Souther, Sheriff, JavaRanch.<\/li>\n<li><a href=\"http://www.javaranch.com/journal/200603/Journal200603.jsp#a5\" rel=\"nofollow noreferrer\">Scriptless JSP Pages<\/a>, an article from JavaRanch Journal <\/li>\n<\/ul>\n",
+            "answer_id": 13042598,
+            "question_id": 13042522,
+            "last_edit_date": 1495541532
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Jlp9D.jpg?s=256",
+                "account_id": 2126926,
+                "user_type": "registered",
+                "user_id": 1888810,
+                "link": "https://stackoverflow.com/users/1888810/shailesh-saxena",
+                "reputation": 3522,
+                "display_name": "Shailesh Saxena",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1361944429,
+            "creation_date": 1361944429,
+            "body": "<p>According to the MVC2 rules, all the logics related to database issues should be kept in persistence layer using DB bean or Hibernate, JDO like frameworks. And all the business logics should be kept in either bean classes or spring  bean, ejb session bean component.\nIf you are using only jsp in any small application, just follow these steps:<\/p>\n\n<ol>\n<li>Create a separate simple or Bean class taking all the properties as private<\/li>\n<li>Write your logic in that class in the form of public methods<\/li>\n<li>Use <code>&lt;jsp:useBean&gt;, &lt;jsp:setProperty&gt; and &lt;jsp:getProperty&gt;<\/code> like tags in your jsp pages to    access the object of your bean class<\/li>\n<li>call the required methods of your Bean class using id(object refrence)<\/li>\n<\/ol>\n\n<p>And placing java code in jsp is not recommended, so try to use jstl or custom tags .<\/p>\n\n<p>I hope it'll help you... :)<\/p>\n",
+            "answer_id": 15105145,
+            "question_id": 13042522
+        }
+    ],
+    "answer_comments": {
+        "13042551": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2eaa8d9cb8db4f78deb16bb17eec34c1?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 1885169,
+                    "user_type": "registered",
+                    "user_id": 1704529,
+                    "link": "https://stackoverflow.com/users/1704529/yogendra-singh",
+                    "reputation": 34467,
+                    "display_name": "Yogendra Singh"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042551,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/4OArJ.jpg?s=256",
+                    "account_id": 1064245,
+                    "user_type": "registered",
+                    "user_id": 1065197,
+                    "link": "https://stackoverflow.com/users/1065197/luiggi-mendoza",
+                    "reputation": 85898,
+                    "display_name": "Luiggi Mendoza",
+                    "accept_rate": 88
+                },
+                "edited": false,
+                "creation_date": 1351049629,
+                "comment_id": 17708712
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/4OArJ.jpg?s=256",
+                    "account_id": 1064245,
+                    "user_type": "registered",
+                    "user_id": 1065197,
+                    "link": "https://stackoverflow.com/users/1065197/luiggi-mendoza",
+                    "reputation": 85898,
+                    "display_name": "Luiggi Mendoza",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042551,
+                "edited": false,
+                "creation_date": 1351049351,
+                "comment_id": 17708654
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2eaa8d9cb8db4f78deb16bb17eec34c1?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 1885169,
+                    "user_type": "registered",
+                    "user_id": 1704529,
+                    "link": "https://stackoverflow.com/users/1704529/yogendra-singh",
+                    "reputation": 34467,
+                    "display_name": "Yogendra Singh"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042551,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/4OArJ.jpg?s=256",
+                    "account_id": 1064245,
+                    "user_type": "registered",
+                    "user_id": 1065197,
+                    "link": "https://stackoverflow.com/users/1065197/luiggi-mendoza",
+                    "reputation": 85898,
+                    "display_name": "Luiggi Mendoza",
+                    "accept_rate": 88
+                },
+                "edited": false,
+                "creation_date": 1351049284,
+                "comment_id": 17708648
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/4OArJ.jpg?s=256",
+                    "account_id": 1064245,
+                    "user_type": "registered",
+                    "user_id": 1065197,
+                    "link": "https://stackoverflow.com/users/1065197/luiggi-mendoza",
+                    "reputation": 85898,
+                    "display_name": "Luiggi Mendoza",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042551,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5252d061371ebb5944acc4447b455d87?s=256&d=identicon&r=PG",
+                    "account_id": 383107,
+                    "user_type": "registered",
+                    "user_id": 738746,
+                    "link": "https://stackoverflow.com/users/738746/bhesh-gurung",
+                    "reputation": 51080,
+                    "display_name": "Bhesh Gurung",
+                    "accept_rate": 97
+                },
+                "edited": false,
+                "creation_date": 1351049278,
+                "comment_id": 17708642
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5252d061371ebb5944acc4447b455d87?s=256&d=identicon&r=PG",
+                    "account_id": 383107,
+                    "user_type": "registered",
+                    "user_id": 738746,
+                    "link": "https://stackoverflow.com/users/738746/bhesh-gurung",
+                    "reputation": 51080,
+                    "display_name": "Bhesh Gurung",
+                    "accept_rate": 97
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042551,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/4OArJ.jpg?s=256",
+                    "account_id": 1064245,
+                    "user_type": "registered",
+                    "user_id": 1065197,
+                    "link": "https://stackoverflow.com/users/1065197/luiggi-mendoza",
+                    "reputation": 85898,
+                    "display_name": "Luiggi Mendoza",
+                    "accept_rate": 88
+                },
+                "edited": false,
+                "creation_date": 1351049216,
+                "comment_id": 17708630
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/4OArJ.jpg?s=256",
+                    "account_id": 1064245,
+                    "user_type": "registered",
+                    "user_id": 1065197,
+                    "link": "https://stackoverflow.com/users/1065197/luiggi-mendoza",
+                    "reputation": 85898,
+                    "display_name": "Luiggi Mendoza",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 13042551,
+                "edited": false,
+                "creation_date": 1351049155,
+                "comment_id": 17708620
+            }
+        ],
+        "13042598": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                    "account_id": 18600,
+                    "user_type": "registered",
+                    "user_id": 42769,
+                    "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                    "reputation": 39948,
+                    "display_name": "Adeel Ansari",
+                    "accept_rate": 95
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042598,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/d8659e561bb8aa7db911a50c530ea15d?s=256&d=identicon&r=PG",
+                    "account_id": 1906675,
+                    "user_type": "registered",
+                    "user_id": 1721412,
+                    "link": "https://stackoverflow.com/users/1721412/doni-andri-cahyono",
+                    "reputation": 793,
+                    "display_name": "Doni Andri Cahyono",
+                    "accept_rate": 65
+                },
+                "edited": false,
+                "creation_date": 1351075105,
+                "comment_id": 17716491
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d8659e561bb8aa7db911a50c530ea15d?s=256&d=identicon&r=PG",
+                    "account_id": 1906675,
+                    "user_type": "registered",
+                    "user_id": 1721412,
+                    "link": "https://stackoverflow.com/users/1721412/doni-andri-cahyono",
+                    "reputation": 793,
+                    "display_name": "Doni Andri Cahyono",
+                    "accept_rate": 65
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042598,
+                "edited": false,
+                "creation_date": 1351074527,
+                "comment_id": 17716227
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J5ujJ.jpg?s=256",
+                    "account_id": 18600,
+                    "user_type": "registered",
+                    "user_id": 42769,
+                    "link": "https://stackoverflow.com/users/42769/adeel-ansari",
+                    "reputation": 39948,
+                    "display_name": "Adeel Ansari",
+                    "accept_rate": 95
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042598,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/d8659e561bb8aa7db911a50c530ea15d?s=256&d=identicon&r=PG",
+                    "account_id": 1906675,
+                    "user_type": "registered",
+                    "user_id": 1721412,
+                    "link": "https://stackoverflow.com/users/1721412/doni-andri-cahyono",
+                    "reputation": 793,
+                    "display_name": "Doni Andri Cahyono",
+                    "accept_rate": 65
+                },
+                "edited": false,
+                "creation_date": 1351050250,
+                "comment_id": 17708820
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d8659e561bb8aa7db911a50c530ea15d?s=256&d=identicon&r=PG",
+                    "account_id": 1906675,
+                    "user_type": "registered",
+                    "user_id": 1721412,
+                    "link": "https://stackoverflow.com/users/1721412/doni-andri-cahyono",
+                    "reputation": 793,
+                    "display_name": "Doni Andri Cahyono",
+                    "accept_rate": 65
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13042598,
+                "edited": false,
+                "creation_date": 1351049984,
+                "comment_id": 17708767
+            }
+        ]
+    }
+}

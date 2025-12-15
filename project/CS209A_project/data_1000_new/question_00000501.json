@@ -1,0 +1,141 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-9x5DuY-agXc/AAAAAAAAAAI/AAAAAAAABmI/xKDbZSaixx4/s256-rj/photo.jpg",
+            "account_id": 2871526,
+            "user_type": "registered",
+            "user_id": 5621419,
+            "link": "https://stackoverflow.com/users/5621419/pierre-mar%c3%a9chal",
+            "reputation": 13,
+            "display_name": "Pierre Mar&#233;chal"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53443013/how-to-avoid-bounded-wildcard-in-return-parameter",
+        "last_activity_date": 1542961964,
+        "creation_date": 1542961618,
+        "answer_count": 1,
+        "title": "How to avoid (bounded) wildcard in return parameter",
+        "body": "<p>I have an interface with a method returning an <em>immutable<\/em> collection with a bounded wildcard.<\/p>\n\n<pre><code>public interface Foo {\n    Set&lt;? extends Bar&gt; getAllBar();\n}\n\npublic interface Bar {\n    String getBar();\n}\n<\/code><\/pre>\n\n<p>An abstract class implementing that interface as well as several concrete classes extending it without overriding the method:<\/p>\n\n<pre><code>abstract class AbstractFoo implements Foo {\n    public Set&lt;? extends Bar&gt; getAllBar() {\n        return Collections.emptySet();\n    }\n}\n<\/code><\/pre>\n\n<p>And a concrete class extending the abstract class, overriding <em>getAllBar<\/em>, narrowing the wildcard:<\/p>\n\n<pre><code>public class FooImpl extends AbstractFoo {\n    public Set&lt;BarImpl&gt; getAllBar() {\n        return Collections.singleton(new BarImpl());\n    }\n}\n\npublic class BarImpl implements Bar {\n    public String getBar() {\n        return \"Bar\";\n    }\n\n    /**\n     * additional BarImpl method\n     */\n    public boolean isWee() {\n        return true;\n    }\n}\n<\/code><\/pre>\n\n<p>The calling code would usually iterate over the returned collection's items as Bar, but some calling classes, aware of FooImpl expect a collection of BarImpl to be able to call <em>isWee()<\/em>.<\/p>\n\n<pre><code>class Zap {\n    private FooImpl foo;\n\n    boolean hasAnyWee() {\n        return foo.getAllBar().stream().anyMatch(BarImpl::isWee);\n    }\n}\n<\/code><\/pre>\n\n<p>Of course now SonarQube complains about wildcard in return type (<a href=\"https://jira.sonarsource.com/browse/RSPEC-1452\" rel=\"nofollow noreferrer\">https://jira.sonarsource.com/browse/RSPEC-1452<\/a>)<\/p>\n\n<p>But is it so wrong in my case ? <\/p>\n\n<p>How could I possibly avoid this ?<\/p>\n",
+        "question_id": 53443013,
+        "tags": [
+            "java",
+            "return-type",
+            "bounded-wildcard"
+        ],
+        "score": 0,
+        "accepted_answer_id": 53443080,
+        "is_answered": true,
+        "view_count": 193
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/AEHnE.png?s=256",
+            "account_id": 3380632,
+            "user_type": "registered",
+            "user_id": 2837741,
+            "link": "https://stackoverflow.com/users/2837741/daniu",
+            "reputation": 15109,
+            "display_name": "daniu",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1542961889,
+        "creation_date": 1542961889,
+        "body": "<p>Make the interface itself generic:<\/p>\n\n<pre><code>public interface Foo&lt;T extends Bar&gt; {\n    Set&lt;T&gt; getAllBar();\n}\n<\/code><\/pre>\n\n<p>Now you can have<\/p>\n\n<pre><code>public class EmptyFoo implements Foo&lt;BarImpl&gt; {\n    public Set&lt;BarImpl&gt;() { return Collections.emptySet(); }\n}\n<\/code><\/pre>\n",
+        "answer_id": 53443080,
+        "question_id": 53443013
+    }],
+    "answer_comments": {"53443080": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/AEHnE.png?s=256",
+                "account_id": 3380632,
+                "user_type": "registered",
+                "user_id": 2837741,
+                "link": "https://stackoverflow.com/users/2837741/daniu",
+                "reputation": 15109,
+                "display_name": "daniu",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53443080,
+            "reply_to_user": {
+                "profile_image": "https://lh4.googleusercontent.com/-9x5DuY-agXc/AAAAAAAAAAI/AAAAAAAABmI/xKDbZSaixx4/s256-rj/photo.jpg",
+                "account_id": 2871526,
+                "user_type": "registered",
+                "user_id": 5621419,
+                "link": "https://stackoverflow.com/users/5621419/pierre-mar%c3%a9chal",
+                "reputation": 13,
+                "display_name": "Pierre Mar&#233;chal"
+            },
+            "edited": false,
+            "creation_date": 1543232866,
+            "comment_id": 93830548
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-9x5DuY-agXc/AAAAAAAAAAI/AAAAAAAABmI/xKDbZSaixx4/s256-rj/photo.jpg",
+                "account_id": 2871526,
+                "user_type": "registered",
+                "user_id": 5621419,
+                "link": "https://stackoverflow.com/users/5621419/pierre-mar%c3%a9chal",
+                "reputation": 13,
+                "display_name": "Pierre Mar&#233;chal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53443080,
+            "edited": false,
+            "creation_date": 1543229694,
+            "comment_id": 93828928
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/AEHnE.png?s=256",
+                "account_id": 3380632,
+                "user_type": "registered",
+                "user_id": 2837741,
+                "link": "https://stackoverflow.com/users/2837741/daniu",
+                "reputation": 15109,
+                "display_name": "daniu",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53443080,
+            "reply_to_user": {
+                "profile_image": "https://lh4.googleusercontent.com/-9x5DuY-agXc/AAAAAAAAAAI/AAAAAAAABmI/xKDbZSaixx4/s256-rj/photo.jpg",
+                "account_id": 2871526,
+                "user_type": "registered",
+                "user_id": 5621419,
+                "link": "https://stackoverflow.com/users/5621419/pierre-mar%c3%a9chal",
+                "reputation": 13,
+                "display_name": "Pierre Mar&#233;chal"
+            },
+            "edited": false,
+            "creation_date": 1543052735,
+            "comment_id": 93785854
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-9x5DuY-agXc/AAAAAAAAAAI/AAAAAAAABmI/xKDbZSaixx4/s256-rj/photo.jpg",
+                "account_id": 2871526,
+                "user_type": "registered",
+                "user_id": 5621419,
+                "link": "https://stackoverflow.com/users/5621419/pierre-mar%c3%a9chal",
+                "reputation": 13,
+                "display_name": "Pierre Mar&#233;chal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53443080,
+            "edited": false,
+            "creation_date": 1543051140,
+            "comment_id": 93785530
+        }
+    ]}
+}

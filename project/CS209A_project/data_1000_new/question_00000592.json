@@ -1,0 +1,112 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-Rg4kdeHROF0/AAAAAAAAAAI/AAAAAAAABnw/y1Fn-X064_g/s256-rj/photo.jpg",
+            "account_id": 235692,
+            "user_type": "registered",
+            "user_id": 8489454,
+            "link": "https://stackoverflow.com/users/8489454/faiz-fadli",
+            "reputation": 25,
+            "display_name": "faiz fadli"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/45777999/how-to-add-loading-dialog-while-media-player-is-in-preparing-in-service-android",
+        "last_activity_date": 1587527883,
+        "creation_date": 1503197283,
+        "answer_count": 4,
+        "title": "How to add loading dialog while media player is in preparing in service (Android)",
+        "body": "<p>I built app to play audio from internet, I use service to play audio in background, the question is how to show loding dialog while media player is in preparing posision in service(background) hire my Code.<\/p>\n\n<h1>Activity<\/h1>\n\n<pre><code>package com.uqifm.onlineradio;\n.......\npublic class MainActivity extends AppCompatActivity {\n\n    Button b_play;\n    Boolean started = false;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        requestWindowFeature(Window.FEATURE_NO_TITLE);\n\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        b_play = (Button) findViewById(R.id.b_play);\n\n        b_play.setOnClickListener(new View.OnClickListener() {\n            @Override\n            public void onClick(View view) {\n                if(started){\n                    started = false;\n                    stopService(new Intent(MainActivity.this,MyService.class));\n                    b_play.setText(\"PLAY\");\n                }else{\n                    started = true;\n                    startService(new Intent(MainActivity.this,MyService.class));\n                    b_play.setText(\"STOP\");\n                }\n            }\n        });\n    }\n\n    @Override\n    protected void onDestroy() {\n        super.onDestroy();\n        stopService(new Intent(MainActivity.this,MyService.class));\n    }\n}\n<\/code><\/pre>\n\n<h1>Service<\/h1>\n\n<pre><code>package com.uqifm.onlineradio;\n....................\npublic class MyService extends Service {\n\n    MediaPlayer mediaPlayer;\n    String stream = \"http://xxxxx:36365\";\n\n    @Override\n    public IBinder onBind(Intent intent) {\n        return null;\n    }\n\n    @Override\n    public void onCreate() {\n        mediaPlayer = new MediaPlayer();\n        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);\n        try {\n            mediaPlayer.setDataSource(stream);\n            mediaPlayer.prepare();\n        } catch (IOException e) {\n            e.printStackTrace();\n        }\n    }\n\n    @Override\n    public int onStartCommand(Intent intent, int flags, int startId) {\n        mediaPlayer.start();\n        return super.onStartCommand(intent, flags, startId);\n    }\n\n    @Override\n    public void onDestroy() {\n        mediaPlayer.release();\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 45777999,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 1539,
+        "last_edit_date": 1538322591
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/852863871429825/picture?type=large",
+                "account_id": 6657226,
+                "user_type": "registered",
+                "user_id": 5137352,
+                "link": "https://stackoverflow.com/users/5137352/nabin-bhandari",
+                "reputation": 16489,
+                "display_name": "Nabin Bhandari",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1503199939,
+            "creation_date": 1503199939,
+            "body": "<p>Register broadcasts, Start a <code>ProgressDialog<\/code> before you start the service. Then wait for the broadcast. After the broadcast, hide the dialog. see example in this thread. <a href=\"https://stackoverflow.com/questions/4823133/send-data-from-service-back-to-my-activity\">Send data from Service back to my activity<\/a><\/p>\n",
+            "answer_id": 45778206,
+            "question_id": 45777999
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4e6939d61468f8409dd1197f47e8b871?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9411286,
+                "user_type": "registered",
+                "user_id": 6995879,
+                "link": "https://stackoverflow.com/users/6995879/mukesh-kumar",
+                "reputation": 231,
+                "display_name": "Mukesh Kumar"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1503211146,
+            "creation_date": 1503211146,
+            "body": "<p>Put a ProgressDialog in xml and set the visibility according to your requirement. Use interface for communicating with service.<\/p>\n",
+            "answer_id": 45779202,
+            "question_id": 45777999
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1170938742990801/picture?type=large",
+                "account_id": 9671880,
+                "user_type": "registered",
+                "user_id": 7176532,
+                "link": "https://stackoverflow.com/users/7176532/eby-cloudins",
+                "reputation": 111,
+                "display_name": "Eby Cloudins"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1517228678,
+            "creation_date": 1517226420,
+            "body": "<p>You can use <code>Broadcast<\/code> or try <code>EventBus<\/code> which is much more easier. You can post an event from the service using <code>EventBus<\/code> and receive the the broadcast in <code>MainActivity<\/code> and update the progress dialogue.<br>\n<a href=\"https://github.com/greenrobot/EventBus\" rel=\"nofollow noreferrer\">Please follow the link.<\/a><\/p>\n",
+            "answer_id": 48500530,
+            "question_id": 45777999,
+            "last_edit_date": 1517228678
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/8NQY9yTK.jpg?s=256",
+                "account_id": 1164443,
+                "user_type": "registered",
+                "user_id": 1143361,
+                "link": "https://stackoverflow.com/users/1143361/badr-bujbara",
+                "reputation": 8757,
+                "display_name": "Badr Bujbara",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1587527883,
+            "creation_date": 1587527883,
+            "body": "<p>Maybe something like this:<\/p>\n\n<pre><code>    fun playAudio(audioUrl: String){\n    showProgressBar()\n    var mediaPlayer: MediaPlayer? = MediaPlayer().apply {\n        setAudioStreamType(AudioManager.STREAM_MUSIC)\n        setDataSource(audioUrl)\n        prepareAsync() // might take long! (for buffering, etc)\n\n    }\n    mediaPlayer?.setOnPreparedListener {\n        hideProgressBar()\n        it.start()\n    } \n    mediaPlayer?.setOnCompletionListener {\n        mediaPlayer.release()\n    } \n}\n<\/code><\/pre>\n",
+            "answer_id": 61357078,
+            "question_id": 45777999
+        }
+    ],
+    "answer_comments": {}
+}

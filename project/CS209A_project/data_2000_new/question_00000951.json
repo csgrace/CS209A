@@ -1,0 +1,50 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f3d2a71fec10df53feff3c7cefe82139?s=256&d=identicon&r=PG",
+            "account_id": 444523,
+            "user_type": "registered",
+            "user_id": 836376,
+            "link": "https://stackoverflow.com/users/836376/kevinbui",
+            "reputation": 1189,
+            "display_name": "KevinBui",
+            "accept_rate": 77
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73229693/how-have-jackson-use-tostring-method-if-object-have-no-public-accessors",
+        "last_activity_date": 1659579618,
+        "creation_date": 1659579618,
+        "answer_count": 0,
+        "title": "How have Jackson use toString method if object have no public accessors?",
+        "body": "<p>I am looking for a solution that have Jackson use toString method whenever it can not serialize an object type.<\/p>\n<p>Let me explain more detail.<\/p>\n<p>I have a class:<\/p>\n<pre><code>@AllArgsConstructor\npublic class TestJackson {\n    public String RequestId;\n    public AntiSerialize foo;\n    @JsonFormat(pattern = &quot;yyyy-MM-dd HH:mm:ss&quot;)\n    public LocalDateTime dateRequest;\n    public Map&lt;String, Object&gt; headers;\n\n    private static class AntiSerialize {\n        @Override\n        public String toString() {\n            return &quot;AntiSerialize &quot; + ZonedDateTime.now().toEpochSecond();\n        }\n    }\n\n    public static TestJackson createSample() {\n        return new TestJackson(\n            &quot;123&quot;,\n            new TestJackson.AntiSerialize(),\n            LocalDateTime.now(),\n            Map.of(&quot;content&quot;, 999,\n                &quot;b3&quot;, new TestJackson.AntiSerialize(),\n                &quot;b4&quot;, Arrays.asList(\n                    new TestJackson.AntiSerialize(),\n                    new TestJackson.AntiSerialize()\n                )\n            )\n        );\n\n    }\n}\n<\/code><\/pre>\n<p>This is to test serialize object<\/p>\n<pre><code>var OM = new ObjectMapper()\n           .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);\ntry {\n    //var f = TestJackson.createSample().foo;\n    //out.println(((Object)f).toString());\n    var json = OM.writerWithDefaultPrettyPrinter()\n              .writeValueAsString(TestJackson.createSample());\n    out.println(json);\n} catch (Exception e) {\n    e.printStackTrace(out);\n}\n<\/code><\/pre>\n<p>It prints<\/p>\n<pre><code>{\n  &quot;RequestId&quot; : &quot;123&quot;,\n  &quot;foo&quot; : { },\n  &quot;dateRequest&quot; : &quot;2022-08-04 09:04:14&quot;,\n  &quot;headers&quot; : {\n    &quot;b3&quot; : { },\n    &quot;b4&quot; : [ { }, { } ],\n    &quot;content&quot; : 999\n  }\n}\n<\/code><\/pre>\n<p>But I expect:<\/p>\n<pre><code>{\n  &quot;RequestId&quot; : &quot;123&quot;,\n  &quot;foo&quot; : &quot;AntiSerialize 1659578741&quot;,\n  &quot;dateRequest&quot; : &quot;2022-08-04 09:04:14&quot;,\n  &quot;headers&quot; : {\n    &quot;b3&quot; : &quot;AntiSerialize 1659578752&quot;,\n    &quot;b4&quot; : [ &quot;AntiSerialize 1659578763&quot;, &quot;AntiSerialize 1659578774&quot; ],\n    &quot;content&quot; : 999\n  }\n}\n<\/code><\/pre>\n<p>Assume <code>TestJackson<\/code> is third party class and can't modify.\n<code>AntiSerialize<\/code> is also a private nested class.<\/p>\n",
+        "question_id": 73229693,
+        "tags": [
+            "java",
+            "json",
+            "serialization",
+            "jackson"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 214
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/PO7Uz.jpg?s=256",
+            "account_id": 2673407,
+            "user_type": "registered",
+            "user_id": 2310289,
+            "link": "https://stackoverflow.com/users/2310289/scary-wombat",
+            "reputation": 44872,
+            "display_name": "Scary Wombat"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 73229693,
+        "edited": false,
+        "creation_date": 1659580068,
+        "comment_id": 129330034
+    }],
+    "answers": [],
+    "answer_comments": {}
+}

@@ -1,0 +1,171 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c451e68f5ad344c439563619a301b19a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12000079,
+            "user_type": "registered",
+            "user_id": 8780314,
+            "link": "https://stackoverflow.com/users/8780314/taymeer",
+            "reputation": 1,
+            "display_name": "Taymeer"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/46778444/servlet-error-checking-multiple-variables",
+        "last_activity_date": 1508188285,
+        "creation_date": 1508185106,
+        "answer_count": 1,
+        "title": "Servlet Error - Checking Multiple Variables",
+        "body": "<pre><code>import java.io.IOException;\nimport java.sql.Connection;\nimport java.sql.DriverManager;\nimport java.sql.ResultSet;\n\nimport javax.servlet.ServletException;\nimport javax.servlet.annotation.WebServlet;\nimport javax.servlet.http.HttpServlet;\nimport javax.servlet.http.HttpServletRequest;\nimport javax.servlet.http.HttpServletResponse;\n\nimport com.mysql.jdbc.PreparedStatement;\n\n/**\n * Servlet implementation class Login\n */\n@WebServlet(\"/Login\")\npublic class Login extends HttpServlet {\n    private static final long serialVersionUID = 1L;\n\n    /**\n     * @see HttpServlet#HttpServlet()\n     */\n    public Login() {\n        super();\n        // TODO Auto-generated constructor stub\n    }\n\n    /**\n     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)\n     */\n    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {\n        // TODO Auto-generated method stub\n        response.getWriter().append(\"Served at: \").append(request.getContextPath());\n    }\n\n    /**\n     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)\n     */\n    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {\n\n\n\n        response.setContentType(\"text/html\");  \n        Connection conn = null;\n        String url=\"jdbc:mysql://localhost:3306/\";\n        String dbName=\"Tamir\";\n        String driver=\"com.mysql.jdbc.Driver\";\n\n\n\n    try{  \n         request.setAttribute(\"message\", \"\");\n        String nick = request.getParameter(\"check_name\");\n        String password = request.getParameter(\"check_password\");\n\n\n      Class.forName(driver).newInstance();  \n      conn = DriverManager.getConnection(url+dbName,\"root\", \"tamir\");\n      //admin check\n      /*\n      java.sql.PreparedStatement st2 = conn.prepareStatement(\"SELECT * FROM users WHERE nickname = ? or email = ? and password = ? and admin = T\");\n      st2.setString(1, nick);\n      st2.setString(2, nick);\n      st2.setString(3, password);\n      ResultSet r2=st2.executeQuery();\n\n      if(r2.next()) {\n        request.getSession().setAttribute(\"admin\", nick);\n    }\n    */\n      //regular check\n      java.sql.PreparedStatement st = conn.prepareStatement(\"SELECT * FROM users WHERE nickname = ? or email = ? and password = ?\");\n      st.setString(1, nick);\n      st.setString(2, nick);\n      st.setString(3, password);\n      ResultSet r1=st.executeQuery();\n\n      if(r1.next()) {\n\n\n            request.getSession().setAttribute(\"user\", nick);\n             request.getRequestDispatcher(\"/tf2main.jsp\").forward(request, response);\n\n\n      } else {\n\n\n\n         request.setAttribute(\"message\", \"Username or password are incorrect.\");\n        request.getSession().setAttribute(\"user\", null);  \n         request.getRequestDispatcher(\"/Login.jsp\").forward(request, response);\n\n      }\n\n    }catch (Exception ex) {\n        System.out.println(\"Error\");\n    }\n    }\n\n}\n<\/code><\/pre>\n\n<p>Hello. So I've made the code above and it is working perfectly, but when I add the comment [which I really need, in order to check if he's an admin... Cruical for me] it just throws the exception for some reason. <\/p>\n\n<p>The only other souloution I've thought about was redricting to another servlet, doing the same action  somehow but that's impossible so I'm kinda stuck, you also can't use ERB.<\/p>\n\n<p>I've tried everything and nothing works.<\/p>\n\n<p>Edit: The error being throwed is:<\/p>\n\n<pre><code>com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: Unknown column 'T' in 'where clause'\nat sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)\nat sun.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)\nat sun.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)\nat java.lang.reflect.Constructor.newInstance(Unknown Source)\nat com.mysql.jdbc.Util.handleNewInstance(Util.java:425)\nat com.mysql.jdbc.Util.getInstance(Util.java:408)\nat com.mysql.jdbc.SQLError.createSQLException(SQLError.java:943)\nat com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3973)\nat com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3909)\nat com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:2527)\nat com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2680)\nat com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2487)\nat com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:1858)\nat com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:1966)\nat Login.doPost(Login.java:68)\nat javax.servlet.http.HttpServlet.service(HttpServlet.java:647)\nat javax.servlet.http.HttpServlet.service(HttpServlet.java:728)\nat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:305)\nat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)\nat org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)\nat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)\nat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)\nat org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:222)\nat org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:123)\nat org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:502)\nat org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:171)\nat org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:100)\nat org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:953)\nat org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:118)\nat org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:408)\nat org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1041)\nat org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:603)\nat org.apache.tomcat.util.net.JIoEndpoint$SocketProcessor.run(JIoEndpoint.java:312)\nat java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)\nat java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)\nat java.lang.Thread.run(Unknown Source)\n<\/code><\/pre>\n",
+        "question_id": 46778444,
+        "tags": [
+            "java",
+            "servlets"
+        ],
+        "score": -1,
+        "is_answered": false,
+        "view_count": 77,
+        "last_edit_date": 1508188114
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c451e68f5ad344c439563619a301b19a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12000079,
+                "user_type": "registered",
+                "user_id": 8780314,
+                "link": "https://stackoverflow.com/users/8780314/taymeer",
+                "reputation": 1,
+                "display_name": "Taymeer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778444,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/25308d33862d9b72e0b93160b1fd778c?s=256&d=identicon&r=PG",
+                "account_id": 3509196,
+                "user_type": "registered",
+                "user_id": 2933977,
+                "link": "https://stackoverflow.com/users/2933977/stdunbar",
+                "reputation": 17640,
+                "display_name": "stdunbar"
+            },
+            "edited": false,
+            "creation_date": 1508188132,
+            "comment_id": 80504082
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/25308d33862d9b72e0b93160b1fd778c?s=256&d=identicon&r=PG",
+                "account_id": 3509196,
+                "user_type": "registered",
+                "user_id": 2933977,
+                "link": "https://stackoverflow.com/users/2933977/stdunbar",
+                "reputation": 17640,
+                "display_name": "stdunbar"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778444,
+            "edited": false,
+            "creation_date": 1508188002,
+            "comment_id": 80504026
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c451e68f5ad344c439563619a301b19a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12000079,
+                "user_type": "registered",
+                "user_id": 8780314,
+                "link": "https://stackoverflow.com/users/8780314/taymeer",
+                "reputation": 1,
+                "display_name": "Taymeer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778444,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/25308d33862d9b72e0b93160b1fd778c?s=256&d=identicon&r=PG",
+                "account_id": 3509196,
+                "user_type": "registered",
+                "user_id": 2933977,
+                "link": "https://stackoverflow.com/users/2933977/stdunbar",
+                "reputation": 17640,
+                "display_name": "stdunbar"
+            },
+            "edited": false,
+            "creation_date": 1508187570,
+            "comment_id": 80503831
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/25308d33862d9b72e0b93160b1fd778c?s=256&d=identicon&r=PG",
+                "account_id": 3509196,
+                "user_type": "registered",
+                "user_id": 2933977,
+                "link": "https://stackoverflow.com/users/2933977/stdunbar",
+                "reputation": 17640,
+                "display_name": "stdunbar"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778444,
+            "edited": false,
+            "creation_date": 1508185223,
+            "comment_id": 80502741
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/1ZcA5.jpg?s=256",
+                "account_id": 2264163,
+                "user_type": "registered",
+                "user_id": 1993392,
+                "link": "https://stackoverflow.com/users/1993392/m-le-rutte",
+                "reputation": 3563,
+                "display_name": "M. le Rutte",
+                "accept_rate": 29
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 46778444,
+            "edited": false,
+            "creation_date": 1508185180,
+            "comment_id": 80502716
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/25308d33862d9b72e0b93160b1fd778c?s=256&d=identicon&r=PG",
+            "account_id": 3509196,
+            "user_type": "registered",
+            "user_id": 2933977,
+            "link": "https://stackoverflow.com/users/2933977/stdunbar",
+            "reputation": 17640,
+            "display_name": "stdunbar"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1508188285,
+        "creation_date": 1508188285,
+        "body": "<p>Update the query to be something like:<\/p>\n\n<pre><code>java.sql.PreparedStatement st2 =\n    conn.prepareStatement(\"SELECT * FROM users WHERE nickname = ? or email = ? and password = ? and admin = 'T'\");\n<\/code><\/pre>\n\n<p>Note the single quote marks around the <code>T<\/code> in the query.<\/p>\n",
+        "answer_id": 46779166,
+        "question_id": 46778444
+    }],
+    "answer_comments": {"46779166": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c451e68f5ad344c439563619a301b19a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12000079,
+            "user_type": "registered",
+            "user_id": 8780314,
+            "link": "https://stackoverflow.com/users/8780314/taymeer",
+            "reputation": 1,
+            "display_name": "Taymeer"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 46779166,
+        "edited": false,
+        "creation_date": 1508189086,
+        "comment_id": 80504507
+    }]}
+}

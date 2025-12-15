@@ -1,0 +1,244 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/48dc46b45ce133a1bd6f3bf57e9cdb3e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1015001,
+            "user_type": "registered",
+            "user_id": 1026764,
+            "link": "https://stackoverflow.com/users/1026764/nomad",
+            "reputation": 7854,
+            "display_name": "noMAD",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8981589/close-file-in-finally-block-doesnt-work",
+        "last_activity_date": 1642826174,
+        "creation_date": 1327374917,
+        "answer_count": 4,
+        "title": "Close file in finally block doesn&#39;t work",
+        "body": "<pre><code>try {\n    FileReader fr = new FileReader(file);\n    BufferedReader br = new BufferedReader(fr);\n    String line = null;\n} catch (FileNotFoundException fnf) {\n    fnf.printStackTrace();\n} finally {\n    fr.close();\n}\n<\/code><\/pre>\n\n<p>The <code>fr.close()<\/code> shows an error:<\/p>\n\n<blockquote>\n  <p>fr cannot be resolved<\/p>\n<\/blockquote>\n\n<p>I had read that closing a file in the finally block is a good practice.<br>\nWhat is that am doing wrong?<\/p>\n",
+        "question_id": 8981589,
+        "tags": [
+            "java",
+            "try-catch-finally"
+        ],
+        "score": 16,
+        "accepted_answer_id": 8981602,
+        "is_answered": true,
+        "view_count": 28031,
+        "last_edit_date": 1327375227
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d84b558fd67be10d5a718fb94231909d?s=256&d=identicon&r=PG",
+                "account_id": 93689,
+                "user_type": "moderator",
+                "user_id": 256196,
+                "link": "https://stackoverflow.com/users/256196/bohemian",
+                "reputation": 427464,
+                "display_name": "Bohemian",
+                "accept_rate": 77
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 29,
+            "is_accepted": true,
+            "last_activity_date": 1327375416,
+            "creation_date": 1327375020,
+            "body": "<p>The variable <code>fr<\/code> only has scope within the <code>try<\/code> block. It is out of scope in the finally block. You need to declare it <em>before<\/em> the <code>try<\/code> block:<\/p>\n\n<pre><code>FileReader fr = null;\ntry {\n    fr = new FileReader(file);\n    BufferedReader br = new BufferedReader(fr);\n    String line = null;\n} catch (FileNotFoundException e) {\n    e.printStackTrace();\n} finally {\n    if (fr != null) {\n        try {\n            fr.close();\n        } catch (IOException e) {\n            // This is unrecoverable. Just report it and move on\n            e.printStackTrace();\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>This is quite a common pattern of code, so it's good to remember it for future similar situations.<\/p>\n\n<p>Consider throwing <code>IOException<\/code> from this method - printing track traces isn't very helpful to callers, <em>and<\/em> you wouldn't need the nested try catch around <code>fr.close()<\/code><\/p>\n",
+            "answer_id": 8981602,
+            "question_id": 8981589,
+            "last_edit_date": 1327375416
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/37d94d72ce28a1a1eea77568b2a871d9?s=256&d=identicon&r=PG",
+                "account_id": 1108799,
+                "user_type": "registered",
+                "user_id": 1099643,
+                "link": "https://stackoverflow.com/users/1099643/kushan",
+                "reputation": 10713,
+                "display_name": "Kushan",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 11,
+            "is_accepted": false,
+            "last_activity_date": 1327375265,
+            "creation_date": 1327375265,
+            "body": "<p>Now finally block is not needed,<\/p>\n\n<pre><code>try (FileReader fr = new FileReader(file);\n    BufferedReader br = new BufferedReader(fr);){\n\n    String line = null;\n\n    }\n\n} catch(FileNotFoundException fnf) {\n    fnf.printStackTrace();\n} \n<\/code><\/pre>\n\n<p>now automatically close your readers<\/p>\n",
+            "answer_id": 8981619,
+            "question_id": 8981589
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/913acc75c0777600b8c85ae549b099df?s=256&d=identicon&r=PG",
+                "account_id": 290947,
+                "user_type": "registered",
+                "user_id": 592795,
+                "link": "https://stackoverflow.com/users/592795/marimaf",
+                "reputation": 5420,
+                "display_name": "marimaf",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1327375623,
+            "creation_date": 1327375623,
+            "body": "<p>You have a problem with your scopes. If you really want to use that syntax you should fix it like this:<\/p>\n\n<pre><code>FileReader fr = null;\ntry {\n    fr = new FileReader(file);\n    BufferedReader br = new BufferedReader(fr);\n    String line = null;\n} catch (FileNotFoundException fnf) {\n    fnf.printStackTrace();\n} finally {\n    if( fr != null)\n       fr.close();\n}\n<\/code><\/pre>\n\n<p>that way, fr will exist in the finally's block scope.<\/p>\n",
+            "answer_id": 8981660,
+            "question_id": 8981589
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a/AATXAJxuICsaPQV8jkEsKtTrEttfP2o2vMz69u93y0Oh=k-s256",
+                "account_id": 24016533,
+                "user_type": "registered",
+                "user_id": 17999420,
+                "link": "https://stackoverflow.com/users/17999420/isuri-mendis",
+                "reputation": 1,
+                "display_name": "Isuri Mendis"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1642826174,
+            "creation_date": 1642826174,
+            "body": "<pre><code>public static void main(String[] args) throws IOException{\n        FileReader file1 = null;\n        try{\n            file1 = new FileReader(&quot;blaaa.txt&quot;);//this file does not exist\n        }\n        catch (FileNotFoundException e){}\n        catch (IOException e)  {e.printStackTrace();}\n        finally {\n            try{file1.close();}\n            catch (NullPointerException e){\n            }\n            finally {\n                System.out.println(&quot;Thank you, please try again&quot;);\n            }\n        }\n    }\n<\/code><\/pre>\n",
+            "answer_id": 70810026,
+            "question_id": 8981589
+        }
+    ],
+    "answer_comments": {
+        "8981602": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/b53c0fe850111d3f1bbd41c24c7c62b3?s=256&d=identicon&r=PG",
+                    "account_id": 86093,
+                    "user_type": "registered",
+                    "user_id": 239657,
+                    "link": "https://stackoverflow.com/users/239657/beni-cherniavsky-paskin",
+                    "reputation": 10207,
+                    "display_name": "Beni Cherniavsky-Paskin"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8981602,
+                "edited": false,
+                "creation_date": 1425817504,
+                "comment_id": 46108851
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d84b558fd67be10d5a718fb94231909d?s=256&d=identicon&r=PG",
+                    "account_id": 93689,
+                    "user_type": "moderator",
+                    "user_id": 256196,
+                    "link": "https://stackoverflow.com/users/256196/bohemian",
+                    "reputation": 427464,
+                    "display_name": "Bohemian",
+                    "accept_rate": 77
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8981602,
+                "edited": false,
+                "creation_date": 1327375442,
+                "comment_id": 11253398
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/59e52b46611567bd018e865500cf92fd?s=256&d=identicon&r=PG",
+                    "account_id": 916642,
+                    "user_type": "registered",
+                    "user_id": 949300,
+                    "link": "https://stackoverflow.com/users/949300/user949300",
+                    "reputation": 15749,
+                    "display_name": "user949300",
+                    "accept_rate": 65
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8981602,
+                "edited": false,
+                "creation_date": 1327375416,
+                "comment_id": 11253394
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/48dc46b45ce133a1bd6f3bf57e9cdb3e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 1015001,
+                    "user_type": "registered",
+                    "user_id": 1026764,
+                    "link": "https://stackoverflow.com/users/1026764/nomad",
+                    "reputation": 7854,
+                    "display_name": "noMAD",
+                    "accept_rate": 72
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8981602,
+                "edited": false,
+                "creation_date": 1327375172,
+                "comment_id": 11253360
+            }
+        ],
+        "8981619": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5c4934b43365e9efb1e68722370f3faf?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 1476930,
+                    "user_type": "registered",
+                    "user_id": 1387113,
+                    "link": "https://stackoverflow.com/users/1387113/hd84335",
+                    "reputation": 10183,
+                    "display_name": "hd84335",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 8981619,
+                "edited": false,
+                "creation_date": 1552322882,
+                "comment_id": 96956312
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f75b1f7433cd473a2440364b73cfb9b0?s=256&d=identicon&r=PG",
+                    "account_id": 6112146,
+                    "user_type": "registered",
+                    "user_id": 4768218,
+                    "link": "https://stackoverflow.com/users/4768218/axxis",
+                    "reputation": 1034,
+                    "display_name": "axxis"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 8981619,
+                "edited": false,
+                "creation_date": 1454764007,
+                "comment_id": 58196601
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/59e52b46611567bd018e865500cf92fd?s=256&d=identicon&r=PG",
+                    "account_id": 916642,
+                    "user_type": "registered",
+                    "user_id": 949300,
+                    "link": "https://stackoverflow.com/users/949300/user949300",
+                    "reputation": 15749,
+                    "display_name": "user949300",
+                    "accept_rate": 65
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 2,
+                "post_id": 8981619,
+                "edited": false,
+                "creation_date": 1327375525,
+                "comment_id": 11253413
+            }
+        ]
+    }
+}

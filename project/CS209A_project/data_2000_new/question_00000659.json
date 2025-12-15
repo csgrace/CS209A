@@ -1,0 +1,151 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dbffc1dd248042c8252cd56bfd540f0a?s=256&d=identicon&r=PG",
+            "account_id": 485913,
+            "user_type": "registered",
+            "user_id": 902509,
+            "link": "https://stackoverflow.com/users/902509/ulquiorra",
+            "reputation": 945,
+            "display_name": "ulquiorra",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/28563513/read-complex-json-file-with-spring-batch",
+        "last_activity_date": 1424225294,
+        "creation_date": 1424182794,
+        "answer_count": 2,
+        "title": "read complex json file with spring batch",
+        "body": "<p>i have a complex json file( with nested json arrays) structure like this: <br/><\/p>\n\n<pre><code>{\"persons\":[ \n{\"id\":\"1\", \"firstName\": \"X\", \"lastName\": \"X\", \"infos\": [{\"address\":[{\"city\": \"X\", \"country\": \"X\"}]}]},\n{\"id\":\"2\", \"firstName\": \"Y\", \"lastName\": \"Y\", \"infos\": [{\"address\":[{\"city\": \"Y\", \"country\": \"Y\"}]}]}\n]}\n<\/code><\/pre>\n\n<p>I want to read each line ( one person) separately <\/p>\n\n<p>So my spring batch configuration is like this<\/p>\n\n<pre><code>&lt;bean id=\"reader\" class=\"org.springframework.batch.item.file.FlatFileItemReader\"\n    scope=\"step\"&gt;\n    &lt;property name=\"resource\" value=\"#{jobParameters[file]}\" /&gt;\n    &lt;property name=\"recordSeparatorPolicy\" ref=\"recordPolicy\" /&gt;\n    &lt;property name=\"lineMapper\" ref=\"lineMapper\" /&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"lineMapper\"\n    class=\"com.batchs.personJob.PersonLineMapper\"&gt;\n    &lt;property name=\"delegate\" ref=\"lineMapperType\" /&gt;\n&lt;/bean&gt;\n\n&lt;bean id=\"lineMapperType\"\n    class=\"org.springframework.batch.item.file.mapping.JsonLineMapper\" /&gt;\n\n&lt;bean id=\"recordPolicy\"\n    class=\"org.springframework.batch.item.file.separator.JsonRecordSeparatorPolicy\" /&gt;\n<\/code><\/pre>\n\n<p>The mapper class looks like<\/p>\n\n<pre><code>    public class PersonLineMapper implements LineMapper&lt;Person&gt; {\n    private JsonLineMapper delegate;\n\n    public mapLine(String line, int lineNumber) throws Exception {\n        Map&lt;String, Object&gt; personAsMap = delegate.mapLine(line, lineNumber);\n        Person person = new Person();\n        // map fields\n        return person ;\n    }\n\n    public void setDelegate(JsonLineMapper delegate) {\n        this.delegate = delegate;\n    }\n}\n<\/code><\/pre>\n\n<p>The problem is than the reader reads only one line (so one commit) because he reads the persons array in my json file like a whole line but i want read instead line per line ( one person at time)<\/p>\n\n<p>How to do this ?<\/p>\n\n<p>I have tried with a simple json file like this :<\/p>\n\n<pre><code>  { \"id\": \"1\",\n      \"firstName\": \"X\",\n      \"lastName\": \"X\"}\n  { \"id\": \"2\",\n      \"firstName\": \"Y\",\n      \"lastName\": \"Y\"}\n<\/code><\/pre>\n\n<p>And it works good ... I read each person one by one<\/p>\n\n<p>Thank you very much<\/p>\n",
+        "question_id": 28563513,
+        "tags": [
+            "java",
+            "json",
+            "spring",
+            "spring-batch"
+        ],
+        "score": 2,
+        "accepted_answer_id": 28565828,
+        "is_answered": true,
+        "view_count": 7001,
+        "last_edit_date": 1424187193
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/4JukK.jpg?s=256",
+                "account_id": 708374,
+                "user_type": "registered",
+                "user_id": 618059,
+                "link": "https://stackoverflow.com/users/618059/michael-minella",
+                "reputation": 21553,
+                "display_name": "Michael Minella",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1424189471,
+            "creation_date": 1424189471,
+            "body": "<p>Unfortunately, you have two options:<\/p>\n\n<ol>\n<li>Write your own record separator that ignores the wrapper persons element/line.<\/li>\n<li>Edit the file in a step before reading it to remove that wrapper line using something like a sed command.<\/li>\n<\/ol>\n\n<p>If you choose option 2, you can execute it via the <code>SystemCommandTasklet<\/code> in the step before the one you actually process it in.<\/p>\n",
+            "answer_id": 28565828,
+            "question_id": 28563513
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/E0nMT.png?s=256",
+                "account_id": 5703004,
+                "user_type": "registered",
+                "user_id": 4507438,
+                "link": "https://stackoverflow.com/users/4507438/john-thompson",
+                "reputation": 524,
+                "display_name": "John Thompson"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1424225294,
+            "creation_date": 1424225294,
+            "body": "<p>An alternative could be to run the file through a transform step to flatten the object structure, so you just have an array of People to deal with. Which should be fine, unless you're dealing with large files. <\/p>\n",
+            "answer_id": 28574786,
+            "question_id": 28563513
+        }
+    ],
+    "answer_comments": {
+        "28574786": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dbffc1dd248042c8252cd56bfd540f0a?s=256&d=identicon&r=PG",
+                "account_id": 485913,
+                "user_type": "registered",
+                "user_id": 902509,
+                "link": "https://stackoverflow.com/users/902509/ulquiorra",
+                "reputation": 945,
+                "display_name": "ulquiorra",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 28574786,
+            "edited": false,
+            "creation_date": 1424336310,
+            "comment_id": 45509533
+        }],
+        "28565828": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/fce9644bacdddf0da96b314db4f71a3b?s=256&d=identicon&r=PG",
+                    "account_id": 1569088,
+                    "user_type": "registered",
+                    "user_id": 1457209,
+                    "link": "https://stackoverflow.com/users/1457209/ams2705",
+                    "reputation": 307,
+                    "display_name": "ams2705",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 28565828,
+                "edited": false,
+                "creation_date": 1521900995,
+                "comment_id": 85934122
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dbffc1dd248042c8252cd56bfd540f0a?s=256&d=identicon&r=PG",
+                    "account_id": 485913,
+                    "user_type": "registered",
+                    "user_id": 902509,
+                    "link": "https://stackoverflow.com/users/902509/ulquiorra",
+                    "reputation": 945,
+                    "display_name": "ulquiorra",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 28565828,
+                "edited": false,
+                "creation_date": 1424336601,
+                "comment_id": 45509694
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dbffc1dd248042c8252cd56bfd540f0a?s=256&d=identicon&r=PG",
+                    "account_id": 485913,
+                    "user_type": "registered",
+                    "user_id": 902509,
+                    "link": "https://stackoverflow.com/users/902509/ulquiorra",
+                    "reputation": 945,
+                    "display_name": "ulquiorra",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 28565828,
+                "edited": false,
+                "creation_date": 1424190649,
+                "comment_id": 45442717
+            }
+        ]
+    }
+}

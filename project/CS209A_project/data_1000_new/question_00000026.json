@@ -1,0 +1,414 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+            "account_id": 154071,
+            "user_type": "registered",
+            "user_id": 369759,
+            "link": "https://stackoverflow.com/users/369759/ses",
+            "reputation": 13381,
+            "display_name": "ses",
+            "accept_rate": 63
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/23785766/why-does-akka-actor-have-only-one-onreceive-method-that-able-to-take-messsage",
+        "last_activity_date": 1460433086,
+        "creation_date": 1400681551,
+        "answer_count": 4,
+        "title": "Why does Akka Actor have only one onReceive() method that able to take messsage",
+        "body": "<p>Just thinking now. Why does Akka Actor Model have only one <code>onReceive()<\/code> method. <\/p>\n\n<p>{<em>I have not used actors in production yet, so excuse me in advance if I misunderstand something. Just thinking about a model in general.<\/em>}<\/p>\n\n<p>Why not have arbitrary methods whatever we need to put to our Actor?<\/p>\n\n<p>Like why not say that whatever public method we have in our actor they will over <code>mail-box<\/code>, pushing that calls to <code>that function call queue<\/code>?<\/p>\n\n<p>like this:<\/p>\n\n<pre><code>class MyActor extends ... {\n public void doSomething1(message:String) {...}\n public void doSomtething2(message:MyMessage) {}\n}\n<\/code><\/pre>\n\n<p>My point is that it might be better to have many methods that represent user calls rather than go over all <code>instanceof(this)<\/code>, <code>instanceof(that)<\/code><\/p>\n\n<p>Having methods, but not onReceive one with many cases in there makes code more readable (for me) and provides better code-navigation abilities, making use of IDE help.<\/p>\n\n<p><strong>UPDATE:<\/strong><\/p>\n\n<p>Just read about <code>TypedActors<\/code>.<\/p>\n\n<p>I wonder why do people usually prefer to use untyped actor over typed ones (I've read some chapters in Akka books, seems Untyped ones are default way to go)? <\/p>\n\n<p>Typed ones seems (to me [at least for that moment]) make code more readable - less 'instanceof' / 'case' - involved. More object-oriented like. More typed like <code>Java<\/code> &amp; <code>scala<\/code> languages are - typed(safe) ones. <\/p>\n\n<p>Even if use <code>pattern-matching<\/code> in <code>scala<\/code> that does not look so clear as list of methods. As I said - easier to <strong>navigate<\/strong> in IDE, just clicking on the method so it brings you to exact place.. rather then going over <code>case: this<\/code>.. <code>case: that<\/code><\/p>\n\n<p>I'm tempting to say that <code>case<\/code> / <code>instanceof<\/code> - way reminds me that old.. stuff from <a href=\"http://msdn.microsoft.com/en-us/library/bb384843.aspx\" rel=\"nofollow\">WinApi<\/a><\/p>\n",
+        "question_id": 23785766,
+        "tags": [
+            "java",
+            "scala",
+            "akka",
+            "actor"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1741,
+        "last_edit_date": 1400688070
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/WPbbR.jpg?s=256",
+                "account_id": 928065,
+                "user_type": "registered",
+                "user_id": 958431,
+                "link": "https://stackoverflow.com/users/958431/roland-kuhn",
+                "reputation": 15482,
+                "display_name": "Roland Kuhn"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 23785766,
+            "edited": false,
+            "creation_date": 1401048843,
+            "comment_id": 36722287
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9359760602e36ed0e43ff61a14f1812d?s=256&d=identicon&r=PG",
+                "account_id": 113266,
+                "user_type": "registered",
+                "user_id": 298389,
+                "link": "https://stackoverflow.com/users/298389/om-nom-nom",
+                "reputation": 62953,
+                "display_name": "om-nom-nom",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 23785766,
+            "edited": false,
+            "creation_date": 1400681712,
+            "comment_id": 36581296
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/cXlPg.jpg?s=256",
+                "account_id": 1049776,
+                "user_type": "registered",
+                "user_id": 1053990,
+                "link": "https://stackoverflow.com/users/1053990/abatyuk",
+                "reputation": 1342,
+                "display_name": "abatyuk",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1400687694,
+            "creation_date": 1400687694,
+            "body": "<p>I'm not a part of Akka team so i can only guess here. But here's my understanding why i would object to the approach you've described.<\/p>\n\n<ol>\n<li>When message is not implemented in the receive function, it does nothing. Most importantly, it doesn't break my system!<\/li>\n<li>I can compose behaviors - say, I want uninitialized behavior that is composed of <code>initializationHandler orElse lifecycleHandler orElse unknownMessageHandler<\/code> and easily switch to <code>businnessProcessHandler orElse lifecycleHandler orElse unknownMessageHandler<\/code>, which in your case will lead either to code duplication, and/or storing local state<\/li>\n<li>I can parameterize my behavior! You can safely have the code like <code>def receive = businessProcessHandler(timeout = 5 millis)<\/code>, and my partial function will have the timeout available without actually storing it in the actor object.<\/li>\n<\/ol>\n",
+            "answer_id": 23788216,
+            "question_id": 23785766
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                "account_id": 1975918,
+                "user_type": "registered",
+                "user_id": 1773710,
+                "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                "reputation": 1421,
+                "display_name": "marekinfo"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1400686865,
+            "creation_date": 1400686865,
+            "body": "<p>The Java onReceive() method for untyped actors is modeled after the original Scala receive() method - since Scala has pattern-matching, there is no need to do instanceof there, you just decompose based on patterns. It's unfortunate that Java doesn't have pattern matching, because decomposition actually offers a better level of abstraction than object-oriented method calls in many cases. Being an event-driven framework, Akka's untyped actors can respond to any complex message type via pattern matching-based decomposition, for example<\/p>\n\n<pre><code>def receive = {\n  case head :: tail =&gt; println(\"Not empty list\")\n  case 1 :: tail =&gt; println(\"list starting with 1 with an arbitrary tail\")\n  case Nil =&gt; println(\"Empty list\")\n  case Person(\"Joe\", lastName) =&gt; println(s\"Hello Joe $lastName\")\n}\n<\/code><\/pre>\n\n<p>You can use <a href=\"http://doc.akka.io/docs/akka/snapshot/java/typed-actors.html\" rel=\"nofollow\">typed actors<\/a> with Java instead if that helps, given that probably object-oriented decomposition is better than instanceof in Java's case since pattern-matching is not available. <\/p>\n\n<p>Typed actors allow you to do method calls instead of message passing. Typed actors support asynchronous \"fire-and-forget\" methods, asynchronous future-returning methods, as well as blocking methods. Typed actors are to be used sparingly since they aren't really part of an actor model of computation, they are Akka's way of supporting object-oriented way of thinking in a message-passing framework, and the actor model and OO \"RPC\" are NOT the same. <a href=\"http://letitcrash.com/post/19074284309/when-to-use-typedactors\" rel=\"nofollow\">Here<\/a> is a good post that covers some of that. As Akka's own documentation says:<\/p>\n\n<blockquote>\n  <p>TypedActors can very easily be abused as RPC, and that is an abstraction which is well-known to be leaky. Hence TypedActors are not what we think of first when we talk about making highly scalable concurrent software easier to write correctly. They have their niche, use them sparingly.<\/p>\n<\/blockquote>\n",
+            "answer_id": 23787912,
+            "question_id": 23785766
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                "account_id": 1975918,
+                "user_type": "registered",
+                "user_id": 1773710,
+                "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                "reputation": 1421,
+                "display_name": "marekinfo"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1400689891,
+            "creation_date": 1400689891,
+            "body": "<p>Also note that typed actors don't allow you to switch behaviors, FSM-style (Akka has an FSM API). To my knowledge, you can't apply become/unbecome to typed actors, but you can to untyped actors. This may or may not be relevant, depending on the use case.<\/p>\n",
+            "answer_id": 23789014,
+            "question_id": 23785766
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hSucb.png?s=256",
+                "account_id": 2870160,
+                "user_type": "registered",
+                "user_id": 2463695,
+                "link": "https://stackoverflow.com/users/2463695/quy-tang",
+                "reputation": 3989,
+                "display_name": "Quy Tang",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1460433086,
+            "creation_date": 1460433086,
+            "body": "<p>If you want a reasonable pattern, you can use like this to take the advantage of lambda expression supported in Java 8 and above<\/p>\n\n<pre><code>import akka.actor.AbstractActor;\nimport akka.japi.pf.ReceiveBuilder;\n\npublic class Root extends AbstractActor {\n    public Root() {\n       receive(ReceiveBuilder\n            .match(DoThis.class, this::doThis)\n            .match(DoThat.class, this::doThat).build());\n    }\n\n    private doThis(DoThis doThis) {}\n    private doThat(DoThat doThat) {}\n}\n<\/code><\/pre>\n",
+            "answer_id": 36563320,
+            "question_id": 23785766
+        }
+    ],
+    "answer_comments": {
+        "23788216": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                "account_id": 154071,
+                "user_type": "registered",
+                "user_id": 369759,
+                "link": "https://stackoverflow.com/users/369759/ses",
+                "reputation": 13381,
+                "display_name": "ses",
+                "accept_rate": 63
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 23788216,
+            "edited": false,
+            "creation_date": 1400689429,
+            "comment_id": 36586956
+        }],
+        "23787912": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                    "account_id": 1975918,
+                    "user_type": "registered",
+                    "user_id": 1773710,
+                    "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                    "reputation": 1421,
+                    "display_name": "marekinfo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1400689713,
+                "comment_id": 36587151
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                    "account_id": 1975918,
+                    "user_type": "registered",
+                    "user_id": 1773710,
+                    "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                    "reputation": 1421,
+                    "display_name": "marekinfo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1400689196,
+                "comment_id": 36586806
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                    "account_id": 1975918,
+                    "user_type": "registered",
+                    "user_id": 1773710,
+                    "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                    "reputation": 1421,
+                    "display_name": "marekinfo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1400689089,
+                "comment_id": 36586734
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                    "account_id": 1975918,
+                    "user_type": "registered",
+                    "user_id": 1773710,
+                    "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                    "reputation": 1421,
+                    "display_name": "marekinfo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1400688995,
+                "comment_id": 36586673
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "edited": false,
+                "creation_date": 1400688480,
+                "comment_id": 36586291
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                    "account_id": 1975918,
+                    "user_type": "registered",
+                    "user_id": 1773710,
+                    "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                    "reputation": 1421,
+                    "display_name": "marekinfo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1400688407,
+                "comment_id": 36586248
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                    "account_id": 1975918,
+                    "user_type": "registered",
+                    "user_id": 1773710,
+                    "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                    "reputation": 1421,
+                    "display_name": "marekinfo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1400688300,
+                "comment_id": 36586167
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/49688fdb3e85cbba9b54ef5506123c87?s=256&d=identicon&r=PG",
+                    "account_id": 1975918,
+                    "user_type": "registered",
+                    "user_id": 1773710,
+                    "link": "https://stackoverflow.com/users/1773710/marekinfo",
+                    "reputation": 1421,
+                    "display_name": "marekinfo"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "edited": false,
+                "creation_date": 1400688155,
+                "comment_id": 36586068
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/8061d4c92db9a6f764b5fa8f75fd59e7?s=256&d=identicon&r=PG",
+                    "account_id": 154071,
+                    "user_type": "registered",
+                    "user_id": 369759,
+                    "link": "https://stackoverflow.com/users/369759/ses",
+                    "reputation": 13381,
+                    "display_name": "ses",
+                    "accept_rate": 63
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 23787912,
+                "edited": false,
+                "creation_date": 1400687072,
+                "comment_id": 36585354
+            }
+        ],
+        "23789014": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9359760602e36ed0e43ff61a14f1812d?s=256&d=identicon&r=PG",
+                "account_id": 113266,
+                "user_type": "registered",
+                "user_id": 298389,
+                "link": "https://stackoverflow.com/users/298389/om-nom-nom",
+                "reputation": 62953,
+                "display_name": "om-nom-nom",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 23789014,
+            "edited": false,
+            "creation_date": 1400701849,
+            "comment_id": 36594085
+        }]
+    }
+}

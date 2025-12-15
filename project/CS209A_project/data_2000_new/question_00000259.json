@@ -1,0 +1,114 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/TQKi7.jpg?s=256",
+            "account_id": 2201571,
+            "user_type": "registered",
+            "user_id": 1945843,
+            "link": "https://stackoverflow.com/users/1945843/astrid",
+            "reputation": 1312,
+            "display_name": "Astrid",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/21192694/acsii-world-map-import-and-reading",
+        "last_activity_date": 1449867361,
+        "creation_date": 1389981495,
+        "answer_count": 3,
+        "title": "ACSII World map import and reading",
+        "body": "<p>I am making a game in Java, and I want the player to be able to move in a world, with specified borders.<\/p>\n\n<p>After searching the web for ways to define a 'world', in other words where the player can move, and where not.<\/p>\n\n<p>I like the idea of 2D ASCII maps, where one character represents a certain amount of pixels, for example:<\/p>\n\n<pre><code>###################\n#-----------------#\n#-----###---------#\n#-----###---------#\n#-----------------#\n###################\n<\/code><\/pre>\n\n<p>In this example, the <code>-<\/code> character represents a 10x10 tile where the player is allow to move in, and the <code>#<\/code> character represents a 10x10 area where the player can't come.<\/p>\n\n<p>In Java, I import the <code>world.txt<\/code> using:<\/p>\n\n<pre><code>void importMap() {\n  BufferedReader br = new BufferedReader(new FileReader(\"world.txt\"));\n  String line;\n  while ((line = br.readLine()) != null) {\n     for (char ch: line.toCharArray()) {\n       // Add to array\n     }\n  }\n  br.close();\n}\n<\/code><\/pre>\n\n<p>However, I have no idea where to store this data. I'm thinking of a 2D array to that I can simply get the character at a certain x,y value like this:<\/p>\n\n<pre><code>world[7][3];\n// Should return #\n<\/code><\/pre>\n\n<p><strong>How should I store this ASCII map? A 2D array, a 2D object, a hashmap, etc. ?<\/strong><\/p>\n",
+        "question_id": 21192694,
+        "tags": [
+            "java",
+            "dictionary",
+            "ascii",
+            "bufferedreader"
+        ],
+        "score": 2,
+        "accepted_answer_id": 21193104,
+        "is_answered": true,
+        "view_count": 303,
+        "last_edit_date": 1449867361
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a983ccf67fa7942199386a01feeb43f7?s=256&d=identicon&r=PG",
+                "account_id": 312321,
+                "user_type": "registered",
+                "user_id": 626318,
+                "link": "https://stackoverflow.com/users/626318/blackcompe",
+                "reputation": 3200,
+                "display_name": "blackcompe"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1389987707,
+            "creation_date": 1389982983,
+            "body": "<p>A 2d array would be best since it carries the smallest memory footprint, and you'll be doing mostly direct accesses. A hashmap carries space overhead and really doesn't add anything useful. As @assylias mentioned, abstracting the data structure in a class makes for a clean interface. @Alexander Tokarev is right about not knowing the array dimensions up front, but you can get around that using NIO.<\/p>\n\n<pre><code>char[][] createWorld(String file)\n{\n    try {\n        List&lt;String&gt; lines = Files.readAllLines(Paths.get(file),\n            Charset.forName(\"US-ASCII\"));\n        char[][] world = new char[lines.size()][];\n        int i = 0;\n        for(String ln: lines)\n            world[i++] = ln.toCharArray();\n        return world;\n    } catch (IOException ex) {\n        Logger.getGlobal().log(Level.SEVERE, null, ex);\n    }\n    return null;\n}\n<\/code><\/pre>\n",
+            "answer_id": 21193104,
+            "question_id": 21192694,
+            "last_edit_date": 1389987707
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/zflGZ.png?s=256",
+                "account_id": 440158,
+                "user_type": "registered",
+                "user_id": 829571,
+                "link": "https://stackoverflow.com/users/829571/assylias",
+                "reputation": 330070,
+                "display_name": "assylias",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1389981867,
+            "creation_date": 1389981867,
+            "body": "<p>Storing the info in a 2D array seems a reasonable solution. However you would probably benefit from hiding that inside a class, for example:<\/p>\n\n<pre><code>class WorldMap {\n    private final char[7][3] world = new char[7][3];\n\n    //x,y below are pixels, so you don't need to convert from array index to pixels\n    //everywhere in your code\n    public boolean canMoveTo(int x, int y) { ... }\n\n    public void addObstacle (Rectangle r) { ... }\n}\n<\/code><\/pre>\n\n<p>you get the idea.<\/p>\n",
+            "answer_id": 21192799,
+            "question_id": 21192694
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/E7Qgq.jpg?s=256",
+                "account_id": 873079,
+                "user_type": "registered",
+                "user_id": 923498,
+                "link": "https://stackoverflow.com/users/923498/alexander-tokarev",
+                "reputation": 2763,
+                "display_name": "Alexander Tokarev",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1389982175,
+            "creation_date": 1389982175,
+            "body": "<p>The main drawback of storing the data in a 2D array is that you should know the size of your \"World\" before parsing to create a suitable array. If the size is constant - then 2D array will fit your solution. If not - consider using different structures.<\/p>\n\n<p>You can also create some dynamically expanded structure, like ArrayList, and transform it to 2D array after parsing. This will solve an unknown size issue.<\/p>\n",
+            "answer_id": 21192883,
+            "question_id": 21192694
+        }
+    ],
+    "answer_comments": {"21192883": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/EtZfm.jpg?s=256",
+            "account_id": 526244,
+            "user_type": "registered",
+            "user_id": 3117035,
+            "link": "https://stackoverflow.com/users/3117035/jvmatl",
+            "reputation": 2132,
+            "display_name": "JVMATL",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 21192883,
+        "edited": false,
+        "creation_date": 1389982412,
+        "comment_id": 31911033
+    }]}
+}

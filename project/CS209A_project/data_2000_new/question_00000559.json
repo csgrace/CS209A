@@ -1,0 +1,63 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+            "account_id": 13644068,
+            "user_type": "registered",
+            "user_id": 9843507,
+            "link": "https://stackoverflow.com/users/9843507/ar-thewaterfall",
+            "reputation": 845,
+            "display_name": "ar.thewaterfall"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/50888623/how-to-return-specific-elements-using-iterator",
+        "last_activity_date": 1529158730,
+        "creation_date": 1529158016,
+        "answer_count": 1,
+        "title": "How to return specific elements using Iterator",
+        "body": "<p>I've got this kind of iterator. But I want to return only specific element in next() method. In my case, I want to return the object that is the instance of <code>BagCoffee<\/code><\/p>\n\n<pre><code>@Override\n    public Iterator&lt;E&gt; iterator() {\n        return new Iterator&lt;E&gt;(){\n            private Node&lt;E&gt; current = head;\n\n\n            @Override\n            public boolean hasNext()  {\n                return current != null;             \n            }\n            @Override\n            public void remove() {\n                throw new UnsupportedOperationException();  \n            }\n            @Override\n            public E next() {\n                Coffee value = null;\n                if (!hasNext()) throw new NoSuchElementException();\n                if(!(current.value instanceof BagCoffee)) {\n                        if(!hasNext()) {\n                            current = current.next;\n                            return next();\n                        } else {\n                            //Stop executing method?\n                        }\n\n                } else {\n                    value = current.value;\n                    current = current.next;\n                }\n\n\n                return (E) value;\n            }\n        };\n    }\n<\/code><\/pre>\n\n<p>The following code will print what I need and then it will print NullPointerException as it continues to iterate even if hasNext() returns false<\/p>\n\n<pre><code>for(Coffee coff: mySet3) {\n            System.out.println(\"\\n\");\n            coff.sayType();\n        }\n<\/code><\/pre>\n\n<p>The problem is that I cannot stop method if there are no elements next.<\/p>\n\n<pre><code>if(!hasNext()) {\n    current = current.next;\n    return next();\n} else {\n    //Stop executing method\n}\n<\/code><\/pre>\n\n<p>What's the proper way to make iterator return specific elements and stop method running?<\/p>\n",
+        "question_id": 50888623,
+        "tags": ["java"],
+        "score": -2,
+        "accepted_answer_id": 50888708,
+        "is_answered": true,
+        "view_count": 204
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/wN7VS.jpg?s=256",
+            "account_id": 12417427,
+            "user_type": "registered",
+            "user_id": 9046139,
+            "link": "https://stackoverflow.com/users/9046139/victor-no%c3%abl",
+            "reputation": 862,
+            "display_name": "Victor No&#235;l"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1529158730,
+        "creation_date": 1529158730,
+        "body": "<p>The main problem is that you are incorrectly managing the state of your iterator: the value of <code>current<\/code> should not contain anything else than a <code>BagCoffee<\/code>.\nIf it does, you can't guarantee that the <code>hasNext()<\/code> contract method is respected because it could return <code>true<\/code> even though there are no <code>BagCoffee<\/code> available next.<\/p>\n\n<p>So you should ensure the correctness of this state at two different time of the life of you object by:<\/p>\n\n<ol>\n<li>Correctly computing the first value of <code>current<\/code> so that it is either a <code>BagCoffee<\/code> or null.<\/li>\n<li>Correctly computing the next value of <code>current<\/code> so that it is either a <code>BagCoffee<\/code> or null.<\/li>\n<\/ol>\n\n<p>Then you can eventually refactor to avoid duplicated code.<\/p>\n",
+        "answer_id": 50888708,
+        "question_id": 50888623
+    }],
+    "answer_comments": {"50888708": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+            "account_id": 13644068,
+            "user_type": "registered",
+            "user_id": 9843507,
+            "link": "https://stackoverflow.com/users/9843507/ar-thewaterfall",
+            "reputation": 845,
+            "display_name": "ar.thewaterfall"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 50888708,
+        "edited": false,
+        "creation_date": 1529181781,
+        "comment_id": 88783933
+    }]}
+}

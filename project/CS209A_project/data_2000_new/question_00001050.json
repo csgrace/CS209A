@@ -1,0 +1,165 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5d02fb41b6405b22d3ae3f3c5b17064a?s=256&d=identicon&r=PG",
+            "account_id": 2457375,
+            "user_type": "registered",
+            "user_id": 2142234,
+            "link": "https://stackoverflow.com/users/2142234/keegs",
+            "reputation": 95,
+            "display_name": "Keegs",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/15621717/why-does-service-crash-when-i-rerun-program",
+        "last_activity_date": 1364236538,
+        "creation_date": 1364234827,
+        "answer_count": 1,
+        "title": "Why does Service crash when I rerun program?",
+        "body": "<p>I'm now starting to write a service routine and I get an error message everytime I rerun my code without altering anything.<\/p>\n\n<p>Here's the Service routine:<\/p>\n\n<p>public class PollingService extends Service{<\/p>\n\n<pre><code>private static final String TAG = PollingService.class.getSimpleName();\n\nprivate Polling updater;\n\npublic boolean isRunning = false;\n\n@Override\npublic IBinder onBind(Intent intent) {\n    return null;\n}\n\n@Override\npublic void onCreate() {\n    super.onCreate();\n    updater = new Polling();\n    Log.d(TAG, \"On Create'd\");\n}\n\n@Override\npublic int onStartCommand(Intent intent, int flags, int startId) {\n    // Start the Polling updater\n    if(!this.isRunning){\n        updater.start();\n        this.isRunning = true;\n    }\n    Log.d(TAG, \"On Start'd\");\n    return super.onStartCommand(intent, flags, startId);\n}\n\n@Override\npublic synchronized void onDestroy() {\n    super.onDestroy();\n    // Stop the Polling updater\n    if(this.isRunning){\n        updater.interrupt();\n    }\n    Log.d(TAG, \"On Destroy'd\");\n}\n\n// Polling Thread\nclass Polling extends Thread {\n    static final long DELAY = 3000;\n\n    @Override\n    public void run() {\n        while (isRunning) {\n            try {\n                // Do something\n                Log.d(TAG, \"Polling run'ing\");\n                // Sleep\n                Thread.sleep(DELAY);\n            } catch (InterruptedException e) {\n                // Interrupted\n                isRunning = false;\n            }\n        }\n    }\n\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>When I run the app I see in the LogCat \"On Create'd\" and \"On Start'd\", and \"Polling run'ing\", however, I rerun the program to see if I get \"On Start'd\" only in the LogCat. But instead I get this error:<\/p>\n\n<p>ActivityManager: Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.project.keegan/.StartApp }\nActivityManager: Warning: Activity not started, its current task has been brought to the front<\/p>\n\n<p>And when I check the LogCat it still says, \"Polling run'ing\". So I went in the emulator: Menu -> App Manager -> and I stopped the Service.<\/p>\n\n<p>When I rerun the program I got the same two errors and my app started but not the service. But here's the funny part, whenever I do any alteration to my code (like if I just pressed the spacebar and then backspace) and clicked Save, and then rerun the program, the Service runs again.<\/p>\n\n<p>Here's the Class I call it from:<\/p>\n\n<p>public class StartApp extends Activity implements View.OnClickListener{<\/p>\n\n<pre><code>TextView disp_hello;\nButton but_go2send, but_go2request;\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    // TODO Auto-generated method stub\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.start_app);\n    Vars();\n    startService(new Intent(this, PollingService.class));\n    but_go2send.setOnClickListener(this);\n    but_go2request.setOnClickListener(this);\n}\n<\/code><\/pre>\n\n<p>.\n.\n.\n}<\/p>\n",
+        "question_id": 15621717,
+        "tags": [
+            "java",
+            "android",
+            "service"
+        ],
+        "score": 0,
+        "accepted_answer_id": 15622218,
+        "is_answered": true,
+        "view_count": 147,
+        "last_edit_date": 1364235364
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cbcf412e8fc60799c981f62a7c30e907?s=256&d=identicon&r=PG",
+            "account_id": 974021,
+            "user_type": "registered",
+            "user_id": 995891,
+            "link": "https://stackoverflow.com/users/995891/zapl",
+            "reputation": 64063,
+            "display_name": "zapl",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1364236538,
+        "creation_date": 1364236538,
+        "body": "<p>Your problem has nothing to do with your code. Eclipse is just smart enough to detect that you did not change any code and it skips replacing the app on the device.<\/p>\n\n<p>And instead of restarting the app (which would involve killing it) it just brings it back to front.<\/p>\n\n<p>If you want to restart it, you need to exist / kill the app or do like you did and insert a space.<\/p>\n",
+        "answer_id": 15622218,
+        "question_id": 15621717
+    }],
+    "answer_comments": {"15622218": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cbcf412e8fc60799c981f62a7c30e907?s=256&d=identicon&r=PG",
+                "account_id": 974021,
+                "user_type": "registered",
+                "user_id": 995891,
+                "link": "https://stackoverflow.com/users/995891/zapl",
+                "reputation": 64063,
+                "display_name": "zapl",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622218,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5d02fb41b6405b22d3ae3f3c5b17064a?s=256&d=identicon&r=PG",
+                "account_id": 2457375,
+                "user_type": "registered",
+                "user_id": 2142234,
+                "link": "https://stackoverflow.com/users/2142234/keegs",
+                "reputation": 95,
+                "display_name": "Keegs",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1364240354,
+            "comment_id": 22162102
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5d02fb41b6405b22d3ae3f3c5b17064a?s=256&d=identicon&r=PG",
+                "account_id": 2457375,
+                "user_type": "registered",
+                "user_id": 2142234,
+                "link": "https://stackoverflow.com/users/2142234/keegs",
+                "reputation": 95,
+                "display_name": "Keegs",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622218,
+            "edited": false,
+            "creation_date": 1364238640,
+            "comment_id": 22161281
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cbcf412e8fc60799c981f62a7c30e907?s=256&d=identicon&r=PG",
+                "account_id": 974021,
+                "user_type": "registered",
+                "user_id": 995891,
+                "link": "https://stackoverflow.com/users/995891/zapl",
+                "reputation": 64063,
+                "display_name": "zapl",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622218,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/5d02fb41b6405b22d3ae3f3c5b17064a?s=256&d=identicon&r=PG",
+                "account_id": 2457375,
+                "user_type": "registered",
+                "user_id": 2142234,
+                "link": "https://stackoverflow.com/users/2142234/keegs",
+                "reputation": 95,
+                "display_name": "Keegs",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1364238404,
+            "comment_id": 22161159
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5d02fb41b6405b22d3ae3f3c5b17064a?s=256&d=identicon&r=PG",
+                "account_id": 2457375,
+                "user_type": "registered",
+                "user_id": 2142234,
+                "link": "https://stackoverflow.com/users/2142234/keegs",
+                "reputation": 95,
+                "display_name": "Keegs",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622218,
+            "edited": false,
+            "creation_date": 1364237536,
+            "comment_id": 22160687
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5d02fb41b6405b22d3ae3f3c5b17064a?s=256&d=identicon&r=PG",
+                "account_id": 2457375,
+                "user_type": "registered",
+                "user_id": 2142234,
+                "link": "https://stackoverflow.com/users/2142234/keegs",
+                "reputation": 95,
+                "display_name": "Keegs",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 15622218,
+            "edited": false,
+            "creation_date": 1364237036,
+            "comment_id": 22160428
+        }
+    ]}
+}

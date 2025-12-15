@@ -1,0 +1,137 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c1211da881e054160a85a3a1b5de7500?s=256&d=identicon&r=PG",
+            "account_id": 1207249,
+            "user_type": "registered",
+            "user_id": 1176587,
+            "link": "https://stackoverflow.com/users/1176587/tb96",
+            "reputation": 265,
+            "display_name": "tb96",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19066133/jar-file-gets-corrupted-when-sent-over-socket",
+        "last_activity_date": 1380367150,
+        "creation_date": 1380365592,
+        "answer_count": 1,
+        "title": "Jar file gets corrupted when sent over socket",
+        "body": "<p>I'm trying to send a jar file over a socket to a server.\nNow everything seems to be working fine but on the other side of the socket, the jar is corrupted. The files have on both sides of the socket the same length. But when I try to use the file in bukkit, the file is corrupted.<\/p>\n\n<p>The client code:<\/p>\n\n<pre><code>public class Main {\nprivate Socket connection;\nprivate ObjectOutputStream outStream;\nprivate static String serverAddress = \"\"; // the ip address\nstatic File fileLoc = new File(\"C:\\\\Users\\\\Tom\\\\Documents\\\\Qubeproject\\\\server\\\\plugins\");\nstatic String fileName = \"\\\\WorldEdit.jar\";\nstatic File file ;\nstatic InputStream IS;\nstatic OutputStream OS;\nstatic byte[] msgByte = new byte[1024];\n\n\npublic static void main(String[] arg0){\n    p(\"Starting this shit up\");\n    file = new File(fileLoc + fileName) ; \n\n    try {\n        Socket connection = connection();\n        IS = connection.getInputStream();\n        OS = connection.getOutputStream();\n\n        OS.write(msg(\"LOL\"));\n        //Authenciation\n\n\n        IS.read(msgByte);\n        if(new String(msgByte).trim().equals(\"OK\")){\n            p(\"OK\");\n\n\n\n            OS.write(msg(fileName));\n            //sending fileName\n\n\n            IS.read(msgByte);\n            p(new String(msgByte).trim());\n            //confirmation\n\n\n\n            OS.write(msg(\"l:\" + (file.length())));\n\n\n\n            byte[] fileByte = new byte[(int)(file.length())];\n\n            FileInputStream jis = new FileInputStream(file);\n            int count = 0;\n            while((count = jis.read(fileByte))&gt;0){\n\n            OS.write(fileByte,0,count);\n            OS.flush();\n            }\n\n            OS.flush();\n\n            setByteZero(msgByte);\n\n            IS.read(msgByte);\n            p(new String(msgByte).trim());\n            //confirmation\n\n        }else{\n            p(\"Authenciation failed\");\n        }\n\n\n\n\n\n\n\n    } catch (Exception e) {\n        // TODO Auto-generated catch block\n        e.printStackTrace();\n    }\n\n}\n    private static void p (String s){\n    System.out.println(s);\n}\n    private static byte[] msg(String s){\n        return s.getBytes();\n    }\n\n    private static Socket connection() throws IOException{\n        Socket socket = new Socket();\n        InetAddress ip =  InetAddress.getByName(serverAddress);\n        InetSocketAddress address = new InetSocketAddress(ip,6969);\n        socket.connect(address,6969);\n        return socket;\n    }\n\n    private static byte[] setByteZero(byte[] workByte) {\n        for(int i=0;i &lt; workByte.length;i++){\n            workByte[i] = 0;\n        }\n        return workByte;\n\n    }\n<\/code><\/pre>\n\n<p>the server code in bukkit<\/p>\n\n<pre><code>public class Checkup  implements Runnable{\nServer serverB;\nServerSocket server;\nSocket client;\nInputStream IS;\nOutputStream OS;\nstatic File destination;\nbyte[] msgByte = new byte[1024];\nString filename;\nlong length;\n\n\n\nCheckup (Server serverm){\n    serverB = serverm;\n}\n\n\n\n\n@Override\npublic void run() {\n\n    try{\n        server = new ServerSocket(6969);\n    }catch(Exception e){\n    }\n    try{\n    while(true){\n            client = server.accept();\n\n\n            IS = client.getInputStream();\n            OS = client.getOutputStream();\n\n            IS.read(msgByte);\n\n\n            if(msg(msgByte).equals(\"LOL\")){\n                OS.write(msg(\"OK\"));\n\n                IS.read(msgByte);\n\n                filename = msg(msgByte);\n\n\n                OS.write(msg(\"Q received name :\" + filename));\n\n                OS.flush();\n\n                setByteZero(msgByte);\n\n                IS.read(msgByte);\n\n                length = Integer.parseInt(new String(msgByte).trim().replace(\"l:\", \"\"));\n\n\n                OS.write(msg(\"Q received length :\" + length));\n\n                byte[] fileByte = new byte[(int)length];\n\n\n                destination = new File(\"C:\\\\Users\\\\Quentin\\\\Desktop\\\\DE server\\\\plugins\" + filename);\n\n                FileOutputStream fos = new FileOutputStream(destination);\n\n                int count = 0;\n\n\n\n                while((count =IS.read(fileByte))&gt;0 ){\n\n\n\n                fos.write(fileByte);\n                fos.flush();\n\n                }\n                fos.flush();\n                fos.close();\n\n                OS.write(msg(\"Q received the jar!Bye\"));\n                client.close();\n\n\n\n            }\n\n\n\n\n\n\n    }       \n\n    }catch (Exception e){\n        e.printStackTrace();\n        try {\n            serverB.reload();\n        } catch (Exception e1) {\n            // TODO Auto-generated catch block\n            e1.printStackTrace();\n        }\n    }\n\nfinally{\n\n    }}\n\n\n\n\nprivate String msg(byte[] strByte){\n    return new String(strByte).trim();\n}\n\nprivate static byte[] msg(String s){\n    return s.getBytes();\n}\n\n\nprivate static byte[] setByteZero(byte[] workByte) {\n    for(int i=0;i &lt; workByte.length;i++){\n        workByte[i] = 0;\n    }\n    return workByte;\n\n}\n<\/code><\/pre>\n",
+        "question_id": 19066133,
+        "tags": [
+            "java",
+            "sockets",
+            "jar",
+            "bukkit"
+        ],
+        "score": 0,
+        "accepted_answer_id": 19066354,
+        "is_answered": true,
+        "view_count": 1015,
+        "last_edit_date": 1380366389
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3e4f2561d701c8fe1bec6a7294a54624?s=256&d=identicon&r=PG",
+                "account_id": 258240,
+                "user_type": "registered",
+                "user_id": 540286,
+                "link": "https://stackoverflow.com/users/540286/ortwin-angermeier",
+                "reputation": 6231,
+                "display_name": "Ortwin Angermeier"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 19066133,
+            "edited": false,
+            "creation_date": 1380369191,
+            "comment_id": 28181259
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521070,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 19066133,
+            "edited": false,
+            "creation_date": 1380366772,
+            "comment_id": 28180762
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c1211da881e054160a85a3a1b5de7500?s=256&d=identicon&r=PG",
+                "account_id": 1207249,
+                "user_type": "registered",
+                "user_id": 1176587,
+                "link": "https://stackoverflow.com/users/1176587/tb96",
+                "reputation": 265,
+                "display_name": "tb96",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19066133,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521070,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1380366661,
+            "comment_id": 28180732
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521070,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "post_id": 19066133,
+            "edited": false,
+            "creation_date": 1380366144,
+            "comment_id": 28180589
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/455f776955f148ffad8174a9b69aa4ba?s=256&d=identicon&r=PG",
+            "account_id": 1369656,
+            "user_type": "registered",
+            "user_id": 1305253,
+            "link": "https://stackoverflow.com/users/1305253/rolfl",
+            "reputation": 17727,
+            "display_name": "rolfl",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1380367150,
+        "creation_date": 1380367150,
+        "body": "<p>@Jon pointed you to the problem, here it is spelled out and formatted.....<\/p>\n\n<p>The following code half-ignores the count (and the count is legal to be 0 too):<\/p>\n\n<pre><code>          while((count =IS.read(fileByte))&gt;0 ){\n            fos.write(fileByte);\n            fos.flush();\n          }\n          fos.flush();\n          fos.close();\n<\/code><\/pre>\n\n<p>and should be written as:<\/p>\n\n<pre><code>          while((count =IS.read(fileByte))&gt;=0 ){\n            fos.write(fileByte, 0, count);\n          }\n          fos.flush();\n          fos.close();\n<\/code><\/pre>\n",
+        "answer_id": 19066354,
+        "question_id": 19066133
+    }],
+    "answer_comments": {}
+}

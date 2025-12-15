@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GiuaJJKi09tgRH3CRg4tqSMxyciOMA3bcAyvm1w=k-s256",
+            "account_id": 19110001,
+            "user_type": "registered",
+            "user_id": 13956214,
+            "link": "https://stackoverflow.com/users/13956214/sherinay-abdukerim",
+            "reputation": 1,
+            "display_name": "Sherinay Abdukerim"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/62976263/deserialize-complex-json-body-validate-one-element-in-it-then-through-that-ma",
+        "last_activity_date": 1595144383,
+        "creation_date": 1595132540,
+        "answer_count": 1,
+        "title": "Deserialize complex json body, validate one element in it, then through that, map to another element (JAVA) is it possible?",
+        "body": "<p>I have a json array to work with, like so:<\/p>\n<pre><code>[\n    {\n        &quot;id&quot;: &quot;12345&quot;,\n        &quot;eauthId&quot;: &quot;123451234512345123451234512345&quot;,\n        &quot;firstName&quot;: &quot;Jane&quot;,\n        &quot;middieInitial&quot;: &quot;M&quot;,\n        &quot;lastName&quot;: &quot;Doe&quot;,\n        &quot;email&quot;: &quot;janedoe@usda.gov&quot;,\n        &quot;roles&quot;: [\n            {\n                &quot;id&quot;: &quot;CTIS_ROLE_ID&quot;,\n                &quot;name&quot;: &quot;A test role for CTIS&quot;,\n                &quot;treatmentName&quot;: &quot;Fumigation&quot;\n            }\n        ]\n    },\n    {\n        &quot;id&quot;: &quot;67890&quot;,\n        &quot;eauthId&quot;: &quot;678906789067890678906789067890&quot;,\n        &quot;firstName&quot;: &quot;John&quot;,\n        &quot;middieInitial&quot;: &quot;Q&quot;,\n        &quot;lastName&quot;: &quot;Admin&quot;,\n        &quot;email&quot;: &quot;johnadmin@usda.gov&quot;,\n        &quot;roles&quot;: [\n            {\n                &quot;id&quot;: &quot;CTIS_ADMIN&quot;,\n                &quot;name&quot;: &quot;An admin role for CTIS&quot;,\n                &quot;treatmentName&quot;: &quot;System Administration&quot;\n            }\n        ]\n    }\n]\n<\/code><\/pre>\n<p>My task is to find out the user's &quot;roles&quot; --&gt; &quot;name&quot;, once match, get that user's email address and sign in using that email address. It seems like a simple task, but it has been really kicking my bottom, since  digging into API is new to me. I've tried different libraries (Jackson, RestAssured, Json Simple) and finally GSon. I don't have time to sit and study everything from the scratch. I just needed a quick solution. But it definitely hasn't been quick. Is anyone kind enough to help me out with this. I'd really appreciate it.<\/p>\n<pre><code>closeableHttpResponse = restClient.get(ConfigurationReader.get(&quot;base_url&quot;) + ConfigurationReader.get(&quot;user_endpoint&quot;));\n//Status code\nint statusCode = closeableHttpResponse.getStatusLine().getStatusCode();\nSystem.out.println(&quot;statusCode = &quot; + statusCode);\nString responseString = EntityUtils.toString(closeableHttpResponse.getEntity(), &quot;UTF-8&quot;);\nType userListType = new TypeToken&lt;List&lt;Users&gt;&gt;(){}.getType(); \nList&lt;Users&gt; users = (List&lt;Users&gt;) new Gson().fromJson(responseString, userListType); \nRoles roles = new Gson().fromJson(responseString, Roles.class); \n<\/code><\/pre>\n<p>it gives me this error<\/p>\n<pre><code>com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was BEGIN_ARRAY at line 1 column 2 path $\n  at com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$Adapter.read(ReflectiveTypeAdapterFactory.java:226)\n  at com.google.gson.Gson.fromJson(Gson.java:932)\n<\/code><\/pre>\n",
+        "question_id": 62976263,
+        "tags": [
+            "java",
+            "json",
+            "json-deserialization"
+        ],
+        "score": -1,
+        "is_answered": false,
+        "view_count": 56,
+        "last_edit_date": 1595144383
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/bWIke.jpg?s=256",
+            "account_id": 14612757,
+            "user_type": "registered",
+            "user_id": 10553764,
+            "link": "https://stackoverflow.com/users/10553764/darkmoon-chief",
+            "reputation": 140,
+            "display_name": "Darkmoon Chief"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1595133492,
+        "creation_date": 1595133492,
+        "body": "<p>The problem with your code is<\/p>\n<pre><code>Type userListType = new TypeToken&lt;List&gt;(){}.getType();\nList users = (List) new Gson().fromJson(responseString, userListType);\n<\/code><\/pre>\n<p>You are not receiving just a list, you are actually deserializing an array of lists.<\/p>\n<p>So try this:<\/p>\n<pre><code>List[] users = (List[]) new Gson().fromJson(responseString, List[].class);\n<\/code><\/pre>\n",
+        "answer_id": 62976354,
+        "question_id": 62976263
+    }],
+    "answer_comments": {}
+}

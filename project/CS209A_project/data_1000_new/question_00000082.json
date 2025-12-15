@@ -1,0 +1,211 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c130387170e0d9be85d2fc978974483a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4793668,
+            "user_type": "registered",
+            "user_id": 3872165,
+            "link": "https://stackoverflow.com/users/3872165/syed",
+            "reputation": 1452,
+            "display_name": "Syed",
+            "accept_rate": 36
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29203709/jdbi-guice-with-dropwizard",
+        "last_activity_date": 1442998262,
+        "creation_date": 1427087892,
+        "answer_count": 2,
+        "title": "jdbi, guice with dropwizard",
+        "body": "<p>Hello I am trying to create an application using dropwizard framework. I have the DAO classes impl which needs an handle to connection manager instance which will then be used to get database connections. I have a multi tenant database application. This connection manager would be a custom implementation.<\/p>\n\n<p>The application uses hikari cp as connection pool and mysql database. I want to initialize the datasource and connection pool using dropwizard managed object feature. Once the datasource is initialized I want to inject the connection manager instance in each of dao classes using guice binding something like<\/p>\n\n<pre><code>bind(ConnectionManager.class).toProvider(ConnectionManagerProvider.class);\n<\/code><\/pre>\n\n<p>Then in each dao impl classes<\/p>\n\n<pre><code>@Inject\npublic class UserDAOIpl extends AbstractDAO {\n    protected UserDAOImpl(ConnectionManager connectionManager) {\n        super(connectionManager);\n    }\n}\n<\/code><\/pre>\n\n<p>I have looked everywhere on the net there is no particular example for my use case. Also there is a lack of documentation at dropwirzard.io<\/p>\n\n<p>This is more of an architectural design question rather than code question.<\/p>\n\n<p>The datasource module would be a separate module which would be used in many service. I am using maven as build tool.<\/p>\n\n<p>My questions are<\/p>\n\n<ol>\n<li>How I can approach this situation ? Some class names and implementation guide lines would be very useful.<\/li>\n<li>The application would be handing half a million requests a day. The solution should be feasible.<\/li>\n<\/ol>\n\n<p>I look forward to community for any guidance or if any body can point me to some good resources.<\/p>\n\n<p>NOTE: We won't be using hibernate for this application and would be using JDBI.<\/p>\n",
+        "question_id": 29203709,
+        "tags": [
+            "java",
+            "mysql",
+            "guice",
+            "dropwizard"
+        ],
+        "score": 8,
+        "is_answered": true,
+        "view_count": 5293
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ME1sS.jpg?s=256",
+            "account_id": 4646802,
+            "user_type": "registered",
+            "user_id": 3871007,
+            "link": "https://stackoverflow.com/users/3871007/prasanna-anbazhagan",
+            "reputation": 1735,
+            "display_name": "Prasanna Anbazhagan",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 29203709,
+        "edited": false,
+        "creation_date": 1486375495,
+        "comment_id": 71301515
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5f528a3f6814d28b583f31842e3e8d9e?s=256&d=identicon&r=PG",
+                "account_id": 224822,
+                "user_type": "registered",
+                "user_id": 484902,
+                "link": "https://stackoverflow.com/users/484902/ahus1",
+                "reputation": 5980,
+                "display_name": "ahus1"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": false,
+            "last_activity_date": 1428689441,
+            "creation_date": 1428669051,
+            "body": "<p>I prepared a setup similar to the one you described as follows. It sets up guice, initializes a DBIFactory (you might need to adopt that part to your scenario). Then a JDBI object is handed over to a repository implementation that can use it to persist an entity of type <code>Vessel<\/code>.<\/p>\n\n<p>(1) Adding guice to the project<\/p>\n\n<pre><code>&lt;dependency&gt;\n  &lt;groupId&gt;com.hubspot.dropwizard&lt;/groupId&gt;\n  &lt;artifactId&gt;dropwizard-guice&lt;/artifactId&gt;\n  &lt;version&gt;x.x.x&lt;/version&gt;\n&lt;/dependency&gt;\n<\/code><\/pre>\n\n<p>(2) Setup Guice in <code>initialize()<\/code>: <\/p>\n\n<pre><code>guiceBundle = GuiceBundle.&lt;YourConfiguration&gt;newBuilder()\n        .addModule(new GuiceModule())\n        .enableAutoConfig(\"your.package.name.heres\")\n        .setConfigClass(YourConfiguration.class)\n        .build();\n<\/code><\/pre>\n\n<p>(3) Guice config for preparing JDBI elements<\/p>\n\n<pre><code>public class GuiceModule extends AbstractModule {\n\n    private DBI jdbi;\n\n    @Provides\n    public DBI prepareJdbi(Environment environment,\n                           SightingConfiguration configuration) throws ClassNotFoundException {\n        // setup DB access including DAOs\n        // implementing a singleton pattern here but avoiding \n        // Guice to initialize DB connection too early\n        if (jdbi == null) {\n            final DBIFactory factory = new DBIFactory();\n            jdbi = factory.build(environment, configuration.getDataSourceFactory(), \"h2\");\n        }\n        return jdbi;\n    }\n\n    @Provides\n    public VesselJDBI prepareVesselJdbi(DBI jdbi) {\n        return jdbi.onDemand(VesselJDBI.class);\n    }\n\n    @Override\n    protected void configure() {\n        bind(VesselRepository.class).to(VesselRepositoryImpl.class);\n        /* ... */\n    }\n}\n<\/code><\/pre>\n\n<p>(4) start using it in your classes<\/p>\n\n<pre><code>public class VesselRepositoryImpl implements VesselRepository {\n\n    private VesselJDBI jdbi;    \n\n    @Inject\n    public VesselRepositoryImpl(VesselJDBI jdbi) {\n        this.jdbi = jdbi;\n    }\n\n    public Vessel create(Vessel instance) {\n        return jdbi.inTransaction((transactional, status) -&gt; {\n            /* do several things with jdbi in a transactional way */\n        });\n    }\n\n}\n<\/code><\/pre>\n\n<p>(please note: the last code example used Java 8. To use JDBI with Java 8 with Dropwizard 0.8.1 please use jdbi version 2.62 to avoid bug <a href=\"https://github.com/jdbi/jdbi/issues/144\" rel=\"noreferrer\">https://github.com/jdbi/jdbi/issues/144<\/a>) <\/p>\n\n<p>Please let me know if this helped you.<\/p>\n\n<p>Best regards,<\/p>\n\n<p>Alexander<\/p>\n",
+            "answer_id": 29561507,
+            "question_id": 29203709,
+            "last_edit_date": 1428689441
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e539b971586610fb6fb2622ee879c782?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3202753,
+                "user_type": "registered",
+                "user_id": 2704500,
+                "link": "https://stackoverflow.com/users/2704500/pandaadb",
+                "reputation": 6486,
+                "display_name": "pandaadb",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1442998262,
+            "creation_date": 1442998262,
+            "body": "<p>I can't comment, but wanted to add on to Alex's answer: <\/p>\n\n<p>For the repository implementation, I recommend having the repository be handled by jDBI instead of using Guice. Here's what I did: <\/p>\n\n<p>In the Guice module, add a provide method:<\/p>\n\n<pre><code>@Provides\n@Singleton\npublic void repository(Dbi dbi) {\n    // dbi.onDemand(whateverYourClassIs.class)\n}\n<\/code><\/pre>\n\n<p>in the repository class, use @CreateSqlObject to have your DAOs available:<\/p>\n\n<pre><code>public abstract class Repo {\n    @CreateSqlObject\n    abstract Dao dao(); // will return a jDBI managed DAO impl\n\n    public void doWhatever() {\n       /// logic\n    }\n}\n<\/code><\/pre>\n\n<p>This has the distinct advantage that you can now use jDBI annotations. (I have not found a way to use them with guice directly). This is very nice for example, if you need to execute DAO code in a transaction. The Repository is still handled within Guice so it can be injected anywhere, but jDBI handles the tricky bits within your DAO/Repository code.<\/p>\n\n<p>Hope this helps :) <\/p>\n\n<p>Artur<\/p>\n",
+            "answer_id": 32734990,
+            "question_id": 29203709
+        }
+    ],
+    "answer_comments": {
+        "32734990": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8bbc94977312d285045b2412257b6cb8?s=256&d=identicon&r=PG",
+                "account_id": 22370,
+                "user_type": "registered",
+                "user_id": 55075,
+                "link": "https://stackoverflow.com/users/55075/kenorb",
+                "reputation": 168701,
+                "display_name": "kenorb",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 32734990,
+            "edited": false,
+            "creation_date": 1442999378,
+            "comment_id": 53311560
+        }],
+        "29561507": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6b0a0c3c2730a12e8a33895f7a9a53e1?s=256&d=identicon&r=PG",
+                    "account_id": 2738066,
+                    "user_type": "registered",
+                    "user_id": 2360257,
+                    "link": "https://stackoverflow.com/users/2360257/mway",
+                    "reputation": 643,
+                    "display_name": "mway"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 29561507,
+                "edited": false,
+                "creation_date": 1582567235,
+                "comment_id": 106813988
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/ME1sS.jpg?s=256",
+                    "account_id": 4646802,
+                    "user_type": "registered",
+                    "user_id": 3871007,
+                    "link": "https://stackoverflow.com/users/3871007/prasanna-anbazhagan",
+                    "reputation": 1735,
+                    "display_name": "Prasanna Anbazhagan",
+                    "accept_rate": 83
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29561507,
+                "edited": false,
+                "creation_date": 1486375472,
+                "comment_id": 71301501
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c130387170e0d9be85d2fc978974483a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4793668,
+                    "user_type": "registered",
+                    "user_id": 3872165,
+                    "link": "https://stackoverflow.com/users/3872165/syed",
+                    "reputation": 1452,
+                    "display_name": "Syed",
+                    "accept_rate": 36
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29561507,
+                "edited": false,
+                "creation_date": 1443005886,
+                "comment_id": 53316009
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5f528a3f6814d28b583f31842e3e8d9e?s=256&d=identicon&r=PG",
+                    "account_id": 224822,
+                    "user_type": "registered",
+                    "user_id": 484902,
+                    "link": "https://stackoverflow.com/users/484902/ahus1",
+                    "reputation": 5980,
+                    "display_name": "ahus1"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29561507,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/c130387170e0d9be85d2fc978974483a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4793668,
+                    "user_type": "registered",
+                    "user_id": 3872165,
+                    "link": "https://stackoverflow.com/users/3872165/syed",
+                    "reputation": 1452,
+                    "display_name": "Syed",
+                    "accept_rate": 36
+                },
+                "edited": false,
+                "creation_date": 1428689973,
+                "comment_id": 47285833
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c130387170e0d9be85d2fc978974483a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4793668,
+                    "user_type": "registered",
+                    "user_id": 3872165,
+                    "link": "https://stackoverflow.com/users/3872165/syed",
+                    "reputation": 1452,
+                    "display_name": "Syed",
+                    "accept_rate": 36
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 29561507,
+                "edited": false,
+                "creation_date": 1428687707,
+                "comment_id": 47284555
+            }
+        ]
+    }
+}

@@ -1,0 +1,108 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/10204407656051253/picture?type=large",
+            "account_id": 6154625,
+            "user_type": "registered",
+            "user_id": 4798004,
+            "link": "https://stackoverflow.com/users/4798004/fagner-schuindt-caetano",
+            "reputation": 181,
+            "display_name": "Fagner Schuindt Caetano",
+            "accept_rate": 55
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/49263070/products-in-products-cannot-be-applied-to-java-lang-string-error",
+        "last_activity_date": 1520970325,
+        "creation_date": 1520964621,
+        "answer_count": 1,
+        "title": "Products( ) in Products cannot be applied to (java.lang.String) Error",
+        "body": "<p>I am getting an error in my MainActivity. <strong><em>Products( ) in Products cannot be applied to (java.lang.String)<\/em><\/strong>\nHere is the code<\/p>\n\n<pre><code>        import android.os.Bundle;\n        import android.support.v7.app.AppCompatActivity;\n        import android.util.Log;\n        import android.view.View;\n        import android.widget.EditText;\n        import android.widget.TextView;\n        import apps.fsc.foodtrackertuesday.R;\n\n// This program exists solely to generate a database and play with it.\n\npublic class MainActivity extends AppCompatActivity {\n    EditText userEntryText;\n    TextView resultsText;\n    myDBManager dbManager;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        // Grab references to UI elements\n        userEntryText   = findViewById(R.id.userEntryText);\n        resultsText     = findViewById(R.id.resultsText);\n\n        // dbManager reference\n        dbManager = new myDBManager(this, null, null, 1);\n\n        // Let's see what's in the database.\n        printDatabase();\n    }\n\n    public void printDatabase()\n    {\n        // Query the database using the dbManager's dbToString() method.\n        String dbString = dbManager.dbToString();\n        // Drop the results onto the UI\n        resultsText.setText(dbString);\n        // Set the UI up for fresh input\n        userEntryText.setText(\"\");\n    }\n\n    public void addFRUITButtonClick(View view)\n    {\n        // Create a new product based on what's in the UI\n        Products products = new Products(userEntryText.getText().toString());\n        // Send that product object to the dbManager so the item can be added.\n        dbManager.addFRUITItem(products);\n        // See what's in the database\n        printDatabase();\n\n    }\n\n    public void delFRUITButtonClick(View view)\n    {\n        // Grab the UI contents and dump it into a string\n        String inputText = userEntryText.getText().toString();\n        // Send that string to the dbManager's delItem() method.\n        dbManager.delFRUITItem(inputText);\n        // See what's in the database\n        printDatabase();\n    }\n}\n<\/code><\/pre>\n\n<p>Here is the MyDBManager <\/p>\n\n<pre><code>package apps.fsc.foodtrackertuesday;\n\n\n\nimport android.content.ContentValues;\nimport android.content.Context;\nimport android.database.Cursor;\nimport android.database.sqlite.SQLiteDatabase;\nimport android.database.sqlite.SQLiteOpenHelper;\n\n\n\npublic class myDBManager extends SQLiteOpenHelper{\n    // Define some global database stuff\n\n    private static final int        DATABASE_VERSION    = 1;\n    private static final String     DATABASE_NAME       = \"database\";\n\n    // Define a table and some columns\n    private static final String     TABLE_NAME                  = \"products\";\n    private static final String     COLUMN_ID                   = \"_id\";\n    private static final String     COLUMN_PRODUCT_FRUIT        = \"productfruit\";\n    private static final String     COLUMN_PRODUCT_DAIRY        = \"productdairy\";\n    private static final String     COLUMN_PRODUCT_GRAINS       = \"productgrains\";\n    private static final String     COLUMN_PRODUCT_VEGETABLES   = \"productvegetables\";\n    private static final String     COLUMN_PRODUCT_PROTEIN      = \"productprotein\";\n\n\n    public myDBManager(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {\n        //super(context, name, factory, version); // original super.\n        super(context, DATABASE_NAME, factory , DATABASE_VERSION);\n    }\n\n    @Override\n    public void onCreate(SQLiteDatabase db) {\n        // put together a sql string to create the table\n        String query =  \"CREATE TABLE \"         + TABLE_NAME + \"(\" +\n                COLUMN_ID                       + \" INTEGER PRIMARY KEY AUTOINCREMENT, \" +\n                COLUMN_PRODUCT_FRUIT            + \" VARCHAR(255) \" +\n                COLUMN_PRODUCT_DAIRY            + \" VARCHAR(255) \" +\n                COLUMN_PRODUCT_GRAINS           + \" VARCHAR(255) \" +\n                COLUMN_PRODUCT_VEGETABLES       + \" VARCHAR(255) \" +\n                COLUMN_PRODUCT_PROTEIN          + \" VARCHAR(255) \" +\n                \");\";\n        // execute the sql command\n        db.execSQL(query);\n    }\n\n    @Override\n    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {\n        // delete the existing database\n        db.execSQL(\"DROP TABLE IF EXISTS \" + TABLE_NAME);\n        // call onCreate\n        onCreate(db);\n    }\n\n    // Add item to database\n    public void addFRUITItem(Products _productFRUIT){\n        // get reference to the database\n        SQLiteDatabase db = getWritableDatabase();\n        ContentValues values = new ContentValues();\n        // Associate column name with value\n        values.put(COLUMN_PRODUCT_FRUIT, _productFRUIT.get_productFRUIT());\n        // insert value into table at the appropriate location\n        db.insert(TABLE_NAME, null, values);\n        // done writing\n        db.close();\n    }\n    public void addDAIRYItem(Products product_dairy){\n        SQLiteDatabase db = getWritableDatabase();\n        ContentValues values = new ContentValues();\n        values.put(COLUMN_PRODUCT_DAIRY, product_dairy.get_productFRUIT());\n        db.insert(TABLE_NAME, null, values);\n        db.close();\n    }\n    public void addVEGETABLESItem(Products product_vegetables){\n        SQLiteDatabase db = getWritableDatabase();\n        ContentValues values = new ContentValues();\n        values.put(COLUMN_PRODUCT_VEGETABLES, product_vegetables.get_productFRUIT());\n        db.insert(TABLE_NAME, null, values);\n        db.close();\n    }\n    public void addGRAINSItem(Products product_grain){\n        SQLiteDatabase db = getWritableDatabase();\n        ContentValues values = new ContentValues();\n        values.put(COLUMN_PRODUCT_GRAINS, product_grain.get_productFRUIT());\n        db.insert(TABLE_NAME, null, values);\n        db.close();\n    }\n    public void addPROTEINItem(Products product_protein){\n        SQLiteDatabase db = getWritableDatabase();\n        ContentValues values = new ContentValues();\n        values.put(COLUMN_PRODUCT_PROTEIN, product_protein.get_productFRUIT());\n        db.insert(TABLE_NAME, null, values);\n        db.close();\n    }\n\n    // Delete an item from the database\n    public void delDAIRYItem(String product_dairy){\n        // Get database reference\n        SQLiteDatabase db = getWritableDatabase();\n\n        // build the sql query\n        String query =  \"DELETE FROM \"  + TABLE_NAME +\n                \" WHERE \"       + COLUMN_PRODUCT_DAIRY +\n                \"=\\\"\"           + product_dairy + \"\\\";\";\n        //execute the query\n        db.execSQL(query);\n    }\n    public void delFRUITItem(String product_fruit){\n        // Get database reference\n        SQLiteDatabase db = getWritableDatabase();\n\n        // build the sql query\n        String query =  \"DELETE FROM \"  + TABLE_NAME +\n                \" WHERE \"       + COLUMN_PRODUCT_FRUIT +\n                \"=\\\"\"           + product_fruit + \"\\\";\";\n        //execute the query\n        db.execSQL(query);\n    }\n    public void delGRAINStem(String product_grains){\n        // Get database reference\n        SQLiteDatabase db = getWritableDatabase();\n\n        // build the sql query\n        String query =  \"DELETE FROM \"  + TABLE_NAME +\n                \" WHERE \"       + COLUMN_PRODUCT_GRAINS +\n                \"=\\\"\"           + product_grains + \"\\\";\";\n        //execute the query\n        db.execSQL(query);\n    }\n    public void delVEGETABLESItem(String product_vegetables){\n        // Get database reference\n        SQLiteDatabase db = getWritableDatabase();\n\n        // build the sql query\n        String query =  \"DELETE FROM \"  + TABLE_NAME +\n                \" WHERE \"       + COLUMN_PRODUCT_VEGETABLES +\n                \"=\\\"\"           + product_vegetables + \"\\\";\";\n        //execute the query\n        db.execSQL(query);\n    }\n    public void delPROTEINItem(String product_protein){\n        // Get database reference\n        SQLiteDatabase db = getWritableDatabase();\n\n        // build the sql query\n        String query =  \"DELETE FROM \"  + TABLE_NAME +\n                \" WHERE \"       + COLUMN_PRODUCT_PROTEIN +\n                \"=\\\"\"           + product_protein + \"\\\";\";\n        //execute the query\n        db.execSQL(query);\n    }\n\n    public String dbToString()\n    {\n        // Get a reference to the database\n        SQLiteDatabase db = getWritableDatabase();\n        String dbString = \"\";\n\n        // Build a sql query\n        String query = \"SELECT * FROM \" + TABLE_NAME + \" WHERE 1\";\n\n        // Point the cursor at the result of the executed query\n        Cursor c = db.rawQuery(query, null);\n\n        // Start at the beginning\n        c.moveToFirst();\n\n        // Iterate through the rows until the end is reached\n        while(!c.isAfterLast()){\n            if(c.getString(c.getColumnIndex(COLUMN_ID))!=null){\n                // dbString += c.getString(c.getColumnIndex(COLUMN_ID));\n                dbString += \" \";\n                dbString += c.getString(c.getColumnIndex(COLUMN_PRODUCT_FRUIT));\n                dbString += \"\\n\";\n            }\n            // point to the next row\n            c.moveToNext();\n        }\n        // close the database\n        db.close();\n        // send back the data\n        return dbString;\n    }\n}\n<\/code><\/pre>\n\n<p>Here is my Products Table<\/p>\n\n<pre><code>package apps.fsc.foodtrackertuesday;\n<\/code><\/pre>\n\n<p>public class Products\n{<\/p>\n\n<pre><code>private int _id;\nprivate String _productFRUIT;\nprivate String _productDAIRY;\nprivate String _productGRAINS;\nprivate String _productPROTEIN;\nprivate String _productVEGETABLES;\n\n\n\n\npublic void _productFRUIT(String _productFRUIT)\n{\n    this._productFRUIT = _productFRUIT;\n}\n\npublic void _productDAIRY(String _productDAIRY)\n{\n    this._productDAIRY = _productDAIRY;\n}\n\npublic void _productGRAINS(String _productGRAINS)\n{\n    this._productGRAINS = _productGRAINS;\n}\n\npublic void _productPROTEIN(String _productPROTEIN)\n{\n    this._productPROTEIN = _productPROTEIN;\n}\n\npublic void _productVEGETABLES(String _productVEGETABLES)\n{\n    this._productVEGETABLES = _productVEGETABLES;\n}\n//Getters\n\npublic int get_id()\n{\n    return _id;\n}\npublic String get_productFRUIT()\n{\n    return _productFRUIT;\n}\npublic String get_productGRAINS()\n{\n    return _productGRAINS;\n}\npublic String get_productVEGETABLES()\n{\n    return _productVEGETABLES;\n}\npublic String get_productPROTEIN()\n{\n    return _productPROTEIN;\n}\npublic String get_productDAIRY()\n{\n    return _productDAIRY;\n}\n\n\n//Setters\npublic void set_id(int _id) {\n    this._id = _id;\n}\npublic void set_productFRUIT(String _productFRUIT)\n{\n    this._productFRUIT = _productFRUIT;\n}\npublic void set_productDAIRY(String _productDAIRY)\n{\n    this._productDAIRY = _productDAIRY;\n}\npublic void set_productGRAINS(String _productGRAINS)\n{\n    this._productGRAINS = _productGRAINS;\n}\npublic void set_productVEGETABLES(String _productVEGETABLES)\n{\n    this._productVEGETABLES = _productVEGETABLES;\n}\npublic void set_productPROTEIN(String _productPROTEIN)\n{\n    this._productPROTEIN = _productPROTEIN;\n}\n}\n<\/code><\/pre>\n\n<p>Why does it happen and how to do I fix this?<br>\nA little context:<br>\nit's an app to store in a table things that you would get in a grocery store.<br>\nIt is subdivided into food groups.<\/p>\n",
+        "question_id": 49263070,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 0,
+        "accepted_answer_id": 49264217,
+        "is_answered": true,
+        "view_count": 1249,
+        "last_edit_date": 1520970325
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ec430cc01ef4cf4ae63ebbe9e8596f72?s=256&d=identicon&r=PG",
+                "account_id": 1547313,
+                "user_type": "registered",
+                "user_id": 1440565,
+                "link": "https://stackoverflow.com/users/1440565/code-apprentice",
+                "reputation": 83994,
+                "display_name": "Code-Apprentice",
+                "accept_rate": 59
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 49263070,
+            "edited": false,
+            "creation_date": 1520970433,
+            "comment_id": 85532737
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/10204407656051253/picture?type=large",
+                "account_id": 6154625,
+                "user_type": "registered",
+                "user_id": 4798004,
+                "link": "https://stackoverflow.com/users/4798004/fagner-schuindt-caetano",
+                "reputation": 181,
+                "display_name": "Fagner Schuindt Caetano",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 49263070,
+            "edited": false,
+            "creation_date": 1520965400,
+            "comment_id": 85530093
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/10204407656051253/picture?type=large",
+                "account_id": 6154625,
+                "user_type": "registered",
+                "user_id": 4798004,
+                "link": "https://stackoverflow.com/users/4798004/fagner-schuindt-caetano",
+                "reputation": 181,
+                "display_name": "Fagner Schuindt Caetano",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 49263070,
+            "edited": false,
+            "creation_date": 1520965394,
+            "comment_id": 85530090
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/10204407656051253/picture?type=large",
+            "account_id": 6154625,
+            "user_type": "registered",
+            "user_id": 4798004,
+            "link": "https://stackoverflow.com/users/4798004/fagner-schuindt-caetano",
+            "reputation": 181,
+            "display_name": "Fagner Schuindt Caetano",
+            "accept_rate": 55
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1520968588,
+        "creation_date": 1520968588,
+        "body": "<p>On products table <\/p>\n\n<pre><code>public Products(String productName) {\n    this._productFRUIT = productName;\n}\n<\/code><\/pre>\n",
+        "answer_id": 49264217,
+        "question_id": 49263070
+    }],
+    "answer_comments": {}
+}

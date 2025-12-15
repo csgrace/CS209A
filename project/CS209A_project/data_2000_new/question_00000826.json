@@ -1,0 +1,100 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f85a8463ca696f6cdb169da446ffc909?s=256&d=identicon&r=PG",
+            "account_id": 892394,
+            "user_type": "registered",
+            "user_id": 930402,
+            "link": "https://stackoverflow.com/users/930402/kejml",
+            "reputation": 2204,
+            "display_name": "Kejml",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/33433830/alternative-solution-to-nonexisting-limit-in-join-with-clause",
+        "last_activity_date": 1446232430,
+        "creation_date": 1446200982,
+        "answer_count": 1,
+        "title": "Alternative solution to nonexisting limit in JOIN ... WITH clause",
+        "body": "<p>I need to model following scenario: Entities have values, that can change over time and I need to keep all the historical values. For example I have entity Article, that has title. If article is created on 1st January 2015, it will get title \"Title 1\", then, on 1st February 2015 someone changes the title to \"Title 2\" and of 1st March, title is changed to \"Title 3\". And I want to able to ask \"What was the article's title on 20th February 2015?\"<\/p>\n\n<p>For this, I created Article entity having list of titles:<\/p>\n\n<pre><code>@Entity\npublic class Article {\n    @Id\n    private Long id;\n    @OneToMany(mappedBy = \"parent\", cascade = CascadeType.ALL)\n    private List&lt;ArticleTitle&gt; title = new LinkedList&lt;&gt;();\n\n    //Setters and getters are here\n}\n<\/code><\/pre>\n\n<p>where titles look like this:<\/p>\n\n<pre><code>@Entity\npublic class Title extends DateDependentEntity&lt;Title&gt; {\n    @NotNull\n    private String title;\n}\n<\/code><\/pre>\n\n<p>and DateDependentEntity looks like this (I have many of them)<\/p>\n\n<pre><code>@MappedSuperclass\npublic abstract class DateDependentEntity&lt;PARENT&gt; {\n    @Id\n    private Long id;\n    @Column(nullable = false)\n    private LocalDate validFrom;\n    @ManyToOne\n    private PARENT parent;\n}\n<\/code><\/pre>\n\n<p>Everything works fine, I have created methods for saving and reading these entities (like \"give me article where id = 1 with values valid on 20. 2. 2015\").<\/p>\n\n<p>But I have problem figuring out HQL filter queries dependent on date, like \"Give me all articles that had title containing 'dog' on '20. 2. 2015'\".<\/p>\n\n<p>First, I though I'll use something like this: <\/p>\n\n<pre><code>SELECT DISTINCT a FROM Article a JOIN a.title at WITH (at.validFrom &lt;= :date)  WHERE at.title LIKE :title\n<\/code><\/pre>\n\n<p>But this does doesn't always return expected result - If the title was \"We love dogs\" in January and \"We like cats\" since February and I filter for values containg dogs in March, it will still find this article. As far as I know I can't use some kind of limit in WITH clause, am I right?<\/p>\n\n<p>So I though I'll use subquery, but those doesn't support LIMIT in HQL, so to problem is same as with JOIN above.<\/p>\n\n<p>Is there some HQL query to solve my problem, or is my model completely wrong for this purpose?<\/p>\n",
+        "question_id": 33433830,
+        "tags": [
+            "java",
+            "hql"
+        ],
+        "score": 4,
+        "accepted_answer_id": 33439105,
+        "is_answered": true,
+        "view_count": 67,
+        "last_edit_date": 1446232430
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f85a8463ca696f6cdb169da446ffc909?s=256&d=identicon&r=PG",
+                "account_id": 892394,
+                "user_type": "registered",
+                "user_id": 930402,
+                "link": "https://stackoverflow.com/users/930402/kejml",
+                "reputation": 2204,
+                "display_name": "Kejml",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 33433830,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/umD6Q.jpg?s=256",
+                "account_id": 2016507,
+                "user_type": "registered",
+                "user_id": 1803692,
+                "link": "https://stackoverflow.com/users/1803692/vogel612",
+                "reputation": 5653,
+                "display_name": "Vogel612",
+                "accept_rate": 96
+            },
+            "edited": false,
+            "creation_date": 1446215442,
+            "comment_id": 54664741
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/umD6Q.jpg?s=256",
+                "account_id": 2016507,
+                "user_type": "registered",
+                "user_id": 1803692,
+                "link": "https://stackoverflow.com/users/1803692/vogel612",
+                "reputation": 5653,
+                "display_name": "Vogel612",
+                "accept_rate": 96
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 33433830,
+            "edited": false,
+            "creation_date": 1446211872,
+            "comment_id": 54662407
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f85a8463ca696f6cdb169da446ffc909?s=256&d=identicon&r=PG",
+            "account_id": 892394,
+            "user_type": "registered",
+            "user_id": 930402,
+            "link": "https://stackoverflow.com/users/930402/kejml",
+            "reputation": 2204,
+            "display_name": "Kejml",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1446217673,
+        "creation_date": 1446217673,
+        "body": "<p>After whole day fiddling with HQL (and after realizing, that IntelliJ marks my query as having incorrect syntax although the query works), I came up with this:<\/p>\n\n<pre><code>SELECT at.parent FROM ArticleTitle at \nWHERE at.title LIKE :title AND (at.validFrom, at.parent) IN (\n    SELECT max(at2.validFrom), at2.parent FROM ArticleTitle at2 \n    WHERE at2.validFrom &lt;= :date GROUP BY at2.parent\n);\n<\/code><\/pre>\n\n<p>This will do for now, although size of the query for just one field kind of scares me, but I think it won't get much simpler with given model. Time will tell if this will be usable in practice.<\/p>\n",
+        "answer_id": 33439105,
+        "question_id": 33433830
+    }],
+    "answer_comments": {}
+}

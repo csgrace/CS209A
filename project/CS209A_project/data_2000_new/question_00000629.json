@@ -1,0 +1,117 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/3NCsP.jpg?s=256",
+            "account_id": 4931123,
+            "user_type": "registered",
+            "user_id": 3970878,
+            "link": "https://stackoverflow.com/users/3970878/md-hasan-basri",
+            "reputation": 167,
+            "display_name": "Md. Hasan Basri"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58281220/is-it-possible-to-avoid-calling-connect-modifying-http-proxy-configuration-while",
+        "last_activity_date": 1739343693,
+        "creation_date": 1570516580,
+        "answer_count": 1,
+        "title": "Is it possible to avoid calling CONNECT modifying HTTP proxy configuration while using WebClient?",
+        "body": "<p>During the migration of <code>spring-web<\/code> to <code>spring-reactive-web<\/code>, we blocked by the implementation of <code>HTTP proxy<\/code> at the <code>WebClient<\/code> builder method.<\/p>\n\n<p>We already tried below code snippet earlier, which is referenced at <a href=\"https://stackoverflow.com/questions/46979982/how-can-i-support-an-http-proxy-using-spring-5-webclient\">How can I support an HTTP Proxy using Spring 5 WebClient?<\/a>.<\/p>\n\n<pre><code>WebClient.Builder currentWebClient = WebClient.builder();\nif (StringUtils.isNotBlank(customRequest.getConnectionMap().get(GatewayConstants.PROXY_HOST))) {\n    HttpClient httpClient = HttpClient.create()\n             .tcpConfiguration(tcpClient -&gt;\n                                tcpClient.proxy(proxy -&gt; proxy.type(ProxyProvider.Proxy.HTTP).host(customRequest.getConnectionMap().get(GatewayConstants.PROXY_HOST)).port(Integer.valueOf(customRequest.getConnectionMap().get(GatewayConstants.PROXY_PORT)))));\n    ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);\n    currentWebClient = currentWebClient.clientConnector(connector);\n}\n<\/code><\/pre>\n\n<p>For the mentioned piece of code required to have TLS enabled proxy support. It try to establish a connection using HTTP-Connect method and for our case we are getting <code>status: 403 Forbidden<\/code>, as we don't have https support for now. To disable HTTPS features from httpClient I even tried <code>noSSL()<\/code> but it won't work for me,<\/p>\n\n<pre><code>HttpClient httpClient = HttpClient.create()\n                        .tcpConfiguration(tcpClient -&gt;\n                                tcpClient\n                                        .noSSL() \n                                        ...\n<\/code><\/pre>\n\n<p>No matter I try enabling or disabling the SSL part from HTTP client, The network activity timeline looks the same, I mean for all the cases it invokes HTTP CONNECT method when I use a proxy.<\/p>\n\n<p><a href=\"https://i.sstatic.net/83hxq.jpg\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/83hxq.jpg\" alt=\"enter image description here\"><\/a><\/p>\n\n<p>Below code looking good and help us calling API's nice but didn't find any standard way of associate <code>HTTP_PROXY (Without HTTP CONNECT method call)<\/code> configuration with it.<\/p>\n\n<pre><code>WebClient.Builder currentWebClient = WebClient.builder();\n\nMono&lt;CustomHttpResponse&gt; response = WebClient.builder().build()\n                    .method(HttpMethod.GET)\n                    .uri(url)\n                    .exchange()\n                    .flatMap(r -&gt; r.bodyToMono(String.class).flatMap(b -&gt; {\n                        customHttpResponse.setBodyMap(convertToMap(customRequest, b));\n                        return Mono.just(customHttpResponse);\n                    }))\n                    .timeout(Duration.ofMillis(10000))\n                    .doOnRequest(r -&gt; logger.info(\"BACKEND_CALL start\"))\n                    .doOnError(r -&gt; logger.info(\"BACKEND_CALL ERROR\"));\n<\/code><\/pre>\n\n<p>Here we're looking for a standard way of implementing HTTP call mechanism for \n<code>GET<\/code>, <code>POST<\/code>, <code>PUT<\/code> and <code>DELETE<\/code> HTTP methods using WebClient considering domain-specific <code>SOCKET_TIMEOUT<\/code>, <code>CONNECTION_TIMEOUT<\/code>, <code>HTTP_PROXY (Without HTTP CONNECT method call)<\/code>, <code>Number of RETRY<\/code> for some back-end call.<\/p>\n\n<p>For the dependency part, the effective version for our WebClient coming from,\n<code>Gradle: org.springframework:spring-web:5.1.7.RELEASE<\/code><\/p>\n\n<p><i>Please feel free to comment below if you have any further query relevant to it.<\/i><\/p>\n",
+        "question_id": 58281220,
+        "tags": [
+            "java",
+            "spring-webflux",
+            "http-proxy",
+            "reactor-netty",
+            "spring-webclient"
+        ],
+        "score": 4,
+        "is_answered": true,
+        "view_count": 1808,
+        "last_edit_date": 1570699632
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cba5f3a4f164acdf5e0a313036203993?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5024231,
+                "user_type": "registered",
+                "user_id": 4036754,
+                "link": "https://stackoverflow.com/users/4036754/violeta-georgieva",
+                "reputation": 2352,
+                "display_name": "Violeta Georgieva"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58281220,
+            "edited": false,
+            "creation_date": 1570788771,
+            "comment_id": 103033670
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/3NCsP.jpg?s=256",
+                "account_id": 4931123,
+                "user_type": "registered",
+                "user_id": 3970878,
+                "link": "https://stackoverflow.com/users/3970878/md-hasan-basri",
+                "reputation": 167,
+                "display_name": "Md. Hasan Basri"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58281220,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/69a481f32a8aaf7edc040474f2513df4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2635431,
+                "user_type": "registered",
+                "user_id": 2280259,
+                "link": "https://stackoverflow.com/users/2280259/isank-a",
+                "reputation": 1675,
+                "display_name": "isank-a",
+                "accept_rate": 33
+            },
+            "edited": false,
+            "creation_date": 1570675053,
+            "comment_id": 102989893
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/69a481f32a8aaf7edc040474f2513df4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2635431,
+                "user_type": "registered",
+                "user_id": 2280259,
+                "link": "https://stackoverflow.com/users/2280259/isank-a",
+                "reputation": 1675,
+                "display_name": "isank-a",
+                "accept_rate": 33
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 58281220,
+            "edited": false,
+            "creation_date": 1570606585,
+            "comment_id": 102961143
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c8309c95f7a2443e564b94ebaf27caa0?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6939776,
+            "user_type": "registered",
+            "user_id": 5326546,
+            "link": "https://stackoverflow.com/users/5326546/sharifs",
+            "reputation": 90,
+            "display_name": "SharifS"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1739343693,
+        "creation_date": 1652444627,
+        "body": "<p>This issue was discussed <a href=\"https://github.com/netty/netty/issues/10475\" rel=\"nofollow noreferrer\">here<\/a>.<\/p>\n<p>I faced the same issue recently and found an workaround which is using jetty-reactive-httpclient as WebClient's client connector.<\/p>\n<p>To use jetty-reactive-httpclient, this dependency is needed:<\/p>\n<pre><code>'org.eclipse.jetty:jetty-reactive-httpclient:1.1.11'\n<\/code><\/pre>\n<p>Then use <code>org.eclipse.jetty.client.HttpClient<\/code> instead of <code>reactor.netty.http.client.HttpClient<\/code> like below:<\/p>\n<pre><code>HttpClient httpClient = new HttpClient();\nProxyConfiguration proxyConfig = httpClient.getProxyConfiguration();\nHttpProxy proxy = new HttpProxy(${proxy.host}, ${proxy.port});\nproxyConfig.getProxies().add(proxy);\nJettyClientHttpConnector jettyClientHttpConnector = new JettyClientHttpConnector(httpClient);\nWebClient client = WebClient.builder().clientConnector(jettyClientHttpConnector).build();\n<\/code><\/pre>\n",
+        "answer_id": 72229564,
+        "question_id": 58281220,
+        "last_edit_date": 1739343693
+    }],
+    "answer_comments": {}
+}

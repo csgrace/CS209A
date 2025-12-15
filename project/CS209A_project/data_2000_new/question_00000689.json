@@ -1,0 +1,163 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/32f38750c7acc0636e661fe37537d44f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6198397,
+            "user_type": "registered",
+            "user_id": 4829042,
+            "link": "https://stackoverflow.com/users/4829042/10anat10",
+            "reputation": 81,
+            "display_name": "10anat10",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/30936121/minecraft-plugin-player-name-error",
+        "last_activity_date": 1434773050,
+        "creation_date": 1434710439,
+        "answer_count": 2,
+        "title": "Minecraft plugin player name error",
+        "body": "<p>I'm writing something like SRM, and everything is fine until server reset. When I'm writing a sign and trying to buy it (region assigned to sign) it should send me a message that I can't, and it does, but after a server reset it doesn't, and in both cases variables are the same... This is my code:<\/p>\n\n<pre><code>package pl.maccraft.regs;\n\nimport java.util.logging.Logger;\n\nimport net.milkbowl.vault.economy.Economy;\n\nimport org.bukkit.plugin.RegisteredServiceProvider;\nimport org.bukkit.plugin.java.JavaPlugin;\nimport org.bukkit.Bukkit;\nimport org.bukkit.ChatColor;\nimport org.bukkit.Material;\nimport org.bukkit.block.Block;\nimport org.bukkit.block.Sign;\nimport org.bukkit.entity.Player;\nimport org.bukkit.event.EventHandler;\nimport org.bukkit.event.Listener;\nimport org.bukkit.event.player.PlayerInteractEvent;\n\nimport com.sk89q.worldguard.bukkit.RegionContainer;\nimport com.sk89q.worldguard.bukkit.WorldGuardPlugin;\nimport com.sk89q.worldguard.domains.DefaultDomain;\nimport com.sk89q.worldguard.protection.managers.RegionManager;\nimport com.sk89q.worldguard.protection.regions.ProtectedRegion;\n\nimport org.bukkit.plugin.Plugin;\n\npublic final class egs extends JavaPlugin implements Listener {\n\n    private static final Logger log = Logger.getLogger(\"Minecraft\");\n    public static Economy econ = null;\n\n    @Override\n    public void onEnable() {\n        getServer().getPluginManager().registerEvents(this, this);\n        getWorldGuard();\n        if (!setupEconomy() ) {\n            log.severe(String.format(\"[%s] - Disabled due to no Vault dependency found!\", getDescription().getName()));\n            getServer().getPluginManager().disablePlugin(this);\n            return;\n        }\n    }\n\n    private WorldGuardPlugin getWorldGuard() {\n        Plugin plugin = getServer().getPluginManager().getPlugin(\"WorldGuard\");\n\n        // WorldGuard may not be loaded\n        if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {\n            return null; // Maybe you want throw an exception instead\n        }\n\n        return (WorldGuardPlugin) plugin;\n    }\n\n    private boolean setupEconomy() {\n        if (getServer().getPluginManager().getPlugin(\"Vault\") == null) {\n            return false;\n        }\n        RegisteredServiceProvider&lt;Economy&gt; rsp = getServer().getServicesManager().getRegistration(Economy.class);\n        if (rsp == null) {\n            return false;\n        }\n\n        econ = rsp.getProvider();\n        return econ != null;\n    }\n\n    @EventHandler\n    public void playerInteract(PlayerInteractEvent event){\n        Player player = event.getPlayer();\n        if(event.getAction() == org.bukkit.event.block.Action.LEFT_CLICK_BLOCK){\n        Block b = event.getClickedBlock();\n        if (b.getType() == (Material.SIGN) || b.getType() == (Material.SIGN_POST) || b.getType() == (Material.WALL_SIGN)){\n            Sign sign = (Sign) b.getState();\n            if (sign.getLine(0).equals(\"[sell]\")){\n                if (!sign.getLine(1).isEmpty()){\n\n\n                RegionContainer container = getWorldGuard().getRegionContainer();\n                RegionManager regions = container.get(player.getWorld());\n                if (regions != null) {\n\n                    ProtectedRegion region = regions.getRegion(sign.getLine(1));\n                    if (region != null) {\n                    DefaultDomain owners = region.getOwners();\n                    if(owners.contains(player.getUniqueId())){\n                        if (!sign.getLine(2).isEmpty()){\n                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), \"say stan:\" + econ.getBalance(player));\n                        event.setCancelled(true);\n                        player.sendMessage(\"To jest twój region\");\n                        sign.setLine(0, ChatColor.DARK_RED + \"[sprzedam]\");\n                        sign.setLine(3, sign.getLine(1));\n                        sign.setLine(1, player.getName());\n                        sign.update(true);  \n                    }else{\n                        player.sendMessage(\"Podaj cenę w trzeciej linii!\");\n                    }\n                    }else{\n                        player.sendMessage(\"To nie jest twój region!\");\n                    };\n                    } else {\n                        player.sendMessage(\"Taki region nie istnieje!\");\n                    }\n                } else {\n                    player.sendMessage(\"Wystąpił błąd, który nie powinien się zdarzyć, powiadom o tym administrację!\");\n                }\n\n\n                }else{\n                    player.sendMessage(\"Podaj nazwę regionu w drugiej linii!\");\n                }   \n            }\n        }\n        }\n        if(event.getAction() == org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK){\n            Block b = event.getClickedBlock();\n            if (b.getType() == (Material.SIGN) || b.getType() == (Material.SIGN_POST) || b.getType() == (Material.WALL_SIGN)){\n                Sign sign = (Sign) b.getState();\n                if (sign.getLine(0).equals(ChatColor.DARK_RED + \"[sprzedam]\")){\n                    if (event.getPlayer().getName() == sign.getLine(1)){\n                        player.sendMessage(\"nie możesz kupić własnej działki\");\n                        player.sendMessage(event.getPlayer().getName() + \" \" + sign.getLine(1));\n                    }else{\n                        player.sendMessage(event.getPlayer().getName() + \" \" + sign.getLine(1));\n                        Double si = Double.valueOf(sign.getLine(2));\n                        if(si &lt;= econ.getBalance(player)){//TO POWINNO BYĆ WIĘKSZE LUB RÓWNE A NIE TAKIE SAMO!!!\n                        RegionContainer container = getWorldGuard().getRegionContainer();\n                        RegionManager regions = container.get(player.getWorld());\n\n                        if (regions != null) {\n                            ProtectedRegion region = regions.getRegion(sign.getLine(3));\n                            if (region != null) {\n                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), \"eco take \" + player.getName() + \" \" + si);\n                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), \"eco give \" + sign.getLine(1) + \" \" + si);\n                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), \"rg removeowner \" + sign.getLine(3) + \" \" + sign.getLine(1));\n                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), \"rg addowner \" + sign.getLine(3) + \" \" + player.getName());\n                                sign.setLine(0, ChatColor.DARK_RED + \"[sprzedane]\");\n                                player.sendMessage(\"kupiono działkę \" + sign.getLine(3) + \" za \" + si);\n                                sign.setLine(1, event.getPlayer().getName());\n                                sign.setLine(2, \"\");\n                                sign.setLine(3, \"\");\n                                sign.update(true);\n                            }\n\n                        }else{\n                            player.sendMessage(\"wystąpił błąd\");\n                        }\n\n\n                        }else{\n                            player.sendMessage(\"Nie masz wystarczająco dużo kasy!\");\n                        }\n                    }\n                }\n            }\n        }\n\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>and console returns only this:<\/p>\n\n<pre><code>[12:27:42] [Server thread/INFO]: [0;35;1m[Server[0;35;1m] stan:1000.0[m\n[12:28:17] [Server thread/INFO]: CONSOLE issued server command: /eco take 10anat10 1000.0\n[12:28:17] [Server thread/INFO]: [0;32;1m$1000 zostalo pobrane z [0;31;22m10anat10[m[0;32;1m konta. Nowy stan konta: $0[m\n[12:28:17] [Server thread/INFO]: CONSOLE issued server command: /eco give 10anat10 1000.0\n[12:28:17] [Server thread/INFO]: [0;32;1m$1000 zostalo dodane do konta [0;31;22m10anat10[m§. Nowy stan konta: $1000.[m\n[12:28:17] [Server thread/INFO]: [0;31;1mPlease specify the world with -w world_name.[m\n[12:28:17] [Server thread/INFO]: [0;31;1mPlease specify the world with -w world_name.[m\n<\/code><\/pre>\n\n<p>I know that I don't specify world for rg addowner and removeovner, but this isn't it and there are no more errors in the logs... Please help me.<\/p>\n",
+        "question_id": 30936121,
+        "tags": [
+            "java",
+            "plugins",
+            "server",
+            "minecraft",
+            "bukkit"
+        ],
+        "score": -1,
+        "accepted_answer_id": 30939262,
+        "is_answered": true,
+        "view_count": 279,
+        "last_edit_date": 1434710762
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/32f38750c7acc0636e661fe37537d44f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6198397,
+                "user_type": "registered",
+                "user_id": 4829042,
+                "link": "https://stackoverflow.com/users/4829042/10anat10",
+                "reputation": 81,
+                "display_name": "10anat10",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1434745960,
+            "creation_date": 1434720095,
+            "body": "<p>When I change<\/p>\n\n<pre><code>if(event.getPlayer().getName() == sign.getLine(1)){\n<\/code><\/pre>\n\n<p>to<\/p>\n\n<pre><code>RegionContainer container = getWorldGuard().getRegionContainer();\nRegionManager regions = container.get(player.getWorld());\nif(regions != null){\n  ProtectedRegion region = regions.getRegion(sign.getLine(3));\n  DefaultDomain owners = region.getOwners();\nif(owners.contains(player.getUniqueId())){\n<\/code><\/pre>\n\n<p>It acts as intended.<\/p>\n",
+            "answer_id": 30939262,
+            "question_id": 30936121,
+            "last_edit_date": 1434745960
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d97e5ee25e5f3373339c2d05d231ed9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 412333,
+                "user_type": "registered",
+                "user_id": 5188428,
+                "link": "https://stackoverflow.com/users/5188428/rishaan-gupta",
+                "reputation": 573,
+                "display_name": "Rishaan Gupta"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1434773050,
+            "creation_date": 1434773050,
+            "body": "<p>You need to compare strings rather then checking if the objects are equal.\n<code>string1.equals(string2)<\/code>/<code>string1.equalsIgnoreCase(string2)<\/code> compares strings while <code>string1 == string2<\/code> doesn't.<\/p>\n\n<p>You could try this:<\/p>\n\n<pre><code>if (event.getPlayer().getName().equals(sign.getLine(1)))\n<\/code><\/pre>\n\n<p>or if you don't want it case sensitive<\/p>\n\n<pre><code>if (event.getPlayer().getName().equalsIgnoreCase(sign.getLine(1)))\n<\/code><\/pre>\n",
+            "answer_id": 30950151,
+            "question_id": 30936121
+        }
+    ],
+    "answer_comments": {
+        "30939262": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/9g4XT.png?s=256",
+                    "account_id": 3288349,
+                    "user_type": "registered",
+                    "user_id": 2767207,
+                    "link": "https://stackoverflow.com/users/2767207/jojodmo",
+                    "reputation": 23606,
+                    "display_name": "Jojodmo",
+                    "accept_rate": 94
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30939262,
+                "edited": false,
+                "creation_date": 1434746675,
+                "comment_id": 49928494
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/32f38750c7acc0636e661fe37537d44f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 6198397,
+                    "user_type": "registered",
+                    "user_id": 4829042,
+                    "link": "https://stackoverflow.com/users/4829042/10anat10",
+                    "reputation": 81,
+                    "display_name": "10anat10",
+                    "accept_rate": 89
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30939262,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/9g4XT.png?s=256",
+                    "account_id": 3288349,
+                    "user_type": "registered",
+                    "user_id": 2767207,
+                    "link": "https://stackoverflow.com/users/2767207/jojodmo",
+                    "reputation": 23606,
+                    "display_name": "Jojodmo",
+                    "accept_rate": 94
+                },
+                "edited": false,
+                "creation_date": 1434746642,
+                "comment_id": 49928474
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/9g4XT.png?s=256",
+                    "account_id": 3288349,
+                    "user_type": "registered",
+                    "user_id": 2767207,
+                    "link": "https://stackoverflow.com/users/2767207/jojodmo",
+                    "reputation": 23606,
+                    "display_name": "Jojodmo",
+                    "accept_rate": 94
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 30939262,
+                "edited": false,
+                "creation_date": 1434745885,
+                "comment_id": 49928144
+            }
+        ],
+        "30950151": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/32f38750c7acc0636e661fe37537d44f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6198397,
+                "user_type": "registered",
+                "user_id": 4829042,
+                "link": "https://stackoverflow.com/users/4829042/10anat10",
+                "reputation": 81,
+                "display_name": "10anat10",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30950151,
+            "edited": false,
+            "creation_date": 1434794245,
+            "comment_id": 49938719
+        }]
+    }
+}

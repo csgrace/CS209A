@@ -1,0 +1,230 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/978a8a0fa53370db91df78d7e0da81f3?s=256&d=identicon&r=PG",
+            "account_id": 54608,
+            "user_type": "registered",
+            "user_id": 163423,
+            "link": "https://stackoverflow.com/users/163423/george",
+            "reputation": 8388,
+            "display_name": "George",
+            "accept_rate": 95
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2537944/prepend-lines-to-file-in-java",
+        "last_activity_date": 1603251771,
+        "creation_date": 1269867073,
+        "answer_count": 6,
+        "title": "Prepend lines to file in Java",
+        "body": "<p>Is there a way to prepend a line to the File in Java, without creating a temporary file, and writing the needed content to it?<\/p>\n",
+        "question_id": 2537944,
+        "tags": [
+            "java",
+            "file-io"
+        ],
+        "score": 24,
+        "accepted_answer_id": 2537991,
+        "is_answered": true,
+        "view_count": 16371,
+        "last_edit_date": 1269867500
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                "account_id": 47283,
+                "user_type": "registered",
+                "user_id": 139985,
+                "link": "https://stackoverflow.com/users/139985/stephen-c",
+                "reputation": 723464,
+                "display_name": "Stephen C",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 25,
+            "is_accepted": true,
+            "last_activity_date": 1603251771,
+            "creation_date": 1269867622,
+            "body": "<p>No, there is no way to do that <strong>SAFELY<\/strong> in Java.  (Or AFAIK, any other programming language.)<\/p>\n<p>No filesystem implementation in any mainstream operating system supports this kind of thing, and you won't find this feature supported in any mainstream programming languages.<\/p>\n<p>Real world file systems are implemented on devices that store data as fixed sized &quot;blocks&quot;.  It is not possible to implement a file system model where you can insert bytes into the middle of a file without significantly slowing down file I/O, wasting disk space or both.<\/p>\n<hr />\n<p>The solutions that involve an in-place rewrite of the file are inherently unsafe.  If your application is killed or the power dies in the middle of the prepend / rewrite process, you are likely to lose data.  I would NOT recommend using that approach in practice.<\/p>\n<p>Use a temporary file and renaming.  It is safer.<\/p>\n",
+            "answer_id": 2537991,
+            "question_id": 2537944,
+            "last_edit_date": 1603251771
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/91cc672598ad95ab501c35cdd8a23d8f?s=256&d=identicon&r=PG",
+                "account_id": 59692,
+                "user_type": "registered",
+                "user_id": 178526,
+                "link": "https://stackoverflow.com/users/178526/sfussenegger",
+                "reputation": 36223,
+                "display_name": "sfussenegger",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1278490460,
+            "creation_date": 1269869129,
+            "body": "<p>There is a way, it involves rewriting the whole file though (but no temporary file). As others mentioned, no file system supports prepending content to a file. Here is some sample code that uses a RandomAccessFile to write and read content while keeping some content buffered in memory:<\/p>\n\n<pre><code>public static void main(final String args[]) throws Exception {\n    File f = File.createTempFile(Main.class.getName(), \"tmp\");\n    f.deleteOnExit();\n\n    System.out.println(f.getPath());\n\n    // put some dummy content into our file\n    BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f)));\n    for (int i = 0; i &lt; 1000; i++) {\n        w.write(UUID.randomUUID().toString());\n        w.write('\\n');\n    }\n    w.flush();\n    w.close();\n\n            // append \"some uuids\" to our file\n    int bufLength = 4096;\n    byte[] appendBuf = \"some uuids\\n\".getBytes();\n    byte[] writeBuf = appendBuf;\n    byte[] readBuf = new byte[bufLength];\n\n    int writeBytes = writeBuf.length;\n\n    RandomAccessFile rw = new RandomAccessFile(f, \"rw\");\n    int read = 0;\n    int write = 0;\n\n    while (true) {\n                    // seek to read position and read content into read buffer\n        rw.seek(read);\n        int bytesRead = rw.read(readBuf, 0, readBuf.length);\n\n                    // seek to write position and write content from write buffer\n        rw.seek(write);\n        rw.write(writeBuf, 0, writeBytes);\n\n                    // no bytes read - end of file reached\n        if (bytesRead &lt; 0) {\n                            // end of\n            break;\n        }\n\n                    // update seek positions for write and read\n        read += bytesRead;\n        write += writeBytes;\n        writeBytes = bytesRead;\n\n                    // reuse buffer, create new one to replace (short) append buf\n        byte[] nextWrite = writeBuf == appendBuf ? new byte[bufLength] : writeBuf;\n        writeBuf = readBuf;\n        readBuf = nextWrite;\n    };\n\n    rw.close();\n\n            // now show the content of our file\n    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));\n\n    String line;\n    while ((line = reader.readLine()) != null) {\n        System.out.println(line);\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 2538169,
+            "question_id": 2537944,
+            "last_edit_date": 1278490460
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/6qyorCBM.jpg?s=256",
+                "account_id": 72238,
+                "user_type": "registered",
+                "user_id": 208660,
+                "link": "https://stackoverflow.com/users/208660/ham-vocke",
+                "reputation": 3004,
+                "display_name": "Ham Vocke"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1269867655,
+            "creation_date": 1269867655,
+            "body": "<p>You could store the file content in a String and prepend the desired line by using a StringBuilder-Object. You just have to put the desired line first and then append the file-content-String.<br>\nNo extra temporary file needed.<\/p>\n",
+            "answer_id": 2537995,
+            "question_id": 2537944
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2343ae368d3241278581ce6c87f62a25?s=256&d=identicon&r=PG",
+                "account_id": 10930,
+                "user_type": "registered",
+                "user_id": 20862,
+                "link": "https://stackoverflow.com/users/20862/ignacio-vazquez-abrams",
+                "reputation": 803910,
+                "display_name": "Ignacio Vazquez-Abrams",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1269867679,
+            "creation_date": 1269867679,
+            "body": "<p>No. There are no \"intra-file shift\" operations, only read and write of discrete sizes.<\/p>\n",
+            "answer_id": 2537998,
+            "question_id": 2537944
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7aee58de3a50c13e688140bc06d60225?s=256&d=identicon&r=PG",
+                "account_id": 35227,
+                "user_type": "registered",
+                "user_id": 99692,
+                "link": "https://stackoverflow.com/users/99692/kevin-reid",
+                "reputation": 46065,
+                "display_name": "Kevin Reid",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1269868577,
+            "creation_date": 1269868577,
+            "body": "<p>It would be possible to do so by reading a chunk of the file of equal length to what you want to prepend, writing the new content in place of it, reading the later chunk and replacing it with what you read before, and so on, rippling down the to the end of the file.<\/p>\n\n<p>However, don't do that, because if anything stops (out-of-memory, power outage, rogue thread calling <code>System.exit<\/code>) in the middle of that process, data will be lost. Use the temporary file instead.<\/p>\n",
+            "answer_id": 2538113,
+            "question_id": 2537944
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/31e5b672c03513002777793c24f872d5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7393746,
+                "user_type": "registered",
+                "user_id": 5626395,
+                "link": "https://stackoverflow.com/users/5626395/dinesh-kumar",
+                "reputation": 1,
+                "display_name": "Dinesh Kumar"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1539306523,
+            "creation_date": 1506145553,
+            "body": "<pre><code>private static void addPreAppnedText(File fileName) {\n    FileOutputStream fileOutputStream =null;\n\n    BufferedReader br = null;\n    FileReader fr = null;\n    String newFileName = fileName.getAbsolutePath() + \"@\";\n\n    try {\n        fileOutputStream = new FileOutputStream(newFileName);\n        fileOutputStream.write(\"preappendTextDataHere\".getBytes());\n\n        fr = new FileReader(fileName);\n        br = new BufferedReader(fr);\n\n        String sCurrentLine;\n\n        while ((sCurrentLine = br.readLine()) != null) {\n            fileOutputStream.write((\"\\n\"+sCurrentLine).getBytes());\n\n        }\n        fileOutputStream.flush();\n    } catch (IOException e) {\n        e.printStackTrace();\n    } finally {\n        try {\n            fileOutputStream.close();\n            if (br != null)\n                br.close();\n\n            if (fr != null)\n                fr.close();\n\n            new File(newFileName).renameTo(new File(newFileName.replace(\"@\", \"\")));\n        } catch (IOException ex) {\n            ex.printStackTrace();\n        }\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 46376476,
+            "question_id": 2537944,
+            "last_edit_date": 1539306523
+        }
+    ],
+    "answer_comments": {
+        "46376476": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                "account_id": 47283,
+                "user_type": "registered",
+                "user_id": 139985,
+                "link": "https://stackoverflow.com/users/139985/stephen-c",
+                "reputation": 723464,
+                "display_name": "Stephen C",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 46376476,
+            "edited": false,
+            "creation_date": 1552306426,
+            "comment_id": 96945987
+        }],
+        "2537991": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                    "account_id": 47283,
+                    "user_type": "registered",
+                    "user_id": 139985,
+                    "link": "https://stackoverflow.com/users/139985/stephen-c",
+                    "reputation": 723464,
+                    "display_name": "Stephen C",
+                    "accept_rate": 69
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 2537991,
+                "edited": false,
+                "creation_date": 1535005984,
+                "comment_id": 90908833
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/784a27e6bd8e74d594673f2026f6c32b?s=256&d=identicon&r=PG",
+                    "account_id": 212661,
+                    "user_type": "registered",
+                    "user_id": 465620,
+                    "link": "https://stackoverflow.com/users/465620/jerry-tian",
+                    "reputation": 3438,
+                    "display_name": "Jerry Tian",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 2,
+                "post_id": 2537991,
+                "edited": false,
+                "creation_date": 1534999973,
+                "comment_id": 90906713
+            }
+        ],
+        "2537995": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0bb816508849359fa018cb8aace1e606?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 104440,
+                "user_type": "registered",
+                "user_id": 279236,
+                "link": "https://stackoverflow.com/users/279236/jwenting",
+                "reputation": 5659,
+                "display_name": "jwenting"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2537995,
+            "edited": false,
+            "creation_date": 1269867843,
+            "comment_id": 2538124
+        }]
+    }
+}

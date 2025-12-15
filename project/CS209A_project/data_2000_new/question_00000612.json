@@ -1,0 +1,217 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+            "account_id": 16063794,
+            "user_type": "registered",
+            "user_id": 14080696,
+            "link": "https://stackoverflow.com/users/14080696/sout-parl",
+            "reputation": 109,
+            "display_name": "Sout parl"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73198176/configure-asciidoctor-maven-plugin-to-generate-a-single-pdf-file",
+        "last_activity_date": 1659392567,
+        "creation_date": 1659379041,
+        "answer_count": 1,
+        "title": "Configure AsciiDoctor Maven plugin to generate a single PDF file",
+        "body": "<p>Is there a way to configure AsciiDoctor Maven plugin to generate one PDF file out of many <code>.adoc<\/code> files?<\/p>\n<p>Currently, it simply translates the structure of asciidoc files into the same structure, but using PDFs. I would like to have a single file and when I click on the link it moves me to the target location in the same PDF. Is this even possible using Maven plugin?<\/p>\n<p>My current pom.xml:<\/p>\n<pre><code>...\n&lt;plugin&gt;\n    &lt;groupId&gt;org.asciidoctor&lt;/groupId&gt;\n    &lt;artifactId&gt;asciidoctor-maven-plugin&lt;/artifactId&gt;\n    &lt;version&gt;2.2.2&lt;/version&gt;\n    &lt;dependencies&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.asciidoctor&lt;/groupId&gt;\n            &lt;artifactId&gt;asciidoctorj-pdf&lt;/artifactId&gt;\n            &lt;version&gt;2.1.4&lt;/version&gt;\n        &lt;/dependency&gt;\n    &lt;/dependencies&gt;\n    &lt;configuration&gt;\n        &lt;sourceDirectory&gt;documentation&lt;/sourceDirectory&gt;\n        &lt;outputDirectory&gt;target/pdf-doc&lt;/outputDirectory&gt;\n        &lt;backend&gt;pdf&lt;/backend&gt;\n        &lt;preserveDirectories&gt;true&lt;/preserveDirectories&gt;\n    &lt;/configuration&gt;\n    &lt;executions&gt;\n        &lt;execution&gt;\n            &lt;id&gt;generate-pdf-doc&lt;/id&gt;\n            &lt;phase&gt;generate-resources&lt;/phase&gt;\n            &lt;goals&gt;\n                &lt;goal&gt;process-asciidoc&lt;/goal&gt;\n            &lt;/goals&gt;\n            &lt;configuration&gt;\n                &lt;backend&gt;pdf&lt;/backend&gt;\n                &lt;attributes&gt;\n                    &lt;source-highlighter&gt;rouge&lt;/source-highlighter&gt;\n                    &lt;icons&gt;font&lt;/icons&gt;\n                    &lt;pagenums/&gt;\n                    &lt;toc/&gt;\n                    &lt;idprefix/&gt;\n                    &lt;idseparator&gt;-&lt;/idseparator&gt;\n                &lt;/attributes&gt;\n            &lt;/configuration&gt;\n        &lt;/execution&gt;\n    &lt;/executions&gt;\n&lt;/plugin&gt;\n...\n<\/code><\/pre>\n",
+        "question_id": 73198176,
+        "tags": [
+            "java",
+            "maven",
+            "asciidoctor"
+        ],
+        "score": 3,
+        "accepted_answer_id": 73198465,
+        "is_answered": true,
+        "view_count": 1447,
+        "last_edit_date": 1659380547
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/DSpH6.jpg?s=256",
+            "account_id": 112317,
+            "user_type": "registered",
+            "user_id": 296328,
+            "link": "https://stackoverflow.com/users/296328/khmarbaise",
+            "reputation": 98455,
+            "display_name": "khmarbaise",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 73198176,
+        "edited": false,
+        "creation_date": 1659379694,
+        "comment_id": 129276188
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/v58O6.jpg?s=256",
+            "account_id": 4181375,
+            "user_type": "registered",
+            "user_id": 3426309,
+            "link": "https://stackoverflow.com/users/3426309/andrey-b-panfilov",
+            "reputation": 6263,
+            "display_name": "Andrey B. Panfilov"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1659392567,
+        "creation_date": 1659380854,
+        "body": "<p>You need to aggregate individual articles into single one like:<\/p>\n<pre><code>:toc: macro\n:toclevels: 3\n:toc-title: Contents\n:doctype: book\n:chapter-label:\n\ntoc::[]\n\n:doctype: book\n\ninclude::article1.adoc[]\n\ninclude::article2.adoc[]\n\n...\n\n<\/code><\/pre>\n<p>and setup maven plugin to compile that single adoc:<\/p>\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;configuration&gt;\n   &lt;sourceDocumentName&gt;single.adoc&lt;/sourceDocumentName&gt;\n&lt;/configuration&gt;\n<\/code><\/pre>\n<hr />\n<p>It seems the Q is more about <code>asciidoc<\/code> rather than <code>maven<\/code>...<\/p>\n<p>I believe to support document links we need to create anchors with unique names, something like:<\/p>\n<p>building-tool.adoc:<\/p>\n<pre><code>[#building_tool]\n= Building tool\n\n== Status\nAccepted\n<\/code><\/pre>\n<p>cloud.adoc:<\/p>\n<pre><code>[#cloud]\n= Cloud\n\n== Status\nAccepted\n<\/code><\/pre>\n<p>adr-log.adoc:<\/p>\n<pre><code>| 08/07/2022\n| xref:adr/building-tool.adoc#building_tool[Building tool]\n| Accepted\n\n| 08/07/2022\n| xref:adr/cloud.adoc#cloud[Cloud]\n| Accepted\n<\/code><\/pre>\n",
+        "answer_id": 73198465,
+        "question_id": 73198176,
+        "last_edit_date": 1659392567
+    }],
+    "answer_comments": {"73198465": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+                "account_id": 16063794,
+                "user_type": "registered",
+                "user_id": 14080696,
+                "link": "https://stackoverflow.com/users/14080696/sout-parl",
+                "reputation": 109,
+                "display_name": "Sout parl"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198465,
+            "edited": false,
+            "creation_date": 1659394028,
+            "comment_id": 129279832
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/v58O6.jpg?s=256",
+                "account_id": 4181375,
+                "user_type": "registered",
+                "user_id": 3426309,
+                "link": "https://stackoverflow.com/users/3426309/andrey-b-panfilov",
+                "reputation": 6263,
+                "display_name": "Andrey B. Panfilov"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 73198465,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+                "account_id": 16063794,
+                "user_type": "registered",
+                "user_id": 14080696,
+                "link": "https://stackoverflow.com/users/14080696/sout-parl",
+                "reputation": 109,
+                "display_name": "Sout parl"
+            },
+            "edited": false,
+            "creation_date": 1659392611,
+            "comment_id": 129279539
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+                "account_id": 16063794,
+                "user_type": "registered",
+                "user_id": 14080696,
+                "link": "https://stackoverflow.com/users/14080696/sout-parl",
+                "reputation": 109,
+                "display_name": "Sout parl"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198465,
+            "edited": false,
+            "creation_date": 1659391843,
+            "comment_id": 129279400
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/v58O6.jpg?s=256",
+                "account_id": 4181375,
+                "user_type": "registered",
+                "user_id": 3426309,
+                "link": "https://stackoverflow.com/users/3426309/andrey-b-panfilov",
+                "reputation": 6263,
+                "display_name": "Andrey B. Panfilov"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198465,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+                "account_id": 16063794,
+                "user_type": "registered",
+                "user_id": 14080696,
+                "link": "https://stackoverflow.com/users/14080696/sout-parl",
+                "reputation": 109,
+                "display_name": "Sout parl"
+            },
+            "edited": false,
+            "creation_date": 1659388557,
+            "comment_id": 129278635
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+                "account_id": 16063794,
+                "user_type": "registered",
+                "user_id": 14080696,
+                "link": "https://stackoverflow.com/users/14080696/sout-parl",
+                "reputation": 109,
+                "display_name": "Sout parl"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198465,
+            "edited": false,
+            "creation_date": 1659388454,
+            "comment_id": 129278603
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/v58O6.jpg?s=256",
+                "account_id": 4181375,
+                "user_type": "registered",
+                "user_id": 3426309,
+                "link": "https://stackoverflow.com/users/3426309/andrey-b-panfilov",
+                "reputation": 6263,
+                "display_name": "Andrey B. Panfilov"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198465,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+                "account_id": 16063794,
+                "user_type": "registered",
+                "user_id": 14080696,
+                "link": "https://stackoverflow.com/users/14080696/sout-parl",
+                "reputation": 109,
+                "display_name": "Sout parl"
+            },
+            "edited": false,
+            "creation_date": 1659386570,
+            "comment_id": 129278155
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GhkxBQDkz8SgBSbHr3PdDHtUSDVW2MsyntxrRdm=k-s256",
+                "account_id": 16063794,
+                "user_type": "registered",
+                "user_id": 14080696,
+                "link": "https://stackoverflow.com/users/14080696/sout-parl",
+                "reputation": 109,
+                "display_name": "Sout parl"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 73198465,
+            "edited": false,
+            "creation_date": 1659386138,
+            "comment_id": 129278039
+        }
+    ]}
+}

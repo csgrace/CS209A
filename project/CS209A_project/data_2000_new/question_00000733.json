@@ -1,0 +1,95 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ee44248cc08f3c6a6695648a8f626d80?s=256&d=identicon&r=PG",
+            "account_id": 1036677,
+            "user_type": "registered",
+            "user_id": 1043754,
+            "link": "https://stackoverflow.com/users/1043754/viniciusc",
+            "reputation": 29,
+            "display_name": "ViniciusC"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26558471/make-a-client-server-connection-stable-in-java",
+        "last_activity_date": 1414205287,
+        "creation_date": 1414200237,
+        "answer_count": 3,
+        "title": "Make a client &amp; server connection stable in Java",
+        "body": "<p>I'm creating a Server application in Java but when client connects to a server and opens a stream, the stream come to and end the connection is lost. What I need is to keep that connection alive even when the stream has ended. Here is a code example to better explain what I'm saying:<\/p>\n\n<pre><code>     diSTR = new DataInputStream(Conexao.getInputStream());\n     doSTR = new DataOutputStream(Conexao.getOutputStream());\n     conectado = true;\n     while (diSTR.available() &gt; 0)\n     {\n        byte[] buffer = new byte[size];\n        diSTR.readFully(buffer);\n        String str = new String(buffer, \"UTF-8\");\n        log(str);\n     }\n<\/code><\/pre>\n\n<p>So when <code>diSTR.available()<\/code> returns <code>0<\/code> the method returns and the connection is over, how can I solve this problem? <\/p>\n",
+        "question_id": 26558471,
+        "tags": [
+            "java",
+            "sockets",
+            "server"
+        ],
+        "score": -1,
+        "is_answered": true,
+        "view_count": 508,
+        "last_edit_date": 1414205287
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                "account_id": 47283,
+                "user_type": "registered",
+                "user_id": 139985,
+                "link": "https://stackoverflow.com/users/139985/stephen-c",
+                "reputation": 723474,
+                "display_name": "Stephen C",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1414204465,
+            "creation_date": 1414203843,
+            "body": "<blockquote>\n  <p>So when diSTR.available() = 0 the method returns and the connection is over, how can I solve this problem? <\/p>\n<\/blockquote>\n\n<p>The solution is to NOT use <code>available()<\/code>.<\/p>\n\n<p>That method tells you how many bytes are available to read <em>right now<\/em> without blocking.  If you use this to tell you \"the connection is over\", then you will get a <em>premature<\/em> end if the other end or the network cannot keep up with the rate at which you can read and process the data.  Even if the other end can keep up, all it takes is a brief networking disruption for the reader to catch up, and the connection to be \"over\" ... according to your criterion.<\/p>\n\n<p>The <em>correct<\/em> way to do this is to just read on the input stream until the read call returns <code>-1<\/code>.  That means \"end of stream\" and indicates that the other end has closed, and there won't be any more data.<\/p>\n",
+            "answer_id": 26558753,
+            "question_id": 26558471,
+            "last_edit_date": 1414204465
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/T9C5P.gif?s=256",
+                "account_id": 410984,
+                "user_type": "registered",
+                "user_id": 783148,
+                "link": "https://stackoverflow.com/users/783148/kjosh",
+                "reputation": 587,
+                "display_name": "kjosh"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1414201157,
+            "creation_date": 1414201157,
+            "body": "<p>You should probably use the java.net package, here's documentation for socket connections:<\/p>\n\n<p><a href=\"http://docs.oracle.com/javase/tutorial/networking/sockets/\" rel=\"nofollow\">http://docs.oracle.com/javase/tutorial/networking/sockets/<\/a><\/p>\n",
+            "answer_id": 26558553,
+            "question_id": 26558471
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b2ee5980501f21314923f751e4740446?s=256&d=identicon&r=PG",
+                "account_id": 95764,
+                "user_type": "registered",
+                "user_id": 260633,
+                "link": "https://stackoverflow.com/users/260633/dev",
+                "reputation": 12266,
+                "display_name": "Dev",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1414204838,
+            "creation_date": 1414203790,
+            "body": "<p>You are misusing <a href=\"http://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html#available()\" rel=\"nofollow\"><code>InputStream.available()<\/code><\/a>. The <code>available()<\/code> call only tells you how many bytes you can read <em>without blocking<\/em>. It doesn't tell you if you have reached the end of the stream. It is common that an inputstream may have 0 bytes to read immediately but still be open.<\/p>\n\n<p>Your while loop can be reconstructed like this<\/p>\n\n<pre><code>int count;\nbyte[] buffer = new byte[4096];\nByteArrayOutputStream baos = new ByteArrayOutputStream();\nwhile((count = diSTR.read(buffer)) != -1){\n    baos.write(buffer, 0, count);\n}\nString str = new String(baos.toByteArray(), \"UTF-8\")\nlog(sb.toString());\n<\/code><\/pre>\n\n<p><a href=\"http://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html#read(byte[],%20int,%20int)\" rel=\"nofollow\"><code>InputStream.read(byte[])<\/code><\/a> will read bytes and return the number of bytes read or <code>-1<\/code> when the end of stream is reached. Each time <code>read()<\/code> returns, the contents of the buffer are written to a <code>ByteArrayOutputStream<\/code>. Once all the bytes have been read (<code>read(byte[])<\/code> returns <code>-1<\/code>) the contents of the stream can then be interpreted as a UTF-8 encoded String.<\/p>\n",
+            "answer_id": 26558747,
+            "question_id": 26558471,
+            "last_edit_date": 1414204838
+        }
+    ],
+    "answer_comments": {}
+}

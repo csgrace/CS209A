@@ -1,0 +1,75 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ad2932058538f1752d66be745ff0b394?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4801578,
+            "user_type": "registered",
+            "user_id": 3878073,
+            "link": "https://stackoverflow.com/users/3878073/user3878073",
+            "reputation": 91,
+            "display_name": "user3878073"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76078612/spring-webflux-no-subscriptions-have-been-created-for-kafka-streams",
+        "last_activity_date": 1682176257,
+        "creation_date": 1682150678,
+        "answer_count": 2,
+        "title": "Spring webFlux No subscriptions have been created for Kafka Streams",
+        "body": "<p>i'm trying to publish message to a Kafka topic using spring web-flux, these are the configurations<\/p>\n<pre><code>@Bean\n    public ReactiveKafkaProducerTemplate&lt;String, String&gt; reactiveKafkaProducerTemplate(\n            KafkaProperties properties) {\n        Map&lt;String, Object&gt; props = properties.buildProducerProperties();\n        return new ReactiveKafkaProducerTemplate&lt;String, String&gt;(SenderOptions.create(props));\n\n\n\n    }\n\n\n@Bean\n    public ReactiveKafkaConsumerTemplate&lt;String, String&gt; reactiveKafkaConsumerTemplateTemplate(\n            KafkaProperties properties) {\n        Map&lt;String, Object&gt; props = properties.buildConsumerProperties();\n        return new ReactiveKafkaConsumerTemplate&lt;&gt;(ReceiverOptions.create(props));\n    }\n<\/code><\/pre>\n<p>Then i try to stream all the values present in the topic<\/p>\n<pre><code> @GetMapping(value = &quot;/stream&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)\npublic Flux&lt;String&gt; postToKafka() {\n    return consumerTemplate.receiveAtMostOnce().map(rec -&gt; rec.value()).doOnNext(System.out::println);\n\n\n}\n<\/code><\/pre>\n<p>but instead of getting data present in the topics i'm getting these error<\/p>\n<p>java.lang.IllegalStateException: No subscriptions have been created\nat reactor.kafka.receiver.ReceiverOptions.subscriber(ReceiverOptions.java:385) ~[reactor-kafka-1.3.3.jar:1.3.3]\nSuppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException:\nError has been observed at the following site(s):\n*__checkpoint ⇢ Handler<\/p>\n",
+        "question_id": 76078612,
+        "tags": [
+            "java",
+            "apache-kafka",
+            "spring-webflux",
+            "spring-kafka"
+        ],
+        "score": 0,
+        "accepted_answer_id": 76079926,
+        "is_answered": true,
+        "view_count": 332,
+        "last_edit_date": 1682171061
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2158ce6e7c048277890eb64458864c1c?s=256&d=identicon&r=PG",
+                "account_id": 3273937,
+                "user_type": "registered",
+                "user_id": 2756547,
+                "link": "https://stackoverflow.com/users/2756547/artem-bilan",
+                "reputation": 122596,
+                "display_name": "Artem Bilan",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1682170588,
+            "creation_date": 1682170588,
+            "body": "<p>You don't provide topics to consume from.\nSee these options of the <code>ReceiverOptions<\/code>:<\/p>\n<pre><code>/**\n * Sets subscription using manual assignment to the specified partitions.\n * This assignment is enabled when the receive Flux of a {@link KafkaReceiver} using this\n * options instance is subscribed to. Any existing subscriptions or assignments on this\n * option are deleted.\n * @return options instance with new partition assignment\n */\n@NonNull\nReceiverOptions&lt;K, V&gt; assignment(Collection&lt;TopicPartition&gt; partitions);\n\n/**\n * Sets subscription using group management to the specified collection of topics.\n * This subscription is enabled when the receive Flux of a {@link KafkaReceiver} using this\n * options instance is subscribed to. Any existing subscriptions or assignments on this\n * option are deleted.\n * @return options instance with new subscription\n */\n@NonNull\nReceiverOptions&lt;K, V&gt; subscription(Collection&lt;String&gt; topics);\n\n/**\n * Sets subscription using group management to the specified pattern.\n * This subscription is enabled when the receive Flux of a {@link KafkaReceiver} using this\n * options instance is subscribed to. Any existing subscriptions or assignments on this\n * option are deleted. Topics are dynamically assigned or removed when topics\n * matching the pattern are created or deleted.\n * @return options instance with new subscription\n */\n@NonNull\nReceiverOptions&lt;K, V&gt; subscription(Pattern pattern);\n<\/code><\/pre>\n",
+            "answer_id": 76079926,
+            "question_id": 76078612
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ad2932058538f1752d66be745ff0b394?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4801578,
+                "user_type": "registered",
+                "user_id": 3878073,
+                "link": "https://stackoverflow.com/users/3878073/user3878073",
+                "reputation": 91,
+                "display_name": "user3878073"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1682176257,
+            "creation_date": 1682176257,
+            "body": "<p>for streaming we need to add receiver options so in the configuration i made the following changes<\/p>\n<pre><code>@Bean\n    public ReceiverOptions&lt;String, String&gt; \n\nkafkaReceiverOptions(KafkaProperties kafkaProperties) {\n        ReceiverOptions&lt;String, String&gt; basicReceiverOptions = ReceiverOptions.create(kafkaProperties.buildConsumerProperties());\n        return basicReceiverOptions.subscription(Collections.singletonList(&quot;topic_name&quot;))\n                .addAssignListener(receiverPartitions -&gt; System.out.println(&quot;onPartitionAssigned &quot;+ receiverPartitions))\n                .addRevokeListener(receiverPartitions -&gt; System.out.println(&quot;onPartitionsRevoked &quot;+ receiverPartitions));\n    }\n<\/code><\/pre>\n<p>and in the consumerTemplate<\/p>\n<pre><code>@Bean\n    public ReactiveKafkaConsumerTemplate&lt;String, String&gt; reactiveKafkaConsumerTemplateTemplate(\n            ReceiverOptions&lt;String, String&gt; kafkaReceiverOptions) {\n        return new ReactiveKafkaConsumerTemplate&lt;&gt;(kafkaReceiverOptions);\n    }\n<\/code><\/pre>\n",
+            "answer_id": 76080338,
+            "question_id": 76078612
+        }
+    ],
+    "answer_comments": {}
+}

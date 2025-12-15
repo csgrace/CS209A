@@ -1,0 +1,267 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/241dc3be852009e67d6154b1f40d2a9e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3198296,
+            "user_type": "registered",
+            "user_id": 2700956,
+            "link": "https://stackoverflow.com/users/2700956/khilmarsen",
+            "reputation": 107,
+            "display_name": "Khilmarsen",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20012659/illegal-triangle-exception",
+        "last_activity_date": 1384624643,
+        "creation_date": 1384559343,
+        "answer_count": 3,
+        "title": "Illegal Triangle Exception",
+        "body": "<p>Im having some problem with my homework and was hoping you guys could help me out. The assignment is this:<\/p>\n\n<blockquote>\n  <p>(<strong>IllegalTriangleException<\/strong>) Programming Exercise 11.1 defined the <strong>Triangle<\/strong> class with three sides. In a Triangle, the sum of any two sides is greater than the other side. The <strong>Triangle<\/strong> class must adhere to this rule. Create the <strong>IllegalTriangleException<\/strong> class, and modify the constructor of the <strong>Triangle<\/strong> class to throw an <strong>IllegalTriangleException<\/strong> object if a triangle is created with sides that violate the rule, as follows:<\/p>\n<\/blockquote>\n\n<pre><code>   /** Construct a triangle with the specified sides */\n    public Triangle(double side1, double side2, double side3)\n       throws IllegalTriangleException {\n        //Implement it\n    }\n<\/code><\/pre>\n\n<p>Okay. Here is the triangle class.<\/p>\n\n<pre><code>import java.lang.Math;\n\npublic class Triangle extends GeometricObject {\n private double side1 = 1.0;\n private double side2 = 1.0;\n private double side3 = 1.0;\n\n public Triangle() {\n\n}\n\n public Triangle(double side1, double side2, double side3) {\n     this.side1 = side1;\n     this.side2 = side2;\n     this.side3 = side3;\n}\n\n public double getSide1() {\n    return side1;\n}\n\n public double getSide2() {\n    return side2;\n}\n\n public double getSide3() {\n    return side3;\n}\n\n public void setSide1(double side1) {\n    this.side1 = side1;\n}\n\n public void setSide2(double side2) {\n    this.side2 = side2;\n}\n\n public void setSide3(double side3) {\n    this.side3 = side3;\n}\n\n public double getArea() {\n     double p = getPerimeter() / 2;\n     return Math.sqrt(p * ((p - side1) * (p - side2) * (p - side3)));\n}\n\n public double getPerimeter() {\n     return side1 + side2 + side3 ;\n}\n\n public String toString() {\n     return \" Triangle: Side 1 = \" + side1 + \" Side 2 = \" + side2\n             + \" Side 3 = \" + side3;\n}\n\n}\n<\/code><\/pre>\n\n<p>The <strong>IllegalTriangleException<\/strong> class:<\/p>\n\n<pre><code> public class IllegalTriangleException extends Exception {\nprivate double perimeter;\n\n /** Construct an exception*/\n  public IllegalTriangleException(double perimeter) {\n    super( \"The sum of any two sides is greater than the other side\" +  perimeter);\n    this.perimeter = perimeter;\n}\n /**return the side*/\n  public double getPerimeter() {\n    return perimeter;\n}\n}\n<\/code><\/pre>\n\n<p>Here is the <strong>TriangleWithException<\/strong> Class:<\/p>\n\n<pre><code>  public class TriangleWithException {\n    //The perimeter of the triangle\n    private double perimeter;\n    private double side1 = 1.0;\n    private double side2 = 1.0;\n    private double side3 = -1.0;\n\n    //Number of objects created\n    private static int numberOfObjects = 0;\n\n        //construct a triangle with perimeter \n    public TriangleWithException(double side1, double side2, double side3)  {\n\n    }\n    //Construct a triangle with a specified perimeter.\n    public TriangleWithException(double newPerimeter) {\n        setPerimeter(newPerimeter);\n        numberOfObjects++;\n\n    }\n    //Return perimeter\n    public double getPerimeter() {\n        return perimeter;\n    }\n\n    //set new perimeter\n    public void setPerimeter(double newPerimeter) throws IllegalArgumentException {\n        if (newPerimeter &gt;= 0)\n            perimeter = newPerimeter;\n        else\n            throw new IllegalArgumentException(\"Any two sides needs to be grater than the other side\");\n\n    }\n    // Return numberOFObjects\n    public static int getNumberOfObjects() {\n        return numberOfObjects;\n    }\n\n    //return area of triangle\n    public double findArea() {\n        double p = getPerimeter() / 2;\n        return Math.sqrt(p * ((p - side1) * (p - side2) * (p - side3)));\n    }\n    }\n<\/code><\/pre>\n\n<p>And at last, the <strong>Testprogram<\/strong>.<\/p>\n\n<pre><code>public class TestTriangleWithException {\npublic static void main(String[] args) {\n    try {\n      new TestTriangleWithException(/** What goes here?*/);\n      new TestTriangleWithException(/** What goes here?*/);\n      new TestTriangleWithException(/** What goes here?*/);\n}\n    catch (IllegalTriangleException ex) {\n        System.out.println(ex);\n}\n    System.out.println(\"Number of objects created: \" + \n            TriangleWithException.getNumberOfObjects());\n}\n}\n  class TriangleWithException {\n//Perimeter\nprivate double perimeter;\n\n//number of objects created\nprivate static int numberOfObjects = 0;\n\n//Construct a triangle with a specified perimeter\npublic TriangleWithException() throws IllegalTriangleException {\n    double side1; \n    double side2; \n    double side3;\n}\n\n//construcj a triangle \npublic TriangleWithException(double newPerimeter)\nthrows IllegalTriangleException {\n    if (newPerimeter &gt;= 0)\n        perimeter = newPerimeter;\n        else\n            throw new IllegalTriangleException(newPerimeter);\n\n}\n\n//Return numberofobjects\npublic static int getNumberOfObjects() {\n    return numberOfObjects;\n\n}\n\n//Return the area of the triangle \n/** How do define getPerimeter for the type IllegalTriangleException?\n * How do i resolve side1, side2 and side3 as variables?*/\npublic double findArea() {\n     double p = getPerimeter() / 2;\n    return Math.sqrt(p * ((p - side1) * (p - side2) * (p - side3)));\n}\n}\n<\/code><\/pre>\n\n<p>So, the issues I'm facing at the moment are <em>these<\/em>: <\/p>\n\n<p>I need to modify the constructor of the <strong>Triangle<\/strong> class to throw an <strong>IllegalTriangleException<\/strong> if the rule is violated.<\/p>\n\n<p>I need to figure out if <code>Perimeter<\/code> is the variable i need and not the sides in the exception classes.<\/p>\n\n<p>I am a beginner so while the solutions might seem obvious to you they are not for me.<\/p>\n\n<p>Any help would be appreciated.<\/p>\n",
+        "question_id": 20012659,
+        "tags": [
+            "java",
+            "exception",
+            "io"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 13121,
+        "last_edit_date": 1384559839
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kKvXH.gif?s=256",
+                "account_id": 31180,
+                "user_type": "registered",
+                "user_id": 85421,
+                "link": "https://stackoverflow.com/users/85421/user85421",
+                "reputation": 29752,
+                "display_name": "user85421"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012659,
+            "edited": false,
+            "creation_date": 1384561941,
+            "comment_id": 29800265
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/241dc3be852009e67d6154b1f40d2a9e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3198296,
+                "user_type": "registered",
+                "user_id": 2700956,
+                "link": "https://stackoverflow.com/users/2700956/khilmarsen",
+                "reputation": 107,
+                "display_name": "Khilmarsen",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012659,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/kKvXH.gif?s=256",
+                "account_id": 31180,
+                "user_type": "registered",
+                "user_id": 85421,
+                "link": "https://stackoverflow.com/users/85421/user85421",
+                "reputation": 29752,
+                "display_name": "user85421"
+            },
+            "edited": false,
+            "creation_date": 1384561698,
+            "comment_id": 29800202
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kKvXH.gif?s=256",
+                "account_id": 31180,
+                "user_type": "registered",
+                "user_id": 85421,
+                "link": "https://stackoverflow.com/users/85421/user85421",
+                "reputation": 29752,
+                "display_name": "user85421"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012659,
+            "edited": false,
+            "creation_date": 1384561266,
+            "comment_id": 29800080
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22ae21a691085f923686de2994056357?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3022791,
+                "user_type": "registered",
+                "user_id": 2563422,
+                "link": "https://stackoverflow.com/users/2563422/michael-s",
+                "reputation": 1893,
+                "display_name": "Michael S"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012659,
+            "edited": false,
+            "creation_date": 1384561101,
+            "comment_id": 29800026
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/241dc3be852009e67d6154b1f40d2a9e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3198296,
+                "user_type": "registered",
+                "user_id": 2700956,
+                "link": "https://stackoverflow.com/users/2700956/khilmarsen",
+                "reputation": 107,
+                "display_name": "Khilmarsen",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012659,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/kKvXH.gif?s=256",
+                "account_id": 31180,
+                "user_type": "registered",
+                "user_id": 85421,
+                "link": "https://stackoverflow.com/users/85421/user85421",
+                "reputation": 29752,
+                "display_name": "user85421"
+            },
+            "edited": false,
+            "creation_date": 1384560772,
+            "comment_id": 29799953
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/241dc3be852009e67d6154b1f40d2a9e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3198296,
+                "user_type": "registered",
+                "user_id": 2700956,
+                "link": "https://stackoverflow.com/users/2700956/khilmarsen",
+                "reputation": 107,
+                "display_name": "Khilmarsen",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012659,
+            "edited": false,
+            "creation_date": 1384560556,
+            "comment_id": 29799896
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kKvXH.gif?s=256",
+                "account_id": 31180,
+                "user_type": "registered",
+                "user_id": 85421,
+                "link": "https://stackoverflow.com/users/85421/user85421",
+                "reputation": 29752,
+                "display_name": "user85421"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20012659,
+            "edited": false,
+            "creation_date": 1384560317,
+            "comment_id": 29799823
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1864610"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 20012659,
+            "edited": false,
+            "creation_date": 1384559959,
+            "comment_id": 29799742
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DbYlx.jpg?s=256",
+                "account_id": 2367596,
+                "user_type": "registered",
+                "user_id": 2073001,
+                "link": "https://stackoverflow.com/users/2073001/steve-p",
+                "reputation": 14719,
+                "display_name": "Steve P.",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 20012659,
+            "edited": false,
+            "creation_date": 1384559538,
+            "comment_id": 29799627
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/w9jTN.jpg?s=256",
+                "account_id": 3013228,
+                "user_type": "registered",
+                "user_id": 2587435,
+                "link": "https://stackoverflow.com/users/2587435/paul-samsotha",
+                "reputation": 209749,
+                "display_name": "Paul Samsotha",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1384562529,
+            "creation_date": 1384561688,
+            "body": "<p>I think should help you out. I added selection statements to  constructor and and helped you with the the <code>Exception<\/code> class. If your <code>GeometricObject<\/code> class is good, this code should work for you.<\/p>\n\n<pre><code>import java.util.Scanner;\n\npublic class TriangleWithException {\n\npublic static void main(String[] args) throws IllegalTriangleException {\n\n    Scanner input = new Scanner(System.in);\n\n    // create triangle\n    Triangle triangle = new Triangle();\n    boolean done = false;\n    double side1 = 1.0;\n    double side2 = 1.0;\n    double side3 = 1.0;\n\n    System.out.println(\"Enter three sides: \");\n\n    while (!done) {\n        try {\n            side1 = input.nextDouble();\n            side2 = input.nextDouble();\n            side3 = input.nextDouble();\n            triangle = new Triangle(side1, side2, side3);\n            done = true;\n        }\n        catch (IllegalTriangleException ex) {\n            System.out.println(ex.getMessage());\n            System.out.print(\"Enter three sides:  \");\n            input.nextLine();\n        }\n    }\n\n\n\n\n    System.out.println(\"Enter a color:  \");\n    String color = input.next();\n    triangle.setColor(color);\n\n    System.out.println(\"Enter true or false for triangle filled: \");\n    boolean filled = input.nextBoolean();\n    triangle.setFilled(filled);\n\n    System.out.println();\n\n    System.out.println(triangle.toString() + \n            \"\\narea: \" + triangle.getArea() + \n            \"\\nperimeter \" + triangle.getPerimeter() +\n            \"\\ncolor: \" + triangle.getColor() + \n            \"\\nfilled: \" + triangle.isFilled());\n}\n\n}\n<\/code><\/pre>\n\n<p>Original Triangle class<\/p>\n\n<pre><code>class Triangle extends GeometricObject {\n\nprotected double side1 = 1.0;\nprotected double side2 = 1.0;\nprotected double side3 = 1.0;\n\npublic Triangle() {\n}\n\npublic Triangle(double side1, double side2, double side3) throws   IllegalTriangleException {\n    if (side1 &gt;= side2 + side3)\n        throw new IllegalTriangleException(side1);\n    else if (side2 &gt;= side1 + side3)\n        throw new IllegalTriangleException(side2);\n    else if (side3 &gt;= side2 + side1)\n        throw new IllegalTriangleException(side3);\n    else {\n        this.side1 = side1;\n        this.side2 = side2;\n        this.side3 = side3;\n    }\n\n}\n\npublic double getSide1() {\n    return side1;\n}\n\npublic double getSide2() {\n    return side2;\n}\n\npublic double getSide3() {\n    return side3;\n}\n\n\npublic double getPerimeter() {\n    return side1 + side2 + side3;\n}\n\npublic double getArea() {\n    double p = (side1 + side2 + side3) / 2;\n    double area = Math.sqrt(p * (p - side1) * (p - side2) * (p - side3));\n    return area;\n}\n\n@Override\npublic String toString() {\n    return \"Triangle side 1 = \" + side1 + \", side 2 = \" + side2 + \", side 3 = \" + side3;\n}\n}\n<\/code><\/pre>\n\n<p>IllegaTriangleException class<\/p>\n\n<pre><code>class IllegalTriangleException extends Exception {\n\nprivate double side = 1.0;\n\npublic IllegalTriangleException(double side) {\n    super(side + \" is larger than other two combined\");\n\n} \n\npublic double getSide1() {\n    return side;\n}\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 20013042,
+            "question_id": 20012659,
+            "last_edit_date": 1384562529
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kKvXH.gif?s=256",
+                "account_id": 31180,
+                "user_type": "registered",
+                "user_id": 85421,
+                "link": "https://stackoverflow.com/users/85421/user85421",
+                "reputation": 29752,
+                "display_name": "user85421"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1384561056,
+            "creation_date": 1384561056,
+            "body": "<p>Starting with the Triangle class:  <\/p>\n\n<pre><code>public class Triangle extends GeometricObject {\n    private double side1;\n    private double side2;\n    private double side3;\n\n    public Triangle(double side1, double side2, double side3) {\n        this.side1 = side1;\n        this.side2 = side2;\n        this.side3 = side3;\n    }\n\n    ...\n}\n<\/code><\/pre>\n\n<p>and the Exception:<\/p>\n\n<pre><code>public class IllegalTriangleException extends Exception {\n\n    public IllegalTriangleException() {\n    }\n\n    public IllegalTriangleException(String message) {\n        super(message);\n    }\n\n    ...\n\n}\n<\/code><\/pre>\n\n<hr>\n\n<p>now you have to add the code for checking the triangle and eventually throwing the exception (only the structure, I won't do the whole job):  <\/p>\n\n<pre><code>public class Triangle extends GeometricObject {\n    private double side1;\n    private double side2;\n    private double side3;\n\n    public Triangle(double side1, double side2, double side3) throws IllegalTriangleException {\n        this.side1 = side1;\n        this.side2 = side2;\n        this.side3 = side3;\n\n        if (E*R*R*O*R)\n            thrown new IllegalTriangleException(\"Any two sides needs to be grater than the other side\");\n    }\n\n    ...\n}\n<\/code><\/pre>\n",
+            "answer_id": 20012933,
+            "question_id": 20012659
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/DbYlx.jpg?s=256",
+                "account_id": 2367596,
+                "user_type": "registered",
+                "user_id": 2073001,
+                "link": "https://stackoverflow.com/users/2073001/steve-p",
+                "reputation": 14719,
+                "display_name": "Steve P.",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1384624643,
+            "creation_date": 1384561117,
+            "body": "<p>In your constructor, you're only taking in the sides, which is when you should be checking for the <code>Exception<\/code>.<br><br>So, we have:<\/p>\n\n<blockquote>\n  <p>side_1 &lt; side_2 + side_3<br> side_2 &lt; side_1 + side_3<br> side_3 &lt;\n  side_1 + side_2<br><\/p>\n<\/blockquote>\n\n<p>this can be rearranged to:<br><\/p>\n\n<blockquote>\n  <p>side_1 &lt; side_2 + side_3<br> side_1 > side_2 - side_3<br>  side_1 >\n  side_3 - side_2<br><\/p>\n<\/blockquote>\n\n<p>this reduces to:<br><\/p>\n\n<blockquote>\n  <p>side_1 &lt; side_2 + side_3<br>  side_1 > absolute_value(side_3 -\n  side_2)<br><\/p>\n<\/blockquote>\n\n<p>So, we have:<br><\/p>\n\n<pre><code>public TriangleWithException(double side1, double side2, double side3) \n                            throws IllegalTriangleException {\n    if (side1 &gt;= side2 + side3 || side1 &lt;= Math.abs(side3-side2))\n        throw new IllegalTriangleException(yourMessage);\n\n    //otherStuffInConstructor\n}\n<\/code><\/pre>\n",
+            "answer_id": 20012946,
+            "question_id": 20012659,
+            "last_edit_date": 1384624643
+        }
+    ],
+    "answer_comments": {}
+}

@@ -1,0 +1,197 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/27079559125269ea0a30acba3fb06235?s=256&d=identicon&r=PG",
+            "account_id": 16164,
+            "user_type": "registered",
+            "user_id": 34935,
+            "link": "https://stackoverflow.com/users/34935/dfrankow",
+            "reputation": 21693,
+            "display_name": "dfrankow",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/3208160/how-to-generate-an-hmac-in-java-equivalent-to-a-python-example",
+        "last_activity_date": 1447317951,
+        "creation_date": 1278624680,
+        "answer_count": 2,
+        "title": "How to generate an HMAC in Java equivalent to a Python example?",
+        "body": "<p>I'm looking at implementing an app getting <a href=\"http://apiwiki.twitter.com/Authentication\" rel=\"noreferrer\">Twitter authorization via Oauth<\/a> in Java. The first step is <a href=\"http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-oauth-request_token\" rel=\"noreferrer\">getting a request token<\/a>. Here is a <a href=\"http://github.com/tav/tweetapp/blob/master/standalone/twitter_oauth_handler.py\" rel=\"noreferrer\">Python example<\/a> for app engine. <\/p>\n\n<p>To test my code, I am running Python and checking output with Java. Here is an example of Python generating a Hash-Based Message Authentication Code (HMAC):<\/p>\n\n<pre><code>#!/usr/bin/python\n\nfrom hashlib import sha1\nfrom hmac import new as hmac\n\nkey = \"qnscAdgRlkIhAUPY44oiexBKtQbGY0orf7OV1I50\"\nmessage = \"foo\"\n\nprint \"%s\" % hmac(key, message, sha1).digest().encode('base64')[:-1]\n<\/code><\/pre>\n\n<p>Output:<\/p>\n\n<pre><code>$ ./foo.py\n+3h2gpjf4xcynjCGU5lbdMBwGOc=\n<\/code><\/pre>\n\n<p>How does one replicate this example in Java?<\/p>\n\n<p>I've seen an <a href=\"http://exampledepot.8waytrips.com/egs/javax.crypto/GenMac.html\" rel=\"noreferrer\">example of HMAC<\/a> in Java:<\/p>\n\n<pre><code>try {\n    // Generate a key for the HMAC-MD5 keyed-hashing algorithm; see RFC 2104\n    // In practice, you would save this key.\n    KeyGenerator keyGen = KeyGenerator.getInstance(\"HmacMD5\");\n    SecretKey key = keyGen.generateKey();\n\n    // Create a MAC object using HMAC-MD5 and initialize with key\n    Mac mac = Mac.getInstance(key.getAlgorithm());\n    mac.init(key);\n\n    String str = \"This message will be digested\";\n\n    // Encode the string into bytes using utf-8 and digest it\n    byte[] utf8 = str.getBytes(\"UTF8\");\n    byte[] digest = mac.doFinal(utf8);\n\n    // If desired, convert the digest into a string\n    String digestB64 = new sun.misc.BASE64Encoder().encode(digest);\n} catch (InvalidKeyException e) {\n} catch (NoSuchAlgorithmException e) {\n} catch (UnsupportedEncodingException e) {\n}\n<\/code><\/pre>\n\n<p>It uses <a href=\"http://download.oracle.com/docs/cd/E17409_01/javase/6/docs/api/javax/crypto/Mac.html\" rel=\"noreferrer\">javax.crypto.Mac<\/a>, all good. However, the <a href=\"http://download.oracle.com/docs/cd/E17409_01/javase/6/docs/api/javax/crypto/SecretKey.html\" rel=\"noreferrer\">SecretKey<\/a> constructors take bytes and an algorithm. <\/p>\n\n<p>What's the algorithm in the Python example? How can one create a Java secret key without an algorithm?<\/p>\n",
+        "question_id": 3208160,
+        "tags": [
+            "java",
+            "oauth",
+            "sha1",
+            "hmac",
+            "cryptoapi"
+        ],
+        "score": 52,
+        "accepted_answer_id": 3208472,
+        "is_answered": true,
+        "view_count": 58471,
+        "last_edit_date": 1447317951
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/63edcce213b4c96b8b4a660e1df2da08?s=256&d=identicon&r=PG",
+                "account_id": 155770,
+                "user_type": "registered",
+                "user_id": 372643,
+                "link": "https://stackoverflow.com/users/372643/bruno",
+                "reputation": 123335,
+                "display_name": "Bruno",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 70,
+            "is_accepted": true,
+            "last_activity_date": 1329914645,
+            "creation_date": 1278628079,
+            "body": "<p>HmacSHA1 seems to be the algorithm name you need:<\/p>\n\n<pre><code>SecretKeySpec keySpec = new SecretKeySpec(\n        \"qnscAdgRlkIhAUPY44oiexBKtQbGY0orf7OV1I50\".getBytes(),\n        \"HmacSHA1\");\n\nMac mac = Mac.getInstance(\"HmacSHA1\");\nmac.init(keySpec);\nbyte[] result = mac.doFinal(\"foo\".getBytes());\n\nBASE64Encoder encoder = new BASE64Encoder();\nSystem.out.println(encoder.encode(result));\n<\/code><\/pre>\n\n<p>produces:<\/p>\n\n<pre><code>+3h2gpjf4xcynjCGU5lbdMBwGOc=\n<\/code><\/pre>\n\n<p>Note that I've used <code>sun.misc.BASE64Encoder<\/code> for a quick implementation here, but you should probably use something that doesn't depend on the Sun JRE. <a href=\"http://commons.apache.org/codec/apidocs/org/apache/commons/codec/binary/Base64.html\" rel=\"noreferrer\">The base64-encoder in Commons Codec<\/a> would be a better choice, for example.<\/p>\n",
+            "answer_id": 3208472,
+            "question_id": 3208160,
+            "last_edit_date": 1329914645
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d8dd35fbc40d47524f6071ef75c6ed04?s=256&d=identicon&r=PG",
+                "account_id": 437199,
+                "user_type": "registered",
+                "user_id": 824770,
+                "link": "https://stackoverflow.com/users/824770/markltbaker",
+                "reputation": 481,
+                "display_name": "markltbaker"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 28,
+            "is_accepted": false,
+            "last_activity_date": 1340113414,
+            "creation_date": 1340113414,
+            "body": "<p>A minor thing but if you are looking for an equivalent to hmac(key,message) then by default the python library will use the MD5 algorithm, so you need to use the HmacMD5 algorithm in Java.<\/p>\n\n<p>I mention this because I had this exact problem and found this answer which was helpful, but I missed the part where a digest method was passed in to hmac() and thus went down a rabbit hole. Hopefully this answer will prevent others doing the same in the future.<\/p>\n\n<p>e.g. in Python REPL<\/p>\n\n<pre><code>&gt;&gt;&gt; import hmac\n&gt;&gt;&gt; hmac.new(\"keyValueGoesHere\", \"secretMessageToHash\").hexdigest()\n'1a7bb3687962c9e26b2d4c2b833b2bf2'\n<\/code><\/pre>\n\n<p>This is equivalent to the Java method:<\/p>\n\n<pre><code>import org.apache.commons.codec.binary.Hex;\nimport javax.crypto.Mac;\nimport javax.crypto.spec.SecretKeySpec;\n\npublic class HashingUtility {\n    public static String HMAC_MD5_encode(String key, String message) throws Exception {\n\n        SecretKeySpec keySpec = new SecretKeySpec(\n                key.getBytes(),\n                \"HmacMD5\");\n\n        Mac mac = Mac.getInstance(\"HmacMD5\");\n        mac.init(keySpec);\n        byte[] rawHmac = mac.doFinal(message.getBytes());\n\n        return Hex.encodeHexString(rawHmac);\n    }\n}\n<\/code><\/pre>\n\n<p>Note that in my example I'm doing the equivalent of .hexdigest()<\/p>\n",
+            "answer_id": 11102291,
+            "question_id": 3208160
+        }
+    ],
+    "answer_comments": {
+        "11102291": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kTAL5.jpg?s=256",
+                "account_id": 381687,
+                "user_type": "registered",
+                "user_id": 736496,
+                "link": "https://stackoverflow.com/users/736496/justin-morris",
+                "reputation": 7339,
+                "display_name": "Justin Morris"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 11102291,
+            "edited": false,
+            "creation_date": 1377096745,
+            "comment_id": 26956506
+        }],
+        "3208472": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/v77qv.png?s=256",
+                    "account_id": 4519725,
+                    "user_type": "registered",
+                    "user_id": 3673398,
+                    "link": "https://stackoverflow.com/users/3673398/scruffy",
+                    "reputation": 580,
+                    "display_name": "Scruffy",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 3208472,
+                "edited": false,
+                "creation_date": 1452166318,
+                "comment_id": 57053191
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/63edcce213b4c96b8b4a660e1df2da08?s=256&d=identicon&r=PG",
+                    "account_id": 155770,
+                    "user_type": "registered",
+                    "user_id": 372643,
+                    "link": "https://stackoverflow.com/users/372643/bruno",
+                    "reputation": 123335,
+                    "display_name": "Bruno",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 3208472,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/tKLRf.jpg?s=256",
+                    "account_id": 7567,
+                    "user_type": "registered",
+                    "user_id": 13189,
+                    "link": "https://stackoverflow.com/users/13189/eckes",
+                    "reputation": 10522,
+                    "display_name": "eckes",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1405259670,
+                "comment_id": 38348205
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/tKLRf.jpg?s=256",
+                    "account_id": 7567,
+                    "user_type": "registered",
+                    "user_id": 13189,
+                    "link": "https://stackoverflow.com/users/13189/eckes",
+                    "reputation": 10522,
+                    "display_name": "eckes",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 3208472,
+                "edited": false,
+                "creation_date": 1405214338,
+                "comment_id": 38339440
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f31c7fbcbb0766d0632d96fd7e74b649?s=256&d=identicon&r=PG",
+                    "account_id": 20228,
+                    "user_type": "registered",
+                    "user_id": 48136,
+                    "link": "https://stackoverflow.com/users/48136/bric3",
+                    "reputation": 42681,
+                    "display_name": "bric3"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 3208472,
+                "edited": false,
+                "creation_date": 1367516466,
+                "comment_id": 23412416
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/5ywwG.jpg?s=256",
+                    "account_id": 159560,
+                    "user_type": "registered",
+                    "user_id": 379028,
+                    "link": "https://stackoverflow.com/users/379028/spring",
+                    "reputation": 11915,
+                    "display_name": "Spring",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 3208472,
+                "edited": false,
+                "creation_date": 1356568740,
+                "comment_id": 19410698
+            }
+        ]
+    }
+}

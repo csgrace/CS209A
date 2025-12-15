@@ -1,0 +1,140 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/klHZT.jpg?s=256",
+            "account_id": 1082349,
+            "user_type": "registered",
+            "user_id": 1078986,
+            "link": "https://stackoverflow.com/users/1078986/asinkxcoswt",
+            "reputation": 2602,
+            "display_name": "asinkxcoswt",
+            "accept_rate": 79
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/24040720/how-to-make-jackson-throw-exception-as-is-when-deserialization-mapping-fail",
+        "last_activity_date": 1594649025,
+        "creation_date": 1401893421,
+        "answer_count": 2,
+        "title": "How to make Jackson throw exception as is when deserialization mapping fail",
+        "body": "<p><a href=\"http://jackson.codehaus.org/\" rel=\"noreferrer\">Jackson<\/a> has a weird behavior in handling Exceptions that occur during deserialization mapping: it throws a <code>JsonMappingException<\/code> whose <code>.getCause()<\/code> returns the innermost of the exception chain.<\/p>\n\n<pre><code>//in main\nObjectMapper jsonMapper = new ObjectMapper();\nString json = \"{\\\"id\\\": 1}\";\ntry {\n    Q q = jsonMapper.readValue(json, Q.class);\n} catch (JsonMappingException e) {\n    System.out.println(e.getCause()); //java.lang.RuntimeException: ex 2\n}\n\n//class Q\npublic class Q {\n    @JsonCreator\n    public Q(@JsonProperty(\"id\") int id) {\n        throw new RuntimeException(\"ex 0\", \n            new RuntimeException(\"ex 1\", \n                new RuntimeException(\"ex 2\")));\n    }\n}\n<\/code><\/pre>\n\n<p>In the code above, I use <code>jsonMapper.readValue(..)<\/code> to map the String <code>json<\/code> to an instance of class <code>Q<\/code> whose the constructor, marked <code>@JsonCreator<\/code>, throws a chain of <code>RuntimeException<\/code>: <code>\"ex 0\", \"ex 1\", \"ex 2\"<\/code>. When the mapping fail, I expected the line <code>System.out.println(e.getCause());<\/code> to print out <code>ex 0<\/code>, but it prints <code>ex 2<\/code>.<\/p>\n\n<p>Why Jackson decides to do this and is there a way to configure it so that it doesn't discard my <code>ex 0<\/code>? I have tried<\/p>\n\n<pre><code>jsonMapper.configure(DeserializationFeature.WRAP_EXCEPTIONS, false);\n<\/code><\/pre>\n\n<p>but it doesn't do anything.<\/p>\n",
+        "question_id": 24040720,
+        "tags": [
+            "java",
+            "json",
+            "jackson",
+            "deserialization"
+        ],
+        "score": 12,
+        "accepted_answer_id": 24045548,
+        "is_answered": true,
+        "view_count": 27530
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/190a780da9c1146f3fdc433dcecdf93d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9949460,
+                "user_type": "registered",
+                "user_id": 7362744,
+                "link": "https://stackoverflow.com/users/7362744/alveomaster",
+                "reputation": 1763,
+                "display_name": "alveomaster",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 24040720,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2b0b84f13227ef860579445b5a9dacb2?s=256&d=identicon&r=PG",
+                "account_id": 2848747,
+                "user_type": "registered",
+                "user_id": 2446387,
+                "link": "https://stackoverflow.com/users/2446387/teja",
+                "reputation": 1254,
+                "display_name": "Teja",
+                "accept_rate": 20
+            },
+            "edited": false,
+            "creation_date": 1571922567,
+            "comment_id": 103405713
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2b0b84f13227ef860579445b5a9dacb2?s=256&d=identicon&r=PG",
+                "account_id": 2848747,
+                "user_type": "registered",
+                "user_id": 2446387,
+                "link": "https://stackoverflow.com/users/2446387/teja",
+                "reputation": 1254,
+                "display_name": "Teja",
+                "accept_rate": 20
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 24040720,
+            "edited": false,
+            "creation_date": 1549447964,
+            "comment_id": 95902125
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/3KVuU.jpg?s=256",
+                "account_id": 1952668,
+                "user_type": "registered",
+                "user_id": 1756430,
+                "link": "https://stackoverflow.com/users/1756430/sam-berry",
+                "reputation": 7994,
+                "display_name": "Sam Berry",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1448473808,
+            "creation_date": 1401908641,
+            "body": "<p>Inside of Jackson's <code>StdValueInstantiator<\/code> this method gets hit when an exception is thrown during deserialization:<\/p>\n\n<pre><code>protected JsonMappingException wrapException(Throwable t)\n{\n    while (t.getCause() != null) {\n        t = t.getCause();\n    }\n    if (t instanceof JsonMappingException) {\n        return (JsonMappingException) t;\n    }\n    return new JsonMappingException(\"Instantiation of \"+getValueTypeDesc()+\" value failed: \"+t.getMessage(), t);\n}\n<\/code><\/pre>\n\n<p>As you can see, this will iterate through each \"level\" of your nested runtime exceptions and set the last one it hits as the cause for the <code>JsonMappingException<\/code> it returns.<\/p>\n\n<p>Here is the code I needed to get this working:<\/p>\n\n<ol>\n<li><p>Register a new module to the <code>ObjectMapper<\/code>.<\/p>\n\n<pre><code>@Test\npublic void testJackson() {\n    ObjectMapper jsonMapper = new ObjectMapper();\n    jsonMapper.registerModule(new MyModule(jsonMapper.getDeserializationConfig()));\n    String json = \"{\\\"id\\\": \\\"1\\\"}\";\n    try {\n        Q q = jsonMapper.readValue(json, Q.class);\n        System.out.println(q.getId());\n    } catch (JsonMappingException e) {\n        System.out.println(e.getCause()); //java.lang.RuntimeException: ex 2\n    } catch (JsonParseException e) {\n    } catch (IOException e) {\n    }\n}\n<\/code><\/pre><\/li>\n<li><p>Create a custom module class.<\/p>\n\n<pre><code>public class MyModule extends SimpleModule {\n    public MyModule(DeserializationConfig deserializationConfig) {\n        super(\"MyModule\", ModuleVersion.instance.version());\n        addValueInstantiator(Q.class, new MyValueInstantiator(deserializationConfig, Q.class));\n        addDeserializer(Q.class, new CustomDeserializer());\n    }\n}\n<\/code><\/pre><\/li>\n<li><p>Create a custom <code>ValueInstantiator<\/code> class to override <code>wrapException(...)<\/code>. Add the instantiator to the module.<\/p>\n\n<pre><code>public class MyValueInstantiator extends StdValueInstantiator {\n    public MyValueInstantiator(DeserializationConfig config, Class&lt;?&gt; valueType) {\n        super(config, valueType);\n    }\n\n    @Override\n    protected JsonMappingException wrapException(Throwable t) {\n        if (t instanceof JsonMappingException) {\n            return (JsonMappingException) t;\n        }\n        return new JsonMappingException(\"Instantiation of \"+getValueTypeDesc()+\" value failed: \"+t.getMessage(), t);\n    }\n}\n<\/code><\/pre><\/li>\n<li><p>Create a custom deserializer to get the module to work properly. Add this class to the module initialization as well.<\/p>\n\n<pre><code>public class CustomDeserializer extends StdScalarDeserializer&lt;Q&gt; {\n    public CustomDeserializer() {\n        super(Q.class);\n    }\n\n    @Override\n    public Q deserialize(JsonParser jp, DeserializationContext context) throws IOException {\n        JsonNode node = jp.getCodec().readTree(jp);\n        return new Q(node.get(\"id\").asText());\n    }\n\n    @Override\n    public Object deserializeWithType(JsonParser jp, DeserializationContext ctxt, TypeDeserializer typeDeserializer) throws IOException {\n        return deserialize(jp, ctxt);\n    }\n}\n<\/code><\/pre><\/li>\n<\/ol>\n",
+            "answer_id": 24045548,
+            "question_id": 24040720,
+            "last_edit_date": 1448473808
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bbee31f6c20963ec6c863bda013f9912?s=256&d=identicon&r=PG",
+                "account_id": 1953204,
+                "user_type": "registered",
+                "user_id": 1756854,
+                "link": "https://stackoverflow.com/users/1756854/given",
+                "reputation": 805,
+                "display_name": "Given"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1594649025,
+            "creation_date": 1594649025,
+            "body": "<p>For anyone looking for a different solution, this worked for me on Spring Boot 2.2.8.RELEASE. NB: This is example is when you have a rest controller with request body that is has an enum and clients could send a wrong field string gender and you want to provide proper error message:<\/p>\n<pre><code>@PostMapping\npublic ResponseEntity&lt;ProfileResponse&gt; updateProfile(@RequestBody @Valid ProfileRequest profileRequest) {\n    \n    ProfileResponse profile = //do something important here that returns profile object response\n    return ResponseEntity\n            .status(HttpStatus.OK)\n            .body(profile);\n}\n<\/code><\/pre>\n<p>ProfileRequest looks like<\/p>\n<pre><code>@Data //Lombok getters and setters\npublic class ProfileRequest{\n    private GenderEnum gender;\n    //some more attributes\n}\n<\/code><\/pre>\n<p>Add this property to the aplication.properties file to make sure that our custom exception GlobalRuntimeException (see later for definition) is not wrapped in JsonMappingException exception.<\/p>\n<pre><code>spring.jackson.deserialization.WRAP_EXCEPTIONS=false\n<\/code><\/pre>\n<p>Then create a class which spring boot will auto create a bean for (This will be used for Deserializing the field gender of type enum). If we don't find an the enum, then we know to throw an error.<\/p>\n<pre><code>@JsonComponent\npublic class GenderEnumDeserializer extends JsonDeserializer&lt;GenderEnum&gt; {\n\n    @Override\n    public GenderEnum deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {\n        String val = p.getValueAsString();\n        GenderEnum genderEnum = GenderEnum.fromName(val);\n        if(genderEnum == null){\n            throw new GlobalRuntimeException(&quot;Invalid gender provided. Valid values are MALE | FEMALE | OTHER&quot;);\n        }\n        return genderEnum;\n    }\n\n}\n<\/code><\/pre>\n<p>The &quot;forName&quot; method in GenderEnum looks like below.<\/p>\n<pre><code>public static GenderEnum fromName(String name) {\n    GenderEnum foundGenderEnum = null;\n    for (GenderEnum genderEnum : values()) {\n        if (genderEnum.name().equalsIgnoreCase(name)) {\n            foundGenderEnum = genderEnum;\n        }\n    }\n    return foundGenderEnum;\n}\n<\/code><\/pre>\n<p>We would then setup catching the GlobalRuntimeException in our ControllerAdvice:<\/p>\n<pre><code>@ResponseBody\n@ExceptionHandler(GlobalRuntimeException.class)\nResponseEntity&lt;?&gt; handleInvalidGlobalRuntimeException(HttpServletRequest request, GlobalRuntimeException ex) {\n    LOGGER.error(&quot;Error &quot; + ex);\n    return ResponseEntity\n            .status(HttpStatus.BAD_REQUEST)\n            .body(new ErrorMessage(ex.getCustomMessage));\n}\n<\/code><\/pre>\n<p>That's it.<\/p>\n",
+            "answer_id": 62877584,
+            "question_id": 24040720
+        }
+    ],
+    "answer_comments": {"62877584": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/QX7cM.jpg?s=256",
+            "account_id": 2467685,
+            "user_type": "registered",
+            "user_id": 2197228,
+            "link": "https://stackoverflow.com/users/2197228/dani",
+            "reputation": 351,
+            "display_name": "Dani",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 62877584,
+        "edited": false,
+        "creation_date": 1659371158,
+        "comment_id": 129273588
+    }]}
+}

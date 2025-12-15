@@ -1,0 +1,298 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/95382fa718375e50077dd808d6ea7b56?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3601385,
+            "user_type": "registered",
+            "user_id": 3004630,
+            "link": "https://stackoverflow.com/users/3004630/user3004630",
+            "reputation": 27,
+            "display_name": "user3004630",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20093722/how-to-show-index-not-the-element",
+        "last_activity_date": 1384965948,
+        "creation_date": 1384944291,
+        "answer_count": 5,
+        "title": "How to show index not the element",
+        "body": "<p>Hi im trying to show the index of the array not the element this is part of my code so far:<\/p>\n\n<pre><code>int randomInt2 = randomGenerator.nextInt(15)+1;\ndouble [] distances = new double [randomInt2];\n\nArrays.sort(distances);// sorts array from highest to lowest        \nfor (double val : distances) {\nSystem.out.println(\"[\"+val+\"],\");\n}\n\nSystem.out.println(\"The Nearest to point 1 is point: \");\n<\/code><\/pre>\n\n<p>Each index holds an value between 1-1000 but i do not want to show the value i want to show the index so that I can show what indexes are closest to point 1 (which is 0) \nSorry if im not being clear and if you need me to explain more then I am happy to<\/p>\n",
+        "question_id": 20093722,
+        "tags": ["java"],
+        "score": -1,
+        "accepted_answer_id": 20093839,
+        "is_answered": true,
+        "view_count": 192
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4af3541c00d591e9a518b9c0b3b1190a?s=256&d=identicon&r=PG",
+                "account_id": 134022,
+                "user_type": "registered",
+                "user_id": 335858,
+                "link": "https://stackoverflow.com/users/335858/sergey-kalinichenko",
+                "reputation": 729237,
+                "display_name": "Sergey Kalinichenko",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20093722,
+            "edited": false,
+            "creation_date": 1384945116,
+            "comment_id": 29937790
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8e74e6223693d6a3c82cd22b4452000a?s=256&d=identicon&r=PG",
+                "account_id": 2034815,
+                "user_type": "registered",
+                "user_id": 1817416,
+                "link": "https://stackoverflow.com/users/1817416/subburaj",
+                "reputation": 5212,
+                "display_name": "Subburaj",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20093722,
+            "edited": false,
+            "creation_date": 1384944466,
+            "comment_id": 29937402
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IF9uS.png?s=256",
+                "account_id": 1924671,
+                "user_type": "registered",
+                "user_id": 1735406,
+                "link": "https://stackoverflow.com/users/1735406/maroun",
+                "reputation": 96352,
+                "display_name": "Maroun",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 20093722,
+            "edited": false,
+            "creation_date": 1384944359,
+            "comment_id": 29937334
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/tNrYV.png?s=256",
+                "account_id": 2222583,
+                "user_type": "registered",
+                "user_id": 1961634,
+                "link": "https://stackoverflow.com/users/1961634/dariusz",
+                "reputation": 22490,
+                "display_name": "Dariusz",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1384965948,
+            "creation_date": 1384944568,
+            "body": "<p>Thanks to dasblinkenlight's comment I finally understood what you need.<\/p>\n\n<p>The easiest way to do what you need to do would be to create an object like <\/p>\n\n<pre><code>class Value implements Comparable&lt;Value&gt; {\n\n  int index;\n  dobule value;\n\n  public int compareTo(Value val) {\n    return Double.compare(this.value, val.value);\n  }\n}\n<\/code><\/pre>\n\n<p>And use it to store the values. Note the <code>Comparable<\/code> implementation - allows you to use <code>Collections.sort()<\/code> and <code>Arrays.sort()<\/code>.<\/p>\n\n<p>You could also <em>not use sorting<\/em>. Sorting an array is a much more complex operation than finding the minimum value. Just iterate over the array once and find the smallest value and return its index.<\/p>\n\n<pre><code>double minVal = Double.MAX_VALUE;\nint minIndex = -1;\nfor (int i=0, max=distances.length; i&lt;max;i++) {\n    if (values[i] &lt; minVal) {\n        minVal = values[i];\n        minIndex = i;\n    }\n}\nSystem.out.println(\"The Nearest to point 1 is point: \"+minIndex+\" with value \"+minVal);\n<\/code><\/pre>\n\n<p><strong>As for indexes<\/strong>: you can't use standard <code>foreach<\/code> loop if you want to access the index of a given element. One of the reasons is that some collections you may iterate over do not support element ordering (like a <code>Set<\/code>).<\/p>\n\n<p>You have to use standard <code>for<\/code> loop or track the index yourself.<\/p>\n\n<pre><code>for (int i=0, max=distances.length; i&lt;max;i++) {\n    System.out.println(\"[\"+i+\"] \"+distances[i]);\n}\n<\/code><\/pre>\n\n<p>or<\/p>\n\n<pre><code>int i = 0;\nfor (double val : distances) {\n    System.out.println(\"[\"+i+\"] \"+val);\n    i++;\n}\n<\/code><\/pre>\n",
+            "answer_id": 20093839,
+            "question_id": 20093722,
+            "last_edit_date": 1384965948
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Ivtn0.jpg?s=256",
+                "account_id": 905416,
+                "user_type": "registered",
+                "user_id": 940428,
+                "link": "https://stackoverflow.com/users/940428/prabhakaran-ramaswamy",
+                "reputation": 26117,
+                "display_name": "Prabhakaran Ramaswamy",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1384944500,
+            "creation_date": 1384944500,
+            "body": "<p>try like this<\/p>\n\n<pre><code>for (int i=0;i&lt; distances.length;i++) {\n      System.out.println(\"distances[\"+i+\"]\");\n}\n<\/code><\/pre>\n",
+            "answer_id": 20093810,
+            "question_id": 20093722
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/de94a2d703fa12904d400de1fc86c251?s=256&d=identicon&r=PG",
+                "account_id": 139432,
+                "user_type": "registered",
+                "user_id": 345027,
+                "link": "https://stackoverflow.com/users/345027/king-nak",
+                "reputation": 11657,
+                "display_name": "king_nak",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1384945806,
+            "creation_date": 1384945806,
+            "body": "<p>I assume you want to find out the index of the item with lowest distance <em>in the original array<\/em>. When you sort the array, this information is lost, as it will simply indexed from <code>0..length-1<\/code>. Therefore, your answer will always be <code>0<\/code>.<\/p>\n\n<p>You can do 2 things:<br>\n1) Find the minimum value:<\/p>\n\n<pre><code>double[] distances = new double [randomInt2];\n// Need copy to for sorting\ndouble[] c = Arrays.copyOf(distances, distances.length);\n// Find minimum value\nArrays.sort(c);\ndouble min = c[0];\n\n// Search that value in the original array:\nfor (int i = 0; i &lt; distances.length; ++i) {\n  if (distances[i] == min) {\n    System.out.println(\"Minimum distance at: \" + i);\n    break;\n  }\n}\n<\/code><\/pre>\n\n<p>2) Store the index information with the distance information:<br>\nFor this you need to:<\/p>\n\n<ol>\n<li>write your own class, like <code>public class Distance<\/code>, with a distance and index member.<\/li>\n<li>Implement a <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/Comparator.html\" rel=\"nofollow\"><code>Comperator&lt;Distance&gt;<\/code><\/a>, so that instances are compared by distance<\/li>\n<li>Make a function like <code>Distance[] convertToDistance(double[] array)<\/code> that creates a Distance array from your pure double values (if needed)<\/li>\n<li>Sort the array using <code>Arrays.sort(T[], Comparator&lt;? extends T&gt;)<\/code> method<\/li>\n<li>Get the result from <code>sortedDistances[0].index<\/code><\/li>\n<\/ol>\n",
+            "answer_id": 20094298,
+            "question_id": 20093722
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2353050223ebecb113741c29458de4b2?s=256&d=identicon&r=PG",
+                "account_id": 2818342,
+                "user_type": "registered",
+                "user_id": 2422776,
+                "link": "https://stackoverflow.com/users/2422776/mureinik",
+                "reputation": 316026,
+                "display_name": "Mureinik"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1384944541,
+            "creation_date": 1384944541,
+            "body": "<p>You can just used an old fashioned <code>for<\/code> loop instead of an enhanced <code>for<\/code> loop:<\/p>\n\n<pre><code>Arrays.sort(distances);// sorts array from highest to lowest        \nfor (int i = 0; i &lt; distances.lengh; ++i) {\n    System.out.println(\"index: \" + i + \":[\" + val + \"],\");\n}\n<\/code><\/pre>\n",
+            "answer_id": 20093828,
+            "question_id": 20093722
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/49eada4a44976663bd0c2bf64b1ac9ee?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3225630,
+                "user_type": "registered",
+                "user_id": 2722085,
+                "link": "https://stackoverflow.com/users/2722085/user2722085",
+                "reputation": 99,
+                "display_name": "user2722085"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1384944678,
+            "creation_date": 1384944678,
+            "body": "<p>you might every distance let be an object of <\/p>\n\n<pre><code>class Distance {\n  public Distance(double dist) {\n    this.dist = dist;\n    this.id = idcount++;\n  }\n\n  static int idcount = 0;\n  public int id;\n  public double dist;\n}\n<\/code><\/pre>\n\n<p>and than call the id in every<\/p>\n",
+            "answer_id": 20093873,
+            "question_id": 20093722
+        }
+    ],
+    "answer_comments": {
+        "20093810": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4af3541c00d591e9a518b9c0b3b1190a?s=256&d=identicon&r=PG",
+                "account_id": 134022,
+                "user_type": "registered",
+                "user_id": 335858,
+                "link": "https://stackoverflow.com/users/335858/sergey-kalinichenko",
+                "reputation": 729237,
+                "display_name": "Sergey Kalinichenko",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20093810,
+            "edited": false,
+            "creation_date": 1384945357,
+            "comment_id": 29937949
+        }],
+        "20093839": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/tNrYV.png?s=256",
+                    "account_id": 2222583,
+                    "user_type": "registered",
+                    "user_id": 1961634,
+                    "link": "https://stackoverflow.com/users/1961634/dariusz",
+                    "reputation": 22490,
+                    "display_name": "Dariusz",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 20093839,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/95382fa718375e50077dd808d6ea7b56?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3601385,
+                    "user_type": "registered",
+                    "user_id": 3004630,
+                    "link": "https://stackoverflow.com/users/3004630/user3004630",
+                    "reputation": 27,
+                    "display_name": "user3004630",
+                    "accept_rate": 60
+                },
+                "edited": false,
+                "creation_date": 1384978996,
+                "comment_id": 29959197
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/95382fa718375e50077dd808d6ea7b56?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3601385,
+                    "user_type": "registered",
+                    "user_id": 3004630,
+                    "link": "https://stackoverflow.com/users/3004630/user3004630",
+                    "reputation": 27,
+                    "display_name": "user3004630",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 20093839,
+                "edited": false,
+                "creation_date": 1384970594,
+                "comment_id": 29954413
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/tNrYV.png?s=256",
+                    "account_id": 2222583,
+                    "user_type": "registered",
+                    "user_id": 1961634,
+                    "link": "https://stackoverflow.com/users/1961634/dariusz",
+                    "reputation": 22490,
+                    "display_name": "Dariusz",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 20093839,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/95382fa718375e50077dd808d6ea7b56?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3601385,
+                    "user_type": "registered",
+                    "user_id": 3004630,
+                    "link": "https://stackoverflow.com/users/3004630/user3004630",
+                    "reputation": 27,
+                    "display_name": "user3004630",
+                    "accept_rate": 60
+                },
+                "edited": false,
+                "creation_date": 1384965971,
+                "comment_id": 29951523
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/95382fa718375e50077dd808d6ea7b56?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 3601385,
+                    "user_type": "registered",
+                    "user_id": 3004630,
+                    "link": "https://stackoverflow.com/users/3004630/user3004630",
+                    "reputation": 27,
+                    "display_name": "user3004630",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 20093839,
+                "edited": false,
+                "creation_date": 1384964285,
+                "comment_id": 29950339
+            }
+        ]
+    }
+}

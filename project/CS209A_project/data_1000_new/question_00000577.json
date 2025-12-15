@@ -1,0 +1,197 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fa970238069a66e30802a231b0bc86d9?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11123997,
+            "user_type": "registered",
+            "user_id": 8166086,
+            "link": "https://stackoverflow.com/users/8166086/tomasl",
+            "reputation": 106,
+            "display_name": "TomasL"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58374527/installing-apk-that-updates-the-same-app-fails-on-android-10-java-lang-security",
+        "last_activity_date": 1753888715,
+        "creation_date": 1571047760,
+        "answer_count": 2,
+        "title": "Installing apk that updates the same app fails on Android 10; java.lang.SecurityException: Files still open",
+        "body": "<p>Our app downloads an APK from our server, and runs this to upgrade itself. As mentioned in <a href=\"https://stackoverflow.com/questions/58085899/android-10-no-activity-found-to-handle-intent\">Android 10 - No Activity found to handle Intent<\/a> and <a href=\"https://stackoverflow.com/questions/58240297/xamarin-android-10-install-apk-no-activity-found-to-handle-intent\">Xamarin Android 10 Install APK - No Activity found to handle Intent<\/a>, this does not work as previously if the mobile device has been upgraded to Android 10, getting \"No Activity found to handle Intent\". <\/p>\n\n<p>We've tried to rewrite this using PackageInstaller as in the example\n<a href=\"https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/content/InstallApkSessionApi.java\" rel=\"nofollow noreferrer\">https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/content/InstallApkSessionApi.java<\/a>, but now get this error instead: <\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------\nAbort message: 'JNI DETECTED ERROR IN APPLICATION: JNI GetStaticMethodID called with pending exception java.lang.SecurityException: Files still open\n  at java.lang.Exception android.os.Parcel.createException(int, java.lang.String) (Parcel.java:2071)\n  at void android.os.Parcel.readException(int, java.lang.String) (Parcel.java:2039)\n  at void android.os.Parcel.readException() (Parcel.java:1987)\n  at void android.content.pm.IPackageInstallerSession$Stub$Proxy.commit(android.content.IntentSender, boolean) (IPackageInstallerSession.java:593)\n  at void android.content.pm.PackageInstaller$Session.commit(android.content.IntentSender) (PackageInstaller.java:1072)\n  at void com.mycompany.myApp.QtJavaCustomBridge.JIntentActionInstallApk(java.lang.String) (QtJavaCustomBridge.java:301)\n  at void org.qtproject.qt5.android.QtNative.startQtApplication() (QtNative.java:-2)\n  at void org.qtproject.qt5.android.QtNative$7.run() (QtNative.java:374)\n  at void org.qtproject.qt5.android.QtThread$1.run() (QtThread.java:61)\n  at void java.lang.Thread.run() (Thread.java:919)\nCaused by: android.os.RemoteException: Remote stack trace:\n    at com.android.server.pm.PackageInstallerSession.assertNoWriteFileTransfersOpenLocked(PackageInstallerSession.java:837)\n    at com.android.server.pm.PackageInstallerSession.sealAndValidateLocked(PackageInstallerSession.java:1094)\n    at com.android.server.pm.PackageInstallerSession.markAsCommitted(PackageInstallerSession.java:987)\n    at com.android.server.pm.PackageInstallerSession.commit(PackageInstallerSession.java:849)\n    at android.content.pm.IPackageInstallerSession$Stub.onTransact(IPackageInstallerSession.java:306)\n(Throwable with no stack trace)\n\n<\/code><\/pre>\n\n<p>Here's the code we use:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>public static final String TAG = \"JAVA\"; \npublic static final String PACKAGE_INSTALLED_ACTION = \"com.mycompany.myApp.SESSION_API_PACKAGE_INSTALLED\";\n\npublic static void JIntentActionInstallApk(final String filename)\n{\n    PackageInstaller.Session session = null;\n    try {\n        Log.i(TAG, \"JIntentActionInstallApk \" + filename);\n        PackageInstaller packageInstaller = MyAppActivity.getActivityInstance().getPackageManager().getPackageInstaller();\n        Log.i(TAG, \"JIntentActionInstallApk - got packageInstaller\");\n        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(\n                PackageInstaller.SessionParams.MODE_FULL_INSTALL);\n        Log.i(TAG, \"JIntentActionInstallApk - set SessionParams\");\n        int sessionId = packageInstaller.createSession(params);\n        session = packageInstaller.openSession(sessionId);\n        Log.i(TAG, \"JIntentActionInstallApk - session opened\");\n\n        // Create an install status receiver.\n        Context context = MyAppActivity.getActivityInstance().getApplicationContext();\n        addApkToInstallSession(context, filename, session);\n        Log.i(TAG, \"JIntentActionInstallApk - apk added to session\");\n\n        Intent intent = new Intent(context, MyAppActivity.class);\n        intent.setAction(MyAppActivity.PACKAGE_INSTALLED_ACTION);\n        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);\n        IntentSender statusReceiver = pendingIntent.getIntentSender();\n        // Commit the session (this will start the installation workflow).\n        session.commit(statusReceiver);\n        Log.i(TAG, \"JIntentActionInstallApk - commited\");\n    } catch (IOException e) {\n        throw new RuntimeException(\"Couldn't install package\", e);\n    } catch (RuntimeException e) {\n        if (session != null) {\n            session.abandon();\n        }\n        throw e;\n    }\n}\n\nprivate static void addApkToInstallSession(Context context, String filename, PackageInstaller.Session session)\n{\n       Log.i(TAG, \"addApkToInstallSession \" + filename);\n       // It's recommended to pass the file size to openWrite(). Otherwise installation may fail\n       // if the disk is almost full.\n       try {\n            OutputStream packageInSession = session.openWrite(\"package\", 0, -1);\n            InputStream input;\n            Uri uri = Uri.parse(filename);\n            input = context.getContentResolver().openInputStream(uri);\n\n                if(input != null) {\n                   Log.i(TAG, \"input.available: \" + input.available());\n                   byte[] buffer = new byte[16384];\n                   int n;\n                   while ((n = input.read(buffer)) &gt;= 0) {\n                       packageInSession.write(buffer, 0, n);\n                   }\n                }\n                else {\n                    Log.i(TAG, \"addApkToInstallSession failed\");\n                    throw new IOException (\"addApkToInstallSession\");\n                }\n\n       }\n       catch (Exception e) {\n           Log.i(TAG, \"addApkToInstallSession failed2 \" + e.toString());\n       }\n}\n\n...\n\n  @Override\n    protected void onNewIntent(Intent intent) {\n        Bundle extras = intent.getExtras();\n        if (PACKAGE_INSTALLED_ACTION.equals(intent.getAction())) {\n            int status = extras.getInt(PackageInstaller.EXTRA_STATUS);\n            String message = extras.getString(PackageInstaller.EXTRA_STATUS_MESSAGE);\n            switch (status) {\n                case PackageInstaller.STATUS_PENDING_USER_ACTION:\n                    // This test app isn't privileged, so the user has to confirm the install.\n                    Intent confirmIntent = (Intent) extras.get(Intent.EXTRA_INTENT);\n                    startActivity(confirmIntent);\n                    break;\n                case PackageInstaller.STATUS_SUCCESS:\n                    Toast.makeText(this, \"Install succeeded!\", Toast.LENGTH_SHORT).show();\n                    break;\n                case PackageInstaller.STATUS_FAILURE:\n                case PackageInstaller.STATUS_FAILURE_ABORTED:\n                case PackageInstaller.STATUS_FAILURE_BLOCKED:\n                case PackageInstaller.STATUS_FAILURE_CONFLICT:\n                case PackageInstaller.STATUS_FAILURE_INCOMPATIBLE:\n                case PackageInstaller.STATUS_FAILURE_INVALID:\n                case PackageInstaller.STATUS_FAILURE_STORAGE:\n                    Toast.makeText(this, \"Install failed! \" + status + \", \" + message,\n                            Toast.LENGTH_SHORT).show();\n                    break;\n                default:\n                    Toast.makeText(this, \"Unrecognized status received from installer: \" + status,\n                            Toast.LENGTH_SHORT).show();\n            }\n        }\n    }\n<\/code><\/pre>\n\n<p>Target SDK is set to API 23 to be able to support old devices some customers have. We're using Qt as the app framework, but Java for native Android functions like this. <\/p>\n\n<p>Some thoughts on this: \n<BR>\n* In <a href=\"https://stackoverflow.com/questions/58240297/xamarin-android-10-install-apk-no-activity-found-to-handle-intent\">Xamarin Android 10 Install APK - No Activity found to handle Intent<\/a>, they mention that they need to do extra garbage collection in Xamarin. Maybe it's because of the same issue we have here? If so, how could we get passed this in Java directly?\n<BR>\n* We're trying to upgrade the same app using a downloaded apk. Will this work at all using package installer? If not, do we then need to use a second app to upgrade the original?\n<BR>\n* We also have a service running in the app as well for notifications, could this be causing the \"Files still open\" issue?<\/p>\n",
+        "question_id": 58374527,
+        "tags": [
+            "java",
+            "android",
+            "apk",
+            "android-install-apk",
+            "android-10.0"
+        ],
+        "score": 3,
+        "accepted_answer_id": 58385417,
+        "protected_date": 1753893916,
+        "is_answered": true,
+        "view_count": 28881
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa970238069a66e30802a231b0bc86d9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11123997,
+                "user_type": "registered",
+                "user_id": 8166086,
+                "link": "https://stackoverflow.com/users/8166086/tomasl",
+                "reputation": 106,
+                "display_name": "TomasL"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1571097243,
+            "creation_date": 1571097243,
+            "body": "<p>I was able to solve this by closing the InputStream and OutputStream. In addition, I had to check for SDK versions prior to 21, as we have minimum API 16 and PackageInstaller was added in API 21.<\/p>\n\n<pre><code>public static void JIntentActionInstallApk(final String filename)\n    {\n        PackageInstaller.Session session = null;\n        try {\n            Log.i(TAG, \"JIntentActionInstallApk \" + filename);\n\n            if(Build.VERSION.SDK_INT &lt; 21) {\n                //as PackageInstaller was added in API 21, let's use the old way of doing it prior to 21\n                Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);\n                Uri apkUri = Uri.parse(filename);\n                Context context = MyAppActivity.getQtActivityInstance().getApplicationContext();\n                ApplicationInfo appInfo = context.getApplicationInfo();\n                intent.setData(apkUri);\n                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);\n                intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false);\n                intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);\n                intent.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME,\n                     appInfo.packageName);\n                MyAppActivity.getQtActivityInstance().startActivity(intent);\n            }\n            else  {\n                // API level 21 or higher, we need to use PackageInstaller\n                PackageInstaller packageInstaller = MyAppActivity.getQtActivityInstance().getPackageManager().getPackageInstaller();\n                Log.i(TAG, \"JIntentActionInstallApk - got packageInstaller\");\n                PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(\n                        PackageInstaller.SessionParams.MODE_FULL_INSTALL);\n                Log.i(TAG, \"JIntentActionInstallApk - set SessionParams\");\n                int sessionId = packageInstaller.createSession(params);\n                session = packageInstaller.openSession(sessionId);\n                Log.i(TAG, \"JIntentActionInstallApk - session opened\");\n\n                // Create an install status receiver.\n                Context context = MyAppActivity.getQtActivityInstance().getApplicationContext();\n                addApkToInstallSession(context, filename, session);\n                Log.i(TAG, \"JIntentActionInstallApk - apk added to session\");\n\n                Intent intent = new Intent(context, MyAppActivity.class);\n                intent.setAction(MyAppActivity.PACKAGE_INSTALLED_ACTION);\n                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);\n                IntentSender statusReceiver = pendingIntent.getIntentSender();\n                // Commit the session (this will start the installation workflow).\n                session.commit(statusReceiver);\n                Log.i(TAG, \"JIntentActionInstallApk - commited\");\n            }\n        } catch (IOException e) {\n            throw new RuntimeException(\"Couldn't install package\", e);\n        } catch (RuntimeException e) {\n            if (session != null) {\n                session.abandon();\n            }\n            throw e;\n        }\n    }\n\n    private static void addApkToInstallSession(Context context, String filename, PackageInstaller.Session session)\n    {\n           Log.i(TAG, \"addApkToInstallSession \" + filename);\n           // It's recommended to pass the file size to openWrite(). Otherwise installation may fail\n           // if the disk is almost full.\n           try {\n                OutputStream packageInSession = session.openWrite(\"package\", 0, -1);\n                InputStream input;\n                Uri uri = Uri.parse(filename);\n                input = context.getContentResolver().openInputStream(uri);\n\n                if(input != null) {\n                   Log.i(TAG, \"input.available: \" + input.available());\n                   byte[] buffer = new byte[16384];\n                   int n;\n                   while ((n = input.read(buffer)) &gt;= 0) {\n                       packageInSession.write(buffer, 0, n);\n                   }\n                }\n                else {\n                    Log.i(TAG, \"addApkToInstallSession failed\");\n                    throw new IOException (\"addApkToInstallSession\");\n                }\n                packageInSession.close();  //need to close this stream\n                input.close();             //need to close this stream\n           }\n           catch (Exception e) {\n               Log.i(TAG, \"addApkToInstallSession failed2 \" + e.toString());\n           }\n   }\n\n<\/code><\/pre>\n",
+            "answer_id": 58385417,
+            "question_id": 58374527
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/647d56abbc68790ad9241501560bb2f4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 39395702,
+                "user_type": "registered",
+                "user_id": 29255446,
+                "link": "https://stackoverflow.com/users/29255446/real-rainzo",
+                "reputation": 1,
+                "display_name": "REAL RAINZO"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1737204833,
+            "creation_date": 1737204833,
+            "body": "<p>all code by 4 spaces using the code toolbar button or the CTRL+K keyboard shortcut. For more editing help, click the [?] toolbar icon.\nDraft saved\nI was able to solve this by closing the InputStream and OutputStream. In addition, I had to check for SDK versions prior to 21, as we have minimum API 16 and PackageInstaller was added in API 21.<\/p>\n<p>public static void JIntentActionInstallApk(final String filename) { PackageInstaller.Session session = null; try { Log.i(TAG, &quot;JIntentActionInstallApk &quot; + filename);<\/p>\n<pre><code>    if(Build.VERSION.SDK_INT &lt; 21) {\n        //as PackageInstaller was added in API 21, let's use the old way of doing it prior to 21\n        Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);\n        Uri apkUri = Uri.parse(filename);\n        Context context = MyAppActivity.getQtActivityInstance().getApplicationContext();\n        ApplicationInfo appInfo = context.getApplicationInfo();\n        intent.setData(apkUri);\n        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);\n        intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false);\n        intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);\n        intent.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME,\n             appInfo.packageName);\n        MyAppActivity.getQtActivityInstance().startActivity(intent);\n    }\n    else  {\n        // API level 21 or higher, we need to use PackageInstaller\n        PackageInstaller packageInstaller = MyAppActivity.getQtActivityInstance().getPackageManager().getPackageInstaller();\n        Log.i(TAG, &quot;JIntentActionInstallApk - got packageInstaller&quot;);\n        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(\n                PackageInstaller.SessionParams.MODE_FULL_INSTALL);\n        Log.i(TAG, &quot;JIntentActionInstallApk - set SessionParams&quot;);\n        int sessionId = packageInstaller.createSession(params);\n        session = packageInstaller.openSession(sessionId);\n        Log.i(TAG, &quot;JIntentActionInstallApk - session opened&quot;);\n\n        // Create an install status receiver.\n        Context context = MyAppActivity.getQtActivityInstance().getApplicationContext();\n        addApkToInstallSession(context, filename, session);\n        Log.i(TAG, &quot;JIntentActionInstallApk - apk added to session&quot;);\n\n        Intent intent = new Intent(context, MyAppActivity.class);\n        intent.setAction(MyAppActivity.PACKAGE_INSTALLED_ACTION);\n        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);\n        IntentSender statusReceiver = pendingIntent.getIntentSender();\n        // Commit the session (this will start the installation workflow).\n        session.commit(statusReceiver);\n        Log.i(TAG, &quot;JIntentActionInstallApk - commited&quot;);\n    }\n} catch (IOException e) {\n    throw new RuntimeException(&quot;Couldn't install package&quot;, e);\n} catch (RuntimeException e) {\n    if (session != null) {\n        session.abandon();\n    }\n    throw e;\n}\n<\/code><\/pre>\n<p>}<\/p>\n<p>private static void addApkToInstallSession(Context context, String filename, PackageInstaller.Session session)\n{\nLog.i(TAG, &quot;addApkToInstallSession &quot; + filename);\n// It's recommended to pass the file size to openWrite(). Otherwise installation may fail\n// if the disk is almost full.\ntry {\nOutputStream packageInSession = session.openWrite(&quot;package&quot;, 0, -1);\nInputStream input;\nUri uri = Uri.parse(filename);\ninput = context.getContentResolver().openInputStream(uri);<\/p>\n<pre><code>        if(input != null) {\n           Log.i(TAG, &quot;input.available: &quot; + input.available());\n           byte[] buffer = new byte[16384];\n           int n;\n           while ((n = input.read(buffer)) &gt;= 0) {\n               packageInSession.write(buffer, 0, n);\n           }\n        }\n        else {\n            Log.i(TAG, &quot;addApkToInstallSession failed&quot;);\n            throw new IOException (&quot;addApkToInstallSession&quot;);\n        }\n        packageInSession.close();  //need to close this stream\n        input.close();             //need to close this stream\n   }\n   catch (Exception e) {\n       Log.i(TAG, &quot;addApkToInstallSession failed2 &quot; + e.toString());\n   }\n<\/code><\/pre>\n<p>}<\/p>\n",
+            "answer_id": 79367169,
+            "question_id": 58374527
+        }
+    ],
+    "answer_comments": {"58385417": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/cbCMj.jpg?s=256",
+                "account_id": 1793722,
+                "user_type": "registered",
+                "user_id": 1633609,
+                "link": "https://stackoverflow.com/users/1633609/sir-nikolay-cesar-the-first",
+                "reputation": 1070,
+                "display_name": "Sir NIkolay Cesar The First",
+                "accept_rate": 25
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58385417,
+            "edited": false,
+            "creation_date": 1588234243,
+            "comment_id": 108822168
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-C7TBmSOn2ck/AAAAAAAAAAI/AAAAAAAADLA/BS5e5k2JOIs/s256-rj/photo.jpg",
+                "account_id": 10253546,
+                "user_type": "registered",
+                "user_id": 7566979,
+                "link": "https://stackoverflow.com/users/7566979/manjunath-kallannavar",
+                "reputation": 606,
+                "display_name": "manjunath kallannavar"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58385417,
+            "edited": false,
+            "creation_date": 1575461143,
+            "comment_id": 104572775
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa970238069a66e30802a231b0bc86d9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11123997,
+                "user_type": "registered",
+                "user_id": 8166086,
+                "link": "https://stackoverflow.com/users/8166086/tomasl",
+                "reputation": 106,
+                "display_name": "TomasL"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58385417,
+            "reply_to_user": {
+                "profile_image": "https://lh4.googleusercontent.com/-C7TBmSOn2ck/AAAAAAAAAAI/AAAAAAAADLA/BS5e5k2JOIs/s256-rj/photo.jpg",
+                "account_id": 10253546,
+                "user_type": "registered",
+                "user_id": 7566979,
+                "link": "https://stackoverflow.com/users/7566979/manjunath-kallannavar",
+                "reputation": 606,
+                "display_name": "manjunath kallannavar"
+            },
+            "edited": false,
+            "creation_date": 1574843161,
+            "comment_id": 104370269
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-C7TBmSOn2ck/AAAAAAAAAAI/AAAAAAAADLA/BS5e5k2JOIs/s256-rj/photo.jpg",
+                "account_id": 10253546,
+                "user_type": "registered",
+                "user_id": 7566979,
+                "link": "https://stackoverflow.com/users/7566979/manjunath-kallannavar",
+                "reputation": 606,
+                "display_name": "manjunath kallannavar"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58385417,
+            "edited": false,
+            "creation_date": 1573733666,
+            "comment_id": 103984607
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fa970238069a66e30802a231b0bc86d9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11123997,
+                "user_type": "registered",
+                "user_id": 8166086,
+                "link": "https://stackoverflow.com/users/8166086/tomasl",
+                "reputation": 106,
+                "display_name": "TomasL"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58385417,
+            "reply_to_user": {
+                "profile_image": "https://lh4.googleusercontent.com/-C7TBmSOn2ck/AAAAAAAAAAI/AAAAAAAADLA/BS5e5k2JOIs/s256-rj/photo.jpg",
+                "account_id": 10253546,
+                "user_type": "registered",
+                "user_id": 7566979,
+                "link": "https://stackoverflow.com/users/7566979/manjunath-kallannavar",
+                "reputation": 606,
+                "display_name": "manjunath kallannavar"
+            },
+            "edited": false,
+            "creation_date": 1572992107,
+            "comment_id": 103733387
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-C7TBmSOn2ck/AAAAAAAAAAI/AAAAAAAADLA/BS5e5k2JOIs/s256-rj/photo.jpg",
+                "account_id": 10253546,
+                "user_type": "registered",
+                "user_id": 7566979,
+                "link": "https://stackoverflow.com/users/7566979/manjunath-kallannavar",
+                "reputation": 606,
+                "display_name": "manjunath kallannavar"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58385417,
+            "edited": false,
+            "creation_date": 1572888370,
+            "comment_id": 103692948
+        }
+    ]}
+}

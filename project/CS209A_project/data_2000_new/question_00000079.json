@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://graph.facebook.com/100001596640224/picture?type=large",
+            "account_id": 4921350,
+            "user_type": "registered",
+            "user_id": 3963856,
+            "link": "https://stackoverflow.com/users/3963856/jeong-sangcheol",
+            "reputation": 113,
+            "display_name": "Jeong SangCheol",
+            "accept_rate": 40
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/25589180/hibernate-org-hibernate-lazyinitializationexception-failed-to-lazily-initiali",
+        "last_activity_date": 1409464580,
+        "creation_date": 1409462711,
+        "answer_count": 1,
+        "title": "hibernate : org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: no session or session was closed",
+        "body": "<p>I'm learn to hibernate.\nBut I'm stuck in a very basic point.<\/p>\n\n<p>When the source of the following<\/p>\n\n<pre><code>    Controller : data collection and ready to display \n    Service : Transaction processing\n    Dao : access Database \n<\/code><\/pre>\n\n<p>And processing data in such a form.<\/p>\n\n<hr>\n\n<p>Test.java<\/p>\n\n<pre><code>@Entity\n@Table ( name = \"table_test\" )\npublic class Test\n{\n\n    @Id\n    @GeneratedValue ( strategy = GenerationType.AUTO )\n    public long id;\n\n    @OneToMany(fetch=FetchType.LAZY)\n    @JoinColumn(name=\"test_id\")\n    @IndexColumn(name=\"orderBy\")\n    public List&lt;TestItem&gt; items;\n\n}\n<\/code><\/pre>\n\n<p>TestItem.java<\/p>\n\n<pre><code>@Entity\n@Table ( name = \"table_item\" )\npublic class TestItem\n{\n\n    @ManyToOne(fetch=FetchType.LAZY)\n    @JoinColumn(name=\"test_id\", insertable=false, updatable=false)\n    public Test parent;\n\n    @Id\n    @GeneratedValue ( strategy = GenerationType.AUTO )\n    public long id;\n\n}\n<\/code><\/pre>\n\n<p>TestDao.java<\/p>\n\n<pre><code>@Repository\npublic class TestDao\n{\n\n    @Autowired SessionFactory sessionFactory;\n\n    protected Session getSession(){\n        return sessionFactory.getCurrentSession();\n    }\n\n    public Test get(long id){\n        return (Test) getSession().createCriteria( Test.class )\n                    .add( Restrictions.eq( \"id\", id ) ).uniqueResult();\n    }\n}\n<\/code><\/pre>\n\n<p>TestService.java<\/p>\n\n<pre><code>@Service\n@Transactional\npublic class TestService\n{\n\n    @Autowired\n    TestDao testd;\n\n    public Test get(long id){\n        return testd.get( id );\n    }\n\n    public List&lt;TestItem&gt; getItems(Test test){\n        List&lt;TestItem&gt; items = test.items;\n        items.iterator();\n        return items;\n    }\n\n}\n<\/code><\/pre>\n\n<p>TestController.java<\/p>\n\n<pre><code>@Controller\n@RequestMapping ( \"/test\" )\npublic class TestController extends BaseController\n{\n    @Autowired\n    TestService testService;\n\n    @RequestMapping ( \"/{id}\" )\n    public String seriesList ( @PathVariable long id, Model model )\n    {\n        Test test = testService.get( id );\n\n        //something...\n\n        List&lt;TestItem&gt; lists = testService.getItems( test );\n\n        for(TestItem item : lists)\n        {\n            Model.addAttribute(item.id);\n        }\n\n        return \"index\";\n    }\n}\n<\/code><\/pre>\n\n<p>EXCEPTION<\/p>\n\n<pre><code>org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: com.test.domain.Test.items, no session or session was closed\n    org.hibernate.collection.AbstractPersistentCollection.throwLazyInitializationException(AbstractPersistentCollection.java:383)\n    org.hibernate.collection.AbstractPersistentCollection.throwLazyInitializationExceptionIfNotConnected(AbstractPersistentCollection.java:375)\n    org.hibernate.collection.AbstractPersistentCollection.initialize(AbstractPersistentCollection.java:368)\n<\/code><\/pre>\n\n<hr>\n\n<p>For what reason if I use the Lazy. <\/p>\n\n<p>This is because it may not be used by the \"Something\" that list.<\/p>\n\n<p>I know how to work around some.<\/p>\n\n<p>1) first solution is \"already list\", but eliminates the need for the lazy.<\/p>\n\n<pre><code>@Service\n@Transactional\npublic class TestService\n{\n\n    @Autowired\n    TestDao testd;\n\n    public Test get(long id){\n        Test test = testd.get( id );\n        test.items.iterator();\n        return test;\n    }\n\n    public List&lt;TestItem&gt; getItems(Test test){\n        List&lt;TestItem&gt; items = test.items;\n        items.iterator();\n        return items;\n    }\n\n}\n<\/code><\/pre>\n\n<p>2) second solution \"process by inner Transaction\", but this solution use, always run in transaction<\/p>\n\n<pre><code>@Controller\n@RequestMapping ( \"/test\" )\npublic class TestController extends BaseController\n{\n    @Autowired\n    TestService testService;\n\n    @RequestMapping ( \"/{id}\" )\n    public String seriesList ( @PathVariable long id, Model model )\n    {\n        return testService.view( id, model );\n    }\n}\n@Service\n@Transactional\npublic class TestService\n{\n\n    @Autowired\n    TestDao testd;\n\n    public Test get(long id){\n        Test test = testd.get( id );\n        return test;\n    }\n\n    public String view(long id, Model model){\n        Test test = get( id );\n\n        List&lt;TestItem&gt; lists = test.items;\n\n        for(TestItem item : lists)\n        {\n            model.addAttribute( item.id );\n        }\n\n        return \"index\";\n    }\n\n}\n<\/code><\/pre>\n\n<hr>\n\n<p>There seems to have several problems.<\/p>\n\n<p>So, I want to bring up only when needed.<\/p>\n",
+        "question_id": 25589180,
+        "tags": [
+            "java",
+            "spring",
+            "hibernate",
+            "session"
+        ],
+        "score": 4,
+        "is_answered": true,
+        "view_count": 1160
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/eba1608948ed951d470209e9403674fa?s=256&d=identicon&r=PG",
+            "account_id": 1888905,
+            "user_type": "registered",
+            "user_id": 1707520,
+            "link": "https://stackoverflow.com/users/1707520/sol4me",
+            "reputation": 15818,
+            "display_name": "sol4me",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 25589180,
+        "edited": false,
+        "creation_date": 1409464131,
+        "comment_id": 39969004
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/pbitM.jpg?s=256",
+            "account_id": 177751,
+            "user_type": "registered",
+            "user_id": 409283,
+            "link": "https://stackoverflow.com/users/409283/lalit",
+            "reputation": 1475,
+            "display_name": "lalit",
+            "accept_rate": 29
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1409464580,
+        "creation_date": 1409464580,
+        "body": "<p>You will need to understand the concept of Session and session boundaries. Hibernate works with proxies for reason of performance and does not loads all the associations unless they are needed. For Session concepts you can see <a href=\"http://tech.lalitbhatt.net/2014/07/hibernate-persistent-context-and-session.html\" rel=\"nofollow\">here<\/a><\/p>\n\n<p>If you are in Spring environment (which I think you are), you might want to check Open Session filter. This opens a session in the context of a request so that you can access associations in all layers. You might not want to increase your transaction boundaries.<\/p>\n",
+        "answer_id": 25589338,
+        "question_id": 25589180
+    }],
+    "answer_comments": {}
+}

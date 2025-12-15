@@ -1,0 +1,120 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rbUrh.jpg?s=256",
+            "account_id": 13284312,
+            "user_type": "registered",
+            "user_id": 9590906,
+            "link": "https://stackoverflow.com/users/9590906/deanqx",
+            "reputation": 125,
+            "display_name": "deanqx"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/77773183/jframe-keep-the-same-window-aspect-ratio-while-resizing",
+        "last_activity_date": 1704642342,
+        "creation_date": 1704632952,
+        "answer_count": 1,
+        "title": "JFrame keep the same window aspect ratio while resizing",
+        "body": "<p>I am working on Linux Gnome.<\/p>\n<p>I want to keep the window in a 16:9 ratio. If for example the width is scaled the code only modifies the height so the user input is not touched.<\/p>\n<p>With this approach the window resizes itself further out than it should.\nFor example I scale the width a little bit and the height pops out much larger than it should.<\/p>\n<pre><code>import java.awt.Color;\nimport java.awt.Dimension;\nimport java.awt.event.ComponentAdapter;\nimport java.awt.event.ComponentEvent;\nimport javax.swing.JFrame;\nimport javax.swing.JPanel;\n\npublic class Main\n{\n    public static void main(String[] args)\n    {\n        JPanel panel = new JPanel();\n        panel.setPreferredSize(new Dimension(1280, 720));\n        panel.setBackground(new Color(89, 108, 171, 255));\n\n        JFrame frame = new JFrame(&quot;Test&quot;);\n        frame.setLocation(100, 100);\n        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n        frame.add(panel);\n        frame.pack();\n        frame.setVisible(true);\n\n        panel.addComponentListener(new ComponentAdapter()\n        {\n            @Override\n            public void componentResized(ComponentEvent e)\n            {\n                int targetWidth = frame.getSize().width;\n                int targetHeight = frame.getSize().width * 9 / 16;\n\n                if (targetHeight &gt; frame.getSize().height)\n                {\n                    targetHeight = frame.getSize().height;\n                    targetWidth = frame.getSize().height * 16 / 9;\n                }\n\n                frame.setSize(targetWidth, targetHeight);\n            }\n        }); \n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 77773183,
+        "tags": [
+            "java",
+            "swing",
+            "user-interface"
+        ],
+        "score": 0,
+        "accepted_answer_id": 77773737,
+        "is_answered": true,
+        "view_count": 100,
+        "last_edit_date": 1704633332
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/38b1c37530189ec4471a43a618e33f67?s=256&d=identicon&r=PG",
+                "account_id": 2053598,
+                "user_type": "registered",
+                "user_id": 1831987,
+                "link": "https://stackoverflow.com/users/1831987/vgr",
+                "reputation": 44991,
+                "display_name": "VGR"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 77773183,
+            "edited": false,
+            "creation_date": 1704636828,
+            "comment_id": 137111785
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54af3ad01b032767b05a7e98fede6d6e?s=256&d=identicon&r=PG",
+                "account_id": 2360785,
+                "user_type": "registered",
+                "user_id": 2067492,
+                "link": "https://stackoverflow.com/users/2067492/matt",
+                "reputation": 12395,
+                "display_name": "matt"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 77773183,
+            "edited": false,
+            "creation_date": 1704635368,
+            "comment_id": 137111649
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54af3ad01b032767b05a7e98fede6d6e?s=256&d=identicon&r=PG",
+                "account_id": 2360785,
+                "user_type": "registered",
+                "user_id": 2067492,
+                "link": "https://stackoverflow.com/users/2067492/matt",
+                "reputation": 12395,
+                "display_name": "matt"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 77773183,
+            "edited": false,
+            "creation_date": 1704635132,
+            "comment_id": 137111632
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/54af3ad01b032767b05a7e98fede6d6e?s=256&d=identicon&r=PG",
+            "account_id": 2360785,
+            "user_type": "registered",
+            "user_id": 2067492,
+            "link": "https://stackoverflow.com/users/2067492/matt",
+            "reputation": 12395,
+            "display_name": "matt"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1704642342,
+        "creation_date": 1704642342,
+        "body": "<p>Here is what I came up with.<\/p>\n<pre><code>    JPanel panel = new JPanel();\n    panel.setPreferredSize(new Dimension(1280, 720));\n    panel.setBackground(new Color(89, 108, 171, 255));\n\n    JFrame frame = new JFrame(&quot;Test&quot;);\n    frame.setLocation(100, 100);\n    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n    JPanel p2 = new JPanel();\n    p2.add(panel);\n    frame.setContentPane(p2);\n    frame.pack();\n    frame.setVisible(true);\n\n    p2.addComponentListener(new ComponentAdapter()\n    {\n        @Override\n        public void componentResized(ComponentEvent e)\n        {\n            int fw = frame.getSize().width;\n            int fh = frame.getSize().height;\n            if( 16*fh &gt; 9*fw ){\n                panel.setPreferredSize( new Dimension(fw, 9*fw/16) );\n            } else{\n                Dimension d = new Dimension(16*fh/9, fh);\n                panel.setPreferredSize( d );\n            }\n\n            frame.validate();\n        }\n    });\n<\/code><\/pre>\n<p>This way, you're not changing a value the user is adjusting. (The size of the frame) You're responding to the change and making sure you're panel is still the correct size.<\/p>\n",
+        "answer_id": 77773737,
+        "question_id": 77773183
+    }],
+    "answer_comments": {"77773737": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rbUrh.jpg?s=256",
+            "account_id": 13284312,
+            "user_type": "registered",
+            "user_id": 9590906,
+            "link": "https://stackoverflow.com/users/9590906/deanqx",
+            "reputation": 125,
+            "display_name": "deanqx"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 77773737,
+        "edited": false,
+        "creation_date": 1704716636,
+        "comment_id": 137119616
+    }]}
+}

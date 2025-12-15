@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lFKnA.jpg?s=256",
+            "account_id": 4548476,
+            "user_type": "registered",
+            "user_id": 3694292,
+            "link": "https://stackoverflow.com/users/3694292/coolcoder",
+            "reputation": 329,
+            "display_name": "coolcoder"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/49190811/tomcat-further-occurrences-of-http-header-parsing-errors-will-be-logged-at-deb",
+        "last_activity_date": 1629708190,
+        "creation_date": 1520588646,
+        "answer_count": 1,
+        "title": "Tomcat - Further occurrences of HTTP header parsing errors will be logged at DEBUG level",
+        "body": "<p>I have created a SpringBoot application. When I am making a HTTP Post request, with a large header size, I am getting the following error : <\/p>\n\n<pre><code>2018-03-09 14:53:01,190 INFO  [http-nio-8080-exec-1] logging.DirectJDKLog (DirectJDKLog.java:182) - Error parsing HTTP request header\nNote: further occurrences of HTTP header parsing errors will be logged at DEBUG level.\njava.lang.IllegalArgumentException: Request header is too large\nat org.apache.coyote.http11.Http11InputBuffer.fill(Http11InputBuffer.java:706) ~[tomcat-embed-core-8.5.27.jar:8.5.27]\nat org.apache.coyote.http11.Http11InputBuffer.parseHeader(Http11InputBuffer.java:853) ~[tomcat-embed-core-8.5.27.jar:8.5.27]\nat org.apache.coyote.http11.Http11InputBuffer.parseHeaders(Http11InputBuffer.java:565) ~[tomcat-embed-core-8.5.27.jar:8.5.27]\nat org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:703) [tomcat-embed-core-8.5.27.jar:8.5.27]\nat org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:66) [tomcat-embed-core-8.5.27.jar:8.5.27]\nat org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:790) [tomcat-embed-core-8.5.27.jar:8.5.27]\nat org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1459) [tomcat-embed-core-8.5.27.jar:8.5.27]\nat org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49) [tomcat-embed-core-8.5.27.jar:8.5.27]\nat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142) [?:1.8.0_101]\nat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617) [?:1.8.0_101]\nat org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61) [tomcat-embed-core-8.5.27.jar:8.5.27]\nat java.lang.Thread.run(Thread.java:745) [?:1.8.0_101]\n<\/code><\/pre>\n\n<p>Please note that further occurrences of HTTP header parsing errors will be logged at DEBUG level (as mentioned in the Error Note). I want to fix this, so that all occurrences of such errors are logged at INFO level itself. <\/p>\n\n<p>So, I added these two lines in application.properties file (which is located at src/main/resources/config/):<\/p>\n\n<pre><code>org.apache.juli.logging.UserDataHelper.CONFIG = INFO_ALL\norg.apache.juli.logging.UserDataHelper.SUPPRESSION_TIME = 0\n# server.maxHttpHeaderSize=10000000\n<\/code><\/pre>\n\n<p>But this is not working (and only the first occurrence of the error is logged at INFO level).<\/p>\n\n<p>Please note that,  setting maxHttpHeaderSize=10000000 is working fine, and it makes the large header issue to go away completely. <\/p>\n\n<p>But what I want here is - that all such errors are logged at INFO level itself.<\/p>\n\n<p>Any help will be appreciated :)<\/p>\n\n<p>Additional Info : SpringBoot version : 1.5.10.RELEASE,\nTomcat version : 8.5.27<\/p>\n",
+        "question_id": 49190811,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "tomcat",
+            "logging"
+        ],
+        "score": 6,
+        "is_answered": true,
+        "view_count": 2749,
+        "last_edit_date": 1629708190
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/qyBNp.jpg?s=256",
+            "account_id": 16269349,
+            "user_type": "registered",
+            "user_id": 11748454,
+            "link": "https://stackoverflow.com/users/11748454/piotr-p-karwasz",
+            "reputation": 16729,
+            "display_name": "Piotr P. Karwasz"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "is_accepted": false,
+        "last_activity_date": 1629702050,
+        "creation_date": 1629702050,
+        "body": "<p>Those two properties must be set as Java system properties. There is not code-free way to set those in Spring Boot (cf. <a href=\"https://stackoverflow.com/q/36895711/11748454\">this question<\/a>), so in this case I would set them in an <code>EmbeddedServletContainerCustomizer<\/code> for Spring Boot 1.x:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Component\npublic class UserDataHelperCustomizer implements EmbeddedServletContainerCustomizer {\n\n   @Override\n   public void customize(ConfigurableEmbeddedServletContainer container) {\n      System.setProperty(&quot;org.apache.juli.logging.UserDataHelper.CONFIG&quot;, &quot;INFO_ALL&quot;);\n   }\n\n}\n<\/code><\/pre>\n<p>and a similar <code>WebServerFactoryCustomizer<\/code> for Spring Boot 2.x:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Component\npublic class UserDataHelperCustomizer implements WebServerFactoryCustomizer&lt;WebServerFactory&gt; {\n\n   @Override\n   public void customize(WebServerFactory factory) {\n         System.setProperty(&quot;org.apache.juli.logging.UserDataHelper.CONFIG&quot;, &quot;INFO_ALL&quot;);\n   }\n}\n<\/code><\/pre>\n<p><strong>Remark:<\/strong> <code>SUPPRESSION_TIME=0<\/code> and <code>CONFIG=INFO_ALL<\/code> are equivalent, so only one needs to be set.<\/p>\n",
+        "answer_id": 68888468,
+        "question_id": 49190811
+    }],
+    "answer_comments": {}
+}

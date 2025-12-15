@@ -1,0 +1,210 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+            "account_id": 2409427,
+            "user_type": "registered",
+            "user_id": 2104921,
+            "link": "https://stackoverflow.com/users/2104921/u6f6o",
+            "reputation": 2200,
+            "display_name": "u6f6o",
+            "accept_rate": 91
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/47894916/how-to-efficiently-distribute-inbound-netty-io-bytebuf-messages-to-a-channelgrou",
+        "last_activity_date": 1513859771,
+        "creation_date": 1513716312,
+        "answer_count": 1,
+        "title": "How to efficiently distribute inbound netty.io ByteBuf messages to a ChannelGroup?",
+        "body": "<p>I created a netty.io BootStrap that receives streaming data from a legacy server. The server sends the data using the ISO-8859-1 charset. There is also an internal \"protocol\" in place that uses different separator bytes:  <\/p>\n\n<pre><code>private static final byte GS = 29;  // FS ASCII char 1D (group separator)\nprivate static final byte RS = 30;  // FS ASCII char 1E (record separator)\nprivate static final byte US = 31;  // FS ASCII char 1F (unit separator)\n\nprivate static final ByteProcessor GROUP_SEPARATOR_LOCATOR = value -&gt; value != GS;\nprivate static final ByteProcessor RECORD_SEPARATOR_LOCATOR = value -&gt; value != RS;\nprivate static final ByteProcessor UNIT_SEPARATOR_LOCATOR = value -&gt; value != US;\n<\/code><\/pre>\n\n<p>These ByteProcessor instances are used to split the messages. Every message is finally translated into its corresponding object representation, whereas the keyValueMapping contains the main content from the origin message: <\/p>\n\n<pre><code>public class Update {\n    private final String id;    \n    private final UpdateType updateType;\n    private final Map&lt;String, byte[]&gt; keyValueMapping;\n    // SOME OTHER STUFF\n}\n<\/code><\/pre>\n\n<p>Subsequently all updates are forwarded to all connected web-socket clients which are handled by a separate ServerBootStrap:  <\/p>\n\n<pre><code>public void distribute(ChannelGroup recipients, Object msg) {\n    Update updateMsg = (Update) msg;\n    recipients.writeAndFlush(updateMsg);\n}\n<\/code><\/pre>\n\n<p>When I activated Java Flight Recording and performed some load tests, I realised that the main allocation hotspots is the method that translates the values from the initial inbound message into am ISO-8859-1 byte array: <\/p>\n\n<pre><code>private byte[] translateValue(ByteBuf in) {\n    byte [] result;\n\n    if (!in.hasArray()) {\n        result = new byte[in.readableBytes()];\n        in.getBytes(in.readerIndex(), result);\n    } else {\n        result = in.array();\n    }\n    return result;\n}\n<\/code><\/pre>\n\n<p>Initially I did not translate the ByteBufs and stored them directly in the Update's keyValueMapping map. Since the ByteBuf object maintains some internal indices (reader, writer, marker etc.) which are not guarded - by design, I was afraid to simply wrap and forward these ByteBufs to different channels (see recipients channelGroup above) and decided to go with this byte[] representation instead. <\/p>\n\n<p>Inspecting the Java Flight Recording results, <strong>I wonder if there is any recommendation how to distribute unchanged inbound data to a group of different channels without bordering the GC too much?<\/strong> Learning from the results, direct buffers are used for the given channel, as a lot of new byte arrays are created. <\/p>\n\n<p>To give more context, I also add the code that performs the remaining message translation: <\/p>\n\n<pre><code>while (in.readableBytes() &gt; 0) {\n    ByteBuf keyAsByteBuf = nextToken(in, UNIT_SEPARATOR_LOCATOR);\n    String key = translateKey(keyAsByteBuf);\n\n    if (key != null) {\n        ByteBuf valueAsByteBuf = nextToken(in, RECORD_SEPARATOR_LOCATOR);\n        byte[] value = translateValue(valueAsByteBuf);\n\n        if (value.length &gt; 0) {\n            mapping.put(key, value); \n        }\n    }\n}\n\nprivate ByteBuf nextToken(ByteBuf in, ByteProcessor locator) {\n    int separatorIdx = in.forEachByte(in.readerIndex(), in.readableBytes(), locator);\n\n    if (separatorIdx &gt;= 0) {\n        ByteBuf token = in.readSlice(separatorIdx - in.readerIndex());\n        in.skipBytes(1);\n        return token;\n    }\n    return in.readSlice(in.readableBytes());\n}\n\nprivate String translateKey(ByteBuf in) {\n    return keyTranslator.translate(in);\n}\n<\/code><\/pre>\n",
+        "question_id": 47894916,
+        "tags": [
+            "java",
+            "netty",
+            "bytebuffer"
+        ],
+        "score": 1,
+        "accepted_answer_id": 47925153,
+        "is_answered": true,
+        "view_count": 821
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/SJPsO.jpg?s=256",
+            "account_id": 9573991,
+            "user_type": "registered",
+            "user_id": 7110799,
+            "link": "https://stackoverflow.com/users/7110799/dmitriy-dumanskiy",
+            "reputation": 13047,
+            "display_name": "Dmitriy Dumanskiy",
+            "accept_rate": 87
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1513859771,
+        "creation_date": 1513859771,
+        "body": "<p>Hm... Actually, your question is not that simple. I'll try to answer briefly.<\/p>\n\n<p>You don't need to translate <code>ByteBuf<\/code> to <code>byte[]<\/code> if you don't need that in your app. So I assume you have next structure:<\/p>\n\n<pre><code>public class Update {\n    private final String id;    \n    private final UpdateType updateType;\n    private final Map&lt;String, ByteBuf&gt; keyValueMapping;\n}\n<\/code><\/pre>\n\n<p>The problem here is that you partially parse <code>ByteBuf<\/code>. So you have java object + <code>ByteBuf<\/code>'s within this java object.<\/p>\n\n<p>That's totally fine and you can operate with those <code>ByteBuf's<\/code> further. Your class <code>Update<\/code> should implement <code>ReferenceCounted<\/code> interface. So when you do <code>recipients.writeAndFlush(updateMsg)<\/code> (assuming recipients are <code>DefaultChannelGroup<\/code>) netty <code>DefaultChannelGroup<\/code> will handle references to those buffers.<\/p>\n\n<p>So what happens:<\/p>\n\n<p>After <code>recipients.writeAndFlush(updateMsg)<\/code>, <code>DefaultChannelGroup<\/code> in loop sends your <code>updateMsg<\/code> to every channel in the list with <code>channel.writeAndFlush(safeDuplicate(message))<\/code>. <code>safeDuplicate<\/code> is special method that handles references to netty <code>ByteBuf<\/code>, so you can send the same buffer to multiple receivers (it actually copies buffers with <code>retainedDuplicate()<\/code>). However, your object is not <code>ByteBuf<\/code>, but java object. Here is code of that method:<\/p>\n\n<pre><code>private static Object safeDuplicate(Object message) {\n    if (message instanceof ByteBuf) {\n        return ((ByteBuf) message).retainedDuplicate();\n    } else if (message instanceof ByteBufHolder) {\n        return ((ByteBufHolder) message).retainedDuplicate();\n    } else {\n        return ReferenceCountUtil.retain(message);\n    }\n}\n<\/code><\/pre>\n\n<p>So, in order to correctly handle references of <code>ByteBuf<\/code> you need to implement <code>ReferenceCounted<\/code> for <code>ReferenceCountUtil.retain(message)<\/code>. Something like that:<\/p>\n\n<pre><code>public class Update implements ReferenceCounted {\n    @Override\n    public final Update retain() {\n        return new Update(id, updateType, makeRetainedBuffers());\n    }  \n\n    private Map makeRetainedBuffers() {\n       Map newMap = new HashMap();\n       for (Entry entry : keyValueMapping) {\n           newMap.put(entry.key, entry.value.duplicate().retain())\n       }\n       return newMap;\n    }\n}\n<\/code><\/pre>\n\n<p>This is just a pseudo code. But you should get the idea. You also have to implement <code>release()<\/code> method within <code>Update<\/code> class and make sure it always releases buffers it holds. And release all buffers inside. I assume you already have the encoder in your pipeline for that <code>Update<\/code> class that will call <code>release()<\/code>. <\/p>\n\n<p>Another option would be to implement own <code>DefaultChannelGroup<\/code>. In that case you don't have to rely on <code>safeDuplicate<\/code> method. And thus you don't need to implement <code>ReferenceCounted<\/code>, however you'll still need to handle retain, release manually inside that class.<\/p>\n",
+        "answer_id": 47925153,
+        "question_id": 47894916
+    }],
+    "answer_comments": {"47925153": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+                "account_id": 2409427,
+                "user_type": "registered",
+                "user_id": 2104921,
+                "link": "https://stackoverflow.com/users/2104921/u6f6o",
+                "reputation": 2200,
+                "display_name": "u6f6o",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47925153,
+            "edited": false,
+            "creation_date": 1515323871,
+            "comment_id": 83250474
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SJPsO.jpg?s=256",
+                "account_id": 9573991,
+                "user_type": "registered",
+                "user_id": 7110799,
+                "link": "https://stackoverflow.com/users/7110799/dmitriy-dumanskiy",
+                "reputation": 13047,
+                "display_name": "Dmitriy Dumanskiy",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47925153,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+                "account_id": 2409427,
+                "user_type": "registered",
+                "user_id": 2104921,
+                "link": "https://stackoverflow.com/users/2104921/u6f6o",
+                "reputation": 2200,
+                "display_name": "u6f6o",
+                "accept_rate": 91
+            },
+            "edited": false,
+            "creation_date": 1515272739,
+            "comment_id": 83240923
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+                "account_id": 2409427,
+                "user_type": "registered",
+                "user_id": 2104921,
+                "link": "https://stackoverflow.com/users/2104921/u6f6o",
+                "reputation": 2200,
+                "display_name": "u6f6o",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47925153,
+            "edited": false,
+            "creation_date": 1515264938,
+            "comment_id": 83238370
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SJPsO.jpg?s=256",
+                "account_id": 9573991,
+                "user_type": "registered",
+                "user_id": 7110799,
+                "link": "https://stackoverflow.com/users/7110799/dmitriy-dumanskiy",
+                "reputation": 13047,
+                "display_name": "Dmitriy Dumanskiy",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 47925153,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+                "account_id": 2409427,
+                "user_type": "registered",
+                "user_id": 2104921,
+                "link": "https://stackoverflow.com/users/2104921/u6f6o",
+                "reputation": 2200,
+                "display_name": "u6f6o",
+                "accept_rate": 91
+            },
+            "edited": false,
+            "creation_date": 1515236401,
+            "comment_id": 83229943
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+                "account_id": 2409427,
+                "user_type": "registered",
+                "user_id": 2104921,
+                "link": "https://stackoverflow.com/users/2104921/u6f6o",
+                "reputation": 2200,
+                "display_name": "u6f6o",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47925153,
+            "edited": false,
+            "creation_date": 1515233398,
+            "comment_id": 83229232
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SJPsO.jpg?s=256",
+                "account_id": 9573991,
+                "user_type": "registered",
+                "user_id": 7110799,
+                "link": "https://stackoverflow.com/users/7110799/dmitriy-dumanskiy",
+                "reputation": 13047,
+                "display_name": "Dmitriy Dumanskiy",
+                "accept_rate": 87
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 47925153,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+                "account_id": 2409427,
+                "user_type": "registered",
+                "user_id": 2104921,
+                "link": "https://stackoverflow.com/users/2104921/u6f6o",
+                "reputation": 2200,
+                "display_name": "u6f6o",
+                "accept_rate": 91
+            },
+            "edited": false,
+            "creation_date": 1513897594,
+            "comment_id": 82837059
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72b24a8fe326631356faf49ea582010a?s=256&d=identicon&r=PG",
+                "account_id": 2409427,
+                "user_type": "registered",
+                "user_id": 2104921,
+                "link": "https://stackoverflow.com/users/2104921/u6f6o",
+                "reputation": 2200,
+                "display_name": "u6f6o",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47925153,
+            "edited": false,
+            "creation_date": 1513871686,
+            "comment_id": 82825399
+        }
+    ]}
+}

@@ -1,0 +1,72 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/91734e5381f091bf3c1d87e898c91353?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 16094748,
+            "user_type": "registered",
+            "user_id": 11617226,
+            "link": "https://stackoverflow.com/users/11617226/skyworld",
+            "reputation": 65,
+            "display_name": "skyworld"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/56903483/how-to-calculate-current-system-time-and-store-time-interval",
+        "last_activity_date": 1562388907,
+        "creation_date": 1562331243,
+        "answer_count": 1,
+        "title": "how to calculate current system time and store time interval",
+        "body": "<p>I want to calculate current system time and store time interval. I am using admob in my application. When a user clicks on ads I want to store current time in <code>sharedPreferences<\/code> and the next ad should show after 10 minutes.<\/p>\n\n<p>So how i can calculate the interval between time stored in <code>sharedPreferences<\/code> and current system time?<\/p>\n\n<p>Here is my code.<\/p>\n\n<pre><code> interstitialAd.setAdListener(new AdListener() {\n\n     @Override\n     public void onAdClosed() {\n         super.onAdClosed();\n         startActivity(intent);\n         interstitialAd.loadAd(new AdRequest.Builder().build());\n     }\n\n\n     @Override\n     public void onAdLoaded() {\n         // Code to be executed when an ad finishes loading.\n         Toast.makeText(Chapters.this, \"loaded\", Toast.LENGTH_SHORT).show();\n\n     }\n\n     @Override\n     public void onAdFailedToLoad(int errorCode) {\n         // Code to be executed when an ad request fails.\n\n\n     }\n\n     @Override\n     public void onAdOpened() {\n         // Code to be executed when the ad is displayed.\n\n\n     }\n     @Override\n     public void onAdClicked() {\n\n         SimpleDateFormat dateFormat = new SimpleDateFormat(\"HH:mm:ss\");\n\n         // Find todays date\n         String currentDateTime = dateFormat.format(new Date()); \n         sharedPreferences=getSharedPreferences(\"TimeStamp\",MODE_PRIVATE);\n         SharedPreferences.Editor editor=sharedPreferences.edit();\n         editor.putString(\"currenttime\",currentDateTime);\n         editor.commit();\n\n     }\n\n\n     @Override\n     public void onAdLeftApplication() {\n         // Code to be executed when the user has left the app.\n     }\n}\n<\/code><\/pre>\n",
+        "question_id": 56903483,
+        "tags": [
+            "java",
+            "android",
+            "datetime",
+            "admob"
+        ],
+        "score": 1,
+        "accepted_answer_id": 56904861,
+        "is_answered": true,
+        "view_count": 199,
+        "last_edit_date": 1562332204
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b9737fb0439f70903f8948ad3963d9cc?s=256&d=identicon&r=PG",
+            "account_id": 288478,
+            "user_type": "registered",
+            "user_id": 588916,
+            "link": "https://stackoverflow.com/users/588916/collapsar",
+            "reputation": 17357,
+            "display_name": "collapsar",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "post_id": 56903483,
+        "edited": false,
+        "creation_date": 1562332340,
+        "comment_id": 100352206
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ZWEI3.jpg?s=256",
+            "account_id": 322981,
+            "user_type": "registered",
+            "user_id": 642706,
+            "link": "https://stackoverflow.com/users/642706/basil-bourque",
+            "reputation": 347060,
+            "display_name": "Basil Bourque",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1562388907,
+        "creation_date": 1562336433,
+        "body": "<p>You are using terrible date-time classes that were supplanted years ago by the modern <em>java.time<\/em> classes defined in JSR 310.<\/p>\n\n<blockquote>\n  <p>From Question:<\/p>\n  \n  <p>When a user clicks on ads I want to store current time in sharedPreferences<\/p>\n<\/blockquote>\n\n<p>Capture the current moment in <a href=\"https://en.wikipedia.org/wiki/Coordinated_Universal_Time\" rel=\"nofollow noreferrer\">UTC<\/a> as an <a href=\"https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/Instant.html\" rel=\"nofollow noreferrer\"><code>Instant<\/code><\/a> object.<\/p>\n\n<pre><code>Instant instant = Instant.now() ;\n<\/code><\/pre>\n\n<p>Generate a string in standard <a href=\"https://en.m.wikipedia.org/wiki/ISO_8601\" rel=\"nofollow noreferrer\">ISO 8601<\/a> format. <\/p>\n\n<pre><code>String output = instant.toString() ;\n<\/code><\/pre>\n\n<blockquote>\n  <p>2019-07-06T04:21:11.091261Z<\/p>\n<\/blockquote>\n\n<p>You may want to <a href=\"https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/Instant.html#truncatedTo(java.time.temporal.TemporalUnit)\" rel=\"nofollow noreferrer\">drop the fractional second<\/a> to zero, for simplicity.<\/p>\n\n<pre><code>Instant instant = Instant.now().truncatedTo( ChronoUnit.SECONDS ) ;\n<\/code><\/pre>\n\n<p>Write this string to storage.<\/p>\n\n<blockquote>\n  <p>From Question:<\/p>\n  \n  <p>calculate the interval between time stored in sharedPreferences and current system time?<\/p>\n<\/blockquote>\n\n<p>Retrieve that stored string. Parse as a <code>Instant<\/code> object. <\/p>\n\n<pre><code>Instant instant = Instant.parse( input ) ;\n<\/code><\/pre>\n\n<p>Calculate elapsed time using <a href=\"https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/Duration.html\" rel=\"nofollow noreferrer\"><code>Duration<\/code><\/a> class.<\/p>\n\n<pre><code>Duration d = Duration.between( instant , Instant.now() ) ;\n<\/code><\/pre>\n\n<p>Sanity check.<\/p>\n\n<pre><code>Boolean movingForwardInTime = ( ! d.isNegative() ) &amp;&amp; ( ! d.isZero() ) ;\nif ( ! movingForwardInTime ) { \u2026 }\n<\/code><\/pre>\n\n<p>Test if over our limit.<\/p>\n\n<pre><code>Duration limit = Duration.ofMinutes( 10 ) ;\nBoolean expired = ( d.compareTo( limit ) &gt; 0 ) ;\n<\/code><\/pre>\n\n<hr>\n\n<h1>About <em>java.time<\/em><\/h1>\n\n<p>The <a href=\"http://docs.oracle.com/javase/10/docs/api/java/time/package-summary.html\" rel=\"nofollow noreferrer\"><em>java.time<\/em><\/a> framework is built into Java 8 and later. These classes supplant the troublesome old <a href=\"https://en.wikipedia.org/wiki/Legacy_system\" rel=\"nofollow noreferrer\">legacy<\/a> date-time classes such as <a href=\"https://docs.oracle.com/javase/10/docs/api/java/util/Date.html\" rel=\"nofollow noreferrer\"><code>java.util.Date<\/code><\/a>, <a href=\"https://docs.oracle.com/javase/10/docs/api/java/util/Calendar.html\" rel=\"nofollow noreferrer\"><code>Calendar<\/code><\/a>, &amp; <a href=\"http://docs.oracle.com/javase/10/docs/api/java/text/SimpleDateFormat.html\" rel=\"nofollow noreferrer\"><code>SimpleDateFormat<\/code><\/a>.<\/p>\n\n<p>To learn more, see the <a href=\"http://docs.oracle.com/javase/tutorial/datetime/TOC.html\" rel=\"nofollow noreferrer\"><em>Oracle Tutorial<\/em><\/a>. And search Stack Overflow for many examples and explanations. Specification is <a href=\"https://jcp.org/en/jsr/detail?id=310\" rel=\"nofollow noreferrer\">JSR 310<\/a>.<\/p>\n\n<p>The <a href=\"http://www.joda.org/joda-time/\" rel=\"nofollow noreferrer\"><em>Joda-Time<\/em><\/a> project, now in <a href=\"https://en.wikipedia.org/wiki/Maintenance_mode\" rel=\"nofollow noreferrer\">maintenance mode<\/a>, advises migration to the <a href=\"http://docs.oracle.com/javase/10/docs/api/java/time/package-summary.html\" rel=\"nofollow noreferrer\">java.time<\/a> classes.<\/p>\n\n<p>You may exchange <em>java.time<\/em> objects directly with your database. Use a <a href=\"https://en.wikipedia.org/wiki/JDBC_driver\" rel=\"nofollow noreferrer\">JDBC driver<\/a> compliant with <a href=\"http://openjdk.java.net/jeps/170\" rel=\"nofollow noreferrer\">JDBC 4.2<\/a> or later. No need for strings, no need for <code>java.sql.*<\/code> classes.<\/p>\n\n<p>Where to obtain the java.time classes? <\/p>\n\n<ul>\n<li><a href=\"https://en.wikipedia.org/wiki/Java_version_history#Java_SE_8\" rel=\"nofollow noreferrer\"><strong>Java SE 8<\/strong><\/a>, <a href=\"https://en.wikipedia.org/wiki/Java_version_history#Java_SE_9\" rel=\"nofollow noreferrer\"><strong>Java SE 9<\/strong><\/a>, <a href=\"https://en.wikipedia.org/wiki/Java_version_history#Java_SE_10\" rel=\"nofollow noreferrer\"><strong>Java SE 10<\/strong><\/a>, <a href=\"https://en.wikipedia.org/wiki/Java_version_history#Java_SE_11\" rel=\"nofollow noreferrer\"><strong>Java SE 11<\/strong><\/a>, and later  - Part of the standard Java API with a bundled implementation.\n\n<ul>\n<li>Java 9 adds some minor features and fixes.<\/li>\n<\/ul><\/li>\n<li><a href=\"https://en.wikipedia.org/wiki/Java_version_history#Java_SE_6\" rel=\"nofollow noreferrer\"><strong>Java SE 6<\/strong><\/a> and <a href=\"https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7\" rel=\"nofollow noreferrer\"><strong>Java SE 7<\/strong><\/a>\n\n<ul>\n<li>Most of the <em>java.time<\/em> functionality is back-ported to Java 6 &amp; 7 in <a href=\"http://www.threeten.org/threetenbp/\" rel=\"nofollow noreferrer\"><strong><em>ThreeTen-Backport<\/em><\/strong><\/a>.<\/li>\n<\/ul><\/li>\n<li><a href=\"https://en.wikipedia.org/wiki/Android_(operating_system)\" rel=\"nofollow noreferrer\"><strong>Android<\/strong><\/a>\n\n<ul>\n<li>Later versions of Android bundle implementations of the <em>java.time<\/em> classes.<\/li>\n<li>For earlier Android (&lt;26), the <a href=\"https://github.com/JakeWharton/ThreeTenABP\" rel=\"nofollow noreferrer\"><strong><em>ThreeTenABP<\/em><\/strong><\/a> project adapts <a href=\"http://www.threeten.org/threetenbp/\" rel=\"nofollow noreferrer\"><strong><em>ThreeTen-Backport<\/em><\/strong><\/a> (mentioned above). See <a href=\"http://stackoverflow.com/q/38922754/642706\"><em>How to use ThreeTenABP\u2026<\/em><\/a>.<\/li>\n<\/ul><\/li>\n<\/ul>\n",
+        "answer_id": 56904861,
+        "question_id": 56903483,
+        "last_edit_date": 1562388907
+    }],
+    "answer_comments": {}
+}

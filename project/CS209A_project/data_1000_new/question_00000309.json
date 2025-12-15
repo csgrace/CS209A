@@ -1,0 +1,134 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ffbc4fd91d0789dc935f2b8bc59ea0cc?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5122787,
+            "user_type": "registered",
+            "user_id": 4105853,
+            "link": "https://stackoverflow.com/users/4105853/arun-kumar",
+            "reputation": 267,
+            "display_name": "arun kumar",
+            "accept_rate": 23
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/38321419/how-to-set-active-profiles-in-spring-annotation-based-java-config",
+        "last_activity_date": 1539348301,
+        "creation_date": 1468304778,
+        "answer_count": 4,
+        "title": "How to set active profiles in Spring annotation based java config",
+        "body": "<p>set active profile like  <code>context.getEnvironment().setActiveProfiles( \"DEV\" );<\/code> \n   which can be achieved by using<\/p>\n\n<pre><code>public class SpringWebInitializer implements WebApplicationInitializer\n{\n\n    public void onStartup( final ServletContext servletContext ) throws ServletException\n    {\n        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();\n        context.getEnvironment().setActiveProfiles(\"DEV\" )\n\n    }\n}\n<\/code><\/pre>\n\n<p>But when extending AbstractAnnotationConfigDispatcherServletInitializer . \nhow can we achieve setting active profile ? <\/p>\n\n<pre><code>public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer\n{\n    @Override\n    protected Class&lt;?&gt;[] getServletConfigClasses() {\n        return new Class[] { WebConfig.class };\n    }\n\n    @Override\n    protected String[] getServletMappings() {\n        return new String[] { \"/\" };\n    }\n\n    @Override\n    protected Class&lt;?&gt;[] getRootConfigClasses() {\n        return null;\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 38321419,
+        "tags": [
+            "java",
+            "spring",
+            "spring-mvc",
+            "spring-4"
+        ],
+        "score": 4,
+        "is_answered": true,
+        "view_count": 6050,
+        "last_edit_date": 1468304851
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5f4cb0d2f97a2f20b9e2d64996164043?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1769203,
+                "user_type": "registered",
+                "user_id": 1614378,
+                "link": "https://stackoverflow.com/users/1614378/devops",
+                "reputation": 9201,
+                "display_name": "devops",
+                "accept_rate": 55
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": false,
+            "last_activity_date": 1468321058,
+            "creation_date": 1468321058,
+            "body": "<p>Activate your profile by using <code>spring.profiles.active<\/code> property.<\/p>\n\n<pre><code>public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {\n\n    @Override\n    protected Class&lt;?&gt;[] getServletConfigClasses() {\n        return new Class[] { WebConfig.class };\n    }\n\n    @Override\n    protected String[] getServletMappings() {\n        return new String[] { \"/\" };\n    }\n\n    @Override\n    protected Class&lt;?&gt;[] getRootConfigClasses() {\n        return null;\n    }\n\n    @Override\n    public void onStartup(ServletContext servletContext) throws ServletException {\n        super.onStartup(servletContext);\n        servletContext.setInitParameter(\"spring.profiles.active\", \"DEV\");\n    }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 38326908,
+            "question_id": 38321419
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100000954272920/picture?type=large",
+                "account_id": 4840930,
+                "user_type": "registered",
+                "user_id": 3905997,
+                "link": "https://stackoverflow.com/users/3905997/pete",
+                "reputation": 1670,
+                "display_name": "Pete",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1468320532,
+            "creation_date": 1468309475,
+            "body": "<p>You have a few options.. <\/p>\n\n<ol>\n<li><p>You can try having a context initializer to load the spring profile from a properties file on the classpath, like the following:<\/p>\n\n<pre><code>public class ContextProfileInitializer implements ApplicationContextInitializer&lt;ConfigurableApplicationContext&gt; {\n\n    private static final Logger LOGGER = LoggerFactory.getLogger(ContextProfileInitializer.class);\n\n    private static final String DEFAULT_SPRING_PROFILE = \"local\";\n\n    @Override\n    public void initialize(final ConfigurableApplicationContext applicationContext) {\n\n        ConfigurableEnvironment environment = applicationContext.getEnvironment();\n        try {\n                environment.getPropertySources().addFirst(new ResourcePropertySource(\"classpath:conf/application.properties\"));\n                if (environment.getProperty(\"spring.profiles.active\") == null) {\n                    environment.setActiveProfiles(DEFAULT_SPRING_PROFILE);\n                }\n                LOGGER.info(\"Activated Spring Profile: \" + environment.getProperty(\"spring.profiles.active\"));\n            } catch (IOException e) {\n                LOGGER.error(\"Could not find properties file in classpath.\");\n            }\n   }\n\n}\n<\/code><\/pre><\/li>\n<\/ol>\n\n<p>Here are some guides with more info:<\/p>\n\n<p><a href=\"https://gist.github.com/rponte/3989915\" rel=\"nofollow\">https://gist.github.com/rponte/3989915<\/a><\/p>\n\n<p><a href=\"http://www.java-allandsundry.com/2014/09/spring-webapplicationinitializer-and.html\" rel=\"nofollow\">http://www.java-allandsundry.com/2014/09/spring-webapplicationinitializer-and.html<\/a><\/p>\n\n<ol start=\"2\">\n<li><p>Alternatively (and a much easier way!) Use Spring Boot.<\/p>\n\n<p>You can simply define <code>spring.profiles.active<\/code> in an <code>application.properties<\/code> file in the classpath.  This will automatically be picked up and loaded into your environment.<\/p><\/li>\n<\/ol>\n\n<p>More info here:<\/p>\n\n<p><a href=\"http://docs.spring.io/spring-boot/docs/current/reference/html/howto-properties-and-configuration.html\" rel=\"nofollow\">http://docs.spring.io/spring-boot/docs/current/reference/html/howto-properties-and-configuration.html<\/a><\/p>\n",
+            "answer_id": 38322820,
+            "question_id": 38321419,
+            "last_edit_date": 1468320532
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4cceabbdd5b64af0e50594b3ef3a8eea?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2019478,
+                "user_type": "registered",
+                "user_id": 1806005,
+                "link": "https://stackoverflow.com/users/1806005/rocky",
+                "reputation": 5014,
+                "display_name": "rocky",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1468308054,
+            "creation_date": 1468305806,
+            "body": "<p>You can use <code>@ActiveProfiles(\"DEV\")<\/code> on some of your <code>@Configuration<\/code> classes, but probably more useful would be passing profile from outside - just run your <code>.jar<\/code> with additional parameter like <code>-Dspring.active.profiles=DEV<\/code><\/p>\n",
+            "answer_id": 38321728,
+            "question_id": 38321419,
+            "last_edit_date": 1468308054
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-JQMO75cCPoc/AAAAAAAAAAI/AAAAAAAAALw/T5jerj89UBg/s256-rj/photo.jpg",
+                "account_id": 12268966,
+                "user_type": "registered",
+                "user_id": 8954685,
+                "link": "https://stackoverflow.com/users/8954685/zenek73",
+                "reputation": 1,
+                "display_name": "Zenek73"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1539348301,
+            "creation_date": 1539348301,
+            "body": "<p>I think it should be rather: -Dspring.profiles.active=...  (Spring 4.1.5)<\/p>\n",
+            "answer_id": 52779825,
+            "question_id": 38321419
+        }
+    ],
+    "answer_comments": {"38321728": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ffbc4fd91d0789dc935f2b8bc59ea0cc?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5122787,
+            "user_type": "registered",
+            "user_id": 4105853,
+            "link": "https://stackoverflow.com/users/4105853/arun-kumar",
+            "reputation": 267,
+            "display_name": "arun kumar",
+            "accept_rate": 23
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 38321728,
+        "edited": false,
+        "creation_date": 1468308053,
+        "comment_id": 64059925
+    }]}
+}

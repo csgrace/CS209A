@@ -1,0 +1,151 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c1aab4ea0606b6539fdc77d08da72237?s=256&d=identicon&r=PG",
+            "account_id": 223906,
+            "user_type": "registered",
+            "user_id": 483409,
+            "link": "https://stackoverflow.com/users/483409/treefrog",
+            "reputation": 1057,
+            "display_name": "treefrog",
+            "accept_rate": 59
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/4717456/synchronize-versus-collection-synchronizedlist-versus-copyonwritearraylist",
+        "last_activity_date": 1295296512,
+        "creation_date": 1295295544,
+        "answer_count": 2,
+        "title": "synchronize versus Collection.synchronizedList versus CopyOnWriteArrayList",
+        "body": "<p>If my requirements dictate that most of my accesses to the list are for reading and modifications if any are going to be minimal, why can't I just do either of the following<\/p>\n\n<ol>\n<li>synchronize modifyList method and use ArrayList. All reads from arraylist will be unsynchronized\nor <\/li>\n<li>inside modifyList, do a Collections.synchronizedList(arrayList) \nor <\/li>\n<li>CopyOnWriteArrayList (not sure what it buys here)<\/li>\n<\/ol>\n\n<p>Why would I use either ? which is better ?<\/p>\n",
+        "question_id": 4717456,
+        "tags": [
+            "java",
+            "list",
+            "collections"
+        ],
+        "score": 0,
+        "accepted_answer_id": 4717551,
+        "is_answered": true,
+        "view_count": 3630
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/67b69133382af2ecefb5470e210151d6?s=256&d=identicon&r=PG",
+                "account_id": 131213,
+                "user_type": "registered",
+                "user_id": 331052,
+                "link": "https://stackoverflow.com/users/331052/affe",
+                "reputation": 48144,
+                "display_name": "Affe"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 4,
+            "is_accepted": true,
+            "last_activity_date": 1295296512,
+            "creation_date": 1295296195,
+            "body": "<p>For 1 &amp; 2, I'm not sure what you're trying to accomplish by only synchronizing writes.  If there are potential readers who might be iterating the list, or who are looking things up by index, then only synchronizing writes proves nothing.  The readers will still be able to read while writes are in progress and may see dirty data or get exceptions (<code>ConcurrentModification<\/code> or <code>IndexOutOfBounds<\/code>.)<\/p>\n\n<p>You would need to synchronize both your reads and writes if you want 'safe' iterating and getting while other threads make changes.  At which point, you may as well have just used a <code>Vector<\/code>.<\/p>\n\n<p><code>CopyOnWriteArrayList<\/code> is purpose built for what you want to do.  It buys safe synchronization-free iterators, while substantially increasing the cost of writes.  It also had the advantage of doing what you want (or what it seems you want from the terse question :) ), entirely encapsulated within the JavaSE API, which reduces 'surprise' for future developers.<\/p>\n\n<p>(do note that if you have multi-step processes involving reads with 'get' even using <code>CopyOnWriteArrayList<\/code> may not be entirely safe.  You need to evaluate what your code actually does and if an interleaving modification would break the method that is getting.)<\/p>\n",
+            "answer_id": 4717551,
+            "question_id": 4717456,
+            "last_edit_date": 1295296512
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/99660662e89949a4b53cd97bc199ead1?s=256&d=identicon&r=PG",
+                "account_id": 2397,
+                "user_type": "registered",
+                "user_id": 3333,
+                "link": "https://stackoverflow.com/users/3333/paul-tomblin",
+                "reputation": 183634,
+                "display_name": "Paul Tomblin",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1295296174,
+            "creation_date": 1295296174,
+            "body": "<p>Another solution would be to use ReentrantReadWriteLock so you can use read-only locks on read operations (which don't block other reads) and a write lock for when you're writing (which will block until there are no reads, and won't allow any read locks until it's released.<\/p>\n",
+            "answer_id": 4717546,
+            "question_id": 4717456
+        }
+    ],
+    "answer_comments": {
+        "4717551": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/67b69133382af2ecefb5470e210151d6?s=256&d=identicon&r=PG",
+                    "account_id": 131213,
+                    "user_type": "registered",
+                    "user_id": 331052,
+                    "link": "https://stackoverflow.com/users/331052/affe",
+                    "reputation": 48144,
+                    "display_name": "Affe"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 4717551,
+                "edited": false,
+                "creation_date": 1348950877,
+                "comment_id": 17073511
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/cb62f835454a654eddad61c118fe8320?s=256&d=identicon&r=PG",
+                    "account_id": 297958,
+                    "user_type": "registered",
+                    "user_id": 603732,
+                    "link": "https://stackoverflow.com/users/603732/languagesnamedaftercofee",
+                    "reputation": 5982,
+                    "display_name": "LanguagesNamedAfterCofee",
+                    "accept_rate": 96
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 4717551,
+                "edited": false,
+                "creation_date": 1348950081,
+                "comment_id": 17073326
+            }
+        ],
+        "4717546": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/99660662e89949a4b53cd97bc199ead1?s=256&d=identicon&r=PG",
+                    "account_id": 2397,
+                    "user_type": "registered",
+                    "user_id": 3333,
+                    "link": "https://stackoverflow.com/users/3333/paul-tomblin",
+                    "reputation": 183634,
+                    "display_name": "Paul Tomblin",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4717546,
+                "edited": false,
+                "creation_date": 1295301456,
+                "comment_id": 5210946
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c1aab4ea0606b6539fdc77d08da72237?s=256&d=identicon&r=PG",
+                    "account_id": 223906,
+                    "user_type": "registered",
+                    "user_id": 483409,
+                    "link": "https://stackoverflow.com/users/483409/treefrog",
+                    "reputation": 1057,
+                    "display_name": "treefrog",
+                    "accept_rate": 59
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 4717546,
+                "edited": false,
+                "creation_date": 1295298542,
+                "comment_id": 5210332
+            }
+        ]
+    }
+}

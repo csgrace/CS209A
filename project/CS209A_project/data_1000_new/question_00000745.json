@@ -1,0 +1,92 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b6cf523d3a52f2fdd73cbec1ae7e6b2b?s=256&d=identicon&r=PG",
+            "account_id": 200877,
+            "user_type": "registered",
+            "user_id": 446976,
+            "link": "https://stackoverflow.com/users/446976/dheeraj-joshi",
+            "reputation": 3157,
+            "display_name": "Dheeraj Joshi",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18119754/unable-to-retrieve-value-from-a-javabean-while-generating-reports-using-jasperre",
+        "last_activity_date": 1495202835,
+        "creation_date": 1375945112,
+        "answer_count": 2,
+        "title": "Unable to retrieve value from a JavaBean while generating reports using JasperReports API",
+        "body": "<p>I am trying to generate a simple <em>JR<\/em> report from a list.<\/p>\n\n<p>I am keep getting <strong>Error retrieving field value from bean : name<\/strong><\/p>\n\n<p>This error comes due to wrong getter method-name since jasper uses reflection to take the fields from a bean. However even after correcting the getter method-name. I keep getting this exception. Is there any other problem? <\/p>\n\n<p>My <em>jrxml<\/em> file is<\/p>\n\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\" ?&gt;\n&lt;!DOCTYPE jasperReport PUBLIC  \"//JasperReports//DTD Report Design//EN\" \"http://jasperreports.sourceforge.net/dtds/jasperreport.dtd\"&gt;\n\n&lt;jasperReport name=\"simpleReport\"&gt;\n  &lt;field name=\"name\" class=\"java.lang.String\"/&gt;\n  &lt;field name=\"count\" class=\"java.lang.String\"/&gt;\n  &lt;title&gt;\n        &lt;band height=\"50\"&gt;\n            &lt;staticText&gt;\n          &lt;reportElement x=\"0\" y=\"0\" width=\"180\" height=\"15\"/&gt;\n            &lt;textElement/&gt;\n          &lt;text&gt;&lt;![CDATA[Report]]&gt;&lt;/text&gt;\n        &lt;/staticText&gt;\n        &lt;/band&gt;\n    &lt;/title&gt;\n  &lt;pageHeader&gt;\n      &lt;band/&gt;\n  &lt;/pageHeader&gt;\n  &lt;columnHeader&gt;\n        &lt;band height=\"20\"&gt;\n        &lt;staticText&gt;\n          &lt;reportElement x=\"180\" y=\"0\" width=\"180\" height=\"20\"/&gt;\n        &lt;textElement&gt;\n            &lt;font isUnderline=\"true\"/&gt;\n        &lt;/textElement&gt;\n        &lt;text&gt;&lt;![CDATA[Event Name]]&gt;&lt;/text&gt;\n      &lt;/staticText&gt;\n      &lt;staticText&gt;\n        &lt;reportElement x=\"360\" y=\"0\" width=\"180\" height=\"20\"/&gt;\n        &lt;textElement&gt;\n          &lt;font isUnderline=\"true\"/&gt;\n        &lt;/textElement&gt;\n        &lt;text&gt;&lt;![CDATA[Count]]&gt;&lt;/text&gt;\n      &lt;/staticText&gt;\n    &lt;/band&gt;\n  &lt;/columnHeader&gt;\n  &lt;detail&gt;\n    &lt;band height=\"20\"&gt;\n      &lt;textField&gt;\n        &lt;reportElement x=\"180\" y=\"0\" width=\"180\" height=\"15\"/&gt;\n        &lt;textElement/&gt;\n        &lt;textFieldExpression&gt;&lt;![CDATA[$F{name}]]&gt;&lt;/textFieldExpression&gt;\n      &lt;/textField&gt;\n      &lt;textField&gt;\n        &lt;reportElement x=\"360\" y=\"0\" width=\"180\" height=\"15\"/&gt;\n        &lt;textElement/&gt;\n        &lt;textFieldExpression&gt;&lt;![CDATA[$F{count}]]&gt;&lt;/textFieldExpression&gt;\n      &lt;/textField&gt;\n    &lt;/band&gt;\n  &lt;/detail&gt;\n  &lt;columnFooter&gt;\n    &lt;band/&gt;\n  &lt;/columnFooter&gt;\n  &lt;pageFooter&gt;\n    &lt;band height=\"15\"&gt;\n      &lt;staticText&gt;\n        &lt;reportElement x=\"0\" y=\"0\" width=\"40\" height=\"15\"/&gt;\n        &lt;textElement/&gt;\n        &lt;text&gt;&lt;![CDATA[Page:]]&gt;&lt;/text&gt;\n      &lt;/staticText&gt;\n      &lt;textField&gt;\n        &lt;reportElement x=\"40\" y=\"0\" width=\"100\" height=\"15\"/&gt;\n        &lt;textElement/&gt;\n        &lt;textFieldExpression class=\"java.lang.Integer\"&gt;&lt;![CDATA[$V{PAGE_NUMBER}]]&gt;&lt;/textFieldExpression&gt;\n      &lt;/textField&gt;\n    &lt;/band&gt;\n  &lt;/pageFooter&gt;\n  &lt;summary&gt;\n    &lt;band/&gt;\n  &lt;/summary&gt;\n&lt;/jasperReport&gt;\n<\/code><\/pre>\n\n<p>Bean class is <\/p>\n\n<pre><code>class EventBean {\n    private String name;\n    private String count;\n\n    public String getName() {\n        return name;\n    }\n    public void setName(String name) {\n        this.name = name;\n    }\n    public String getCount() {\n        return count;\n    }\n    public void setCount(String count) {\n        this.count = count;\n    }\n}\n\nclass EventNameList {\n    public ArrayList&lt;EventBean&gt; getDataBeanList() {\n        ArrayList&lt;EventBean&gt; list = new ArrayList&lt;EventBean&gt;();\n\n        list.add(generate(\"Flow\", \"100\"));\n        list.add(generate(\"Non flow\", \"300\"));\n        list.add(generate(\"Allow\", \"600\"));\n        list.add(generate(\"Deny\", \"50\"));\n\n        return list;\n    }\n\n    private EventBean generate(String name, String country) {\n        EventBean bean = new EventBean();\n        bean.setName(name);\n        bean.setCount(country);\n\n        return bean;\n    }\n}\n<\/code><\/pre>\n\n<p>And I am generating reports here<\/p>\n\n<pre><code>JasperCompileManager.compileReportToFile(inpuutjrxml, outputjasper);\n\nEventNameList list = new EventNameList();\nJRBeanCollectionDataSource beanList = new JRBeanCollectionDataSource(list.getDataBeanList());\n\nJasperPrint jasperPrint = JasperFillManager.fillReport(outputjasper, new HashMap(), beanList);\n\nJasperExportManager.exportReportToPdfStream(jasperPrint, new FileOutputStream(pefoutput));\n<\/code><\/pre>\n\n<p>Do we need to make any more modification to bean class?<\/p>\n",
+        "question_id": 18119754,
+        "tags": [
+            "java",
+            "jasper-reports"
+        ],
+        "score": 3,
+        "accepted_answer_id": 18120468,
+        "protected_date": 1496129373,
+        "is_answered": true,
+        "view_count": 3948,
+        "last_edit_date": 1375948020
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/KZr6z.jpg?s=256",
+                "account_id": 469619,
+                "user_type": "registered",
+                "user_id": 876298,
+                "link": "https://stackoverflow.com/users/876298/alex-k",
+                "reputation": 22927,
+                "display_name": "Alex K"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "is_accepted": true,
+            "last_activity_date": 1375947524,
+            "creation_date": 1375947524,
+            "body": "<p>The solution is very simple - you should change the access modifier of <em>JavaBean<\/em> class to <strong><em>public<\/em><\/strong>.<\/p>\n\n<p>Like this:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>public class EventBean {\n    private String name;\n    private String count;\n\n    public String getName() {\n        return name;\n    }\n\n    public void setName(String name) {\n        this.name = name;\n    }\n\n    public String getCount() {\n        return count;\n    }\n\n    public void setCount(String count) {\n        this.count = count;\n    }\n}\n<\/code><\/pre>\n\n<p>Don't forget that you are using your own package.<\/p>\n\n<hr>\n\n<p>You can find more information about <em>JavaBean Data Sources<\/em> <a href=\"http://jasperreports.sourceforge.net/sample.reference/datasource/index.html#javabeandatasources\" rel=\"noreferrer\">here<\/a><\/p>\n",
+            "answer_id": 18120468,
+            "question_id": 18119754
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Cf0af.png?s=256",
+                "account_id": 6440797,
+                "user_type": "registered",
+                "user_id": 4990883,
+                "link": "https://stackoverflow.com/users/4990883/amirouche",
+                "reputation": 3806,
+                "display_name": "Amirouche",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1495202835,
+            "creation_date": 1495202835,
+            "body": "<p>the Bean attribute should be started with Small letter<\/p>\n\n<p>example :<\/p>\n\n<pre><code>public class DataBean {\n     private String name;\n     private String dateStart;\n     private String DateEnd; //  -&gt;dateEnd\n     private String prixTotale;\n     private String prixPayer;\n<\/code><\/pre>\n",
+            "answer_id": 44072185,
+            "question_id": 18119754
+        }
+    ],
+    "answer_comments": {"18120468": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b6cf523d3a52f2fdd73cbec1ae7e6b2b?s=256&d=identicon&r=PG",
+            "account_id": 200877,
+            "user_type": "registered",
+            "user_id": 446976,
+            "link": "https://stackoverflow.com/users/446976/dheeraj-joshi",
+            "reputation": 3157,
+            "display_name": "Dheeraj Joshi",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 18120468,
+        "edited": false,
+        "creation_date": 1375948003,
+        "comment_id": 26532015
+    }]}
+}

@@ -1,0 +1,227 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+            "account_id": 5640709,
+            "user_type": "registered",
+            "user_id": 4464680,
+            "link": "https://stackoverflow.com/users/4464680/justdeko",
+            "reputation": 1134,
+            "display_name": "justdeko",
+            "accept_rate": 70
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29734542/timepicker-integer-error",
+        "last_activity_date": 1429472015,
+        "creation_date": 1429470685,
+        "answer_count": 1,
+        "title": "Timepicker Integer Error",
+        "body": "<p>I have a timepicker in my preference activity for setting the time when a notification should be displayed. The value is stored as a string, for example: \"15:45\". To understand the problem, I will further explain what happens next to the value:<\/p>\n\n<pre><code>SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(context);\n    String hour = pref.getString(\"notification_time\",\"\");\n    // notification_time is my preference key\n    String Hora = hour;\n    int hours = Integer.parseInt(Hora.substring(0, 2));\n    int min = Integer.parseInt(Hora.substring(3, 5));\n    // as you can see, I parse the string, and then use the integers to set the time (see below)\n    calendar.set(Calendar.HOUR_OF_DAY, hours);\n    calendar.set(Calendar.MINUTE, min);\n    calendar.set(Calendar.SECOND, 00);\n<\/code><\/pre>\n\n<p>Now the problem is, My TimePicker stores the value differently, if the time is AM: for example, if you set the time to 07:45, it stores the time in the string as \"7:45\", not \"07:45\", and thus this line in the code fails:<\/p>\n\n<pre><code>int hours = Integer.parseInt(Hora.substring(0, 2));\n<\/code><\/pre>\n\n<p>(Throwing this error, not really necessary to understand the problem):<\/p>\n\n<pre><code>java.lang.NumberFormatException: Invalid int: \"5:\"\n<\/code><\/pre>\n\n<p>,because the position for \"substring\" isnt working anymore. (1 digit stored in the string instead of 2). Same goes for minutes, for example if I set the minutes to 08, my timepicker stores them as 8, and the same problem occurs again.<\/p>\n\n<p>Now I have thought about two ways to solve this problem: Either I change the code in my settingsactivity and parse the string differently, or I change the way how I store the strings:<\/p>\n\n<pre><code>if (positiveResult) {\n        lastHour=picker.getCurrentHour();\n        lastMinute=picker.getCurrentMinute();\n        String time=String.valueOf(lastHour)+\":\"+String.valueOf(lastMinute);\n\n        if (callChangeListener(time)) {\n            persistString(time);\n        }\n        setSummary(getSummary());\n    }\n<\/code><\/pre>\n\n<p>(These are the lines of code responsible for saving the value as a string)<\/p>\n\n<p>How should I solve the problem?<\/p>\n",
+        "question_id": 29734542,
+        "tags": [
+            "java",
+            "android",
+            "string",
+            "android-preferences",
+            "timepicker"
+        ],
+        "score": 1,
+        "accepted_answer_id": 29734630,
+        "is_answered": true,
+        "view_count": 111
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/beb2718e80f7f03479da5f65f2481f15?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3603873,
+            "user_type": "registered",
+            "user_id": 3006544,
+            "link": "https://stackoverflow.com/users/3006544/ryan-j",
+            "reputation": 8351,
+            "display_name": "Ryan J"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1429472015,
+        "creation_date": 1429471049,
+        "body": "<p>You could try using <code>DateFormat<\/code>'s <code>parse<\/code> method to parse your notification time string. This will return a <code>Date<\/code> object that you can use to set the date/time of your <code>Calendar<\/code> object.<\/p>\n\n<p>Something like:<\/p>\n\n<pre><code>DateFormat df = new SimpleDateFormat(\"H:mm\"); // construct date formatter to recognize your time pattern\nDate myDate = df.parse(pref.getString(\"notification_time\",\"\"));\ncalendar.setTime(myDate);  // set the time of calendar object\n\n// do other stuff with date here...\n<\/code><\/pre>\n\n<p>This way, you don't need to bother with parsing the time and you can let existing tools do the work for you.<\/p>\n\n<p>Simple test:<\/p>\n\n<pre><code>public class Test {\n    public static void main(String[] args) throws Exception {\n        DateFormat df = new SimpleDateFormat(\"H:mm\");\n        Date myDate = df.parse(\"17:45\");\n        System.out.println(myDate.toString());\n\n        Calendar c = Calendar.getInstance();\n        c.setTime(myDate);\n\n        int hours = c.get(Calendar.HOUR_OF_DAY);\n        int min = c.get(Calendar.MINUTE);\n\n        System.out.println(\"Hour = \" + hours + \"\\nMin = \" + min);\n    }\n}\n<\/code><\/pre>\n\n<p>Produces:<\/p>\n\n<pre><code>Thu Jan 01 17:45:00 PST 1970\nHour = 17\nMin = 45\n<\/code><\/pre>\n",
+        "answer_id": 29734630,
+        "question_id": 29734542,
+        "last_edit_date": 1429472015
+    }],
+    "answer_comments": {"29734630": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "edited": false,
+            "creation_date": 1429558226,
+            "comment_id": 47645678
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "edited": false,
+            "creation_date": 1429553665,
+            "comment_id": 47642797
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/beb2718e80f7f03479da5f65f2481f15?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3603873,
+                "user_type": "registered",
+                "user_id": 3006544,
+                "link": "https://stackoverflow.com/users/3006544/ryan-j",
+                "reputation": 8351,
+                "display_name": "Ryan J"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "edited": false,
+            "creation_date": 1429552749,
+            "comment_id": 47642234
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "edited": false,
+            "creation_date": 1429551912,
+            "comment_id": 47641711
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/beb2718e80f7f03479da5f65f2481f15?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3603873,
+                "user_type": "registered",
+                "user_id": 3006544,
+                "link": "https://stackoverflow.com/users/3006544/ryan-j",
+                "reputation": 8351,
+                "display_name": "Ryan J"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "edited": false,
+            "creation_date": 1429472287,
+            "comment_id": 47602841
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "edited": false,
+            "creation_date": 1429472151,
+            "comment_id": 47602795
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/beb2718e80f7f03479da5f65f2481f15?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3603873,
+                "user_type": "registered",
+                "user_id": 3006544,
+                "link": "https://stackoverflow.com/users/3006544/ryan-j",
+                "reputation": 8351,
+                "display_name": "Ryan J"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "edited": false,
+            "creation_date": 1429471651,
+            "comment_id": 47602588
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-8JmyJuysqbM/AAAAAAAAAAI/AAAAAAAAAqU/Lb9fp_9V5RQ/s256-rj/photo.jpg",
+                "account_id": 5640709,
+                "user_type": "registered",
+                "user_id": 4464680,
+                "link": "https://stackoverflow.com/users/4464680/justdeko",
+                "reputation": 1134,
+                "display_name": "justdeko",
+                "accept_rate": 70
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29734630,
+            "edited": false,
+            "creation_date": 1429471304,
+            "comment_id": 47602442
+        }
+    ]}
+}

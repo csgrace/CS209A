@@ -1,0 +1,73 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user12585593"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/63315545/how-to-make-a-stepcounter-working-in-the-background",
+        "last_activity_date": 1596910141,
+        "creation_date": 1596890642,
+        "answer_count": 1,
+        "title": "How to make a stepcounter working in the background?",
+        "body": "<p>I have an app which is supposed to count footsteps via my smartphone, it is working just fine. However, I would like it to be able to count steps while I'm not using it in the background.<\/p>\n<p>This is my code, it is written in polish, for that I'm sorry. Here are few translations.<\/p>\n<pre><code>mLiczKrok is Footsteps count\ntextKroki is a text View which means TextFootsteps\n<\/code><\/pre>\n<p><strong>What should I add in on pause method,in order to continue counting?<\/strong><\/p>\n<pre><code>  protected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main);\n    if(ContextCompat.checkSelfPermission(this,\n            Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_DENIED){\n        //ask for permission\n        requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, PHYISCAL_ACTIVITY);\n    }\n    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);\n    textKroki= findViewById(R.id.textKroki);\n    sensorManager= (SensorManager) getSystemService(SENSOR_SERVICE);\n\n    if(sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)!=null){\n\n        mLiczKrok = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);\n        x= true;\n    }\n    else {\n\n        textKroki.setText(&quot;Brak sensora.&quot;); x=false;\n    }\n}\n\n\n\n @Override\npublic void onSensorChanged(SensorEvent sensorEvent) {\nif (sensorEvent.sensor==mLiczKrok){\nLiczKroki= (int) sensorEvent.values[0];\ntextKroki.setText(String.valueOf(LiczKroki));}}\n @Override\npublic void onAccuracyChanged(Sensor sensor, int i) {\n\n}\n\n@Override\nprotected void onResume() {\n    super.onResume();\n    if(sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)!=null){\n\n      sensorManager.registerListener(this,mLiczKrok,SensorManager.SENSOR_DELAY_NORMAL);\n    }\n}\n@Override\nprotected void onPause() {\n    super.onPause();\n    if(sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)!=null){\n      sensorManager.unregisterListener(this,mLiczKrok);\n\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 63315545,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 1,
+        "accepted_answer_id": 63318126,
+        "is_answered": true,
+        "view_count": 217,
+        "last_edit_date": 1596910141
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cfe596e33055dcff6cde2614a65e3ebd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11547848,
+            "user_type": "registered",
+            "user_id": 8461344,
+            "link": "https://stackoverflow.com/users/8461344/code-demon",
+            "reputation": 1342,
+            "display_name": "Code Demon"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "post_id": 63315545,
+        "edited": false,
+        "creation_date": 1596894307,
+        "comment_id": 111960351
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f6bbdd338a76544f0bd64d25e095c0b4?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7618814,
+            "user_type": "registered",
+            "user_id": 5777384,
+            "link": "https://stackoverflow.com/users/5777384/pushpasakthi",
+            "reputation": 91,
+            "display_name": "PushpaSakthi"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1596906510,
+        "creation_date": 1596906510,
+        "body": "<p>it seems that on pause method having unregistering type_step_counter sensor. Which will never recieves the foot step counting  Please remove following lines present in onpause method. And re-run and test your app.<\/p>\n<pre><code>    if(sensorManager.getDefaultSensor( \n                  Sensor.TYPE_STEP_COUNTER) != null){\n        sensorManager.unregisterListener(this, mLiczKrok);\n     }\n<\/code><\/pre>\n<p>Add above lines inside ondestroy() of activity.<\/p>\n<p>Note: if this context Is not suitable to you, please inform. In you project is there any reason behind unregistering foot step counter sensor in onpause method .??<\/p>\n",
+        "answer_id": 63318126,
+        "question_id": 63315545
+    }],
+    "answer_comments": {"63318126": [{
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user12585593"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 63318126,
+        "edited": false,
+        "creation_date": 1596959277,
+        "comment_id": 111973788
+    }]}
+}

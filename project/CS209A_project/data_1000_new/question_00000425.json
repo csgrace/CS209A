@@ -1,0 +1,203 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/d96cb225839f1ee822cd6921d57ab092?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3536015,
+            "user_type": "registered",
+            "user_id": 2954317,
+            "link": "https://stackoverflow.com/users/2954317/ozzymado",
+            "reputation": 998,
+            "display_name": "ozzymado",
+            "accept_rate": 90
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22872004/decrypt-method-returning-null",
+        "last_activity_date": 1396642640,
+        "creation_date": 1396641665,
+        "answer_count": 2,
+        "title": "Decrypt method returning null",
+        "body": "<p>I have this cryptography class.<\/p>\n\n<pre><code>import java.security.*;\nimport javax.crypto.*;\nimport javax.crypto.spec.*;\npublic class Crypto\n{\n    public Crypto(){\n\n    }\n\n    public static void main(String args[]){\n        Crypto crypto = new Crypto();\n        byte encrypted[] = crypto.encrypt(\"test encryption\");\n        System.out.println(encrypted);\n        String decrypted = crypto.decrypt(encrypted);\n        System.out.println(decrypted);\n\n    }\n\n    public byte[] encrypt(String input){\n        try{\n            Crypto crypto = new Crypto();\n            SecretKeySpec key = crypto.hashPhrase();\n            Cipher aes = Cipher.getInstance(\"AES/ECB/PKCS5Padding\");\n            aes.init(Cipher.ENCRYPT_MODE, key);\n            return aes.doFinal(input.getBytes());\n        }\n        catch(Exception e){\n            return null;\n        }\n    }\n\n    public SecretKeySpec hashPhrase(){\n        try{\n            String code = \"some code\";\n            MessageDigest digest = MessageDigest.getInstance(\"SHA\");\n            digest.update(code.getBytes());\n            return new SecretKeySpec(digest.digest(), 0, 16, \"AES\");\n        }\n        catch(Exception e){\n            return null;\n        }\n    }\n\n    public String decrypt(byte[] input){\n        try{\n            Crypto crypto = new Crypto();\n            SecretKeySpec key = crypto.hashPhrase();\n            Cipher aes = Cipher.getInstance(\"AES/ECB/PKCS5Padding\");\n            aes.init(Cipher.DECRYPT_MODE, key);\n            return new String(aes.doFinal(input));\n        }\n        catch(Exception e){\n            return null;\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>When I run main in this class, it works fine. I see an encrypted value, and then after the decrypt method is called I see the original input - \"test encryption.\"<\/p>\n\n<p>However, when I try to actually use the decrypt method, I run into issues. I've shortened this class a bit to only show the relevant parts.<\/p>\n\n<pre><code>public void read() throws java.io.IOException{\n    Crypto crypto = new Crypto();\n    byte[] input;\n    BufferedReader in = new BufferedReader(new FileReader(\"C:\\\\Budget\\\\data.txt\")); \n    while(in.ready()) {\n        input = in.readLine().getBytes();\n        BudgetInterface.list.add(crypto.decrypt(input)); //ArrayList of Objects\n        System.out.println(crypto.decrypt(input));\n        //BudgetInterface.list.add(in.readLine()); - artifact from version without cryptographic capability\n    }\n    in.close();\n}\n<\/code><\/pre>\n\n<p>BudgetInterface.list is an ArrayList of objects, as mentioned, and I'm trying to add the decrypted version of the input to the array, but crypto.decrypt(input) is returning for each line in the file. If I remove the cryptography element, it's able to read in lines from the file with no problem. If I don't try to decrypt, it also reads in just fine. Why does the decrypt method return null in this method, but not in the main method of the Crypto class?<\/p>\n\n<p>EDIT: The error I'm getting after getting the stack trace is <code>javax.crypto.IllegalBlockSizeException: Input length must be multiple of 16 when decrypting with padded cipher<\/code>\nI understand what this is saying, but how come this only happens when I get something encrypted from a file? The byte array that I'm reading from the file and the one I'm getting from the main method in Crypto are the same length.<\/p>\n",
+        "question_id": 22872004,
+        "tags": [
+            "java",
+            "encryption",
+            "cryptography"
+        ],
+        "score": 0,
+        "accepted_answer_id": 22872249,
+        "is_answered": true,
+        "view_count": 2733,
+        "last_edit_date": 1396642248
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521060,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872004,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/ca89cd2050b8c0c5c5cb8966dbe99b6e?s=256&d=identicon&r=PG",
+                "account_id": 2821163,
+                "user_type": "registered",
+                "user_id": 2424896,
+                "link": "https://stackoverflow.com/users/2424896/ntoskrnl",
+                "reputation": 5764,
+                "display_name": "ntoskrnl"
+            },
+            "edited": false,
+            "creation_date": 1396648294,
+            "comment_id": 34900710
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ca89cd2050b8c0c5c5cb8966dbe99b6e?s=256&d=identicon&r=PG",
+                "account_id": 2821163,
+                "user_type": "registered",
+                "user_id": 2424896,
+                "link": "https://stackoverflow.com/users/2424896/ntoskrnl",
+                "reputation": 5764,
+                "display_name": "ntoskrnl"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872004,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521060,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1396648109,
+            "comment_id": 34900641
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d96cb225839f1ee822cd6921d57ab092?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3536015,
+                "user_type": "registered",
+                "user_id": 2954317,
+                "link": "https://stackoverflow.com/users/2954317/ozzymado",
+                "reputation": 998,
+                "display_name": "ozzymado",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22872004,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521060,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1396642362,
+            "comment_id": 34897725
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521060,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "post_id": 22872004,
+            "edited": false,
+            "creation_date": 1396641785,
+            "comment_id": 34897434
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+                "account_id": 11683,
+                "user_type": "registered",
+                "user_id": 22656,
+                "link": "https://stackoverflow.com/users/22656/jon-skeet",
+                "reputation": 1521060,
+                "display_name": "Jon Skeet",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1396642640,
+            "creation_date": 1396642640,
+            "body": "<p>Aside from everything else, the most <em>fundamental<\/em> problem you've got here is that you're converting binary data to a string just using the platform default encoding, as if it's actually just text. It's not - it's binary data.<\/p>\n\n<p>If you want one line of text per encrypted input, that's fine - but you need to convert the binary data to text as base64 or something similar. Never, ever, ever treat arbitrary binary data (encrypted data, compressed data, image data, music data... basically anything other than text) as if it's just encoded text. Even when you <em>do<\/em> have encoded text, specify the encoding explicitly.<\/p>\n\n<p>Fix that - and stop using <code>BufferedReader.ready()<\/code>, preferring to call <code>readLine()<\/code> and terminate when it returns <code>null<\/code> - and you'll be in a better position. Fix the exception handling too, of course.<\/p>\n\n<p>See my <a href=\"http://msmvps.com/blogs/jon_skeet/archive/2014/01/20/diagnosing-issues-with-reversible-data-transformations.aspx\" rel=\"nofollow\">blog post about reversible transformations<\/a> for more information about diagnosing this sort of thing, and <a href=\"http://marcgravell.blogspot.co.uk/2013/02/how-many-ways-can-you-mess-up-io.html\" rel=\"nofollow\">Marc Gravell's post about IO<\/a> for more about IO bugs.<\/p>\n",
+            "answer_id": 22872249,
+            "question_id": 22872004
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5527d6bb829d75befe914163f5e8cf60?s=256&d=identicon&r=PG",
+                "account_id": 1441481,
+                "user_type": "registered",
+                "user_id": 1361506,
+                "link": "https://stackoverflow.com/users/1361506/azurefrog",
+                "reputation": 10995,
+                "display_name": "azurefrog"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1396641926,
+            "creation_date": 1396641926,
+            "body": "<p>Look at what your decrypt method is doing:<\/p>\n\n<pre><code>    catch(Exception e){\n        return null;\n    }\n<\/code><\/pre>\n\n<p>If you aren't going to handle the exception, you shouldn't catch it.\nOr at the <em>very<\/em> least, you should print the stack trace for the exception:<\/p>\n\n<pre><code>    catch(Exception e){\n        e.printStackTrace();\n    }\n<\/code><\/pre>\n",
+            "answer_id": 22872067,
+            "question_id": 22872004
+        }
+    ],
+    "answer_comments": {"22872249": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=256&d=identicon&r=PG",
+            "account_id": 11683,
+            "user_type": "registered",
+            "user_id": 22656,
+            "link": "https://stackoverflow.com/users/22656/jon-skeet",
+            "reputation": 1521060,
+            "display_name": "Jon Skeet",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 22872249,
+        "reply_to_user": {
+            "profile_image": "https://www.gravatar.com/avatar/d96cb225839f1ee822cd6921d57ab092?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3536015,
+            "user_type": "registered",
+            "user_id": 2954317,
+            "link": "https://stackoverflow.com/users/2954317/ozzymado",
+            "reputation": 998,
+            "display_name": "ozzymado",
+            "accept_rate": 90
+        },
+        "edited": false,
+        "creation_date": 1396643785,
+        "comment_id": 34898464
+    }]}
+}

@@ -1,0 +1,120 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ZFxwo.jpg?s=256",
+            "account_id": 4628731,
+            "user_type": "registered",
+            "user_id": 3751810,
+            "link": "https://stackoverflow.com/users/3751810/jmb",
+            "reputation": 139,
+            "display_name": "jmb",
+            "accept_rate": 29
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/33434045/how-to-bypass-https-sslhandshakeexception-with-tomee",
+        "last_activity_date": 1446341694,
+        "creation_date": 1446201722,
+        "answer_count": 1,
+        "title": "How to bypass Https SSLHandshakeException with Tomee",
+        "body": "<p>I am trying to invoke a <code>WS<\/code> over <code>SSL<\/code>, from a <code>tomee 1.6 server<\/code>, but I get a <code>SSLHandshakeError<\/code>. The problem is that the certificate is self signed, and is not recognized by my <code>JVM<\/code>. As it is only for test purpose, and not production, I have been asked to bypass the certificate control.\nI read a lot of stuff about how to proceed, and I have written that code :<\/p>\n\n<p>a class <strong>NaiveSSLContext<\/strong> :<\/p>\n\n<pre><code>package fr.csf.ssl;\n\nimport java.security.NoSuchAlgorithmException;\nimport java.security.NoSuchProviderException;\nimport java.security.Provider;\nimport java.security.cert.X509Certificate;\n\nimport javax.net.ssl.SSLContext;\nimport javax.net.ssl.TrustManager;\n\nimport javax.net.ssl.X509TrustManager;\n\n/**\n * A factory class which creates an {@link SSLContext} that\n * naively accepts all certificates without verification.\n */\npublic class NaiveSSLContext\n{\n    private NaiveSSLContext()\n    {}\n\n    /**\n     * Get an SSLContext that implements the specified secure\n     * socket protocol and naively accepts all certificates\n     * without verification.\n     */\n    public static SSLContext getInstance( String protocol) throws NoSuchAlgorithmException\n    {\n        SSLContext sslCtx = SSLContext.getInstance( protocol);\n        init( sslCtx);\n        return sslCtx;\n    }\n\n    /**\n     * Get an SSLContext that implements the specified secure\n     * socket protocol and naively accepts all certificates\n     * without verification.\n     */\n    public static SSLContext getInstance( String protocol, Provider provider) throws NoSuchAlgorithmException\n    {\n        SSLContext sslCtx = SSLContext.getInstance( protocol, provider);\n        init( sslCtx);\n        return sslCtx;\n    }\n\n    /**\n     * Get an SSLContext that implements the specified secure\n     * socket protocol and naively accepts all certificates\n     * without verification.\n     */\n    public static SSLContext getInstance( String protocol, String provider) throws NoSuchAlgorithmException, NoSuchProviderException\n    {\n        SSLContext sslCtx = SSLContext.getInstance( protocol, provider);\n        init( sslCtx);\n        return sslCtx;\n    }\n\n    /**\n     * Set NaiveTrustManager to the given context.\n     */\n    private static void init( SSLContext context)\n    {\n        try\n        {\n            // Set NaiveTrustManager.\n            context.init( null, new TrustManager[] { new NaiveTrustManager() }, new java.security.SecureRandom());\n            System.out.println( \"------------- Initialisation du NaiveSSLContext ---------------------\");\n        }\n        catch( java.security.KeyManagementException e)\n        {\n            throw new RuntimeException( \"Failed to initialize an SSLContext.\", e);\n        }\n    }\n\n    /**\n     * A {@link TrustManager} which trusts all certificates naively.\n     */\n    private static class NaiveTrustManager implements X509TrustManager\n    {\n        @Override\n        public X509Certificate[] getAcceptedIssuers()\n        {\n            System.out.println( \"------------- NaiveTrustManager.getAcceptedIssuers() ---------------------\");\n            return null;\n        }\n\n        @Override\n        public void checkClientTrusted( X509Certificate[] certs, String authType)\n        {\n            System.out.println( \"------------- NaiveTrustManager.checkClientTrusted( \" + certs.toString() + \", \" + authType\n                    + \") ---------------------\");\n        }\n\n        @Override\n        public void checkServerTrusted( X509Certificate[] certs, String authType)\n        {\n            System.out.println( \"------------- NaiveTrustManager.checkServerTrusted( \" + certs.toString() + \", \" + authType\n                    + \") ---------------------\");\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>and another class <strong>NaiveSSLSocketFactory<\/strong> :<\/p>\n\n<pre><code>package fr.csf.ssl;\n\nimport java.io.IOException;\nimport java.net.InetAddress;\nimport java.net.Socket;\nimport java.net.UnknownHostException;\nimport java.security.NoSuchAlgorithmException;\n\npublic class NaiveSSLSocketFactory extends javax.net.ssl.SSLSocketFactory\n{\n    private javax.net.ssl.SSLSocketFactory factory;\n\n    public NaiveSSLSocketFactory() throws NoSuchAlgorithmException\n    {\n        javax.net.ssl.SSLContext sslCtx = NaiveSSLContext.getInstance( \"SSL\");\n        factory = sslCtx.getSocketFactory();\n    }\n\n    private final String[] enabledProtocols = new String[]\n    { \"SSLv3\", \"TLSv1\" };\n\n    @Override\n    public Socket createSocket( Socket s, String host, int port, boolean autoClose) throws IOException\n    {\n        Socket socket = factory.createSocket( s, host, port, autoClose);\n        ((javax.net.ssl.SSLSocket) socket).setEnabledProtocols( enabledProtocols);\n        return socket;\n    }\n\n    @Override\n    public Socket createSocket( String host, int port) throws IOException, UnknownHostException\n    {\n        Socket socket = factory.createSocket( host, port);\n        ((javax.net.ssl.SSLSocket) socket).setEnabledProtocols( enabledProtocols);\n        return socket;\n    }\n\n    @Override\n    public Socket createSocket( InetAddress host, int port) throws IOException\n    {\n        Socket socket = factory.createSocket( host, port);\n        ((javax.net.ssl.SSLSocket) socket).setEnabledProtocols( enabledProtocols);\n        return socket;\n    }\n\n    @Override\n    public Socket createSocket( String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException\n    {\n        Socket socket = factory.createSocket( host, port, localHost, localPort);\n        ((javax.net.ssl.SSLSocket) socket).setEnabledProtocols( enabledProtocols);\n        return socket;\n    }\n\n    @Override\n    public Socket createSocket( InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException\n    {\n        Socket socket = factory.createSocket( address, port, localAddress, localPort);\n        ((javax.net.ssl.SSLSocket) socket).setEnabledProtocols( enabledProtocols);\n        return socket;\n    }\n\n    @Override\n    public String[] getDefaultCipherSuites()\n    {\n        String[] cipherSuites = factory.getDefaultCipherSuites();\n        return cipherSuites;\n    }\n\n    @Override\n    public String[] getSupportedCipherSuites()\n    {\n        String[] cipherSuites = factory.getSupportedCipherSuites();\n        return cipherSuites;\n    }\n}\n<\/code><\/pre>\n\n<p>The problem is that I can't find out how to make the JVM use my Naive* classes instead of the default ones. I have tried different methods, but neither of them work :<\/p>\n\n<p>First try :<\/p>\n\n<pre><code>javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory( new NaiveSSLSocketFactory());\n<\/code><\/pre>\n\n<p>My log traces in the checkClientTruted methods are never displayed. It seems that my NaiveSSLSocketFactory is never called.<\/p>\n\n<p>2nd try :<\/p>\n\n<pre><code>java.security.Security.setProperty( \"ssl.SocketFactory.provider\", new NaiveSSLSocketFactory().getClass().getName());\n<\/code><\/pre>\n\n<p>I experienced a ClassNotFoundException due to a ClassLoader problem, but after this problem was fixed, the same problem remains. <\/p>\n\n<p>I eventually found a blog where it was said that CXF client had to do a little more configuration stuff :<\/p>\n\n<pre><code>&lt;http-conf:conduit name=\"*.http-conduit\" &gt;\n    &lt;http-conf:tlsClientParameters \n        useHttpsURLConnectionDefaultSslSocketFactory=\"true\"     \n    /&gt;\n&lt;/http-conf:conduit&gt;\n<\/code><\/pre>\n\n<p>As I use a Tomee1.6 server, my program is a CXF client. So that must be the solution. But where do I have to write this configuration properties ? I can't find any xml file in Tomee, related with CXF. There's only e cxf.properties file, which is nearly empty.<\/p>\n",
+        "question_id": 33434045,
+        "tags": [
+            "java",
+            "web-services",
+            "ssl",
+            "cxf",
+            "apache-tomee"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 935,
+        "last_edit_date": 1446203467
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ZFxwo.jpg?s=256",
+                "account_id": 4628731,
+                "user_type": "registered",
+                "user_id": 3751810,
+                "link": "https://stackoverflow.com/users/3751810/jmb",
+                "reputation": 139,
+                "display_name": "jmb",
+                "accept_rate": 29
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 33434045,
+            "reply_to_user": {
+                "profile_image": "https://graph.facebook.com/100007829376909/picture?type=large",
+                "account_id": 4763924,
+                "user_type": "registered",
+                "user_id": 3850595,
+                "link": "https://stackoverflow.com/users/3850595/jordi-castilla",
+                "reputation": 27069,
+                "display_name": "Jordi Castilla",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1446210217,
+            "comment_id": 54661252
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/100007829376909/picture?type=large",
+                "account_id": 4763924,
+                "user_type": "registered",
+                "user_id": 3850595,
+                "link": "https://stackoverflow.com/users/3850595/jordi-castilla",
+                "reputation": 27069,
+                "display_name": "Jordi Castilla",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 33434045,
+            "edited": false,
+            "creation_date": 1446203496,
+            "comment_id": 54657181
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/n7uAEtPN.jpg?s=256",
+            "account_id": 22466,
+            "user_type": "registered",
+            "user_id": 55452,
+            "link": "https://stackoverflow.com/users/55452/dave-l",
+            "reputation": 11279,
+            "display_name": "Dave L.",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1446341694,
+        "creation_date": 1446341694,
+        "body": "<p>First, Tomcat isn't involved with your <em>consumption<\/em> of a web service - in fact it's really not involved with with any outbound connections your application is making.<\/p>\n\n<p>I know of two ways to achieve your desired results provided by CXF in a way that won't affect any other outbound SSL connections running on the same JVM: <\/p>\n\n<ol>\n<li>add the self-signed certificate to the CXF client's conduit trust\nstore, or <\/li>\n<li>install a \"do-nothing\" trust manager to to the CXF\nclient's TLS parameters<\/li>\n<\/ol>\n\n<p>The first method is preferable as the second will trust any endpoint your client connects with.<\/p>\n\n<p>To implement the first method, create a key store containing the certificate you wish to trust (and for good measure, include any intermediary certificates). Then add this trust store as outlined in CXF handbook section <a href=\"http://cxf.apache.org/docs/client-http-transport-including-ssl-support.html#ClientHTTPTransport(includingSSLsupport)-ConfiguringSSLSupport\" rel=\"nofollow noreferrer\">Configuring SSL Support<\/a>. Your conduit configuration will look something like this: <\/p>\n\n<pre><code>&lt;http:conduit name=\"{http://apache.org/hello_world}HelloWorld.http-conduit\"&gt;\n\n  &lt;http:tlsClientParameters&gt;\n    &lt;sec:trustManagers&gt;\n      &lt;sec:keyStore type=\"JKS\" password=\"password\"\n                  file=\"my/file/dir/Truststore.jks\"/&gt;\n    &lt;/sec:trustManagers&gt;\n  &lt;/http:tlsClientParameters&gt;\n  &lt;http:client AutoRedirect=\"true\" Connection=\"Keep-Alive\"/&gt;\n&lt;/http:conduit&gt;\n<\/code><\/pre>\n\n<p>Note that the conduit name in the example above is obviously just an example. See <a href=\"https://stackoverflow.com/questions/21120264/https-url-hostname-not-matching-common-name-cn-despite-setting-disablecncheck/21208001#21208001\">the update to my answer here<\/a> regarding another question as how to specify the conduit name. Also note that I did not include a cipher suite filter as I believe it will default to some set of values, which is potentially unsafe if you're using Java 6 or older .. but that's a whole other topic.<\/p>\n\n<p>Also, you can eschew Spring configuration of CXF entirely and do all of the above programmatically using CXF client APIs.<\/p>\n\n<p>I also highly suggest using a tool like <a href=\"http://keystore-explorer.sourceforge.net/\" rel=\"nofollow noreferrer\">KeyStore Explorer<\/a> to extract certificate (and intermediaries) from the target endpoint and import them into your new trust store. <\/p>\n\n<p>Finally, I would like to point out, in reference to your initial solution, the danger of using JVM-wide installation of things like SSL socket factories and trust managers as supported by the JDK API. There is a possibility of perilous consequences of doing so when running inside of a container supporting multiple applications: you can subvert the security profile of other applications. One of the benefits of using a framework like CXF is that it provides means to customize SSL/TLS configurations for each application client (or server) instance.<\/p>\n",
+        "answer_id": 33458374,
+        "question_id": 33434045,
+        "last_edit_date": 1495540341
+    }],
+    "answer_comments": {"33458374": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ZFxwo.jpg?s=256",
+            "account_id": 4628731,
+            "user_type": "registered",
+            "user_id": 3751810,
+            "link": "https://stackoverflow.com/users/3751810/jmb",
+            "reputation": 139,
+            "display_name": "jmb",
+            "accept_rate": 29
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 33458374,
+        "edited": false,
+        "creation_date": 1446451725,
+        "comment_id": 54731631
+    }]}
+}

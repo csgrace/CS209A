@@ -1,0 +1,184 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8c05288abe373bddf77428a4544642b0?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 13114893,
+            "user_type": "registered",
+            "user_id": 12765160,
+            "link": "https://stackoverflow.com/users/12765160/kiley",
+            "reputation": 49,
+            "display_name": "Kiley"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59869918/javaive-created-an-adding-class-and-it-compiles-but-nothing-gets-added-to-th",
+        "last_activity_date": 1579747589,
+        "creation_date": 1579737684,
+        "answer_count": 1,
+        "title": "[java]I&#39;ve created an adding class and it compiles but nothing get&#39;s added to the array list",
+        "body": "<p>I created multiple classes and part of what I want to do is create a solar system and allow users to input information about planets and continuously add them to an array list, and when they are done adding planets, displays a summary of their solar system. \nI wanted to display which planet, based on the orbital radius they inputted, is closest to the sun. So to make this easier I decided to create an addPlanet() method that will scan through an array list and add the new planet in the correct order depending on the orbital radius. <\/p>\n\n<pre><code>public void addPlanet(Planet p) {\n  if (solarSystem.size() == 0) { //solarSystem is the array list of planets\n     solarSystem.add(p);\n  } else {\n     for (int i = 0; i &lt;= solarSystem.size(); i++) {\n        if (p.getOrbital() &lt; solarSystem.get(i).getOrbital()) {\n           solarSystem.add(i, p);\n           break;\n        }  \n     }\n  }\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>I already constructed three planets to start with and then prompt the user to input information of additional planets. However, when I print the summary of the solar system, the additional user inputted planets don't show up. \nThe summary code is: <\/p>\n\n<pre><code>  System.out.println(solarSystem.toString());\n  System.out.println(\"The planet closest to the sun is: \" + solarSystem.getClosest());\n  System.out.println(\"The total mass of your planets in your solar system is: \" + solarSystem.totalMass() + \" Earth mass\");\n<\/code><\/pre>\n\n<p>Here is my full Solar System class <\/p>\n\n<pre><code>   import java.util.*;\n   public class SolarSystem {\n   private static ArrayList&lt;Planet&gt; solarSystem;\n   private String name;\n\n   //Create an array list to add planets \n   public SolarSystem() {\n      this.solarSystem = new ArrayList&lt;Planet&gt;(); \n   }\n\n   //print out the Solar System\n   public String toString() {\n      String system = \"The solar system: \";\n      for (Planet n : solarSystem) { \n         system += n.getName() + \" \"; \n      }\n      return system;\n   }\n\n   public void addPlanet(Planet p) {\n      if (solarSystem.size() == 0) {\n         solarSystem.add(p);\n      } else {\n         for (int i = 0; i &lt;= solarSystem.size(); i++) {\n            if (p.getOrbital() &lt; solarSystem.get(i).getOrbital()) {\n               solarSystem.add(i, p);\n               break;\n            }  \n         }\n      }\n   }\n\n   public String getClosest() {\n      return solarSystem.get(0).getName();\n   }\n\n   public double totalMass() {\n      double mass = 0;\n      for (Planet p : solarSystem) {\n         mass += p.getMass();\n      }\n      return mass;   \n   }\n}\n<\/code><\/pre>\n\n<p>The client class where it takes user input is: <\/p>\n\n<pre><code>import java.util.*;\npublic class Astronomer {\n   public static void main(String[] args) {\n      Scanner scan = new Scanner(System.in);\n      SolarSystem solarSystem = new SolarSystem();\n      Planet earth = new Planet(1, 149.6, 23.5, \"Earth\", 1);\n      solarSystem.addPlanet(earth);\n      System.out.println(earth.toString());\n\n      Planet mercury = new Planet(0.055, 41.7, 2.1, \"Mercury\", 0.24);\n      solarSystem.addPlanet(mercury);\n      System.out.println(mercury.toString());\n\n      Planet mango = new Planet(0.7, 5.2, \"Mango\", 0.7);\n      mango.setOrbital(53.4);\n      solarSystem.addPlanet(mango);\n      System.out.println(mango.toString());\n\n\n\n      System.out.println(\"The closest planet to the Sun is \" + solarSystem.getClosest());\n      System.out.println(\"Would you like to add additional planets? \");\n      String add = scan.next(); \n      while(add.substring(0, 1).equalsIgnoreCase(\"y\")) {\n         System.out.println(\"Enter the name of the planet: \");\n         String name = scan.next(); \n         System.out.println(\"Enter the mass of the planet in terms of Earth mass: \");\n         double mass = scan.nextDouble(); \n         System.out.println(\"Enter the orbital radius in million km: \");\n         double radius = scan.nextDouble();\n         System.out.println(\"Enter the measure of axis tilt in degrees: \");\n         double axis = scan.nextDouble(); \n         System.out.println(\"Enter the period of the planet in years: \"); \n         double period = scan.nextDouble();\n         Planet a = new Planet(mass, radius, axis, name, axis); //how to make it so it creates a new planet and not overwrite planet already created\n         System.out.println(a.toString());\n         System.out.println(\"Would you like to add additional planets? \");\n         add = scan.next(); \n      }\n      System.out.println(solarSystem.toString());\n      System.out.println(\"The planet closest to the sun is: \" + solarSystem.getClosest());\n      System.out.println(\"The total mass of your planets in your solar system is: \" + solarSystem.totalMass() + \" Earth mass\");\n      System.out.println(\"Goodbye!\"); \n      }         \n }\n<\/code><\/pre>\n\n<p>How could I fix my code so that when a user inputs a planet, it actually get's added to my array list of planets? <\/p>\n\n<p>SOLUTION: I forgot to add<\/p>\n\n<pre><code>solarSystem.addPlanet(a);\n<\/code><\/pre>\n\n<p>after creating the new planet. <\/p>\n",
+        "question_id": 59869918,
+        "tags": [
+            "java",
+            "class",
+            "arraylist",
+            "user-input"
+        ],
+        "score": -1,
+        "accepted_answer_id": 59870818,
+        "is_answered": true,
+        "view_count": 273,
+        "last_edit_date": 1579747589
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8c05288abe373bddf77428a4544642b0?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13114893,
+                "user_type": "registered",
+                "user_id": 12765160,
+                "link": "https://stackoverflow.com/users/12765160/kiley",
+                "reputation": 49,
+                "display_name": "Kiley"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59869918,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                "account_id": 6780825,
+                "user_type": "registered",
+                "user_id": 5221149,
+                "link": "https://stackoverflow.com/users/5221149/andreas",
+                "reputation": 160084,
+                "display_name": "Andreas"
+            },
+            "edited": false,
+            "creation_date": 1579741748,
+            "comment_id": 105871637
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8c05288abe373bddf77428a4544642b0?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13114893,
+                "user_type": "registered",
+                "user_id": 12765160,
+                "link": "https://stackoverflow.com/users/12765160/kiley",
+                "reputation": 49,
+                "display_name": "Kiley"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59869918,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2Vx3A.jpg?s=256",
+                "account_id": 2345668,
+                "user_type": "registered",
+                "user_id": 2055998,
+                "link": "https://stackoverflow.com/users/2055998/pm-77-1",
+                "reputation": 13449,
+                "display_name": "PM 77-1",
+                "accept_rate": 68
+            },
+            "edited": false,
+            "creation_date": 1579741646,
+            "comment_id": 105871609
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                "account_id": 6780825,
+                "user_type": "registered",
+                "user_id": 5221149,
+                "link": "https://stackoverflow.com/users/5221149/andreas",
+                "reputation": 160084,
+                "display_name": "Andreas"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59869918,
+            "edited": false,
+            "creation_date": 1579738216,
+            "comment_id": 105870909
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                "account_id": 6780825,
+                "user_type": "registered",
+                "user_id": 5221149,
+                "link": "https://stackoverflow.com/users/5221149/andreas",
+                "reputation": 160084,
+                "display_name": "Andreas"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59869918,
+            "edited": false,
+            "creation_date": 1579738073,
+            "comment_id": 105870871
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2Vx3A.jpg?s=256",
+                "account_id": 2345668,
+                "user_type": "registered",
+                "user_id": 2055998,
+                "link": "https://stackoverflow.com/users/2055998/pm-77-1",
+                "reputation": 13449,
+                "display_name": "PM 77-1",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59869918,
+            "edited": false,
+            "creation_date": 1579737869,
+            "comment_id": 105870827
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/10155343202040931/picture?type=large",
+            "account_id": 9862178,
+            "user_type": "registered",
+            "user_id": 7304758,
+            "link": "https://stackoverflow.com/users/7304758/jay-steel",
+            "reputation": 36,
+            "display_name": "Jay Steel"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1579746264,
+        "creation_date": 1579746264,
+        "body": "<p>looking at the logic in the add planet<\/p>\n\n<p>the first thing, which was mentioned before, is your for loop is prone to an <code>IndexOutOfBoundsException<\/code>, so first change the &lt;= to a &lt; like below, the reason for this, size() returns the amount of objects in the array, but the index starts from 0, so for an array of 3 objects, the max index would only be 2.<\/p>\n\n<p>when you're adding the new planet, your if statement limits additional planets to only add the planet if it has a smaller orbital, if it has a larger orbital than all other planets it will never get added, I can see why you've done it this way, and that's to add the planet in into the array to keep them in size order, but you need to account for adding if it's larger too.<\/p>\n\n<p>To do this I'd suggest the following, remove the break from the if, and replace this with a return (if it adds a planet, the method no longer has any reason to run), and after the for loop, put in an addPlanet call, which will add it at the end should the method still be running. See modified code below, I hope this helps.<\/p>\n\n<pre><code>public void addPlanet(Planet p) {\n  if (solarSystem.size() == 0) {\n     solarSystem.add(p);\n  } else {\n     for (int i = 0; i &lt; solarSystem.size(); i++) {\n        if (p.getOrbital() &lt; solarSystem.get(i).getOrbital()) {\n           solarSystem.add(i, p);\n           return; // adding planet is complete so we will exit the method here\n        }  \n     }\n     // if we're here, the planet must be larger than all others\n     // so we will add the planet at the end of the array\n     solarSystem.add(p);\n  }\n}\n<\/code><\/pre>\n",
+        "answer_id": 59870818,
+        "question_id": 59869918
+    }],
+    "answer_comments": {"59870818": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/10155343202040931/picture?type=large",
+            "account_id": 9862178,
+            "user_type": "registered",
+            "user_id": 7304758,
+            "link": "https://stackoverflow.com/users/7304758/jay-steel",
+            "reputation": 36,
+            "display_name": "Jay Steel"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 59870818,
+        "reply_to_user": {
+            "profile_image": "https://www.gravatar.com/avatar/8c05288abe373bddf77428a4544642b0?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 13114893,
+            "user_type": "registered",
+            "user_id": 12765160,
+            "link": "https://stackoverflow.com/users/12765160/kiley",
+            "reputation": 49,
+            "display_name": "Kiley"
+        },
+        "edited": false,
+        "creation_date": 1579783157,
+        "comment_id": 105886854
+    }]}
+}

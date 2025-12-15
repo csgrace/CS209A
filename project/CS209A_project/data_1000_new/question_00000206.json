@@ -1,0 +1,78 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/tOdum.jpg?s=256",
+            "account_id": 3229059,
+            "user_type": "registered",
+            "user_id": 2724741,
+            "link": "https://stackoverflow.com/users/2724741/wujek-samo-z%c5%82o",
+            "reputation": 56,
+            "display_name": "Wujek Samo Zło"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/20093724/entity-manager-lifecycle-in-weblogic",
+        "last_activity_date": 1517718887,
+        "creation_date": 1384944303,
+        "answer_count": 0,
+        "title": "Entity manager lifecycle in Weblogic",
+        "body": "<p>I have EAR application written with EJB 3.1, where I'm using JPA 2.0.\nPersistance unit is configured to use JTA<\/p>\n\n<pre><code>&lt;persistence-unit name=\"JPACommonParameters\" transaction-type=\"JTA\"&gt;\n&lt;provider&gt;org.eclipse.persistence.jpa.PersistenceProvider&lt;/provider&gt;\n<\/code><\/pre>\n\n<p>I've created simple deployment, where in EJB I inject Entity manager just like this<\/p>\n\n<pre><code>@PersistenceContext(unitName = \"JPACommonParameters\")\nprotected EntityManager em;\n<\/code><\/pre>\n\n<p>Using this jpa I called simple query using createNamedQuery.\nApplication is deployed on WLS 12.1.1.0, managed server. \nAfter first deployment it is working. Everything is fine. \nAfter updating the same application without any change I've receiving ClastCastException as object returned from query is not the same as in application.<\/p>\n\n<pre><code>result = (ParamDef) em.createNamedQuery(\"ParamDef.findActiveParamDef\").\ngetSingleResult();\n<\/code><\/pre>\n\n<p>After long investigation I've found, that problem is with classloader. Object returned from entity manager is loaded by different classloader(Classloader used during first deployment) than object ParamDef in bracket I'm casting.<\/p>\n\n<p>Everything is working fine when I will restart manged wls server. \nMy question is: How to configure application of wls to initialize entityManger every redeploy of application on server to get it working without restart. <\/p>\n\n<p>Here is my pom file<\/p>\n\n<pre><code>&lt;project xmlns=\"http://maven.apache.org/POM/4.0.0\"   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\"&gt;\n&lt;parent&gt;\n    &lt;artifactId&gt;ofs-direct-services&lt;/artifactId&gt;\n    &lt;groupId&gt;com.oproc.first.app&lt;/groupId&gt;\n    &lt;version&gt;1.1&lt;/version&gt;\n&lt;/parent&gt;\n\n&lt;artifactId&gt;IT-app&lt;/artifactId&gt;\n\n&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;\n&lt;packaging&gt;war&lt;/packaging&gt;\n&lt;name&gt;IT-app Integ. Tests for app&lt;/name&gt;\n&lt;url&gt;http://maven.apache.org&lt;/url&gt;\n&lt;properties&gt;\n    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;\n    &lt;cxf.version&gt;2.2.3&lt;/cxf.version&gt;\n&lt;/properties&gt;\n&lt;dependencyManagement&gt;\n    &lt;dependencies&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.jboss.arquillian&lt;/groupId&gt;\n        &lt;artifactId&gt;arquillian-bom&lt;/artifactId&gt;\n        &lt;version&gt;1.1.1.Final&lt;/version&gt;\n        &lt;scope&gt;import&lt;/scope&gt;\n        &lt;type&gt;pom&lt;/type&gt;\n    &lt;/dependency&gt;\n    &lt;/dependencies&gt;\n&lt;/dependencyManagement&gt;\n&lt;dependencies&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.jboss.spec&lt;/groupId&gt;\n        &lt;artifactId&gt;jboss-javaee-6.0&lt;/artifactId&gt;\n        &lt;version&gt;1.0.0.Final&lt;/version&gt;\n        &lt;type&gt;pom&lt;/type&gt;\n        &lt;scope&gt;provided&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.jboss.arquillian.junit&lt;/groupId&gt;\n        &lt;artifactId&gt;arquillian-junit-container&lt;/artifactId&gt;\n        &lt;scope&gt;test&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.jboss.arquillian.container&lt;/groupId&gt;\n        &lt;artifactId&gt;arquillian-wls-remote-12.1&lt;/artifactId&gt;\n        &lt;version&gt;1.0.0.Alpha2&lt;/version&gt;\n        &lt;scope&gt;test&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;org.jboss.weld&lt;/groupId&gt;\n        &lt;artifactId&gt;weld-core&lt;/artifactId&gt;\n        &lt;version&gt;1.1.5.Final&lt;/version&gt;\n        &lt;scope&gt;test&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;junit&lt;/groupId&gt;\n        &lt;artifactId&gt;junit&lt;/artifactId&gt;\n        &lt;scope&gt;test&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;log4j&lt;/groupId&gt;\n        &lt;artifactId&gt;log4j&lt;/artifactId&gt;\n        &lt;scope&gt;provided&lt;/scope&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first.app&lt;/groupId&gt;\n        &lt;artifactId&gt;customer-app-services&lt;/artifactId&gt;\n        &lt;version&gt;1.1&lt;/version&gt;\n        &lt;type&gt;ejb&lt;/type&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first.common.parameters&lt;/groupId&gt;\n        &lt;artifactId&gt;common-parameters-services&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;\n        &lt;type&gt;ejb&lt;/type&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first.common.parameters&lt;/groupId&gt;\n        &lt;artifactId&gt;common-parameters-api&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first.common.parameters&lt;/groupId&gt;\n        &lt;artifactId&gt;common-parameters-db&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first.common.parameters&lt;/groupId&gt;\n        &lt;artifactId&gt;common-parameters-services&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first&lt;/groupId&gt;\n        &lt;artifactId&gt;ejb-tuxedo-connector-ejb&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;  \n        &lt;type&gt;ejb&lt;/type&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first&lt;/groupId&gt;\n        &lt;artifactId&gt;ejb-tuxedo-connector-client&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;  \n        &lt;type&gt;jar&lt;/type&gt;\n    &lt;/dependency&gt;\n    &lt;dependency&gt;\n        &lt;groupId&gt;com.oproc.first&lt;/groupId&gt;\n        &lt;artifactId&gt;db4b-db&lt;/artifactId&gt;\n        &lt;version&gt;1.0&lt;/version&gt;\n        &lt;type&gt;jar&lt;/type&gt;\n    &lt;/dependency&gt;\n&lt;/dependencies&gt;\n&lt;profiles&gt;\n    &lt;profile&gt;\n        &lt;id&gt;no_integration_testing&lt;/id&gt;\n        &lt;activation&gt;\n            &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;\n        &lt;/activation&gt;\n        &lt;build&gt;\n            &lt;plugins&gt;\n                &lt;plugin&gt;\n                    &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;\n                    &lt;version&gt;2.12&lt;/version&gt;\n                    &lt;executions&gt;\n                        &lt;execution&gt;\n                            &lt;id&gt;default-test&lt;/id&gt;\n                            &lt;configuration&gt;\n                                &lt;excludes&gt;\n                                    &lt;exclude&gt;**/*Test.java&lt;/exclude&gt;\n                                &lt;/excludes&gt;\n                                &lt;skipTests&gt;true&lt;/skipTests&gt;\n                            &lt;/configuration&gt;\n                        &lt;/execution&gt;\n                    &lt;/executions&gt;\n                &lt;/plugin&gt;\n            &lt;/plugins&gt;\n        &lt;/build&gt;\n    &lt;/profile&gt;\n    &lt;profile&gt;\n        &lt;id&gt;integration_testing&lt;/id&gt;\n        &lt;build&gt;\n            &lt;plugins&gt;\n                &lt;plugin&gt;\n                    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;\n                    &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;\n                    &lt;version&gt;2.3.2&lt;/version&gt;\n                    &lt;configuration&gt;\n                        &lt;source&gt;1.6&lt;/source&gt;\n                        &lt;target&gt;1.6&lt;/target&gt;\n                        &lt;compilerArguments&gt;\n                            &lt;endorseddirs&gt;${project.build.directory}/endorsed&lt;/endorseddirs&gt;\n                        &lt;/compilerArguments&gt;\n                    &lt;/configuration&gt;\n                &lt;/plugin&gt;\n                &lt;plugin&gt;\n                    &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;\n                    &lt;version&gt;2.12&lt;/version&gt;\n                    &lt;executions&gt;\n                        &lt;execution&gt;\n                            &lt;id&gt;surefire-it&lt;/id&gt;\n                            &lt;phase&gt;integration-test&lt;/phase&gt;\n                            &lt;goals&gt;\n                                &lt;goal&gt;test&lt;/goal&gt;\n                            &lt;/goals&gt;\n                            &lt;configuration&gt;\n                                &lt;skipTests&gt;false&lt;/skipTests&gt;\n                            &lt;/configuration&gt;\n                        &lt;/execution&gt;\n                    &lt;/executions&gt;\n                &lt;/plugin&gt;\n            &lt;/plugins&gt;\n        &lt;/build&gt;\n    &lt;/profile&gt;\n&lt;/profiles&gt;\n&lt;/project&gt;\n<\/code><\/pre>\n",
+        "question_id": 20093724,
+        "tags": [
+            "java",
+            "jpa-2.0",
+            "jta",
+            "weblogic12c"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 296,
+        "last_edit_date": 1517718887
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/tOdum.jpg?s=256",
+                "account_id": 3229059,
+                "user_type": "registered",
+                "user_id": 2724741,
+                "link": "https://stackoverflow.com/users/2724741/wujek-samo-z%c5%82o",
+                "reputation": 56,
+                "display_name": "Wujek Samo Zło"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20093724,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/f44nE.jpg?s=256",
+                "account_id": 1912589,
+                "user_type": "registered",
+                "user_id": 1725975,
+                "link": "https://stackoverflow.com/users/1725975/sym-sym",
+                "reputation": 3606,
+                "display_name": "Sym-Sym"
+            },
+            "edited": false,
+            "creation_date": 1385710283,
+            "comment_id": 30255391
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/f44nE.jpg?s=256",
+                "account_id": 1912589,
+                "user_type": "registered",
+                "user_id": 1725975,
+                "link": "https://stackoverflow.com/users/1725975/sym-sym",
+                "reputation": 3606,
+                "display_name": "Sym-Sym"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 20093724,
+            "edited": false,
+            "creation_date": 1385660037,
+            "comment_id": 30240738
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

@@ -1,0 +1,346 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4110740,
+            "user_type": "registered",
+            "user_id": 3373589,
+            "link": "https://stackoverflow.com/users/3373589/user3373589",
+            "reputation": 13,
+            "display_name": "user3373589",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22139372/extract-all-cell-references-in-excel-with-regex-in-java",
+        "last_activity_date": 1393829508,
+        "creation_date": 1393824902,
+        "answer_count": 2,
+        "title": "Extract all cell references in excel with regex in java",
+        "body": "<p>have excel data and formulars like:<\/p>\n\n<ul>\n<li>(S10+S14+S18+S22+S26+S30+S34)<\/li>\n<li>E10+E11+SUM(E10;E14:E17)*E18-IF(E19&lt;1,E20, E21)<\/li>\n<li>SUM(E14:E19)<\/li>\n<li>S16*S15<\/li>\n<\/ul>\n\n<p>and so on.<\/p>\n\n<p>I want to get all the cell references out of the strings.\nLike in this Example: \"E10+E11+SUM(E10;E14:E17)*E18-IF(E19&lt;1,E20, E21)\"<\/p>\n\n<p><strong>I want the output substring like \"E10 E11 ... E21\"<\/strong> or separated with \",\".<\/p>\n\n<p>I tested a lot with regex but can't get a valid result.\nI am using this code:<\/p>\n\n<pre><code>String formulaString = \"E10+E11+SUM(E10;E14:E17)*E18-IF(E19&lt;1,E20, E21)\";\nPattern pattern = Pattern.compile(\"REGEX\");\nMatcher matcher = pattern.matcher(formulaString);\n<\/code><\/pre>\n\n<p>I have tried the following regex:<\/p>\n\n<p><a href=\"http://social.msdn.microsoft.com/Forums/en-US/815e819c-f0f2-4a53-8407-98b0f7f116e2/regex-to-extract-list-of-cell-references-from-excel-formula?forum=csharpgeneral\" rel=\"nofollow\">http://social.msdn.microsoft.com/Forums/en-US/815e819c-f0f2-4a53-8407-98b0f7f116e2/regex-to-extract-list-of-cell-references-from-excel-formula?forum=csharpgeneral<\/a><\/p>\n\n<p>REGEX: (\\w+|)?\\$?(?:\\bXF[A-D]|X[A-E][A-Z]|[A-W][A-Z]{2}|[A-Z]{2}|[A-Z])\\$?(?:104857[0-6]|10485[0-6]\\d|1048[0-4]\\d{2}|104[0-7]\\d{3}|10[0-3]\\d{4}|[1-9]\\d{1,5}|[1-9])d?\\b(:\\s?\\$?(?:\\bXF[A-D]|X[A-E][A-Z]|[A-W][A-Z]{2}|[A-Z]{2}|[A-Z])\\$?(?:104857[0-6]|10485[0-6]\\d|1048[0-4]\\d{2}|104[0-7]\\d{3}|10[0-3]\\d{4}|[1-9]\\d{1,5}|[1-9])d?\\b)?<\/p>\n\n<p><a href=\"http://social.msdn.microsoft.com/Forums/en-US/dc179984-4fc8-4346-90e8-1649a23b6afe/regex-solution-to-id-excel-cell-references-in-an-excel-formula-string?forum=regexp\" rel=\"nofollow\">http://social.msdn.microsoft.com/Forums/en-US/dc179984-4fc8-4346-90e8-1649a23b6afe/regex-solution-to-id-excel-cell-references-in-an-excel-formula-string?forum=regexp<\/a><\/p>\n\n<p>REGEX: \\$?\\b([A-Z]|[A-H][A-Z]|I[A-V])\\$?([1-9]\\d{0,3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-6])\\b([:\\s]\\$?\\b([A-Z]|[A-H][A-Z]|I[A-V])\\$?([1-9]\\d{0,3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-6])\\b)?<\/p>\n\n<p>For some of the formular they are working, but not for all.<\/p>\n\n<p>I hope anyone can help me or give me a tip :)<\/p>\n",
+        "question_id": 22139372,
+        "tags": [
+            "java",
+            "regex",
+            "excel",
+            "substring",
+            "excel-formula"
+        ],
+        "score": 0,
+        "accepted_answer_id": 22139521,
+        "is_answered": true,
+        "view_count": 1248,
+        "last_edit_date": 1393825822
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/FWzkg.jpg?s=256",
+                "account_id": 3705785,
+                "user_type": "registered",
+                "user_id": 3084359,
+                "link": "https://stackoverflow.com/users/3084359/solace",
+                "reputation": 2189,
+                "display_name": "Solace",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1393829508,
+            "creation_date": 1393825559,
+            "body": "<pre><code>public static void main(String[]args){\nString formula = \"E10+E11+SUM(E10;E14:E17)*E18-IF(E19&lt;1,E20, E21)\";\nString output=\"\";\n\n\nfor(String c: formula.split(\"[^A-z0-9]+\")){\n    if(isCell(c)){\n               output+=c+\" \";\n    }\n}\n\n\n}\n\nprivate static boolean isCell(String current){\n   boolean hasLetter = false;\n   boolean hasNumber = false;\n\nfor(int i=0; i&lt;current.length() &amp;&amp; (!hasLetter || !hasNumber); i++){\n\n\n    if(current.charAt(i)&gt;=65 &amp;&amp; current.charAt(i)&lt;=90){\n\n\n        hasLetter=true;\n    }\n    else if(current.charAt(i)&gt;='0' &amp;&amp; current.charAt(i)&lt;='9'){\n\n        hasNumber=true;\n    }\n}\n\nreturn hasLetter &amp;&amp; hasNumber;\n}\n<\/code><\/pre>\n",
+            "answer_id": 22139521,
+            "question_id": 22139372,
+            "last_edit_date": 1393829508
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3f1b07588085f5a7dc48beb1c2ad1514?s=256&d=identicon&r=PG",
+                "account_id": 2698283,
+                "user_type": "registered",
+                "user_id": 2329698,
+                "link": "https://stackoverflow.com/users/2329698/uyuyuy99",
+                "reputation": 353,
+                "display_name": "uyuyuy99",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1393826087,
+            "creation_date": 1393826087,
+            "body": "<p>On the first thread you linked to, the regex you put below the link is nowhere to be found on the page. Were you really using a regex from that page? The regex that was suggested was:<\/p>\n\n<pre><code>(\\w+|)?\\$?(?:\\bXF[A-D]|X[A-E][A-Z]|[A-W][A-Z]{2}|[A-Z]{2}|[A-Z])\\$?(?:104857[0-6]|10485[0-6]\\d|1048[0-4]\\d{2}|104[0-7]\\d{3}|10[0-3]\\d{4}|[1-9]\\d{1,5}|[1-9])d?\\b(:\\s?\\$?(?:\\bXF[A-D]|X[A-E][A-Z]|[A-W][A-Z]{2}|[A-Z]{2}|[A-Z])\\$?(?:104857[0-6]|10485[0-6]\\d|1048[0-4]\\d{2}|104[0-7]\\d{3}|10[0-3]\\d{4}|[1-9]\\d{1,5}|[1-9])d?\\b)?\n<\/code><\/pre>\n\n<p>Try that.<\/p>\n\n<p>Also, it would help to know what <em>specific<\/em> strings don't get matched correctly, since you mentioned that some of them work.<\/p>\n",
+            "answer_id": 22139623,
+            "question_id": 22139372
+        }
+    ],
+    "answer_comments": {
+        "22139521": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/FWzkg.jpg?s=256",
+                    "account_id": 3705785,
+                    "user_type": "registered",
+                    "user_id": 3084359,
+                    "link": "https://stackoverflow.com/users/3084359/solace",
+                    "reputation": 2189,
+                    "display_name": "Solace",
+                    "accept_rate": 92
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393829444,
+                "comment_id": 33594664
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4110740,
+                    "user_type": "registered",
+                    "user_id": 3373589,
+                    "link": "https://stackoverflow.com/users/3373589/user3373589",
+                    "reputation": 13,
+                    "display_name": "user3373589",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393828560,
+                "comment_id": 33594313
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/FWzkg.jpg?s=256",
+                    "account_id": 3705785,
+                    "user_type": "registered",
+                    "user_id": 3084359,
+                    "link": "https://stackoverflow.com/users/3084359/solace",
+                    "reputation": 2189,
+                    "display_name": "Solace",
+                    "accept_rate": 92
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393827978,
+                "comment_id": 33594081
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4110740,
+                    "user_type": "registered",
+                    "user_id": 3373589,
+                    "link": "https://stackoverflow.com/users/3373589/user3373589",
+                    "reputation": 13,
+                    "display_name": "user3373589",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393827744,
+                "comment_id": 33593974
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/FWzkg.jpg?s=256",
+                    "account_id": 3705785,
+                    "user_type": "registered",
+                    "user_id": 3084359,
+                    "link": "https://stackoverflow.com/users/3084359/solace",
+                    "reputation": 2189,
+                    "display_name": "Solace",
+                    "accept_rate": 92
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393827241,
+                "comment_id": 33593773
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4110740,
+                    "user_type": "registered",
+                    "user_id": 3373589,
+                    "link": "https://stackoverflow.com/users/3373589/user3373589",
+                    "reputation": 13,
+                    "display_name": "user3373589",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393826685,
+                "comment_id": 33593560
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/FWzkg.jpg?s=256",
+                    "account_id": 3705785,
+                    "user_type": "registered",
+                    "user_id": 3084359,
+                    "link": "https://stackoverflow.com/users/3084359/solace",
+                    "reputation": 2189,
+                    "display_name": "Solace",
+                    "accept_rate": 92
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393826430,
+                "comment_id": 33593479
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3f1b07588085f5a7dc48beb1c2ad1514?s=256&d=identicon&r=PG",
+                    "account_id": 2698283,
+                    "user_type": "registered",
+                    "user_id": 2329698,
+                    "link": "https://stackoverflow.com/users/2329698/uyuyuy99",
+                    "reputation": 353,
+                    "display_name": "uyuyuy99",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393826219,
+                "comment_id": 33593405
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/FWzkg.jpg?s=256",
+                    "account_id": 3705785,
+                    "user_type": "registered",
+                    "user_id": 3084359,
+                    "link": "https://stackoverflow.com/users/3084359/solace",
+                    "reputation": 2189,
+                    "display_name": "Solace",
+                    "accept_rate": 92
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393826113,
+                "comment_id": 33593376
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4110740,
+                    "user_type": "registered",
+                    "user_id": 3373589,
+                    "link": "https://stackoverflow.com/users/3373589/user3373589",
+                    "reputation": 13,
+                    "display_name": "user3373589",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393825963,
+                "comment_id": 33593341
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3f1b07588085f5a7dc48beb1c2ad1514?s=256&d=identicon&r=PG",
+                    "account_id": 2698283,
+                    "user_type": "registered",
+                    "user_id": 2329698,
+                    "link": "https://stackoverflow.com/users/2329698/uyuyuy99",
+                    "reputation": 353,
+                    "display_name": "uyuyuy99",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139521,
+                "edited": false,
+                "creation_date": 1393825778,
+                "comment_id": 33593278
+            }
+        ],
+        "22139623": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4110740,
+                    "user_type": "registered",
+                    "user_id": 3373589,
+                    "link": "https://stackoverflow.com/users/3373589/user3373589",
+                    "reputation": 13,
+                    "display_name": "user3373589",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139623,
+                "edited": false,
+                "creation_date": 1393826775,
+                "comment_id": 33593597
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3f1b07588085f5a7dc48beb1c2ad1514?s=256&d=identicon&r=PG",
+                    "account_id": 2698283,
+                    "user_type": "registered",
+                    "user_id": 2329698,
+                    "link": "https://stackoverflow.com/users/2329698/uyuyuy99",
+                    "reputation": 353,
+                    "display_name": "uyuyuy99",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 22139623,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4110740,
+                    "user_type": "registered",
+                    "user_id": 3373589,
+                    "link": "https://stackoverflow.com/users/3373589/user3373589",
+                    "reputation": 13,
+                    "display_name": "user3373589",
+                    "accept_rate": 60
+                },
+                "edited": false,
+                "creation_date": 1393826711,
+                "comment_id": 33593573
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/147b3982d32248ccbc7b4965fbf22939?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4110740,
+                    "user_type": "registered",
+                    "user_id": 3373589,
+                    "link": "https://stackoverflow.com/users/3373589/user3373589",
+                    "reputation": 13,
+                    "display_name": "user3373589",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 22139623,
+                "edited": false,
+                "creation_date": 1393826437,
+                "comment_id": 33593483
+            }
+        ]
+    }
+}

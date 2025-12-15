@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0deb42281ea367526e941579136f6868?s=256&d=identicon&r=PG",
+            "account_id": 26955082,
+            "user_type": "registered",
+            "user_id": 20523607,
+            "link": "https://stackoverflow.com/users/20523607/vinod",
+            "reputation": 19,
+            "display_name": "vinod"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/74466540/springboot-with-gcp-bigtable",
+        "last_activity_date": 1668629439,
+        "creation_date": 1668629035,
+        "answer_count": 1,
+        "title": "springboot with GCP BigTable",
+        "body": "<p>i am a new bee to GCP and trying to develop springboot rest api that connects to GCP Bigtable, do we have a quickstart guide that helps in development.<\/p>\n",
+        "question_id": 74466540,
+        "tags": [
+            "java",
+            "spring-boot",
+            "google-cloud-platform",
+            "bigtable"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 885
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/8Y0sd.jpg?s=256",
+            "account_id": 2881560,
+            "user_type": "registered",
+            "user_id": 2472345,
+            "link": "https://stackoverflow.com/users/2472345/aaron",
+            "reputation": 1411,
+            "display_name": "Aaron",
+            "accept_rate": 62
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1668629439,
+        "creation_date": 1668629439,
+        "body": "<p>Yup, there is. Check out this link to get started. You need the Java client library.<\/p>\n<p><a href=\"https://cloud.google.com/bigtable/docs/reference/libraries#client-libraries-install-java\" rel=\"nofollow noreferrer\">https://cloud.google.com/bigtable/docs/reference/libraries#client-libraries-install-java<\/a><\/p>\n<p>for Maven:<\/p>\n<pre><code>&lt;dependencyManagement&gt;\n  &lt;dependencies&gt;\n    &lt;dependency&gt;\n      &lt;groupId&gt;com.google.cloud&lt;/groupId&gt;\n      &lt;artifactId&gt;libraries-bom&lt;/artifactId&gt;\n      &lt;version&gt;26.1.4&lt;/version&gt;\n      &lt;type&gt;pom&lt;/type&gt;\n      &lt;scope&gt;import&lt;/scope&gt;\n    &lt;/dependency&gt;\n  &lt;/dependencies&gt;\n&lt;/dependencyManagement&gt;\n\n&lt;dependencies&gt;\n  &lt;dependency&gt;\n    &lt;groupId&gt;com.google.cloud&lt;/groupId&gt;\n    &lt;artifactId&gt;google-cloud-bigtable&lt;/artifactId&gt;\n  &lt;/dependency&gt;\n<\/code><\/pre>\n<p>Then check this for usage:\n<a href=\"https://cloud.google.com/bigtable/docs/reference/libraries#client-libraries-usage-java\" rel=\"nofollow noreferrer\">https://cloud.google.com/bigtable/docs/reference/libraries#client-libraries-usage-java<\/a><\/p>\n<pre><code>import com.google.api.gax.rpc.NotFoundException;\nimport com.google.cloud.bigtable.data.v2.BigtableDataClient;\nimport com.google.cloud.bigtable.data.v2.BigtableDataSettings;\nimport com.google.cloud.bigtable.data.v2.models.Row;\nimport com.google.cloud.bigtable.data.v2.models.RowCell;\n\npublic class Quickstart {\n\n  public static void main(String... args) {\n    String projectId = args[0]; // my-gcp-project-id\n    String instanceId = args[1]; // my-bigtable-instance-id\n    String tableId = args[2]; // my-bigtable-table-id\n\n    quickstart(projectId, instanceId, tableId);\n  }\n\n  public static void quickstart(String projectId, String instanceId, String tableId) {\n    BigtableDataSettings settings =\n        BigtableDataSettings.newBuilder().setProjectId(projectId).setInstanceId(instanceId).build();\n\n    // Initialize client that will be used to send requests. This client only needs to be created\n    // once, and can be reused for multiple requests. After completing all of your requests, call\n    // the &quot;close&quot; method on the client to safely clean up any remaining background resources.\n    try (BigtableDataClient dataClient = BigtableDataClient.create(settings)) {\n      System.out.println(&quot;\\nReading a single row by row key&quot;);\n      Row row = dataClient.readRow(tableId, &quot;r1&quot;);\n      System.out.println(&quot;Row: &quot; + row.getKey().toStringUtf8());\n      for (RowCell cell : row.getCells()) {\n        System.out.printf(\n            &quot;Family: %s    Qualifier: %s    Value: %s%n&quot;,\n            cell.getFamily(), cell.getQualifier().toStringUtf8(), cell.getValue().toStringUtf8());\n      }\n    } catch (NotFoundException e) {\n      System.err.println(&quot;Failed to read from a non-existent table: &quot; + e.getMessage());\n    } catch (Exception e) {\n      System.out.println(&quot;Error during quickstart: \\n&quot; + e.toString());\n    }\n  }\n}\n<\/code><\/pre>\n",
+        "answer_id": 74466615,
+        "question_id": 74466540
+    }],
+    "answer_comments": {}
+}

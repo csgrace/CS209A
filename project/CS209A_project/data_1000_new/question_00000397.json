@@ -1,0 +1,72 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/275b492bbf2bd4648a89d2decb5cc62b?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7956914,
+            "user_type": "registered",
+            "user_id": 6005868,
+            "link": "https://stackoverflow.com/users/6005868/cparks10",
+            "reputation": 377,
+            "display_name": "cparks10",
+            "accept_rate": 53
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/77406283/transactional-method-from-class-1-calling-external-methods-throws-error-and-is",
+        "last_activity_date": 1699239880,
+        "creation_date": 1698884079,
+        "answer_count": 2,
+        "title": "Transactional method from class 1 calling external methods, throws error, and is not rolling back",
+        "body": "<p>I need it to rollback the entire transaction when an error is thrown, but it does not roll back, just throws the errors and continues to process.<\/p>\n<p>Component Class has a transactional method with a try catch block. Within the try, two external calls are being made to two different classes. The first call (serviceA.method1) succeeds and I see the DB update. The second one fails. Adding @Transactional to the other methods in the other classes does not seem to be working either.<\/p>\n<p>I am under the impression that unless specifically stated, when transactionMethod instantiates, a Transaction is created. From there, any additional calls are part of that transaction unless the method or class states otherwise with Propagation.<\/p>\n<pre><code>import javax.transaction.Transactional;\n\ncomponentClass:\n   @Transactional\n   public transactionMethod() {\n      try{\n        serviceA.method1();\n        serviceB.method2();\n      } catch() {\n        log.error();\n      }\n   }\n   \nserviceA:\n   public method1() {\n      try{\n        save();\n      } catch() {\n        log.error();\n      }\n   }   \n   \nserviceC:\n   public method2() {\n      try{\n        save();\n      } catch() {\n        log.error();\n      }\n   }  ```\n<\/code><\/pre>\n",
+        "question_id": 77406283,
+        "tags": [
+            "java",
+            "transactions"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 96
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80138bda994d16f1b21076dc8e38265d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8884226,
+                "user_type": "registered",
+                "user_id": 6633045,
+                "link": "https://stackoverflow.com/users/6633045/phuongnq1995",
+                "reputation": 1747,
+                "display_name": "phuongnq1995"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1698897170,
+            "creation_date": 1698897170,
+            "body": "<blockquote>\n<p>The transaction will be rollback if an exception is thrown.<\/p>\n<\/blockquote>\n<p>This is a correct statement, but your <code>method1()<\/code> and <code>method2()<\/code> do not throw any exceptions out of the method. In <code>transactionMethod<\/code> point of view, there are no exceptions propagated to me, so I can process the rest.<\/p>\n<p>If you want to do it, remove your <code>catch<\/code> in <code>method1()<\/code> or <code>method2()<\/code>.\nOr you can throw another exception like<\/p>\n<pre><code>try{\n    save();\n} catch() {\n    log.error();\n    throw new RuntimeException(); // here is the throw ex\n}\n<\/code><\/pre>\n<p>Hope my explanation helps!<\/p>\n",
+            "answer_id": 77406832,
+            "question_id": 77406283
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/kaVnR.jpg?s=256",
+                "account_id": 29386739,
+                "user_type": "registered",
+                "user_id": 22516044,
+                "link": "https://stackoverflow.com/users/22516044/joeycactus",
+                "reputation": 1,
+                "display_name": "JoeyCactus"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1699239880,
+            "creation_date": 1698905611,
+            "body": "<p>Maybe you can try to throw an exception and make sure it is not being caught within the valid area of the transaction;<\/p>\n<p>Another way is that you can add <code>@Transactional<\/code> on <code>methodB<\/code>; then, when the exception is thrown from <code>methodB<\/code> to where it is called, the transaction will roll back.<\/p>\n<p>And you can set some parameters of <code>@Transactional<\/code>, like propagation, that will change transaction's delivery mode.<\/p>\n",
+            "answer_id": 77407290,
+            "question_id": 77406283,
+            "last_edit_date": 1699239880
+        }
+    ],
+    "answer_comments": {}
+}

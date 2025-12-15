@@ -1,0 +1,140 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/735ed8c1abf1a1f7b907b78d9594303c?s=256&d=identicon&r=PG",
+            "account_id": 14282929,
+            "user_type": "registered",
+            "user_id": 10317086,
+            "link": "https://stackoverflow.com/users/10317086/engopy",
+            "reputation": 353,
+            "display_name": "EnGoPy"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58447965/spring-mvc-new-row-in-database-is-created-while-want-to-update",
+        "last_activity_date": 1571393570,
+        "creation_date": 1571391028,
+        "answer_count": 1,
+        "title": "Spring MVC new row in database is created while want to update",
+        "body": "<p>I write my first form using Spring MVC pattern and Hibernate.\n<br>\nI have a problem when I want to update existing row in table.\nAfter click \"Edit\" Buttno in a table, correct row is found in db. Then I can update \"name\" field and click SAVE button. Than in database i created new row with new ID.<\/p>\n\n<p>I have wrote two <code>System.out<\/code> to check current values of object.<\/p>\n\n<p><strong>My Controller class:<\/strong><\/p>\n\n<pre><code>@Controller\n//@RequestMapping(\"/\")\npublic class InterventionController {\n\n@Autowired\nprivate InterventionService interventionService;\n\n@GetMapping(\"/\")\npublic String viewHomePage(Model model){\n    List&lt;InterventionModel&gt; interventionList = interventionService.listAll();\n    model.addAttribute(\"interventionList\", interventionList);\n    return \"index\";\n}\n\n@GetMapping(\"/new\")\npublic String addInterventionForm(Model model){\n    InterventionModel interventionModel = new InterventionModel();\n    model.addAttribute(\"interventionModel\", interventionModel);\n    System.out.println(model.toString());\n    return \"new_intervention\";\n}\n\n@RequestMapping(value=\"/save\", method = RequestMethod.POST)\npublic String saveIntervention(@ModelAttribute(\"interventionModel\")InterventionModel interventionModel){\n    System.out.println(\"Object retreived from editing view \"+interventionModel); // &lt;- just to check in console object attributes\n    interventionService.save(interventionModel);\n    return \"redirect:/\";\n}\n\n@RequestMapping(\"/edit/{id}\")\npublic ModelAndView showEditInterventionForm(@PathVariable(name=\"id\") Long id){\n    ModelAndView mav = new ModelAndView(\"edit_intervention\");\n    InterventionModel interventionModel = interventionService.get(id).get(); // &lt;-- Optional received from service layer\n    mav.addObject(\"interventionModel\", interventionModel);\n    System.out.println(\"Object retrieved from database : \"+interventionModel); // &lt;- just to check in console object attributes\n    return mav;\n}\n\n@GetMapping(\"/delete/{id}\")\npublic String deleteIntervention(@PathVariable(name=\"id\") Long id){\n    interventionService.delete(id);\n    return \"redirect:/\";\n}\n<\/code><\/pre>\n\n<p>My <code>InterventionModel<\/code> class doesn't contain any annotation. I don't know if that is a mistake, but that object is DTO between controller and service layer. In the service layer, it is mapped to the entity which is annotated <code>@Entity<\/code>. <\/p>\n\n<pre><code>public class InterventionModel {\n\nprivate Long id;\nprivate String name;\n\npublic InterventionModel() {\n}\n\npublic InterventionModel(Long id, String name) {\n    this.id = id;\n    this.name = name;\n}\n\npublic Long getId() {\n    return id;\n}\n\npublic String getName() {\n    return name;\n}\n\npublic void setName(String name) {\n    this.name = name;\n}\n\n@Override\npublic String toString() {\n    return \"InterventionModel{\" +\n            \"id=\" + id +\n            \", name='\" + name + '\\'' +\n            '}';\n} }\n<\/code><\/pre>\n\n<p><strong>index.html<\/strong><\/p>\n\n<p><div class=\"snippet\" data-lang=\"js\" data-hide=\"false\" data-console=\"true\" data-babel=\"false\">\r\n<div class=\"snippet-code\">\r\n<pre class=\"snippet-code-html lang-html prettyprint-override\"><code>&lt;!DOCTYPE html&gt;\r\n&lt;html xmlns:th=\"http://www.thymeleaf.org\"&gt;\r\n&lt;head&gt;\r\n    &lt;meta charset=\"ISO-8859-1\"&gt;\r\n    &lt;title&gt;Interventions&lt;/title&gt;\r\n&lt;/head&gt;\r\n&lt;body&gt;\r\n\r\n&lt;div align=\"center\"&gt;\r\n    &lt;h1&gt;Interventions&lt;/h1&gt;\r\n    &lt;a href=\"new\"&gt;Create new Intervention&lt;/a&gt;\r\n    &lt;br&gt;&lt;br&gt;\r\n    &lt;table border=\"2\" cellpadding=\"10\"&gt;\r\n        &lt;thead&gt;\r\n        &lt;tr&gt;\r\n            &lt;th&gt;Intervention Id&lt;/th&gt;\r\n            &lt;th&gt;Name&lt;/th&gt;\r\n            &lt;th&gt;Actions&lt;/th&gt;\r\n        &lt;/tr&gt;\r\n        &lt;/thead&gt;\r\n        &lt;tbody&gt;\r\n        &lt;tr th:each=\"intervention :${interventionList}\"&gt;\r\n            &lt;td th:text=\"${intervention.id}\"&gt;Intervention Id&lt;/td&gt;\r\n            &lt;td th:text=\"${intervention.name}\"&gt;Name&lt;/td&gt;\r\n            &lt;td&gt;\r\n                &lt;a th:href=\"@{'/edit/' + ${intervention.id}}\"&gt;Edit&lt;/a&gt;\r\n                &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;\r\n                &lt;a th:href=\"@{'/delete/' + ${intervention.id}}\"&gt;Delete&lt;/a&gt;\r\n            &lt;/td&gt;\r\n        &lt;/tr&gt;\r\n        &lt;/tbody&gt;\r\n    &lt;/table&gt;\r\n&lt;/div&gt;\r\n&lt;/body&gt;\r\n&lt;/html&gt;<\/code><\/pre>\r\n<\/div>\r\n<\/div>\r\n<\/p>\n\n<p>and <strong>edit_intervention.html<\/strong><\/p>\n\n<p><div class=\"snippet\" data-lang=\"js\" data-hide=\"false\" data-console=\"true\" data-babel=\"false\">\r\n<div class=\"snippet-code\">\r\n<pre class=\"snippet-code-html lang-html prettyprint-override\"><code>&lt;!DOCTYPE html&gt;\r\n&lt;html xmlns:th=\"http://www.thymeleaf.org\"&gt;\r\n&lt;head&gt;\r\n    &lt;meta charset=\"ISO-8859-1\"&gt;\r\n    &lt;title&gt;Edit Intervention&lt;/title&gt;\r\n&lt;/head&gt;\r\n&lt;body&gt;\r\n&lt;div align=\"center\"&gt;\r\n    &lt;h1&gt;Edit Intervention&lt;/h1&gt;\r\n    &lt;br/&gt;\r\n    &lt;form action=\"#\" th:action=\"@{/save}\" th:object=\"${interventionModel}\" method=\"post\"&gt;\r\n        &lt;table border=\"0\" cellpadding=\"10\"&gt;\r\n            &lt;tr&gt;\r\n                &lt;td&gt;Intervention ID&lt;/td&gt;\r\n&lt;!--                &lt;td&gt;&lt;input type=\"text\" th:field=\"*{id}\" readonly=\"readonly\"/&gt;&lt;/td&gt;--&gt;\r\n                &lt;td&gt;&lt;input type=\"text\" th:field=\"*{id}\" readonly=\"readonly\"/&gt;&lt;/td&gt;\r\n            &lt;/tr&gt;\r\n            &lt;tr&gt;\r\n                &lt;td&gt;Intervention name&lt;/td&gt;\r\n                &lt;td&gt;&lt;input type=\"text\" th:field=\"*{name}\"/&gt;&lt;/td&gt;\r\n            &lt;/tr&gt;\r\n            &lt;tr&gt;\r\n                &lt;td colspan=\"2\"&gt;&lt;button type=\"submit\"&gt;Save&lt;/button&gt; &lt;/td&gt;\r\n            &lt;/tr&gt;\r\n        &lt;/table&gt;\r\n    &lt;/form&gt;\r\n&lt;/div&gt;\r\n\r\n&lt;/body&gt;\r\n&lt;/html&gt;<\/code><\/pre>\r\n<\/div>\r\n<\/div>\r\n<\/p>\n\n<p>What is curious for me. Object when is retrieved from DB has proper attributes (id, name) than Model is created and sent to <code>edit_intervention.html<\/code> form. After changing name, it goes back to save method but there ID number is \"null\", instead of name which contains changed new value.\n<br> For me (as a beginner) it looks like no all attributes are transferred from the view to the save method in controller. When we have ID set to \"null\" it's a sign for hibernate to create new row.\n<br> I guess there is a minor failure which I cannot find.\n<br> Logs from terminal when I call update form:<br>\n<a href=\"https://i.sstatic.net/gDqqc.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/gDqqc.png\" alt=\"enter image description here\"><\/a> \n<br> and view how table after modification looks like:<br>\n<a href=\"https://i.sstatic.net/kSWdj.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/kSWdj.png\" alt=\"enter image description here\"><\/a>\n<br><br>Thank you in advance for help.<\/p>\n",
+        "question_id": 58447965,
+        "tags": [
+            "java",
+            "html",
+            "spring",
+            "hibernate",
+            "model-view-controller"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 596,
+        "last_edit_date": 1571393570
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7968be6a96e5964059cd54fc88f693f5?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4884433,
+            "user_type": "registered",
+            "user_id": 3937291,
+            "link": "https://stackoverflow.com/users/3937291/%d0%90%d0%bb%d0%b5%d0%ba%d1%81%d0%b5%d0%b9-%d0%9f%d0%b5%d1%82%d1%80%d0%be%d0%b2",
+            "reputation": 11,
+            "display_name": "Алексей Петров"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1571392956,
+        "creation_date": 1571392956,
+        "body": "<p>As you see your id field is null. Because probably the Long value wasn't set. \nIn entity class you should mark id property as <code>@Id<\/code>, also you can always add the <code>@GeneratedValue<\/code> annotation above.<\/p>\n",
+        "answer_id": 58448521,
+        "question_id": 58447965
+    }],
+    "answer_comments": {"58448521": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7968be6a96e5964059cd54fc88f693f5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4884433,
+                "user_type": "registered",
+                "user_id": 3937291,
+                "link": "https://stackoverflow.com/users/3937291/%d0%90%d0%bb%d0%b5%d0%ba%d1%81%d0%b5%d0%b9-%d0%9f%d0%b5%d1%82%d1%80%d0%be%d0%b2",
+                "reputation": 11,
+                "display_name": "Алексей Петров"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58448521,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/735ed8c1abf1a1f7b907b78d9594303c?s=256&d=identicon&r=PG",
+                "account_id": 14282929,
+                "user_type": "registered",
+                "user_id": 10317086,
+                "link": "https://stackoverflow.com/users/10317086/engopy",
+                "reputation": 353,
+                "display_name": "EnGoPy"
+            },
+            "edited": false,
+            "creation_date": 1571840590,
+            "comment_id": 103374951
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/735ed8c1abf1a1f7b907b78d9594303c?s=256&d=identicon&r=PG",
+                "account_id": 14282929,
+                "user_type": "registered",
+                "user_id": 10317086,
+                "link": "https://stackoverflow.com/users/10317086/engopy",
+                "reputation": 353,
+                "display_name": "EnGoPy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58448521,
+            "edited": false,
+            "creation_date": 1571669960,
+            "comment_id": 103308328
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7968be6a96e5964059cd54fc88f693f5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4884433,
+                "user_type": "registered",
+                "user_id": 3937291,
+                "link": "https://stackoverflow.com/users/3937291/%d0%90%d0%bb%d0%b5%d0%ba%d1%81%d0%b5%d0%b9-%d0%9f%d0%b5%d1%82%d1%80%d0%be%d0%b2",
+                "reputation": 11,
+                "display_name": "Алексей Петров"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 58448521,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/735ed8c1abf1a1f7b907b78d9594303c?s=256&d=identicon&r=PG",
+                "account_id": 14282929,
+                "user_type": "registered",
+                "user_id": 10317086,
+                "link": "https://stackoverflow.com/users/10317086/engopy",
+                "reputation": 353,
+                "display_name": "EnGoPy"
+            },
+            "edited": false,
+            "creation_date": 1571404086,
+            "comment_id": 103240723
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/735ed8c1abf1a1f7b907b78d9594303c?s=256&d=identicon&r=PG",
+                "account_id": 14282929,
+                "user_type": "registered",
+                "user_id": 10317086,
+                "link": "https://stackoverflow.com/users/10317086/engopy",
+                "reputation": 353,
+                "display_name": "EnGoPy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58448521,
+            "edited": false,
+            "creation_date": 1571393799,
+            "comment_id": 103235369
+        }
+    ]}
+}

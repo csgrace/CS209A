@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8bef1524e355fc6a5be23432f5a3bd25?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5386329,
+            "user_type": "registered",
+            "user_id": 4290082,
+            "link": "https://stackoverflow.com/users/4290082/hopeistheonlyweapon",
+            "reputation": 587,
+            "display_name": "hopeIsTheonlyWeapon",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/44937619/hbase-long-comparison-filter-using-java-api",
+        "last_activity_date": 1499408778,
+        "creation_date": 1499298084,
+        "answer_count": 1,
+        "title": "Hbase Long Comparison Filter using Java Api",
+        "body": "<p>I am unable to compare a Long value in one of the column values of my HBase table. I am using java api. Below is the code snippet.I clearly have a value in the table which satisfies the filter. <\/p>\n\n<p>I would also like to know what is lexicographical comparison and how would I perform long comparison. <\/p>\n\n<p>Any direction on this greatly helpful.<\/p>\n\n<p>Thanks in advance<\/p>\n\n<pre><code>FilterList list = new FilterList(FilterList.Operator.MUST_PASS_ALL);\nSingleColumnValueFilter fil = new SingleColumnValueFilter(CF1_BYTE, VALUE_BYTE, CompareOp.LESS,new BinaryComparator(Bytes.toBytes(50)));\n Scan scan = new Scan();\n scan.addColumn(Bytes.toBytes(\"C1\"),Bytes.toBytes(\"VALUE\"));\n    list.addFilter(fil);\n    scan.setFilter(list);\n    try {\n        ResultScanner scanner = table.getScanner(scan);\n\n        for(Result r : scanner){\n            String VAL = Bytes.toString(r.getValue(Bytes.toBytes(\"C1\"),Bytes.toBytes(\"VALUE\")));\n            count ++;\n            if(count == 1000){\n                break;\n            }\n            System.out.println(count +\"  \"+Bytes.toString(r.getRow()) + \"        \"+VAL );\n        }\n        scanner.close();\n\n    } catch (IOException e) {\n        // TODO Auto-generated catch block\n        e.printStackTrace();\n    }\n\n    try {\n        table.close();\n    } catch (IOException e) {\n        // TODO Auto-generated catch block\n        e.printStackTrace();\n    }\n<\/code><\/pre>\n",
+        "question_id": 44937619,
+        "tags": [
+            "java",
+            "hbase"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 821
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/wTtAV.jpg?s=256",
+            "account_id": 5530990,
+            "user_type": "registered",
+            "user_id": 4390959,
+            "link": "https://stackoverflow.com/users/4390959/gorros",
+            "reputation": 1461,
+            "display_name": "gorros",
+            "accept_rate": 29
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1499408778,
+        "creation_date": 1499352668,
+        "body": "<p>According to  <a href=\"http://hbase.apache.org/apidocs/org/apache/hadoop/hbase/filter/SingleColumnValueFilter.html\" rel=\"nofollow noreferrer\">doc<\/a>, you have to provide your own comparator which will deserialize Long values from Byte arrays. As I know default comparison is lexicographical. Regarding lexicographical comparison, you can find <a href=\"https://stackoverflow.com/questions/4064633/string-comparison-in-java\">this<\/a> post useful. And <a href=\"https://stackoverflow.com/questions/34166809/faster-comparison-of-longs-in-byte-format\">this<\/a> post provide a clue how you can write the corresponding comparator.<\/p>\n\n<p><strong>Update<\/strong>:<\/p>\n\n<pre><code>import java.util.Comparator\nimport org.apache.hadoop.hbase.util.Bytes \n\nclass LongComparator implements Comparator&lt;byte[]&gt; {\n    public int compare(byte[] left, byte[] right) {\n        long leftLong = Bytes.toLong(left);\n        long rightLong = Bytes.toLong(right);\n        return Long.compare(leftLong, rightLong);\n    }\n}\n<\/code><\/pre>\n\n<p>I suggest using HBase utils instead of guava since it may conflict with HBase guava dependencies.<\/p>\n",
+        "answer_id": 44952315,
+        "question_id": 44937619,
+        "last_edit_date": 1499408778
+    }],
+    "answer_comments": {"44952315": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wTtAV.jpg?s=256",
+                "account_id": 5530990,
+                "user_type": "registered",
+                "user_id": 4390959,
+                "link": "https://stackoverflow.com/users/4390959/gorros",
+                "reputation": 1461,
+                "display_name": "gorros",
+                "accept_rate": 29
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44952315,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8bef1524e355fc6a5be23432f5a3bd25?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5386329,
+                "user_type": "registered",
+                "user_id": 4290082,
+                "link": "https://stackoverflow.com/users/4290082/hopeistheonlyweapon",
+                "reputation": 587,
+                "display_name": "hopeIsTheonlyWeapon",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1499363857,
+            "comment_id": 76887322
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8bef1524e355fc6a5be23432f5a3bd25?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5386329,
+                "user_type": "registered",
+                "user_id": 4290082,
+                "link": "https://stackoverflow.com/users/4290082/hopeistheonlyweapon",
+                "reputation": 587,
+                "display_name": "hopeIsTheonlyWeapon",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44952315,
+            "edited": false,
+            "creation_date": 1499360255,
+            "comment_id": 76885099
+        }
+    ]}
+}

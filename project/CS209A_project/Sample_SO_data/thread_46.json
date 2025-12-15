@@ -1,0 +1,116 @@
+{
+  "question": {
+    "tags": [
+      "java",
+      "spring",
+      "spring-boot",
+      "hibernate",
+      "keycloak"
+    ],
+    "owner": {
+      "account_id": 44513517,
+      "reputation": 39,
+      "user_id": 31792251,
+      "user_type": "registered",
+      "profile_image": "https://www.gravatar.com/avatar/f6f574506ae54f6024a15fcc62361899?s=256&d=identicon&r=PG&f=y&so-version=2",
+      "display_name": "Karl Bauer",
+      "link": "https://stackoverflow.com/users/31792251/karl-bauer"
+    },
+    "is_answered": true,
+    "view_count": 146,
+    "closed_date": 1762181263,
+    "answer_count": 3,
+    "score": 3,
+    "last_activity_date": 1762172613,
+    "creation_date": 1761930952,
+    "last_edit_date": 1761930990,
+    "question_id": 79806055,
+    "link": "https://stackoverflow.com/questions/79806055/how-to-model-jpa-relationships-when-users-live-in-keycloak",
+    "closed_reason": "Opinion-based",
+    "title": "How to model JPA relationships when users live in Keycloak?"
+  },
+  "answers": [
+    {
+      "owner": {
+        "account_id": 3284439,
+        "reputation": 40384,
+        "user_id": 2764255,
+        "user_type": "registered",
+        "accept_rate": 50,
+        "profile_image": "https://www.gravatar.com/avatar/2c14e217d79c08ca104e6e11d8e1710f?s=256&d=identicon&r=PG&f=y&so-version=2",
+        "display_name": "Nikos Paraskevopoulos",
+        "link": "https://stackoverflow.com/users/2764255/nikos-paraskevopoulos"
+      },
+      "is_accepted": false,
+      "score": -1,
+      "last_activity_date": 1762172613,
+      "creation_date": 1762172613,
+      "answer_id": 79807862,
+      "question_id": 79806055,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<p>I do not agree with other answers saying that syncing is not correct. At the time of this writing multi-deployment applications (be they microservices or whatever you want) are a real thing. Often they use separate DBs, so joining data between them is not always an option. These separate deployment/separate DB applications <em>have</em> to synchronize their data and the industry is satisfied with the &quot;eventual consistency&quot; model.</p>\n<p>So, in my opinion, syncing <em>is</em> a valid option. Specifically, &quot;Sync via a Keycloak Event Listener SPI on registration/updates&quot;. This is a good option because you don't waste CPU/network &quot;cycles&quot; for each request to get potential updates for an infrequently changing piece of data (the user). Not necessarily the correct one, but valid.</p>\n<p>If you go for this option, it would be very convenient to use Keycloak's UUID as the key of your private <code>User</code> table, as mentioned in other answers. Make sure to copy only the absolutely minimum set of data your application needs, not more. Certainly not any kind of credentials!!!</p>\n<p>This way you have direct, local access to the user information from your application(s), saving you the cost of doing the external call to Keycloak every time you need it <em>and</em> saving Keycloak some resources from replying to the application the same data over and over again. A good caching could protect you from this problem too, if you can sort out the caching invalidation rules.</p>\n<p>Speaking of caching, another idea would be to execute the actual call to Keycloak every time you need the user details; but cache the result, so it is only executed once. Use Keycloak's event to invalidate the cache.</p>\n<p>I am not sure how are you thinking to implement B? Somehow link the DBs (deploy Keycloak &amp; app in the same DB? Create a link between DB servers? etc). Anyway, I assume a foreign key from your model to Keycloak's. Wouldn't this couple the models a bit too much? Still, it is also valid solution.</p>\n<p>Bottom line: in my opinion both are valid. I would choose syncing through Keycloak events, but you should choose whatever fits your needs best.</p>\n",
+      "comments": []
+    },
+    {
+      "owner": {
+        "account_id": 44514275,
+        "reputation": 11,
+        "user_id": 31792633,
+        "user_type": "registered",
+        "profile_image": "https://www.gravatar.com/avatar/1476a7f63ca5922062726c3f8ac6d080?s=256&d=identicon&r=PG&f=y&so-version=2",
+        "display_name": "Ayush Shukla",
+        "link": "https://stackoverflow.com/users/31792633/ayush-shukla"
+      },
+      "is_accepted": false,
+      "score": 1,
+      "last_activity_date": 1761937113,
+      "creation_date": 1761937113,
+      "answer_id": 79806123,
+      "question_id": 79806055,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<p>Consider referencing users by their Keycloak UUID in your application tables rather than maintaining a separate local user table. If your business requirements don’t demand querying users by name or other attributes locally, storing only the Keycloak UUID allows you to fetch full user details through the Keycloak Admin REST API (GET /realms/{realm}/users/{uuid}) as needed. This approach leverages Keycloak’s built-in IAM security, keeps your app decoupled from identity management concerns, and ensures you always have current data while minimizing local exposure of sensitive user info.</p>\n",
+      "comments": []
+    },
+    {
+      "owner": {
+        "account_id": 17553626,
+        "reputation": 423,
+        "user_id": 12733532,
+        "user_type": "registered",
+        "profile_image": "https://lh3.googleusercontent.com/-EAww28wDCxk/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rcgKS9dXdmUh-hOQPlZYZygBUfLwQ/s256-rj/photo.jpg",
+        "display_name": "Max",
+        "link": "https://stackoverflow.com/users/12733532/max"
+      },
+      "is_accepted": false,
+      "score": 3,
+      "last_activity_date": 1761932099,
+      "creation_date": 1761932099,
+      "answer_id": 79806069,
+      "question_id": 79806055,
+      "content_license": "CC BY-SA 4.0",
+      "body": "<p>Might be discussed. I think option B is the correct, modern, and production-ready best practice. Your identity provider (Keycloak) should be the single source of truth (SSoT) for user identity. Option A (Syncing) is an anti-pattern. It violates the single source of truth principle. It creates a fragile, tightly-coupled system where your application database is just a stale, partial copy of Keycloak's data.</p>\n",
+      "comments": []
+    }
+  ],
+  "question_comments": [
+    {
+      "owner": {
+        "account_id": 187094,
+        "reputation": 5301,
+        "user_id": 424903,
+        "user_type": "registered",
+        "profile_image": "https://i.sstatic.net/8oHZF.png?s=256",
+        "display_name": "Gimby",
+        "link": "https://stackoverflow.com/users/424903/gimby"
+      },
+      "edited": false,
+      "score": 0,
+      "creation_date": 1762267320,
+      "post_id": 79806055,
+      "comment_id": 140835904,
+      "content_license": "CC BY-SA 4.0",
+      "body": "C. Do have a local user table with an internal ID, but only with minimal information in it that need not be synced and the Keycloak userId is stored there as an external ID. You will want to avoid an external ID becoming part of a foreign key which it inevitably will, even if right now it won&#39;t. Systems have a tendency to grow in ways you never planned for. Besides, having your own user table grants you the freedom to enable/disable said user in your local system only, rather than the entire keycloak account having to be disabled."
+    }
+  ],
+  "answer_comments": {}
+}

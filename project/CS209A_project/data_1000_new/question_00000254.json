@@ -1,0 +1,77 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/aa04b5be366aea0a1b23c2be3654a2c1?s=256&d=identicon&r=PG",
+            "account_id": 24291554,
+            "user_type": "registered",
+            "user_id": 18236494,
+            "link": "https://stackoverflow.com/users/18236494/feelinlit",
+            "reputation": 1,
+            "display_name": "feelinLit"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/74466833/modelmapper-throws-an-error-when-maps-one-list-to-map-but-works-correctly-with-a",
+        "last_activity_date": 1668665624,
+        "creation_date": 1668630589,
+        "answer_count": 0,
+        "title": "ModelMapper throws an error when maps one List to Map but works correctly with another List that is actually the same",
+        "body": "<p>I am using ModelMapper v3.1.0 for my project on SpringBoot v2.7.4.<\/p>\n<p>There are three classes: <code>DoctorEntity<\/code>, <code>Doctor<\/code>(Model) and <code>DoctorDTO<\/code>:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public class Doctor {\n    // Key is ID of the value\n    private Map&lt;Long, AppointmentInterface&gt; appointments;\n    ...\n}\n<\/code><\/pre>\n<pre class=\"lang-java prettyprint-override\"><code>public class DoctorDTO {\n    private List&lt;AppointmentDto&gt; appointments;\n    ...\n}\n<\/code><\/pre>\n<pre class=\"lang-java prettyprint-override\"><code>public class DoctorEntity {\n    private List&lt;AppointmentEntity&gt; appointmentEntities\n    ...\n}\n<\/code><\/pre>\n<p>As you can see <code>Doctor<\/code>'s property is <code>Map<\/code>, while others are <code>List<\/code>s.<\/p>\n<p>To help <code>ModelMapper<\/code> map 'List' into 'Map' I had to override the methods:<br />\n<strong>DoctorDTO -&gt; Doctor:<\/strong><\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Override\nprotected void mapSpecificFieldsToModelFromDto(DoctorDto source, Doctor destination) {\n\n    if (source.getAppointments() != null)\n        destination.setAppointments(source.getAppointments()\n                .stream()\n                .collect(Collectors.toMap(AppointmentDto::getId,\n                        elem -&gt; mapper.map(elem, Appointment.class))));\n}\n<\/code><\/pre>\n<p><strong>DoctorEntity -&gt; Doctor:<\/strong><\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Override\nprotected void mapSpecificFieldsToModelFromEntity(DoctorEntity source, Doctor destination) {\n\n    if (source.getAppointmentEntities() != null)\n        destination.setAppointments(source.getAppointmentEntities()\n                .stream()\n                .collect(Collectors.toMap(AppointmentEntity::getId,\n                        elem -&gt; mapper.map(elem, Appointment.class))));\n}\n<\/code><\/pre>\n<p>I have written two tests to check the mapping to <code>Doctor<\/code>:<\/p>\n<p><strong>1(Passes):<\/strong><\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Autowired\nprivate Mapper&lt;DoctorEntity, Doctor, DoctorDto&gt; doctorMapper;\n\n@Test\nvoid mapEntityToModel() {\n    DoctorEntity doctorEntity = new DoctorEntity(1L,\n            ...\n            List.of(new AppointmentEntity(1L,\n                            LocalDate.now(),\n                            AppointmentState.OPEN,\n                            null,\n                            null,\n                            null)\n            ));\n\n    Doctor doctor = doctorMapper.toModelFromEntity(doctorEntity);\n\n\n    doctorEntity.getAppointments().forEach(a -&gt; assertTrue(doctor.getAppointments().containsKey(a.getId())));\n}\n<\/code><\/pre>\n<p><strong>2(Fails):<\/strong><\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@Autowired\nprivate Mapper&lt;DoctorEntity, Doctor, DoctorDto&gt; doctorMapper;\n\nvoid mapDtoToModel() {\n        DoctorDto doctorDto = new DoctorDto(1L,\n                ...\n                List.of(new AppointmentDto(1L,\n                                LocalDate.now(),\n                                AppointmentState.OPEN,\n                                null,\n                                null,\n                                null)\n                ));\n\n        Doctor doctor = doctorMapper.toModelFromDto(doctorDto);\n\n        doctorDto.getAppointments().forEach(a -&gt; assertTrue(doctor.getAppointments().containsKey(a.getId())));\n    }\n<\/code><\/pre>\n<p>The issue occurs when <code>ModelMapper<\/code> tries to map <code>DoctorDTO<\/code> to <code>Doctor<\/code> but throws an error:<\/p>\n<pre><code>1) Failed to instantiate instance of destination java.util.Map. Ensure that java.util.Map has a non-private no-argument constructor.\n<\/code><\/pre>\n<p><strong>However<\/strong>, it maps <code>DoctorEntity<\/code> to <code>Doctor<\/code> correctly without throwing any error.<\/p>\n<p>I've tried to change <code>Map<\/code> interface to <code>HashMap<\/code> and <strong>it did the trick<\/strong>. But I can't understand why does <code>ModelMapper<\/code> maps one <code>List<\/code> to <code>Map<\/code> and doesn't map the other when they're the same.<\/p>\n",
+        "question_id": 74466833,
+        "tags": [
+            "java",
+            "spring-boot",
+            "modelmapper"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 116,
+        "last_edit_date": 1668665624
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aa04b5be366aea0a1b23c2be3654a2c1?s=256&d=identicon&r=PG",
+                "account_id": 24291554,
+                "user_type": "registered",
+                "user_id": 18236494,
+                "link": "https://stackoverflow.com/users/18236494/feelinlit",
+                "reputation": 1,
+                "display_name": "feelinLit"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 74466833,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/3ff877ba5d92af8a272304b398e43e1d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12488260,
+                "user_type": "registered",
+                "user_id": 9090751,
+                "link": "https://stackoverflow.com/users/9090751/mafor",
+                "reputation": 10871,
+                "display_name": "Mafor"
+            },
+            "edited": false,
+            "creation_date": 1668665782,
+            "comment_id": 131462109
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3ff877ba5d92af8a272304b398e43e1d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12488260,
+                "user_type": "registered",
+                "user_id": 9090751,
+                "link": "https://stackoverflow.com/users/9090751/mafor",
+                "reputation": 10871,
+                "display_name": "Mafor"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 74466833,
+            "edited": false,
+            "creation_date": 1668639161,
+            "comment_id": 131457812
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

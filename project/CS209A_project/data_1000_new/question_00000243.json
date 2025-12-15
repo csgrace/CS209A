@@ -1,0 +1,319 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+            "account_id": 6588799,
+            "user_type": "registered",
+            "user_id": 5090758,
+            "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+            "reputation": 2676,
+            "display_name": "William Rosenbloom",
+            "accept_rate": 46
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/35620908/is-it-possible-to-make-a-java-executable",
+        "last_activity_date": 1535026982,
+        "creation_date": 1456385233,
+        "answer_count": 5,
+        "title": "Is it possible to make a Java executable?",
+        "body": "<p>To be clear, by executable I do not mean literal bytes ready for the processor. For example a bash script, which is interpreted and not executable, becomes executable when a shebang is added to the top that specifies the script should be run by <code>/bin/bash<\/code> or <code>/bin/sh<\/code> or whatever program will be interpreting it.<\/p>\n\n<p>I was wondering if it's possible to do with Java, which is not technically a scripting language but is definitely not executable. It seems like Java would be hard because the user doesn't actually have the opportunity to add a shebang to the compiled file, and the compiled java cannot come from stdin.<\/p>\n",
+        "question_id": 35620908,
+        "tags": [
+            "java",
+            "executable",
+            "bin",
+            "shebang",
+            "interpreted-language"
+        ],
+        "score": 5,
+        "accepted_answer_id": 51659146,
+        "is_answered": true,
+        "view_count": 1220,
+        "last_edit_date": 1533230920
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IspsC.jpg?s=256",
+                "account_id": 2326469,
+                "user_type": "registered",
+                "user_id": 2040863,
+                "link": "https://stackoverflow.com/users/2040863/john-hascall",
+                "reputation": 9444,
+                "display_name": "John Hascall",
+                "accept_rate": 96
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1456385696,
+            "creation_date": 1456385696,
+            "body": "<p>You can certainly create a file:<\/p>\n\n<pre><code>#!/any/executable/program args\n...input goes here...\n<\/code><\/pre>\n\n<p>You could do it with Java<\/p>\n\n<pre><code>#!/path/bin/java mainclass\n...this is System.in...\n<\/code><\/pre>\n",
+            "answer_id": 35621039,
+            "question_id": 35620908
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8b4cd43b6e0e26bffccf2d0d6dfc2562?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1333388,
+                "user_type": "registered",
+                "user_id": 3746632,
+                "link": "https://stackoverflow.com/users/3746632/ldmtwo",
+                "reputation": 495,
+                "display_name": "ldmtwo"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1495821622,
+            "creation_date": 1456387215,
+            "body": "<p>Instead of writing lots of code to have Java be executable in source form, you have a few options:<\/p>\n\n<p>Use Scala! Did you know that Scala is built off Java? It has an interpreter and compiler. You can run a script, a shell or compile and run it. Scala and Java work seamlessly together. Both compile to the same bytecode and run on a JVM. Yes, the language would feel weird because Scala is like a cross between Java, R and Python, but most of the core language is unchanged and all Java packages are available. Give Scala a try. If you are on Linux, you might as well look at Spark too, even for one machine. <\/p>\n\n<p>If you insist on using Java only, you can create a hybrid program that does two things (I've done this before): compile code and run it. The executable or even a bash script can do the work of taking source files and making them executable. If you are looking to make a Java shell, then you need to make a dynamic runtime compiler/loader, but you simply need to use what Java/Oracle already gives us. Imagine inserting Java syntax from a file where I put a print statement. You could have anything in there you wanted as long as it compiles. See this example: <\/p>\n\n<pre><code>package util.injection;\n\nimport java.io.File;\nimport java.io.FileWriter;\nimport java.io.IOException;\nimport java.io.Writer;\nimport java.net.MalformedURLException;\nimport java.net.URL;\nimport java.net.URLClassLoader;\nimport java.util.ArrayList;\nimport java.util.Arrays;\nimport java.util.List;\nimport java.util.Locale;\nimport javax.tools.Diagnostic;\nimport javax.tools.DiagnosticCollector;\nimport javax.tools.JavaCompiler;\nimport javax.tools.JavaFileObject;\nimport javax.tools.StandardJavaFileManager;\nimport javax.tools.ToolProvider;\n\npublic class Compiler {\n\n    static final long t0 = System.currentTimeMillis();\n\n    public static void main(String[] args) {\n        StringBuilder sb = new StringBuilder(64);\n        String packageName = \"util\";\n        String className = \"HelloWorld\";\n        sb.append(\"package util;\\n\");\n        sb.append(\"public class HelloWorld extends \" + Function.class.getName() + \" {\\n\");\n        sb.append(\"    public void test() {\\n\");\n        sb.append(\"        System.out.println(\\\"Hello from dynamic function!\\\");\\n\");\n        sb.append(\"    }\\n\");\n        sb.append(\"}\\n\");\n        String code = sb.toString();\n\n        String jarLibraryFile = \"target/myprojectname.jar\";\n\n        Function dynFunction = code2class(packageName, className, code, jarLibraryFile);\n        dynFunction.test();\n    }\n\n    public static Function code2class(String packageName, String className, String code, String jarLibraryFile) {\n        String wholeClassName = packageName.replace(\"/\", \".\") + \".\" + className;\n        String fileName = wholeClassName.replace(\".\", \"/\") + \".java\";//\"testcompile/HelloWorld.java\";\n        File javaCodeFile = new File(fileName);\n        string2file(javaCodeFile, code);\n        Function dynFunction = null;\n        try {\n\n            boolean success = compile(jarLibraryFile, javaCodeFile);\n\n            /**\n             * Load and execute\n             * ************************************************************************************************\n             */\n            System.out.println(\"Running... \" + (System.currentTimeMillis() - t0) + \" ms\");\n            Object obj = load(wholeClassName);\n            // Santity check\n            if (obj instanceof Function) {\n                dynFunction = (Function) obj;\n                // Run it \n                //Edit: call dynFunction.test(); to see something\n            }\n            System.out.println(\"Finished... \" + (System.currentTimeMillis() - t0) + \" ms\");\n        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException exp) {\n            exp.printStackTrace();\n        }\n        return dynFunction;\n    }\n\n    public static boolean compile(String jarLibraryFile, File javaCodeFile) throws IOException {\n        /**\n         * Compilation Requirements\n         * ********************************************************************************************\n         */\n        System.out.println(\"Compiling... \" + (System.currentTimeMillis() - t0) + \" ms\");\n        DiagnosticCollector&lt;JavaFileObject&gt; diagnostics = new DiagnosticCollector&lt;&gt;();\n        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();\n        StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);\n\n        // This sets up the class path that the compiler will use.\n        // I've added the .jar file that contains the DoStuff interface within in it...\n        List&lt;String&gt; optionList = new ArrayList&lt;&gt;(2);\n        optionList.add(\"-classpath\");\n        optionList.add(System.getProperty(\"java.class.path\") + \";\" + jarLibraryFile);\n\n        Iterable&lt;? extends JavaFileObject&gt; compilationUnit\n                = fileManager.getJavaFileObjectsFromFiles(Arrays.asList(javaCodeFile));\n        JavaCompiler.CompilationTask task = compiler.getTask(\n                null,\n                fileManager,\n                diagnostics,\n                optionList,\n                null,\n                compilationUnit);\n        fileManager.close();\n\n        /**\n         * *******************************************************************************************\n         * Compilation Requirements *\n         */\n        if (task.call()) {\n            return true;\n            /**\n             * ***********************************************************************************************\n             * Load and execute *\n             */\n        } else {\n            for (Diagnostic&lt;? extends JavaFileObject&gt; diagnostic : diagnostics.getDiagnostics()) {\n                System.out.format(\"Error on line %d in %s%n\",\n                        diagnostic.getLineNumber(),\n                        diagnostic.getSource().toUri());\n                System.out.printf(\"Code = %s\\nMessage = %s\\n\", diagnostic.getCode(), diagnostic.getMessage(Locale.US));\n\n            }\n        }\n        return false;\n    }\n\n    public static void string2file(File outputFile, String code) {\n        if (outputFile.getParentFile().exists() || outputFile.getParentFile().mkdirs()) {\n\n            try {\n                Writer writer = null;\n                try {\n                    writer = new FileWriter(outputFile);\n                    writer.write(code);\n                    writer.flush();\n                } finally {\n                    try {\n                        writer.close();\n                    } catch (Exception e) {\n                    }\n                }\n            } catch (IOException exp) {\n                exp.printStackTrace();\n            }\n        }\n    }\n\n    public static Object load(String wholeClassName) throws IllegalAccessException, InstantiationException, ClassNotFoundException, MalformedURLException {\n        // Create a new custom class loader, pointing to the directory that contains the compiled\n        // classes, this should point to the top of the package structure!\n        URLClassLoader classLoader = new URLClassLoader(new URL[]{new File(\"./\").toURI().toURL()});\n        // Load the class from the classloader by name....\n        Class&lt;?&gt; loadedClass = classLoader.loadClass(wholeClassName);\n        // Create a new instance...\n        Object obj = loadedClass.newInstance();\n        return obj;\n    }\n\n}\n<\/code><\/pre>\n\n<p>..<\/p>\n\n<pre><code>package util.injection;\n\npublic class Function {\n\n    private static final long serialVersionUID = 7526472295622776147L;\n\n    public void test() {\n                System.out.println(\"Hello from original Function!\");\n    }\n\n    public int getID() {\n        return -1;\n    }\n\n    public void apply(float[] img, int x, int y) {\n\n    }\n\n    public double dot(double[] x, double[] y) {\n            return 0;\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 35621489,
+            "question_id": 35620908,
+            "last_edit_date": 1495821622
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9583e7add7525567f0f199ae4bce2844?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 29165,
+                "user_type": "registered",
+                "user_id": 78569,
+                "link": "https://stackoverflow.com/users/78569/imaskar",
+                "reputation": 3009,
+                "display_name": "Imaskar",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1535026982,
+            "creation_date": 1535023729,
+            "body": "<p>Since JDK11 you can do it directly with source code:<\/p>\n\n<pre><code>#!/usr/lib/jvm/jdk-11/bin/java --source 8\n\npublic class Oneliner {\n  public static void main(String[] args){\n    System.out.println(\"ok\");\n  }\n}\n<\/code><\/pre>\n\n<p>Note, that <code>--source<\/code> parameter is mandatory if file extension is not <code>.java<\/code>. Values 6-11 are supported, but 6 is marked as deprecated.<\/p>\n",
+            "answer_id": 51984775,
+            "question_id": 35620908,
+            "last_edit_date": 1535026982
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UmvnY.jpg?s=256",
+                "account_id": 476761,
+                "user_type": "registered",
+                "user_id": 887836,
+                "link": "https://stackoverflow.com/users/887836/alexander-oh",
+                "reputation": 25951,
+                "display_name": "Alexander Oh",
+                "accept_rate": 96
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1456388578,
+            "creation_date": 1456387159,
+            "body": "<p>No. It's not possible to put a she bang on any script and it will execute. Bash relies on the fact that the file with the shebang ignores lines starting with <code>#<\/code>. Hence any scripting language or byte code that can ignore the first line with the shebang will work.<\/p>\n\n<p>If your language doesn't support # as comment or ignores the first line needs to go through another scripting language that ignores that.<\/p>\n\n<p>That being said you can have bash scripts that have binary blobs inline that can be called. Game  installers do so.<\/p>\n",
+            "answer_id": 35621464,
+            "question_id": 35620908,
+            "last_edit_date": 1456388578
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                "account_id": 6588799,
+                "user_type": "registered",
+                "user_id": 5090758,
+                "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                "reputation": 2676,
+                "display_name": "William Rosenbloom",
+                "accept_rate": 46
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1533230584,
+            "creation_date": 1533230584,
+            "body": "<p>After two and a half years I have stumbled upon a more complete answer than was given in 2016. <strong>The Java binaries can be embedded within the executable, contrary to John Hascall's answer.<\/strong> <a href=\"https://coderwall.com/p/ssuaxa/how-to-make-a-jar-file-linux-executable\" rel=\"nofollow noreferrer\">This article<\/a> explains how this can be done in linux and unix like systems by <a href=\"http://www.linuxjournal.com/content/add-binary-payload-your-shell-scripts\" rel=\"nofollow noreferrer\">adding a binary payload to a shell script<\/a>.<\/p>\n\n<p>I will offer a short summary of the procedure.<\/p>\n\n<p><strong>Given<\/strong> an executable jar named <code>any_java_executable.jar<\/code>\n<br><strong>Given<\/strong> you want to create an executable named <code>my_executable<\/code>\n<br><strong>Given<\/strong> a script file named <code>basis.sh<\/code> with the following contents<\/p>\n\n<pre><code>#!/bin/sh\nMYSELF=`which \"$0\" 2&gt;/dev/null`\n[ $? -gt 0 -a -f \"$0\" ] &amp;&amp; MYSELF=\"./$0\"\njava=java\nif test -n \"$JAVA_HOME\"; then\n    java=\"$JAVA_HOME/bin/java\"\nfi\nexec \"$java\" $java_args -jar $MYSELF \"$@\"\nexit 1\n<\/code><\/pre>\n\n<p>The native executable can be created by running the following two commands.<\/p>\n\n<pre><code>cat basis.sh any_java_executable.jar &gt; my_executable;\nchmod +x my_executable;\n<\/code><\/pre>\n\n<p>Then <code>my_executable<\/code> is a native executable capable of running the java program without depending on the location of the jar file. It can be executed by running<\/p>\n\n<pre><code>./my_executable [arg1 [arg2 [arg3...]]]\n<\/code><\/pre>\n\n<p>and can be used anywhere as a CLI tool if placed in <code>/usr/local/bin<\/code>.<\/p>\n",
+            "answer_id": 51659146,
+            "question_id": 35620908
+        }
+    ],
+    "answer_comments": {
+        "35621039": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                    "account_id": 6588799,
+                    "user_type": "registered",
+                    "user_id": 5090758,
+                    "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                    "reputation": 2676,
+                    "display_name": "William Rosenbloom",
+                    "accept_rate": 46
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 35621039,
+                "edited": false,
+                "creation_date": 1533230732,
+                "comment_id": 90281881
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/IspsC.jpg?s=256",
+                    "account_id": 2326469,
+                    "user_type": "registered",
+                    "user_id": 2040863,
+                    "link": "https://stackoverflow.com/users/2040863/john-hascall",
+                    "reputation": 9444,
+                    "display_name": "John Hascall",
+                    "accept_rate": 96
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 35621039,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                    "account_id": 6588799,
+                    "user_type": "registered",
+                    "user_id": 5090758,
+                    "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                    "reputation": 2676,
+                    "display_name": "William Rosenbloom",
+                    "accept_rate": 46
+                },
+                "edited": false,
+                "creation_date": 1456386508,
+                "comment_id": 58924842
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                    "account_id": 6588799,
+                    "user_type": "registered",
+                    "user_id": 5090758,
+                    "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                    "reputation": 2676,
+                    "display_name": "William Rosenbloom",
+                    "accept_rate": 46
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 35621039,
+                "edited": false,
+                "creation_date": 1456386279,
+                "comment_id": 58924709
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/IspsC.jpg?s=256",
+                    "account_id": 2326469,
+                    "user_type": "registered",
+                    "user_id": 2040863,
+                    "link": "https://stackoverflow.com/users/2040863/john-hascall",
+                    "reputation": 9444,
+                    "display_name": "John Hascall",
+                    "accept_rate": 96
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 35621039,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                    "account_id": 6588799,
+                    "user_type": "registered",
+                    "user_id": 5090758,
+                    "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                    "reputation": 2676,
+                    "display_name": "William Rosenbloom",
+                    "accept_rate": 46
+                },
+                "edited": false,
+                "creation_date": 1456385948,
+                "comment_id": 58924512
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                    "account_id": 6588799,
+                    "user_type": "registered",
+                    "user_id": 5090758,
+                    "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                    "reputation": 2676,
+                    "display_name": "William Rosenbloom",
+                    "accept_rate": 46
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 35621039,
+                "edited": false,
+                "creation_date": 1456385802,
+                "comment_id": 58924448
+            }
+        ],
+        "35621464": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/UmvnY.jpg?s=256",
+                    "account_id": 476761,
+                    "user_type": "registered",
+                    "user_id": 887836,
+                    "link": "https://stackoverflow.com/users/887836/alexander-oh",
+                    "reputation": 25951,
+                    "display_name": "Alexander Oh",
+                    "accept_rate": 96
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 35621464,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                    "account_id": 6588799,
+                    "user_type": "registered",
+                    "user_id": 5090758,
+                    "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                    "reputation": 2676,
+                    "display_name": "William Rosenbloom",
+                    "accept_rate": 46
+                },
+                "edited": false,
+                "creation_date": 1456482978,
+                "comment_id": 58979081
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/2f2jp.png?s=256",
+                    "account_id": 6588799,
+                    "user_type": "registered",
+                    "user_id": 5090758,
+                    "link": "https://stackoverflow.com/users/5090758/william-rosenbloom",
+                    "reputation": 2676,
+                    "display_name": "William Rosenbloom",
+                    "accept_rate": 46
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 35621464,
+                "edited": false,
+                "creation_date": 1456482573,
+                "comment_id": 58978777
+            }
+        ],
+        "51659146": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/IspsC.jpg?s=256",
+                "account_id": 2326469,
+                "user_type": "registered",
+                "user_id": 2040863,
+                "link": "https://stackoverflow.com/users/2040863/john-hascall",
+                "reputation": 9444,
+                "display_name": "John Hascall",
+                "accept_rate": 96
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51659146,
+            "edited": false,
+            "creation_date": 1537421617,
+            "comment_id": 91779481
+        }]
+    }
+}

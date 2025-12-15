@@ -1,0 +1,90 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5809fb9263004516a60f579c04877ab3?s=256&d=identicon&r=PG",
+            "account_id": 1134168,
+            "user_type": "registered",
+            "user_id": 1119595,
+            "link": "https://stackoverflow.com/users/1119595/w25r",
+            "reputation": 882,
+            "display_name": "w25r"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/9268892/coding-against-os-specific-jres",
+        "last_activity_date": 1386093240,
+        "creation_date": 1329171525,
+        "answer_count": 2,
+        "title": "Coding Against OS Specific JREs",
+        "body": "<p>I have code that relies on the NTSystem class (com.sun.security.auth.module.NTSystem) which is found in rt.jar for Windows JREs.  But when I am compile my class on a Linux machine, it fails, because that class is not supplied with the Linux JDK/JRE.<\/p>\n\n<p>Now, when RUNNING the code, it makes sense that I would be unable to use the NTSystem class and it's functions.  But my code is smart enough to determine what OS it's running on, and to use the appropriate classes.<\/p>\n\n<p>Conversely, developing in Windows, I don't have access to com.sun.security.auth.module.UnixSystem.  Am I forced to use reflection to load and use these classes because of a compile time limitation?  Or is there a special rt.jar that has all the classes in it for building purposes?<\/p>\n\n<p>Thanks in advance.<\/p>\n",
+        "question_id": 9268892,
+        "tags": [
+            "java",
+            "windows",
+            "linux"
+        ],
+        "score": 4,
+        "is_answered": true,
+        "view_count": 1844
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/h8RJB.png?s=256",
+            "account_id": 2073508,
+            "user_type": "registered",
+            "user_id": 1847482,
+            "link": "https://stackoverflow.com/users/1847482/alexander",
+            "reputation": 2926,
+            "display_name": "Alexander",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 9268892,
+        "edited": false,
+        "creation_date": 1422896436,
+        "comment_id": 44919843
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d58ba93ec223d23b2fd6216aa52c5a6?s=256&d=identicon&r=PG",
+                "account_id": 2826194,
+                "user_type": "registered",
+                "user_id": 2428802,
+                "link": "https://stackoverflow.com/users/2428802/jmehrens",
+                "reputation": 11111,
+                "display_name": "jmehrens"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1386093240,
+            "creation_date": 1381945734,
+            "body": "<p>Create JAAS config files for each target platform or create <a href=\"http://docs.oracle.com/javase/7/docs/api/javax/security/auth/login/Configuration.html\" rel=\"nofollow\">entries<\/a> for each platform in a single JAAS config.  Then access the information through Java SE APIs without using the com.sun.* packages directly.  This can be performed via the <a href=\"http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/AcnOnly.html\" rel=\"nofollow\">Java Authentication and Authorization Service (JAAS)<\/a> (javax.security.auth.* and javax.security.auth.login.*).  Create a <a href=\"http://docs.oracle.com/javase/7/docs/technotes/guides/security/jgss/tutorials/LoginConfigFile.html\" rel=\"nofollow\">JAAS config file<\/a> with the following entry:<\/p>\n\n<pre><code>sampleApp {\n    com.sun.security.auth.module.NTLoginModule required debug=false;\n};\n<\/code><\/pre>\n\n<p>Save that entry as <code>sampleapp_jaas.config<\/code>.  Next set the system property so Java will look for the config file.<\/p>\n\n<pre><code>-Djava.security.auth.login.config==sampleapp_jaas.config\n<\/code><\/pre>\n\n<p>Note that the double equals has special meaning. See the <a href=\"http://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/login/ConfigFile.html\" rel=\"nofollow\">com.sun.security.auth.login.ConfigFile<\/a> for details on the load order.<\/p>\n\n<p>Then create LoginContext that will look for the entry in the JAAS config. Call login to populate the subject.  From there, you can access information using the subject API.  For instance the following example just list the groups assigned to the current user.<\/p>\n\n<pre><code>LoginContext l = new LoginContext(\"sampleApp\");\nl.login();\ntry {\n    Subject s = l.getSubject();\n    for (Principal p : s.getPrincipals()) {\n        System.out.println(p);\n    }\n} finally {\n    l.logout();\n}\n<\/code><\/pre>\n\n<p>Using this setup, Java will use the com.sun.security.auth.module.NTSystem class to get the information but none of your code will be hardwired to the non-standard APIs.<\/p>\n",
+            "answer_id": 19410292,
+            "question_id": 9268892,
+            "last_edit_date": 1386093240
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/53ee9941b3fefef67175daf212e62d41?s=256&d=identicon&r=PG",
+                "account_id": 23121,
+                "user_type": "registered",
+                "user_id": 57695,
+                "link": "https://stackoverflow.com/users/57695/peter-lawrey",
+                "reputation": 535107,
+                "display_name": "Peter Lawrey",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1329171786,
+            "creation_date": 1329171786,
+            "body": "<p>If you really need these OS specific classes, I would get the source for them, compile them and create your own small library to compile against. 9Or you can use a copy of the classes from different installations) <\/p>\n\n<p>I believe the OpenJDK has up to three flavours (including Solaris) so it wouldn't be too hard to create a simple library of them all.<\/p>\n",
+            "answer_id": 9268934,
+            "question_id": 9268892
+        }
+    ],
+    "answer_comments": {}
+}

@@ -1,0 +1,150 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f4df32e12789bc76a46ea40c50a7ca78?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 938288,
+            "user_type": "registered",
+            "user_id": 966823,
+            "link": "https://stackoverflow.com/users/966823/sprocket12",
+            "reputation": 5494,
+            "display_name": "sprocket12",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/21192751/best-practice-in-android-class-constructor",
+        "last_activity_date": 1389983059,
+        "creation_date": 1389981677,
+        "answer_count": 4,
+        "title": "Best practice in android class constructor",
+        "body": "<p>What is the correct way I should initialise my class in android, the class is called <code>Compilation<\/code> and it has all its values in the db.<\/p>\n\n<p>I can do the following :<\/p>\n\n<h1>1<\/h1>\n\n<pre><code>public Compilation(int id)\n{\n    // get db singleton here and fill all values\n    // however I feel this is bad OO because nobody knows I am doing this\n}\n<\/code><\/pre>\n\n<h1>2<\/h1>\n\n<pre><code>public Compilation(int id, SQLiteDatabase db)\n{\n    // use the provided db to get the info\n    // however now all calling classes will have to get the db for me\n}\n<\/code><\/pre>\n\n<h1>3<\/h1>\n\n<pre><code>// get all compilations at once\nSQLiteDatabase db = DatabaseHelper.getInstance().getReadableDatabase();\nCursor c = db.rawQuery(\"SELECT * FROM Compilation\", null);\n\nwhile(c.moveToNext())\n{\n    // get all params here\n    Compilation comp = new Compilation (a,b,c,d,e);\n}\n\npublic Compilation(a,b,c,d,e)\n{\n    // just assign all the values given to private vars\n}\n\nThe problem I see with this is that now the Compilation class is no longer so self contained, it needs another class to initialise it.\n<\/code><\/pre>\n\n<p>Which one is the proper way to do it?<\/p>\n",
+        "question_id": 21192751,
+        "tags": [
+            "java",
+            "android",
+            "class",
+            "constructor",
+            "dependencies"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 196
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/667ceb2bde7548ff392b8c4f1c7c72a4?s=256&d=identicon&r=PG",
+            "account_id": 442800,
+            "user_type": "registered",
+            "user_id": 833622,
+            "link": "https://stackoverflow.com/users/833622/sherif-elkhatib",
+            "reputation": 45962,
+            "display_name": "Sherif elKhatib",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 21192751,
+        "edited": false,
+        "creation_date": 1389982151,
+        "comment_id": 31910901
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/76a0d0bd331ad7b05f199871de330087?s=256&d=identicon&r=PG",
+                "account_id": 27259,
+                "user_type": "registered",
+                "user_id": 1205130,
+                "link": "https://stackoverflow.com/users/1205130/marek-szanyi",
+                "reputation": 2318,
+                "display_name": "Marek Szanyi",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1389982939,
+            "creation_date": 1389982939,
+            "body": "<p>The general rule in software design tells us that we should create Classes which have the minimum dependency on other parts of the software system. This way we end up with Classes which are better reusable.<\/p>\n\n<p>The first alternative you have proposed is the worst one because its create a very tight dependency on one specific data provider( sqlite ). Maintenance of such class can be a nightmare( Just imagine that the next release of Android will come with sqlite or mysql :) and you want to switch to mysql)<\/p>\n\n<p>The second one is kinda better if you would replace the constructor parameter from a Class to an Interface and thus creating something that we call <a href=\"http://en.wikipedia.org/wiki/Dependency_injection\" rel=\"nofollow\">Dependency injection<\/a> .However there are better ways of doing dependency injection on Android (check out for example <a href=\"http://square.github.io/dagger/\" rel=\"nofollow\">Dagger<\/a>)<\/p>\n\n<p>The third one seems to me as the best fit, since you don't create any dependency. Perhaps to ease the creation of such classes (and to make the code a little bit more \"enterprise\"), you could create a factory class which would create the instances of Compilation Class (more about this <a href=\"http://en.wikipedia.org/wiki/Factory_method_pattern\" rel=\"nofollow\">here<\/a> ) <\/p>\n\n<p>In the very end however this is not a question about Android best practices but about software design decisions which highly depend on what are you trying to do! <\/p>\n",
+            "answer_id": 21193091,
+            "question_id": 21192751
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f45f6390ed302362e23fb364deeee3c7?s=256&d=identicon&r=PG",
+                "account_id": 1241587,
+                "user_type": "registered",
+                "user_id": 1204061,
+                "link": "https://stackoverflow.com/users/1204061/elbuild",
+                "reputation": 4889,
+                "display_name": "elbuild",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1389983059,
+            "creation_date": 1389983059,
+            "body": "<p>All your options are correct, but I think a factory based approach will work fine. I've used it in different occasions. I just wrote down a skeleton of such an alternative approach.<\/p>\n\n<pre><code>public class CompilationFactory\n{\n\n// DB instance and/or cache implementation (HashMap based or via 3rd party lib)\n\nstatic \n{\n    // DB init stuff here \n    // if your app logic allows it you can also cache Compilation to avoid \n    // reading the DB multiple times\n}\n\npublic static Compilation compilationForId(int id)\n{\n    // either read your Compilation from the DB or from the precomputed cache\n}\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 21193123,
+            "question_id": 21192751
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/352105646dd61c8da3ac3e7e3818b533?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3664310,
+                "user_type": "registered",
+                "user_id": 3053234,
+                "link": "https://stackoverflow.com/users/3053234/user3053234",
+                "reputation": 385,
+                "display_name": "user3053234",
+                "accept_rate": 38
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1389982026,
+            "creation_date": 1389982026,
+            "body": "<p>I wouldn't do it this way, I'd use an empty constructor then use an Application (<a href=\"http://developer.android.com/reference/android/app/Application.html\" rel=\"nofollow\">http://developer.android.com/reference/android/app/Application.html<\/a>) and serve my self the DB from the Application so I don't have to keep instantiating. Might be too advanced if you're doing a school project but yeah..<\/p>\n",
+            "answer_id": 21192839,
+            "question_id": 21192751
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/sOEVX.jpg?s=256",
+                "account_id": 3275558,
+                "user_type": "registered",
+                "user_id": 2757729,
+                "link": "https://stackoverflow.com/users/2757729/nathaniel-d-waggoner",
+                "reputation": 2896,
+                "display_name": "Nathaniel D. Waggoner",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1389982734,
+            "creation_date": 1389982734,
+            "body": "<p>This depends slightly on the implementation of your Database - if you're using content providers or not, etc.<\/p>\n\n<p>All of the provided examples are \"correct\" from the standpoint that they will work.  That said number 3 is a red flag to me.  Without further code to clarify you run the risk of calling \"getReadableDatabase\" more than once, which is unescesary.<\/p>\n\n<p>Beyond that point, it's difficult to know exactly what to recommend you here.  There are fancy ways to do this, and they might be overkill for you depending on your projects nature.<\/p>\n\n<p>I'm going to operate under the assumption that you have a Class which manages Compilations.  Something like, and keepping it simple in this case would be the following:<\/p>\n\n<pre><code>public class CompliationManager() {\n\n    private ArrayList&lt;Compilation&gt; myCompilations = new ArrayList&lt;Compilation&gt;();\n    SQLiteDatabase db; \n    public CompilationManager() {\n     db = DatabaseHelper.getInstance().getReadableDatabase();\n    }\n    public void loadCompliations() {\n\n      Cursor c = db.rawQuery(\"SELECT * FROM Compilation\", null);\n      while(c.moveToNext()) {\n         Compilation comp = new Compilation(c);\n         myCompilations.add(comp);\n      }    \n      c.close();\n    }    \n\n}\n\n\npublic class Compilation() {\n\n    public Compilation(Cursor c) {\n      // do the actual retrival, setting of fields etc...\n      getCompilationFromCursor();  \n    }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 21193039,
+            "question_id": 21192751
+        }
+    ],
+    "answer_comments": {"21192839": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f4df32e12789bc76a46ea40c50a7ca78?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 938288,
+            "user_type": "registered",
+            "user_id": 966823,
+            "link": "https://stackoverflow.com/users/966823/sprocket12",
+            "reputation": 5494,
+            "display_name": "sprocket12",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 21192839,
+        "edited": false,
+        "creation_date": 1389992561,
+        "comment_id": 31916309
+    }]}
+}

@@ -1,0 +1,75 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Gxeex.jpg?s=256",
+            "account_id": 6456799,
+            "user_type": "registered",
+            "user_id": 5001909,
+            "link": "https://stackoverflow.com/users/5001909/nailiebreak",
+            "reputation": 73,
+            "display_name": "nailiebreak",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/68327372/spring-data-jpa-hibernate-save-children-entities-without-finding-parent-firstl",
+        "last_activity_date": 1626714213,
+        "creation_date": 1625917310,
+        "answer_count": 2,
+        "title": "Spring Data JPA + Hibernate save children entities without finding parent firstly",
+        "body": "<p>In my opinion, if you want to save children entities, you must find their parent firstly. But it's not true. Following is an example.<\/p>\n<p><strong>Person table<\/strong><\/p>\n<pre><code>public class Person {\n  @Id\n  @GeneratedValue(strategy = GenerationType.IDENTITY)\n  private Long id;\n  \n  @OneToMany(mappedBy = &quot;person&quot;, fetch = FetchType.LAZY)\n  private List&lt;Book&gt; books;\n}\n<\/code><\/pre>\n<p><strong>Book table<\/strong><\/p>\n<pre><code>public class Book {\n  @Id\n  @GeneratedValue(strategy = GenerationType.IDENTITY)\n  private Long id;\n\n  private String name;\n\n  @ManyToOne(fetch = FetchType.LAZY, optional = false)\n  @JoinColumn(name = &quot;person_id&quot;, nullable = false)\n  private Person person;\n}\n<\/code><\/pre>\n<p><strong>BookRepository<\/strong><\/p>\n<pre><code>public interface BookRepository extends CrudRepository&lt;Book, Long&gt; {}\n<\/code><\/pre>\n<p><strong>persist process<\/strong><\/p>\n<pre><code>// the person(id=1) is in the database.\nPerson p = new Person();\np.setId(1);\n\nBook book = new Book();\nbook.setPerson(p);\nbook.setName(&quot;book&quot;);\n\nbookRepository.save(book); // no error throws\n<\/code><\/pre>\n<p>I want to know why the last statement is success. The person instance is created manually and is not retrieved from database by Spring Data JPA, I think it means the state of person instance is transient.<\/p>\n",
+        "question_id": 68327372,
+        "tags": [
+            "java",
+            "hibernate",
+            "spring-data-jpa",
+            "persistence",
+            "many-to-one"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 772
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/cADAp.jpg?s=256",
+                "account_id": 10859295,
+                "user_type": "registered",
+                "user_id": 7984621,
+                "link": "https://stackoverflow.com/users/7984621/s-anushan",
+                "reputation": 786,
+                "display_name": "S. Anushan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1625931074,
+            "creation_date": 1625931074,
+            "body": "<p>Based on your logic Book and person are new then you have to create those objects. Why you think it should come from database. If you want retrieve the user by findbyId then set the newly created book in List and save the user object behind the scenes it will do the updation in the database for that user.<\/p>\n",
+            "answer_id": 68329130,
+            "question_id": 68327372
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/0a81b8b5d21688d12a820dd0516853fd?s=256&d=identicon&r=PG",
+                "account_id": 179640,
+                "user_type": "registered",
+                "user_id": 412446,
+                "link": "https://stackoverflow.com/users/412446/christian-beikov",
+                "reputation": 16603,
+                "display_name": "Christian Beikov",
+                "accept_rate": 41
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1626714213,
+            "creation_date": 1626714213,
+            "body": "<p>You can use <code>personRepository.getOne(1)<\/code> which will return a proxy for a person with id 1. Setting this object then as person on the book will do what you are looking for.<\/p>\n",
+            "answer_id": 68444397,
+            "question_id": 68327372
+        }
+    ],
+    "answer_comments": {}
+}

@@ -1,0 +1,113 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-pRtfFuGwRC4/AAAAAAAAAAI/AAAAAAAAAJs/n7GVlpwunOQ/s256-rj/photo.jpg",
+            "account_id": 6241364,
+            "user_type": "registered",
+            "user_id": 4854882,
+            "link": "https://stackoverflow.com/users/4854882/jamie-a-reade",
+            "reputation": 117,
+            "display_name": "Jamie A-Reade"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/51565017/call-function-from-class-for-many-classes-without-resetting-values",
+        "last_activity_date": 1532964236,
+        "creation_date": 1532722774,
+        "answer_count": 3,
+        "title": "Call function from class for many classes without resetting values",
+        "body": "<p>so basically I have several different Java classes in Android studio. One of these classes contains a host of functions that I need to call from different classes based on what the user selects. My issue is that I need the class that I'm calling these functions from, to remember its variable values. This is an exact example of the class that contains all of the functions that I  need to call, one important variable is Logged.<\/p>\n\n<p>A solution would have been to call the class from every class that needs access to it, but that would require Classy classy= new Classy(); which would then reset the variables to null.<\/p>\n\n<pre><code>public class Classy {\nprivate String snumber;\nprivate String spassword;\npublic Context context;\nprivate boolean logged = false;\n\npublic String getSnumber() {\n    return snumber;\n}\n\npublic String getSpassword() {\n    return spassword;\n}\n\npublic void setContext(Context context) {\n    this.context = context;\n}\n\npublic void setSnumber(String snumber) {\n    this.snumber = snumber;\n}\n\npublic void setSpassword(String spassword) {\n    this.spassword = spassword;\n}\n\npublic boolean getLogged() {\n    return logged;\n}\n\npublic void setLogged(boolean logged) {\n    this.logged = logged;\n}\n\npublic boolean Read() {\n\n    try {\n        InputStream inputStream = context.openFileInput(\"COHFTW.txt\");\n        if (inputStream != null) {\n            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);\n            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);\n            String receiveString = \"\";\n            StringBuilder stringBuilder = new StringBuilder();\n\n            while ((receiveString = bufferedReader.readLine()) != null) {\n                stringBuilder.append(receiveString);\n            }\n            inputStream.close();\n            String contents = stringBuilder.toString();\n            if (contents.isEmpty()) {\n                return false;\n            } else {\n                snumber = contents.substring(0, contents.indexOf(\"#\"));\n                spassword = contents.substring(contents.indexOf(\"#\") + 1);\n            }\n        }\n    } catch (FileNotFoundException e) {\n        System.out.println(\"_______________File Not Found_________________\");\n        return false;\n\n    } catch (IOException e) {\n        System.out.println(\"________________File Unreadable________________\");\n        return false;\n\n    }\n\n    return true;\n}\n\n\npublic boolean ClearFile() {\n\n\n    try {\n        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(\"COHFTW.txt\", Context.MODE_PRIVATE));\n\n        outputStreamWriter.write(\"\");\n        outputStreamWriter.close();\n        System.out.println(\"________________________File Cleared________________\");\n        return true;\n\n    } catch (Exception e) {\n        System.out.println(\"________________Error:\" + e + \"________________\");\n\n        return false;\n\n    }\n\n}\n\n\npublic boolean Write() {\n\n    System.out.println(\"________________Writing\" + snumber + \" \" + spassword + \"________________\");\n\n    try {\n        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(\"COHFTW.txt\", Context.MODE_PRIVATE));\n\n        outputStreamWriter.write(snumber + \"#\" + spassword);\n        outputStreamWriter.close();\n        System.out.println(\"________________________Saved: \" + snumber + \"#\" + spassword + \"________________\");\n        return true;\n\n    } catch (Exception e) {\n        System.out.println(\"________________Error:\" + e + \"________________\");\n\n        return false;\n\n    }\n\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>Any help would be appreciated, because currently I'm reading from a text-file every time I want to access a web-page (Name and password are taken from the text-file) and it's causing some serious lag.<\/p>\n",
+        "question_id": 51565017,
+        "tags": [
+            "java",
+            "android",
+            "android-context",
+            "function-call",
+            "public-method"
+        ],
+        "score": 0,
+        "accepted_answer_id": 51565284,
+        "is_answered": true,
+        "view_count": 1190
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Zpacy.jpg?s=256",
+                "account_id": 1207648,
+                "user_type": "registered",
+                "user_id": 1176870,
+                "link": "https://stackoverflow.com/users/1176870/chris-stillwell",
+                "reputation": 10577,
+                "display_name": "Chris Stillwell",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1532964236,
+            "creation_date": 1532724145,
+            "body": "<p>This sounds like a perfect use case for a Singleton class!<\/p>\n\n<p>First create a <em>private static<\/em> instance of your class.<\/p>\n\n<pre><code>public class Classy {\n    private static Classy instance;\n<\/code><\/pre>\n\n<p>Next create a <strong>private <em>constructor<\/em><\/strong> and <strong>public <em>method<\/em><\/strong> to call that constructor<\/p>\n\n<pre><code>private Classy(){ /*... */ }\n\npublic void instantiate(){\n    if(instance != null) return;\n    instance = new Classy();\n} \n<\/code><\/pre>\n\n<p>Finally create a method to get your singleton<\/p>\n\n<pre><code>public static Classy getInstance() {\n    // Optionally include a null check\n    // if(instance == null) instantiate();\n    return instance;\n}\n<\/code><\/pre>\n\n<p>The end result allows you to access your values across any class like so:<\/p>\n\n<pre><code>Classy.getInstance().getSpassword()\n<\/code><\/pre>\n",
+            "answer_id": 51565284,
+            "question_id": 51565017,
+            "last_edit_date": 1532964236
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dd60e3263a606d9c3cd420c48466f5a1?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3950740,
+                "user_type": "registered",
+                "user_id": 3261253,
+                "link": "https://stackoverflow.com/users/3261253/agillgilla",
+                "reputation": 889,
+                "display_name": "agillgilla"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1532723432,
+            "creation_date": 1532723432,
+            "body": "<p>Your wording is a little weird in the question, but if I understand correctly I think you want to use <strong>class variables<\/strong> instead of <strong>instance variables<\/strong>.  All you have to do is add the <code>static<\/code> keyword to your variables and methods that you define in the class and access the variables by the <strong>class<\/strong> instead of the <strong>instance<\/strong>.\n<hr>\nLike this:<\/p>\n\n<pre><code>private static String snumber;\nprivate static String spassword;\nprivate static boolean logged = false;\npublic static String getSnumber() {\n    return Classy.snumber;\n}\n\npublic static String getSpassword() {\n    return Classy.spassword;\n}\n\npublic static void setContext(Context context) {\n    Classy.context = context;\n}\n\npublic static void setSnumber(String snumber) {\n    Classy.snumber = snumber;\n}\n\npublic static void setSpassword(String spassword) {\n    Classy.spassword = spassword;\n}\n\npublic static boolean getLogged() {\n    return Classy.logged;\n}\n\npublic static void setLogged(boolean logged) {\n    Classy.logged = logged;\n}\n/* The rest of your code */\n<\/code><\/pre>\n\n<p>This way, the variables are not dependent on <strong>the instance of the class<\/strong> you create, instead they are only owned by <strong>the class itself<\/strong>.<\/p>\n\n<p>But now you cannot do <code>Classy classy = new Classy();<\/code> because that will make a new <strong>instance<\/strong> and it will have no <strong>instance variables<\/strong>.<\/p>\n\n<p><strong><em>Happy Coding!<\/em><\/strong><\/p>\n",
+            "answer_id": 51565147,
+            "question_id": 51565017
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1182b1d5518a596d4e8cfe0567a65c4d?s=256&d=identicon&r=PG",
+                "account_id": 2792262,
+                "user_type": "registered",
+                "user_id": 2402272,
+                "link": "https://stackoverflow.com/users/2402272/john-bollinger",
+                "reputation": 190832,
+                "display_name": "John Bollinger",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1532724033,
+            "creation_date": 1532724033,
+            "body": "<blockquote>\n<p>I have several different Java classes in Android studio.\nOne of these classes contains a host of functions that I need to call\nfrom different classes based on what the user selects. My issue is\nthat I need the class that I'm calling these functions from, to\nremember its variable values. [...]<\/p>\n<p>A solution would have been to call the class from every class that\nneeds access to it, but that would require <code>Classy classy= new Classy();<\/code> which would then reset the variables to null.<\/p>\n<\/blockquote>\n<p>Class <code>Classy<\/code>'s methods are all instance methods, not class methods, so the <em>only<\/em> way you can invoke them is on an instance.  Each instance will retain the values of its variables for its lifetime, subject to changes made via its methods (or directly, in the case of <code>public<\/code> variable <code>context<\/code>).<\/p>\n<p>The solution, then, is to create <em>and retain<\/em> a separate <code>Classy<\/code> instance in each scope that requires distinct <code>Classy<\/code> values, but not more than one.  In particular, from your description, it sounds like methods of other classes indeed should not create their own instances, just as you say.<\/p>\n<p>The question may then boil down to how to retain <code>Classy<\/code> instances across methods, but that's pretty simple: you use an instance variable, or possibly a class variable, of some other class.  Perhaps one for each other class that uses <code>Classy<\/code>, if each needs to retain its own set of <code>Classy<\/code> variables.  Or if every other class should use the same <code>Classy<\/code> instance, then you could also make it a class variable of the <code>Classy<\/code> class itself -- that's the core of the &quot;Singleton&quot; pattern.<\/p>\n",
+            "answer_id": 51565261,
+            "question_id": 51565017,
+            "last_edit_date": 1592644375
+        }
+    ],
+    "answer_comments": {"51565284": [{
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-pRtfFuGwRC4/AAAAAAAAAAI/AAAAAAAAAJs/n7GVlpwunOQ/s256-rj/photo.jpg",
+            "account_id": 6241364,
+            "user_type": "registered",
+            "user_id": 4854882,
+            "link": "https://stackoverflow.com/users/4854882/jamie-a-reade",
+            "reputation": 117,
+            "display_name": "Jamie A-Reade"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 51565284,
+        "edited": false,
+        "creation_date": 1533475586,
+        "comment_id": 90350758
+    }]}
+}

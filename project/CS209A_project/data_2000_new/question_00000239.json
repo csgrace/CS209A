@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-VHitMWgoQFk/AAAAAAAAAAI/AAAAAAAAAAc/nhYeEh8kDe0/s256-rj/photo.jpg",
+            "account_id": 11825870,
+            "user_type": "registered",
+            "user_id": 8653771,
+            "link": "https://stackoverflow.com/users/8653771/dranreb-benedicto",
+            "reputation": 89,
+            "display_name": "Dranreb Benedicto",
+            "accept_rate": 62
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48992320/fixing-image-memory-leaks-with-glide",
+        "last_activity_date": 1519663432,
+        "creation_date": 1519660685,
+        "answer_count": 1,
+        "title": "Fixing Image Memory Leaks with Glide",
+        "body": "<p>I have an app that functions as this:<\/p>\n\n<p>User opens app -> Activity Contains an ImageView that when clicked... -> Opens an image viewer with cropper -> Changes the image in the ImageView based on the selected image's URI<\/p>\n\n<p>This all works. I just noticed that when loading full resolution images, my app lags and sometimes crashes. This could be due to the image's size/resolution in which I have no idea how to fix.<\/p>\n\n<p>My Code:<\/p>\n\n<pre><code>private void goSelectImage(){\n    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M){\n        if (ContextCompat.checkSelfPermission(CompleteProfileActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){\n            Toast.makeText(this, \"Access Denied\", Toast.LENGTH_LONG).show();\n            ActivityCompat.requestPermissions(CompleteProfileActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},1);\n        } else {\n            BringImagePicker();\n        }\n\n    } else {\n        BringImagePicker();\n    }\n}\n\nprivate void BringImagePicker() {\n    // start picker to get image for cropping and then use the image in cropping activity\n    CropImage.activity()\n            .setGuidelines(CropImageView.Guidelines.ON)\n            .setAspectRatio(1,1)\n            .start(CompleteProfileActivity.this);\n}\n\n//CROP FUNCTIONALITY - ESSENTIAL\n@Override\npublic void onActivityResult(int requestCode, int resultCode, Intent data) {\n    if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {\n        CropImage.ActivityResult result = CropImage.getActivityResult(data);\n        if (resultCode == RESULT_OK) {\n            mainImageUri = result.getUri();\n            //Bitmap bitmap = BitmapFactory.decodeResource(mainImageUri);\n            imgProfile.setImageURI(mainImageUri);\n\n            //isChanged = true;\n\n        } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {\n            Exception error = result.getError();\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Noticed I tried <code>Bitmap bitmap = BitmapFactory.decodeResource(mainImageUri);<\/code> which didn't somewhat worked. Is there any code that can help me reduce the image's display resolution in the ImageView? Sorry for asking such broad question, I'm just starting in Android Studio.<\/p>\n",
+        "question_id": 48992320,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 943,
+        "last_edit_date": 1519661698
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/209db164a95dd90dcd8c3810776efc49?s=256&d=identicon&r=PG",
+            "account_id": 4012734,
+            "user_type": "registered",
+            "user_id": 3305685,
+            "link": "https://stackoverflow.com/users/3305685/gut",
+            "reputation": 331,
+            "display_name": "Gut"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1519663432,
+        "creation_date": 1519663432,
+        "body": "<p>Your call to <code>imgProfile.setImageURI(mainImageUri);<\/code> will decode the bitmap from the UI thread.<\/p>\n\n<p><a href=\"https://developer.android.com/reference/android/widget/ImageView.html#setImageURI(android.net.Uri)\" rel=\"nofollow noreferrer\">https://developer.android.com/reference/android/widget/ImageView.html#setImageURI(android.net.Uri)<\/a><\/p>\n\n<p>See the official documentation to know how to load bitmap efficiently :<\/p>\n\n<p><a href=\"https://developer.android.com/topic/performance/graphics/load-bitmap.html\" rel=\"nofollow noreferrer\">https://developer.android.com/topic/performance/graphics/load-bitmap.html<\/a><\/p>\n",
+        "answer_id": 48993165,
+        "question_id": 48992320
+    }],
+    "answer_comments": {}
+}

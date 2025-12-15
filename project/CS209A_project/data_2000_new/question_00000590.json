@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fdf3f20ddc6254919e4bb1fdabd9f0f5?s=256&d=identicon&r=PG",
+            "account_id": 1150410,
+            "user_type": "registered",
+            "user_id": 1132260,
+            "link": "https://stackoverflow.com/users/1132260/bonuslord",
+            "reputation": 463,
+            "display_name": "BonusLord",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26532346/prevent-proguard-from-obfuscating-overriden-method",
+        "last_activity_date": 1414097542,
+        "creation_date": 1414080220,
+        "answer_count": 1,
+        "title": "Prevent Proguard from obfuscating overriden method",
+        "body": "<p>I'm using this block in my Proguard configuration to prevent methods annotated with @AccessedViaReflection from being obfuscated and it works fine in simple cases:<\/p>\n\n<pre><code>-keepclassmembers class * {\n    @com.mimvista.AccessedViaReflection &lt;fields&gt;;\n    @com.mimvista.AccessedViaReflection &lt;methods&gt;;\n    @com.mimvista.AccessedViaReflection &lt;init&gt;(...);\n}\n<\/code><\/pre>\n\n<p>However, when a class overrides a method annotated with @AccessedViaReflection and narrows the return type, the overridden method gets obfuscated.  (This problem ONLY happens if the return type is narrowed.) For example:<\/p>\n\n<pre><code>public class A {\n   @AccessedViaReflection\n   public Object get() {return null;}\n}\n\npublic class B extends A {\n   @Override\n   public String get() {return \"\";}\n}\n<\/code><\/pre>\n\n<p>In this case, the 'get()' method of B ends up getting obfuscated by Proguard.  (Actually, the resulting class file ends up with 2 methods.  One called get() that returns Object and one called a() that returns String.)  This is not desirable and breaks some of our reflection code.  Is there any way to make the annotation apply to narrowed overrides?<\/p>\n",
+        "question_id": 26532346,
+        "tags": [
+            "java",
+            "reflection",
+            "proguard",
+            "obfuscation"
+        ],
+        "score": 0,
+        "accepted_answer_id": 26537254,
+        "is_answered": true,
+        "view_count": 867
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b74805b9e0096d4ad17e585ef190b74b?s=256&d=identicon&r=PG",
+            "account_id": 229619,
+            "user_type": "registered",
+            "user_id": 492694,
+            "link": "https://stackoverflow.com/users/492694/eric-lafortune",
+            "reputation": 45726,
+            "display_name": "Eric Lafortune"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1414097542,
+        "creation_date": 1414097542,
+        "body": "<p>You'll have to annotate that method as well. The javac compiler has added the extra synthetic method, to properly override the base method. As far as ProGuard or the JVM are concerned, your method is just a method like any other, so it is obfuscated.<\/p>\n",
+        "answer_id": 26537254,
+        "question_id": 26532346
+    }],
+    "answer_comments": {}
+}

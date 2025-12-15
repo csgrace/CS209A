@@ -1,0 +1,73 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/649821cb51ef40f0b6c9bf87fcd4c08e?s=256&d=identicon&r=PG",
+            "account_id": 5334,
+            "user_type": "registered",
+            "user_id": 8528,
+            "link": "https://stackoverflow.com/users/8528/spencer-kormos",
+            "reputation": 8491,
+            "display_name": "Spencer Kormos",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22871991/trying-to-strip-namespace-from-xml-before-validating-using-streaming-parser-sjs",
+        "last_activity_date": 1396830590,
+        "creation_date": 1396641611,
+        "answer_count": 1,
+        "title": "Trying to strip namespace from XML before validating using Streaming parser (SJSXP)",
+        "body": "<p>I'm trying to ignore the namespaces provided in the root element of an XML file, in order to validate against an external schema. Unfortunately, I cannot change some of the items, as this is a heavily intertwined legacy system. <\/p>\n\n<p>I've read (here on SO) that I should be able to use filters around the input XML, but it doesn't seem to work and feel like I'm missing something. When I run the validation, I get the following error message:<\/p>\n\n<p>org.xml.sax.SAXParseException: cvc-elt.1: Cannot find the declaration of element 'MY_ROOT_ELEMENT'.<\/p>\n\n<p>Here's the beginning of the XML file with the namespace info:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?&gt;\n&lt;MY_ROOT_ELEMENT xmlns=\"http://www.mycompany.net/somename\" \n  schemaVersion=\"2.0.0\" \n  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  xsi:schemaLocation=\"http://www.mycompany.net/somename \n                      myschema.xsd\"&gt;\n    ...\n&lt;/MY_ROOT_ELEMENT&gt;\n<\/code><\/pre>\n\n<p>Here's the accompanying beginning of the schema where MY_ROOT_ELEMENT is defined:<\/p>\n\n<pre><code>&lt;xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n  elementFormDefault=\"qualified\" \n  attributeFormDefault=\"unqualified\"&gt;\n    &lt;xs:element name=\"MY_ROOT_ELEMENT\" type=\"MY_ROOT_ELEMENT\"/&gt;\n<\/code><\/pre>\n\n<p>The StreamReaderDelegate which is used to ignore the namespace:<\/p>\n\n<pre><code>private static final class NoNamespaceStreamReaderDelegate extends StreamReaderDelegate {\n    NoNamespaceStreamReaderDelegate(XMLStreamReader reader) {\n        super(reader);\n    }\n\n    @Override\n    public NamespaceContext getNamespaceContext() {\n        return super.getNamespaceContext();\n    }\n\n    @Override\n    public int getNamespaceCount() {\n        return 1;\n    }\n\n    @Override\n    public String getNamespacePrefix(int index) {\n        if (index == 0) {\n            return \"xsi\";\n        }\n\n        throw new NullPointerException();\n    }\n\n    @Override\n    public String getNamespaceURI() {\n        return null;\n    }\n\n    @Override\n    public String getNamespaceURI(String prefix) {\n        if (\"xsi\".equals(prefix)) {\n            return XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;\n        }\n        return null;\n    }\n\n    @Override\n    public String getNamespaceURI(int index) {\n        if (index == 0) {\n            return XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;\n        }\n        return null;\n    }\n}\n<\/code><\/pre>\n\n<p>And lastly, how the validation is called:<\/p>\n\n<pre><code>// reads from the classpath\nXMLStreamReader reader = createReaderFromSource();\nSchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);\nSchema schema = sf.newSchema(inputSource.getSchema());\nSource readerSource = new StAXSource(new NoNamespaceStreamReaderDelegate(reader));\n\nValidator validator = schema.newValidator();\nvalidator.validate(readerSource);\n<\/code><\/pre>\n",
+        "question_id": 22871991,
+        "tags": [
+            "java",
+            "xml",
+            "xsd-validation",
+            "stax",
+            "sjsxp"
+        ],
+        "score": 0,
+        "accepted_answer_id": 22901761,
+        "is_answered": true,
+        "view_count": 932,
+        "last_edit_date": 1396830045
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/f6pBp.gif?s=256",
+            "account_id": 3768354,
+            "user_type": "registered",
+            "user_id": 3131203,
+            "link": "https://stackoverflow.com/users/3131203/keshlam",
+            "reputation": 8076,
+            "display_name": "keshlam",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 22871991,
+        "edited": false,
+        "creation_date": 1396755190,
+        "comment_id": 34929489
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/649821cb51ef40f0b6c9bf87fcd4c08e?s=256&d=identicon&r=PG",
+            "account_id": 5334,
+            "user_type": "registered",
+            "user_id": 8528,
+            "link": "https://stackoverflow.com/users/8528/spencer-kormos",
+            "reputation": 8491,
+            "display_name": "Spencer Kormos",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1396830590,
+        "creation_date": 1396830590,
+        "body": "<p>Posting this for posterity's sake.<\/p>\n\n<p>Seems like the answer is to set the \"IS_NAMESPACE_AWARE\" property on the XMLInputFactory to false, and then use the StreamReaderDelegate to make sure the xsi:schemaLocation is ignored. Many wrapper libraries make this part of their API, but for <a href=\"http://www.java-tips.org/java-ee-tips/enterprise-java-beans/introducing-the-sun-java-streaming-xml-p.html\" rel=\"nofollow\">the default StAX implementation<\/a>, you need to set the property.<\/p>\n\n<p>Once I declared the following, and implemented the Delegate, everything worked like a charm.<\/p>\n\n<pre><code>XMLInputFactory factory = XMLInputFactory.newInstance();\nfactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.TRUE);\n<\/code><\/pre>\n",
+        "answer_id": 22901761,
+        "question_id": 22871991
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,174 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4d4c5200e64564047976e390fa9ed1cc?s=256&d=identicon&r=PG",
+            "account_id": 162919,
+            "user_type": "registered",
+            "user_id": 384706,
+            "link": "https://stackoverflow.com/users/384706/cratylus",
+            "reputation": 54314,
+            "display_name": "Cratylus",
+            "accept_rate": 64
+        },
+        "closed_date": 1355409777,
+        "link": "https://stackoverflow.com/questions/13827887/are-there-things-that-is-bad-idea-in-to-do-via-jni",
+        "last_activity_date": 1355307776,
+        "creation_date": 1355257346,
+        "answer_count": 2,
+        "title": "Are there things that is bad idea in to do via JNI?",
+        "body": "<p>Are there any kind of things we should <strong>not<\/strong> do from JNI call? What are these?<br>\nFor example, I need to use a C++ library which under the hood does blocking and non-blocking I/O calls.<br>\nAre there any caveats I should be aware in these cases? I also know that the same functionality is offered by a script (not sure the actual scripting language though). Would that be a better alternative (to call script from <code>Java<\/code>)? If yes why?<\/p>\n",
+        "question_id": 13827887,
+        "tags": [
+            "java",
+            "linux",
+            "io",
+            "java-native-interface",
+            "blocking"
+        ],
+        "score": -1,
+        "closed_reason": "not a real question",
+        "is_answered": true,
+        "view_count": 236
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9870a37447a4ae811096e8e7d10ed3f9?s=256&d=identicon&r=PG",
+                "account_id": 123958,
+                "user_type": "registered",
+                "user_id": 318758,
+                "link": "https://stackoverflow.com/users/318758/joni",
+                "reputation": 111769,
+                "display_name": "Joni",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1355272897,
+            "creation_date": 1355272897,
+            "body": "<p>JNI does not restrict what you can do in many ways, except when you use <a href=\"http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/functions.html#GetPrimitiveArrayCritical\" rel=\"nofollow\"><code>GetPrimitiveArrayCritical<\/code> and <code>GetStringCritical<\/code><\/a>:<\/p>\n\n<blockquote>\n  <p>After calling <code>GetPrimitiveArrayCritical<\/code>, the native code should not\n  run for an extended period of time before it calls\n  <code>ReleasePrimitiveArrayCritical<\/code>. We must treat the code inside this pair\n  of functions as running in a \"critical region.\" Inside a critical\n  region, native code must not call other JNI functions, or any system\n  call that may cause the current thread to block and wait for another\n  Java thread. (For example, the current thread must not call read on a\n  stream being written by another Java thread.)<\/p>\n<\/blockquote>\n\n<p>Otherwise you are pretty much free to do what ever you want, bar things that change how the JVM and the OS interact (like <a href=\"http://javajiggle.com/2008/01/06/if-jni-based-application-is-crashing-check-signal-handling/\" rel=\"nofollow\">replacing the JVM signal handlers<\/a>).<\/p>\n\n<p>You also ask if you should run a script instead of calling native functions directly. It is safer to execute an external process if you don't know what exactly the C++ library will do, but it's also less convenient (you need to establish a way to communicate) and probably slower than making the call in the same process.<\/p>\n",
+            "answer_id": 13830943,
+            "question_id": 13827887
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f41ea8d86f7a9cc950aaa0e24b9b2cea?s=256&d=identicon&r=PG",
+                "account_id": 475994,
+                "user_type": "registered",
+                "user_id": 886653,
+                "link": "https://stackoverflow.com/users/886653/pavel-zdenek",
+                "reputation": 7283,
+                "display_name": "Pavel Zdenek",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1355307776,
+            "creation_date": 1355307776,
+            "body": "<p>From my personal experience, bad idea is using bigger-than-usual 3rd-party library as a black box, not knowing what exactly is going on in it. Threading, I/O, hardware APIs access, long running JNI calls, and worst of all, custom memory management (instead of standard lib malloc/free). Hairy problems may occur, including JVM reporting memory leaks and exceptions in strange places, and/or inexplicable crashes. With one such library (huge OpenGL engine) we had to dissect and take the external process approach. It communicated via named pipes and was surprisingly fast. Lesson to take: always know what the native lib is doing under the hood, which isn't that much necessary with JARs.<\/p>\n",
+            "answer_id": 13837600,
+            "question_id": 13827887
+        }
+    ],
+    "answer_comments": {
+        "13837600": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f41ea8d86f7a9cc950aaa0e24b9b2cea?s=256&d=identicon&r=PG",
+                    "account_id": 475994,
+                    "user_type": "registered",
+                    "user_id": 886653,
+                    "link": "https://stackoverflow.com/users/886653/pavel-zdenek",
+                    "reputation": 7283,
+                    "display_name": "Pavel Zdenek",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 13837600,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4d4c5200e64564047976e390fa9ed1cc?s=256&d=identicon&r=PG",
+                    "account_id": 162919,
+                    "user_type": "registered",
+                    "user_id": 384706,
+                    "link": "https://stackoverflow.com/users/384706/cratylus",
+                    "reputation": 54314,
+                    "display_name": "Cratylus",
+                    "accept_rate": 64
+                },
+                "edited": false,
+                "creation_date": 1355389114,
+                "comment_id": 19077022
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4d4c5200e64564047976e390fa9ed1cc?s=256&d=identicon&r=PG",
+                    "account_id": 162919,
+                    "user_type": "registered",
+                    "user_id": 384706,
+                    "link": "https://stackoverflow.com/users/384706/cratylus",
+                    "reputation": 54314,
+                    "display_name": "Cratylus",
+                    "accept_rate": 64
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13837600,
+                "edited": false,
+                "creation_date": 1355331273,
+                "comment_id": 19057285
+            }
+        ],
+        "13830943": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9870a37447a4ae811096e8e7d10ed3f9?s=256&d=identicon&r=PG",
+                    "account_id": 123958,
+                    "user_type": "registered",
+                    "user_id": 318758,
+                    "link": "https://stackoverflow.com/users/318758/joni",
+                    "reputation": 111769,
+                    "display_name": "Joni",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13830943,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/4d4c5200e64564047976e390fa9ed1cc?s=256&d=identicon&r=PG",
+                    "account_id": 162919,
+                    "user_type": "registered",
+                    "user_id": 384706,
+                    "link": "https://stackoverflow.com/users/384706/cratylus",
+                    "reputation": 54314,
+                    "display_name": "Cratylus",
+                    "accept_rate": 64
+                },
+                "edited": false,
+                "creation_date": 1355332632,
+                "comment_id": 19058074
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4d4c5200e64564047976e390fa9ed1cc?s=256&d=identicon&r=PG",
+                    "account_id": 162919,
+                    "user_type": "registered",
+                    "user_id": 384706,
+                    "link": "https://stackoverflow.com/users/384706/cratylus",
+                    "reputation": 54314,
+                    "display_name": "Cratylus",
+                    "accept_rate": 64
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 13830943,
+                "edited": false,
+                "creation_date": 1355331177,
+                "comment_id": 19057223
+            }
+        ]
+    }
+}

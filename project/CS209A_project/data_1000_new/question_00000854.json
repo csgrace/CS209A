@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8294c86012a4438ec7ccc500edf24940?s=256&d=identicon&r=PG",
+            "account_id": 202330,
+            "user_type": "registered",
+            "user_id": 449339,
+            "link": "https://stackoverflow.com/users/449339/siebe",
+            "reputation": 378,
+            "display_name": "Siebe"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/71159983/gtklookandfeel-causes-deadlock-on-ubuntu-20",
+        "last_activity_date": 1645146778,
+        "creation_date": 1645108029,
+        "answer_count": 1,
+        "title": "GTKLookAndFeel causes deadlock on Ubuntu 20",
+        "body": "<p>I'm running into a strange issue when running the following code:<\/p>\n<pre><code>public static void main(String[] args) throws Exception {\n    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());\n    JFrame frame = new JFrame(&quot;Test&quot;);\n    frame.setLocationRelativeTo(null);\n    SwingUtilities.invokeAndWait(JFXPanel::new);\n    frame.add(new JFXPanel());\n    Platform.runLater(() -&gt; {\n        JPanel panel = new JPanel();\n        System.exit(0);\n    });\n    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);\n    frame.setSize(200, 100);\n    frame.setVisible(true);\n}\n<\/code><\/pre>\n<p>First of all, the code is compiled with OpenJDK-11 and OpenJFX-11, and in Windows this runs just fine (i.e. exits at the <code>System.exit(0)<\/code> call).<\/p>\n<p>However, if I run this on Linux (specifically Ubuntu 20.04), the call to <code>new JPanel()<\/code> locks the thread, and the program never exits. Commenting out the <code>UIManager.setLookAndFeel<\/code> call will get it to work normally again.<\/p>\n<p>Am I just running into a bug in the <code>com.sun.java.swing.plaf.gtk.GTKLookAndFeel<\/code> (which is what the SystemLookAndFeel returns) or am I doing something wrong/unexpected here?<\/p>\n",
+        "question_id": 71159983,
+        "tags": [
+            "java",
+            "javafx",
+            "gtk",
+            "ubuntu-20.04",
+            "openjdk-11"
+        ],
+        "score": 1,
+        "accepted_answer_id": 71160978,
+        "is_answered": true,
+        "view_count": 129
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e8e6e627b4b90ec816c5c7aa04cbcc26?s=256&d=identicon&r=PG",
+            "account_id": 2518243,
+            "user_type": "registered",
+            "user_id": 2189127,
+            "link": "https://stackoverflow.com/users/2189127/james-d",
+            "reputation": 210916,
+            "display_name": "James_D"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1645146778,
+        "creation_date": 1645111990,
+        "body": "<blockquote>\n<p>am I doing something wrong/unexpected here?<\/p>\n<\/blockquote>\n<p>Yes, you are doing something wrong: you're violating the <a href=\"https://docs.oracle.com/en/java/javase/16/docs/api/java.desktop/javax/swing/package-summary.html#threading\" rel=\"nofollow noreferrer\">Swing threading policy<\/a>, which states<\/p>\n<blockquote>\n<p>All Swing components and related classes, unless otherwise documented, must be accessed on the event dispatching thread.<\/p>\n<\/blockquote>\n<p>This answer will show you how to refactor your code so it obeys that\n(and other) threading rules. I don't have a Linux environment to test this on, so it's possible there are also bugs in the Linux implementation of JavaFX and/or Swing or in the <code>GTKLookAndFeel<\/code>, but\nthis at a minimum gives you a correct way to test that.<\/p>\n<p>Most of the code in your <code>main<\/code> method should be executed on the AWT event dispatch thread. You can achieve this by wrapping it in <code>SwingUtilities.invokeLater(...)<\/code>.<\/p>\n<p>The exceptions to that are:<\/p>\n<ol>\n<li><p><code>Platform.runLater(...)<\/code>, which schedules something to be run on the FX Application thread, can itself be called from anywhere. However, the <code>new JPanel()<\/code> which you call inside it should <strong>not<\/strong> be executed on the FX Application Thread, it should be executed on the AWT event dispatch thread.<\/p>\n<\/li>\n<li><p><code>SwingUtilities.invokeAndWait(...)<\/code> <strong>must not<\/strong> be called from the AWT event dispatch thread. This schedules code to be executed on the AWT event dispatch thread, and pauses the current thread until it is completed. Thus calling <code>SwingUtilities.invokeAndWait(...)<\/code> from the AWT event dispatch thread will result in deadlock. The code<\/p>\n<pre><code> SwingUtilities.invokeAndWait(JFXPanel::new);\n<\/code><\/pre>\n<p>schedules <code>new JFXPanel()<\/code> to be executed on the AWT event dispatch thread, and blocks the current thread until that has completed. If you are already on the AWT event dispatch thread, simply calling<\/p>\n<pre><code> new JFXPanel();\n<\/code><\/pre>\n<p>achieves the same thing.<\/p>\n<\/li>\n<\/ol>\n<p>I understand that your code is an attempt to create a minimum reproducible example, but it's not really clear what it's an example of, as there's code there whose purpose is completely unclear. For example, you create two <code>JFXPanel<\/code> instances, the first of which you discard. And you create a <code>JPanel<\/code>, which you similarly discard, deliberately on the incorrect thread.<\/p>\n<p>I don't have a Linux environment to test this, but the closest &quot;correct&quot; version of the code you posted is something like this. If this code still hangs, I believe there is a bug in the library implementation somewhere.<\/p>\n<pre><code>public static void main(String[] args) throws Exception {\n\n    // We are not on the AWT event dispatch thread, so if we\n    // want to create and access Swing components, we must wrap\n    // that code inside SwingUtilities.invokeLater(...):\n\n    SwingUtilities.invokeLater(() -&gt; {\n        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());\n        JFrame frame = new JFrame(&quot;Test&quot;);\n        frame.setLocationRelativeTo(null);\n\n        // We must not call SwingUtilities.invokeAndWait(...)\n        // from the event dispatch thread, so remove this:\n        // SwingUtilities.invokeAndWait(JFXPanel::new);\n\n        // To create new JFXPanel and block until the call is\n        // complete, we just create it in the usual way (since\n        // we're already on the event dispatch thread)\n        new JFXPanel();\n\n        frame.add(new JFXPanel());\n        Platform.runLater(() -&gt; {\n            // This code block is executed on the FX Application Thread\n            // To create a swing component, we must wrap the\n            // code in SwingUtilities.invokeLater(...), so it's\n            // executed on the Event Dispatch Thread:\n            SwingUtilities.invokeLater(() -&gt; {\n                JPanel panel = new JPanel();\n                System.exit(0);\n            });\n        });\n        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);\n        frame.setSize(200, 100);\n        frame.setVisible(true);\n    });\n\n}\n<\/code><\/pre>\n<p>As an aside, note that the Look and Feel will only affect Swing components; it will not affect JavaFX controls, whose appearance and behavior are managed by JavaFX (by default by the default CSS stylesheet). So anything you place in the <code>JFXPanel<\/code> will not be affected by the look and feel.<\/p>\n<p>And finally, you should not mix multiple UI toolkits unless you have a very compelling reason to do so. As you can see, working with two independent single-threaded toolkits is challenging.<\/p>\n",
+        "answer_id": 71160978,
+        "question_id": 71159983,
+        "last_edit_date": 1645146778
+    }],
+    "answer_comments": {"71160978": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8294c86012a4438ec7ccc500edf24940?s=256&d=identicon&r=PG",
+            "account_id": 202330,
+            "user_type": "registered",
+            "user_id": 449339,
+            "link": "https://stackoverflow.com/users/449339/siebe",
+            "reputation": 378,
+            "display_name": "Siebe"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 71160978,
+        "edited": false,
+        "creation_date": 1645188828,
+        "comment_id": 125811097
+    }]}
+}

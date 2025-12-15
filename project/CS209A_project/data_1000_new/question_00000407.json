@@ -1,0 +1,192 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/495398d2f6ad26415a5db48a8df4ef4a?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10334511,
+            "user_type": "registered",
+            "user_id": 7623165,
+            "link": "https://stackoverflow.com/users/7623165/technoj",
+            "reputation": 185,
+            "display_name": "technoJ"
+        },
+        "closed_date": 1540271970,
+        "link": "https://stackoverflow.com/questions/52941548/localdate-formatdatetimeformatter-formatter-does-not-declare-throws-in-metho",
+        "last_activity_date": 1540271964,
+        "creation_date": 1540271317,
+        "answer_count": 1,
+        "title": "LocalDate.format(DateTimeFormatter formatter) does not declare &quot;throws&quot; in method signature",
+        "body": "<p>I was going through the java source code for LocalDate API, and found that the methods are missing <strong>throws<\/strong> declaration. However the javadoc clearly mentions that the method could throws DateTimeException. Below is the source from LocalDate API from Java 8 .<\/p>\n\n<pre><code>/**\n * Formats this date using the specified formatter.\n * &lt;p&gt;\n * This date will be passed to the formatter to produce a string.\n *\n * @param formatter  the formatter to use, not null\n * @return the formatted date string, not null\n * @throws DateTimeException if an error occurs during printing\n */\n@Override  // override for Javadoc and performance\npublic String format(DateTimeFormatter formatter) {\n    Objects.requireNonNull(formatter, \"formatter\");\n    return formatter.format(this);\n}\n<\/code><\/pre>\n\n<ol>\n<li>Should this be the right way to declare a method which throws exception (I expected <strong>throws<\/strong> in method signature which enables the clients to properly handle the exception, but this does not give the client a clue about exception unless the javadoc is being read) ?<\/li>\n<\/ol>\n\n<p>Please me know if I missed something to understand this properly?<\/p>\n",
+        "question_id": 52941548,
+        "tags": [
+            "java",
+            "java-8",
+            "exception",
+            "localdate"
+        ],
+        "score": 0,
+        "closed_reason": "Duplicate",
+        "is_answered": false,
+        "view_count": 339
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8283c64511fa80afed5259d10850168f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7612423,
+                "user_type": "registered",
+                "user_id": 5772882,
+                "link": "https://stackoverflow.com/users/5772882/anonymous",
+                "reputation": 87410,
+                "display_name": "Anonymous"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941548,
+            "edited": false,
+            "creation_date": 1540275829,
+            "comment_id": 92793066
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/eT2FU.jpg?s=256",
+                "account_id": 951981,
+                "user_type": "registered",
+                "user_id": 977919,
+                "link": "https://stackoverflow.com/users/977919/sidgate",
+                "reputation": 15334,
+                "display_name": "sidgate",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941548,
+            "edited": false,
+            "creation_date": 1540271880,
+            "comment_id": 92791654
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bedab8d59cdd9ca2366251c11df4795e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7595189,
+            "user_type": "registered",
+            "user_id": 5761558,
+            "link": "https://stackoverflow.com/users/5761558/ernest-k",
+            "reputation": 45490,
+            "display_name": "ernest_k"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1540271964,
+        "creation_date": 1540271964,
+        "body": "<p><code>DateTimeException<\/code> is an unchecked exception, so it doesn't have to be declared methods.<\/p>\n\n<p>Why does <code>LocalDate#format<\/code> declare it? Because it can be thrown by methods it itself delegates that execution to. Following the call chain, we see that <code>DateTimeFormatter.formatTo(TemporalAccessor, Appendable)<\/code> is the method doing the actual work, and it is throwing the exception; and none of the intermediate methods is catching/handling it.<\/p>\n\n<pre><code>public void formatTo(TemporalAccessor temporal, Appendable appendable) {\n    ...\n    try {\n        ...\n    } catch (IOException ex) {\n        throw new DateTimeException(ex.getMessage(), ex);\n    }\n}\n<\/code><\/pre>\n\n<p>I believe this is indeed an example of good exception documentation (document exceptions that should be expected, be they checked or not, even if you are not explicitly throwing them in the method in question)<\/p>\n",
+        "answer_id": 52941644,
+        "question_id": 52941548
+    }],
+    "answer_comments": {"52941644": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/81867ed9ccb05e96f9e24a57713b971b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7087645,
+                "user_type": "registered",
+                "user_id": 5423951,
+                "link": "https://stackoverflow.com/users/5423951/j5423951",
+                "reputation": 131,
+                "display_name": "j5423951"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941644,
+            "edited": false,
+            "creation_date": 1648742491,
+            "comment_id": 126707578
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bedab8d59cdd9ca2366251c11df4795e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7595189,
+                "user_type": "registered",
+                "user_id": 5761558,
+                "link": "https://stackoverflow.com/users/5761558/ernest-k",
+                "reputation": 45490,
+                "display_name": "ernest_k"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941644,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/81867ed9ccb05e96f9e24a57713b971b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7087645,
+                "user_type": "registered",
+                "user_id": 5423951,
+                "link": "https://stackoverflow.com/users/5423951/j5423951",
+                "reputation": 131,
+                "display_name": "j5423951"
+            },
+            "edited": false,
+            "creation_date": 1648650369,
+            "comment_id": 126678970
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/81867ed9ccb05e96f9e24a57713b971b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7087645,
+                "user_type": "registered",
+                "user_id": 5423951,
+                "link": "https://stackoverflow.com/users/5423951/j5423951",
+                "reputation": 131,
+                "display_name": "j5423951"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941644,
+            "edited": false,
+            "creation_date": 1648650062,
+            "comment_id": 126678845
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bedab8d59cdd9ca2366251c11df4795e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7595189,
+                "user_type": "registered",
+                "user_id": 5761558,
+                "link": "https://stackoverflow.com/users/5761558/ernest-k",
+                "reputation": 45490,
+                "display_name": "ernest_k"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941644,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/81867ed9ccb05e96f9e24a57713b971b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7087645,
+                "user_type": "registered",
+                "user_id": 5423951,
+                "link": "https://stackoverflow.com/users/5423951/j5423951",
+                "reputation": 131,
+                "display_name": "j5423951"
+            },
+            "edited": false,
+            "creation_date": 1648556988,
+            "comment_id": 126649775
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/81867ed9ccb05e96f9e24a57713b971b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7087645,
+                "user_type": "registered",
+                "user_id": 5423951,
+                "link": "https://stackoverflow.com/users/5423951/j5423951",
+                "reputation": 131,
+                "display_name": "j5423951"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 52941644,
+            "edited": false,
+            "creation_date": 1648542683,
+            "comment_id": 126644112
+        }
+    ]}
+}

@@ -1,0 +1,33 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/649667f37f2f442107b12460fac76eaf?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11298801,
+            "user_type": "registered",
+            "user_id": 8285456,
+            "link": "https://stackoverflow.com/users/8285456/mrpebbles",
+            "reputation": 113,
+            "display_name": "Mrpebbles"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/73229631/how-to-parse-untyped-nested-json-with-polymorphism",
+        "last_activity_date": 1659579984,
+        "creation_date": 1659578918,
+        "answer_count": 0,
+        "title": "How to Parse untyped, nested JSON with Polymorphism?",
+        "body": "<p>I am using Feign to hit external APIs, and then to process the externally generated JSON (aka, the response data cannot be modified in any way), and I am trying to bundle these together into an extensible super type. At this point, I am not even sure if what I am trying to do is possible with Jackson / Feign. If it would be much easier to abandon (or heavily restructure) the polymorphism, I think I am also ready to give up on it and just create a bunch of sub classes.<\/p>\n<p>Here are my two main questions, with more context below.<\/p>\n<ol>\n<li>Should I just separate the easily deduced types from the complex types, and have a little more duplicated boiler plate?<\/li>\n<li>How can I create a custom deserializer for the list object I linked? Ideally I would like to have some way to populate the more boiler plate fields less manually -- as an example, it would be great if I could call default deserializers inside it, which would rely more on the standard annotations in other objects.<\/li>\n<\/ol>\n<p>Ideally, I would like one class, like this:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public final class BillApiResponse {\n\n    @Valid\n    @JsonProperty(&quot;response_status&quot;)\n    private boolean responseStatus;\n\n    @Valid\n    @JsonProperty(&quot;response_message&quot;)\n    private String responseMessage;\n\n    @JsonProperty(&quot;response_data&quot;)\n    private BillApiResponseData responseData;\n\n    //getters and setters, etc.\n\n}\n<\/code><\/pre>\n<p>and then I would to have Jackson automatically map the simpler objects in whatever way is easiest (LoginResponse, LoginError), while I would try to implement a custom handler for the more complex objects (UpdateObject, ListOfObjects).<\/p>\n<p>So, something like this:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>@JsonTypeInfo(use = Id.DEDUCTION)\n@JsonSubTypes({\n    @Type(value = BillLoginSuccess.class),\n    @Type(value = BillErrorResponse.class),\n    //@Type(value = BillResponseObject[].class) &lt;--- This breaks things when added\n })\n// @JsonTypeResolver(value = BillResponseTypeResolver.class) &lt;--- Open to using one of \n// these if I can figure out how\n// @JsonDeserialize(using = BillResponseDeserializer.class) &lt;--- Also open to using a \n// custom deserializer, but I would like to keep it only for certain parts\npublic interface BillApiResponseData {}\n<\/code><\/pre>\n<p>Here is a link to the API specification I am trying to hit:<\/p>\n<p><a href=\"https://developer.bill.com/hc/en-us/articles/210136993-List\" rel=\"nofollow noreferrer\">Get a List of Objects<\/a><\/p>\n<ul>\n<li>This returns an untyped array of untyped objects. Jackson does not seem to like that the array is untyped, and stops parsing everything there. Once inside, we would have to grab the type from a property.<\/li>\n<\/ul>\n<pre class=\"lang-json prettyprint-override\"><code>{\n  &quot;response_status&quot; : 0,\n  &quot;response_message&quot; : &quot;Success&quot;,\n  &quot;response_data&quot; : [{\n    &quot;entity&quot; : &quot;SentPay&quot;,\n    &quot;id&quot; : &quot;stp01AUXGYKCBGFMaqlc&quot;\n    // More fields\n  } // More values]\n}\n<\/code><\/pre>\n<p><a href=\"https://developer.bill.com/hc/en-us/articles/208197226-Login\" rel=\"nofollow noreferrer\">Login<\/a><\/p>\n<ul>\n<li>This returns a totally new object. Generally not having issues handling this one (until I add support for the above list, and then all of the parsing breaks down as Jackson throws errors).<\/li>\n<\/ul>\n<p><a href=\"https://developer.bill.com/hc/en-us/articles/208182666-Customer\" rel=\"nofollow noreferrer\">Update Object<\/a><\/p>\n<ul>\n<li>This returns an untyped object. Once again, we would have to go inside and look at the property.<\/li>\n<\/ul>\n<p>I have tried a number of things, but generally I was not successful (hence I am here!).<\/p>\n<p>These include:<\/p>\n<ol>\n<li>Trying to hook into the lifecycle and take over if I detect an array object. I believe this fails because Jackson throws an error when it sees the array does not have a type associated with it.<\/li>\n<\/ol>\n<pre class=\"lang-java prettyprint-override\"><code>    SimpleModule customDeserializerModule = new SimpleModule()\n            .setDeserializerModifier(new BeanDeserializerModifier() {\n                @Override\n                public JsonDeserializer&lt;?&gt; modifyDeserializer(\n                        DeserializationConfig config,\n                        BeanDescription beanDesc,\n                        JsonDeserializer&lt;?&gt; defaultDeserializer) {\n                    if (beanDesc.getBeanClass().isArray()) {\n                        return new BillResponseDeserializer(defaultDeserializer);\n                    } else {\n                        return defaultDeserializer;\n                    }\n                }\n            });\n<\/code><\/pre>\n<ol start=\"2\">\n<li>Custom Deserializers. The issue I have is that it seems to want to route ALL of my deserialization calls into the custom one, and I don't want to have to handle the simpler items, which can be deduced.<\/li>\n<li>TypeIdResolvers / TypeResolvers. Frankly these are confusing me a little bit, and I cannot find a good example online to try out.<\/li>\n<\/ol>\n",
+        "question_id": 73229631,
+        "tags": [
+            "java",
+            "jackson",
+            "jackson-databind"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 218,
+        "last_edit_date": 1659579984
+    },
+    "question_comments": [],
+    "answers": [],
+    "answer_comments": {}
+}

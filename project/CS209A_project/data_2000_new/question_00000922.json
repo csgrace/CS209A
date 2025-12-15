@@ -1,0 +1,119 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ad3a4fb99f1b3e8e9ddfbb62913c9231?s=256&d=identicon&r=PG",
+            "account_id": 1474405,
+            "user_type": "registered",
+            "user_id": 1385188,
+            "link": "https://stackoverflow.com/users/1385188/emil-c",
+            "reputation": 342,
+            "display_name": "Emil C",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19743298/spring-integration-header-lost",
+        "last_activity_date": 1383409857,
+        "creation_date": 1383404845,
+        "answer_count": 1,
+        "title": "Spring Integration - header lost",
+        "body": "<p>I'm new to Spring Integration and Spring Integration AMQP.<\/p>\n\n<p>I have the following code:<\/p>\n\n<pre><code>&lt;bean id=\"enricher\" class=\"soft.Enricher\"/&gt;\n\n&lt;amqp:inbound-channel-adapter queue-names=\"QUEUE1\" channel=\"amqpInboundChannel\"/&gt;\n\n&lt;int:channel id=\"amqpInboundChannel\"&gt;\n    &lt;int:interceptors&gt;\n        &lt;int:wire-tap channel=\"logger\"/&gt;\n    &lt;/int:interceptors&gt;\n&lt;/int:channel&gt;\n\n&lt;int:header-enricher input-channel=\"amqpInboundChannel\" output-channel=\"routingChannel\"&gt;\n        &lt;int:header name=\"store\" value=\"sj\" /&gt;\n&lt;/int:header-enricher&gt;\n\n&lt;int:channel id=\"routingChannel\" /&gt;\n\n&lt;int:header-value-router input-channel=\"routingChannel\" header-name=\"store\"&gt;\n    &lt;int:mapping value=\"sj\" channel=\"channelSJ\" /&gt;\n    &lt;int:mapping value=\"jy\" channel=\"channelJY\" /&gt;\n&lt;/int:header-value-router&gt;\n\n&lt;amqp:outbound-channel-adapter channel=\"channelSJ\" exchange-name=\"ex_store\" routing-key=\"sj\" amqp-template=\"rabbitTemplate\"/&gt;\n&lt;amqp:outbound-channel-adapter channel=\"channelJY\" exchange-name=\"ex_store\" routing-key=\"jy\" amqp-template=\"rabbitTemplate\"/&gt;\n\n&lt;int:channel id=\"channelSJ\" /&gt;\n&lt;int:channel id=\"channelJY\" /&gt;\n\n&lt;int:logging-channel-adapter id=\"logger\" level=\"ERROR\" /&gt;\n<\/code><\/pre>\n\n<p>The setup is the following:<\/p>\n\n<p><img src=\"https://i.sstatic.net/Svw3x.png\" alt=\"My Setup\"><\/p>\n\n<p>Everything is working fine except that headers are lost when a message is picked up by the inbound-channel-adapter.<\/p>\n\n<p>Likewise the header being enriched called \"store\" is also lost when the message is being send to the exchange using the outbound-channel-adapter.  <\/p>\n\n<p>This is how a message is looking before being picked up by the inbound-channel-adapter:<\/p>\n\n<p><img src=\"https://i.sstatic.net/4CQ6u.png\" alt=\"Before\"><\/p>\n\n<p>This is how the same message is looking after the whole process (notice no headers)<\/p>\n\n<p><img src=\"https://i.sstatic.net/KMdoB.png\" alt=\"After\"><\/p>\n",
+        "question_id": 19743298,
+        "tags": [
+            "java",
+            "spring",
+            "spring-integration",
+            "spring-amqp"
+        ],
+        "score": 1,
+        "accepted_answer_id": 19743430,
+        "is_answered": true,
+        "view_count": 4533
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Frfi1.png?s=256",
+            "account_id": 1423067,
+            "user_type": "registered",
+            "user_id": 1347281,
+            "link": "https://stackoverflow.com/users/1347281/vidya",
+            "reputation": 30370,
+            "display_name": "Vidya",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 8,
+        "is_accepted": true,
+        "last_activity_date": 1383409857,
+        "creation_date": 1383405739,
+        "body": "<p>I think your problem is described <a href=\"http://docs.spring.io/spring-integration/reference/html/amqp.html\">here<\/a>:<\/p>\n\n<p>\"<em>By default only standard AMQP properties (e.g. contentType) will be copied to and from Spring Integration MessageHeaders. Any user-defined headers within the AMQP MessageProperties will NOT be copied to or from an AMQP Message unless explicitly identified via 'requestHeaderNames' and/or 'replyHeaderNames' properties of this HeaderMapper. If you need to copy all user-defined headers simply use wild-card character '<\/em>'.*\"<\/p>\n\n<p>So you need to define your own custom instance of <code>DefaultAmqpHeaderMapper<\/code> and configure the <code>inbound-channel-adapter<\/code> with it. See <a href=\"http://docs.spring.io/spring-integration/docs/latest-ga/api/org/springframework/integration/amqp/support/DefaultAmqpHeaderMapper.html\">here<\/a>.<\/p>\n\n<p>It might look something like this:<\/p>\n\n<pre><code>        &lt;bean id=\"myHeaderMapper\" class=\"org.springframework.integration.amqp.support.DefaultAmqpHeaderMapper\"&gt;\n                    &lt;property name=\"requestHeaderNames\" value=\"*\"/&gt;\n                    &lt;property name=\"replyHeaderNames\" value=\"*\"/&gt;\n        &lt;/bean&gt;\n\n        &lt;amqp:inbound-channel-adapter queue-names=\"QUEUE1\" channel=\"amqpInboundChannel\"\n                                      header-mapper=\"myHeaderMapper\"/&gt;\n<\/code><\/pre>\n",
+        "answer_id": 19743430,
+        "question_id": 19743298,
+        "last_edit_date": 1383409857
+    }],
+    "answer_comments": {"19743430": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Frfi1.png?s=256",
+                "account_id": 1423067,
+                "user_type": "registered",
+                "user_id": 1347281,
+                "link": "https://stackoverflow.com/users/1347281/vidya",
+                "reputation": 30370,
+                "display_name": "Vidya",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743430,
+            "edited": false,
+            "creation_date": 1383492911,
+            "comment_id": 29356224
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 19743430,
+            "edited": false,
+            "creation_date": 1383420014,
+            "comment_id": 29340735
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Frfi1.png?s=256",
+                "account_id": 1423067,
+                "user_type": "registered",
+                "user_id": 1347281,
+                "link": "https://stackoverflow.com/users/1347281/vidya",
+                "reputation": 30370,
+                "display_name": "Vidya",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743430,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/ad3a4fb99f1b3e8e9ddfbb62913c9231?s=256&d=identicon&r=PG",
+                "account_id": 1474405,
+                "user_type": "registered",
+                "user_id": 1385188,
+                "link": "https://stackoverflow.com/users/1385188/emil-c",
+                "reputation": 342,
+                "display_name": "Emil C",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1383409920,
+            "comment_id": 29337667
+        }
+    ]}
+}

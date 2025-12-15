@@ -1,0 +1,101 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ce238ff6835aa49b970b0d2460d6620c?s=256&d=identicon&r=PG",
+            "account_id": 3136252,
+            "user_type": "registered",
+            "user_id": 2652707,
+            "link": "https://stackoverflow.com/users/2652707/jbartmann",
+            "reputation": 1569,
+            "display_name": "Jbartmann",
+            "accept_rate": 78
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/38102375/how-can-i-start-an-embedded-server-in-jboss-cli-from-java-code",
+        "last_activity_date": 1468249946,
+        "creation_date": 1467209887,
+        "answer_count": 1,
+        "title": "How can I start an embedded server in jboss cli from java code?",
+        "body": "<p>I want to check some cli commands if they are valid from java. I cant use the config file I'm currently running on. Additionally I can't use a running Wildfly at all, since I would have to do reloads every now and then. <\/p>\n\n<p>So I want to use offline-cli (cli with embedded server)<\/p>\n\n<p><strong>What I'm doing:<\/strong> <\/p>\n\n<p>Connect to CLi using <code>org.jboss.as.cli.scriptsupport.CLI<\/code><\/p>\n\n<pre><code>CLI cli = CLI.newInstance();\ncli.connect(\"127.0.0.1\",9990,\"admin\",\"admin\".toCharArray());\n<\/code><\/pre>\n\n<p>starting an embedded server via cli.cmd<\/p>\n\n<pre><code>cli.cmd(\"embed-server --server-config=standalone.xml --std-out=discard\");\n<\/code><\/pre>\n\n<p>But apart from me waiting forever for this command to finish (?) nothing happens. <\/p>\n\n<p>One thing I noticed was, after deploying my application <code>configuration-management.war<\/code> to wildfly, state changes to \"deployed\". But then, a service fails to start. I did not pay much attention to it, because after that I can see an output from my application. Maybe this has something to do with it?<\/p>\n\n<pre><code>2016-06-29 15:59:55,333 INFO  [org.wildfly.extension.undertow] (ServerService Thread Pool -- 83) WFLYUT0021: Registered web context: /configuration\n\n2016-06-29 15:59:55,364 INFO  [org.jboss.as.server] (DeploymentScanner-threads - 2) WFLYSRV0016: Replaced deployment \"configuration-management.war\" with deployment \"configuration-management.war\"\n\n2016-06-29 15:59:55,364 INFO  [org.jboss.as.controller] (DeploymentScanner-threads - 2) WFLYCTL0183: Service status report\n\nWFLYCTL0186:   Services which failed to start:      service jboss.deployment.unit.\"configuration-management.war\".POST_MODULE\n\n\n\n2016-06-29 16:00:29,530 INFO  [stdout] (default task-1) this is mine!\n<\/code><\/pre>\n\n<p>All there is is just that little spinning wheel of death at the upper left corner of my mozilla firefox, indicating that I'm still waiting for a response. <\/p>\n\n<p>Any hints?<\/p>\n",
+        "question_id": 38102375,
+        "tags": [
+            "java",
+            "wildfly-10",
+            "jboss-cli",
+            "embedded-jboss"
+        ],
+        "score": 3,
+        "accepted_answer_id": 38106074,
+        "is_answered": true,
+        "view_count": 2553,
+        "last_edit_date": 1467210290
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/eX5Ms.jpg?s=256",
+            "account_id": 51161,
+            "user_type": "registered",
+            "user_id": 152794,
+            "link": "https://stackoverflow.com/users/152794/james-r-perkins",
+            "reputation": 17960,
+            "display_name": "James R. Perkins"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1468249946,
+        "creation_date": 1467220178,
+        "body": "<p>When you start an embedded server it doesn't start any interfaces. This includes the management interface. It doesn't look like the script support allows for embedded CLI. You could <a href=\"https://issues.jboss.org/browse/WFCORE\" rel=\"nofollow\">file a feature request<\/a> to support it though.<\/p>\n\n<p>However you can use the CLI <code>CommandContext<\/code> API to achieve this.<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>final CommandContext commandContext = CommandContextFactory.getInstance().newCommandContext();\ncommandContext.handle(\"embed-server --jboss-home=/path/to/wildfly-10.0.0.Final\");\ncommandContext.handle(\":read-resource\");\ncommandContext.handle(\"stop-embedded-server\");\n<\/code><\/pre>\n\n<p>Do note some command, like <code>module add<\/code>, will require the <code>jboss.home.dir<\/code> system property to be set as well.<\/p>\n",
+        "answer_id": 38106074,
+        "question_id": 38102375,
+        "last_edit_date": 1468249946
+    }],
+    "answer_comments": {"38106074": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/eX5Ms.jpg?s=256",
+                "account_id": 51161,
+                "user_type": "registered",
+                "user_id": 152794,
+                "link": "https://stackoverflow.com/users/152794/james-r-perkins",
+                "reputation": 17960,
+                "display_name": "James R. Perkins"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 38106074,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/Hboo3.jpg?s=256",
+                "account_id": 374852,
+                "user_type": "registered",
+                "user_id": 725306,
+                "link": "https://stackoverflow.com/users/725306/mohammad-faisal",
+                "reputation": 5959,
+                "display_name": "Mohammad Faisal",
+                "accept_rate": 97
+            },
+            "edited": false,
+            "creation_date": 1597850612,
+            "comment_id": 112269549
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Hboo3.jpg?s=256",
+                "account_id": 374852,
+                "user_type": "registered",
+                "user_id": 725306,
+                "link": "https://stackoverflow.com/users/725306/mohammad-faisal",
+                "reputation": 5959,
+                "display_name": "Mohammad Faisal",
+                "accept_rate": 97
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 38106074,
+            "edited": false,
+            "creation_date": 1597848980,
+            "comment_id": 112268643
+        }
+    ]}
+}

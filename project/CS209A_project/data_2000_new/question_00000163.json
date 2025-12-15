@@ -1,0 +1,180 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1014ba58176f5e095219c3447f85285c?s=256&d=identicon&r=PG",
+            "account_id": 465939,
+            "user_type": "registered",
+            "user_id": 870382,
+            "link": "https://stackoverflow.com/users/870382/novice-user",
+            "reputation": 3914,
+            "display_name": "Novice User",
+            "accept_rate": 56
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/42965921/use-interface-in-spring-controller-method-argument",
+        "last_activity_date": 1566866178,
+        "creation_date": 1490234447,
+        "answer_count": 3,
+        "title": "Use interface in Spring controller method argument",
+        "body": "<p>I've two classes <code>A<\/code> &amp; <code>B<\/code> which are implementing an interface.<\/p>\n\n<pre><code>public class A implements MyInterface {\n\n    // Class A stuff\n  private String name;\n\n  public String getName() {\n   return name;\n  }\n\n  public void setName(String name) {\nthis.name = name;\n }\n}\n\npublic class B implements MyInterface { \n    //Class B stuff\n\n   private MyCustomClass myCustomclass;\n\n   public String getName() {\n    this.myCustomclass.getName();\n }\n}\n\n\npublic interface MyInterface {\n\n  public String getName();\n}\n<\/code><\/pre>\n\n<p>I want to use a single controller method which can work on both A and B depending on which object the frontend sends. So when I try to use Interface, Spring complains no suitable message converter found.<\/p>\n\n<blockquote>\n<pre><code>@RequestMapping(value = \"/mymethod\", method = RequestMethod.POST) \npublic String updateRecord(@RequestBody MyInterface myInterface, HttpServletResponse response) { \n        //Do stuff\n}\n<\/code><\/pre>\n<\/blockquote>\n",
+        "question_id": 42965921,
+        "tags": [
+            "java",
+            "spring",
+            "spring-mvc",
+            "model-view-controller"
+        ],
+        "score": 6,
+        "accepted_answer_id": 42968268,
+        "is_answered": true,
+        "view_count": 6775,
+        "last_edit_date": 1490247084
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-9-3pCbljKGY/AAAAAAAAAAI/AAAAAAAAAEE/3dJvT0fbUnQ/s256-rj/photo.jpg",
+                "account_id": 6506515,
+                "user_type": "registered",
+                "user_id": 5035525,
+                "link": "https://stackoverflow.com/users/5035525/ramanujan-r",
+                "reputation": 1739,
+                "display_name": "Ramanujan R",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42965921,
+            "edited": false,
+            "creation_date": 1490247485,
+            "comment_id": 73029358
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1014ba58176f5e095219c3447f85285c?s=256&d=identicon&r=PG",
+                "account_id": 465939,
+                "user_type": "registered",
+                "user_id": 870382,
+                "link": "https://stackoverflow.com/users/870382/novice-user",
+                "reputation": 3914,
+                "display_name": "Novice User",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42965921,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/efXih.jpg?s=256",
+                "account_id": 1607778,
+                "user_type": "registered",
+                "user_id": 1487469,
+                "link": "https://stackoverflow.com/users/1487469/pramod-s-nikam",
+                "reputation": 4562,
+                "display_name": "Pramod S. Nikam",
+                "accept_rate": 76
+            },
+            "edited": false,
+            "creation_date": 1490247096,
+            "comment_id": 73029217
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/efXih.jpg?s=256",
+                "account_id": 1607778,
+                "user_type": "registered",
+                "user_id": 1487469,
+                "link": "https://stackoverflow.com/users/1487469/pramod-s-nikam",
+                "reputation": 4562,
+                "display_name": "Pramod S. Nikam",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 42965921,
+            "edited": false,
+            "creation_date": 1490246133,
+            "comment_id": 73028868
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-9-3pCbljKGY/AAAAAAAAAAI/AAAAAAAAAEE/3dJvT0fbUnQ/s256-rj/photo.jpg",
+                "account_id": 6506515,
+                "user_type": "registered",
+                "user_id": 5035525,
+                "link": "https://stackoverflow.com/users/5035525/ramanujan-r",
+                "reputation": 1739,
+                "display_name": "Ramanujan R",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "is_accepted": true,
+            "last_activity_date": 1490248612,
+            "creation_date": 1490248612,
+            "body": "<p>Jackson can determine which implementation is to use to serialize to JSON but it can't determine which to use to deserialize the JSON.  For serializing, all it needs to do is call getClass() and build a serializer for that type. But there is (currently) no such type information when deserializing. You should use the Jackson annotations <code>@JsonTypeInfo<\/code> and <code>@JsonSubTypes<\/code> to achieve polymorphic json.<\/p>\n\n<pre><code>@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = \"type\")\n@JsonSubTypes({@JsonSubTypes.Type(value = A.class, name = \"A\"),\n        @JsonSubTypes.Type(value = B.class, name = \"B\")})\npublic interface MyInterface {\n\n}\n<\/code><\/pre>\n\n<p>Then the request body <code>myInterface<\/code> must be,<\/p>\n\n<p><code>{type:'A', name:'My name'}<\/code> or <code>{type:'B', myCustomclass:{....}}<\/code> <\/p>\n\n<p>Refer these three :<\/p>\n\n<p><a href=\"https://stackoverflow.com/questions/28056618/spring-mvc-requestbody-into-an-interface-instead-of-a-class\">Spring MVC @RequestBody into an Interface instead of a class<\/a><\/p>\n\n<p><a href=\"https://github.com/FasterXML/jackson-docs/wiki/JacksonPolymorphicDeserialization\" rel=\"noreferrer\">https://github.com/FasterXML/jackson-docs/wiki/JacksonPolymorphicDeserialization<\/a><\/p>\n\n<p><a href=\"https://stackoverflow.com/questions/17247189/spring-requestbody-containing-a-list-of-different-types-but-same-interface\">Spring @RequestBody containing a list of different types (but same interface)<\/a><\/p>\n",
+            "answer_id": 42968268,
+            "question_id": 42965921,
+            "last_edit_date": 1495540446
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/vAg5j.jpg?s=256",
+                "account_id": 4190153,
+                "user_type": "registered",
+                "user_id": 3432966,
+                "link": "https://stackoverflow.com/users/3432966/saurabhygk",
+                "reputation": 35,
+                "display_name": "saurabhygk"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1566866178,
+            "creation_date": 1490245760,
+            "body": "<p>Have you tried by passing Object class or by passing generic type reference?<\/p>\n\n<pre><code>public String updateRecord(@RequestBody Object obj,..\n<\/code><\/pre>\n\n<p>or<\/p>\n\n<pre><code>public String updateRecord(@RequestBody T obj,.. // I am not sure for this\n<\/code><\/pre>\n\n<p>Then check <code>instanceOf<\/code> in your controller method.<\/p>\n",
+            "answer_id": 42967679,
+            "question_id": 42965921,
+            "last_edit_date": 1566866178
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a9dc152935410cae2663c47f4c8c90aa?s=256&d=identicon&r=PG",
+                "account_id": 2387116,
+                "user_type": "registered",
+                "user_id": 2087856,
+                "link": "https://stackoverflow.com/users/2087856/ravi",
+                "reputation": 51,
+                "display_name": "Ravi"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1490247689,
+            "creation_date": 1490247689,
+            "body": "<p>As per my understanding spring/jackson will not be able to recognise what type of object to create unless incoming json explicitly mentions about the same. See below link, it talks about abstract classes though. Basically there are multiple ways to achieve this, using jsonTypeinfo or argument resolvers etc. Check if this helps. <a href=\"https://stackoverflow.com/questions/7336920/abstract-classes-and-spring-mvc-modelattribute-requestparam\">Abstract classes and Spring MVC @ModelAttribute/@RequestParam<\/a><\/p>\n",
+            "answer_id": 42968094,
+            "question_id": 42965921,
+            "last_edit_date": 1495542740
+        }
+    ],
+    "answer_comments": {"42968268": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4d727b253d7f9683aa478fcf0c88ea0e?s=256&d=identicon&r=PG",
+            "account_id": 401578,
+            "user_type": "registered",
+            "user_id": 768217,
+            "link": "https://stackoverflow.com/users/768217/timco",
+            "reputation": 132,
+            "display_name": "TimCO",
+            "accept_rate": 40
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 42968268,
+        "edited": false,
+        "creation_date": 1709156761,
+        "comment_id": 137645666
+    }]}
+}

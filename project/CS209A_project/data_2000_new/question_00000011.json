@@ -1,0 +1,137 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/902bcec23881c4d32f6b7a1f9797a061?s=256&d=identicon&r=PG",
+            "account_id": 98668,
+            "user_type": "registered",
+            "user_id": 266956,
+            "link": "https://stackoverflow.com/users/266956/kris",
+            "reputation": 5792,
+            "display_name": "Kris",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18202548/java-snakeyaml-prevent-dumping-reference-names",
+        "last_activity_date": 1631456452,
+        "creation_date": 1376376988,
+        "answer_count": 3,
+        "title": "Java SnakeYaml - prevent dumping reference names",
+        "body": "<p>I have the following method which I use to get the object converted to <code>yaml<\/code> representation (which I can eg. print to console)<\/p>\n\n<pre><code>@Nonnull\nprivate String outputObject(@Nonnull final ObjectToPrint packageSchedule) {\n    DumperOptions options = new DumperOptions();\n    options.setAllowReadOnlyProperties(true);\n    options.setPrettyFlow(true);\n    return new Yaml(new Constructor(), new JodaTimeRepresenter(), options).dump(ObjectToPrint);\n}\n<\/code><\/pre>\n\n<p>All is good, but for some object contained within <code>ObjectToPrint<\/code> structure I get something like reference name and not the real object content, eg.<\/p>\n\n<pre><code>!!com.blah.blah.ObjectToPrint\nbusinessYears:\n- businessYearMonths: 12\n  ppiYear: &amp;id001 {\n    endDate: 30-06-2013,\n    endYear: 2013,\n    startDate: 01-07-2012,\n    startYear: 2012\n  }\n  ppiPeriod:\n    ppiYear: *id001\n    endDate: 27-03-2014\n    startDate: 21-06-2013\n    units: 24.000\n  number: 1\n<\/code><\/pre>\n\n<p>As you can see from the example above I have <code>ppiYear<\/code> object printed (marked as <code>$id001<\/code>) and the same object is used in <code>ppiPeriod<\/code> but only the reference name is printed there, not the object content.\nHow to print the object content everytime I use that object within my structure, which I want to be converted to yaml (<code>ObjectToPrint<\/code>).\nPS. It would be nice not to print the reference name at all (<code>&amp;id001<\/code>) but thats not crucial<\/p>\n",
+        "question_id": 18202548,
+        "tags": [
+            "java",
+            "snakeyaml"
+        ],
+        "score": 12,
+        "accepted_answer_id": 18419489,
+        "is_answered": true,
+        "view_count": 5546
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/96b31daf523e9b1caea5df93ffd70253?s=256&d=identicon&r=PG",
+                "account_id": 2104108,
+                "user_type": "registered",
+                "user_id": 1870904,
+                "link": "https://stackoverflow.com/users/1870904/r-moeller",
+                "reputation": 3446,
+                "display_name": "R.Moeller"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1377353760,
+            "creation_date": 1377353760,
+            "body": "<p>This is because you reference the same object at different places. To avoid this you need to create copies of those objects.\nYaml does not have a flag to switch this off, because you might get into endless loops in case of cyclic references.\nHowever you might tweak Yaml source code to ignore double references:<\/p>\n\n<p>look at Serializer line ~170 method serializeNode:<\/p>\n\n<pre><code>...\n if ( this.serializedNodes.contains(node) ) {\n    this.emmitter.emit( new AliasEvent( ... ) );\n } else {\n    serializedNodes.add(node); // &lt;== Replace with myHook(serializedNodes,node);\n ...\n\n void myHook(serializedNodes,node) {\n    if ( node's class != myClass(es) to avoid ) {\n        serializedNodes.add(node);\n    }\n<\/code><\/pre>\n\n<p>if you find a way to avoid Yaml to put nodes into the serializedNodes collection, your problem will be solved, however your programm will loop endless in case of cyclic references.<\/p>\n\n<p>Best solution is to add a hook which avoids registering only the class you want to be written plain.<\/p>\n",
+            "answer_id": 18419489,
+            "question_id": 18202548
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b2cc5103505bf11a36c99c961929db5b?s=256&d=identicon&r=PG",
+                "account_id": 38079,
+                "user_type": "registered",
+                "user_id": 109079,
+                "link": "https://stackoverflow.com/users/109079/partly-cloudy",
+                "reputation": 6983,
+                "display_name": "Partly Cloudy"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1525801177,
+            "creation_date": 1525801177,
+            "body": "<p>As a way to do this without changing the SnakeYAML source code, you can define:<\/p>\n\n<pre><code>public class NonAnchorRepresenter extends Representer {\n\n    public NonAnchorRepresenter() {\n        this.multiRepresenters.put(Map.class, new RepresentMap() {\n            public Node representData(Object data) {\n                return representWithoutRecordingDescendents(data, super::representData);\n            }            \n        });\n    }\n\n    protected Node representWithoutRecordingDescendents(Object data, Function&lt;Object,Node&gt; worker) {\n        Map&lt;Object,Node&gt; representedObjectsOnEntry = new LinkedHashMap&lt;Object,Node&gt;(representedObjects);\n        try {\n            return worker.apply(data);\n        } finally {\n            representedObjects.clear();\n            representedObjects.putAll(representedObjectsOnEntry);\n        }        \n    }\n\n}\n<\/code><\/pre>\n\n<p>and use it as e.g. <code>new Yaml(new SafeConstructor(), new NonAnchorRepresenter());<\/code><\/p>\n\n<p>This only does maps, and it <em>does<\/em> use anchors when it has to, i.e. where a map refers to an ancestor.  It would need similar extensions for sets and lists if required.  (In my case it was empty maps that were the biggest offender.)<\/p>\n\n<p>(It would be more easily handled in the SnakeYAML codebase on <code>Representer.representData<\/code> looking at an option e.g. <code>setAllowAnchors<\/code> defaulting to true, with the logic above to reset <code>representedObjects<\/code> after recursing if disallowed.  I take the point at <a href=\"https://stackoverflow.com/a/18419489/109079\">https://stackoverflow.com/a/18419489/109079<\/a> about the possibility of endless loops but it would be straightforward using this strategy to detect any reference to a parent map and fail fast.)<\/p>\n",
+            "answer_id": 50239383,
+            "question_id": 18202548
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/34DhK.jpg?s=256",
+                "account_id": 15070001,
+                "user_type": "registered",
+                "user_id": 10875851,
+                "link": "https://stackoverflow.com/users/10875851/zvi-mints",
+                "reputation": 1152,
+                "display_name": "Zvi Mints"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1631456452,
+            "creation_date": 1631456452,
+            "body": "<p>Another solution which i came by is using <code>io.circle<\/code> instead <code>snake-yaml<\/code> if it possible.<\/p>\n<p>Scala code:<\/p>\n<pre class=\"lang-scala prettyprint-override\"><code> private[this] def removeAnchors(configYaml: String): String = {\n    val withoutAnchorsObj = io.circe.yaml.parser.parse(configYaml).valueOr(throw _)\n    val withoutAnchorString = io.circe.yaml.Printer(dropNullKeys = true, mappingStyle = Printer.FlowStyle.Block).pretty(withoutAnchorsObj)\n    logger.info(s&quot;Removed Anchors from configYaml: $configYaml, result: $withoutAnchorString&quot;)\n    withoutAnchorString\n  }\n<\/code><\/pre>\n<p>build.sbt:<\/p>\n<pre><code>val circeVersion = &quot;0.12.0&quot;\n\nlibraryDependencies ++= Seq(\n  &quot;io.circe&quot; %% &quot;circe-yaml&quot; % circeVersion,\n  &quot;io.circe&quot; %% &quot;circe-parser&quot; % circeVersion,\n)\n<\/code><\/pre>\n",
+            "answer_id": 69152256,
+            "question_id": 18202548
+        }
+    ],
+    "answer_comments": {"18419489": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/96b31daf523e9b1caea5df93ffd70253?s=256&d=identicon&r=PG",
+                "account_id": 2104108,
+                "user_type": "registered",
+                "user_id": 1870904,
+                "link": "https://stackoverflow.com/users/1870904/r-moeller",
+                "reputation": 3446,
+                "display_name": "R.Moeller"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18419489,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/pluWW.jpg?s=256",
+                "account_id": 2465781,
+                "user_type": "registered",
+                "user_id": 2148913,
+                "link": "https://stackoverflow.com/users/2148913/ajeesh",
+                "reputation": 1646,
+                "display_name": "Ajeesh",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1412270458,
+            "comment_id": 41022122
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/pluWW.jpg?s=256",
+                "account_id": 2465781,
+                "user_type": "registered",
+                "user_id": 2148913,
+                "link": "https://stackoverflow.com/users/2148913/ajeesh",
+                "reputation": 1646,
+                "display_name": "Ajeesh",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18419489,
+            "edited": false,
+            "creation_date": 1410710829,
+            "comment_id": 40419270
+        }
+    ]}
+}

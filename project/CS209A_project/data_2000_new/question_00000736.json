@@ -1,0 +1,70 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-4Lac7YSPcGg/AAAAAAAAAAI/AAAAAAAADq4/GDiHvgu3aE4/s256-rj/photo.jpg",
+            "account_id": 5228287,
+            "user_type": "registered",
+            "user_id": 4179597,
+            "link": "https://stackoverflow.com/users/4179597/ali",
+            "reputation": 51,
+            "display_name": "Ali"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26558413/how-to-extract-text-from-specific-rows-in-nested-tables-with-jsoup",
+        "last_activity_date": 1438327677,
+        "creation_date": 1414199643,
+        "answer_count": 1,
+        "title": "How to extract text from specific rows in nested tables with Jsoup",
+        "body": "<p>I'm using Jsoup to extract text from a website, and I can't figure out how to properly get specific rows  of data in nested tables. I need to get the plain text after the parts that say <strong>Property Address:<\/strong> and <strong>Mailing Address:<\/strong>, so I can store the data.<\/p>\n\n<p>Here is the HTML source I am parsing:<\/p>\n\n<pre><code>&lt;table width=\"730\" border=\"0\" cellspacing=\"0\" cellpadding=\"2\"&gt;\n  &lt;tr&gt; \n    &lt;td&gt;&lt;table width=\"730\" border=\"0\" cellspacing=\"0\" cellpadding=\"2\"&gt;\n      &lt;tr&gt; \n        &lt;td&gt;&lt;h1&gt;Property Information&lt;/h1&gt;\n          &lt;table width=\"758\"&gt;\n            &lt;tr&gt;[IRRELEVANT]&lt;/tr&gt;\n            &lt;tr&gt;[IRRELEVANT]&lt;/tr&gt;\n            &lt;tr&gt;\n              &lt;td colspan=\"3\"&gt;&lt;strong&gt;Property Address:&lt;/strong&gt;&amp;nbsp;!!THIS PLAIN TEXT HERE IS WHAT I NEED!! DATA1&lt;/td&gt;\n              &lt;td&gt;&amp;nbsp;&lt;/td&gt;\n              &lt;/tr&gt;\n            &lt;tr&gt;\n              &lt;td colspan=\"3\"&gt;&lt;strong&gt;Mailing Address:&lt;/strong&gt;!!NEED THIS TOO!! DATA2&lt;/td&gt;\n              &lt;td&gt;&amp;nbsp;&lt;/td&gt;\n              &lt;/tr&gt;\n            &lt;tr&gt;[IRRELEVANT]&lt;/tr&gt;...................\n<\/code><\/pre>\n\n<p>I was using this as a template, but it doesn't work, and I have no idea how to make it work.<\/p>\n\n<pre><code>Document documentSerialNumberPageData = Jsoup.connect(stringURLOfSerialNumberPage).get();   //connect to serial number page\nElements elementsSerialNumberPageData = documentSerialNumberPageData.select(\"#tabletext tbody &gt; tr &gt; td &gt; tbody &gt; tr &gt; td &gt; tbody &gt; tr &gt; td\");  //this is not even remotely correct... :(\nElement elementAddress = elementsSerialNumberPageData.get(0);\nSystem.out.println(elementAddress.text());\n<\/code><\/pre>\n\n<p>My knowledge of HTML/CSS is very limited, but I'm proficient in Java. Any suggestions? Thanks!\nFull Source Here: <a href=\"https://github.com/PhotonPhighter/NODScraper/blob/master/src/nodscraper/Main.java\" rel=\"nofollow\">https://github.com/PhotonPhighter/NODScraper/blob/master/src/nodscraper/Main.java<\/a><\/p>\n",
+        "question_id": 26558413,
+        "tags": [
+            "java",
+            "html",
+            "dom",
+            "jsoup"
+        ],
+        "score": 0,
+        "accepted_answer_id": 26618303,
+        "is_answered": true,
+        "view_count": 1232
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b939cffa7810b102ee4e2679196ca2b6?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4042222,
+            "user_type": "registered",
+            "user_id": 3324704,
+            "link": "https://stackoverflow.com/users/3324704/fonkap",
+            "reputation": 2517,
+            "display_name": "fonkap",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1414530096,
+        "creation_date": 1414529743,
+        "body": "<p>You can try this:<\/p>\n\n<pre><code>Elements innerTable = documentSerialNumberPageData.select(\"body &gt; table:nth-child(2) &gt; tbody &gt; tr &gt; td &gt; table &gt; tbody &gt; tr &gt; td &gt; table:nth-child(2)\");\nString propertyAddress = ((org.jsoup.nodes.TextNode)innerTable.select(\"tr:nth-child(3) &gt; td &gt; strong\").first().nextSibling()).text();\nString mailingAddress = ((org.jsoup.nodes.TextNode)innerTable.select(\"tr:nth-child(4) &gt; td &gt; strong\").first().nextSibling()).text();\n<\/code><\/pre>\n\n<p>First, you select the <code>table<\/code>, then you select the <code>strong<\/code> tag in the first <code>td<\/code> in the third <code>tr<\/code>, then you pick the next sibling to that, you take the <code>text()<\/code> in it and you are done. We do the same for the forth <code>tr<\/code>.<\/p>\n\n<p>With <code>text()<\/code> JSoup will translate the <code>&amp;nbsp;<\/code> into spaces, if you prefer not, you can also call <code>toString()<\/code>.<\/p>\n\n<p>Hope that it helps.<\/p>\n\n<p>PS: Can I suggest a trick? You can use developer tools of Chrome or Firefox to find a tag in a html page, then right click and <code>Copy CSS Path<\/code>. This will give you the selector you can use in JSoup!<\/p>\n",
+        "answer_id": 26618303,
+        "question_id": 26558413,
+        "last_edit_date": 1414530096
+    }],
+    "answer_comments": {"26618303": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-4Lac7YSPcGg/AAAAAAAAAAI/AAAAAAAADq4/GDiHvgu3aE4/s256-rj/photo.jpg",
+            "account_id": 5228287,
+            "user_type": "registered",
+            "user_id": 4179597,
+            "link": "https://stackoverflow.com/users/4179597/ali",
+            "reputation": 51,
+            "display_name": "Ali"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 26618303,
+        "edited": false,
+        "creation_date": 1414624942,
+        "comment_id": 41891463
+    }]}
+}

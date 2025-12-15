@@ -1,0 +1,191 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ruOXU.png?s=256",
+            "account_id": 6613712,
+            "user_type": "registered",
+            "user_id": 5107794,
+            "link": "https://stackoverflow.com/users/5107794/danny-fried",
+            "reputation": 106,
+            "display_name": "Danny Fried"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60208543/from-spring-context-to-spring-annotation",
+        "last_activity_date": 1581603608,
+        "creation_date": 1581599037,
+        "answer_count": 3,
+        "title": "from Spring context to Spring annotation",
+        "body": "<p>I'm moving my project package from Spring xml file configuration to class annotation configuration.\nIm stuck with a bean instantiation failed on a bean defined in a another context xml file.\nThis is the definition :  <\/p>\n\n<pre><code>&lt;bean id=\"mglsChecker\" class=\"DefaultMglsAdapter\" destroy-method=\"close\"&gt;\n        &lt;constructor-arg value=\"${mgls.server.address}\"/&gt;\n        &lt;constructor-arg value=\"${mgls.fname}\"/&gt;\n        &lt;constructor-arg value=\"${mgls.lcount}\"/&gt;\n    &lt;/bean&gt; \n<\/code><\/pre>\n\n<p>the mglsChecker class is defined in an infrastucture package common to the entire \"solution\".\nThe issue is that the variables \"${}\" are not defined so now this class is not instantiated. \nI dont understand how it works when my project is xml file configured. \nIn the original applicationContext.xml I dont see any references to this mglsChecker context file.\nAny help where should i look into ? what am i missing ?\n thanks,<\/p>\n",
+        "question_id": 60208543,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot"
+        ],
+        "score": 2,
+        "accepted_answer_id": 60209771,
+        "is_answered": true,
+        "view_count": 238
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a93c40079f6b00bedc49671910351f4b?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4277107,
+            "user_type": "registered",
+            "user_id": 3497465,
+            "link": "https://stackoverflow.com/users/3497465/filippo-possenti",
+            "reputation": 1404,
+            "display_name": "Filippo Possenti"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "post_id": 60208543,
+        "edited": false,
+        "creation_date": 1581600188,
+        "comment_id": 106495603
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Yyx8U.jpg?s=256",
+                "account_id": 1625750,
+                "user_type": "registered",
+                "user_id": 1501345,
+                "link": "https://stackoverflow.com/users/1501345/amit-kumar-lal",
+                "reputation": 5809,
+                "display_name": "Amit Kumar Lal",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1581601020,
+            "creation_date": 1581601020,
+            "body": "<p>Load the properties in the java file via <\/p>\n\n<pre><code>@Configuration\n@PropertySource(\"classpath:foo.properties\")\npublic class DefaultMglsAdapter{\n\n    //...\n}\n<\/code><\/pre>\n\n<p>Inject the properties via <\/p>\n\n<pre><code>@Value( \"${mgls.server.address}\" )\nprivate String serverAddress;\n<\/code><\/pre>\n",
+            "answer_id": 60209148,
+            "question_id": 60208543
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/AEHnE.png?s=256",
+                "account_id": 3380632,
+                "user_type": "registered",
+                "user_id": 2837741,
+                "link": "https://stackoverflow.com/users/2837741/daniu",
+                "reputation": 15109,
+                "display_name": "daniu",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1581603608,
+            "creation_date": 1581602913,
+            "body": "<p>You can use<\/p>\n\n<pre><code>@Configuration\nclass YourConfig {\n    // you usually don't need to explicitly give the bean name\n    // if you don't, Spring gives it the config's method name\n    @Bean(name = \"mglsChecker\", destroyMethod = \"close\") \n    MglsAdapter mglsChecker(@Value(\"${mgls.server.address}\") String address,\n                                   @Value(\"${mgls.fname}\") String  fname,\n                                   @Value(\"${mgls.lcount}\") long lcount) {\n        return new DefaultMglsAdapter(address, fname, lcount);\n    }\n}\n<\/code><\/pre>\n\n<p>Personally, I prefer creating <code>@Component<\/code> classes, but for that you need to be able to edit the <code>DefaultMglsAdapter<\/code> class.<\/p>\n\n<pre><code>@Component\nclass DefaultMglsAdapter implements MglsAdapter {\n    // fields to hold the configs\n    DefaultMglsAdapter(@Value(\"${mgls.server.address}\") String address,\n                                   @Value(\"${mgls.fname}\") String  fname,\n                                   @Value(\"${mgls.lcount}\") long lcount) {\n        // set fields\n    }\n    @PreDestroy\n    void close() {\n        // cleanup\n    }\n}\n<\/code><\/pre>\n\n<p>EDIT: incorporated Andreas' correction :)<\/p>\n",
+            "answer_id": 60209771,
+            "question_id": 60208543,
+            "last_edit_date": 1581603608
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/EbtFp.jpg?s=256",
+                "account_id": 7964764,
+                "user_type": "registered",
+                "user_id": 6011302,
+                "link": "https://stackoverflow.com/users/6011302/manjur",
+                "reputation": 63,
+                "display_name": "Manjur"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1581602425,
+            "creation_date": 1581602425,
+            "body": "<p>The variables which are mentioned with \"${}\" syntax are key/place-holders of properties.\nPlease search or find such key from *.properties or *.config or *.xml or any such custom properties files. If you find any such properties file then specify classpath or location of that file where you want to configure it as given below:<\/p>\n\n<p>By XML:    <\/p>\n\n<pre><code>&lt;context:property-placeholder location=\"classpath:path/to/PropertiesFile\"/&gt;    \n<\/code><\/pre>\n\n<p>By Annotation:    <\/p>\n\n<pre><code>@Configuration    \n@PropertySource(\"classpath:path/to/PropertiesFile\")    \n@Value(\"${Property}\")\n<\/code><\/pre>\n\n<p>Thanks and Regards.<\/p>\n",
+            "answer_id": 60209602,
+            "question_id": 60208543
+        }
+    ],
+    "answer_comments": {
+        "60209771": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                    "account_id": 6780825,
+                    "user_type": "registered",
+                    "user_id": 5221149,
+                    "link": "https://stackoverflow.com/users/5221149/andreas",
+                    "reputation": 160084,
+                    "display_name": "Andreas"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 60209771,
+                "edited": false,
+                "creation_date": 1581603533,
+                "comment_id": 106497703
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/AEHnE.png?s=256",
+                    "account_id": 3380632,
+                    "user_type": "registered",
+                    "user_id": 2837741,
+                    "link": "https://stackoverflow.com/users/2837741/daniu",
+                    "reputation": 15109,
+                    "display_name": "daniu",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60209771,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                    "account_id": 6780825,
+                    "user_type": "registered",
+                    "user_id": 5221149,
+                    "link": "https://stackoverflow.com/users/5221149/andreas",
+                    "reputation": 160084,
+                    "display_name": "Andreas"
+                },
+                "edited": false,
+                "creation_date": 1581603310,
+                "comment_id": 106497547
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                    "account_id": 6780825,
+                    "user_type": "registered",
+                    "user_id": 5221149,
+                    "link": "https://stackoverflow.com/users/5221149/andreas",
+                    "reputation": 160084,
+                    "display_name": "Andreas"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 60209771,
+                "edited": false,
+                "creation_date": 1581603215,
+                "comment_id": 106497475
+            }
+        ],
+        "60209148": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                "account_id": 6780825,
+                "user_type": "registered",
+                "user_id": 5221149,
+                "link": "https://stackoverflow.com/users/5221149/andreas",
+                "reputation": 160084,
+                "display_name": "Andreas"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60209148,
+            "edited": false,
+            "creation_date": 1581603337,
+            "comment_id": 106497565
+        }]
+    }
+}

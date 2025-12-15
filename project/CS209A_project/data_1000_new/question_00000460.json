@@ -1,0 +1,126 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7f7da156eeaa0e3ba6f16aa5eaab8690?s=256&d=identicon&r=PG",
+            "account_id": 603065,
+            "user_type": "unregistered",
+            "user_id": 303570,
+            "link": "https://stackoverflow.com/users/303570/venom",
+            "reputation": 23,
+            "display_name": "venom"
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2538054/how-to-implement-listener",
+        "last_activity_date": 1269870988,
+        "creation_date": 1269868149,
+        "answer_count": 2,
+        "title": "how to implement listener?",
+        "body": "<p>I have some dynamic tree. And now I need to implement some functionality, that happend every time, when simply click on node. (I mean only one click on node, which \"makes it blue\")<\/p>\n\n<p>**EDIT2: ** I use beanTreeView and package openide<\/p>\n\n<p>How to implement listener of this action?<\/p>\n\n<p>EDIT - added pseudocode<\/p>\n\n<pre><code>public class MyNode extends AbstractNode{ //openide package\n   private String name;\n\n   public MyNode(String nameOfNode){\n       super (new Children.LEAF);\n       name = nameOfNode;\n   }\n   ....\n   ....\n}\n\npublic class IWantNameOfSelectedNode extends JPanel{   \n    private JLabel jLnameOfNode;\n\n   public IWantNameOfSelectedNode(){\n       jLnameOfNode.setText(\"wiating for node selection\");\n   }\n<\/code><\/pre>\n\n<p>Now, I need put name of selected node to jLabel, and change it every time when selection of node changes.<\/p>\n",
+        "question_id": 2538054,
+        "tags": [
+            "java",
+            "listener",
+            "openide"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 2282,
+        "last_edit_date": 1269870988
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/931a6e09fe05d3fb98f7e7c1ead28ad1?s=256&d=identicon&r=PG",
+                "account_id": 99105,
+                "user_type": "registered",
+                "user_id": 267878,
+                "link": "https://stackoverflow.com/users/267878/cheesepls",
+                "reputation": 907,
+                "display_name": "CheesePls"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "post_id": 2538054,
+            "edited": false,
+            "creation_date": 1269869228,
+            "comment_id": 2538335
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/eBhfq.jpg?s=256",
+                "account_id": 35487,
+                "user_type": "registered",
+                "user_id": 100516,
+                "link": "https://stackoverflow.com/users/100516/roman",
+                "reputation": 66456,
+                "display_name": "Roman",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "post_id": 2538054,
+            "edited": false,
+            "creation_date": 1269868314,
+            "comment_id": 2538205
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6cd776da01e915df274276084eb9858b?s=256&d=identicon&r=PG",
+                "account_id": 43577,
+                "user_type": "registered",
+                "user_id": 127479,
+                "link": "https://stackoverflow.com/users/127479/adamski",
+                "reputation": 54835,
+                "display_name": "Adamski",
+                "accept_rate": 95
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1269870230,
+            "creation_date": 1269870230,
+            "body": "<p>Assuming you're using the Swing <code>JTree<\/code> class you should define a <code>TreeSelectionListener<\/code> and add it to the underlying <code>TreeModel<\/code>.  If you wish to use <code>ActionListener<\/code> instead you'll need to write some <strong>adapter<\/strong> code to translate <code>TreeSelectionEvent<\/code>s into <code>ActionEvent<\/code>s (although this would actually be fairly pointless).<\/p>\n\n<p><strong>Example<\/strong><\/p>\n\n<pre><code>/**\n * Adapter class responsible for translating TreeSelectionEvents into\n * ActionEvents.\n */\npublic class TreeSelectionAdapter implements TreeSelectionListener {\n  private final AtomicInteger nextId = new AtomicInteger(0);\n  // Prefer CopyOnWriteArrayList to avoid ConcurrentModificationException if an\n  // ActionListener removes itself as a listener during notification.\n  private final CopyOnWriteArrayList&lt;ActionListener&gt; listeners;\n\n  public TreeSelectionAdapter() {\n    this.listeners = new CopyOnWriteArrayList&lt;ActionListener();\n  }\n\n  public void addActionListener(ActionListener l) {\n    this.listeners.add(l);\n  }\n\n  public void removeActionListener(ActionListener l) {\n    this.listeners.remove(l);\n  }\n\n  public void valueChanged(TreeSelectionEvent evt) {\n    // Create new ActionEvent which corresponds to incoming TreeSelectionEvent\n    // and notify registered ActionListeners.\n    ActionEvent aEvt = new ActionEvent(evt.getSource(),\n      nextId.getAndIncrement(), \"selectionChanged\");\n\n    for (ActionListener listener : listeners) {\n      listener.actionPerformed(listener);\n    }\n  }\n}\n\nTreeNode rootNode = createTreeModel(); // Create custom model\nJTree tree = new JTree(rootNode); // Install model into JTree.\n\n// Add adapter listener to underlying selection model.\ntree.getSelectionModel().addTreeSelectionListener(adapter);\n\n// Register ActionListener with adapter listener.\nadapter.addActionListener(new ActionListener() {\n  public void actionPerformed(ActionEvent evt) {\n    System.err.println(\"Selection has changed in some way!\");\n  }\n});\n<\/code><\/pre>\n",
+            "answer_id": 2538280,
+            "question_id": 2538054
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/abd7e4e758d0d286502543a7b032abcf?s=256&d=identicon&r=PG",
+                "account_id": 19015,
+                "user_type": "registered",
+                "user_id": 44124,
+                "link": "https://stackoverflow.com/users/44124/kannan-ekanath",
+                "reputation": 17811,
+                "display_name": "Kannan Ekanath",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1269869100,
+            "creation_date": 1269869100,
+            "body": "<p>I am assuming it is a Swing Tree. You could achieve this by using a CustomRenderer component or using a TreeSelectionListener interface.<\/p>\n\n<p>This <a href=\"http://www.cs.cf.ac.uk/Dave/HCI/HCI_Handout_CALLER/node155.html\" rel=\"nofollow noreferrer\">link<\/a> has a tutorial for an advanced Example on how to alter the icons, backgrounds etc. What you need is a much simpler version than that.<\/p>\n\n<p>The code you will be interested in is <\/p>\n\n<pre><code>public Component getTreeCellRendererComponent( JTree tree,\n                    Object value, boolean bSelected, boolean bExpanded,\n                            boolean bLeaf, int iRow, boolean bHasFocus )\n    {\n        // Find out which node we are rendering and get its text\n        DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;\n        String  labelText = (String)node.getUserObject();\n\n        this.bSelected = bSelected;\n\n        // Set the correct foreground color\n        if( !bSelected )\n            setForeground( Color.black );\n        else\n            setForeground( Color.white );\n            ....\n    }\n<\/code><\/pre>\n",
+            "answer_id": 2538168,
+            "question_id": 2538054
+        }
+    ],
+    "answer_comments": {"2538168": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7f7da156eeaa0e3ba6f16aa5eaab8690?s=256&d=identicon&r=PG",
+            "account_id": 603065,
+            "user_type": "unregistered",
+            "user_id": 303570,
+            "link": "https://stackoverflow.com/users/303570/venom",
+            "reputation": 23,
+            "display_name": "venom"
+        },
+        "content_license": "CC BY-SA 2.5",
+        "score": 0,
+        "post_id": 2538168,
+        "edited": false,
+        "creation_date": 1269869327,
+        "comment_id": 2538346
+    }]}
+}

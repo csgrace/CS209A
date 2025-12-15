@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e539b971586610fb6fb2622ee879c782?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3202753,
+            "user_type": "registered",
+            "user_id": 2704500,
+            "link": "https://stackoverflow.com/users/2704500/pandaadb",
+            "reputation": 6486,
+            "display_name": "pandaadb",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34134678/drools-kmodule-persistence-configuration",
+        "last_activity_date": 1449567223,
+        "creation_date": 1449494720,
+        "answer_count": 1,
+        "title": "Drools KModule persistence configuration",
+        "body": "<p>I am trying to set up a kmodule with persistence. I am using guice internally so the spring example isn't very helpful to me.<\/p>\n\n<p>My current setup looks like that: <\/p>\n\n<ul>\n<li>I have a core project that manages my sessions <\/li>\n<li>I have multiple other projects that contribute sessions through META-INF/kmodule.xml files <\/li>\n<\/ul>\n\n<p>This works fine, however I have only done this programatically (setting the environment's EntityManager and TransactionManager). Now I want to have this configuration in the kmodule so the modules themselves can define if they'd like to be persisted or not.<\/p>\n\n<p>The issue is, that I don't know how to create the session for that, or how to configure the module. For example the easiest code snippets that I could find would look something like that:<\/p>\n\n<pre><code>&lt;kmodule\n        xmlns=\"http://jboss.org/kie/6.0.0/kmodule\"&gt;\n\n    &lt;kbase name=\"kbase1\"&gt;\n        &lt;ksession name=\"ksession1\"/&gt;\n    &lt;/kbase&gt;\n\n&lt;/kmodule&gt;\n<\/code><\/pre>\n\n<p>At which point the session is created like this:<\/p>\n\n<pre><code>    KieServices ks = KieServices.Factory.get();\n    KieContainer kContainer = ks.getKieClasspathContainer();\n    KieSession kSession = kContainer.newKieSession(name);\n<\/code><\/pre>\n\n<p>However, how does one configure persistence in the module, or if that is not possible, how does one pass the correct session name in a programatical setup. What I have is:<\/p>\n\n<pre><code>        // Guice inject Entitymanager and TransactionManager and setup the Environment variable env\n        KieSessionConfiguration ksconf = ks.newKieSessionConfiguration();\n        ksconf.setOption(ClockTypeOption.get(\"realtime\"));\n        JPAKnowledgeService.newStatefulKnowledgeSession(kbase, ksconf, env);\n<\/code><\/pre>\n\n<p>I was thinking that maybe there is a way to pass the session name to the JPAKnowledgeService class through the KieSessionConfiguraton but I can't seem to find any way. <\/p>\n\n<p>Alternatively it would be even cooler to configure that in the kmodule itself. I could use the spring approach, but I somewhat doubt that injection will work like that. As far as I know, the Postprocessor in spring would do the persistence injections. I don't think guice can do that even if I provide them? <\/p>\n\n<p>Thanks<\/p>\n",
+        "question_id": 34134678,
+        "tags": [
+            "java",
+            "jpa",
+            "persistence",
+            "drools"
+        ],
+        "score": 0,
+        "accepted_answer_id": 34152339,
+        "is_answered": true,
+        "view_count": 2213
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e539b971586610fb6fb2622ee879c782?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3202753,
+            "user_type": "registered",
+            "user_id": 2704500,
+            "link": "https://stackoverflow.com/users/2704500/pandaadb",
+            "reputation": 6486,
+            "display_name": "pandaadb",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1449567223,
+        "creation_date": 1449567223,
+        "body": "<p>So I looked into it and dug into a lot of drools code to try and work this out. <\/p>\n\n<p>All the KieContainer#newSession does is to query the model and then ask the base for a new session with the session's configuration: <\/p>\n\n<pre><code>public KieSession newKieSession(String kSessionName, Environment environment, KieSessionConfiguration conf) {\n    KieSessionModelImpl kSessionModel = (KieSessionModelImpl) getKieSessionModel(kSessionName);\n    if ( kSessionModel == null ) {\n        log.error(\"Unknown KieSession name: \" + kSessionName);\n        return null;\n    }\n    if (kSessionModel.getType() == KieSessionModel.KieSessionType.STATELESS) {\n        throw new RuntimeException(\"Trying to create a stateful KieSession from a stateless KieSessionModel: \" + kSessionName);\n    }\n    KieBase kBase = getKieBase( kSessionModel.getKieBaseModel().getName() );\n    if ( kBase == null ) {\n        log.error(\"Unknown KieBase name: \" + kSessionModel.getKieBaseModel().getName());\n        return null;\n    }\n\n    KieSession kSession = kBase.newKieSession( conf != null ? conf : getKnowledgeSessionConfiguration(kSessionModel), environment );\n    wireListnersAndWIHs(kSessionModel, kSession);\n    registerLoggers(kSessionModel, kSession);\n    kSessions.put(kSessionName, kSession);\n    return kSession;\n}\n<\/code><\/pre>\n\n<p>At the same time, this is exactly what the StoreService implementation does as well, with some advanced harry potter code to make things persistent. It however ignores the configuration of the session, which I would almost say is a bug.. (might raise one after this) <\/p>\n\n<p>The configuration created by the KieContainer however only takes 2 options into account anyway:<\/p>\n\n<pre><code>private KieSessionConfiguration getKnowledgeSessionConfiguration(KieSessionModelImpl kSessionModel) {\n    KieSessionConfiguration ksConf = KnowledgeBaseFactory.newKnowledgeSessionConfiguration();\n    ksConf.setOption( kSessionModel.getClockType() );\n    ksConf.setOption( kSessionModel.getBeliefSystem() );\n    return ksConf;\n}\n<\/code><\/pre>\n\n<p>This means, that I would have 2 options to solve this: <\/p>\n\n<p>either write my own KieContainerImpl that does the right thing (why bother...) or simulate the session configuration. I decided to do the second. <\/p>\n\n<pre><code>public KieSession createJPASession(final String kieBaseId, Optional&lt;String&gt; clockType, Optional&lt;String&gt; beliefSystem) {\n    log.info(String.format(\"Creating JPA Session for kieBase %s, clockType %s, beliefSystem %s\", kieBaseId, clockType, beliefSystem));\n    KieBase kieBase = kContainer.getKieBase(kieBaseId);\n    KieSessionConfiguration ksConf = ks.newKieSessionConfiguration();\n\n    // Set this thing up manually. Looking at the impl/docs these are the only two options available to set.\n    // The Storage service will remove those options from a default session for whatever reason, however we can set this manually\n    // This means we can use the base configuration and have things run in a normal way\n\n    if (clockType.isPresent()) {\n        ksConf.setOption(ClockTypeOption.get(clockType.get()));\n    }\n    if (beliefSystem.isPresent()) {\n        ksConf.setOption(BeliefSystemTypeOption.get(beliefSystem.get()));\n    }\n\n    KieSession jpaSession = ks.getStoreServices().newKieSession(kieBase, ksConf, env);\n    sessions.put(jpaSession.getIdentifier(), jpaSession);\n    return jpaSession;\n}\n<\/code><\/pre>\n\n<p>This last code snippet will create the configured session while making it persistent as well. <\/p>\n\n<p>Alternatively, by casting KieContainer to KieContainerImpl one gets access to the public method needed to query the KieSession object in the KieModule. (man that's a lot of Kie's) That way one could use the same methods and access the XML configuration.\nMy approach is a mix of that (use xml config for KieBase/Module while programatically set the beliefesystem and the clocktype). Reason being that I do not want to depend on the internal implementation and I didn't want to bother implementing my own KieContainer and wiring it in. <\/p>\n\n<p>I hope this helps someone out. If someone else knows the \"correct\" way to do that, please post it. <\/p>\n",
+        "answer_id": 34152339,
+        "question_id": 34134678
+    }],
+    "answer_comments": {}
+}

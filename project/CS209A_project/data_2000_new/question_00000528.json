@@ -1,0 +1,104 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6811ff0d3f4d0a93003a38d5206b5368?s=256&d=identicon&r=PG",
+            "account_id": 1388318,
+            "user_type": "registered",
+            "user_id": 1319772,
+            "link": "https://stackoverflow.com/users/1319772/eric-zhang",
+            "reputation": 35,
+            "display_name": "Eric Zhang"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18070546/merge-sort-with-insertion-sort",
+        "last_activity_date": 1375755612,
+        "creation_date": 1375753586,
+        "answer_count": 1,
+        "title": "merge sort with insertion sort",
+        "body": "<p>I was implementing a merge sort in <a href=\"http://algs4.cs.princeton.edu/lectures/22Mergesort.pdf\" rel=\"nofollow\">Algorithms in Java 4th edition<\/a>.\nMy basic merge sort works, and I want to improve the algorithm by using insertion sort when the array size is less than 7.\nI thought it is obvious an efficient improvement, but actually the original one is faster than the improved one for large data.<\/p>\n\n<p>Here is my improved merge sort, CUTOFF = 7:<\/p>\n\n<pre><code>private static void merge(Comparable[] a, Comparable[] aux, int lo, int mid, int hi) {\n\n  // Copy to aux[]\n  for (int i = lo; i &lt;= hi; i++) {\n    aux[i] = a[i];\n  }\n\n  // Merge back to a[]\n  int i = lo, j = mid + 1;\n  for (int k = lo; k &lt;= hi; k++) {\n    if      (i &gt; mid)              a[k] = aux[j++];\n    else if (j &gt; hi)               a[k] = aux[i++];\n    else if (less(aux[i], aux[j])) a[k] = aux[i++];\n    else                           a[k] = aux[j++];\n  }\n}\n\nprivate static void sort(Comparable[] a, Comparable[] aux, int lo, int hi) {\n\n  // #1 improvement\n  // Stop condition for this recursion.\n  // This time we add a CUTOFF, when the items in array\n  // is less than 7, we will use insertion sort.\n  if (hi &lt;= lo + CUTOFF - 1) {\n    Insertion.sort(a, lo, hi);\n    return;\n  }\n\n  int mid = lo + (hi - lo) / 2;\n  sort(a, aux, lo, mid);\n  sort(a, aux, mid + 1, hi);\n  if (!less(a[mid+1], a[mid])) return;\n  merge(a, aux, lo, mid, hi);\n}\n\npublic static void sort(Comparable[] a) {\n  Comparable[] aux = new Comparable[a.length];\n  sort(a, aux, 0, a.length - 1);\n}\n<\/code><\/pre>\n\n<p>The insertion sort code:<\/p>\n\n<pre><code>public static void sort(Comparable[] a, int lo, int hi) {\n  for (int i = lo; i &lt;= hi; i++) {\n    for (int j = i; j &gt; 0 &amp;&amp; less(a[j], a[j - 1]); j--) {\n      exch(a, j, j - 1);\n    }\n  }\n}\n<\/code><\/pre>\n\n<p>I used a SortCompare.java to compare the execute time:<\/p>\n\n<pre><code>public class SortCompare {\n\n  public static double time(String alg, Comparable[] a) {\n    Stopwatch timer = new Stopwatch();\n    if (alg.equals(\"Insertion\")) Insertion.sort(a);\n    if (alg.equals(\"Selection\")) Selection.sort(a);\n    if (alg.equals(\"Shell\")) Shell.sort(a);\n    if (alg.equals(\"Merge\")) Merge.sort(a);\n    if (alg.equals(\"MergeWithImprovements\")) MergeWithImprovements.sort(a);\n    //if (alg.equals(\"Quick\")) Quick.sort(a);\n    //if (alg.equals(\"Heap\")) Heap.sort(a);\n    if (alg.equals(\"InsertionWithSentinel\")) InsertionWithSentinel.sort(a);\n    return timer.elapsedTime();\n  }\n\n  public static double timeRandomInput(String alg, int N, int T) {\n    // Use alg to sort T random arrays of length N.\n    double total = 0.0;\n    Double[] a = new Double[N];\n    for (int t = 0; t &lt; T; t++) {\n      for (int i = 0; i &lt; N; i++) {\n        a[i] = StdRandom.uniform();\n      }\n      total += time(alg, a);\n    }\n    return total;\n  }\n\n  public static void main(String[] args) {\n    String alg1 = args[0];\n    String alg2 = args[1];\n    int N = Integer.parseInt(args[2]);\n    int T = Integer.parseInt(args[3]);\n    double t1 = timeRandomInput(alg1, N, T);  // Total for alg1\n    double t2 = timeRandomInput(alg2, N, T);\n    StdOut.printf(\"For %d random Doubles\\n   %s is\", N, alg1);\n    StdOut.printf(\" %.1f times faster than %s\\n\", t2/t1, alg2);\n  }\n}\n<\/code><\/pre>\n\n<p>I generated 100 arrays with 10000 elements each. The original merge sort is 30 times faster than the improved one!<\/p>\n",
+        "question_id": 18070546,
+        "tags": [
+            "java",
+            "algorithm",
+            "mergesort"
+        ],
+        "score": 2,
+        "accepted_answer_id": 18070830,
+        "is_answered": true,
+        "view_count": 3491
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/641cf17f1135ccbc3d35d954942ccde3?s=256&d=identicon&r=PG",
+                "account_id": 1840178,
+                "user_type": "registered",
+                "user_id": 1669747,
+                "link": "https://stackoverflow.com/users/1669747/aks",
+                "reputation": 1433,
+                "display_name": "AKS",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18070546,
+            "edited": false,
+            "creation_date": 1375806593,
+            "comment_id": 26470914
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MzjRd.png?s=256",
+                "account_id": 1925356,
+                "user_type": "registered",
+                "user_id": 1735954,
+                "link": "https://stackoverflow.com/users/1735954/azad",
+                "reputation": 5055,
+                "display_name": "Azad",
+                "accept_rate": 85
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "post_id": 18070546,
+            "edited": false,
+            "creation_date": 1375754245,
+            "comment_id": 26445199
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c82b2b9bdcf1baaf4677238d59cf745f?s=256&d=identicon&r=PG",
+            "account_id": 200231,
+            "user_type": "registered",
+            "user_id": 445976,
+            "link": "https://stackoverflow.com/users/445976/blastfurnace",
+            "reputation": 18691,
+            "display_name": "Blastfurnace"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1375755612,
+        "creation_date": 1375755612,
+        "body": "<p>You insertion sort function is definitely wrong. Note the <code>j &gt; 0<\/code> end condition. You pass in <code>[lo..hi]<\/code> but your code can iterate <code>j<\/code> all the way down to <code>1<\/code>. I think you want something like:<\/p>\n\n<pre><code>public static void sort(Comparable[] a, int lo, int hi) {\n  for (int i = lo + 1; i &lt;= hi; i++) {\n    for (int j = i; j &gt; lo &amp;&amp; less(a[j], a[j - 1]); j--) {\n      exch(a, j, j - 1);\n    }\n  }\n}\n<\/code><\/pre>\n",
+        "answer_id": 18070830,
+        "question_id": 18070546
+    }],
+    "answer_comments": {"18070830": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6811ff0d3f4d0a93003a38d5206b5368?s=256&d=identicon&r=PG",
+            "account_id": 1388318,
+            "user_type": "registered",
+            "user_id": 1319772,
+            "link": "https://stackoverflow.com/users/1319772/eric-zhang",
+            "reputation": 35,
+            "display_name": "Eric Zhang"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 18070830,
+        "edited": false,
+        "creation_date": 1375759527,
+        "comment_id": 26446255
+    }]}
+}

@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/35b53d225e26a1d354a5d350931ab83d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10165570,
+            "user_type": "registered",
+            "user_id": 7507656,
+            "link": "https://stackoverflow.com/users/7507656/steve-malek",
+            "reputation": 11,
+            "display_name": "Steve Malek"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/49883347/android-external-library-access",
+        "last_activity_date": 1574224155,
+        "creation_date": 1523983119,
+        "answer_count": 1,
+        "title": "Android external library access",
+        "body": "<p>I am attempting to access an Android shared object from an Android application that I am working on.  Based on online information on how to do this I have created the following folder structure within my project:<\/p>\n\n<pre><code>|--app:\n|--|--src:\n|--|--|--main\n|--|--|--|--jniLibs\n|--|--|--|--|--armeabi\n|--|--|--|--|--|--.so Files\n|--|--|--|--|--armeabi-v7a\n|--|--|--|--|--|--.so Files\n<\/code><\/pre>\n\n<p>In my java code the stringFromJNI method which I am trying to call from the shared object is not being resolved.  I am not sure what I need to do to fix this as I have read similar examples online.<\/p>\n\n<p>Here is the Java code for the application:<\/p>\n\n<pre><code>package com.example.ndktest.androidlibcall;\n\nimport android.support.v7.app.AppCompatActivity;\nimport android.os.Bundle;\nimport android.util.Log;\n\npublic class AndroidLibCall extends AppCompatActivity {\n    public static String TAG = \"AndroidLibCall\";\n\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        //Log.d(TAG, getRegister());\n        Log.d(TAG, stringFromJNI);\n    }\n\n    static {\n        try {\n            System.loadLibrary(\"libhello-jni\");\n        }\n        catch (UnsatisfiedLinkError e)\n        {\n            System.out.println(\"UnsatisfiedLinkError in static block\");\n            e.printStackTrace();\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>Here is my build.gradle file:<\/p>\n\n<pre><code>apply plugin: 'com.android.application'\n\nandroid {\n    compileSdkVersion 26\n    flavorDimensions \"versionCode\"\n    defaultConfig {\n        applicationId \"com.example.ndktest.androidlibcall\"\n        minSdkVersion 15\n        targetSdkVersion 26\n        versionCode 1\n        versionName \"1.0\"\n        testInstrumentationRunner \"android.support.test.runner.AndroidJUnitRunner\"\n        externalNativeBuild {\n            cmake {\n                cppFlags \"\"\n            }\n        }\n    }\n\n    sourceSets {\n        main {\n            jniLibs.srcDirs = ['src/main/jnilibs']\n        }\n    }\n\n    buildTypes {\n        release {\n            minifyEnabled false\n            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'\n        }\n    }\n    externalNativeBuild {\n        cmake {\n            path \"CMakeLists.txt\"\n        }\n    }\n\n    productFlavors {\n        x86 {\n            ndk {\n                abiFilter \"x86\"\n            }\n        }\n        arm {\n            ndk {\n                abiFilters \"armeabi-v7a\", \"armeabi\"\n            }\n        }\n    }\n}\n\ndependencies {\n    implementation fileTree(dir: 'libs', include: ['*.jar'])\n    implementation 'com.android.support:appcompat-v7:26.1.0'\n    testImplementation 'junit:junit:4.12'\n    androidTestImplementation 'com.android.support.test:runner:1.0.1'\n    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'\n}\n<\/code><\/pre>\n",
+        "question_id": 49883347,
+        "tags": [
+            "java",
+            "gradle",
+            "android-ndk",
+            "java-native-interface"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 137,
+        "last_edit_date": 1574224155
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/83a45711c4c32eeeb3826d279e50f8ab?s=256&d=identicon&r=PG",
+            "account_id": 65347,
+            "user_type": "registered",
+            "user_id": 192373,
+            "link": "https://stackoverflow.com/users/192373/alex-cohn",
+            "reputation": 57373,
+            "display_name": "Alex Cohn",
+            "accept_rate": 74
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1523989692,
+        "creation_date": 1523989692,
+        "body": "<p>Your Java class should declare a <strong>native<\/strong> method, e.g.<\/p>\n\n<pre><code>private native String stringFromJNI();\n<\/code><\/pre>\n\n<p>Now you can call it as any other method of your class, e.g.<\/p>\n\n<pre><code>Log.d(TAG, stringFromJNI() );\n<\/code><\/pre>\n\n<p><em>Don't miss the parentheses!<\/em><\/p>\n\n<p>As for the <strong>build.gradle<\/strong>, you don't need <code>externalNativeBuild<\/code> there when you supply the library in <strong>jniLibs<\/strong> folder. Your <code>productFlavors<\/code> section will fail with Android Studio 3.0 or higher, because you picked it up from an outdated example. But you can simply remove it, because again <strong>jniLibs<\/strong> folder will take care of this.<\/p>\n\n<p>The unresolved question is whether after above changes your <strong>ndktest<\/strong> will work. This depends on what you have in the C++ code, and how you built the file <strong>liblibhello-jni.so<\/strong>.<\/p>\n\n<p><em>Note that your Java code looks for the peculiar file as I show above<\/em>.<\/p>\n\n<p>If your prebuilt file is named <strong>libhello-jni.so<\/strong>, you must change your Java:<\/p>\n\n<pre><code>System.loadLibrary(\"hello-jni\");\n<\/code><\/pre>\n",
+        "answer_id": 49885072,
+        "question_id": 49883347
+    }],
+    "answer_comments": {"49885072": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/35b53d225e26a1d354a5d350931ab83d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10165570,
+            "user_type": "registered",
+            "user_id": 7507656,
+            "link": "https://stackoverflow.com/users/7507656/steve-malek",
+            "reputation": 11,
+            "display_name": "Steve Malek"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 49885072,
+        "edited": false,
+        "creation_date": 1523991066,
+        "comment_id": 86786954
+    }]}
+}

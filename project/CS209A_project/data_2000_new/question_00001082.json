@@ -1,0 +1,147 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1849862b8e7694b6843aad8d04bb9442?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7299128,
+            "user_type": "registered",
+            "user_id": 5562650,
+            "link": "https://stackoverflow.com/users/5562650/user5562650",
+            "reputation": 189,
+            "display_name": "user5562650"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45397928/how-can-i-iterate-throughout-on-list-of-nested-java-objects",
+        "last_activity_date": 1724065438,
+        "creation_date": 1501403756,
+        "answer_count": 5,
+        "title": "How can I iterate throughout on list of nested java objects?",
+        "body": "<p>I have an object class which is contains a list of itself... Something like this:<\/p>\n\n<pre><code>public class SearchItemType implements Serializable {\n  protected List&lt;SearchItemType&gt; childItem;\n}\n<\/code><\/pre>\n\n<p>The childItem also can conatain list of child items. My question is, can I iterate over childItems in all levels?<\/p>\n\n<p>Right now my code looks like this:<\/p>\n\n<pre><code>public SearchItemType getElementByOpenedRowID(SearchItemType gridResult, String selectedRowId, Boolean found) {\n        SearchItemType element = new SearchItemType();\n\n        if (gridResult.getId().equals(selectedRowId)) {\n            element = gridResult;\n            found = true;\n        }\n\n        for (SearchItemType child : gridResult.getChildItem()) {\n            if (child.getId().equals(selectedRowId)) {\n                element = child;\n                found = true;\n                break;\n            }\n        }\n        if (!found) {\n            for (SearchItemType child : gridResult.getChildItem()) {\n                element = getElementByOpenedRowID(child, selectedRowId, found);\n                checkChildID(child, selectedRowId);\n                if (element != null) break;\n            }\n        }\n        return element;\n    }\n<\/code><\/pre>\n\n<p>Many thanks.<\/p>\n",
+        "question_id": 45397928,
+        "tags": [
+            "java",
+            "arraylist",
+            "nested"
+        ],
+        "score": 0,
+        "accepted_answer_id": 45398046,
+        "is_answered": true,
+        "view_count": 3650
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/FKKLW.jpg?s=256",
+            "account_id": 404649,
+            "user_type": "registered",
+            "user_id": 773113,
+            "link": "https://stackoverflow.com/users/773113/mike-nakis",
+            "reputation": 63073,
+            "display_name": "Mike Nakis",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 45397928,
+        "edited": false,
+        "creation_date": 1501404162,
+        "comment_id": 77756536
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/1gC8p.jpg?s=256",
+                "account_id": 1501633,
+                "user_type": "registered",
+                "user_id": 1406083,
+                "link": "https://stackoverflow.com/users/1406083/billy-brown",
+                "reputation": 2362,
+                "display_name": "Billy Brown"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1501404678,
+            "creation_date": 1501404678,
+            "body": "<p>There is one error: at the start of the method, you set <code>SearchItemType element = new SearchItemType();<\/code> but then check for <code>null<\/code> when you recurse. <code>element<\/code> will never be null. You can fix this by setting it to <code>null<\/code> at the start, but I have some suggestions about your code:<\/p>\n\n<ul>\n<li>Instead of assigning the found value to an element and setting a <code>found<\/code> flag, just return the object as soon as you find it. At the end of the method return <code>null<\/code>. This will be much clearer.<\/li>\n<li>Iterating over the children and checking them will currently be executed even if the parent was the one that was searched for. In fact, you can remove this loop entirely, as it is handled by the recursive step below.<\/li>\n<li>Why are you passing <code>found<\/code> as a parameter? If you pass it <code>true<\/code>, then there is no point in having it, so if you really need it, just instantiate it in the method.<\/li>\n<li>Make sure to check that <code>gridResult<\/code> is not null. You could remedy this by making <code>getElementByOpenedRowID<\/code> a method on <code>SearchItemType<\/code>, meaning that <code>gridResult<\/code> does not need to be passed.<\/li>\n<\/ul>\n\n<p>Applying these changes will result in:<\/p>\n\n<pre><code>public SearchItemType getElementByOpenedRowID(SearchItemType gridResult, String selectedRowId) {\n    // stop at null\n    if (gridResult == null) {\n        return null;\n    }\n    if (gridResult.getId().equals(selectedRowId)) {\n        return gridResult; // return once found\n    }\n\n    // check all of the children\n    for (SearchItemType child : gridResult.getChildItem()) {\n        // do the search again for every child\n        SearchItemType result = getElementByOpenedRowID(child, selectedRowId);\n        if (result != null) {\n            // return once found and sent it all the way to the top\n            return result;\n        }\n    }\n    return null;\n}\n<\/code><\/pre>\n",
+            "answer_id": 45398046,
+            "question_id": 45397928
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/iypYQ.png?s=256",
+                "account_id": 6358010,
+                "user_type": "registered",
+                "user_id": 4934560,
+                "link": "https://stackoverflow.com/users/4934560/b%c3%a1lint",
+                "reputation": 4069,
+                "display_name": "B&#225;lint",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1501404457,
+            "creation_date": 1501404457,
+            "body": "<p>You can do this with recursion:<\/p>\n\n<pre><code>public void iterate(SearchItemType type) {\n    // Do something with type\n    for (SearchItemType child in type.childItem) {\n        iterate(child);\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 45398015,
+            "question_id": 45397928
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d775cf2bb05880f27cacdcaa42a8f323?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7338313,
+                "user_type": "registered",
+                "user_id": 5588873,
+                "link": "https://stackoverflow.com/users/5588873/swapnil",
+                "reputation": 230,
+                "display_name": "swapnil"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1501404468,
+            "creation_date": 1501404468,
+            "body": "<p>Yes you can iterate on <code>childItem<\/code> object at any level as long as <code>childItem<\/code> is not null and object inside it has non-null values.<\/p>\n\n<p>In Data structure implementation of LinkedList every node in the LinkedList has <code>Data<\/code> fields link to other nodes (In case of Java it's reference to other nodes).<\/p>\n\n<p>It's also called as self referencing objects that means object pointing to object of similar type.<\/p>\n\n<p>As long as you have non-null values in the list you can iterate at any level.<\/p>\n\n<p>Data structures in <code>Java<\/code> are implemented in similar manner.\nHave look at <code>Node class<\/code> in this code snippet:\n<a href=\"https://github.com/SwapnilBGaikwad/Collection/blob/master/src/main/java/com/datastructures/LinkedList.java\" rel=\"nofollow noreferrer\">Linked List implementation using self referencing pointers<\/a><\/p>\n",
+            "answer_id": 45398016,
+            "question_id": 45397928
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/hlBv2.png?s=256",
+                "account_id": 2995406,
+                "user_type": "registered",
+                "user_id": 2542043,
+                "link": "https://stackoverflow.com/users/2542043/sercanturkmen",
+                "reputation": 127,
+                "display_name": "sercanturkmen"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1501404575,
+            "creation_date": 1501404575,
+            "body": "<p>You want to iterate through the children recursively as so:<\/p>\n\n<pre><code>public SearchItemType getElementByOpenedRowID(SearchItemType gridResult, String selectedRowId) {\n    SearchItemType element = null;\n    if (gridResult == null) return null;\n    else if (gridResult.getId().equals(selectedRowId)) return gridResult;\n    else {\n        for (SearchItemType child : gridResult.getChildItem()) {\n            element = getElementByOpenedRowID(child, selectedRowId);\n            if (element != null) break;\n        }\n    }\n    return element;\n}\n<\/code><\/pre>\n",
+            "answer_id": 45398034,
+            "question_id": 45397928
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2dfeb903b8e8860f98e63973f16a26d2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3234177,
+                "user_type": "registered",
+                "user_id": 2728766,
+                "link": "https://stackoverflow.com/users/2728766/lucio-menci",
+                "reputation": 143,
+                "display_name": "Lucio Menci"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1724065438,
+            "creation_date": 1724065438,
+            "body": "<p>I played around by creating an iterator.<\/p>\n<p>See this:<\/p>\n<pre><code>public class SearchItemType {\n    protected List&lt;SearchItemType&gt; childItem = new ArrayList();\n    protected String id;\n\n    public SearchItemType(String id) {\n        this.id = id;\n    }\n\n    public static void main(String[] args) {\n        SearchItemType one = new SearchItemType(&quot;1&quot;);\n        SearchItemType one_one = new SearchItemType(&quot;1.1&quot;);\n        SearchItemType one_two = new SearchItemType(&quot;1.2&quot;);\n        SearchItemType one_three = new SearchItemType(&quot;1.3&quot;);\n        SearchItemType one_four = new SearchItemType(&quot;1.4&quot;);\n        SearchItemType one_two_one = new SearchItemType(&quot;1.2.1&quot;);\n        SearchItemType one_two_two = new SearchItemType(&quot;1.2.2&quot;);\n        SearchItemType one_two_three = new SearchItemType(&quot;1.2.3&quot;);\n        SearchItemType one_three_one = new SearchItemType(&quot;1.3.1&quot;);\n        SearchItemType one_three_two = new SearchItemType(&quot;1.3.2&quot;);\n        SearchItemType one_three_three = new SearchItemType(&quot;1.3.3&quot;);\n        SearchItemType one_three_two_one = new SearchItemType(&quot;1.3.2.1&quot;);\n        SearchItemType one_three_two_two = new SearchItemType(&quot;1.3.2.2&quot;);\n        one.childItem.add(one_one);\n        one.childItem.add(one_two);\n        one.childItem.add(one_three);\n        one.childItem.add(one_four);\n        one_two.childItem.add(one_two_one);\n        one_two.childItem.add(one_two_two);\n        one_two.childItem.add(one_two_three);\n        one_three.childItem.add(one_three_one);\n        one_three.childItem.add(one_three_two);\n        one_three.childItem.add(one_three_three);\n        one_three_two.childItem.add(one_three_two_one);\n        one_three_two.childItem.add(one_three_two_two);\n\n        Iterator&lt;SearchItemType&gt; itr = one.getItemTypeIterator();\n        while (itr.hasNext())\n            System.out.println(itr.next().id);\n    }\n\n    public Iterator&lt;SearchItemType&gt; getItemTypeIterator() {\n        return new Iterator&lt;SearchItemType&gt;() {\n            ArrayList&lt;SearchItemType&gt; parents = new ArrayList();\n            SearchItemType next = null;\n            boolean avoidChildren = false, nextSearched = false;\n\n            public boolean hasNext() {\n                if (!nextSearched)\n                    searchNext();\n                nextSearched = true;\n                return next != null;\n            }\n\n            public SearchItemType next() {\n                if (!nextSearched)\n                    searchNext();\n                nextSearched = false;\n                return next;\n            }\n\n            private void searchNext() {\n                if (next == null) {\n                    next = SearchItemType.this;\n                    return;\n                }\n\n                if (!avoidChildren) {\n                    if (next.childItem.size() &gt; 0) {\n                        parents.add(next);\n                        next = next.childItem.get(0);\n                    } else {\n                        avoidChildren = true;\n                    }\n                }\n\n                if (avoidChildren) {\n                    while (parents.size() &gt; 0) {\n                        SearchItemType lastParent = parents.get(parents.size() - 1);\n                        int i = lastParent.childItem.indexOf(next);\n                        if (i &lt; lastParent.childItem.size() - 1) {\n                            next = lastParent.childItem.get(i + 1);\n                            avoidChildren = false;\n                            return;\n                        } else {\n                            next = lastParent;\n                            parents.remove(parents.size() - 1);\n                        }\n                    }\n                    next = null;\n                }\n            }\n        };\n    }\n}\n<\/code><\/pre>\n<p>The result is:<\/p>\n<pre><code>1\n1.1\n1.2\n1.2.1\n1.2.2\n1.2.3\n1.3\n1.3.1\n1.3.2\n1.3.2.1\n1.3.2.2\n1.3.3\n1.4\n<\/code><\/pre>\n",
+            "answer_id": 78887576,
+            "question_id": 45397928
+        }
+    ],
+    "answer_comments": {}
+}

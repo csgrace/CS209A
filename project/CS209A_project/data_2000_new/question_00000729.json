@@ -1,0 +1,65 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5f422cd7a13d16f7a5b68add77e43acf?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5228447,
+            "user_type": "registered",
+            "user_id": 4179696,
+            "link": "https://stackoverflow.com/users/4179696/mrbigwaffles",
+            "reputation": 1,
+            "display_name": "MrBigWaffles"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26558613/passing-a-method-to-another-method-from-a-different-class",
+        "last_activity_date": 1414203231,
+        "creation_date": 1414201977,
+        "answer_count": 1,
+        "title": "Passing a method to another method from a different Class",
+        "body": "<p>Basically im coding a differential equation solver class that will take equations from an \"Equation\" Class and solve it using the rK4 method.<\/p>\n\n<p>The main problem Im running into, is that I can't find a way to send a method to another class without extending and gaining acess through inheritance, or making a specefic instance of that Equation methods in my ODE class.<\/p>\n\n<p>for example, how would I make the code below work? (remember I am not allowed to make a specific instance of Equation methods within the ODE class):<\/p>\n\n<pre><code>public class Equations {\n  public double pressureDrp( double a, double b) {\n   return a+b;  //this is just a dummy equation for the sake of the question\n  }\n  public double waffles( double a, double b) {\n   return a-b;  //this is just a dummy equation for the sake of the question\n  }\n\n}\n\npublic class ODE {\n  //x being a method being passed in of \"Equations\" type.\n  public double rK4( Equation method x ) {\n    return x(3, 4);   \n     //this would return a value of 7 from the pressureDrp method in class Pressure\n    //if I had passed in the waffles method instead I would of gotten a value of -1.\n  }\n}\n<\/code><\/pre>\n",
+        "question_id": 26558613,
+        "tags": ["java"],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 69,
+        "last_edit_date": 1414203177
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e00907e98ad4fa3ed61ad74acd5dca8c?s=256&d=identicon&r=PG",
+            "account_id": 1477445,
+            "user_type": "registered",
+            "user_id": 1387518,
+            "link": "https://stackoverflow.com/users/1387518/danm7",
+            "reputation": 2242,
+            "display_name": "DanM7",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 26558613,
+        "edited": false,
+        "creation_date": 1414203093,
+        "comment_id": 41738265
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+            "account_id": 247613,
+            "user_type": "registered",
+            "user_id": 522444,
+            "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+            "reputation": 285766,
+            "display_name": "Hovercraft Full Of Eels",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1414203231,
+        "creation_date": 1414203231,
+        "body": "<p>I would use an interface to encapsulate the concept of a binary method and to allow <strong>call-backs<\/strong>, something like:<\/p>\n\n<pre><code>interface BinaryEquation {\n   double operate(double d1, double d2);\n}\n<\/code><\/pre>\n\n<p>This could then be placed in your equations class like so:<\/p>\n\n<pre><code>class Equations {\n   public static class PressureDrop implements BinaryEquation {\n\n      @Override\n      public double operate(double d1, double d2) {\n         return d1 + d2;\n      }\n\n   }\n\n   public static class Waffles implements BinaryEquation {\n\n      @Override\n      public double operate(double d1, double d2) {\n         return d1 - d2;\n      }\n\n   } \n}\n<\/code><\/pre>\n\n<p>And used like so:<\/p>\n\n<pre><code>class ODE {\n   public double rk4(BinaryEquation eq) {\n      return eq.operate(3, 4);   \n   }\n}\n<\/code><\/pre>\n\n<p>Or better like so:<\/p>\n\n<pre><code>public class BinaryTest {\n   public static void main(String[] args) {\n      System.out.println(\"PressureDrop(3, 4): \" + new Equations.PressureDrop().operate(3, 4));\n      System.out.println(\"PressureDrop(3, 4): \" + new Equations.Waffles().operate(3, 4));\n   }\n}\n<\/code><\/pre>\n",
+        "answer_id": 26558720,
+        "question_id": 26558613
+    }],
+    "answer_comments": {}
+}

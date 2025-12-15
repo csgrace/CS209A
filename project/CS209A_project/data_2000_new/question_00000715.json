@@ -1,0 +1,133 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/21747efee0b8f50874a11540e78a897b?s=256&d=identicon&r=PG",
+            "account_id": 633423,
+            "user_type": "unregistered",
+            "user_id": 397924,
+            "link": "https://stackoverflow.com/users/397924/deepak",
+            "reputation": 31,
+            "display_name": "Deepak"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/3299075/how-to-create-java-client-using-axis-1-4-for-consuming-wcf-service-using-wshttpb",
+        "last_activity_date": 1697120840,
+        "creation_date": 1279714756,
+        "answer_count": 2,
+        "title": "How to create java client using AXis 1.4 for consuming WCF service using wsHttpBinding",
+        "body": "<p>I have created a java client for consuming WCF service using axis 1.4. If I use basicHttpBinding than everything works fine, but if I use wsHttpBinding than I am getting following error:-<\/p>\n\n<pre><code>Did not understand \"MustUnderstand\" header(s):{http://www.w3.org/2005/08/addressing}Action\nAxisFault\n faultCode: {http://www.w3.org/2003/05/soap-envelope}MustUnderstand\n faultSubcode: \n faultString: Did not understand &amp;quot;MustUnderstand&amp;quot; header(s):{http://www.w3.org/2005/08/addressing}Action\n faultActor: \n faultNode: \n faultDetail: \n    {http://xml.apache.org/axis/}stackTrace:\n    at org.apache.axis.handlers.soap.MustUnderstandChecker.invoke(MustUnderstandChecker.java:96)\n    at org.apache.axis.client.AxisClient.invoke(AxisClient.java:206)\n    at org.apache.axis.client.Call.invokeEngine(Call.java:2784)\n    at org.apache.axis.client.Call.invoke(Call.java:2767)\n    at org.apache.axis.client.Call.invoke(Call.java:2443)\n    at org.apache.axis.client.Call.invoke(Call.java:2366)\n    at org.apache.axis.client.Call.invoke(Call.java:1812)\n    at org.tempuri.WSHttpBinding_IService1Stub.getData(WSHttpBinding_IService1Stub.java:171)\n    at Mytes.main(Mytes.java:14)\n\n    {http://xml.apache.org/axis/}hostname:2207A-H7-SITA\n\nDid not understand \"MustUnderstand\" header(s):{http://www.w3.org/2005/08/addressing}Action\n    at org.apache.axis.handlers.soap.MustUnderstandChecker.invoke(MustUnderstandChecker.java:96)\n    at org.apache.axis.client.AxisClient.invoke(AxisClient.java:206)\n    at org.apache.axis.client.Call.invokeEngine(Call.java:2784)\n    at org.apache.axis.client.Call.invoke(Call.java:2767)\n    at org.apache.axis.client.Call.invoke(Call.java:2443)\n    at org.apache.axis.client.Call.invoke(Call.java:2366)\n    at org.apache.axis.client.Call.invoke(Call.java:1812)\n    at org.tempuri.WSHttpBinding_IService1Stub.getData(WSHttpBinding_IService1Stub.java:171)\n    at Mytes.main(Mytes.java:14)\n<\/code><\/pre>\n\n<p>Pls let me know how can I resolve this error. Thanks.<\/p>\n",
+        "question_id": 3299075,
+        "tags": [
+            "java",
+            "wcf",
+            "client",
+            "axis"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 7497,
+        "last_edit_date": 1323074797
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7a8cf09fe294e01b00a57edd514b350c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3869387,
+                "user_type": "registered",
+                "user_id": 3205043,
+                "link": "https://stackoverflow.com/users/3205043/vincent",
+                "reputation": 41,
+                "display_name": "vincent"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1395687874,
+            "creation_date": 1394188774,
+            "body": "<p>When you use Axis to generate proxy for a WCF service, it generates the  stub that automatically sets the <code>MustUnderstand<\/code> header for <code>http://www.w3.org/2005/08/addressing<\/code><\/p>\n\n<p>The code below  resets the MustUnderstand flag back to false. for the method being invoked. I had a similar issue today and was able to resolve using the code that's posted here<\/p>\n\n<pre><code>//maybe someother service stub,i show you a case\n    CommentWcfServiceLocator locator =new CommentWcfServiceLocator();\n    WSHttpBinding_ICommentServiceStub stub;\n    try {       \n    //get a stub and set service url\n    stub = (WSHttpBinding_ICommentServiceStub)   locator.getWSHttpBinding_ICommentService(new         java.net.URL(\"http://www.google.com/CommentWcfService.svc\"));\n\n    // the key is here , importantest!!! follow this\n    // set action, action path,you can find in your java code\n    SOAPHeaderElement action = new SOAPHeaderElement(new QName(\"wsa:Action\"),     \"http://tempuri.org/ICommentService/GetCommentSummaryByHotelId\");\n    SOAPHeaderElement to = new SOAPHeaderElement(new QName(\"wsa:To\"),\n    stub._getProperty(javax.xml.rpc.Stub.ENDPOINT_ADDRESS_PROPERTY));\n        action.setActor(null);\n        action.setNamespaceURI(\"http://www.w3.org/2005/08/addressing\");\n        to.setActor(null);\n        to.setNamespaceURI(\"http://www.w3.org/2005/08/addressing\");\n         // set header\n                stub.setHeader(action);\n        stub.setHeader(to);\n                // must set this property\n        stub._setProperty(Call.CHECK_MUST_UNDERSTAND, Boolean.FALSE);\n            stub.getCommentSummaryByHotelId(\"\",\"02201158\", 0);\n    } \ncatch(Exception EX){}\n<\/code><\/pre>\n\n<p>I found the <a href=\"http://wso2.com/library/tutorials/understand-famous-did-not-understand-mustunderstand-header-s-error/\" rel=\"nofollow\">this post<\/a> on MustUnderstand veru helpful. <\/p>\n",
+            "answer_id": 22247791,
+            "question_id": 3299075,
+            "last_edit_date": 1395687874
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/30b9c232885aff20d6e1e110b09fe6b9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 48546,
+                "user_type": "registered",
+                "user_id": 144290,
+                "link": "https://stackoverflow.com/users/144290/devson",
+                "reputation": 1000,
+                "display_name": "devson",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": -2,
+            "is_accepted": false,
+            "last_activity_date": 1697120840,
+            "creation_date": 1279782946,
+            "body": "<p>BasicHttpBinding or webHttpBinidng (REST services) are the only option to interact with non-microsoft technologies.\nBasicHttpBinding is only binding which supports the Basic Profile 1.1 for interoperability.<\/p>\n<p>Please go through below links and see if they can help you out to understand basic and ws bidning.<\/p>\n<p><a href=\"http://www.devproconnections.com/article/net-framework2/choosing-the-right-web-service-binding.aspx\" rel=\"nofollow noreferrer\">http://www.devproconnections.com/article/net-framework2/choosing-the-right-web-service-binding.aspx<\/a><\/p>\n<p><a href=\"https://web.archive.org/web/20161223065644/http://geekswithblogs.net/claeyskurt/archive/2008/04/22/121508.aspx\" rel=\"nofollow noreferrer\">Link<\/a><\/p>\n",
+            "answer_id": 3306573,
+            "question_id": 3299075,
+            "last_edit_date": 1697120840
+        }
+    ],
+    "answer_comments": {
+        "22247791": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b86eb3ebbc0df3779e23a09c3719cdfb?s=256&d=identicon&r=PG",
+                "account_id": 2206479,
+                "user_type": "registered",
+                "user_id": 1949572,
+                "link": "https://stackoverflow.com/users/1949572/dhawalk",
+                "reputation": 1277,
+                "display_name": "Dhawalk",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22247791,
+            "edited": false,
+            "creation_date": 1395686890,
+            "comment_id": 34441636
+        }],
+        "3306573": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/b86eb3ebbc0df3779e23a09c3719cdfb?s=256&d=identicon&r=PG",
+                    "account_id": 2206479,
+                    "user_type": "registered",
+                    "user_id": 1949572,
+                    "link": "https://stackoverflow.com/users/1949572/dhawalk",
+                    "reputation": 1277,
+                    "display_name": "Dhawalk",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 3306573,
+                "edited": false,
+                "creation_date": 1395687739,
+                "comment_id": 34442107
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c8c9f38b29502d06af9c195d4b5d0128?s=256&d=identicon&r=PG",
+                    "account_id": 213492,
+                    "user_type": "registered",
+                    "user_id": 466903,
+                    "link": "https://stackoverflow.com/users/466903/diggingforfire",
+                    "reputation": 3409,
+                    "display_name": "diggingforfire",
+                    "accept_rate": 85
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 3306573,
+                "edited": false,
+                "creation_date": 1325699858,
+                "comment_id": 10873237
+            }
+        ]
+    }
+}

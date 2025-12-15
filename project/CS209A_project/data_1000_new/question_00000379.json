@@ -1,0 +1,153 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fd241d493f0d8d0a86d24df3f1a12b3b?s=256&d=identicon&r=PG",
+            "account_id": 934548,
+            "user_type": "registered",
+            "user_id": 963731,
+            "link": "https://stackoverflow.com/users/963731/fran%c3%a7ois-lamarre",
+            "reputation": 147,
+            "display_name": "Fran&#231;ois Lamarre",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/7773291/jdbc-c3p0-hibernate-setautocommit-can-someone-please-help-me-clarify-the",
+        "last_activity_date": 1410450366,
+        "creation_date": 1318624552,
+        "answer_count": 1,
+        "title": "JDBC - c3p0 - hibernate - setAutocommit, Can someone please help me clarify the story",
+        "body": "<p>The fundamental source of my questionning came from this observation. When I use Hibernate and make any query, I get the following in the MySQL logs:<\/p>\n\n<pre><code>SET autocommit=0\ninsert into SimpleNamedEntity (name, version) values (null, 0)\ncommit\nSET autocommit=1\n<\/code><\/pre>\n\n<p>Now, I did some research (refs below, would have added more, but I'm not 'good' enough it seems :-)) and this seems to be a fairly classic problem. I did a number of tests on various levels of architecture (mysql config, jdbc, connection pool, hibernate) to get a better idea of how things work, and I ended up more confused as a result, so here are a few questions:<\/p>\n\n<ul>\n<li><p>Can someone confirm if autocommit does or doesn't have a negative impact on performance? The main reason I see for this is defensive behavior to prevent unwanted uncommitted transactions that would happen if people forgot to commit after statement execution. Is there another reason?<\/p><\/li>\n<li><p>The way I see it, it seems to me that you will want autocommit to off when doing large dependant inserts-updates-deletes as this helps ensure data integrity. If all I want to do are selects, then it's useless and I'd probably want to set it to true to avoid some long-transaction lock-type side-effects. Does that make sense?<\/p><\/li>\n<li><p>I noticed that whatever the mysql autocommit setting, the jdbc connection is always to true and the only way for me to control that (have it false by default) is to add <code>init-connect=\"SET AUTOCOMMIT=0\"<\/code> on the mysql server'. But, the strange part is once I start using <code>c3p0<\/code> with that setting, <code>c3p0<\/code> decides to manually override that and forces the set autocommit to 1. There's even a rollback in this case I find really suspect. Why does c3p0 force-set the flag? Why does it rollback when it doesn't normally? Is there a way to tell c3p0 not to do this?<\/p>\n\n<pre><code>19 Query    SHOW COLLATION\n19 Query    SELECT @@session.autocommit\n19 Query    SET NAMES utf8mb4\n19 Query    SET character_set_results = NULL\n19 Query    SET sql_mode='STRICT_TRANS_TABLES'\n19 Query    SELECT @@session.tx_isolation\n19 Query    rollback\n19 Query    SET autocommit=1\n<\/code><\/pre><\/li>\n<li><p>I was trying to 'clean up' the autocommit statements I was having in the example above. The closest I got was by setting autocommit to off on the mysql server. But even then, hibernate feels compelled to at a minimum do one <code>set autocommit = 0<\/code> statement at the beginning of a transaction. Why would it need to do that? To 'reset' transaction state? Is there a configuration path I can use somewhere in the stack to prevent hibernate from doing this?<\/p><\/li>\n<\/ul>\n\n<p>References:\n<a href=\"http://download.oracle.com/javase/tutorial/jdbc/basics/transactions.html\" rel=\"nofollow\">Java JDBC ref<\/a>\n<a href=\"http://www.bigdbahead.com/?p=230\" rel=\"nofollow\">Article on the problem<\/a><\/p>\n\n<hr>\n\n<p>(edit - clarification)<\/p>\n\n<p>I am re-reading my question and can understand how complicated it all sounds. I'm sorry I wasn't clear, I'll try to clarify. I want transactions. I get the InnoDB part, READ_COMMITED. I also understand autocommit is essentially a transaction per sql statement. Here's what I don't get:<\/p>\n\n<ol>\n<li><p>hibernate does 2 calls to the DB it doesn't need to do in my first example. I don't need it to toggle between autocommit = false and autocommit = true. I expect it to stay at false all the time but however I configure it, it still wants to make set autocommit calls automatically. I don't get why it does that.<\/p><\/li>\n<li><p>c3p0 exhibits somewhat similar behavior. It does set autocommit automagically for me when I don't want it to, and I also don't understand why it does that.<\/p><\/li>\n<\/ol>\n",
+        "question_id": 7773291,
+        "tags": [
+            "java",
+            "mysql",
+            "hibernate",
+            "jdbc"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 4210,
+        "last_edit_date": 1410450366
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fd241d493f0d8d0a86d24df3f1a12b3b?s=256&d=identicon&r=PG",
+                "account_id": 934548,
+                "user_type": "registered",
+                "user_id": 963731,
+                "link": "https://stackoverflow.com/users/963731/fran%c3%a7ois-lamarre",
+                "reputation": 147,
+                "display_name": "Fran&#231;ois Lamarre",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773291,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7d7d85dc52220de2f18fe25dbdd35a59?s=256&d=identicon&r=PG",
+                "account_id": 247477,
+                "user_type": "registered",
+                "user_id": 994168,
+                "link": "https://stackoverflow.com/users/994168/tscho",
+                "reputation": 2054,
+                "display_name": "tscho"
+            },
+            "edited": false,
+            "creation_date": 1318785996,
+            "comment_id": 9482669
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7d7d85dc52220de2f18fe25dbdd35a59?s=256&d=identicon&r=PG",
+                "account_id": 247477,
+                "user_type": "registered",
+                "user_id": 994168,
+                "link": "https://stackoverflow.com/users/994168/tscho",
+                "reputation": 2054,
+                "display_name": "tscho"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773291,
+            "edited": false,
+            "creation_date": 1318625848,
+            "comment_id": 9465401
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/524fe9a7f91c40368675c8b23e566527?s=256&d=identicon&r=PG",
+            "account_id": 934511,
+            "user_type": "registered",
+            "user_id": 963700,
+            "link": "https://stackoverflow.com/users/963700/darryl-miles",
+            "reputation": 4631,
+            "display_name": "Darryl Miles"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": false,
+        "last_activity_date": 1318647183,
+        "creation_date": 1318625507,
+        "body": "<p>You need to decide if you are doing transactions or not.<\/p>\n\n<p>It is important to understand how SQL servers work, there is no such thing as no transactions.  What autoCommit=true does it make each statement a transaction in its own right, you don't need to use an explicit <code>BEGIN TRANSACTION<\/code> and <code>COMMIT<\/code> around each statement (the SQL server implies this behavior).<\/p>\n\n<p>Yes... it is important that you do SELECTs inside transaction.  That fact you suggest it is not needed indicates you do not yet fully appreciate and understand the point of relational integrity.<\/p>\n\n<p>Hibernate expects relational integrity to exist, if you read some data now, then runs some Java code, then use the data you previously read to access more data from SQL (for example using Hibernates lazy loading feature) then it is important that data still exists isn't it.  Otherwise what should your Java code do now?  throw the user an error?<\/p>\n\n<p>This is what using transactions and say the default <code>READ_COMMITTED<\/code> Transaction Isolation level would provide and this is the minimum level you should start your quest to grok (learn) SQL.<\/p>\n\n<p>So are you doing transactions or not.  The question is do you want consistent, reliable, repeatible behavior or do you fast but sometimes crazy ?  (this is not to say transactions slow down performance, that is a common misconception, only transactions that have conflicts with each other might lower performance, working on large data sets in an open transaction increase the possibility to lower performance).<\/p>\n\n<p>Re autoCommit=true|false affecting performance.  I think you are asking the wrong question.<\/p>\n\n<p>Re databases locking up due to long transactions, this is usually a code/code-design bug, sometimes it is a design issue about how to do about doing things in SQL.  Many small data-set transactions is good, one big large data-set is bad.<\/p>\n\n<p>.<\/p>\n\n<p>In order to get transactional support in MySQL you should ensure all your tables are InnoDB type using <code>\"CREATE TABLE tableName ( ... ) ENGINE=InnoDB;\"<\/code>.<\/p>\n\n<p>You should keep the SQL driver, pooled connection handle (via c3p0) with <code>autoCommit=false<\/code> (this should be the default).<\/p>\n\n<p>You should ensure the default Transaction Isolation Level is (at least) <code>READ_COMMITTED<\/code>.<\/p>\n\n<p>Don't forget to use the correct Hibernate dialect for InnoDB (check the hibernate startup logging output).<\/p>\n\n<p>Now learn how to use that.  If you hit a problem it is because you are doing something wrong and don't fully understand it all.  If you feel you need to lower the isolation level, stop using transactions or need <code>autoCommit=true<\/code> then you should seriously hire a professional consulant to look at the project and should not consider turning it off until you understand why and when you can turn it off.<\/p>\n\n<p>.<\/p>\n\n<p><strong>Update after your edit<\/strong><\/p>\n\n<p>The default autoCommit setting is a property of the driver and/or the connection pooler.  So the suggestion to mess with hibernate setting isn't where I'd start.<\/p>\n\n<p>By default hibernate checks what it gets and modifies it if necessary.  Then puts is back to how it was before returning the Connection to the connection pooling (some broken connection poolers don't check/reset this so hibernate does this to improve its inter-operation within a larger system).<\/p>\n\n<p>So if it is assistance with setting up the connection pooler (c3p0) then maybe you should start by posting the details of how you configured it ?  The version you are using, also an example of the JDBC connection string in use and also the MySQL driver jar you are using.<\/p>\n\n<p>Also what is your deployment scenario ?  standalone J2SE ?  web-app WAR ?  app-server ?<\/p>\n\n<p>Can you write some test code to get a Connection and there is API to ask it what the autoCommit mode it.  <a href=\"http://download.oracle.com/javase/6/docs/api/java/sql/Connection.html#getAutoCommit%28%29\" rel=\"nofollow\">http://download.oracle.com/javase/6/docs/api/java/sql/Connection.html#getAutoCommit%28%29<\/a>  Your goal is to then adjust your configuration so that you always get 'false' back from this API.<\/p>\n\n<p>The MySQL driver documentation <a href=\"http://dev.mysql.com/doc/refman/5.1/en/connector-j-reference-configuration-properties.html\" rel=\"nofollow\">http://dev.mysql.com/doc/refman/5.1/en/connector-j-reference-configuration-properties.html<\/a> there is some reference to autoCommit in there.<\/p>\n\n<p>You also want to try and run \"mysqladmin variables\" on your server to get back the server configuration, it maybe possible to set it globally (which seems like a silly thing to do IMHO).<\/p>\n\n<p>In short you need to find the source of where it is being set on, since that is an unusual default.  Then you can remove it.<\/p>\n",
+        "answer_id": 7773433,
+        "question_id": 7773291,
+        "last_edit_date": 1318647183
+    }],
+    "answer_comments": {"7773433": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fd241d493f0d8d0a86d24df3f1a12b3b?s=256&d=identicon&r=PG",
+                "account_id": 934548,
+                "user_type": "registered",
+                "user_id": 963731,
+                "link": "https://stackoverflow.com/users/963731/fran%c3%a7ois-lamarre",
+                "reputation": 147,
+                "display_name": "Fran&#231;ois Lamarre",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773433,
+            "edited": false,
+            "creation_date": 1318784191,
+            "comment_id": 9482420
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d873f397779db38cd510d9ee5416fd43?s=256&d=identicon&r=PG",
+                "account_id": 213468,
+                "user_type": "registered",
+                "user_id": 466862,
+                "link": "https://stackoverflow.com/users/466862/mark-rotteveel",
+                "reputation": 110280,
+                "display_name": "Mark Rotteveel"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773433,
+            "edited": false,
+            "creation_date": 1318678276,
+            "comment_id": 9470832
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fd241d493f0d8d0a86d24df3f1a12b3b?s=256&d=identicon&r=PG",
+                "account_id": 934548,
+                "user_type": "registered",
+                "user_id": 963731,
+                "link": "https://stackoverflow.com/users/963731/fran%c3%a7ois-lamarre",
+                "reputation": 147,
+                "display_name": "Fran&#231;ois Lamarre",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 7773433,
+            "edited": false,
+            "creation_date": 1318640532,
+            "comment_id": 9467595
+        }
+    ]}
+}

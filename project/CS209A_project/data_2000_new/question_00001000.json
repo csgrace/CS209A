@@ -1,0 +1,297 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/80a68e69526f81d2dc560c47eedd198a?s=256&d=identicon&r=PG",
+            "account_id": 67390,
+            "user_type": "registered",
+            "user_id": 197229,
+            "link": "https://stackoverflow.com/users/197229/mr-boy",
+            "reputation": 64560,
+            "display_name": "Mr. Boy",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/14964833/non-blocking-odbc-calls-in-java",
+        "last_activity_date": 1365517032,
+        "creation_date": 1361298747,
+        "answer_count": 4,
+        "title": "Non-blocking ODBC calls in Java",
+        "body": "<p>I use pretty standard Java ODBC functionality - grab a <code>Connection<\/code> from the pool, create a <code>Statement<\/code> and execute it.<\/p>\n\n<p>Our use-case is a game, logging game progress - ODBC calls are largely calls to stored procedures and in most cases there are no return values. So the fact the ODBC call blocks is annoying - the game is already turn based but users can see longer pauses if the DB is slow.<\/p>\n\n<p>If I don't need to check the result of an ODBC call, is there any built-in functionality to execute the statement asyncronously? If not, what is a good way to do this without writing lots of code? I DO still need to catch ODBC exceptions when and if they occur.<\/p>\n\n<p>This question looks related although not identical... <a href=\"https://stackoverflow.com/questions/4087696/is-asynchronous-jdbc-call-possible\">Is asynchronous jdbc call possible?<\/a><\/p>\n",
+        "question_id": 14964833,
+        "tags": [
+            "java",
+            "jdbc",
+            "java-6"
+        ],
+        "score": 1,
+        "accepted_answer_id": 15042787,
+        "is_answered": true,
+        "view_count": 1324,
+        "last_edit_date": 1495541551
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80a68e69526f81d2dc560c47eedd198a?s=256&d=identicon&r=PG",
+                "account_id": 67390,
+                "user_type": "registered",
+                "user_id": 197229,
+                "link": "https://stackoverflow.com/users/197229/mr-boy",
+                "reputation": 64560,
+                "display_name": "Mr. Boy",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14964833,
+            "edited": false,
+            "creation_date": 1361870330,
+            "comment_id": 21217722
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VsfsM.jpg?s=256",
+                "account_id": 1659920,
+                "user_type": "registered",
+                "user_id": 1528401,
+                "link": "https://stackoverflow.com/users/1528401/glen-best",
+                "reputation": 23135,
+                "display_name": "Glen Best"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14964833,
+            "edited": false,
+            "creation_date": 1361852667,
+            "comment_id": 21211356
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80a68e69526f81d2dc560c47eedd198a?s=256&d=identicon&r=PG",
+                "account_id": 67390,
+                "user_type": "registered",
+                "user_id": 197229,
+                "link": "https://stackoverflow.com/users/197229/mr-boy",
+                "reputation": 64560,
+                "display_name": "Mr. Boy",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14964833,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/6b39911759d36daa9c0b3d47c08ec75b?s=256&d=identicon&r=PG",
+                "account_id": 351195,
+                "user_type": "registered",
+                "user_id": 687514,
+                "link": "https://stackoverflow.com/users/687514/anders-r-bystrup",
+                "reputation": 16110,
+                "display_name": "Anders R. Bystrup"
+            },
+            "edited": false,
+            "creation_date": 1361366504,
+            "comment_id": 21036543
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6b39911759d36daa9c0b3d47c08ec75b?s=256&d=identicon&r=PG",
+                "account_id": 351195,
+                "user_type": "registered",
+                "user_id": 687514,
+                "link": "https://stackoverflow.com/users/687514/anders-r-bystrup",
+                "reputation": 16110,
+                "display_name": "Anders R. Bystrup"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14964833,
+            "edited": false,
+            "creation_date": 1361360236,
+            "comment_id": 21033222
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/e2b9E.png?s=256",
+                "account_id": 1878912,
+                "user_type": "registered",
+                "user_id": 1699518,
+                "link": "https://stackoverflow.com/users/1699518/ericson",
+                "reputation": 1658,
+                "display_name": "ericson"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 10,
+            "is_accepted": true,
+            "last_activity_date": 1361637116,
+            "creation_date": 1361637116,
+            "body": "<p>Let's assume you have a <code>OdbcCaller<\/code>:<\/p>\n\n<pre><code>public class OdbcCaller {\n\npublic void callODBC() {\n    // call ODBC directly\n    // ...\n}\n<\/code><\/pre>\n\n<p>You can wrap it in a runnable task and submit the task to a thread pool to make it executes asyncronously:<\/p>\n\n<pre><code>public void asyncCallODBC() {\n    // wrap the call with a runnable task\n    executor.execute(new Runnable() {\n\n        @Override\n        public void run() {\n            callODBC();\n        }\n    });\n    // the above line would return immediately.\n}\n<\/code><\/pre>\n\n<p>The <code>executor<\/code> is a thread pool implementation provided by JDK, it could be defined as follows:<\/p>\n\n<pre><code>Executor executor = new ThreadPoolExecutor(/* core pool size */5,\n        /* maximum pool size */10,\n        /* keepAliveTime */1,\n        /* time unit of keepAliveTime */TimeUnit.MINUTES,\n        /* work queue */new ArrayBlockingQueue&lt;Runnable&gt;(10000),\n        /* custom thread factory */new ThreadFactory() {\n            private AtomicInteger counter = new AtomicInteger(0);\n\n            @Override\n            public Thread newThread(Runnable r) {\n                Thread t = new Thread(r, \"asyncCaller-\" + (counter.incrementAndGet()));\n                return t;\n            }\n        },\n        /*\n         * policy applied when all tasks are occupied and task\n         * queue is full.\n         */new ThreadPoolExecutor.CallerRunsPolicy());\n<\/code><\/pre>\n\n<p>The <code>ThreadPoolExecutor<\/code> is highly configurable and is welled documented in <a href=\"http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html\" rel=\"noreferrer\">JavaDoc<\/a>, you might want read it first.<\/p>\n\n<p>Following are some sugguestion of thread pool configurations based on my experiences: <\/p>\n\n<ul>\n<li>The proper thread pool size is depending on the scenario, you may need run some tests to tune it. <\/li>\n<li>The work queue is used to cache the tasks when there are no available worker threads. A unbounded queue is not a good idea as you might run out your memory. <\/li>\n<li>It is a good practice to provide a <code>ThreadFactory<\/code> and give the threads a meaningful name. It will be very useful when you need to inspect threads states(using <code>jstack<\/code> or other tools).<\/li>\n<li>The reject policy is applied when no resources is available. You can choose one of the build-in policy(reject, discard, caller-run, discardOldest), or implement your own policy.<\/li>\n<\/ul>\n",
+            "answer_id": 15042787,
+            "question_id": 14964833
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/61eaaf63ae526b029d6c82d5975c1ae9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1622859,
+                "user_type": "registered",
+                "user_id": 1499066,
+                "link": "https://stackoverflow.com/users/1499066/john-smith",
+                "reputation": 2332,
+                "display_name": "John Smith"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1361972738,
+            "creation_date": 1361972738,
+            "body": "<pre><code>public class Snippet\n{\n    static int i = 0;\n\n\n\n    public static void main(String[] args) throws SQLException\n    {\n        ExecutorService eventExecutor = Executors.newSingleThreadExecutor();\n        final Connection c = DriverManager.getConnection(\"jdbc:url\", \"user\",\n                \"password\");\n        Runnable r = new Runnable()\n        {\n\n            public void run()\n            {\n                try\n                {\n                    CallableStatement s = c\n                            .prepareCall(\"{ call your_procedure(?) }\");\n                    s.setInt(1, i);\n                    s.execute();\n                } catch (SQLException e)\n                {\n                    e.printStackTrace();\n                }\n            }\n        };\n        for (; i &lt; 100; i++)\n            eventExecutor.submit(r);\n    }\n}\n<\/code><\/pre>\n\n<p>Runs the call to your_procedure 100 times with 100 different parameters.<\/p>\n",
+            "answer_id": 15113646,
+            "question_id": 14964833
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/iZoA9.jpg?s=256",
+                "account_id": 2130230,
+                "user_type": "registered",
+                "user_id": 1891219,
+                "link": "https://stackoverflow.com/users/1891219/gaborsch",
+                "reputation": 15758,
+                "display_name": "gaborsch"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1361983312,
+            "creation_date": 1361983312,
+            "body": "<p>If you are using EJB 3.1, you can create a <code>@Stateless<\/code> EJB, and mark one of the methods <code>@Asynchronous<\/code>. This is an out-of-the-box solution for Enterprise Java environment (<em>There<\/em> the external management of <code>Thread<\/code> resources are not recommended). <\/p>\n",
+            "answer_id": 15117471,
+            "question_id": 14964833
+        },
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/589709364/picture?type=large",
+                "account_id": 1672648,
+                "user_type": "registered",
+                "user_id": 1538814,
+                "link": "https://stackoverflow.com/users/1538814/user1538814",
+                "reputation": 211,
+                "display_name": "user1538814",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -2,
+            "is_accepted": false,
+            "last_activity_date": 1361298969,
+            "creation_date": 1361298969,
+            "body": "<p>Not sure about this but maybe you can use an aynsctask? That handles db stuff in a different thread<\/p>\n",
+            "answer_id": 14964890,
+            "question_id": 14964833
+        }
+    ],
+    "answer_comments": {
+        "15117471": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/sZiEO.jpg?s=256",
+                    "account_id": 1100048,
+                    "user_type": "registered",
+                    "user_id": 1092670,
+                    "link": "https://stackoverflow.com/users/1092670/anthonyjclink",
+                    "reputation": 1008,
+                    "display_name": "AnthonyJClink",
+                    "accept_rate": 93
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15117471,
+                "edited": false,
+                "creation_date": 1423519096,
+                "comment_id": 45173511
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/80a68e69526f81d2dc560c47eedd198a?s=256&d=identicon&r=PG",
+                    "account_id": 67390,
+                    "user_type": "registered",
+                    "user_id": 197229,
+                    "link": "https://stackoverflow.com/users/197229/mr-boy",
+                    "reputation": 64560,
+                    "display_name": "Mr. Boy",
+                    "accept_rate": 61
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15117471,
+                "edited": false,
+                "creation_date": 1361997490,
+                "comment_id": 21281762
+            }
+        ],
+        "14964890": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/80a68e69526f81d2dc560c47eedd198a?s=256&d=identicon&r=PG",
+                "account_id": 67390,
+                "user_type": "registered",
+                "user_id": 197229,
+                "link": "https://stackoverflow.com/users/197229/mr-boy",
+                "reputation": 64560,
+                "display_name": "Mr. Boy",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14964890,
+            "edited": false,
+            "creation_date": 1361356009,
+            "comment_id": 21031101
+        }],
+        "15042787": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/e2b9E.png?s=256",
+                    "account_id": 1878912,
+                    "user_type": "registered",
+                    "user_id": 1699518,
+                    "link": "https://stackoverflow.com/users/1699518/ericson",
+                    "reputation": 1658,
+                    "display_name": "ericson"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15042787,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/80a68e69526f81d2dc560c47eedd198a?s=256&d=identicon&r=PG",
+                    "account_id": 67390,
+                    "user_type": "registered",
+                    "user_id": 197229,
+                    "link": "https://stackoverflow.com/users/197229/mr-boy",
+                    "reputation": 64560,
+                    "display_name": "Mr. Boy",
+                    "accept_rate": 61
+                },
+                "edited": false,
+                "creation_date": 1361782353,
+                "comment_id": 21179859
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/80a68e69526f81d2dc560c47eedd198a?s=256&d=identicon&r=PG",
+                    "account_id": 67390,
+                    "user_type": "registered",
+                    "user_id": 197229,
+                    "link": "https://stackoverflow.com/users/197229/mr-boy",
+                    "reputation": 64560,
+                    "display_name": "Mr. Boy",
+                    "accept_rate": 61
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 15042787,
+                "edited": false,
+                "creation_date": 1361781933,
+                "comment_id": 21179686
+            }
+        ]
+    }
+}

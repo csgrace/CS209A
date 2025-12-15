@@ -1,0 +1,182 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9ab9365d5346bcc31a7b58dd3d39ebf4?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8945056,
+            "user_type": "registered",
+            "user_id": 6672821,
+            "link": "https://stackoverflow.com/users/6672821/felixei",
+            "reputation": 1,
+            "display_name": "felixei"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/50888638/link-checkbox-with-checkable-interface-for-a-listview",
+        "last_activity_date": 1529158545,
+        "creation_date": 1529158187,
+        "answer_count": 0,
+        "title": "Link CheckBox with Checkable Interface for a ListView",
+        "body": "<p>For my Android application I have implemented a <code>ListView<\/code> that is populated by a Custom Adapter from <code>BaseAdapter<\/code> and a custom Layout for the rows.<\/p>\n\n<p>Now i would like to make entries checkable by using the corresponding methods from ListView, like <code>setItemChecked()<\/code> or <code>getCheckedItemCount()<\/code>.<\/p>\n\n<p>I created a custom Layout class for the row layout that imlpements <code>Checkable<\/code> interface and retrieved the Button using <code>findViewById<\/code> to be able to access it inside the overridden methods from <code>Checkable<\/code>.<\/p>\n\n<p>When long clicking on an entry in the list, the methods get invoked, but I get a NullpointerException, saying the CheckBox is referencing null:<\/p>\n\n<pre><code>java.lang.NullPointerException: Attempt to invoke virtual method 'void android.widget.CompoundButton.setChecked(boolean)' on a null object reference\n<\/code><\/pre>\n\n<p>What is the appropriate way to link the checkbox of each entry inside a checkable Layout?<\/p>\n\n<p>The checkable Layout class looks like this:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>package com.lastname.name.arcadaobjecttracker;\n\nimport android.content.Context;\nimport android.support.annotation.Nullable;\nimport android.util.AttributeSet;\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.widget.CheckBox;\nimport android.widget.Checkable;\nimport android.widget.LinearLayout;\n\n\n//extend the Layout for the row view (each element in the listView) to add support for checkable rows (called by the listView methods like setItemChecked() etc.)\npublic class CheckableRowLayout extends LinearLayout implements Checkable\n{\n\n    View view;\n    CheckBox checkBox;\n\n    public CheckableRowLayout(Context context)\n    {\n        super(context);\n        init(context);\n    }\n\n    public CheckableRowLayout(Context context, @Nullable AttributeSet attrs)\n    {\n        super(context, attrs);\n        init(context);\n    }\n\n    public CheckableRowLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr)\n    {\n        super(context, attrs, defStyleAttr);\n        init(context);\n    }\n\n\n    private void init(Context context)\n    {\n        checkBox = (CheckBox) findViewById(R.id.checkBox);\n    }\n\n    @Override\n    public void setChecked(boolean checked)\n    {\n        checkBox.setChecked(checked);\n    }\n\n    @Override\n    public boolean isChecked()\n    {\n        return checkBox.isChecked();\n    }\n\n    @Override\n    public void toggle()\n    {\n        checkBox.toggle();\n    }\n}\n<\/code><\/pre>\n\n<p>The Layout consists of the following xml file with checkbox:<\/p>\n\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;com.lastname.name.arcadaobjecttracker.CheckableRowLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"wrap_content\"\n    android:gravity=\"center_vertical\"\n    android:orientation=\"horizontal\"&gt;\n\n    &lt;CheckBox\n        android:id=\"@+id/checkBox\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_weight=\"0\"\n        android:visibility=\"visible\" /&gt;\n\n    &lt;include\n        layout=\"@layout/list_view_layout\"\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"wrap_content\" /&gt;\n\n&lt;/com.lastname.name.arcadaobjecttracker.CheckableRowLayout&gt;\n<\/code><\/pre>\n\n<p>which includes the rest of the layout:<\/p>\n\n<pre class=\"lang-xml prettyprint-override\"><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;android.support.constraint.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"wrap_content\"&gt;\n\n    &lt;ImageView\n        android:id=\"@+id/thumbnailImageView\"\n        android:layout_width=\"80dp\"\n        android:layout_height=\"45dp\"\n        android:layout_marginBottom=\"8dp\"\n        android:layout_marginStart=\"8dp\"\n        android:layout_marginTop=\"8dp\"\n        app:layout_constraintBottom_toBottomOf=\"parent\"\n        app:layout_constraintStart_toStartOf=\"parent\"\n        app:layout_constraintTop_toTopOf=\"parent\"\n        app:srcCompat=\"@drawable/ic_videocam_black_24dp\" /&gt;\n\n    &lt;TextView\n        android:id=\"@+id/nameTextView\"\n        android:layout_width=\"0dp\"\n        android:layout_height=\"wrap_content\"\n        android:layout_marginEnd=\"8dp\"\n        android:layout_marginStart=\"8dp\"\n        android:singleLine=\"true\"\n        android:text=\"Thisisaverylongnameforavideofilethatforsureexceedsthetextviewsize\"\n        android:textColor=\"@color/black\"\n        android:textSize=\"18sp\"\n        app:layout_constraintEnd_toEndOf=\"parent\"\n        app:layout_constraintStart_toEndOf=\"@+id/thumbnailImageView\"\n        app:layout_constraintTop_toTopOf=\"@+id/thumbnailImageView\" /&gt;\n\n    &lt;TextView\n        android:id=\"@+id/dateTextView\"\n        android:layout_width=\"80dp\"\n        android:layout_height=\"wrap_content\"\n        android:layout_marginStart=\"8dp\"\n        android:singleLine=\"true\"\n        android:text=\"2018-01-01\"\n        app:layout_constraintBottom_toBottomOf=\"@+id/thumbnailImageView\"\n        app:layout_constraintStart_toEndOf=\"@+id/thumbnailImageView\" /&gt;\n\n    &lt;TextView\n        android:id=\"@+id/durationTextView\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_marginStart=\"8dp\"\n        android:singleLine=\"true\"\n        android:text=\"Duration\"\n        android:textAlignment=\"textStart\"\n        app:layout_constraintBottom_toBottomOf=\"@+id/dateTextView\"\n        app:layout_constraintStart_toEndOf=\"@+id/dateTextView\" /&gt;\n\n    &lt;TextView\n        android:id=\"@+id/hasTrackingTextView\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_marginEnd=\"8dp\"\n        android:text=\"TextView\"\n\n        android:textAlignment=\"viewEnd\"\n        app:layout_constraintBottom_toBottomOf=\"@+id/durationTextView\"\n        app:layout_constraintEnd_toEndOf=\"parent\" /&gt;\n\n    &lt;android.support.constraint.Guideline\n        android:id=\"@+id/guideline\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:orientation=\"vertical\"\n        app:layout_constraintGuide_begin=\"20dp\" /&gt;\n\n    &lt;android.support.constraint.Guideline\n        android:id=\"@+id/guideline2\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:orientation=\"vertical\"\n        app:layout_constraintGuide_percent=\"0.42\" /&gt;\n&lt;/android.support.constraint.ConstraintLayout&gt;\n<\/code><\/pre>\n",
+        "question_id": 50888638,
+        "tags": [
+            "java",
+            "android",
+            "android-layout",
+            "listview",
+            "custom-adapter"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 260,
+        "last_edit_date": 1529158545
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/nrUML.jpg?s=256",
+                "account_id": 6305344,
+                "user_type": "registered",
+                "user_id": 4898562,
+                "link": "https://stackoverflow.com/users/4898562/i-a-mok",
+                "reputation": 2904,
+                "display_name": "i_A_mok"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888638,
+            "edited": false,
+            "creation_date": 1529470696,
+            "comment_id": 88878731
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9ab9365d5346bcc31a7b58dd3d39ebf4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8945056,
+                "user_type": "registered",
+                "user_id": 6672821,
+                "link": "https://stackoverflow.com/users/6672821/felixei",
+                "reputation": 1,
+                "display_name": "felixei"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888638,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/31b41159edcc827d59913465cf571717?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13113788,
+                "user_type": "registered",
+                "user_id": 9473786,
+                "link": "https://stackoverflow.com/users/9473786/tyler-v",
+                "reputation": 11151,
+                "display_name": "Tyler V"
+            },
+            "edited": false,
+            "creation_date": 1529419895,
+            "comment_id": 88861492
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/31b41159edcc827d59913465cf571717?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13113788,
+                "user_type": "registered",
+                "user_id": 9473786,
+                "link": "https://stackoverflow.com/users/9473786/tyler-v",
+                "reputation": 11151,
+                "display_name": "Tyler V"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888638,
+            "edited": false,
+            "creation_date": 1529174015,
+            "comment_id": 88782271
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9ab9365d5346bcc31a7b58dd3d39ebf4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8945056,
+                "user_type": "registered",
+                "user_id": 6672821,
+                "link": "https://stackoverflow.com/users/6672821/felixei",
+                "reputation": 1,
+                "display_name": "felixei"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888638,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/31b41159edcc827d59913465cf571717?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13113788,
+                "user_type": "registered",
+                "user_id": 9473786,
+                "link": "https://stackoverflow.com/users/9473786/tyler-v",
+                "reputation": 11151,
+                "display_name": "Tyler V"
+            },
+            "edited": false,
+            "creation_date": 1529172520,
+            "comment_id": 88781932
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/31b41159edcc827d59913465cf571717?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13113788,
+                "user_type": "registered",
+                "user_id": 9473786,
+                "link": "https://stackoverflow.com/users/9473786/tyler-v",
+                "reputation": 11151,
+                "display_name": "Tyler V"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888638,
+            "edited": false,
+            "creation_date": 1529163927,
+            "comment_id": 88779939
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9ab9365d5346bcc31a7b58dd3d39ebf4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8945056,
+                "user_type": "registered",
+                "user_id": 6672821,
+                "link": "https://stackoverflow.com/users/6672821/felixei",
+                "reputation": 1,
+                "display_name": "felixei"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888638,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/31b41159edcc827d59913465cf571717?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13113788,
+                "user_type": "registered",
+                "user_id": 9473786,
+                "link": "https://stackoverflow.com/users/9473786/tyler-v",
+                "reputation": 11151,
+                "display_name": "Tyler V"
+            },
+            "edited": false,
+            "creation_date": 1529161744,
+            "comment_id": 88779371
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/31b41159edcc827d59913465cf571717?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 13113788,
+                "user_type": "registered",
+                "user_id": 9473786,
+                "link": "https://stackoverflow.com/users/9473786/tyler-v",
+                "reputation": 11151,
+                "display_name": "Tyler V"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 50888638,
+            "edited": false,
+            "creation_date": 1529159070,
+            "comment_id": 88778731
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

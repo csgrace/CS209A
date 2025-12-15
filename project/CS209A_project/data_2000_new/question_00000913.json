@@ -1,0 +1,138 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6748bc95d9e904e9a302714a867b9233?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 460624,
+            "user_type": "registered",
+            "user_id": 861832,
+            "link": "https://stackoverflow.com/users/861832/oneiros",
+            "reputation": 3588,
+            "display_name": "oneiros",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13827721/inserting-1000-lines-in-a-sql-table-through-jdbc-using-a-loop-performance",
+        "last_activity_date": 1355257201,
+        "creation_date": 1355256640,
+        "answer_count": 3,
+        "title": "Inserting 1000 lines in a SQL table through JDBC using a loop - Performance",
+        "body": "<p>I have a file that contains about 1000 lines. \nThe functionality that I am trying to implement is to get this file, validate it, and once it is validated, I have to insert the lines into a database table :)<\/p>\n\n<p>My question is: Does doing an insert in a for loop pose a major performance problem?\nThis for loop will call insert on each line of the file. \nSo we are talking about a 1000 INSERTs done via a for loop. \nWhat would be the best way to implement something like this?\nAm I doing something that is obviously wrong?<\/p>\n",
+        "question_id": 13827721,
+        "tags": [
+            "java",
+            "sql",
+            "jdbc"
+        ],
+        "score": 1,
+        "accepted_answer_id": 13827803,
+        "is_answered": true,
+        "view_count": 3852
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7b7593f5000f5edda281f38c58863b0d?s=256&d=identicon&r=PG",
+            "account_id": 1084298,
+            "user_type": "registered",
+            "user_id": 1080405,
+            "link": "https://stackoverflow.com/users/1080405/vaibhav-desai",
+            "reputation": 2738,
+            "display_name": "Vaibhav Desai",
+            "accept_rate": 71
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "post_id": 13827721,
+        "edited": false,
+        "creation_date": 1355256907,
+        "comment_id": 19029409
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/umB9d.png?s=256",
+                "account_id": 1807690,
+                "user_type": "registered",
+                "user_id": 1644440,
+                "link": "https://stackoverflow.com/users/1644440/zhedar",
+                "reputation": 3510,
+                "display_name": "Zhedar",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1355256803,
+            "creation_date": 1355256803,
+            "body": "<p>You can batch all those inserts.\nAs you read your file, you build your inserts and then execute them like this:<\/p>\n\n<pre><code>Statement st = con.createStatement();\nst.addBatch(\"INSERT INTO xx VALUES(...)\");\nst.addBatch(\"INSERT INTO xx VALUES(...)\")\nst.executeBatch();\n<\/code><\/pre>\n\n<p>With this technique you are able to deal with big inputs efficiently.<\/p>\n",
+            "answer_id": 13827758,
+            "question_id": 13827721
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ticHc.jpg?s=256",
+                "account_id": 258390,
+                "user_type": "registered",
+                "user_id": 540552,
+                "link": "https://stackoverflow.com/users/540552/victor-stafusa",
+                "reputation": 14679,
+                "display_name": "Victor Stafusa",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1355257201,
+            "creation_date": 1355256823,
+            "body": "<p>This normally should be no problem. Start a transaction, insert each line a time and close the transaction. That is it. 1000 lines should be no problem.<\/p>\n\n<p>On the other hand, if you try to do this with 1,000,000 lines, its likely that you will run on trouble, so you should do in packets of say 1000 transactions with 1000 lines each.<\/p>\n\n<p>If for some reason 1000 lines in a transaction is too much, do it in packets of, lets say 200, 100 or 50.<\/p>\n",
+            "answer_id": 13827767,
+            "question_id": 13827721,
+            "last_edit_date": 1355257201
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user330315"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1355256962,
+            "creation_date": 1355256962,
+            "body": "<p>Essentially there is nothing wrong with doing 1000 inserts in a loop. For 1000 rows it's probably not going to make a big difference, but if you really want to get the best performance you should batch your inserts using a PreparedStatement:<\/p>\n\n<pre><code>PreparedStatement  pstmt = con.prepareStatement(\"insert into the_table (col1, col2) values (?,?)\");\nfor (row=0; row &lt; rowCount; row ++) {\n  // obtain the values for each row\n  pstmt.setInt(1, some_value);\n  pstmt.setString(2, other_value);\n  pstmt.addBatch();\n}\npstmt.executeBatch();\ncon.commit();\n<\/code><\/pre>\n\n<p>If you expect more rows, you might want to call executeBatch() every 1000 rows or so, because all the data (set via <code>addBatch()<\/code>) is kept in memory until you call <code>executeBatch()<\/code><\/p>\n",
+            "answer_id": 13827803,
+            "question_id": 13827721
+        }
+    ],
+    "answer_comments": {"13827767": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/ticHc.jpg?s=256",
+                "account_id": 258390,
+                "user_type": "registered",
+                "user_id": 540552,
+                "link": "https://stackoverflow.com/users/540552/victor-stafusa",
+                "reputation": 14679,
+                "display_name": "Victor Stafusa",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13827767,
+            "edited": false,
+            "creation_date": 1355257228,
+            "comment_id": 19029550
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user330315"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13827767,
+            "edited": false,
+            "creation_date": 1355257012,
+            "comment_id": 19029453
+        }
+    ]}
+}

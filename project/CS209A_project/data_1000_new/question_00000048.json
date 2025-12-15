@@ -1,0 +1,312 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+            "account_id": 64840,
+            "user_type": "registered",
+            "user_id": 191206,
+            "link": "https://stackoverflow.com/users/191206/dferraro",
+            "reputation": 6448,
+            "display_name": "dferraro",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/3660532/cannot-connect-to-oracle-db-from-java-ora-12560-tnsprotocol-adapter-error",
+        "last_activity_date": 1301676409,
+        "creation_date": 1283876501,
+        "answer_count": 3,
+        "title": "Cannot connect to Oracle DB from Java - ORA-12560: TNS:protocol adapter error",
+        "body": "<p>This is my first Java application I am creating (using Eclipse IDE) and the second Oracle based app (I'm a .NET/MSSQL guy for years). The first Oracle app I wrote in .NET did not have any issues, and I'm trying to connect to the same server.<\/p>\n\n<ul>\n<li>I have installed:\n\n<ul>\n<li>'Java 2 Platform, Enterprise Edition 1.4 SDK'<\/li>\n<li>'Java DB `10.5.3.0'\n-'Java(TM) 6 Update 21<\/li>\n<li>'Java(TM) SE Development Kit 6 update 21<\/li>\n<li>'Oracle IRM Client' (11g)<\/li>\n<li><a href=\"http://www.oracle.com/technetwork/database/enterprise-edition/jdbc-112010-090769.html\" rel=\"nofollow noreferrer\">Oracle 11g Release 2 JDBC Drivers<\/a> (ojdbc6.jar)<\/li>\n<\/ul><\/li>\n<\/ul>\n\n<p>My code is <em>very<\/em> simple. Here it is:<\/p>\n\n<pre><code>  OracleDataSource ods = new OracleDataSource();\n            ods.setURL(\"jdbc:oracle:oci:@\");\n            ods.setUser(\"username\");\n            ods.setPassword(\"password\");\n            ods.setServerName(\"servername\");\n            ods.setPortNumber(1549);\n            ods.setServiceName(\"foo.myservice.com\");\n   Connection conn = ods.getConnection();\n<\/code><\/pre>\n\n<p>I get below exception:<\/p>\n\n<p>Exception in thread \"main\" java.sql.SQLException: ORA-12560: TNS:protocol adapter error<\/p>\n\n<pre><code>at oracle.jdbc.driver.T2CConnection.checkError(T2CConnection.java:737)\nat oracle.jdbc.driver.T2CConnection.logon(T2CConnection.java:401)\nat oracle.jdbc.driver.PhysicalConnection.&lt;init&gt;(PhysicalConnection.java:531)\nat oracle.jdbc.driver.T2CConnection.&lt;init&gt;(T2CConnection.java:148)\nat oracle.jdbc.driver.T2CDriverExtension.getConnection(T2CDriverExtension.java:53)\nat oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:503)\nat oracle.jdbc.pool.OracleDataSource.getPhysicalConnection(OracleDataSource.java:280)\nat oracle.jdbc.pool.OracleDataSource.getConnection(OracleDataSource.java:207)\nat oracle.jdbc.pool.OracleDataSource.getConnection(OracleDataSource.java:157)\nat Select.GetScalar(Select.java:47)\nat Job.Run(Job.java:20)\nat Main.main(Main.java:19)\n<\/code><\/pre>\n\n<p>I have google'd the hack out of this.. I've tried adding a 'TNS entry to the tnsnames.ora file'. I've tried adding '##NAMES.DIRECTORY_PATH = (TNSNAMES, EZCONNECT)' to the sqlnet.ora file. I've tried various other things but nothing is working.<\/p>\n\n<p>Has anyone experienced this before and has any clue on how to get this to work?? Am I using the wrong version? Server is remote (I don't have Oracle server installed locally, just client). Maybe I have wrong version of Java SDK or the wrong version of the JDBC .jar file?? I just need to connect to Oracle and run a single simple query! Thanks much for any help.<\/p>\n",
+        "question_id": 3660532,
+        "tags": [
+            "java",
+            "oracle-database",
+            "jdbc",
+            "ora-12560"
+        ],
+        "score": 3,
+        "accepted_answer_id": 3660678,
+        "is_answered": true,
+        "view_count": 6825,
+        "last_edit_date": 1301676409
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                "account_id": 16878,
+                "user_type": "registered",
+                "user_id": 37213,
+                "link": "https://stackoverflow.com/users/37213/duffymo",
+                "reputation": 309604,
+                "display_name": "duffymo",
+                "accept_rate": 81
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1283877550,
+            "creation_date": 1283877550,
+            "body": "<p>Try using the type IV JDBC driver instead of OCI if you can.  The thin url looks like this:<\/p>\n\n<pre><code>jdbc:oracle:thin:@host[:port]/service\n<\/code><\/pre>\n\n<p>I'd try code that looked more like this (fill in your defaults for the driver, URL, username, and password): <\/p>\n\n<pre><code>    package persistence;\n\n    import java.sql.*;\n    import java.util.ArrayList;\n    import java.util.HashMap;\n    import java.util.List;\n    import java.util.Map;\n\n    public class DatabaseUtils\n    {\n\n        private static final String DEFAULT_DRIVER = \"\";\n        private static final String DEFAULT_URL = \"\";\n        private static final String DEFAULT_USERNAME = \"\";\n        private static final String DEFAULT_PASSWORD = \"\";\n\n        public static void main(String[] args)\n        {\n            String driver = ((args.length &gt; 0) ? args[0] : DEFAULT_DRIVER);\n            String url = ((args.length &gt; 1) ? args[1] : DEFAULT_URL);\n            String username = ((args.length &gt; 2) ? args[2] : DEFAULT_USERNAME);\n            String password = ((args.length &gt; 3) ? args[3] : DEFAULT_PASSWORD);\n\n            Connection connection = null;\n\n            try\n            {\n                connection = createConnection(driver, url, username, password);\n                DatabaseMetaData meta = connection.getMetaData();\n                System.out.println(meta.getDatabaseProductName());\n                System.out.println(meta.getDatabaseProductVersion());\n            }\n            catch (Exception e)\n            {\n                e.printStackTrace(); \n            }\n            finally\n            {\n                close(connection);\n            }\n        }\n\n        public static Connection createConnection(String driver, String url, String username, String password) throws ClassNotFoundException, SQLException\n        {\n            Class.forName(driver);\n\n            if ((username == null) || (password == null) || (username.trim().length() == 0) || (password.trim().length() == 0))\n            {\n                return DriverManager.getConnection(url);\n            }\n            else\n            {\n                return DriverManager.getConnection(url, username, password);\n            }\n        }\n\n        public static void close(Connection connection)\n        {\n            try\n            {\n                if (connection != null)\n                {\n                    connection.close();\n                }\n            }\n            catch (SQLException e)\n            {\n                e.printStackTrace();\n            }\n        }\n\n\n        public static void close(Statement st)\n        {\n            try\n            {\n                if (st != null)\n                {\n                    st.close();\n                }\n            }\n            catch (SQLException e)\n            {\n                e.printStackTrace();\n            }\n        }\n\n        public static void close(ResultSet rs)\n        {\n            try\n            {\n                if (rs != null)\n                {\n                    rs.close();\n                }\n            }\n            catch (SQLException e)\n            {\n                e.printStackTrace();\n            }\n        }\n\n        public static void rollback(Connection connection)\n        {\n            try\n            {\n                if (connection != null)\n                {\n                    connection.rollback();\n                }\n            }\n            catch (SQLException e)\n            {\n                e.printStackTrace();\n            }\n        }\n\n        public static List&lt;Map&lt;String, Object&gt;&gt; map(ResultSet rs) throws SQLException\n        {\n            List&lt;Map&lt;String, Object&gt;&gt; results = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();\n\n            try\n            {\n                if (rs != null)\n                {\n                    ResultSetMetaData meta = rs.getMetaData();\n                    int numColumns = meta.getColumnCount();\n                    while (rs.next())\n                    {\n                        Map&lt;String, Object&gt; row = new HashMap&lt;String, Object&gt;();\n                        for (int i = 1; i &lt;= numColumns; ++i)\n                        {\n                            String name = meta.getColumnName(i);\n                            Object value = rs.getObject(i);\n                            row.put(name, value);\n                        }\n                        results.add(row);\n                    }\n                }\n            }\n            finally\n            {\n                close(rs);\n            }\n\n            return results;\n        }\n    }\n<\/code><\/pre>\n",
+            "answer_id": 3660678,
+            "question_id": 3660532
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f9474b14f9de5e2ae59b969ec2d328d6?s=256&d=identicon&r=PG",
+                "account_id": 46922,
+                "user_type": "registered",
+                "user_id": 138830,
+                "link": "https://stackoverflow.com/users/138830/gawi",
+                "reputation": 14239,
+                "display_name": "gawi",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1283877591,
+            "creation_date": 1283877591,
+            "body": "<p>If you want something simple, you should try using the THIN client instead of OCI client.\nDon't forget to include the right jar (ojdbc5.jar for Java 5, ojdbc6.jar for Java 6).<\/p>\n",
+            "answer_id": 3660689,
+            "question_id": 3660532
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/577eb615320e138b75acef8ba72897d1?s=256&d=identicon&r=PG",
+                "account_id": 5396,
+                "user_type": "registered",
+                "user_id": 8670,
+                "link": "https://stackoverflow.com/users/8670/dcookie",
+                "reputation": 43713,
+                "display_name": "DCookie",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1283878278,
+            "creation_date": 1283878278,
+            "body": "<p>Is the ServiceName you specified the service name of the Oracle instance you're trying to connect to? You're sure the port is correct?<\/p>\n",
+            "answer_id": 3660776,
+            "question_id": 3660532
+        }
+    ],
+    "answer_comments": {
+        "3660678": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+                    "account_id": 64840,
+                    "user_type": "registered",
+                    "user_id": 191206,
+                    "link": "https://stackoverflow.com/users/191206/dferraro",
+                    "reputation": 6448,
+                    "display_name": "dferraro",
+                    "accept_rate": 84
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 3660678,
+                "edited": false,
+                "creation_date": 1468611299,
+                "comment_id": 64216057
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                    "account_id": 16878,
+                    "user_type": "registered",
+                    "user_id": 37213,
+                    "link": "https://stackoverflow.com/users/37213/duffymo",
+                    "reputation": 309604,
+                    "display_name": "duffymo",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 3660678,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+                    "account_id": 64840,
+                    "user_type": "registered",
+                    "user_id": 191206,
+                    "link": "https://stackoverflow.com/users/191206/dferraro",
+                    "reputation": 6448,
+                    "display_name": "dferraro",
+                    "accept_rate": 84
+                },
+                "edited": false,
+                "creation_date": 1468186074,
+                "comment_id": 64010060
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                    "account_id": 16878,
+                    "user_type": "registered",
+                    "user_id": 37213,
+                    "link": "https://stackoverflow.com/users/37213/duffymo",
+                    "reputation": 309604,
+                    "display_name": "duffymo",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 1,
+                "post_id": 3660678,
+                "edited": false,
+                "creation_date": 1283883925,
+                "comment_id": 3852088
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+                    "account_id": 64840,
+                    "user_type": "registered",
+                    "user_id": 191206,
+                    "link": "https://stackoverflow.com/users/191206/dferraro",
+                    "reputation": 6448,
+                    "display_name": "dferraro",
+                    "accept_rate": 84
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 3660678,
+                "edited": false,
+                "creation_date": 1283882807,
+                "comment_id": 3851910
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+                    "account_id": 64840,
+                    "user_type": "registered",
+                    "user_id": 191206,
+                    "link": "https://stackoverflow.com/users/191206/dferraro",
+                    "reputation": 6448,
+                    "display_name": "dferraro",
+                    "accept_rate": 84
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 3660678,
+                "edited": false,
+                "creation_date": 1283881736,
+                "comment_id": 3851748
+            }
+        ],
+        "3660689": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f9474b14f9de5e2ae59b969ec2d328d6?s=256&d=identicon&r=PG",
+                    "account_id": 46922,
+                    "user_type": "registered",
+                    "user_id": 138830,
+                    "link": "https://stackoverflow.com/users/138830/gawi",
+                    "reputation": 14239,
+                    "display_name": "gawi",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 3660689,
+                "edited": false,
+                "creation_date": 1283959143,
+                "comment_id": 3861647
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+                    "account_id": 64840,
+                    "user_type": "registered",
+                    "user_id": 191206,
+                    "link": "https://stackoverflow.com/users/191206/dferraro",
+                    "reputation": 6448,
+                    "display_name": "dferraro",
+                    "accept_rate": 84
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 3660689,
+                "edited": false,
+                "creation_date": 1283883990,
+                "comment_id": 3852103
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/f9474b14f9de5e2ae59b969ec2d328d6?s=256&d=identicon&r=PG",
+                    "account_id": 46922,
+                    "user_type": "registered",
+                    "user_id": 138830,
+                    "link": "https://stackoverflow.com/users/138830/gawi",
+                    "reputation": 14239,
+                    "display_name": "gawi",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 3660689,
+                "edited": false,
+                "creation_date": 1283883378,
+                "comment_id": 3852003
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+                    "account_id": 64840,
+                    "user_type": "registered",
+                    "user_id": 191206,
+                    "link": "https://stackoverflow.com/users/191206/dferraro",
+                    "reputation": 6448,
+                    "display_name": "dferraro",
+                    "accept_rate": 84
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 3660689,
+                "edited": false,
+                "creation_date": 1283881977,
+                "comment_id": 3851784
+            }
+        ],
+        "3660776": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/eeec80237213c91e5bab56b77ac5b8ca?s=256&d=identicon&r=PG",
+                    "account_id": 16878,
+                    "user_type": "registered",
+                    "user_id": 37213,
+                    "link": "https://stackoverflow.com/users/37213/duffymo",
+                    "reputation": 309604,
+                    "display_name": "duffymo",
+                    "accept_rate": 81
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 1,
+                "post_id": 3660776,
+                "edited": false,
+                "creation_date": 1283883992,
+                "comment_id": 3852106
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7455387966bf165ef1bd14eb231babed?s=256&d=identicon&r=PG",
+                    "account_id": 64840,
+                    "user_type": "registered",
+                    "user_id": 191206,
+                    "link": "https://stackoverflow.com/users/191206/dferraro",
+                    "reputation": 6448,
+                    "display_name": "dferraro",
+                    "accept_rate": 84
+                },
+                "content_license": "CC BY-SA 2.5",
+                "score": 0,
+                "post_id": 3660776,
+                "edited": false,
+                "creation_date": 1283878419,
+                "comment_id": 3851211
+            }
+        ]
+    }
+}

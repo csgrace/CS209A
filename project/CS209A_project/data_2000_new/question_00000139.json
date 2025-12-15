@@ -1,0 +1,531 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+            "account_id": 13078254,
+            "user_type": "registered",
+            "user_id": 9449585,
+            "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+            "reputation": 202,
+            "display_name": "Sandeep Patel"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53260370/attempt-to-invoke-virtual-method-android-view-surfaceholder-android-view-surfac",
+        "last_activity_date": 1542022865,
+        "creation_date": 1542019051,
+        "answer_count": 1,
+        "title": "Attempt to invoke virtual method &#39;android.view.SurfaceHolder android.view.SurfaceView.getHolder()&#39; on a null object reference",
+        "body": "<p>i'll be simply generate video recorder application using Camera. but it's crash and give me a bellow error :<\/p>\n\n<blockquote>\n  <p>Attempt to invoke virtual method\n      'android.view.SurfaceHolderandroid.view.SurfaceView.getHolder()' on a\n       null object reference`<\/p>\n<\/blockquote>\n\n<p><strong><code>Capture Video Activity.class<\/code><\/strong><\/p>\n\n<pre><code>import java.io.File;\nimport java.io.IOException;\nimport java.text.SimpleDateFormat;\nimport java.util.Date;\n\nimport android.app.Activity;\nimport android.content.pm.ActivityInfo;\nimport android.hardware.Camera;\nimport android.hardware.camera2.CameraCharacteristics;\nimport android.media.CamcorderProfile;\nimport android.media.MediaRecorder;\nimport android.os.Bundle;\nimport android.os.Environment;\nimport android.util.Log;\nimport android.view.Surface;\nimport android.view.SurfaceHolder;\nimport android.view.SurfaceView;\nimport android.view.View;\nimport android.view.View.OnClickListener;\nimport android.widget.ToggleButton;\n\nimport static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;\nimport static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;\n\n    public class CaptureVideoActivity extends Activity implements SurfaceHolder.Callback {\n\n        private MediaRecorder mMediaRecorder;\n        private Camera mCamera;\n        private SurfaceView mSurfaceView;\n        private SurfaceHolder mHolder;\n        private View mToggleButton;\n        private boolean mInitSuccesful;\n        CameraCharacteristics characteristics;\n\n        @Override\n        public void onCreate(Bundle savedInstanceState) {\n            super.onCreate(savedInstanceState);\n            setContentView(R.layout.activity_capture_video);\n\n            // we shall take the video in landscape orientation\n            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);\n\n            mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);\n            mHolder = mSurfaceView.getHolder();\n            mHolder.addCallback(this);\n            mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);\n\n            mToggleButton = (ToggleButton) findViewById(R.id.toggleRecordingButton);\n            mToggleButton.setOnClickListener(new View.OnClickListener() {\n                @Override\n                // toggle video recording\n                public void onClick(View v) {\n                    if (((ToggleButton) v).isChecked()) {\n                        mMediaRecorder.start();\n                        try {\n                            Thread.sleep(7 * 1000); // This will recode for 10 seconds, if you don't want then just remove it.\n                        } catch (Exception e) {\n                            e.printStackTrace();\n                        }\n                        //finish();\n                    } else {\n                        mMediaRecorder.stop();\n                        mMediaRecorder.reset();\n                        try {\n                            initRecorder(mHolder.getSurface());\n                        } catch (IOException e) {\n                            e.printStackTrace();\n                        }\n                    }\n                }\n            });\n        }\n\n        /* Init the MediaRecorder, the order the methods are called is vital to\n         * its correct functioning */\n        private void initRecorder(Surface surface) throws IOException {\n            // It is very important to unlock the camera before doing setCamera\n            // or it will results in a black preview\n            if (mCamera == null) {\n                mCamera = Camera.open();\n                mCamera.unlock();\n            }\n\n            if (mMediaRecorder == null) mMediaRecorder = new MediaRecorder();\n            mMediaRecorder.setPreviewDisplay(surface);\n            mMediaRecorder.setCamera(mCamera);\n\n            File file = getOutputMediaFile(2);\n            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);\n            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);\n            //       mMediaRecorder.setOutputFormat(8);\n           // mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);\n            mMediaRecorder.setOutputFile(file.getAbsolutePath());\n            mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));\n            /*mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);\n            mMediaRecorder.setVideoEncodingBitRate(512 * 1000);\n            mMediaRecorder.setVideoFrameRate(30);\n            mMediaRecorder.setVideoSize(640, 480);*/\n            int deviceorientation = getResources().getConfiguration().orientation;\n            mMediaRecorder.setOrientationHint(getJpegOrientation(characteristics, deviceorientation));\n\n            try {\n                mMediaRecorder.prepare();\n            } catch (IllegalStateException e) {\n                // This is thrown if the previous calls are not called with the\n                // proper order\n                e.printStackTrace();\n            }\n\n            mInitSuccesful = true;\n        }\n\n        @Override\n        public void surfaceCreated(SurfaceHolder holder) {\n            try {\n                if (!mInitSuccesful)\n                    initRecorder(mHolder.getSurface());\n            } catch (IOException e) {\n                e.printStackTrace();\n            }\n        }\n\n        @Override\n        public void surfaceDestroyed(SurfaceHolder holder) {\n            shutdown();\n        }\n\n        @Override\n        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {\n        }\n\n        private void shutdown() {\n            // Release MediaRecorder and especially the Camera as it's a shared\n            // object that can be used by other applications\n            mMediaRecorder.reset();\n            mMediaRecorder.release();\n            mCamera.release();\n\n            // once the objects have been released they can't be reused\n            mMediaRecorder = null;\n            mCamera = null;\n        }\n\n        private static File getOutputMediaFile(int type){\n            // To be safe, you should check that the SDCard is mounted\n            // using Environment.getExternalStorageState() before doing this.\n\n            File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(\n                    Environment.DIRECTORY_PICTURES), \"Test Capture\");\n            // This location works best if you want the created images to be shared\n            // between applications and persist after your app has been uninstalled.\n\n            // Create the storage directory if it does not exist\n            if (! mediaStorageDir.exists()){\n                if (! mediaStorageDir.mkdirs()){\n                    Log.d(\"MyCameraApp\", \"failed to create directory\");\n                    return null;\n                }\n            }\n\n            // Create a media file name\n            String timeStamp = new SimpleDateFormat(\"yyyyMMdd_HHmmss\").format(new Date());\n            File mediaFile;\n            if (type == MEDIA_TYPE_IMAGE){\n                mediaFile = new File(mediaStorageDir.getPath() + File.separator +\n                        \"IMG_\"+ timeStamp + \".jpg\");\n            } else if(type == MEDIA_TYPE_VIDEO) {\n                mediaFile = new File(mediaStorageDir.getPath() + File.separator +\n                        \"VID_\"+ timeStamp + \".mp4\");\n            } else {\n                return null;\n            }\n\n            return mediaFile;\n        }\n\n        private int getJpegOrientation(CameraCharacteristics c, int deviceOrientation) {\n            if (deviceOrientation == android.view.OrientationEventListener.ORIENTATION_UNKNOWN)\n                return 0;\n            int sensorOrientation = c.get(CameraCharacteristics.SENSOR_ORIENTATION);\n\n            // Round device orientation to a multiple of 90\n            deviceOrientation = (deviceOrientation + 45) / 90 * 90;\n\n            // Reverse device orientation for front-facing cameras\n            boolean facingFront = c.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;\n            if (facingFront) deviceOrientation = -deviceOrientation;\n\n            // Calculate desired JPEG orientation relative to camera orientation to make\n            // the image upright relative to the device orientation\n            return (sensorOrientation + deviceOrientation + 360) % 360;\n\n        }\n    }\n<\/code><\/pre>\n\n<p><strong><code>activity_capture_video.xml<\/code><\/strong><\/p>\n\n<pre><code>&lt;LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:orientation=\"vertical\"\n    android:layout_width=\"fill_parent\"\n    android:layout_height=\"fill_parent\"&gt;\n    &lt;ToggleButton\n        android:id=\"@+id/toggleRecordingButton\"\n        android:layout_width=\"fill_parent\"\n        android:textOff=\"Start Recording\"\n        android:textOn=\"Stop Recording\"\n        android:layout_height=\"wrap_content\"\n        /&gt;\n    &lt;FrameLayout\n        android:layout_width=\"fill_parent\"\n        android:layout_height=\"fill_parent\"&gt;\n        &lt;SurfaceView android:id=\"@+id/surfaceView\"\n            android:layout_width=\"fill_parent\"\n            android:layout_height=\"fill_parent\"&gt;&lt;/SurfaceView&gt;\n\n    &lt;/FrameLayout&gt;\n&lt;/LinearLayout&gt;\n<\/code><\/pre>\n\n<p>i have already read all the link details :<\/p>\n\n<ul>\n<li><p><a href=\"https://stackoverflow.com/questions/40926238/how-to-solve-android-view-surfaceview-getholder-on-a-null-object-reference\">How to solve &quot;android.view.SurfaceView.getHolder()&#39; on a null object reference&quot;?<\/a><\/p><\/li>\n<li><p><a href=\"https://stackoverflow.com/questions/44640334/android-view-surfaceholder-android-view-surfaceview-getholder-on-a-null-obje\">&#39;android.view.SurfaceHolder android.view.SurfaceView.getHolder()&#39; on a null object reference in SurfaceView<\/a><\/p><\/li>\n<li><p><a href=\"https://stackoverflow.com/questions/4852740/surfaceview-getholder-not-returning-surfaceholder\">surfaceView.getHolder not returning SurfaceHolder<\/a><\/p><\/li>\n<\/ul>\n\n<p>but not useful for me. <\/p>\n",
+        "question_id": 53260370,
+        "tags": [
+            "java",
+            "android",
+            "android-camera",
+            "surfaceview",
+            "surfaceholder"
+        ],
+        "score": 5,
+        "is_answered": true,
+        "view_count": 4012,
+        "last_edit_date": 1542022865
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1542029395,
+            "comment_id": 93410525
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "edited": false,
+            "creation_date": 1542029323,
+            "comment_id": 93410487
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1542029296,
+            "comment_id": 93410481
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "edited": false,
+            "creation_date": 1542029263,
+            "comment_id": 93410465
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1542029190,
+            "comment_id": 93410416
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "edited": false,
+            "creation_date": 1542027348,
+            "comment_id": 93409467
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "edited": false,
+            "creation_date": 1542023498,
+            "comment_id": 93407356
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1542021081,
+            "comment_id": 93406133
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "edited": false,
+            "creation_date": 1542020674,
+            "comment_id": 93405907
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "edited": false,
+            "creation_date": 1542020544,
+            "comment_id": 93405834
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/2jBjo.png?s=256",
+                "account_id": 2069643,
+                "user_type": "registered",
+                "user_id": 1844392,
+                "link": "https://stackoverflow.com/users/1844392/piyush",
+                "reputation": 18931,
+                "display_name": "Piyush",
+                "accept_rate": 65
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260370,
+            "edited": false,
+            "creation_date": 1542020287,
+            "comment_id": 93405702
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8909812,
+            "user_type": "registered",
+            "user_id": 6650476,
+            "link": "https://stackoverflow.com/users/6650476/bala555",
+            "reputation": 187,
+            "display_name": "Bala555"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1542019696,
+        "creation_date": 1542019696,
+        "body": "<p>I guess you were following some tutorial video or website. If not please do it now.<\/p>\n\n<p>Check the following things.<\/p>\n\n<ol>\n<li>Check the import statements for all mainly surfaceview, surfaceholder and camera.<\/li>\n<li>Check the elements in xml.<\/li>\n<li>Check whether the xml is linked to java by ctrl+click on R.id.surfaceView<\/li>\n<\/ol>\n",
+        "answer_id": 53260546,
+        "question_id": 53260370
+    }],
+    "answer_comments": {"53260546": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909812,
+                "user_type": "registered",
+                "user_id": 6650476,
+                "link": "https://stackoverflow.com/users/6650476/bala555",
+                "reputation": 187,
+                "display_name": "Bala555"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "edited": false,
+            "creation_date": 1542092354,
+            "comment_id": 93433102
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909812,
+                "user_type": "registered",
+                "user_id": 6650476,
+                "link": "https://stackoverflow.com/users/6650476/bala555",
+                "reputation": 187,
+                "display_name": "Bala555"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "edited": false,
+            "creation_date": 1542089517,
+            "comment_id": 93432144
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "edited": false,
+            "creation_date": 1542085669,
+            "comment_id": 93430942
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909812,
+                "user_type": "registered",
+                "user_id": 6650476,
+                "link": "https://stackoverflow.com/users/6650476/bala555",
+                "reputation": 187,
+                "display_name": "Bala555"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "edited": false,
+            "creation_date": 1542085480,
+            "comment_id": 93430888
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909812,
+                "user_type": "registered",
+                "user_id": 6650476,
+                "link": "https://stackoverflow.com/users/6650476/bala555",
+                "reputation": 187,
+                "display_name": "Bala555"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "edited": false,
+            "creation_date": 1542085361,
+            "comment_id": 93430856
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "edited": false,
+            "creation_date": 1542026601,
+            "comment_id": 93409084
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909812,
+                "user_type": "registered",
+                "user_id": 6650476,
+                "link": "https://stackoverflow.com/users/6650476/bala555",
+                "reputation": 187,
+                "display_name": "Bala555"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "edited": false,
+            "creation_date": 1542025831,
+            "comment_id": 93408665
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909812,
+                "user_type": "registered",
+                "user_id": 6650476,
+                "link": "https://stackoverflow.com/users/6650476/bala555",
+                "reputation": 187,
+                "display_name": "Bala555"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "edited": false,
+            "creation_date": 1542023951,
+            "comment_id": 93407652
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "edited": false,
+            "creation_date": 1542022892,
+            "comment_id": 93407063
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4d01027f66b8931c54373e7a1cefde9c?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8909812,
+                "user_type": "registered",
+                "user_id": 6650476,
+                "link": "https://stackoverflow.com/users/6650476/bala555",
+                "reputation": 187,
+                "display_name": "Bala555"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53260546,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s256-rj/photo.jpg",
+                "account_id": 13078254,
+                "user_type": "registered",
+                "user_id": 9449585,
+                "link": "https://stackoverflow.com/users/9449585/sandeep-patel",
+                "reputation": 202,
+                "display_name": "Sandeep Patel"
+            },
+            "edited": false,
+            "creation_date": 1542022472,
+            "comment_id": 93406844
+        }
+    ]}
+}

@@ -1,0 +1,94 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/18e378d17d0ad50e9feee63ff98f54cf?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 431570,
+            "user_type": "registered",
+            "user_id": 815724,
+            "link": "https://stackoverflow.com/users/815724/peter-o",
+            "reputation": 33098,
+            "display_name": "Peter O."
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34481103/does-adding-a-new-dependency-to-a-library-with-compatible-api-changes-affect-b",
+        "last_activity_date": 1452109361,
+        "creation_date": 1451224581,
+        "answer_count": 3,
+        "title": "Does adding a new dependency to a library, with compatible API changes, affect binary compatibility?",
+        "body": "<h2>My question:<\/h2>\n\n<p>Does adding a new dependency to a library affect binary compatibility, as long as the library's external API is otherwise backwards compatible?<\/p>\n\n<h2>My situation:<\/h2>\n\n<p>My <a href=\"https://github.com/peteroupc/CBOR\">CBOR library<\/a> contains classes for arbitrary-precision arithmetic (in the PeterO namespace). (It's in C# and Java; the Java version is in a separate repository, but the same issue applies to both versions.)<\/p>\n\n<p>I have moved these classes to a new namespace (in PeterO.Numbers), and renamed them (retaining the original classes for backward compatibility), because the namespace where they are now is meant to contain only utility classes. I plan to move the new classes to a separate library and make the CBOR library call that library as a dependency, since the arbitrary-precision classes are obviously useful outside of CBOR. (I plan to eventually deprecate the old classes.)<\/p>\n\n<p>But I'm concerned if making a separate library this way is a binary compatibility issue, such that I can't just update the minor version, but also the major version. The CBOR library is version 2.3.1 at the time of this writing. Am I able to do this and change the version to 2.4, or only 3.0?<\/p>\n",
+        "question_id": 34481103,
+        "tags": [
+            "java",
+            "c#",
+            "binary-compatibility"
+        ],
+        "score": 21,
+        "accepted_answer_id": 34641449,
+        "is_answered": true,
+        "view_count": 622,
+        "last_edit_date": 1451669402
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4c117b516f5109426f94e4e7528ac4e8?s=256&d=identicon&r=PG",
+                "account_id": 223921,
+                "user_type": "registered",
+                "user_id": 483431,
+                "link": "https://stackoverflow.com/users/483431/stackthis",
+                "reputation": 1252,
+                "display_name": "StackThis",
+                "accept_rate": 35
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1452109361,
+            "creation_date": 1452109361,
+            "body": "<p>As long as you started out with an interface to begin with and all your libraries' clients are aware of that interface, you will be fine. It does not matter where your code resides in your library or in a library outside of it as long as your library has an interface which its clients understand and it implements the interface.<\/p>\n\n<p>This is an age old problem and has been solved 15 years ago by COM (component object model). Keep your interfaces separate from implementation and you are golden.<\/p>\n",
+            "answer_id": 34641449,
+            "question_id": 34481103
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9e462b11b46069ee682e1ce8bc5f5825?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1063012,
+                "user_type": "registered",
+                "user_id": 1064245,
+                "link": "https://stackoverflow.com/users/1064245/m-a",
+                "reputation": 73182,
+                "display_name": "M A",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": false,
+            "last_activity_date": 1451666256,
+            "creation_date": 1451666256,
+            "body": "<p>I'll answer for the Java version. <a href=\"https://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html\">This section of the Java Language Specification<\/a> describes in detail the changes that can be done to applications while preserving binary compatibility.<\/p>\n\n<p>From what I understand, your changes (although they may affect a great portion of the source) are simple refactorings that expose some utility classes to another module, and re-direct the old classes to call this new module. This is described in the section on <a href=\"https://docs.oracle.com/javase/specs/jls/se7/html/jls-13.html#jls-13.3\">Evolution of Packages<\/a>:<\/p>\n\n<blockquote>\n  <p>A new top level class or interface type may be added to a package without breaking compatibility with pre-existing binaries, provided the new type does not reuse a name previously given to an unrelated type.<\/p>\n<\/blockquote>\n\n<p>So this does not break binary compatibility with existing classes that use your library. Any existing class <code>CBORClient<\/code> that used to call <code>CBORUtil.doArithmetic()<\/code> will continue to work without the need to re-compile it, since the method is still there, only its body has changed to call another module to do the computation.<\/p>\n",
+            "answer_id": 34557912,
+            "question_id": 34481103
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e969fa119d3539690668bb62715a63fa?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7554382,
+                "user_type": "registered",
+                "user_id": 5734653,
+                "link": "https://stackoverflow.com/users/5734653/waxoft",
+                "reputation": 21,
+                "display_name": "Waxoft"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1451669695,
+            "creation_date": 1451669695,
+            "body": "<p>It's better avoid adding new dependency until next major version, Until that, add change's internally and create your new arbitrary-precision library with same class and synchronize them without dependency.<\/p>\n\n<p>so for version 2.4 add changes in new namespace and call them from old class and create another class library for  arbitrary-precision classes and synchronize them until next major version for CBOR library<\/p>\n",
+            "answer_id": 34558386,
+            "question_id": 34481103
+        }
+    ],
+    "answer_comments": {}
+}

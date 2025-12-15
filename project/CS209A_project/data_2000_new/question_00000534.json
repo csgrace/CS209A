@@ -1,0 +1,625 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/J83Pf.jpg?s=256",
+            "account_id": 3139162,
+            "user_type": "registered",
+            "user_id": 2654980,
+            "link": "https://stackoverflow.com/users/2654980/milchtee",
+            "reputation": 3,
+            "display_name": "Milchtee"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18070234/trouble-bubble-sorting-recursion-an-array-of-integers-in-java",
+        "last_activity_date": 1376071881,
+        "creation_date": 1375751013,
+        "answer_count": 3,
+        "title": "Trouble bubble sorting (recursion) an array of integers in Java",
+        "body": "<p>Attempting to implement a recursive method to sort an array of integers:<\/p>\n\n<pre><code>    public static void bubbleSort(int[] arr, int n){\n\n      int index = n-1;\n\n      System.out.println(\"Round number: \" + n);\n      System.out.println(Arrays.toString(arr));\n\n      while(index&gt;=1)\n      {\n          if(arr[index] &lt;  arr[index-1])\n              swap(arr, index, index-1);\n\n\n          index--;\n      }\n      if(n&gt;1)\n          bubbleSort(arr, n-1);\n  }\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>It seems to work fine for the first few rounds, moving the smallest integer in the set to the front, but it just stops working around midway. Any idea why? Thanks!<\/p>\n",
+        "question_id": 18070234,
+        "tags": [
+            "java",
+            "arrays",
+            "sorting",
+            "recursion"
+        ],
+        "score": 0,
+        "accepted_answer_id": 18070405,
+        "is_answered": true,
+        "view_count": 1679
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                "account_id": 1054395,
+                "user_type": "registered",
+                "user_id": 1057429,
+                "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                "reputation": 53643,
+                "display_name": "Nir Alfasi",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18070234,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/Mo4PM.jpg?s=256",
+                "account_id": 2674661,
+                "user_type": "registered",
+                "user_id": 2311327,
+                "link": "https://stackoverflow.com/users/2311327/sello",
+                "reputation": 297,
+                "display_name": "Sello"
+            },
+            "edited": false,
+            "creation_date": 1375754488,
+            "comment_id": 26445246
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Mo4PM.jpg?s=256",
+                "account_id": 2674661,
+                "user_type": "registered",
+                "user_id": 2311327,
+                "link": "https://stackoverflow.com/users/2311327/sello",
+                "reputation": 297,
+                "display_name": "Sello"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 18070234,
+            "edited": false,
+            "creation_date": 1375751597,
+            "comment_id": 26444636
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                "account_id": 135732,
+                "user_type": "registered",
+                "user_id": 338803,
+                "link": "https://stackoverflow.com/users/338803/sje397",
+                "reputation": 41922,
+                "display_name": "sje397",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1376071881,
+            "creation_date": 1375751422,
+            "body": "<p>Your algorithm moves the smallest value to the start of the array each time, then ignores the last element on subsequent calls. Unfortunately the last element isn't guaranteed to be the largest.<\/p>\n\n<p>One way to fix it might be to initialise <code>index<\/code> to <code>arr.length - 1<\/code>, and continue the loop while <code>index &gt; arr.length - n<\/code>. <\/p>\n",
+            "answer_id": 18070276,
+            "question_id": 18070234,
+            "last_edit_date": 1376071881
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                "account_id": 1054395,
+                "user_type": "registered",
+                "user_id": 1057429,
+                "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                "reputation": 53643,
+                "display_name": "Nir Alfasi",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1375755243,
+            "creation_date": 1375751647,
+            "body": "<p>Change the <code>if<\/code> condition to:<\/p>\n\n<pre><code>...\nif(arr[index] &lt;  arr[index-1]){\n   swap(arr, index, index-1);\n   index = n;\n}\nindex--;\n...\n<\/code><\/pre>\n\n<p>The problem is that after you find an array member to \"delegate\" across the array - you need to \"restart\" cause there could be other members that needs to be \"reconsidered\".\nRun with a debugger and see what I mean if I'm not clear enough with my description.<\/p>\n\n<p>Full solution:<\/p>\n\n<pre><code>import java.util.Arrays;\n\n/**\n * User: alfasin\n * Date: 8/5/13\n */\npublic class BubbleSort {\n\n    public static void bubbleSort(int[] arr, int n){\n\n        int index = n-1;\n\n        System.out.println(\"Round number: \" + n);\n        System.out.println(Arrays.toString(arr));\n\n        while(index&gt;=1)\n        {\n            if(arr[index] &lt;  arr[index-1]){\n                swap(arr, index, index-1);\n                index = n;\n            }\n            index--;\n        }\n        if(n&gt;1)\n            bubbleSort(arr, n-1);\n    }\n\n    private static void swap(int[] arr, int index, int i) {\n        arr[i] = arr[i] ^ arr[index];\n        arr[index] = arr[i] ^ arr[index];\n        arr[i] = arr[i] ^ arr[index];\n    }\n\n    public static void main(String...args){\n        int[] arr = {4,2,9,6,2,8,1};\n        bubbleSort(arr, arr.length);\n        for(int i=0; i&lt;arr.length; i++){\n            System.out.print(arr[i]+\" \");\n        }\n    }\n\n}\n<\/code><\/pre>\n\n<p>Like sjee397 suggested - this is more of a \"version\" of bubble sort...<\/p>\n\n<p>A more \"conservative\" version of bubble sort:<\/p>\n\n<pre><code>public static void bubbleSort(int[] arr, int n){\n        boolean swapped= true;\n        while (swapped){\n            swapped = false;\n            for(int i=0; i&lt;arr.length-1; i++){\n                if(arr[i]&gt;arr[i+1]){\n                    swap(arr,i,i+1);\n                    swapped = true;\n                }\n            }\n        }\n    }\n<\/code><\/pre>\n",
+            "answer_id": 18070300,
+            "question_id": 18070234,
+            "last_edit_date": 1375755243
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/54b1ca7c6dda29d4b8bfb8aadf2a208f?s=256&d=identicon&r=PG",
+                "account_id": 160998,
+                "user_type": "registered",
+                "user_id": 381447,
+                "link": "https://stackoverflow.com/users/381447/darkhan",
+                "reputation": 1318,
+                "display_name": "Darkhan",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1375753329,
+            "creation_date": 1375752479,
+            "body": "<p>Try this:<\/p>\n\n<pre><code>import java.util.*;\n\npublic class Test{\n    public static void main(String[] args){\n        int[] ttt = {9,8,7,6,5,4,3,2,1};\n\n        bubbleSort(ttt, ttt.length);\n    }\n\n    public static void bubbleSort(int[] arr, int n){\n        int index = 0;\n\n        System.out.println(\"Round number: \" + n);\n        System.out.println(Arrays.toString(arr));\n\n        while(index &lt; n - 1){\n            if(arr[index] &gt;  arr[index + 1]){\n                swap(arr, index, index + 1);\n            }\n            index++;\n        }\n\n        if(n &gt; 1){\n            bubbleSort(arr, n-1);\n        }\n    }\n\n    public static void swap(int[] arr, int i, int j){\n        int tmp = arr[i];\n        arr[i] = arr[j];\n        arr[j] = tmp;\n    }\n}\n<\/code><\/pre>\n\n<p>In your case on every round you guarantee that by the end of every round you will have the smallest number pushed to its place, but then leave out the last element of an array, which is not necessarily the largest number. You should do it in reverse order, push the largest number to its place and then leave it out in the next round.<\/p>\n\n<p><a href=\"http://en.wikipedia.org/wiki/File:Bubble-sort-example-300px.gif\" rel=\"nofollow\">http://en.wikipedia.org/wiki/File:Bubble-sort-example-300px.gif<\/a><\/p>\n\n<p>FYI: Bubble sort's worst case performance is O(n^2), maybe you'd want to implement better sort algorithms like quicksort or merge sort?<\/p>\n",
+            "answer_id": 18070405,
+            "question_id": 18070234,
+            "last_edit_date": 1375753329
+        }
+    ],
+    "answer_comments": {
+        "18070276": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1376071944,
+                "comment_id": 26589187
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1375936871,
+                "comment_id": 26527712
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375935632,
+                "comment_id": 26527439
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1375935339,
+                "comment_id": 26527382
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1375935291,
+                "comment_id": 26527367
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1375935061,
+                "comment_id": 26527331
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375934578,
+                "comment_id": 26527228
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1375886609,
+                "comment_id": 26507191
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375842099,
+                "comment_id": 26485369
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1375810233,
+                "comment_id": 26472927
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "edited": false,
+                "creation_date": 1375759390,
+                "comment_id": 26446227
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070276,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375757049,
+                "comment_id": 26445795
+            }
+        ],
+        "18070405": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/J83Pf.jpg?s=256",
+                    "account_id": 3139162,
+                    "user_type": "registered",
+                    "user_id": 2654980,
+                    "link": "https://stackoverflow.com/users/2654980/milchtee",
+                    "reputation": 3,
+                    "display_name": "Milchtee"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070405,
+                "edited": false,
+                "creation_date": 1375771304,
+                "comment_id": 26449442
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070405,
+                "edited": false,
+                "creation_date": 1375757456,
+                "comment_id": 26445859
+            }
+        ],
+        "18070300": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375762682,
+                "comment_id": 26446962
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "edited": false,
+                "creation_date": 1375761440,
+                "comment_id": 26446663
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375760968,
+                "comment_id": 26446559
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "edited": false,
+                "creation_date": 1375759972,
+                "comment_id": 26446351
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "edited": false,
+                "creation_date": 1375759898,
+                "comment_id": 26446336
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375759338,
+                "comment_id": 26446218
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/XG8at.jpg?s=256",
+                    "account_id": 1054395,
+                    "user_type": "registered",
+                    "user_id": 1057429,
+                    "link": "https://stackoverflow.com/users/1057429/nir-alfasi",
+                    "reputation": 53643,
+                    "display_name": "Nir Alfasi",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1375759121,
+                "comment_id": 26446183
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2b99fb33f647bc77b3d4a55a31402882?s=256&d=identicon&r=PG",
+                    "account_id": 135732,
+                    "user_type": "registered",
+                    "user_id": 338803,
+                    "link": "https://stackoverflow.com/users/338803/sje397",
+                    "reputation": 41922,
+                    "display_name": "sje397",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 18070300,
+                "edited": false,
+                "creation_date": 1375757272,
+                "comment_id": 26445830
+            }
+        ]
+    }
+}

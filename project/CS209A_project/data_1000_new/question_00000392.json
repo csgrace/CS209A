@@ -1,0 +1,88 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-DEfA2Q7GK0I/AAAAAAAAAAI/AAAAAAAAABY/KZn3wMdHB54/s256-rj/photo.jpg",
+            "account_id": 14279597,
+            "user_type": "registered",
+            "user_id": 10314668,
+            "link": "https://stackoverflow.com/users/10314668/namyulbae",
+            "reputation": 97,
+            "display_name": "namyulbae"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/77406857/i-want-to-prevent-the-registration-of-the-parent-bean-when-the-child-bean-is-reg",
+        "last_activity_date": 1698900061,
+        "creation_date": 1698897742,
+        "answer_count": 1,
+        "title": "I want to prevent the registration of the parent bean when the child bean is registered",
+        "body": "<p>UserService.java<\/p>\n<pre><code>@Service\nclass UserService {\n    //target test method\n    public int getUser(){\n        DbUtil.getMapper(UserMapper.java);\n    }\n}\n<\/code><\/pre>\n<p>DbUtil.java<\/p>\n<pre><code>class DbUtil {\n    \n    static DbService dbService;\n    \n    public static &lt;T&gt; T getMapper(Class&lt;T&gt; clazz){\n        if(dbService == null){\n            dbService = ((DbService)) ApplicationContextManager.getBean(&quot;dbService&quot;);\n        }\n        return dbService.getSqlSessionTemplate().getMapper(clazz);\n    }\n}\n<\/code><\/pre>\n<p>DbService.java<\/p>\n<pre><code>@Autowired\n    private SomeConfiguration configuration;\n    \n    @Autowired\n    private SecondConfiguration secondConfiguration;\n    \n    public SqlSessionTemplate getSqlSessionTemplate(){\n        //complecated logic...\n    }\n<\/code><\/pre>\n<p>FakeDbService.java<\/p>\n<pre><code>@Service\nclass FakeDbService extends DbService {\n    public SqlSessionTemplate getSqlSessionTemplate(){\n        // simple logic ...\n    }\n}\n<\/code><\/pre>\n<p>TestConfiguration<\/p>\n<pre><code>@Configuration\n@Import(FakeDbService.class)\nclass TestConfiguration {\n    \n}\n<\/code><\/pre>\n<p>Test.java<\/p>\n<pre><code>@ContextConfiguration(classes = TestConfiguration.class)\n@RunWith(SpringJUnit4ClassRunner.class)\npublic class Test {\n    \n    @Autowired\n    private UserService userService;\n    \n    @Test\n    public void userServiceTest(){\n        userService.getUser();\n    }\n}\n<\/code><\/pre>\n<p>My purpose is to test <code>getUser<\/code> method in <code>UserService<\/code>.\n<code>DbUtil<\/code> class import <code>DbService<\/code> bean using <code>ApplicationContextManager.getBean(&quot;dbService&quot;)<\/code>.\nBecause <code>DbService<\/code> class has a lot of dependencies and requires additional dependencies, I tried to create a <code>FakeDbService<\/code> that overrides only the necessary methods and inherits <code>DbService<\/code>.\nBut it didn't work.<\/p>\n<p>When creating the spring container, not only the <code>FakeDbService<\/code> bean was registered, but also the parent class, the <code>DbService<\/code> bean.\nThere was an error in not finding bean because spring container was executed without adding dependence on <code>DbService<\/code>.\nI want to prevent the generation of <code>DbService<\/code> which is a parent class during spring container generation.<\/p>\n<p>Wouldn't it be possible to test it like this?\nOr is there another way to test in the above structure? (However, I can't modify source of <code>DbService<\/code> and <code>DbUtil<\/code>)<\/p>\n<p>Thank you for your help.<\/p>\n",
+        "question_id": 77406857,
+        "tags": [
+            "java",
+            "spring",
+            "javabeans"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 96
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e442a53d36f9351aee11b5ecb8369691?s=256&d=identicon&r=PG",
+                "account_id": 6520,
+                "user_type": "registered",
+                "user_id": 11002,
+                "link": "https://stackoverflow.com/users/11002/tgdavies",
+                "reputation": 11634,
+                "display_name": "tgdavies",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 77406857,
+            "edited": false,
+            "creation_date": 1698899502,
+            "comment_id": 136463764
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e442a53d36f9351aee11b5ecb8369691?s=256&d=identicon&r=PG",
+                "account_id": 6520,
+                "user_type": "registered",
+                "user_id": 11002,
+                "link": "https://stackoverflow.com/users/11002/tgdavies",
+                "reputation": 11634,
+                "display_name": "tgdavies",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 77406857,
+            "edited": false,
+            "creation_date": 1698899309,
+            "comment_id": 136463750
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e442a53d36f9351aee11b5ecb8369691?s=256&d=identicon&r=PG",
+            "account_id": 6520,
+            "user_type": "registered",
+            "user_id": 11002,
+            "link": "https://stackoverflow.com/users/11002/tgdavies",
+            "reputation": 11634,
+            "display_name": "tgdavies",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1698900061,
+        "creation_date": 1698900061,
+        "body": "<p>Create a Spring component which converts <code>DbUtil<\/code> to a non-static component:<\/p>\n<pre><code>@Component\nclass DbUtilComponent {\n    public &lt;T&gt; T getMapper(Class&lt;T&gt; clazz) { return DbUtil.getMapper(clazz); }\n    ...\n}\n<\/code><\/pre>\n<p>Inject this into <code>UserService<\/code>:<\/p>\n<pre><code>@Service\nclass UserService {\n    private final DbUtilComponent dbUtilComponent;\n\n    public UserService(DbUtilComponent dbUtilComponent) {\n        this.dbUtilComponent = dbUtilComponent;\n    }\n    //target test method\n    public int getUser(){\n        dbUtilComponent.getMapper(UserMapper.java);\n    }\n}\n<\/code><\/pre>\n<p>Then just use Mockito for your test, don't even start a Spring context.<\/p>\n<pre><code>@ExtendWith(MockitoExtension.class)\npublic class Test {\n    @Mock\n    private DbUtilComponent dbUtilComponent;\n    @InjectMocks\n    private UserService userService;\n    \n    @Test\n    public void userServiceTest(){\n        when(dbUtilComponent.getMapper(UserMapper.class)).thenReturn(...);\n        userService.getUser();\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 77406990,
+        "question_id": 77406857
+    }],
+    "answer_comments": {}
+}

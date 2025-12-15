@@ -1,0 +1,217 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9019bc78b0dea6d5cd9133afaa5749d4?s=256&d=identicon&r=PG",
+            "account_id": 1310846,
+            "user_type": "registered",
+            "user_id": 1258873,
+            "link": "https://stackoverflow.com/users/1258873/sergey-chepurnov",
+            "reputation": 1447,
+            "display_name": "Sergey Chepurnov",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/42800720/one-to-many-with-collectioninteger",
+        "last_activity_date": 1489590968,
+        "creation_date": 1489549420,
+        "answer_count": 2,
+        "title": "one-to-many with Collection&lt;Integer&gt;",
+        "body": "<p>I have a table \"seance\" in DB ('id' is a PK):<\/p>\n\n<pre><code>CREATE TABLE seance(\n    id int NOT NULL AUTO_INCREMENT,\n    seance_id int,\n    number int,\n    PRIMARY KEY (id)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n<\/code><\/pre>\n\n<p>seance<\/p>\n\n<pre><code>id, seance_id, number\n1, 111222, 1951\n2, 111222, 1951\n3, 111222, 1951\n4, 333222, 1415\n5, 333222, 1415\n6, 333222, 1415\n<\/code><\/pre>\n\n<p>Entity class:<\/p>\n\n<pre><code>@Entity\n@Table(name = \"seance\")\npublic class Seance {\n\n    public Seance() {}\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.AUTO)\n    private Integer id;\n\n    @Column(name = \"seance_id\")\n    private Integer seanceId;\n\n    @Column(name = \"number\")\n    @ElementCollection// it is wrong cause require TWO tables\n    //what I should write here or modify?\n    private Set&lt;Integer&gt; number = new HashSet&lt;Integer&gt;();\n\n    public Seance(Integer seanceId, Set&lt;Integer&gt; number) {\n        this.seanceId = seanceId;\n        this.number = number;\n    }\n\n    // getters and setters\n\n}\n<\/code><\/pre>\n\n<p>As a result I want to have an instance of Seance class:<\/p>\n\n<blockquote>\n  <p>Integer seanceId: 111222;<\/p>\n  \n  <p>Set number:  1951, 1951, 1951;<\/p>\n<\/blockquote>\n",
+        "question_id": 42800720,
+        "tags": [
+            "java",
+            "hibernate",
+            "spring-boot",
+            "spring-data-jpa",
+            "one-to-many"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 1773,
+        "last_edit_date": 1489590968
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/1170172793034232/picture?type=large",
+                "account_id": 8666433,
+                "user_type": "registered",
+                "user_id": 6486778,
+                "link": "https://stackoverflow.com/users/6486778/vivien-saa",
+                "reputation": 767,
+                "display_name": "Vivien SA&#39;A"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1489570287,
+            "creation_date": 1489570287,
+            "body": "<p>You need to have your entity like this :<\/p>\n\n<pre><code>@Entity\n@Table(name = \"seance\")\npublic class Seance {\n\n    public Seance() {\n    }\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.AUTO)\n    private Integer id;\n\n    @Column(name = \"seance_id\")\n    private Integer seanceId;\n\n@ElementCollection\n  @CollectionTable(\n        name=\"NUMBER\",\n        joinColumns=@JoinColumn(name=\"OWNER_ID\")\n  )\n    private Set&lt;Integer&gt; number = new HashSet&lt;Integer&gt;();\n\n    public Sessions(Integer seanceId, Set&lt;Integer&gt; number) {\n        this.seanceId = seanceId;\n        this.number = number;\n    }\n\n    public Integer getSeanceId() {\n        return seanceId;\n    }\n\n    public void setSeanceId(Integer seanceId) {\n        this.seanceId = seanceId;\n    }\n\n    public Set&lt;Integer&gt; getNumber() {\n        return number;`enter code here`\n    }\n\n    public void setNumber(Set&lt;Integer&gt; number) {\n        this.number = number;\n    }\n\n}\n<\/code><\/pre>\n\n<p>doing like this, you will have two tables and number is going to have a table, without being and entity. Moreover, your conception is event bad because you have redundance that is something to avoid when deeling with DataBases. \n you can also follow this link\n <a href=\"https://en.wikibooks.org/wiki/Java_Persistence/ElementCollection\" rel=\"nofollow noreferrer\">https://en.wikibooks.org/wiki/Java_Persistence/ElementCollection<\/a><\/p>\n",
+            "answer_id": 42805763,
+            "question_id": 42800720
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c6b9d87c65b2798018d9095c4d92b215?s=256&d=identicon&r=PG",
+                "account_id": 1146287,
+                "user_type": "registered",
+                "user_id": 1128953,
+                "link": "https://stackoverflow.com/users/1128953/liping-huang",
+                "reputation": 4484,
+                "display_name": "Liping Huang",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1489556875,
+            "creation_date": 1489556875,
+            "body": "<p>Yes, It is meant to handle several non-standard relationship mappings,  the <code>ElementCollection<\/code> can be used to define a one-to-many relationship and the <code>ElementCollection<\/code> values are always stored in a separate table. <\/p>\n",
+            "answer_id": 42801957,
+            "question_id": 42800720
+        }
+    ],
+    "answer_comments": {
+        "42805763": [
+            {
+                "owner": {
+                    "profile_image": "https://graph.facebook.com/1170172793034232/picture?type=large",
+                    "account_id": 8666433,
+                    "user_type": "registered",
+                    "user_id": 6486778,
+                    "link": "https://stackoverflow.com/users/6486778/vivien-saa",
+                    "reputation": 767,
+                    "display_name": "Vivien SA&#39;A"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 42805763,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9019bc78b0dea6d5cd9133afaa5749d4?s=256&d=identicon&r=PG",
+                    "account_id": 1310846,
+                    "user_type": "registered",
+                    "user_id": 1258873,
+                    "link": "https://stackoverflow.com/users/1258873/sergey-chepurnov",
+                    "reputation": 1447,
+                    "display_name": "Sergey Chepurnov",
+                    "accept_rate": 86
+                },
+                "edited": false,
+                "creation_date": 1489583532,
+                "comment_id": 72733690
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9019bc78b0dea6d5cd9133afaa5749d4?s=256&d=identicon&r=PG",
+                    "account_id": 1310846,
+                    "user_type": "registered",
+                    "user_id": 1258873,
+                    "link": "https://stackoverflow.com/users/1258873/sergey-chepurnov",
+                    "reputation": 1447,
+                    "display_name": "Sergey Chepurnov",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 42805763,
+                "edited": false,
+                "creation_date": 1489578301,
+                "comment_id": 72729841
+            },
+            {
+                "owner": {
+                    "profile_image": "https://graph.facebook.com/1170172793034232/picture?type=large",
+                    "account_id": 8666433,
+                    "user_type": "registered",
+                    "user_id": 6486778,
+                    "link": "https://stackoverflow.com/users/6486778/vivien-saa",
+                    "reputation": 767,
+                    "display_name": "Vivien SA&#39;A"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 42805763,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9019bc78b0dea6d5cd9133afaa5749d4?s=256&d=identicon&r=PG",
+                    "account_id": 1310846,
+                    "user_type": "registered",
+                    "user_id": 1258873,
+                    "link": "https://stackoverflow.com/users/1258873/sergey-chepurnov",
+                    "reputation": 1447,
+                    "display_name": "Sergey Chepurnov",
+                    "accept_rate": 86
+                },
+                "edited": false,
+                "creation_date": 1489573442,
+                "comment_id": 72726453
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9019bc78b0dea6d5cd9133afaa5749d4?s=256&d=identicon&r=PG",
+                    "account_id": 1310846,
+                    "user_type": "registered",
+                    "user_id": 1258873,
+                    "link": "https://stackoverflow.com/users/1258873/sergey-chepurnov",
+                    "reputation": 1447,
+                    "display_name": "Sergey Chepurnov",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 42805763,
+                "edited": false,
+                "creation_date": 1489571474,
+                "comment_id": 72725039
+            }
+        ],
+        "42801957": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/c6b9d87c65b2798018d9095c4d92b215?s=256&d=identicon&r=PG",
+                    "account_id": 1146287,
+                    "user_type": "registered",
+                    "user_id": 1128953,
+                    "link": "https://stackoverflow.com/users/1128953/liping-huang",
+                    "reputation": 4484,
+                    "display_name": "Liping Huang",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 42801957,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/9019bc78b0dea6d5cd9133afaa5749d4?s=256&d=identicon&r=PG",
+                    "account_id": 1310846,
+                    "user_type": "registered",
+                    "user_id": 1258873,
+                    "link": "https://stackoverflow.com/users/1258873/sergey-chepurnov",
+                    "reputation": 1447,
+                    "display_name": "Sergey Chepurnov",
+                    "accept_rate": 86
+                },
+                "edited": false,
+                "creation_date": 1489589316,
+                "comment_id": 72738381
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/9019bc78b0dea6d5cd9133afaa5749d4?s=256&d=identicon&r=PG",
+                    "account_id": 1310846,
+                    "user_type": "registered",
+                    "user_id": 1258873,
+                    "link": "https://stackoverflow.com/users/1258873/sergey-chepurnov",
+                    "reputation": 1447,
+                    "display_name": "Sergey Chepurnov",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 42801957,
+                "edited": false,
+                "creation_date": 1489570402,
+                "comment_id": 72724286
+            }
+        ]
+    }
+}

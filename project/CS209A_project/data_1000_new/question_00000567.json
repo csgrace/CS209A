@@ -1,0 +1,150 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a9b03f942c0008bfb372f924edc77378?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6611041,
+            "user_type": "registered",
+            "user_id": 5106152,
+            "link": "https://stackoverflow.com/users/5106152/user2313232",
+            "reputation": 77,
+            "display_name": "user2313232",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/31358849/compare-two-values-that-are-hashed-with-salt",
+        "last_activity_date": 1436630172,
+        "creation_date": 1436629170,
+        "answer_count": 2,
+        "title": "compare two values that are hashed with salt",
+        "body": "<p>I would like to know how can I compare two values that are hashed with salt.\nI tried but it keeps giving me the output \"Not Same\".<\/p>\n\n<p>Please help. Thanks in advance.<\/p>\n\n<p>This is one of the Output that I captured<\/p>\n\n<pre><code>hash with salt of String a:OÌÛ\n_Uùá|.\u2022ðP2š\nhash with salt of String b:&amp;Í¸p40\u201dfôŽéž4\\õ\nNot Same\n<\/code><\/pre>\n\n<p>This is my implementation<\/p>\n\n<pre><code>import java.security.NoSuchAlgorithmException;\nimport java.security.SecureRandom;\nimport java.security.spec.InvalidKeySpecException;\nimport java.security.spec.KeySpec;\nimport java.util.Arrays;\nimport javax.crypto.SecretKeyFactory;\nimport javax.crypto.spec.PBEKeySpec;\n\npublic class Test {\n    public static void main(String[] args) {\n        String inputOne = \"abc\";\n        String a = new String(toHash(inputOne));\n        System.out.println(\"hash with salt of String a:\" + a);\n        String inputTwo = \"abc\";\n        String b = new String(toHash(inputTwo));\n        System.out.println(\"hash with salt of String b:\" + b);\n        if(Arrays.equals(toHash(inputOne), toHash(inputTwo))) {\n            System.out.println(\"Same\");\n        }\n        else {\n            System.out.println(\"Not Same\");\n        }\n    }\n\n    public static byte[] toHash(String password) {\n        byte[] salt = new byte[16];\n        byte[] hash = null;\n        SecretKeyFactory f = null;\n        SecureRandom random = new SecureRandom();\n        random.nextBytes(salt);\n        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);\n        try {\n            f = SecretKeyFactory.getInstance(\"PBKDF2WithHmacSHA1\");\n        } catch (NoSuchAlgorithmException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        }\n        try {\n            hash = f.generateSecret(spec).getEncoded();\n        } catch (InvalidKeySpecException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        }\n        return hash;\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 31358849,
+        "tags": ["java"],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 452
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/aa98a2c5baceef5ffcaf95fdde12b8fb?s=256&d=identicon&r=PG",
+            "account_id": 44195,
+            "user_type": "registered",
+            "user_id": 129570,
+            "link": "https://stackoverflow.com/users/129570/oliver-charlesworth",
+            "reputation": 273725,
+            "display_name": "Oliver Charlesworth",
+            "accept_rate": 79
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 6,
+        "post_id": 31358849,
+        "edited": false,
+        "creation_date": 1436629341,
+        "comment_id": 50698853
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/xT8bo.png?s=256",
+                "account_id": 1986016,
+                "user_type": "registered",
+                "user_id": 1781222,
+                "link": "https://stackoverflow.com/users/1781222/thecodingfrog",
+                "reputation": 3534,
+                "display_name": "TheCodingFrog",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1436630172,
+            "creation_date": 1436630172,
+            "body": "<p>The problem is  <code>SecureRandom random = new SecureRandom();random.nextBytes(salt);<\/code><\/p>\n\n<p>The documentation of <code>nextBytes<\/code> says:<\/p>\n\n<blockquote>\n  <p>/**\n       * Generates a user-specified number of random bytes.\n       *\n       * <p> If a call to <code>setSeed<\/code> had not occurred previously,\n       * the first call to this method forces this SecureRandom object\n       * to seed itself.  This self-seeding will not occur if\n       * <code>setSeed<\/code> was previously called.\n       *\n       * @param bytes the array to be filled in with random bytes.\n       */<\/p>\n<\/blockquote>\n\n<pre><code>synchronized public void nextBytes(byte[] bytes) {\n    secureRandomSpi.engineNextBytes(bytes);\n}\n<\/code><\/pre>\n\n<p>If you call <code>nextBytes<\/code> once with same seed then it will generate the same hash, below is the code:<\/p>\n\n<pre><code>public class Test {\n\n    static SecureRandom random = new SecureRandom();\n    static byte[] salt = new byte[16];\n\n    static {\n        random.nextBytes(salt);\n    }\n\n    public static void main(String[] args) {\n        String inputOne = \"abc\";\n        String a = new String(toHash(inputOne));\n        System.out.println(\"hash with salt of String a:\" + a);\n        String inputTwo = \"abc\";\n        String b = new String(toHash(inputTwo));\n        System.out.println(\"hash with salt of String b:\" + b);\n\n        if(Arrays.equals(toHash(inputOne), toHash(inputTwo))) {\n            System.out.println(\"Same\");\n        }\n        else {\n            System.out.println(\"Not Same\");\n        }\n    }\n\n    public static byte[] toHash(String password) {\n\n        byte[] hash = null;\n\n        SecretKeyFactory f = null;\n\n        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);\n        try {\n            f = SecretKeyFactory.getInstance(\"PBKDF2WithHmacSHA1\");\n        } catch (NoSuchAlgorithmException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        }\n        try {\n            hash = f.generateSecret(spec).getEncoded();\n        } catch (InvalidKeySpecException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        }\n        return hash;\n    }\n}\n<\/code><\/pre>\n\n<p>And output:<\/p>\n\n<blockquote>\n  <p>hash with salt of String a:D??I?/?\u0013??? <\/p>\n  \n  <p>?* <\/p>\n  \n  <p>hash with salt of String b:D??I?/?\u0013??? <\/p>\n  \n  <p>?* <\/p>\n  \n  <p>Same<\/p>\n<\/blockquote>\n",
+            "answer_id": 31358976,
+            "question_id": 31358849
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dVLIh.jpg?s=256",
+                "account_id": 5281408,
+                "user_type": "registered",
+                "user_id": 4216641,
+                "link": "https://stackoverflow.com/users/4216641/turing85",
+                "reputation": 20275,
+                "display_name": "Turing85"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1436629688,
+            "creation_date": 1436629688,
+            "body": "<p>The very reason for salts is, that you get different hash values for the same cleartext. Why you want to use salt then? This is simple. Imagine you store your hashed passwords in a database. Now a hacker comes along and hacks your database. Although he/she is not able to see the passwords in clear text, the same passwords get mapped on the same hash. Therefore, if 20% of all hashes are the same and you are able to decrypt only one of theses passwords, you decrypted 20% of the password database. This even gets worse, since <a href=\"https://en.wikipedia.org/wiki/Rainbow_table\" rel=\"nofollow\">rainbow tables<\/a> are a thing.<\/p>\n\n<p>To learn more about hashing, salt and storing passwords in general, you may want to take a look at <a href=\"https://youtu.be/8ZtInClXe1Q\" rel=\"nofollow\">this computerphile video about the topic<\/a>.<\/p>\n",
+            "answer_id": 31358918,
+            "question_id": 31358849
+        }
+    ],
+    "answer_comments": {
+        "31358918": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dVLIh.jpg?s=256",
+                "account_id": 5281408,
+                "user_type": "registered",
+                "user_id": 4216641,
+                "link": "https://stackoverflow.com/users/4216641/turing85",
+                "reputation": 20275,
+                "display_name": "Turing85"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 31358918,
+            "edited": false,
+            "creation_date": 1437336207,
+            "comment_id": 50973673
+        }],
+        "31358976": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/xT8bo.png?s=256",
+                    "account_id": 1986016,
+                    "user_type": "registered",
+                    "user_id": 1781222,
+                    "link": "https://stackoverflow.com/users/1781222/thecodingfrog",
+                    "reputation": 3534,
+                    "display_name": "TheCodingFrog",
+                    "accept_rate": 71
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 31358976,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/dVLIh.jpg?s=256",
+                    "account_id": 5281408,
+                    "user_type": "registered",
+                    "user_id": 4216641,
+                    "link": "https://stackoverflow.com/users/4216641/turing85",
+                    "reputation": 20275,
+                    "display_name": "Turing85"
+                },
+                "edited": false,
+                "creation_date": 1436631427,
+                "comment_id": 50699500
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/dVLIh.jpg?s=256",
+                    "account_id": 5281408,
+                    "user_type": "registered",
+                    "user_id": 4216641,
+                    "link": "https://stackoverflow.com/users/4216641/turing85",
+                    "reputation": 20275,
+                    "display_name": "Turing85"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 31358976,
+                "edited": false,
+                "creation_date": 1436630554,
+                "comment_id": 50699247
+            }
+        ]
+    }
+}

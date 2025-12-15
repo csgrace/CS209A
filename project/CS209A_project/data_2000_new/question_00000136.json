@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/4uapS.png?s=256",
+            "account_id": 3649743,
+            "user_type": "registered",
+            "user_id": 3042207,
+            "link": "https://stackoverflow.com/users/3042207/fabrizio-stellato",
+            "reputation": 1911,
+            "display_name": "Fabrizio Stellato",
+            "accept_rate": 42
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53260474/invoke-of-a-method-logging-as-method-declaring-class",
+        "last_activity_date": 1544408931,
+        "creation_date": 1542019428,
+        "answer_count": 1,
+        "title": "Invoke of a method - logging as method declaring class",
+        "body": "<p>I'm currently using JBoss interceptors and Proxy classes for wrapping method invoking at runtime and log some statistics.<\/p>\n\n<p>So said, having this code:<\/p>\n\n<pre><code>public class ProxyLoggingInterceptor &lt;T&gt; implements InvocationHandler {\n\nprivate Logger logger = LoggerFactory.getLogger(ProxyLoggingInterceptor.class);\n\n\n    @Override\n    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {\n        logger.info(\"%s.%s\", t.getClass().getSimpleName(), method.getName());\n    }\n}\n<\/code><\/pre>\n\n<p>the log will produce something like this:<\/p>\n\n<pre><code>12-11-2018 11:41.09,728 INFO (ProxyLoggingInterceptor) - [ANALYTICS]: MyClass.myMethod\n<\/code><\/pre>\n\n<p>However I'd like to show the logging declaring class as the logger entry, that is MyClass. \nThe desired result would be like:<\/p>\n\n<pre><code>12-11-2018 11:41.09,728 INFO (MyClass) - [ANALYTICS]: MyClass.myMethod\n<\/code><\/pre>\n\n<p>Is there any way that would not considered as a bad practice ?<\/p>\n",
+        "question_id": 53260474,
+        "tags": [
+            "java",
+            "logging",
+            "aop"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 378
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lDK9h.png?s=256",
+            "account_id": 1087271,
+            "user_type": "registered",
+            "user_id": 1082681,
+            "link": "https://stackoverflow.com/users/1082681/kriegaex",
+            "reputation": 68584,
+            "display_name": "kriegaex",
+            "accept_rate": 90
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1544408931,
+        "creation_date": 1544408931,
+        "body": "<p>Actually I am not into AOP based on dynamic proxies, I always use AspectJ where this kind of problem does not exist and it is easy to get the information you want because the original classes get modified. But having found the question anyway due to its <em>aop<\/em> tag and having played around a bit, I am trying to answer it:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>package de.scrum_master.app;\n\nimport java.lang.reflect.InvocationHandler;\nimport java.lang.reflect.Method;\nimport java.lang.reflect.Proxy;\nimport java.util.Map;\nimport java.util.function.Function;\n\npublic class ProxyLoggingInterceptor&lt;T&gt; implements InvocationHandler {\n  @Override\n  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {\n    System.out.printf(\n      \"%s.%s%n\",\n      proxy.getClass().getGenericInterfaces()[0].getTypeName(),\n      method.getName()\n    );\n    return null;\n  }\n\n  public static void main(String[] args) {\n    ClassLoader classLoader = ProxyLoggingInterceptor.class.getClassLoader();\n\n    Map mapProxy = (Map) Proxy.newProxyInstance(\n      classLoader,\n      new Class[] { Map.class },\n      new ProxyLoggingInterceptor&lt;Map&gt;()\n    );\n    mapProxy.put(\"foo\", 11);\n\n    Function functionProxy = (Function) Proxy.newProxyInstance(\n      classLoader,\n      new Class[] { Function.class },\n      new ProxyLoggingInterceptor&lt;Function&gt;()\n    );\n    functionProxy.apply(\"x\");\n\n    Runnable runnableProxy = (Runnable) Proxy.newProxyInstance(\n      classLoader,\n      new Class[] { Runnable.class },\n      new ProxyLoggingInterceptor&lt;Runnable&gt;()\n    );\n    runnableProxy.run();\n  }\n}\n<\/code><\/pre>\n\n<p>Console output:<\/p>\n\n<pre class=\"lang-none prettyprint-override\"><code>java.util.Map.put\njava.util.function.Function.apply\njava.lang.Runnable.run\n<\/code><\/pre>\n\n<p>Is that what you want?<\/p>\n",
+        "answer_id": 53698744,
+        "question_id": 53260474
+    }],
+    "answer_comments": {}
+}

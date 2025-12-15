@@ -1,0 +1,275 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+            "account_id": 1946663,
+            "user_type": "registered",
+            "user_id": 1751640,
+            "link": "https://stackoverflow.com/users/1751640/mordechai",
+            "reputation": 16550,
+            "display_name": "Mordechai",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/45777949/whats-the-purpose-of-uses-directive-in-java-9",
+        "last_activity_date": 1581340830,
+        "creation_date": 1503196559,
+        "answer_count": 3,
+        "title": "What&#39;s the purpose of &#39;uses&#39; directive in Java 9?",
+        "body": "<p>Java's <code>ServiceLoader<\/code> class is now officially baked into the Java language. Instead of looking for providers in <code>META-INF/services<\/code> you can now use the <\/p>\n\n<pre><code>provides &lt;spiClass&gt; with &lt;providerClass&gt;\n<\/code><\/pre>\n\n<p>What I fail to understand is, the use of <code>uses<\/code> in the service loading module declaration:<\/p>\n\n<pre><code>uses &lt;spiClass&gt;\n<\/code><\/pre>\n\n<p>Quoting from <a href=\"http://openjdk.java.net/projects/jigsaw/spec/sotms/\" rel=\"noreferrer\"><em>The State of the Module System<\/em><\/a><\/p>\n\n<blockquote>\n  <p>The module system\n  could identify uses of\n  services by scanning the\n  class files in module\n  artifacts for invocations\n  of the\n  <code>ServiceLoader::load<\/code>\n  methods, but that would\n  be both slow and\n  unreliable. That a\n  module uses a particular\n  service is a fundamental\n  aspect of that module\u2019s\n  definition, so for both\n  efficiency and clarity we\n  express that in the\n  module\u2019s declaration\n  with a uses clause:<\/p>\n\n<pre>module java.sql {\n   requires transitive java.logging;\n   requires transitive java.xml;\n   exports java.sql;\n   exports javax.sql;\n   exports javax.transaction.xa;\n   uses java.sql.Driver;\n}<\/pre>\n<\/blockquote>\n\n<p>Why is it fundamental for the module system to know uses of a particular service, especially how will this introduce efficiency? Aren't services loaded lazily? Why can't the service loader just look for providers on the fly? <\/p>\n",
+        "question_id": 45777949,
+        "tags": [
+            "java",
+            "java-9",
+            "java-module",
+            "module-info"
+        ],
+        "score": 21,
+        "accepted_answer_id": 45813229,
+        "is_answered": true,
+        "view_count": 6978,
+        "last_edit_date": 1581340830
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/DLHqU.png?s=256",
+            "account_id": 1223835,
+            "user_type": "registered",
+            "user_id": 1189885,
+            "link": "https://stackoverflow.com/users/1189885/chrylis-cautiouslyoptimistic",
+            "reputation": 77469,
+            "display_name": "chrylis -cautiouslyoptimistic-",
+            "accept_rate": 43
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 45777949,
+        "edited": false,
+        "creation_date": 1503196649,
+        "comment_id": 78513503
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/CId7Y.jpg?s=256",
+                "account_id": 2973802,
+                "user_type": "registered",
+                "user_id": 2525313,
+                "link": "https://stackoverflow.com/users/2525313/nicolai-parlog",
+                "reputation": 51708,
+                "display_name": "Nicolai Parlog",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 13,
+            "is_accepted": true,
+            "last_activity_date": 1512129492,
+            "creation_date": 1503392449,
+            "body": "<p>When the JVM launches, the module system <a href=\"https://blog.codefx.org/java/java-module-system-tutorial/#dependencies-readability\" rel=\"noreferrer\">resolves dependencies<\/a> and builds the module graph. Only modules that make it into the graph are available at run time (even if others are observable). If modules are properly decoupled via services, there is a good chance, though, that the providing modules are <em>not<\/em> transitive dependencies of the initial module. So without further efforts, service provider modules would routinely not make it into the module graph and thus not be available at run time when a module tries to use a service.<\/p>\n\n<blockquote>\n  <p>In order for the <code>java.sql<\/code> module to make use of this driver [...] the module system must <strong>add the driver module to the module graph<\/strong> and resolve its dependencies [...].<\/p>\n<\/blockquote>\n\n<p>So for services to properly work, provider modules must make it into the module graph even if they are not transitively required from the initial module. But how can the module system identify which modules are needed as service providers? All that use a <code>provides<\/code> clause? That would be a little too much. No, only providers of services that are actually needed should be resolved.<\/p>\n\n<p>This makes it necessary to identify services uses. As others have pointed out, bytecode analysis is slow and unreliable, so a more explicit mechanism is needed to guarantee efficiency and correctness: <code>uses<\/code> clauses. Only with them can the module system reliably and efficiently make all service provider modules available.<\/p>\n\n<blockquote>\n  <p>If the application is a module, then its module declaration must have a <code>uses<\/code> directive that specifies the service; this helps to locate providers and <strong>ensure they will execute reliably<\/strong>.<\/p>\n<\/blockquote>\n\n<p>You can observe this behavior if launching <a href=\"https://github.com/CodeFX-org/demo-jpms-monitor/tree/feature-services\" rel=\"noreferrer\">a service-based application<\/a> with the flag <code>--show-module-resolution<\/code>:<\/p>\n\n<pre><code>root monitor\nmonitor requires monitor.observer\n[...]\nmonitor binds monitor.observer.beta\nmonitor binds monitor.observer.alpha\n<\/code><\/pre>\n\n<p>The module <em>monitor<\/em> <strong>binds<\/strong> the modules <code>monitor.observer.alpha<\/code> and <code>monitor.observer.beta<\/code> even though it does not depend on either of them.<\/p>\n\n<p>(Quotes are from <a href=\"http://openjdk.java.net/projects/jigsaw/spec/sotms/\" rel=\"noreferrer\">The State of the Module System<\/a>; emphasis mine.)<\/p>\n",
+            "answer_id": 45813229,
+            "question_id": 45777949,
+            "last_edit_date": 1512129492
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/147c5a9cc1feec049c50da791ac7d144?s=256&d=identicon&r=PG",
+                "account_id": 47283,
+                "user_type": "registered",
+                "user_id": 139985,
+                "link": "https://stackoverflow.com/users/139985/stephen-c",
+                "reputation": 723464,
+                "display_name": "Stephen C",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": false,
+            "last_activity_date": 1503200424,
+            "creation_date": 1503198187,
+            "body": "<blockquote>\n  <p>Why is it fundamental for the module system to know uses of a particular service ...<\/p>\n<\/blockquote>\n\n<p>Because of dependency resolution.  <a href=\"http://openjdk.java.net/projects/jigsaw/spec/sotms/\" rel=\"noreferrer\"><em>The State of the Module System<\/em><\/a> says in the example a few lines above your quoted text:<\/p>\n\n<blockquote>\n  <p>In order for the <code>java.sql<\/code> module to make use of this driver, the <code>ServiceLoader<\/code> class must be able to instantiate the driver class via reflection; for that to happen, the module system must add the driver module to the module graph and resolve its dependencies ...<\/p>\n<\/blockquote>\n\n<p>The key point is that reflection is used to do the instantiation.  It happens <em>after<\/em> module resolution ... and after the application has started running.<\/p>\n\n<blockquote>\n  <p>... especially how will this introduce efficiency?<\/p>\n<\/blockquote>\n\n<p>Scanning a codebase for all calls to <code>ServiceLoader::load<\/code> is expensive.  It is not sufficient to just know that a method is called (which could be done by analysis of classfile dependencies).  You also need to know what <em>parameters were used<\/em> to determine what classes are going to be loaded.  And (as the SotMS document points out) that would be open to errors; e.g. if the parameters are runtime expressions rather than compile-time constant expressions.<\/p>\n\n<p>The solution they have adopted is to provide a way to explicitly declare a dependency on a reflectively loaded class.<\/p>\n",
+            "answer_id": 45778058,
+            "question_id": 45777949,
+            "last_edit_date": 1503200424
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                "account_id": 6780825,
+                "user_type": "registered",
+                "user_id": 5221149,
+                "link": "https://stackoverflow.com/users/5221149/andreas",
+                "reputation": 160084,
+                "display_name": "Andreas"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 6,
+            "is_accepted": false,
+            "last_activity_date": 1503198105,
+            "creation_date": 1503198105,
+            "body": "<p>Quoting from Java 9 javadoc of <a href=\"http://download.java.net/java/jdk9/docs/api/java/util/ServiceLoader.html\" rel=\"noreferrer\"><code>ServiceLoader<\/code><\/a> (emphasis added by me):<\/p>\n\n<blockquote>\n  <p>An application obtains a service loader for a given service by invoking one of the static <code>load<\/code> methods of ServiceLoader. If the application is a module, then its module declaration must have a <em>uses<\/em> directive that specifies the service; <strong>this helps to locate providers and ensure they will execute reliably<\/strong>. In addition, if the service is not in the application module, then the module declaration must have a <em>requires<\/em> directive that specifies the module which exports the service.<\/p>\n<\/blockquote>\n",
+            "answer_id": 45778052,
+            "question_id": 45777949
+        }
+    ],
+    "answer_comments": {
+        "45813229": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/CId7Y.jpg?s=256",
+                    "account_id": 2973802,
+                    "user_type": "registered",
+                    "user_id": 2525313,
+                    "link": "https://stackoverflow.com/users/2525313/nicolai-parlog",
+                    "reputation": 51708,
+                    "display_name": "Nicolai Parlog",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45813229,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+                    "account_id": 1946663,
+                    "user_type": "registered",
+                    "user_id": 1751640,
+                    "link": "https://stackoverflow.com/users/1751640/mordechai",
+                    "reputation": 16550,
+                    "display_name": "Mordechai",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1505085814,
+                "comment_id": 79254604
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/CId7Y.jpg?s=256",
+                    "account_id": 2973802,
+                    "user_type": "registered",
+                    "user_id": 2525313,
+                    "link": "https://stackoverflow.com/users/2525313/nicolai-parlog",
+                    "reputation": 51708,
+                    "display_name": "Nicolai Parlog",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45813229,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+                    "account_id": 1946663,
+                    "user_type": "registered",
+                    "user_id": 1751640,
+                    "link": "https://stackoverflow.com/users/1751640/mordechai",
+                    "reputation": 16550,
+                    "display_name": "Mordechai",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1505085531,
+                "comment_id": 79254560
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+                    "account_id": 1946663,
+                    "user_type": "registered",
+                    "user_id": 1751640,
+                    "link": "https://stackoverflow.com/users/1751640/mordechai",
+                    "reputation": 16550,
+                    "display_name": "Mordechai",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45813229,
+                "edited": false,
+                "creation_date": 1503409297,
+                "comment_id": 78596148
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+                    "account_id": 1946663,
+                    "user_type": "registered",
+                    "user_id": 1751640,
+                    "link": "https://stackoverflow.com/users/1751640/mordechai",
+                    "reputation": 16550,
+                    "display_name": "Mordechai",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45813229,
+                "edited": false,
+                "creation_date": 1503408634,
+                "comment_id": 78595597
+            }
+        ],
+        "45778052": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+                    "account_id": 1946663,
+                    "user_type": "registered",
+                    "user_id": 1751640,
+                    "link": "https://stackoverflow.com/users/1751640/mordechai",
+                    "reputation": 16550,
+                    "display_name": "Mordechai",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45778052,
+                "edited": false,
+                "creation_date": 1503240751,
+                "comment_id": 78524161
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/s4qlq.png?s=256",
+                    "account_id": 6780825,
+                    "user_type": "registered",
+                    "user_id": 5221149,
+                    "link": "https://stackoverflow.com/users/5221149/andreas",
+                    "reputation": 160084,
+                    "display_name": "Andreas"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 3,
+                "post_id": 45778052,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+                    "account_id": 1946663,
+                    "user_type": "registered",
+                    "user_id": 1751640,
+                    "link": "https://stackoverflow.com/users/1751640/mordechai",
+                    "reputation": 16550,
+                    "display_name": "Mordechai",
+                    "accept_rate": 75
+                },
+                "edited": false,
+                "creation_date": 1503212238,
+                "comment_id": 78516118
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/MA5Ln.png?s=256",
+                    "account_id": 1946663,
+                    "user_type": "registered",
+                    "user_id": 1751640,
+                    "link": "https://stackoverflow.com/users/1751640/mordechai",
+                    "reputation": 16550,
+                    "display_name": "Mordechai",
+                    "accept_rate": 75
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 45778052,
+                "edited": false,
+                "creation_date": 1503206724,
+                "comment_id": 78515064
+            }
+        ]
+    }
+}

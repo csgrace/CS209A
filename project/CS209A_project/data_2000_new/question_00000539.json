@@ -1,0 +1,104 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bbf54a085ed2be8f68f52c0d4c8696f1?s=256&d=identicon&r=PG",
+            "account_id": 28663,
+            "user_type": "registered",
+            "user_id": 76777,
+            "link": "https://stackoverflow.com/users/76777/simon",
+            "reputation": 12980,
+            "display_name": "simon",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/2183252/how-can-i-read-contents-from-spring-messagesource-within-a-enum",
+        "last_activity_date": 1265108778,
+        "creation_date": 1265105991,
+        "answer_count": 1,
+        "title": "How can I read contents from Spring Messagesource within a Enum?",
+        "body": "<p>I have an Enum containing three different Status types. These statuses should be displayed in an email sent to users, and the strings containing the statuses to be displayed are stored in messages.properties (read using an implementation of Spring class org.springframework.context.MessageSource). This works well in a normal Spring controller. However, I would prefer to get the \"display status\" within the Enum (to contain the logic in one place).<\/p>\n\n<p>However, auto-wiring the messagesource to the enum as in the following code does not seem to work, as the messageSource property is always empty.<\/p>\n\n<pre><code>\npublic enum InitechStatus{\n        OPEN(\"open\"), CLOSED(\"closed\"), BROKEN(\"broken\");\n\n        public final String name;\n        @Autowired\n        private MessageSource messageSource;\n\n        InitechStatus(String name) {\n            this.name = name;\n        }\n\n        @Override\n        public String toString() {\n\n            String displayStatusString = messageSource.getMessage(\"page.systemadministration.broadcastmail.status.\"\n                    + this.name, null, Locale.ENGLISH);\n            return displayStatusString;\n        }\n\n\n    }\n<\/code><\/pre>\n\n<p>How can I use the auto-wired messagesource within the Enum (or is there some other way to achieve what I'm trying)?<\/p>\n",
+        "question_id": 2183252,
+        "tags": [
+            "java",
+            "spring",
+            "properties",
+            "enums",
+            "autowired"
+        ],
+        "score": 3,
+        "accepted_answer_id": 2183411,
+        "is_answered": true,
+        "view_count": 13884,
+        "last_edit_date": 1265108778
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bbf54a085ed2be8f68f52c0d4c8696f1?s=256&d=identicon&r=PG",
+            "account_id": 28663,
+            "user_type": "registered",
+            "user_id": 76777,
+            "link": "https://stackoverflow.com/users/76777/simon",
+            "reputation": 12980,
+            "display_name": "simon",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 8,
+        "is_accepted": true,
+        "last_activity_date": 1265108735,
+        "creation_date": 1265108106,
+        "body": "<p>I found the solution from this answer on SO: <a href=\"https://stackoverflow.com/questions/710392/using-spring-ioc-to-set-up-enum-values#711022\">Using Spring IoC to set up enum values<\/a> <\/p>\n\n<p>This gave me the pointer to use java.util.ResourceBundle to read the messages, like this: <\/p>\n\n<pre><code>\npublic enum InitechStatus{\n        OPEN(\"open\"), CLOSED(\"closed\"), BROKEN(\"broken\");\n\n        private static ResourceBundle resourceBundle = ResourceBundle.getBundle(\"messages\",\n                Locale.ENGLISH);\n\n        public final String name;\n        @Autowired\n        private MessageSource messageSource;\n\n        InitechStatus(String name) {\n            this.name = name;\n        }\n\n        @Override\n        public String toString() {\n\n            String displayStatusString = resourceBundle.getString(\"page.systemadministration.broadcastmail.status.\"\n                    + this.name);\n            return displayStatusString;\n        }\n\n\n    }\n\n<\/code><\/pre>\n",
+        "answer_id": 2183411,
+        "question_id": 2183252,
+        "last_edit_date": 1495542647
+    }],
+    "answer_comments": {"2183411": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bbf54a085ed2be8f68f52c0d4c8696f1?s=256&d=identicon&r=PG",
+                "account_id": 28663,
+                "user_type": "registered",
+                "user_id": 76777,
+                "link": "https://stackoverflow.com/users/76777/simon",
+                "reputation": 12980,
+                "display_name": "simon",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 2183411,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/65019644900260aca01dc7a37208023c?s=256&d=identicon&r=PG",
+                "account_id": 192156,
+                "user_type": "registered",
+                "user_id": 433145,
+                "link": "https://stackoverflow.com/users/433145/laura",
+                "reputation": 2981,
+                "display_name": "laura",
+                "accept_rate": 79
+            },
+            "edited": false,
+            "creation_date": 1330085646,
+            "comment_id": 11923798
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/65019644900260aca01dc7a37208023c?s=256&d=identicon&r=PG",
+                "account_id": 192156,
+                "user_type": "registered",
+                "user_id": 433145,
+                "link": "https://stackoverflow.com/users/433145/laura",
+                "reputation": 2981,
+                "display_name": "laura",
+                "accept_rate": 79
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 2183411,
+            "edited": false,
+            "creation_date": 1330017670,
+            "comment_id": 11904211
+        }
+    ]}
+}

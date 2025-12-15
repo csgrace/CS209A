@@ -1,0 +1,147 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/wRjsM.png?s=256",
+            "account_id": 1573092,
+            "user_type": "registered",
+            "user_id": 1460321,
+            "link": "https://stackoverflow.com/users/1460321/fahad-mullaji",
+            "reputation": 1442,
+            "display_name": "Fahad Mullaji",
+            "accept_rate": 21
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/30960359/hibernate-after-some-time-i-am-getting-jdbcconnectionexception-in-aws",
+        "last_activity_date": 1434984334,
+        "creation_date": 1434849036,
+        "answer_count": 1,
+        "title": "Hibernate - after some time I am getting JDBCConnectionException in AWS -",
+        "body": "<p>I started to get this exception when I made SessionFactory as static property. I don't get this exception right away when I push code to AWS server. I get it after few days. And when I get it I keep on getting it. Exception goes away when I restart AWS server.<\/p>\n\n<p>Here is my code...<\/p>\n\n<pre><code>public List&lt;E&gt; getAll(Class&lt;E&gt; c) {\n\n    if (busUtil.iSessionFactory == null)\n        busUtil.loadSessionFactory();\n\n    Session session = busUtil.iSessionFactory.openSession();\n\n    List&lt;E&gt; t = null;\n    try {\n\n        session.beginTransaction();\n        t = session.createCriteria(c).list();\n        session.getTransaction().commit();\n\n    } catch (Exception e) {\n        e.printStackTrace();\n\n        new AppLogger().log(\"Exception\" + busUtil.getStackTrace(e) , busConstant.SeveritySevere, new Object() {\n        }.getClass().getEnclosingMethod().getName());\n\n        session.getTransaction().rollback();\n    } finally {\n        session.close();\n    }\n    return t;\n}\n<\/code><\/pre>\n\n<p>This is what I found in my logs.<\/p>\n\n<pre><code>Jun 19, 2015 1:12:40 PM com.org.panthers.util.AppLogger log - SEVERE: selectFirstOrDefault - Exceptionorg.hibernate.exception.JDBCConnectionException: could not extract ResultSet\nat org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:132)\nat org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:49)\nat org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:126)\nat org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:112)\nat org.hibernate.engine.jdbc.internal.ResultSetReturnImpl.extract(ResultSetReturnImpl.java:91)\nat org.hibernate.loader.Loader.getResultSet(Loader.java:2065)\nat org.hibernate.loader.Loader.executeQueryStatement(Loader.java:1862)\nat org.hibernate.loader.Loader.executeQueryStatement(Loader.java:1838)\nat org.hibernate.loader.Loader.doQuery(Loader.java:909)\nat org.hibernate.loader.Loader.doQueryAndInitializeNonLazyCollections(Loader.java:354)\nat org.hibernate.loader.Loader.doList(Loader.java:2553)\nat org.hibernate.loader.Loader.doList(Loader.java:2539)\nat org.hibernate.loader.Loader.listIgnoreQueryCache(Loader.java:2369)\nat org.hibernate.loader.Loader.list(Loader.java:2364)\nat org.hibernate.loader.hql.QueryLoader.list(QueryLoader.java:496)\nat org.hibernate.hql.internal.ast.QueryTranslatorImpl.list(QueryTranslatorImpl.java:387)\nat org.hibernate.engine.query.spi.HQLQueryPlan.performList(HQLQueryPlan.java:231)\nat org.hibernate.internal.SessionImpl.list(SessionImpl.java:1264)\nat org.hibernate.internal.QueryImpl.list(QueryImpl.java:103)\nat com.org.panthers.util.BaseDAOImpl.selectFirstOrDefault(BaseDAOImpl.java:232)\nat com.org.panthers.business.busQuestion.loadQuestionsByThread(busQuestion.java:109)\nat com.org.panthers.service.QuestionService.loadQuestionsByThread(QuestionService.java:62)\nat com.org.panthers.controller.QuestionController.getQuestionsByThread(QuestionController.java:49)\nat sun.reflect.GeneratedMethodAccessor55.invoke(Unknown Source)\nat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\nat java.lang.reflect.Method.invoke(Method.java:606)\nat com.sun.jersey.spi.container.JavaMethodInvokerFactory$1.invoke(JavaMethodInvokerFactory.java:60)\nat com.sun.jersey.server.impl.model.method.dispatch.AbstractResourceMethodDispatchProvider$ResponseOutInvoker._dispatch(AbstractResourceMethodDispatchProvider.java:205)\nat com.sun.jersey.server.impl.model.method.dispatch.ResourceJavaMethodDispatcher.dispatch(ResourceJavaMethodDispatcher.java:75)\nat com.sun.jersey.server.impl.uri.rules.HttpMethodRule.accept(HttpMethodRule.java:302)\nat com.sun.jersey.server.impl.uri.rules.RightHandPathRule.accept(RightHandPathRule.java:147)\nat com.sun.jersey.server.impl.uri.rules.ResourceClassRule.accept(ResourceClassRule.java:108)\nat com.sun.jersey.server.impl.uri.rules.RightHandPathRule.accept(RightHandPathRule.java:147)\nat com.sun.jersey.server.impl.uri.rules.RootResourceClassesRule.accept(RootResourceClassesRule.java:84)\nat com.sun.jersey.server.impl.application.WebApplicationImpl._handleRequest(WebApplicationImpl.java:1480)\nat com.sun.jersey.server.impl.application.WebApplicationImpl._handleRequest(WebApplicationImpl.java:1411)\nat com.sun.jersey.server.impl.application.WebApplicationImpl.handleRequest(WebApplicationImpl.java:1360)\nat com.sun.jersey.server.impl.application.WebApplicationImpl.handleRequest(WebApplicationImpl.java:1350)\nat com.sun.jersey.spi.container.servlet.WebComponent.service(WebComponent.java:416)\nat com.sun.jersey.spi.container.servlet.ServletContainer.service(ServletContainer.java:538)\nat com.sun.jersey.spi.container.servlet.ServletContainer.service(ServletContainer.java:716)\nat javax.servlet.http.HttpServlet.service(HttpServlet.java:728)\nat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:305)\nat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)\nat org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)\nat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)\nat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)\nat org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:222)\nat org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:123)\nat org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:502)\nat org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:171)\nat org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:100)\nat org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:953)\nat org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:118)\nat org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:408)\nat org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1041)\nat org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:603)\nat org.apache.tomcat.util.net.JIoEndpoint$SocketProcessor.run(JIoEndpoint.java:310)\nat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)\nat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)\nat java.lang.Thread.run(Thread.java:745) - Caused by: com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: Communications link failure - The last packet successfully received from the server was 28,901,647 milliseconds ago.  The last packet sent successfully to the server was 0 milliseconds ago.\nat sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)\nat sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)\nat sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)\nat java.lang.reflect.Constructor.newInstance(Constructor.java:526)\nat com.mysql.jdbc.Util.handleNewInstance(Util.java:377)\nat com.mysql.jdbc.SQLError.createCommunicationsException(SQLError.java:1036)\nat com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:3427)\nat com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:3327)\nat com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3814)\nat com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:2435)\nat com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2582)\nat com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2530)\nat com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:1907)\nat com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:2030)\nat org.hibernate.engine.jdbc.internal.ResultSetReturnImpl.extract(ResultSetReturnImpl.java:82)\n... 56 more - Caused by: java.io.EOFException: Can not read response from server. Expected to read 4 bytes, read 0 bytes before connection was unexpectedly lost.\nat com.mysql.jdbc.MysqlIO.readFully(MysqlIO.java:2914)\nat com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:3337)\n... 64 more\n<\/code><\/pre>\n\n<p>Database configuration .. <\/p>\n\n<pre><code>&lt;hibernate-configuration&gt;\n\n&lt;session-factory&gt;\n\n    &lt;!-- Database connection settings --&gt;\n    &lt;property name=\"hibernate.connection.driver_class\"&gt;com.mysql.jdbc.Driver&lt;/property&gt;\n    &lt;property name=\"hibernate.connection.password\"&gt;root&lt;/property&gt;\n    &lt;property name=\"hibernate.connection.url\"&gt;jdbc:mysql://localhost:3306/CURIOSITE&lt;/property&gt;\n    &lt;property name=\"hibernate.connection.username\"&gt;root&lt;/property&gt;\n    &lt;property name=\"hibernate.dialect\"&gt;org.hibernate.dialect.MySQL5Dialect&lt;/property&gt;\n\n    &lt;!-- JDBC connection pool (use the built-in) --&gt;\n    &lt;property name=\"connection.pool_size\"&gt;10&lt;/property&gt;\n\n    &lt;!-- SQL dialect --&gt;\n    &lt;property name=\"dialect\"&gt;org.hibernate.dialect.MySQL5Dialect&lt;/property&gt;\n\n    &lt;!-- Disable the second-level cache --&gt;\n    &lt;property name=\"cache.provider_class\"&gt;org.hibernate.cache.NoCacheProvider&lt;/property&gt;\n\n    &lt;!-- Echo all executed SQL to stdout --&gt;\n    &lt;property name=\"show_sql\"&gt;true&lt;/property&gt;\n\n    &lt;!-- Drop and re-create the database schema on startup --&gt;\n    &lt;property name=\"hbm2ddl.auto\"&gt;update&lt;/property&gt;\n\n&lt;/session-factory&gt;\n<\/code><\/pre>\n\n<p><\/p>\n\n<p>Well one way to get rid this exception is to catch this exception and reload SessionFactory as this started happening when I made SessionFactory as static property.<\/p>\n\n<p>But does anybody know why am I getting this exception?<\/p>\n\n<p>Any help is appreciated. Thanks <\/p>\n",
+        "question_id": 30960359,
+        "tags": [
+            "java",
+            "hibernate",
+            "amazon-web-services"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1013,
+        "last_edit_date": 1434984334
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wRjsM.png?s=256",
+                "account_id": 1573092,
+                "user_type": "registered",
+                "user_id": 1460321,
+                "link": "https://stackoverflow.com/users/1460321/fahad-mullaji",
+                "reputation": 1442,
+                "display_name": "Fahad Mullaji",
+                "accept_rate": 21
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960359,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/c757c67d232974346812f9afb4e2a157?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 333431,
+                "user_type": "registered",
+                "user_id": 659298,
+                "link": "https://stackoverflow.com/users/659298/300d7309ef17",
+                "reputation": 24838,
+                "display_name": "300D7309EF17",
+                "accept_rate": 61
+            },
+            "edited": false,
+            "creation_date": 1434855820,
+            "comment_id": 49954118
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c757c67d232974346812f9afb4e2a157?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 333431,
+                "user_type": "registered",
+                "user_id": 659298,
+                "link": "https://stackoverflow.com/users/659298/300d7309ef17",
+                "reputation": 24838,
+                "display_name": "300D7309EF17",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960359,
+            "edited": false,
+            "creation_date": 1434855348,
+            "comment_id": 49954042
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c757c67d232974346812f9afb4e2a157?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 333431,
+            "user_type": "registered",
+            "user_id": 659298,
+            "link": "https://stackoverflow.com/users/659298/300d7309ef17",
+            "reputation": 24838,
+            "display_name": "300D7309EF17",
+            "accept_rate": 61
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1434856554,
+        "creation_date": 1434856554,
+        "body": "<p><a href=\"https://docs.jboss.org/hibernate/orm/3.3/reference/en-US/html/session-configuration.html\" rel=\"nofollow\">As Hibernate's session-factory documentation states<\/a>: \"Hibernate's own connection pooling algorithm is, however, quite rudimentary. It is intended to help you get started and is <em>not intended for use in a production system<\/em>\".<\/p>\n\n<p>One of the reasons is that Hibernate doesn't test connection health. That means long-running connections on imperfect networks tend towards failure, as you are seeing.<\/p>\n\n<p><code>c3p0<\/code> works well with Hibernate and allows you to <a href=\"http://www.mchange.com/projects/c3p0/#managing_pool_size\" rel=\"nofollow\">easily configure max connection age and test connection health<\/a>.<\/p>\n",
+        "answer_id": 30960943,
+        "question_id": 30960359
+    }],
+    "answer_comments": {"30960943": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/c757c67d232974346812f9afb4e2a157?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 333431,
+                "user_type": "registered",
+                "user_id": 659298,
+                "link": "https://stackoverflow.com/users/659298/300d7309ef17",
+                "reputation": 24838,
+                "display_name": "300D7309EF17",
+                "accept_rate": 61
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960943,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/wRjsM.png?s=256",
+                "account_id": 1573092,
+                "user_type": "registered",
+                "user_id": 1460321,
+                "link": "https://stackoverflow.com/users/1460321/fahad-mullaji",
+                "reputation": 1442,
+                "display_name": "Fahad Mullaji",
+                "accept_rate": 21
+            },
+            "edited": false,
+            "creation_date": 1434862733,
+            "comment_id": 49955082
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wRjsM.png?s=256",
+                "account_id": 1573092,
+                "user_type": "registered",
+                "user_id": 1460321,
+                "link": "https://stackoverflow.com/users/1460321/fahad-mullaji",
+                "reputation": 1442,
+                "display_name": "Fahad Mullaji",
+                "accept_rate": 21
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30960943,
+            "edited": false,
+            "creation_date": 1434861454,
+            "comment_id": 49954907
+        }
+    ]}
+}

@@ -1,0 +1,121 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-OukutoT90ao/AAAAAAAAAAI/AAAAAAAAADU/yfCqNkZUOYI/s256-rj/photo.jpg",
+            "account_id": 6537385,
+            "user_type": "registered",
+            "user_id": 5056379,
+            "link": "https://stackoverflow.com/users/5056379/vibhatha-abeykoon",
+            "reputation": 21,
+            "display_name": "Vibhatha Abeykoon"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/37186120/how-to-authenticate-the-client-service-when-using-cas-in-spring-security",
+        "last_activity_date": 1543756889,
+        "creation_date": 1463054056,
+        "answer_count": 0,
+        "title": "How to authenticate the client service when using CAS in Spring Security?",
+        "body": "<p>\nI have created CAS server and the CAS Client application. Basically the authentication of a service app has been done using service ticket and proxy ticket validation. In this case, initially I validate a particular user by validation of the service ticket and then authorize a user for a particular app by generating a proxy ticket using the service ticket. In this case I am able to successfully validate the service and proxy tickets in the service application. The problem that I am facing is that once I validated the user I can retrieve the user information via Assertion object using the following code segment. <\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>Assertion assertion = serviceTicketValidator.validate(serviceTicket);\n<\/code><\/pre>\n\n<p>Here the <code>serviceTicektValidator<\/code> object is a class that I have written by implementing the <code>Cas20ServiceTicketValidator<\/code> valdation functions. Here the assertion object is set to the <code>SecurityContextHolder<\/code> as follows.<\/p>\n\n<p><div class=\"snippet\" data-lang=\"js\" data-hide=\"false\" data-console=\"false\" data-babel=\"false\">\r\n<div class=\"snippet-code\">\r\n<pre class=\"snippet-code-html lang-html prettyprint-override\"><code>CasAssertionAuthenticationToken token = new CasAssertionAuthenticationToken(assertion, serviceTicket);\r\nSecurityContextHolder.getContext().setAuthentication(token);\r\n \t\t\t\t\t\t\t\t   \t\t\r\n\t \t\t\t\t\t\t\t\t   \t\t<\/code><\/pre>\r\n<\/div>\r\n<\/div>\r\n<\/p>\n\n<p>Here this way, I am setting the authentication object. But the fact is once the request is changed or consider a new request, in the <code>SecurityContextPersistenceFilter<\/code> filter class in the following code segment the <code>SecurityContext<\/code> object is being cleared. So once a new request is fired the already stored authentication detail is vanished from the <code>SecurityContextHolder<\/code> object. So once every request the authentication details has to be set, because a particular service or proxy ticket can only be validated once. Here the approach taken by me is keeping the <code>Assertion<\/code> object and ticket generated in the Session and then at the beginning of this class (or actually I am doing all these in a filter) I check whether these values are in the session and again at each new request the <code>CasAssertionAuthenticationToken<\/code> is set to the <code>SecurityContextHolder<\/code>. <\/p>\n\n<p><div class=\"snippet\" data-lang=\"js\" data-hide=\"false\" data-console=\"false\" data-babel=\"false\">\r\n<div class=\"snippet-code\">\r\n<pre class=\"snippet-code-html lang-html prettyprint-override\"><code> HttpRequestResponseHolder holder = new HttpRequestResponseHolder(request, response);\r\n        SecurityContext contextBeforeChainExecution = repo.loadContext(holder);\r\n\r\n        try {\r\n            SecurityContextHolder.setContext(contextBeforeChainExecution);\r\n\r\n            chain.doFilter(holder.getRequest(), holder.getResponse());\r\n\r\n        } finally {\r\n            SecurityContext contextAfterChainExecution = SecurityContextHolder.getContext();\r\n            // Crucial removal of SecurityContextHolder contents - do this before anything else.\r\n            SecurityContextHolder.clearContext();\r\n            repo.saveContext(contextAfterChainExecution, holder.getRequest(), holder.getResponse());\r\n            request.removeAttribute(FILTER_APPLIED);\r\n\r\n            if (debug) {\r\n                logger.debug(\"SecurityContextHolder now cleared, as request processing completed\");\r\n            }\r\n        }<\/code><\/pre>\r\n<\/div>\r\n<\/div>\r\n<\/p>\n\n<p>The application is working the expected way, but I want to know whether there is a better way to implement this by using advanced techniques in Spring Filters or any other option. I also considered local storage of tickets and authentication information, but I want to do this within Spring Application even without using this session storage mechanism. I want to know whether this is possible or not?<\/p>\n",
+        "question_id": 37186120,
+        "tags": [
+            "java",
+            "spring",
+            "spring-security",
+            "cas"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 1107,
+        "last_edit_date": 1543756889
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-OukutoT90ao/AAAAAAAAAAI/AAAAAAAAADU/yfCqNkZUOYI/s256-rj/photo.jpg",
+                "account_id": 6537385,
+                "user_type": "registered",
+                "user_id": 5056379,
+                "link": "https://stackoverflow.com/users/5056379/vibhatha-abeykoon",
+                "reputation": 21,
+                "display_name": "Vibhatha Abeykoon"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37186120,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2ed901e1f7e084b1a46d854f64142aad?s=256&d=identicon&r=PG",
+                "account_id": 307015,
+                "user_type": "registered",
+                "user_id": 618087,
+                "link": "https://stackoverflow.com/users/618087/rob-winch",
+                "reputation": 21760,
+                "display_name": "Rob Winch"
+            },
+            "edited": false,
+            "creation_date": 1465441864,
+            "comment_id": 62905599
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2ed901e1f7e084b1a46d854f64142aad?s=256&d=identicon&r=PG",
+                "account_id": 307015,
+                "user_type": "registered",
+                "user_id": 618087,
+                "link": "https://stackoverflow.com/users/618087/rob-winch",
+                "reputation": 21760,
+                "display_name": "Rob Winch"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37186120,
+            "edited": false,
+            "creation_date": 1465391619,
+            "comment_id": 62881033
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-OukutoT90ao/AAAAAAAAAAI/AAAAAAAAADU/yfCqNkZUOYI/s256-rj/photo.jpg",
+                "account_id": 6537385,
+                "user_type": "registered",
+                "user_id": 5056379,
+                "link": "https://stackoverflow.com/users/5056379/vibhatha-abeykoon",
+                "reputation": 21,
+                "display_name": "Vibhatha Abeykoon"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37186120,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2ed901e1f7e084b1a46d854f64142aad?s=256&d=identicon&r=PG",
+                "account_id": 307015,
+                "user_type": "registered",
+                "user_id": 618087,
+                "link": "https://stackoverflow.com/users/618087/rob-winch",
+                "reputation": 21760,
+                "display_name": "Rob Winch"
+            },
+            "edited": false,
+            "creation_date": 1465362881,
+            "comment_id": 62863301
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2ed901e1f7e084b1a46d854f64142aad?s=256&d=identicon&r=PG",
+                "account_id": 307015,
+                "user_type": "registered",
+                "user_id": 618087,
+                "link": "https://stackoverflow.com/users/618087/rob-winch",
+                "reputation": 21760,
+                "display_name": "Rob Winch"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 37186120,
+            "edited": false,
+            "creation_date": 1465329340,
+            "comment_id": 62853494
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

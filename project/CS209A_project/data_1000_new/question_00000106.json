@@ -1,0 +1,206 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a6e46ff26e8efb428f34743a7947f6fd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4908319,
+            "user_type": "registered",
+            "user_id": 3954374,
+            "link": "https://stackoverflow.com/users/3954374/bigbill91",
+            "reputation": 49,
+            "display_name": "BigBill91"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/30625128/java-lang-nullpointerexception-attempt-to-invoke-virtual-method-actionbar-setn",
+        "last_activity_date": 1433348676,
+        "creation_date": 1433347129,
+        "answer_count": 2,
+        "title": "java.lang.NullPointerException: Attempt to invoke virtual method &#39;ActionBar.setNavigationMode(int)&#39; on a null object reference",
+        "body": "<p>I am getting this error at runtime.<\/p>\n\n<pre><code>java.lang.NullPointerException: Attempt to invoke virtual method 'void android.support.v7.app.ActionBar.setNavigationMode(int)' on a null object reference\n<\/code><\/pre>\n\n<p><b>Main Activity.java<\/b><\/p>\n\n<pre><code>    public class MainActivity &lt;T extends Fragment&gt; extends ActionBarActivity implements ListView.OnItemClickListener\n    {  \n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_main);\n\n    ActionBar actionBar = getSupportActionBar();\n\n    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);\n    actionBar.setDisplayShowTitleEnabled(false);\n\n    ActionBar.Tab tab;\n    tab = actionBar.newTab()\n            .setText(\"Categories\")\n            .setTabListener(new TabListener&lt;CategoriesFragment&gt;(\n                    this, \"Categories\", CategoriesFragment.class));\n    actionBar.addTab(tab);\n\n    tab = actionBar.newTab()\n            .setText(\"Acceuil\")\n            .setTabListener(new TabListener&lt;AcceuilFragment&gt;(\n                    this, \"Acceuil\", AcceuilFragment.class));\n    actionBar.addTab(tab);\n    tab = actionBar.newTab()\n            .setText(\"Topics\")\n            .setTabListener(new TabListener&lt;TopicsFragment&gt;(\n                    this, \"Topics\", TopicsFragment.class));\n    actionBar.addTab(tab);\n\n    tab = actionBar.newTab()\n            .setText(\"Tendances\")\n            .setTabListener(new TabListener&lt;TendancesFragment&gt;(\n                    this, \"Tendances\", TendancesFragment.class));\n    actionBar.addTab(tab);\n\n    setRef();\n\n    //Set the custom toolbar\n    if (toolbar != null)\n    {\n        toolbar.setTitle(R.string.app_name);\n        setSupportActionBar(toolbar);\n    }\n\n    drawerToggle = new ActionBarDrawerToggle(\n            this,\n            drawerLayout,\n            toolbar,\n            R.string.open,\n            R.string.close\n    )\n\n    {\n        public void onDrawerClosed(View view)\n        {\n            Log.d(\"MainActivity\", \"OnDrawerClosed\");\n            super.onDrawerClosed(view);\n            invalidateOptionsMenu();\n        }\n\n        public void onDrawerOpened(View drawerView)\n        {\n            Log.d(\"MainActivity\", \"OnDrawerOpened\");\n            super.onDrawerOpened(drawerView);\n            invalidateOptionsMenu();\n        }\n    };\n\n    drawerLayout.setDrawerListener(drawerToggle);\n\n    getSupportActionBar().setDisplayHomeAsUpEnabled(true);\n\n    // use this setting to improve performance if you know that changes\n    // in content do not change the layout size of the RecyclerView\n    mRecyclerView.setHasFixedSize(true);\n\n    // use a linear layout manager\n    mLayoutManager = new LinearLayoutManager(this);\n    mRecyclerView.setLayoutManager(mLayoutManager);\n    mRecyclerView.setItemAnimator(new DefaultItemAnimator());\n\n    // specify an adapter (see also next example)\n    mAdapter = new MyAdapter(myDataset);\n    mRecyclerView.setAdapter(mAdapter);\n\n\n}\n\n@Override\nprotected void onPostCreate(Bundle savedInstanceState) {\n    super.onPostCreate(savedInstanceState);\n    drawerToggle.syncState();\n}\n\nprivate void setRef()\n{\n    // create reference to the xml views\n    mRecyclerView = (android.support.v7.widget.RecyclerView) findViewById(R.id.my_recycler_view);\n    fab = (Button) findViewById(R.id.addButton);\n    drawerLayout = (android.support.v4.widget.DrawerLayout) findViewById(R.id.drawer_layout);\n    drawerLayout.setStatusBarBackground(R.color.primarydark);\n\n    toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);\n    leftDrawerList = (ListView) findViewById(R.id.list_drawer);\n\n    View list_header = getLayoutInflater().inflate(R.layout.drawerlist_header, null);\n    leftDrawerList.addHeaderView(list_header);\n    navigationDrawerAdapter = new ArrayAdapter&lt;String&gt;(MainActivity.this, android.R.layout.simple_expandable_list_item_1, leftSliderData);\n    leftDrawerList.setAdapter(navigationDrawerAdapter);\n    leftDrawerList.setOnItemClickListener(this);\n}\n\n@Override\npublic void onItemClick(AdapterView&lt;?&gt; parent, View view, int position, long id)\n{\n    Toast.makeText(getApplicationContext(), \"Clicked on \" + leftSliderData[position - 1], Toast.LENGTH_LONG).show();\n}\n\npublic void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {\n    // Check if the fragment is already initialized\n    if (mFragment == null) {\n        // If not, instantiate and add it to the activity\n        mFragment = Fragment.instantiate(mActivity, mClass.getName());\n        ft.add(android.R.id.content, mFragment, mTag);\n    } else {\n        // If it exists, simply attach it in order to show it\n        ft.attach(mFragment);\n    }\n}\n\npublic void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {\n    if (mFragment != null) {\n        // Detach the fragment, because another one is being attached\n        ft.detach(mFragment);\n    }\n}\n\npublic void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {\n    // User selected the already selected tab. Usually do nothing.\n    }\n}\n<\/code><\/pre>\n\n<p><b>activity_main.xml<\/b><\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;android.support.v4.widget.DrawerLayout\nxmlns:android=\"http://schemas.android.com/apk/res/android\"\nxmlns:tools=\"http://schemas.android.com/tools\"\nxmlns:app=\"http://schemas.android.com/apk/res-auto\"\nandroid:id=\"@+id/drawer_layout\"\nandroid:layout_width=\"match_parent\"\nandroid:layout_height=\"match_parent\"\nandroid:fitsSystemWindows=\"true\"\ntools:context=\".MainActivity\"&gt;\n\n&lt;!-- Setting this one to true makes the status bar\n    to have a non-transparent shitty background --&gt;\n\n&lt;!--\n     As the main content view, the view below consumes the entire\n     space available using match_parent in both dimensions.\n--&gt;\n\n&lt;FrameLayout\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    android:fitsSystemWindows=\"false\"&gt;\n\n    &lt;include layout=\"@layout/actionbarlayout\"&gt;&lt;/include&gt;\n\n    &lt;include layout=\"@layout/content_view\"&gt;&lt;/include&gt;\n\n    &lt;Button\n        android:id=\"@+id/addButton\"\n        android:text=\"+\"\n        android:textSize=\"25sp\"\n        android:textColor=\"@android:color/white\"\n        android:textAlignment=\"center\"\n        android:layout_marginRight=\"15dp\"\n        android:layout_marginBottom=\"15dp\"\n        android:background=\"@drawable/circlebtn\"\n        android:layout_width=\"56dp\"\n        android:layout_height=\"56dp\"\n        android:stateListAnimator=\"@animator/anim\"\n        android:elevation=\"4dp\"\n        style=\"?android:buttonStyleSmall\"\n        android:layout_gravity=\"right|bottom\" &gt;\n    &lt;/Button&gt;\n\n&lt;/FrameLayout&gt;\n\n&lt;com.androprogrammer.test.materialapp1.ScrimInsetsFrameLayout\n    android:id=\"@+id/container\"\n    android:layout_width=\"wrap_content\"\n    android:layout_height=\"match_parent\"\n    android:fitsSystemWindows=\"true\"\n    android:elevation=\"8dp\"\n    android:layout_gravity=\"start\"\n    app:insetForeground=\"#4000\"&gt;\n\n    &lt;ListView\n        android:id=\"@+id/list_drawer\"\n        android:layout_width=\"@dimen/drawer_width\"\n        android:layout_height=\"match_parent\"\n        android:choiceMode=\"singleChoice\"\n        android:background=\"@android:color/white\"\n        android:fitsSystemWindows=\"true\"&gt;\n    &lt;/ListView&gt;\n\n&lt;/com.androprogrammer.test.materialapp1.ScrimInsetsFrameLayout&gt;\n&lt;/android.support.v4.widget.DrawerLayout&gt;\n<\/code><\/pre>\n\n<p><b>values/styles.xml<\/b><\/p>\n\n<pre><code>&lt;resources&gt;\n\n&lt;!-- Base application theme. --&gt;\n&lt;style name=\"AppTheme\" parent=\"AppTheme.Base\"/&gt;\n\n&lt;style name=\"AppTheme.Base\" parent=\"Theme.AppCompat.Light\"&gt;\n    &lt;item name=\"colorPrimary\"&gt;@color/primary&lt;/item&gt;\n    &lt;item name=\"colorPrimaryDark\"&gt;@color/primarydark&lt;/item&gt;\n    &lt;item name=\"colorAccent\"&gt;@color/primary&lt;/item&gt;\n    &lt;item name=\"colorControlHighlight\"&gt;@color/primary&lt;/item&gt;\n    &lt;item name=\"android:windowNoTitle\"&gt;true&lt;/item&gt;\n    &lt;item name=\"windowActionBar\"&gt;false&lt;/item&gt;\n    &lt;item name=\"drawerArrowStyle\"&gt;@style/DrawerArrowStyle&lt;/item&gt;\n    &lt;item name=\"windowActionModeOverlay\"&gt;true&lt;/item&gt;\n\n&lt;/style&gt;\n\n&lt;style name=\"DrawerArrowStyle\" parent=\"Widget.AppCompat.DrawerArrowToggle\"&gt;\n    &lt;item name=\"spinBars\"&gt;true&lt;/item&gt;\n    &lt;item name=\"color\"&gt;@android:color/white&lt;/item&gt;\n&lt;/style&gt;\n&lt;/resources&gt;\n<\/code><\/pre>\n\n<p><b>v21/styles.xml<\/b><\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;resources&gt;\n&lt;style name=\"AppTheme\" parent=\"AppTheme.Base\"&gt;\n    &lt;item name=\"android:windowDrawsSystemBarBackgrounds\"&gt;true&lt;/item&gt;\n    &lt;item name=\"android:statusBarColor\"&gt;@android:color/transparent&lt;/item&gt;\n    &lt;item name=\"android:windowContentTransitions\"&gt;true&lt;/item&gt;\n    &lt;item name=\"android:windowAllowEnterTransitionOverlap\"&gt;true&lt;/item&gt;\n    &lt;item name=\"android:windowAllowReturnTransitionOverlap\"&gt;true&lt;/item&gt;\n    &lt;item name=\"android:windowSharedElementEnterTransition\"&gt;@android:transition/move&lt;/item&gt;\n    &lt;item name=\"android:windowSharedElementExitTransition\"&gt;@android:transition/move&lt;/item&gt;\n\n&lt;/style&gt;\n&lt;/resources&gt;\n<\/code><\/pre>\n\n<p><b>AndroidManifest.xml<\/b><\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\npackage=\"com.androprogrammer.test.materialapp1\" &gt;\n\n&lt;application\n    android:allowBackup=\"true\"\n    android:icon=\"@drawable/ic_launcher\"\n    android:label=\"@string/app_name\"\n    android:theme=\"@style/AppTheme\" &gt;\n    &lt;activity\n        android:name=\".MainActivity\"\n        android:label=\"@string/app_name\" &gt;\n        &lt;intent-filter&gt;\n            &lt;action android:name=\"android.intent.action.MAIN\" /&gt;\n\n            &lt;category android:name=\"android.intent.category.LAUNCHER\" /&gt;\n        &lt;/intent-filter&gt;\n    &lt;/activity&gt;\n&lt;/application&gt;\n\n&lt;/manifest&gt;\n<\/code><\/pre>\n\n<p>Help Please :)<\/p>\n",
+        "question_id": 30625128,
+        "tags": [
+            "java",
+            "android",
+            "xml",
+            "nullpointerexception",
+            "navigation-drawer"
+        ],
+        "score": 4,
+        "is_answered": true,
+        "view_count": 6865,
+        "last_edit_date": 1433347569
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a6e46ff26e8efb428f34743a7947f6fd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4908319,
+                "user_type": "registered",
+                "user_id": 3954374,
+                "link": "https://stackoverflow.com/users/3954374/bigbill91",
+                "reputation": 49,
+                "display_name": "BigBill91"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30625128,
+            "edited": false,
+            "creation_date": 1433366284,
+            "comment_id": 49327420
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Un4Se.jpg?s=256",
+                "account_id": 1714173,
+                "user_type": "registered",
+                "user_id": 1974671,
+                "link": "https://stackoverflow.com/users/1974671/d0nut",
+                "reputation": 2836,
+                "display_name": "d0nut"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30625128,
+            "edited": false,
+            "creation_date": 1433351555,
+            "comment_id": 49318916
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a6e46ff26e8efb428f34743a7947f6fd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4908319,
+                "user_type": "registered",
+                "user_id": 3954374,
+                "link": "https://stackoverflow.com/users/3954374/bigbill91",
+                "reputation": 49,
+                "display_name": "BigBill91"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30625128,
+            "edited": false,
+            "creation_date": 1433347705,
+            "comment_id": 49316620
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/i4SzF.jpg?s=256",
+                "account_id": 3131299,
+                "user_type": "registered",
+                "user_id": 2649012,
+                "link": "https://stackoverflow.com/users/2649012/phant%c3%b4maxx",
+                "reputation": 38136,
+                "display_name": "Phant&#244;maxx",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30625128,
+            "edited": false,
+            "creation_date": 1433347576,
+            "comment_id": 49316550
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a6e46ff26e8efb428f34743a7947f6fd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4908319,
+                "user_type": "registered",
+                "user_id": 3954374,
+                "link": "https://stackoverflow.com/users/3954374/bigbill91",
+                "reputation": 49,
+                "display_name": "BigBill91"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30625128,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/njYjc.jpg?s=256",
+                "account_id": 401234,
+                "user_type": "registered",
+                "user_id": 767676,
+                "link": "https://stackoverflow.com/users/767676/acapulco",
+                "reputation": 3553,
+                "display_name": "Acapulco",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1433347519,
+            "comment_id": 49316520
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/njYjc.jpg?s=256",
+                "account_id": 401234,
+                "user_type": "registered",
+                "user_id": 767676,
+                "link": "https://stackoverflow.com/users/767676/acapulco",
+                "reputation": 3553,
+                "display_name": "Acapulco",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30625128,
+            "edited": false,
+            "creation_date": 1433347328,
+            "comment_id": 49316385
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/390398a10d3d090c99b0abae39159b56?s=256&d=identicon&r=PG",
+                "account_id": 3127704,
+                "user_type": "registered",
+                "user_id": 2646261,
+                "link": "https://stackoverflow.com/users/2646261/heloisasim",
+                "reputation": 5026,
+                "display_name": "heloisasim",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1433348600,
+            "creation_date": 1433348600,
+            "body": "<p>Try to change the parent style<\/p>\n\n<pre><code>&lt;style name=\"AppTheme\" parent=\"Theme.AppCompat.Light.DarkActionBar\"&gt;\n<\/code><\/pre>\n\n<p>and <code>ActionBarActivity<\/code> is deprecated, you should use <code>AppCompatActivity<\/code>  <\/p>\n",
+            "answer_id": 30625640,
+            "question_id": 30625128
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Un4Se.jpg?s=256",
+                "account_id": 1714173,
+                "user_type": "registered",
+                "user_id": 1974671,
+                "link": "https://stackoverflow.com/users/1974671/d0nut",
+                "reputation": 2836,
+                "display_name": "d0nut"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1433348676,
+            "creation_date": 1433348676,
+            "body": "<p>In your style.xml you have to have the actionbar enabled. If the actionbar is disabled (set to false) then it will not be added in to the activity at runtime (ie <code>getActionBar()<\/code> returns <code>null<\/code>).<\/p>\n",
+            "answer_id": 30625656,
+            "question_id": 30625128
+        }
+    ],
+    "answer_comments": {"30625656": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a6e46ff26e8efb428f34743a7947f6fd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4908319,
+            "user_type": "registered",
+            "user_id": 3954374,
+            "link": "https://stackoverflow.com/users/3954374/bigbill91",
+            "reputation": 49,
+            "display_name": "BigBill91"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 30625656,
+        "edited": false,
+        "creation_date": 1433349226,
+        "comment_id": 49317525
+    }]}
+}

@@ -1,0 +1,160 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6300eae443acb2db31278bbd1107e328?s=256&d=identicon&r=PG",
+            "account_id": 1141737,
+            "user_type": "registered",
+            "user_id": 1125433,
+            "link": "https://stackoverflow.com/users/1125433/mynameismarcin",
+            "reputation": 117,
+            "display_name": "mynameismarcin",
+            "accept_rate": 88
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/40642576/spring-object-is-not-an-instance-of-declaring-class",
+        "last_activity_date": 1480116528,
+        "creation_date": 1479331313,
+        "answer_count": 0,
+        "title": "Spring: object is not an instance of declaring class",
+        "body": "<p>i wrote simple Spring app\nwith config in xml:<\/p>\n\n<pre><code>  &lt;bean id=\"flyingDelegate\" class=\"pl.marcindebski.spring.aspects.LowFlyingKnight\"&gt;&lt;/bean&gt;\n\n  &lt;aop:config&gt;\n    &lt;aop:aspect ref=\"usageTracking\"&gt;\n        &lt;aop:declare-parents\n            types-matching=\"pl.marcindebski.spring.aspects.Knight+\"\n            implement-interface=\"pl.marcindebski.spring.aspects.FlyingKnight\"\n            delegate-ref=\"flyingDelegate\"\n            /&gt;\n    &lt;/aop:aspect&gt;\n  &lt;/aop:config&gt;\n<\/code><\/pre>\n\n<p>and when i run app with code:<\/p>\n\n<pre><code>    Knight knight = context.getBean(Knight.class);\n\n    if (knight instanceof FlyingKnight)\n    {\n        FlyingKnight flyingKnight =(FlyingKnight)knight;                                                \n        flyingKnight.fly();\n    }\n\ncontext.close();\n<\/code><\/pre>\n\n<p>on the line with <code>flyingKnight.fly();<\/code>  i got:<\/p>\n\n<pre><code>Exception in thread \"main\" org.springframework.aop.AopInvocationException: AOP configuration seems to be invalid: tried calling method [public abstract void pl.marcindebski.spring.aspects.FlyingKnight.fly()] on target [pl.marcindebski.spring.aspects.BraveKnight@5e82df6a]; nested exception is java.lang.IllegalArgumentException: object is not an instance of declaring class\n<\/code><\/pre>\n\n<p>QUESTIONS:<\/p>\n\n<p>1)the class <code>LowFlyingKnight<\/code> implements <code>fly()<\/code> method from <code>FlyingKnight<\/code> interface. Why the Spring consider <code>Knight<\/code> is <code>FlyingKnight<\/code> (<code>knight instanceof FlyingKnight<\/code>) is true, but it's fail on calling <code>fly()<\/code> method.<\/p>\n\n<p>2) the class BraveKnight is an implementation of Knight interface, so why <code>knight instanceof BraveKnight<\/code> is false, but <code>knight.embarkOnQuest<\/code> execute implementation from BraveKnight<\/p>\n\n<hr>\n\n<p>main class -> App.java<\/p>\n\n<pre><code>package pl.marcindebski.spring.aspects;\n\nimport org.springframework.context.support.FileSystemXmlApplicationContext;\n\npublic class App {\n\n    public static void main(String[] args) throws Exception {\n        FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext(\n                new String[] {\n                        \"E:/dev/eclipse-workspaces/1-aspects/flying.xml\",\n                        \"E:/dev/eclipse-workspaces/1-aspects/minstrel.xml\" });\n\n        Knight braveKnight = context.getBean(Knight.class);\n        if (braveKnight instanceof BraveKnight) { // FALSE!\n            braveKnight.embarkOnQuest();\n        }\n\n        braveKnight.embarkOnQuest(); // Working!\n\n        if (braveKnight instanceof FlyingKnight) // true\n        {\n            FlyingKnight flyingKnight = (FlyingKnight) braveKnight;\n            flyingKnight.fly();// why its not working ?\n        }\n\n        context.close();\n    }\n\n}\n<\/code><\/pre>\n\n<p>aspects:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\n  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  xmlns:aop=\"http://www.springframework.org/schema/aop\"\n  xsi:schemaLocation=\"http://www.springframework.org/schema/aop \n      http://www.springframework.org/schema/aop/spring-aop.xsd\n        http://www.springframework.org/schema/beans \n      http://www.springframework.org/schema/beans/spring-beans.xsd\"&gt;\n\n\n  &lt;bean id=\"flyingDelegate\" class=\"pl.marcindebski.spring.aspects.LowFlyingKnight\"&gt;&lt;/bean&gt;\n\n  &lt;aop:config&gt;\n    &lt;aop:aspect&gt;\n        &lt;aop:declare-parents\n            types-matching=\"pl.marcindebski.spring.aspects.Knight+\"\n            implement-interface=\"pl.marcindebski.spring.aspects.FlyingKnight\"\n            delegate-ref=\"flyingDelegate\"\n            /&gt;\n    &lt;/aop:aspect&gt;\n  &lt;/aop:config&gt;\n\n&lt;/beans&gt;\n<\/code><\/pre>\n\n<p>beans definitions:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;beans xmlns=\"http://www.springframework.org/schema/beans\"\n  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  xmlns:aop=\"http://www.springframework.org/schema/aop\"\n  xsi:schemaLocation=\"http://www.springframework.org/schema/aop \n      http://www.springframework.org/schema/aop/spring-aop.xsd\n        http://www.springframework.org/schema/beans \n      http://www.springframework.org/schema/beans/spring-beans.xsd\"&gt;\n\n  &lt;bean id=\"knight\" class=\"pl.marcindebski.spring.aspects.BraveKnight\"&gt;\n    &lt;constructor-arg ref=\"quest\" /&gt;\n  &lt;/bean&gt;\n\n  &lt;bean id=\"quest\" class=\"pl.marcindebski.spring.aspects.SlayDragonQuest\"&gt;\n    &lt;constructor-arg value=\"#{T(System).out}\" /&gt;\n  &lt;/bean&gt;\n\n  &lt;bean id=\"minstrel\" class=\"pl.marcindebski.spring.aspects.Minstrel\"&gt;\n    &lt;constructor-arg value=\"#{T(System).out}\" /&gt;\n  &lt;/bean&gt;\n\n  &lt;aop:config&gt;\n    &lt;aop:aspect ref=\"minstrel\"&gt;\n      &lt;aop:pointcut id=\"embark\"\n          expression=\"execution(* *.embarkOnQuest(..))\"/&gt;\n\n      &lt;aop:before pointcut-ref=\"embark\" \n          method=\"singBeforeQuest\"/&gt;\n\n      &lt;aop:after pointcut-ref=\"embark\" \n          method=\"singAfterQuest\"/&gt;\n    &lt;/aop:aspect&gt;\n  &lt;/aop:config&gt;\n\n&lt;/beans&gt;\n<\/code><\/pre>\n",
+        "question_id": 40642576,
+        "tags": [
+            "java",
+            "spring",
+            "aop",
+            "spring-aop"
+        ],
+        "score": 2,
+        "is_answered": false,
+        "view_count": 1337,
+        "last_edit_date": 1480116528
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6300eae443acb2db31278bbd1107e328?s=256&d=identicon&r=PG",
+                "account_id": 1141737,
+                "user_type": "registered",
+                "user_id": 1125433,
+                "link": "https://stackoverflow.com/users/1125433/mynameismarcin",
+                "reputation": 117,
+                "display_name": "mynameismarcin",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642576,
+            "edited": false,
+            "creation_date": 1479406921,
+            "comment_id": 68555622
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/9aUPX.png?s=256",
+                "account_id": 178596,
+                "user_type": "registered",
+                "user_id": 410677,
+                "link": "https://stackoverflow.com/users/410677/kuhajeyan",
+                "reputation": 11107,
+                "display_name": "kuhajeyan",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642576,
+            "edited": false,
+            "creation_date": 1479371746,
+            "comment_id": 68531505
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6300eae443acb2db31278bbd1107e328?s=256&d=identicon&r=PG",
+                "account_id": 1141737,
+                "user_type": "registered",
+                "user_id": 1125433,
+                "link": "https://stackoverflow.com/users/1125433/mynameismarcin",
+                "reputation": 117,
+                "display_name": "mynameismarcin",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642576,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/5iJz9.png?s=256",
+                "account_id": 3540948,
+                "user_type": "registered",
+                "user_id": 2958086,
+                "link": "https://stackoverflow.com/users/2958086/compass",
+                "reputation": 5957,
+                "display_name": "Compass"
+            },
+            "edited": false,
+            "creation_date": 1479332630,
+            "comment_id": 68517804
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/5iJz9.png?s=256",
+                "account_id": 3540948,
+                "user_type": "registered",
+                "user_id": 2958086,
+                "link": "https://stackoverflow.com/users/2958086/compass",
+                "reputation": 5957,
+                "display_name": "Compass"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642576,
+            "edited": false,
+            "creation_date": 1479332263,
+            "comment_id": 68517647
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6300eae443acb2db31278bbd1107e328?s=256&d=identicon&r=PG",
+                "account_id": 1141737,
+                "user_type": "registered",
+                "user_id": 1125433,
+                "link": "https://stackoverflow.com/users/1125433/mynameismarcin",
+                "reputation": 117,
+                "display_name": "mynameismarcin",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642576,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/5iJz9.png?s=256",
+                "account_id": 3540948,
+                "user_type": "registered",
+                "user_id": 2958086,
+                "link": "https://stackoverflow.com/users/2958086/compass",
+                "reputation": 5957,
+                "display_name": "Compass"
+            },
+            "edited": false,
+            "creation_date": 1479332111,
+            "comment_id": 68517569
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/5iJz9.png?s=256",
+                "account_id": 3540948,
+                "user_type": "registered",
+                "user_id": 2958086,
+                "link": "https://stackoverflow.com/users/2958086/compass",
+                "reputation": 5957,
+                "display_name": "Compass"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 40642576,
+            "edited": false,
+            "creation_date": 1479331875,
+            "comment_id": 68517445
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

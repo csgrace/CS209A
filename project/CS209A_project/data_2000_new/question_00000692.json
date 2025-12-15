@@ -1,0 +1,253 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4baf166c23c0e4dde05a2fe3e9b467c8?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6316374,
+            "user_type": "registered",
+            "user_id": 4906173,
+            "link": "https://stackoverflow.com/users/4906173/cruxion-effux",
+            "reputation": 1054,
+            "display_name": "cruxion effux",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/30936056/how-to-keep-data-with-each-channel-on-nio-server",
+        "last_activity_date": 1434725860,
+        "creation_date": 1434710226,
+        "answer_count": 2,
+        "title": "How to keep data with each channel on NIO Server",
+        "body": "<p>I have a Java NIO server which receives data from clients.<\/p>\n\n<p>When a channel is ready for read i.e <code>key.isReadable()<\/code> return true <code>read(key)<\/code> is called to read data.<\/p>\n\n<p>Currently I am using a single read buffer for all channels and in <code>read()<\/code> method , I clear the buffer and read into it and then finally put into a byte array , supposing that I will get all data in one shot. <\/p>\n\n<p>But let's say I do not get complete data in one shot(I have special characters at data ending to detect).<\/p>\n\n<p><strong>Problem :<\/strong><\/p>\n\n<p>So now how to keep this partial data with channel or how to deal with partial read problem ? or globally ?<\/p>\n\n<p>I read somewhere attachments are not good.<\/p>\n",
+        "question_id": 30936056,
+        "tags": [
+            "java",
+            "nio"
+        ],
+        "score": 4,
+        "accepted_answer_id": 30936591,
+        "is_answered": true,
+        "view_count": 1475
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2da13c01f1e4e8c4a13615b6e0a3b760?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4092618,
+                "user_type": "registered",
+                "user_id": 3360241,
+                "link": "https://stackoverflow.com/users/3360241/john",
+                "reputation": 5317,
+                "display_name": "John",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 30936056,
+            "edited": false,
+            "creation_date": 1434714350,
+            "comment_id": 49909406
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6f118f710d3077f91c0c0d722f7be0a3?s=256&d=identicon&r=PG",
+                "account_id": 17750,
+                "user_type": "registered",
+                "user_id": 40064,
+                "link": "https://stackoverflow.com/users/40064/wim-deblauwe",
+                "reputation": 27240,
+                "display_name": "Wim Deblauwe",
+                "accept_rate": 69
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 30936056,
+            "edited": false,
+            "creation_date": 1434713539,
+            "comment_id": 49908887
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2da13c01f1e4e8c4a13615b6e0a3b760?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4092618,
+                "user_type": "registered",
+                "user_id": 3360241,
+                "link": "https://stackoverflow.com/users/3360241/john",
+                "reputation": 5317,
+                "display_name": "John",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 30936056,
+            "edited": false,
+            "creation_date": 1434710417,
+            "comment_id": 49906936
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2da13c01f1e4e8c4a13615b6e0a3b760?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4092618,
+                "user_type": "registered",
+                "user_id": 3360241,
+                "link": "https://stackoverflow.com/users/3360241/john",
+                "reputation": 5317,
+                "display_name": "John",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 7,
+            "is_accepted": true,
+            "last_activity_date": 1434725860,
+            "creation_date": 1434711929,
+            "body": "<p>Take a look at the Reactor pattern. Here is a link to basic implementation by professor Doug Lea:<\/p>\n\n<p><a href=\"http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf\" rel=\"nofollow\">http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf<\/a><\/p>\n\n<p>The idea is to have single reactor thread which blocks on Selector call. Once there are IO events ready, reactor thread dispatches the events to appropriate handlers. \nIn pdf above, there is inner class Acceptor within Reactor which accepts new connections. <\/p>\n\n<p>Author uses single handler for read and write events and maintains state of this handler. I prefer to have separate handlers for reads and writes but this is not as easy to work with as with 'state machine'. There can be only one Attachment per event, so some kind of injection is needed to switch read/write handlers.<\/p>\n\n<p>To maintain state between subsequent read/writes you will have to do couple of things:<\/p>\n\n<ul>\n<li>Introduce custom protocol which tells you when the message is fully read<\/li>\n<li>Have timeout or cleanup mechanism for stale connections<\/li>\n<li>Maintain client specific sessions<\/li>\n<\/ul>\n\n<p>So, you can do something like this:<\/p>\n\n<pre><code>public class Reactor implements Runnable{\n\n    Selector selector = Selector.open();\n\n    ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();\n\n    public Reactor(int port) throws IOException {\n\n        serverSocketChannel.socket().bind(new InetSocketAddress(port));\n\n        serverSocketChannel.configureBlocking(false);\n\n        // let Reactor handle new connection events\n        registerAcceptor();\n\n    }\n\n    /**\n     * Registers Acceptor as handler for new client connections.\n     * \n     * @throws ClosedChannelException\n     */\n    private void registerAcceptor() throws ClosedChannelException {\n\n\n        SelectionKey selectionKey0 = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);\n\n        selectionKey0.attach(new Acceptor());\n    }\n\n    @Override\n    public void run(){\n\n        while(!Thread.interrupted()){\n\n            startReactorLoop();\n\n        }\n\n    }\n\n    private void startReactorLoop() {\n\n        try {\n\n            // wait for new events for each registered or new clients\n            selector.select();\n\n            // get selection keys for pending events\n            Set&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys();\n\n            Iterator&lt;SelectionKey&gt; selectedKeysIterator = selectedKeys.iterator();\n\n            while (selectedKeysIterator.hasNext()) {\n\n                // dispatch even to handler for the given key\n                dispatch(selectedKeysIterator.next());\n\n                // remove dispatched key from the collection\n                selectedKeysIterator.remove();\n            }\n\n        } catch (IOException e) {\n            // TODO add handling of this exception\n            e.printStackTrace();\n        }\n    }\n\n    private void dispatch(SelectionKey interestedEvent) {\n\n        if (interestedEvent.attachment() != null) {\n\n            EventHandler handler = (EventHandler) interestedEvent.attachment();\n\n            handler.processEvent();\n        }\n\n    }\n\n    private class Acceptor implements EventHandler {\n\n        @Override\n        public void processEvent() {\n\n            try {\n\n                SocketChannel clientConnection = serverSocketChannel.accept();\n\n                if (clientConnection != null) {\n\n                    registerChannel(clientConnection);\n\n                }\n\n            } catch (IOException e) {e.printStackTrace();}\n\n        }\n    /**\n     *  Save Channel - key association - in Map perhaps.\n     * This is required for subsequent/partial reads/writes\n     */\n    private void registerChannel(SocketChannel clientChannel) {\n\n\n        // notify injection mechanism of new connection (so it can activate Read Handler)\n}\n<\/code><\/pre>\n\n<p>Once read event is handled, notify injection mechanism that write handler can be injected.<\/p>\n\n<p>New instances of read and write handlers are created by the injection mechanism once, when new Connection is available. This injection mechanism switches handlers as needed. Lookup of handlers for each Channel is done from the Map that is filled at the connection Acceptance by the method `registerChannel().<\/p>\n\n<p>Read and write handlers have <code>ByteBuffer<\/code> instances, and since each Socket Channel has its own pair of handlers, you can now maintain state between partial reads and writes.<\/p>\n\n<p>Two tips to improve performance:<\/p>\n\n<ul>\n<li><p>Try to do first read immediately when connection is accepted. Only if you don't read enough data as defined by header in your custom protocol, register Channel interest for read events.<\/p><\/li>\n<li><p>Try to do write first without registering interest for write events and only if you don't write all the data, register interest for \nwrite.<\/p><\/li>\n<\/ul>\n\n<p>This will reduce number of Selector wakeups.<\/p>\n\n<p>Something like this:<\/p>\n\n<pre><code>SocketChannel socketChannel;\n\nbyte[] outData;\n\nfinal static int MAX_OUTPUT = 1024;\n\nByteBuffer output = ByteBuffer.allocate(MAX_OUTPUT);\n\n// if message was not written fully\nif (socketChannel.write(output) &lt; messageSize()) {\n\n// register interest for write event\nSelectionKey selectionKey = socketChannel.register(selector, SelectionKey.OP_WRITE); \n        selectionKey.attach(writeHandler);\n        selector.wakeup();\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>Finally, there should be timed Task which checks if Connections are still alive/SelectionKeys are canceled. If client breaks TCP connection, server will usually not know of this. As a result, there will be number of Event handlers in memory, bind as Attachments to stale connections which will result with memory leak.<\/p>\n\n<p>This is the reason why you may say Attachments are not good, but the issue can be dealt with.<\/p>\n\n<p>To deal with this here are two simple ways:<\/p>\n\n<ul>\n<li><p>TCP keep alive could be enabled<\/p><\/li>\n<li><p>periodic task could check timestamp of last activity on the given Channel. If it is idle for to long, server should terminate connection.<\/p><\/li>\n<\/ul>\n",
+            "answer_id": 30936591,
+            "question_id": 30936056,
+            "last_edit_date": 1434725860
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                "account_id": 71739,
+                "user_type": "registered",
+                "user_id": 207421,
+                "link": "https://stackoverflow.com/users/207421/user207421",
+                "reputation": 311890,
+                "display_name": "user207421",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1434720466,
+            "creation_date": 1434720466,
+            "body": "<p>There's an ancient and very inaccurate NIO blog from someone at Amazon  where it is wrongly asserted that key attachments are memory leaks. Complete and utter BS. Not even logical. This is also the one where he asserts you need all kinds of supplementary queues. Never had to do that yet, in about 13 years of NIO.<\/p>\n\n<p>What you need is a <code>ByteBuffer<\/code> <em>per channel,<\/em> or possibly two, one for read and one for write. You can store a single one as the attachment itself: if you want two, or have other data to store, you need to define yourself a <code>Session<\/code> class that contains both buffers and whatever else you want to associate with the channel, for example client credentials, and use the <code>Session<\/code> object as the attachment.<\/p>\n\n<p>You really can't get very far in NIO with a single buffer for all channels.<\/p>\n",
+            "answer_id": 30939396,
+            "question_id": 30936056
+        }
+    ],
+    "answer_comments": {
+        "30939396": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/82e49fdd83e8bd64be25c93737523150?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4655265,
+                    "user_type": "registered",
+                    "user_id": 3771015,
+                    "link": "https://stackoverflow.com/users/3771015/crakama",
+                    "reputation": 845,
+                    "display_name": "crakama",
+                    "accept_rate": 25
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30939396,
+                "edited": false,
+                "creation_date": 1517727682,
+                "comment_id": 84207513
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4baf166c23c0e4dde05a2fe3e9b467c8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 6316374,
+                    "user_type": "registered",
+                    "user_id": 4906173,
+                    "link": "https://stackoverflow.com/users/4906173/cruxion-effux",
+                    "reputation": 1054,
+                    "display_name": "cruxion effux",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30939396,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/5072aae6b80c67293a9745a942964c7a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4217241,
+                    "user_type": "registered",
+                    "user_id": 3453041,
+                    "link": "https://stackoverflow.com/users/3453041/water",
+                    "reputation": 3815,
+                    "display_name": "Water",
+                    "accept_rate": 93
+                },
+                "edited": false,
+                "creation_date": 1434954278,
+                "comment_id": 49977712
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5072aae6b80c67293a9745a942964c7a?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4217241,
+                    "user_type": "registered",
+                    "user_id": 3453041,
+                    "link": "https://stackoverflow.com/users/3453041/water",
+                    "reputation": 3815,
+                    "display_name": "Water",
+                    "accept_rate": 93
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30939396,
+                "edited": false,
+                "creation_date": 1434942766,
+                "comment_id": 49974634
+            }
+        ],
+        "30936591": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/2da13c01f1e4e8c4a13615b6e0a3b760?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 4092618,
+                    "user_type": "registered",
+                    "user_id": 3360241,
+                    "link": "https://stackoverflow.com/users/3360241/john",
+                    "reputation": 5317,
+                    "display_name": "John",
+                    "accept_rate": 91
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30936591,
+                "edited": false,
+                "creation_date": 1463470642,
+                "comment_id": 62065786
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/5cfe5f7d64f44be04f147295f5c7b88e?s=256&d=identicon&r=PG",
+                    "account_id": 71739,
+                    "user_type": "registered",
+                    "user_id": 207421,
+                    "link": "https://stackoverflow.com/users/207421/user207421",
+                    "reputation": 311890,
+                    "display_name": "user207421",
+                    "accept_rate": 82
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30936591,
+                "edited": false,
+                "creation_date": 1463426776,
+                "comment_id": 62050056
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/4baf166c23c0e4dde05a2fe3e9b467c8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 6316374,
+                    "user_type": "registered",
+                    "user_id": 4906173,
+                    "link": "https://stackoverflow.com/users/4906173/cruxion-effux",
+                    "reputation": 1054,
+                    "display_name": "cruxion effux",
+                    "accept_rate": 60
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 30936591,
+                "edited": false,
+                "creation_date": 1434955860,
+                "comment_id": 49978442
+            }
+        ]
+    }
+}

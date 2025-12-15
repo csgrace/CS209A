@@ -1,0 +1,179 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user1736248"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/26532275/hibernate-how-to-correctly-delete-children-in-onetomany",
+        "last_activity_date": 1414146840,
+        "creation_date": 1414079960,
+        "answer_count": 2,
+        "title": "Hibernate How to correctly delete children in @OneToMany?",
+        "body": "<p>I have a very simple unidirectional @OneToMany from a Parent object to a List of children with CascadeType.ALL. How would I correctly remove and delete one of the children?<\/p>\n\n<p>Simply calling remove(child) on the List and then session.saveOrUpdate(parent) of course does not work and the child is not deleted in the database unless I specify orphan removal.<\/p>\n\n<p>As an alternative to orphan removal, would it be correct if I session.delete(child) to delete it in the DB, then remove(child) from the List and do I then have to session.refresh(parent) so my parent object in memory has the right state?<\/p>\n\n<p>How would I correctly remove the child and have it deleted in the database without orphan removal?<\/p>\n\n<p>I am currently thinking about this in my ParentDao:<\/p>\n\n<pre><code>public void removeChild(Parent parent, Child child) {\n    Session session = HibernateUtil.getSessionFactory().openSession();\n    Transaction tx = null;\n    try {\n        session.beginTransaction();\n\n        session.delete(child);\n\n        session.getTransaction().commit();\n\n        parent.getChildren().remove(child);\n        session.refresh(parent);\n    } catch (RuntimeException e) {\n        if (tx != null) {\n            tx.rollback();\n        }\n        throw e;\n    } finally {\n        session.close();\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 26532275,
+        "tags": [
+            "java",
+            "hibernate",
+            "hibernate-onetomany"
+        ],
+        "score": 1,
+        "accepted_answer_id": 26532707,
+        "is_answered": true,
+        "view_count": 9092,
+        "last_edit_date": 1414080268
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3e2508245eeab19948bac480af509c41?s=256&d=identicon&r=PG",
+                "account_id": 367630,
+                "user_type": "registered",
+                "user_id": 713932,
+                "link": "https://stackoverflow.com/users/713932/leozin",
+                "reputation": 387,
+                "display_name": "leozin"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1414146840,
+            "creation_date": 1414081301,
+            "body": "<p>As you area going to do the @Cascade(DELETE_ORPHAN) (from Hibernate) manually, here is the code that does pretty much the same behavior.<\/p>\n\n<p>Entities:<\/p>\n\n<pre><code>class Library {\n\n  @Id\n  private Integer id;\n\n  @OneToMany\n  private List&lt;Book&gt; books;\n\n  // getters and setters    \n}\n\nclass Book {\n\n  @Id\n  private Integer id; \n\n  @ManyToOne\n  private Libraby library;\n\n  // getters and setters\n}\n<\/code><\/pre>\n\n<p>And a simple example:<\/p>\n\n<pre><code>session.beginTransaction();\n\n// load a library with ID = 1\nLibrary library = session.get(Library.class, 1);\n\n// assuming that your library has two books\nBook book = library.getBooks().get(0); //gets the first book\nlibrary.getBooks().remove(0); // Remove this book from the library\nsession.delete(book);\n\nsession.getTransaction().commit();\n<\/code><\/pre>\n\n<p>And your Book will be deleted from the database and the lisf othe parent will be updated as well.<\/p>\n",
+            "answer_id": 26532707,
+            "question_id": 26532275,
+            "last_edit_date": 1414146840
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3da252812ded8700a14732cd46203449?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 2813792,
+                "user_type": "registered",
+                "user_id": 2419434,
+                "link": "https://stackoverflow.com/users/2419434/javafan",
+                "reputation": 1559,
+                "display_name": "javafan",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1414086599,
+            "creation_date": 1414086599,
+            "body": "<p>Can you try below code? Removing from list before commit.<\/p>\n\n<pre><code>public void removeChild(Parent parent, Child child) {\n    Session session = HibernateUtil.getSessionFactory().openSession();\n    Transaction tx = null;\n    try {\n        session.beginTransaction();\n\n        parent.getChildren().remove(child); \n        session.delete(child);\n\n        session.getTransaction().commit();\n\n\n       // session.refresh(parent); // this is not required\n    } catch (RuntimeException e) {\n        if (tx != null) {\n            tx.rollback();\n        }\n        throw e;\n    } finally {\n        session.close();\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 26534224,
+            "question_id": 26532275
+        }
+    ],
+    "answer_comments": {
+        "26534224": [{
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user1736248"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 26534224,
+            "edited": false,
+            "creation_date": 1414150262,
+            "comment_id": 41716885
+        }],
+        "26532707": [
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user1736248"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26532707,
+                "edited": false,
+                "creation_date": 1414155256,
+                "comment_id": 41719227
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user1736248"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26532707,
+                "edited": false,
+                "creation_date": 1414154838,
+                "comment_id": 41718996
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e2508245eeab19948bac480af509c41?s=256&d=identicon&r=PG",
+                    "account_id": 367630,
+                    "user_type": "registered",
+                    "user_id": 713932,
+                    "link": "https://stackoverflow.com/users/713932/leozin",
+                    "reputation": 387,
+                    "display_name": "leozin"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26532707,
+                "edited": false,
+                "creation_date": 1414151271,
+                "comment_id": 41717305
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user1736248"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26532707,
+                "edited": false,
+                "creation_date": 1414150165,
+                "comment_id": 41716839
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/3e2508245eeab19948bac480af509c41?s=256&d=identicon&r=PG",
+                    "account_id": 367630,
+                    "user_type": "registered",
+                    "user_id": 713932,
+                    "link": "https://stackoverflow.com/users/713932/leozin",
+                    "reputation": 387,
+                    "display_name": "leozin"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26532707,
+                "edited": false,
+                "creation_date": 1414146440,
+                "comment_id": 41715162
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user1736248"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26532707,
+                "edited": false,
+                "creation_date": 1414145937,
+                "comment_id": 41714930
+            },
+            {
+                "owner": {
+                    "user_type": "does_not_exist",
+                    "display_name": "user1736248"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 26532707,
+                "edited": false,
+                "creation_date": 1414082694,
+                "comment_id": 41692408
+            }
+        ]
+    }
+}

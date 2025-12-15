@@ -1,0 +1,130 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/142aa293cd3afa3b873ec9c584030730?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4097924,
+            "user_type": "registered",
+            "user_id": 3364181,
+            "link": "https://stackoverflow.com/users/3364181/user3364181",
+            "reputation": 551,
+            "display_name": "user3364181",
+            "accept_rate": 21
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/51565096/jhipster-search-entity-by-field-of-his-entity",
+        "last_activity_date": 1578908081,
+        "creation_date": 1532723200,
+        "answer_count": 3,
+        "title": "JHipster Search entity by field of his entity",
+        "body": "<p>I have Tournament entity. He have OneToOne relation with Prize entity. Prize entity have filed \"amount\". So if i want to do search Tournaments that have prize between some 2 values how can i do that using JHipster QueryService ?<\/p>\n",
+        "question_id": 51565096,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "spring-data-jpa",
+            "jhipster"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 5188
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f88bda0d824d52354be2cfa6bb1e7b85?s=256&d=identicon&r=PG",
+                "account_id": 4609207,
+                "user_type": "registered",
+                "user_id": 3737815,
+                "link": "https://stackoverflow.com/users/3737815/jon-ruddell",
+                "reputation": 6362,
+                "display_name": "Jon Ruddell"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1533065697,
+            "creation_date": 1533065697,
+            "body": "<p>Based on the fact you are using QueryService, I'm assuming you enabled the <a href=\"https://www.jhipster.tech/entities-filtering/\" rel=\"nofollow noreferrer\"><code>Filtering<\/code> option<\/a> when generating your entities.  To query <code>Tournament<\/code> entities with a <code>Prize<\/code> amount between two values, a few things need to be added.<\/p>\n\n<p>In <code>TournamentQueryService<\/code>, add the following to build a specification for the <code>prize.amount<\/code> field:<\/p>\n\n<pre><code>if (criteria.getPrizeAmount() != null) {\n    specification = specification.and(buildReferringEntitySpecification(criteria.getPrizeAmount(), Tournament_.prize, Prize_.amount));\n}\n<\/code><\/pre>\n\n<p>In <code>TournamentCriteria<\/code>, add a field for the <code>prizeAmount<\/code> filter: <code>private DoubleFilter prizeAmount;<\/code>.  Also add getters and setters.<\/p>\n\n<p>Now you can test the request through Swagger (under menu Admin->API) and filter tournaments based on the prize amount field.<\/p>\n\n<p>If you want to make this query in the client, you need to add two parameters to the HTTP request:<\/p>\n\n<ul>\n<li><code>prizeAmount.greaterOrEqualThan<\/code><\/li>\n<li><code>prizeAmount.lessOrEqualThan<\/code><\/li>\n<\/ul>\n\n<p>You can add them in the <code>query<\/code> call like below, which will return Tournaments with prize amounts >= 1 and &lt;= 5 (example is Angular):<\/p>\n\n<pre><code>loadAll() {\n    this.tournamentService.query({\n        'prizeAmount.greaterOrEqualThan': 1,\n        'prizeAmount.lessOrEqualThan': 5\n    }).subscribe(\n        (res: HttpResponse&lt;ITournament[]&gt;) =&gt; {\n            this.tournaments = res.body;\n        },\n        (res: HttpErrorResponse) =&gt; this.onError(res.message)\n    );\n}\n<\/code><\/pre>\n\n<hr>\n\n<p>If you want the <code>TournamentDTO<\/code> to contain the prize amount as a field, the <code>prizeAmount<\/code> field needs to be added in the <code>TournamentDTO<\/code> (add field and getters/setters).  You also need to add <code>@Mapping(source = \"prize.amount\", target = \"prizeAmount\")<\/code> in <code>TournamentMapper<\/code> to map the prize data to that field in the <code>TournamentDTO<\/code>.<\/p>\n",
+            "answer_id": 51620813,
+            "question_id": 51565096
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d7ded4b01d2e3854ce8e154f040d38f2?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7683231,
+                "user_type": "registered",
+                "user_id": 5821870,
+                "link": "https://stackoverflow.com/users/5821870/lucasb",
+                "reputation": 1,
+                "display_name": "LucasB"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1534109563,
+            "creation_date": 1534109563,
+            "body": "<p>Is it possible to make that if we add another relation in Prize (Currency for example) and build specification ?<\/p>\n\n<p>I didn't succeed because the definition is <\/p>\n\n<p><code>buildReferringEntitySpecification(Filter&lt;X&gt; filter,\n        SingularAttribute&lt;? super ENTITY, OTHER&gt; reference,\n        SingularAttribute&lt;OTHER, X&gt; valueField)<\/code><\/p>\n\n<p>So we have <code>buildReferringEntitySpecification(Filter&lt;Long&gt; filter,\n        SingularAttribute&lt;Tournament, Prize&gt; reference,\n        SingularAttribute&lt;Prize, Currency *(instead of Long)*&gt; valueField)<\/code><\/p>\n",
+            "answer_id": 51813042,
+            "question_id": 51565096
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AAuE7mB7SA-2gPlrg-BTonZdWEFDCqQeI8Fzcj8Un4w=k-s256",
+                "account_id": 17516371,
+                "user_type": "registered",
+                "user_id": 12703314,
+                "link": "https://stackoverflow.com/users/12703314/javeed-nazeer",
+                "reputation": 29,
+                "display_name": "Javeed Nazeer"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1578908081,
+            "creation_date": 1578908081,
+            "body": "<p>Please implement this method in your own class like below.<\/p>\n\n<pre><code>public static &lt;ENTITY, ENTITY2&gt; Specification&lt;ENTITY&gt; buildReferringEntitySpecification(\n        Filter&lt;Currency&gt; filter,\n        SingularAttribute&lt;? super ENTITY, ENTITY2&gt; reference,\n        SingularAttribute&lt;ENTITY2, Currency&gt; valueField) {\n        if (filter.getEquals() != null) {\n            return buildEqualsJoin(filter.getEquals(), reference, valueField);\n        } else if (filter.getIn() != null) {\n            return buildInJoin(filter.getIn(), reference, valueField);\n        } else if (filter.getSpecified() != null) {\n            return buildByFieldSpecifiedJoin(filter.getSpecified(), reference, valueField);\n        }\n        return null;\n    }\n<\/code><\/pre>\n",
+            "answer_id": 59713820,
+            "question_id": 51565096
+        }
+    ],
+    "answer_comments": {"51620813": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/tNzrI.jpg?s=256",
+                "account_id": 7943207,
+                "user_type": "registered",
+                "user_id": 5996498,
+                "link": "https://stackoverflow.com/users/5996498/galilo-galilo",
+                "reputation": 579,
+                "display_name": "Galilo Galilo",
+                "accept_rate": 62
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51620813,
+            "edited": false,
+            "creation_date": 1682407814,
+            "comment_id": 134205987
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/142aa293cd3afa3b873ec9c584030730?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4097924,
+                "user_type": "registered",
+                "user_id": 3364181,
+                "link": "https://stackoverflow.com/users/3364181/user3364181",
+                "reputation": 551,
+                "display_name": "user3364181",
+                "accept_rate": 21
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51620813,
+            "edited": false,
+            "creation_date": 1538386227,
+            "comment_id": 92111195
+        }
+    ]}
+}

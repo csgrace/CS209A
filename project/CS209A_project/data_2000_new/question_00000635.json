@@ -1,0 +1,84 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/05402e8c53c0a4295a29410f1f24eb83?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4820760,
+            "user_type": "registered",
+            "user_id": 3891511,
+            "link": "https://stackoverflow.com/users/3891511/user3891511",
+            "reputation": 53,
+            "display_name": "user3891511"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58280910/avoid-escape-while-parsing-json-string",
+        "last_activity_date": 1570517023,
+        "creation_date": 1570514515,
+        "answer_count": 1,
+        "title": "Avoid escape while parsing JSON string",
+        "body": "<p>I have an input json string contains few special characters which are already escaped and some special character(like en-dash/em-dash) which are not escaped. After parsing this json string(need to parse this string to retrieve an array of objects), it is converting a string with special characters to Unicode value(for example en-dash character to \\u2013). My requirement is to not escape any special character and keep the other already escaped characters as it is. In simple terms, after parsing JSON string, content should not change.<\/p>\n\n<p>Please suggest some approach to handle this.<\/p>\n\n<p>After parsing, I have tried unescaping it using StringEscapeUtils. But it is converting even the other special character.\nOne way is to search the string if contains any unicode character and escape only that part. But special characters are not fixed. It can be anything. <\/p>\n\n<p>Example: <\/p>\n\n<pre><code>{\n    \"orders\": [\n        {\n            \"name\": \"hello\u2013world\\ntext\",\n            \"type\": \"text\\n\"\n        },\n        {\n            \"name\": \"hello\",\n            \"type\": \"text\"\n        }\n    ]\n}\n<\/code><\/pre>\n\n<p>For above string when I parse using org.json.simple,it is escaping endash character to <code>\"hello\\u2013world\\ntext\"<\/code> for name field. Is there a way, I can restrict escaping of special characters while parsing.<\/p>\n",
+        "question_id": 58280910,
+        "tags": ["java"],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 3353,
+        "last_edit_date": 1570515864
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/WJyiD.jpg?s=256",
+                "account_id": 2437651,
+                "user_type": "registered",
+                "user_id": 2127121,
+                "link": "https://stackoverflow.com/users/2127121/villat",
+                "reputation": 1475,
+                "display_name": "Villat",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58280910,
+            "edited": false,
+            "creation_date": 1570516176,
+            "comment_id": 102927887
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/WTxXA.jpg?s=256",
+                "account_id": 7072373,
+                "user_type": "registered",
+                "user_id": 5413565,
+                "link": "https://stackoverflow.com/users/5413565/mushif-ali-nawaz",
+                "reputation": 3916,
+                "display_name": "Mushif Ali Nawaz"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58280910,
+            "edited": false,
+            "creation_date": 1570515744,
+            "comment_id": 102927768
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/WTxXA.jpg?s=256",
+            "account_id": 7072373,
+            "user_type": "registered",
+            "user_id": 5413565,
+            "link": "https://stackoverflow.com/users/5413565/mushif-ali-nawaz",
+            "reputation": 3916,
+            "display_name": "Mushif Ali Nawaz"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1570517023,
+        "creation_date": 1570516632,
+        "body": "<p>Probably you are not parsing the JSON correctly. I have tried to parse the provided JSON using <code>ObjectMapper<\/code> into a <code>Map<\/code> <em>(you can use a <code>class<\/code> too)<\/em>: <\/p>\n\n<pre><code>String json = \"{\\n\" +\n        \"    \\\"orders\\\": [\\n\" +\n        \"        {\\n\" +\n        \"            \\\"name\\\": \\\"hello\u2013world\\\\ntext\\\",\\n\" +\n        \"            \\\"type\\\": \\\"text\\\\n\\\"\\n\" +\n        \"        },\\n\" +\n        \"        {\\n\" +\n        \"            \\\"name\\\": \\\"hello\\\",\\n\" +\n        \"            \\\"type\\\": \\\"text\\\"\\n\" +\n        \"        }\\n\" +\n        \"    ]\\n\" +\n        \"}\";\n<\/code><\/pre>\n\n<p>For unformatted json it would be: <\/p>\n\n<pre><code>String json = \"{\\\"orders\\\":[{\\\"name\\\":\\\"hello\u2013world\\\\ntext\\\",\\\"type\\\":\\\"text\\\\n\\\"},{\\\"name\\\":\\\"hello\\\",\\\"type\\\":\\\"text\\\"}]}\";\n<\/code><\/pre>\n\n<p>Using <code>ObjectMapper<\/code> for parsing the <code>json<\/code>: <\/p>\n\n<pre><code>ObjectMapper objectMapper = new ObjectMapper();    // package: com.fasterxml.jackson.databind\nMap map = objectMapper.readValue(json, Map.class); // reading JSON as Map\n<\/code><\/pre>\n\n<p>Now if we print the <code>map<\/code>: <\/p>\n\n<pre><code>System.out.println(map);\n<\/code><\/pre>\n\n<p>It prints: <\/p>\n\n<pre><code>{orders=[{name=hello\u2013world\ntext, type=text\n}, {name=hello, type=text}]}\n<\/code><\/pre>\n\n<blockquote>\n  <p>You can see that it printed a new-line for <code>\\n<\/code><\/p>\n<\/blockquote>\n\n<p>Now if we print the actual value of <code>map<\/code>: <\/p>\n\n<pre><code>System.out.println(objectMapper.writeValueAsString(map));\n<\/code><\/pre>\n\n<p>It prints: <\/p>\n\n<pre><code>{\"orders\":[{\"name\":\"hello\u2013world\\ntext\",\"type\":\"text\\n\"},{\"name\":\"hello\",\"type\":\"text\"}]}\n<\/code><\/pre>\n",
+        "answer_id": 58281237,
+        "question_id": 58280910,
+        "last_edit_date": 1570517023
+    }],
+    "answer_comments": {}
+}

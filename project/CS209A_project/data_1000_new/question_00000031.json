@@ -1,0 +1,117 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/GDyML.jpg?s=256",
+            "account_id": 1367445,
+            "user_type": "registered",
+            "user_id": 1303598,
+            "link": "https://stackoverflow.com/users/1303598/kyle-walker",
+            "reputation": 579,
+            "display_name": "Kyle Walker",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/13709123/why-wont-midi-note-timings-work",
+        "last_activity_date": 1546347391,
+        "creation_date": 1354644264,
+        "answer_count": 1,
+        "title": "Why won&#39;t midi note timings work?",
+        "body": "<p>I'm creating a midi piano roll editor. The Note class creates and contains a NOTE_ON object and an associated NOTE_OFF object as well as a rectangle which the user manipulates on the screen to manipulate the pitch, timing and duration of the notes.  Below is the code for this class minus the code for the rectangle. I can't figure out why it's not working properly.  The test program creates five of these Note objects and displays them on the piano roll grid, and they play properly.  The method for changing pitch works properly too when a rectangle is dragged up or down.  But the notes start misbehaving when I call the methods to change timing or duration. First of all, they don't play where they're told when moved, and then if the notes are dragged on top of or extended over each other, the moved note will prevent the notes below it from playing.  My unit of movement sent to these methods as an arg is set to 16, so the note will always snap to a 16th beat position.  Can anyone spot anything wrong with my code?<\/p>\n\n<pre><code>public class Note {\nMidiEvent noteOn;\nMidiEvent noteOff;\n\nprivate int channel;\nprivate int pitch;\nprivate int vel;\n\n// Constructor calls methods to create NOTE_ON, NOTE_OFF, and graphical rectangle\npublic Note(MidiMessage on, long tickPos) {\n    noteOn = createNoteOn(on, tickPos);\n    ShortMessage shortMessage = (ShortMessage) on;\n    noteOff = createNoteOff(shortMessage.getChannel(), shortMessage.getData1(), tickPos);\n}\n\npublic MidiEvent createNoteOn(MidiMessage on, long tickPos) {\n    noteOn = new MidiEvent(on, tickPos);\n    return noteOn;\n}\n\npublic MidiEvent createNoteOff(int chan, int pitch, long tickPos) {\n    try {\n        noteOff = new MidiEvent(new ShortMessage(ShortMessage.NOTE_OFF, chan, pitch, 0), tickPos + 2);\n    } catch (InvalidMidiDataException e) {\n            e.printStackTrace();\n    }\n    return noteOff;\n}\n\n// Method for moving musical pitch of this note up or down for both NOTE_ON and NOTE_OFF\npublic void setPitch(int pitchUpOrDown) {\n    MidiMessage message = noteOn.getMessage();\n    ShortMessage shortMessage = (ShortMessage) message;\n        channel = shortMessage.getChannel();\n        pitch = shortMessage.getData1();\n        vel = shortMessage.getData2();\n        try {\n            shortMessage.setMessage(ShortMessage.NOTE_ON, channel, pitch + pitchUpOrDown, vel);\n        } catch (InvalidMidiDataException e) {\n            e.printStackTrace();\n        }\n        message = noteOff.getMessage();\n        shortMessage = (ShortMessage) message;\n        try {\n            shortMessage.setMessage(ShortMessage.NOTE_OFF, channel, pitch + pitchUpOrDown, 0);\n        } catch (InvalidMidiDataException e) {\n            e.printStackTrace();\n        }\n}\n\n// Moves entire note without changing duration of note\npublic void shiftLocation(int diff) {\n    noteOn.setTick(noteOn.getTick() + diff);\n    noteOff.setTick(noteOff.getTick() + diff);\n}\n\n// Moves start time of note while leaving end time in place, changes duration of note\npublic void setStartTime(long start) {\n    noteOn.setTick(start);\n}\n\n// Moves end time of note while leaving start time in place, changes duration of note\npublic void setDuration(int duration) {\n    noteOff.setTick(noteOff.getTick() + duration);\n}\n<\/code><\/pre>\n\n<p>The MIDI sequencer and synthesizer:<\/p>\n\n<pre><code>import javax.sound.midi.*;\n\npublic class MusicEngine {\nSequencer sequencer;\nSequence sequence;\nSynthesizer synthesizer;\nTrack track;\nMidiEvent event;\n// PPQ, or ticks per beat\nint ticksPerBeat = 16;\nint tempoBPM = 120;\n\n// Constructor\npublic MusicEngine() {      \n    createMidi();\n}\n\n// Get sequencer and sequence and track\npublic void createMidi() {\n    try {\n        sequencer =  MidiSystem.getSequencer();\n        if (sequencer == null) {\n            System.out.println(\"Cannot get a sequencer\");\n            System.exit(0);\n        }\n        sequencer.open();\n\n        // If sequencer is not the same as synthesizer, link the two \n        // (required in J2SE 5.0)\n        if (!(sequencer instanceof Synthesizer)) {\n            System.out.println(\"Linking the sequencer to the synthesizer\");\n            synthesizer = MidiSystem.getSynthesizer();\n            synthesizer.open();\n            Receiver synthReceiver = synthesizer.getReceiver();\n            Transmitter seqTransmitter = sequencer.getTransmitter();\n            seqTransmitter.setReceiver(synthReceiver);\n        } else \n            synthesizer = (Synthesizer)sequencer;\n        sequence = new Sequence(Sequence.PPQ, ticksPerBeat);\n        track = sequence.createTrack();\n        sequencer.setTempoInBPM(tempoBPM);\n    } catch(MidiUnavailableException e) {\n        System.out.println(\"No sequencer available\");\n        System.exit(0);\n    } catch(Exception e) {\n        e.printStackTrace();\n        System.exit(0);\n    }\n\n}\n\n// Create an individual MIDI event\npublic MidiEvent createEvent(int command, int channel, int one, int two, int tick) {\n    event = null;\n    try {\n        ShortMessage a = new ShortMessage();\n        a.setMessage(command, channel, one, two);\n        event = new MidiEvent(a, tick);\n    } catch(InvalidMidiDataException e) {\n        e.printStackTrace();\n    }\n    return event;\n}\n\npublic void add(MidiEvent event) {\n    track.add(event);\n}\n\npublic void playSong(int tempo) {\n    try {\n        sequencer.setSequence(sequence);\n    }\n    catch (InvalidMidiDataException e) {\n        e.printStackTrace();\n    }\n\n    sequencer.start();\n}\n\npublic void stopSong() {\n    sequencer.stop();\n}\n}\n<\/code><\/pre>\n",
+        "question_id": 13709123,
+        "tags": [
+            "java",
+            "midi",
+            "javax.sound.midi"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 1426,
+        "last_edit_date": 1546347391
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/GDyML.jpg?s=256",
+                "account_id": 1367445,
+                "user_type": "registered",
+                "user_id": 1303598,
+                "link": "https://stackoverflow.com/users/1303598/kyle-walker",
+                "reputation": 579,
+                "display_name": "Kyle Walker",
+                "accept_rate": 72
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13709123,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/72641170cc9abff008d21ac50894803b?s=256&d=identicon&r=PG",
+                "account_id": 20470,
+                "user_type": "registered",
+                "user_id": 48933,
+                "link": "https://stackoverflow.com/users/48933/neil-coffey",
+                "reputation": 21865,
+                "display_name": "Neil Coffey",
+                "accept_rate": 90
+            },
+            "edited": false,
+            "creation_date": 1354646548,
+            "comment_id": 18829045
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72641170cc9abff008d21ac50894803b?s=256&d=identicon&r=PG",
+                "account_id": 20470,
+                "user_type": "registered",
+                "user_id": 48933,
+                "link": "https://stackoverflow.com/users/48933/neil-coffey",
+                "reputation": 21865,
+                "display_name": "Neil Coffey",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13709123,
+            "edited": false,
+            "creation_date": 1354645091,
+            "comment_id": 18828374
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/54dfe6c69b839881780a4007113fbe4a?s=256&d=identicon&r=PG",
+            "account_id": 8069,
+            "user_type": "registered",
+            "user_id": 14302,
+            "link": "https://stackoverflow.com/users/14302/nik-reiman",
+            "reputation": 40708,
+            "display_name": "Nik Reiman",
+            "accept_rate": 98
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1354700147,
+        "creation_date": 1354700147,
+        "body": "<p>I might be misunderstanding your code here, but it seems that you are only increasing the length of notes in your <code>setDuration()<\/code> method. Shouldn't it look like this instead?<\/p>\n\n<pre><code>public void setDuration(int duration) {\n    noteOff.setTick(noteOn.getTick() + duration);\n}\n<\/code><\/pre>\n",
+        "answer_id": 13720051,
+        "question_id": 13709123
+    }],
+    "answer_comments": {"13720051": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/GDyML.jpg?s=256",
+            "account_id": 1367445,
+            "user_type": "registered",
+            "user_id": 1303598,
+            "link": "https://stackoverflow.com/users/1303598/kyle-walker",
+            "reputation": 579,
+            "display_name": "Kyle Walker",
+            "accept_rate": 72
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 13720051,
+        "edited": false,
+        "creation_date": 1354713359,
+        "comment_id": 18852524
+    }]}
+}

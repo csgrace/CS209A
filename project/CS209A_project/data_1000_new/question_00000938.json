@@ -1,0 +1,102 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dba480cc92ce48a277dedce692249454?s=256&d=identicon&r=PG",
+            "account_id": 1067803,
+            "user_type": "registered",
+            "user_id": 1067846,
+            "link": "https://stackoverflow.com/users/1067846/phidelux",
+            "reputation": 2291,
+            "display_name": "Phidelux",
+            "accept_rate": 58
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8604758/android-ant-build",
+        "last_activity_date": 1326431663,
+        "creation_date": 1324561516,
+        "answer_count": 1,
+        "title": "Android Ant Build",
+        "body": "<p>I would like to build two versions of my <code>Android<\/code>application using an <code>Apache ant<\/code> file. The problem is, that both versions are identical except the advertisement in the lite version. I read about using <code>Configurations<\/code> with ant to <code>build<\/code> debug versions.<\/p>\n\n<p>The following class defines some constants that can be referenced within the application.<\/p>\n\n<pre><code>public class Config {\n    // Whether or not to include logging in the app.\n    public final static boolean LOGGING = true;\n}\n<\/code><\/pre>\n\n<p>And here is an example on how to use this constants to determine if logging is enabled or not.<\/p>\n\n<pre><code>if (Config.LOGGING) {\n    Log.d(TAG, \"[onCreate] Success\");\n}\n<\/code><\/pre>\n\n<p>Now i can enable and disable logging in my properties file.<\/p>\n\n<pre><code># Turn on or off logging.\nconfig.logging=true\n<\/code><\/pre>\n\n<p>That does not work, because before using this config I have to create a second config file and use <code>filterset<\/code> and copy.<\/p>\n\n<pre><code>public class Config {\n    // Whether or not to include logging in the app.\n    public final static boolean LOGGING = @CONFIG.LOGGING@;\n}\n<\/code><\/pre>\n\n<p>That's pretty easy, but how I could use this to build two versions of my application with and without advertisement. And how could I change the package names using ant, so the <code>android market<\/code> would accept both packages (Full and Lite).<\/p>\n\n<hr>\n\n<p>Thank you, for your suggestions, but I still have some problems.<\/p>\n\n<p>I managed to write some basic targets that cleanup my builds and copy all files needed to build the application in two folders /full and /lite. So I have two directories with the same content. Now I rename all matches of the applications package name in all *.java files and the AndroidManifest file (target prepare).<\/p>\n\n<p>To really build two different version I would now have to include the code from my first post. But how do I have to do this and how can I build both versions in the release target and write the resulting *.apk files into the build directoy?<\/p>\n\n<p>Finally ... Would that be all I have to do to build running *.apks that would be accepted by the android market? <\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;project name=\"my.application\" default=\"help\" basedir=\".\"&gt;\n    &lt;!-- Load the custom property files --&gt;\n    &lt;property file=\"build.properties\" /&gt;\n    &lt;property file=\"passwords.properties\" /&gt;\n\n    &lt;!-- Set global properties for this build --&gt;\n    &lt;property name=\"my.application.pkg\" value=\"my.application\"/&gt;\n    &lt;property name=\"my.application.pkg.full\" value=\"my.application.full\"/&gt;\n    &lt;property name=\"my.application.pkg.lite\" value=\"my.application.lite\"/&gt;\n\n    &lt;property name=\"my.application\" location=\".\"/&gt;\n    &lt;property name=\"my.application.build\" location=\"build\"/&gt;\n    &lt;property name=\"my.application.src\" location=\"src\"/&gt;\n    &lt;property name=\"my.application.res\" location=\"res\"/&gt;\n    &lt;property name=\"my.application.gen\" location=\"gen\"/&gt;\n\n    &lt;property name=\"my.application.full\" location=\"full\"/&gt;\n    &lt;property name=\"my.application.full.src\" location=\"full/src\"/&gt;\n    &lt;property name=\"my.application.full.res\" location=\"full/res\"/&gt;\n    &lt;property name=\"my.application.full.gen\" location=\"full/gen\"/&gt;\n    &lt;property name=\"my.application.full.build\" location=\"full/build\"/&gt;\n\n    &lt;property name=\"my.application.lite\" location=\"lite\"/&gt;\n    &lt;property name=\"my.application.lite.build\" location=\"lite/build\"/&gt;\n    &lt;property name=\"my.application.lite.src\" location=\"lite/src\"/&gt;\n    &lt;property name=\"my.application.lite.res\" location=\"lite/res\"/&gt;\n    &lt;property name=\"my.application.lite.gen\" location=\"lite/gen\"/&gt;\n\n    &lt;!-- Create and update the local.properties file --&gt;\n    &lt;loadproperties srcFile=\"local.properties\" /&gt;\n\n    &lt;!-- Load the ant.properties file --&gt;\n    &lt;property file=\"ant.properties\" /&gt;\n\n    &lt;!-- Load the project.properties file --&gt;\n    &lt;loadproperties srcFile=\"project.properties\" /&gt;\n\n    &lt;!-- Quick check on sdk.dir. --&gt;\n    &lt;fail\n        message=\"sdk.dir is missing.\"\n        unless=\"sdk.dir\" /&gt;\n\n    &lt;!-- Version-tag: 1 --&gt;\n    &lt;import file=\"${sdk.dir}/tools/ant/build.xml\" /&gt;\n\n    &lt;target name=\"release\" depends=\"report, prepare\"&gt;\n        &lt;echo&gt;Building the target!&lt;/echo&gt;\n    &lt;/target&gt;\n\n    &lt;target name=\"prepare\" depends=\"cleanup\" &gt;\n        &lt;!-- Copy the Manifest.xml to the full copy --&gt;\n        &lt;copyfile src=\"${my.application}/AndroidManifest.xml\" \n            dest=\"${my.application.full}/AndroidManifest.xml\" /&gt;\n\n        &lt;!-- Copy the source files to the full copy --&gt;\n        &lt;copy todir=\"${my.application.full.src}\" overwrite=\"true\"&gt;\n            &lt;fileset dir=\"${my.application.src}\" /&gt; \n        &lt;/copy&gt;\n\n        &lt;!-- Copy the resources to the full copy --&gt;\n        &lt;copy todir=\"${my.application.full.res}\" overwrite=\"true\"&gt;\n            &lt;fileset dir=\"${my.application.res}\" /&gt; \n        &lt;/copy&gt;\n\n        &lt;!-- Copy the generated to the full copy --&gt;\n        &lt;copy todir=\"${my.application.full.gen}\" overwrite=\"true\"&gt;\n            &lt;fileset dir=\"${my.application.gen}\" /&gt; \n        &lt;/copy&gt;\n\n        &lt;!-- Replace the package name in the full manifest file --&gt;\n        &lt;replaceregexp file=\"${my.application.full}/AndroidManifest.xml\"\n            match='package=\"(.*)\"'\n            replace='package=\"${my.application.pkg.full}\"'\n            byline=\"false\" /&gt;\n\n        &lt;!-- Change the package name in all Java files --&gt;\n        &lt;replaceregexp flags=\"g\" byline=\"false\"&gt;\n            &lt;regexp pattern=\"${my.application.pkg}\" /&gt; \n            &lt;substitution expression=\"${my.application.pkg.full}\" /&gt;\n            &lt;fileset dir=\"${my.application.full.src}\" includes=\"**/*.java\" /&gt; \n        &lt;/replaceregexp&gt;\n\n        &lt;!-- Copy the Manifest.xml to the lite copy --&gt;\n        &lt;copyfile src=\"${my.application}/AndroidManifest.xml\" \n            dest=\"${my.application.lite}/AndroidManifest.xml\" /&gt;\n\n        &lt;!-- Copy the source files to the lite copy --&gt;\n        &lt;copy todir=\"${my.application.lite.src}\" overwrite=\"true\"&gt;\n            &lt;fileset dir=\"${my.application.src}\" /&gt; \n        &lt;/copy&gt;\n\n        &lt;!-- Copy the resources to the lite copy --&gt;\n        &lt;copy todir=\"${my.application.lite.res}\" overwrite=\"true\"&gt;\n            &lt;fileset dir=\"${my.application.res}\" /&gt; \n        &lt;/copy&gt;\n\n        &lt;!-- Copy the generated to the lite copy --&gt;\n        &lt;copy todir=\"${my.application.lite.gen}\" overwrite=\"true\"&gt;\n            &lt;fileset dir=\"${my.application.gen}\" /&gt; \n        &lt;/copy&gt;\n\n        &lt;!-- Replace the package name in the lite manifest file --&gt;\n        &lt;replaceregexp file=\"${my.application.lite}/AndroidManifest.xml\"\n            match='package=\"(.*)\"'\n            replace='package=\"${my.application.pkg.lite}\"'\n            byline=\"false\" /&gt;\n\n        &lt;!-- Change the package name in all Java files --&gt;\n        &lt;replaceregexp flags=\"g\" byline=\"false\"&gt;\n            &lt;regexp pattern=\"${my.application.pkg}\" /&gt; \n            &lt;substitution expression=\"${my.application.pkg.lite}\" /&gt;\n            &lt;fileset dir=\"${my.application.lite.src}\" includes=\"**/*.java\" /&gt; \n        &lt;/replaceregexp&gt;\n    &lt;/target&gt;\n\n    &lt;!-- Deletes all directories, not needed anymore after compiling the source files --&gt;\n    &lt;target name=\"cleanup\"&gt;\n        &lt;!-- Delete the full version build dir --&gt;\n        &lt;delete dir=\"${my.application.full}\"/&gt;\n        &lt;!-- Delete the lite version build dir --&gt;\n        &lt;delete dir=\"${my.application.lite}\"/&gt;\n        &lt;!-- Delete the *.apk file --&gt;\n        &lt;delete file=\"my.application.full.apk\"/&gt;\n        &lt;!-- Delete the *.apk file --&gt;\n        &lt;delete file=\"my.application.lite.apk\"/&gt;\n    &lt;/target&gt;\n&lt;/project&gt;\n<\/code><\/pre>\n",
+        "question_id": 8604758,
+        "tags": [
+            "java",
+            "android",
+            "apache",
+            "ant",
+            "build"
+        ],
+        "score": 5,
+        "accepted_answer_id": 8605950,
+        "is_answered": true,
+        "view_count": 2207,
+        "last_edit_date": 1324644203
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dba480cc92ce48a277dedce692249454?s=256&d=identicon&r=PG",
+                "account_id": 1067803,
+                "user_type": "registered",
+                "user_id": 1067846,
+                "link": "https://stackoverflow.com/users/1067846/phidelux",
+                "reputation": 2291,
+                "display_name": "Phidelux",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8604758,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/1de54f2e5dbc404c2d0e3b375ec98ddd?s=256&d=identicon&r=PG",
+                "account_id": 267517,
+                "user_type": "registered",
+                "user_id": 555747,
+                "link": "https://stackoverflow.com/users/555747/mac",
+                "reputation": 1153,
+                "display_name": "Mac",
+                "accept_rate": 56
+            },
+            "edited": false,
+            "creation_date": 1354866768,
+            "comment_id": 18911225
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/1de54f2e5dbc404c2d0e3b375ec98ddd?s=256&d=identicon&r=PG",
+                "account_id": 267517,
+                "user_type": "registered",
+                "user_id": 555747,
+                "link": "https://stackoverflow.com/users/555747/mac",
+                "reputation": 1153,
+                "display_name": "Mac",
+                "accept_rate": 56
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8604758,
+            "edited": false,
+            "creation_date": 1352174388,
+            "comment_id": 18045471
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fb95bb0af4074fdc2055c07479f008bf?s=256&d=identicon&r=PG",
+            "account_id": 187221,
+            "user_type": "registered",
+            "user_id": 425122,
+            "link": "https://stackoverflow.com/users/425122/quickdraw-mcgraw",
+            "reputation": 2246,
+            "display_name": "quickdraw mcgraw"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1324567390,
+        "creation_date": 1324567390,
+        "body": "<p>There are a number of ways in which you could achieve what you require.<\/p>\n\n<p>Here are a couple of ideas that I have used in the past,<\/p>\n\n<p>1) Have two application 'heads' that pull in a common Android library. \nEach head initializes static data that sets up the library to behave as either the lite or the full version of your application.\nThis has the advantage that you can perform the build from Eclipse projects as well as with Ant.<\/p>\n\n<p>2) Have two seperate build targets that share common build targets to create two seperate apk files.\nIn the Ant build script have it build two versions of the APK.\nOne that is the full version and then the other which builds the lite version.\nThe difference between the two targets are that they build using slightly different files (either by copying, directing to diferent directories or modifying with scripts).<\/p>\n\n<p>This can all be done in Ant using targets and properties.<\/p>\n\n<p>If at the top level of your build you have a release target depending on two other targets.<\/p>\n\n<p>e.g.<\/p>\n\n<pre><code>&lt;target name=\"release\"\n  depends=\"release-Full, release-Lite\"&gt;\n&lt;/target&gt;\n\n&lt;target name=\"release-Full\"&gt;\n  &lt;ant antfile=\"thisbuild.xml\" inheritAll=\"true\" target=\"full\"&gt;\n    &lt;property name=\"MyCustomProperty\" value=\"Full\" /&gt;\n  &lt;/ant&gt;\n&lt;/target&gt;\n\n\n\n&lt;target name=\"release-Lite\"&gt;\n  &lt;ant antfile=\"thisbuild.xml\" inheritAll=\"true\" target=\"lite\"&gt;\n    &lt;property name=\"MyCustomProperty\" value=\"Lite\" /&gt;\n   &lt;/ant&gt;\n &lt;/target&gt;\n<\/code><\/pre>\n\n<p>You can then use these targets and properties to modify your build to do whatever you require to build each of the APK files.<\/p>\n",
+        "answer_id": 8605950,
+        "question_id": 8604758
+    }],
+    "answer_comments": {}
+}

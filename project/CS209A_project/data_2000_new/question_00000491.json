@@ -1,0 +1,95 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/15d6ba8f4dbd9f8e9df5f077afb253dc?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3294291,
+            "user_type": "registered",
+            "user_id": 2771888,
+            "link": "https://stackoverflow.com/users/2771888/abdul",
+            "reputation": 1206,
+            "display_name": "Abdul",
+            "accept_rate": 44
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/39996343/spring-redirect-is-not-working-when-i-have-path-parameters-in-method-signature",
+        "last_activity_date": 1476268155,
+        "creation_date": 1476268155,
+        "answer_count": 0,
+        "title": "Spring redirect is not working when i have path parameters in method signature",
+        "body": "<p>The below is the code to display all employees<\/p>\n\n<pre><code>@RequestMapping(value = \"/displayAllEmps\")\npublic ModelAndView displayAllEmps() {\n    ModelAndView modelAndView = new ModelAndView(\"dispAllEmps\");\n    List&lt;Employee&gt; employees = employeeService.fetchAllEmps();\n    modelAndView.addObject(\"employees\", employees);\n    modelAndView.addObject(\"listMsg\", \"&lt;br&gt;Employees List!!!\");\n    return modelAndView;\n}\n<\/code><\/pre>\n\n<p>the below method is successfully redirecting me to the employee list page<\/p>\n\n<pre><code>@RequestMapping(value=\"/updateEmployee\",method = RequestMethod.POST)\npublic String updateEmployeeUsingObject(@ModelAttribute(\"employee\") Employee employee, Model model){\n    employee.setFirstName(\"Changes TEsting\");\n    employeeService.updateEmployee(employee);\n    List&lt;Employee&gt; employees = employeeService.fetchAllEmps();\n    model.addAttribute(\"employees\", employees);\n    model.addAttribute(\"listMsg\", \"&lt;br&gt;Employees List --- After updating Employee\");\n    return \"redirect:displayAllEmps\";\n}\n<\/code><\/pre>\n\n<p>but when I am redirecting from the below method its not working. URL is also little bit strange in the browser<\/p>\n\n<pre><code>@RequestMapping(value=\"/deleteEmployee/{empId}\")\n    public String deleteEmployee(@PathVariable(\"empId\") int empId,Model model){\n        boolean result = employeeService.deleteEmployee(empId);\n        List&lt;Employee&gt; employees = employeeService.fetchAllEmps();\n        model.addAttribute(\"employees\", employees);\n        model.addAttribute(\"listMsg\", \"&lt;br&gt;Employees List --- After Deleting Employee\");\n        return \"redirect:displayAllEmps\";\n    }\n<\/code><\/pre>\n\n<p>URL: <a href=\"http://localhost:9876/SpringAnnotationDemo_Tomcat/deleteEmployee/displayAllEmps?listMsg=%3Cbr%3EEmployees+List+---+After+Deleting+Employee\" rel=\"nofollow\">http://localhost:9876/SpringAnnotationDemo_Tomcat/deleteEmployee/displayAllEmps?listMsg=%3Cbr%3EEmployees+List+---+After+Deleting+Employee<\/a><\/p>\n\n<p>The below is my jsp code:<\/p>\n\n<pre><code>&lt;%@ page language=\"java\" contentType=\"text/html; charset=ISO-8859-1\"\n    pageEncoding=\"ISO-8859-1\"%&gt;\n&lt;%@ taglib uri=\"http://java.sun.com/jstl/core_rt\" prefix=\"c\"%&gt;\n&lt;!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\"&gt;\n&lt;html&gt;\n&lt;head&gt;\n&lt;meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"&gt;\n&lt;title&gt;Insert title here&lt;/title&gt;\n&lt;/head&gt;\n&lt;body&gt;\n\n    Welcome!!! ${myMap.DisMsg } ${listMsg}\n    Context Path: &lt;c:out value=\"${pageContext.request.contextPath}\"/&gt;\n    &lt;br/&gt;\n    requestURI: &lt;c:out value=\"${pageContext.request.requestURI}\"/&gt;\n        &lt;br/&gt;\n    servletPaht: &lt;c:out value=\"${pageContext.request.servletPath}\"/&gt;\n&lt;%--    Context Path: &lt;c:out value=\"${pageContext.request.contextPath}\"/&gt;\n\n    Context Path: &lt;c:out value=\"${pageContext.request.contextPath}\"/&gt;\n\n     --%&gt;\n    &lt;br&gt;---------------------------------------\n    &lt;br&gt;\n\n    &lt;table border=\"1\"&gt;\n        &lt;tr&gt;\n            &lt;!-- td&gt;ID&lt;/td&gt; --&gt;\n            &lt;td&gt;First Name&lt;/td&gt;\n            &lt;td&gt;Last Name&lt;/td&gt;\n            &lt;td&gt;Telephone&lt;/td&gt;\n            &lt;td&gt;Email&lt;/td&gt;\n            &lt;td&gt;&lt;/td&gt;\n            &lt;td&gt;&lt;/td&gt;\n        &lt;/tr&gt;\n        &lt;c:forEach var=\"emp\" items=\"${employees}\"&gt;\n            &lt;tr&gt;\n                &lt;!-- td&gt;${emp.id}&lt;/td&gt; --&gt;\n                &lt;td&gt;${emp.firstName}&lt;/td&gt;\n                &lt;td&gt;${emp.lastName}&lt;/td&gt;\n                &lt;td&gt;${emp.telephone}&lt;/td&gt;\n                &lt;td&gt;${emp.email}&lt;/td&gt;\n                &lt;td&gt;&lt;a href=\"&lt;c:url value=\"getEmpForUpdate/${emp.id}\" /&gt;\"&gt;Update&lt;/a&gt;&lt;/td&gt;\n                &lt;td&gt;&lt;a href=\"&lt;c:url value=\"deleteEmployee/${emp.id}\" /&gt;\"&gt;Delete&lt;/a&gt;&lt;/td&gt;\n            &lt;/tr&gt;\n        &lt;/c:forEach&gt;\n    &lt;/table&gt;\n\n&lt;/body&gt;\n&lt;/html&gt;\n<\/code><\/pre>\n\n<p>In the above code i have doubt that when i am redirecting from my controller method. why \"deleteEmployee\" is still there in the URL?<\/p>\n\n<p>I think the URL should be like below.<\/p>\n\n<p><a href=\"http://localhost:9876/SpringAnnotationDemo_Tomcat/displayAllEmps?listMsg=%3Cbr%3EEmployees+List+---+After+Deleting+Employee\" rel=\"nofollow\">http://localhost:9876/SpringAnnotationDemo_Tomcat/displayAllEmps?listMsg=%3Cbr%3EEmployees+List+---+After+Deleting+Employee<\/a><\/p>\n\n<p>Please let me know what is the best practice to edit an existing record in the DB using spring MVC.<\/p>\n",
+        "question_id": 39996343,
+        "tags": [
+            "java",
+            "html",
+            "spring"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 33
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996343,
+            "edited": false,
+            "creation_date": 1476276290,
+            "comment_id": 67275524
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/15d6ba8f4dbd9f8e9df5f077afb253dc?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3294291,
+                "user_type": "registered",
+                "user_id": 2771888,
+                "link": "https://stackoverflow.com/users/2771888/abdul",
+                "reputation": 1206,
+                "display_name": "Abdul",
+                "accept_rate": 44
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996343,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "edited": false,
+            "creation_date": 1476273636,
+            "comment_id": 67273840
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 39996343,
+            "edited": false,
+            "creation_date": 1476268676,
+            "comment_id": 67270728
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

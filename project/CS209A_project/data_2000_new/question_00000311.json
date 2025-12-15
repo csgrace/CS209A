@@ -1,0 +1,275 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4122735,
+            "user_type": "registered",
+            "user_id": 3382625,
+            "link": "https://stackoverflow.com/users/3382625/treesoft",
+            "reputation": 295,
+            "display_name": "treesoft",
+            "accept_rate": 47
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/29647010/how-to-pause-oncreate-until-boot-completed",
+        "last_activity_date": 1429101107,
+        "creation_date": 1429091466,
+        "answer_count": 1,
+        "title": "How to pause onCreate until boot completed?",
+        "body": "<p>I host widgets in my app and it seems, that if i start my app before booting of the device is completed, widgets cannot be created properly. Widgets then seem to be not loaded completely or not initialized/updated correctly. For instance: BatteryBotIndicator-Widget, which shows the battery status in percentage, shows a value of \"XX\" instead of some number like \"70%\". If i then restart my app and try to recreate the widget with:<\/p>\n\n<pre><code>AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);\n<\/code><\/pre>\n\n<p>it gives me null for appWidgetInfo (i fetch appWidgetId from SQLite database). And widget cannot be recreated.<\/p>\n\n<p>It is kind of difficult to debug the real cause in this situation to find out what is exactly causing this (Starting Debugger at the right time). I assume the AppWidgetManager is not ready yet or something.<\/p>\n\n<p>What i can say for sure: If i wait until i receive the broadcast-event BOOT_COMPLETED all widgets are created properly.<\/p>\n\n<p>So how can i pause the execution of onCreate until booting is completed?<\/p>\n\n<p>I can think of putting the thread to sleep in a while loop until the BroadcastReceiver (BOOT_COMPLETED) is setting a bool-variable in application-data to true. But i dont want to wait for this event always at starting of my app, as you can imagine ;)<\/p>\n",
+        "question_id": 29647010,
+        "tags": [
+            "java",
+            "android",
+            "widget"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 604,
+        "last_edit_date": 1429093585
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647010,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/3b9947f64a2f07c03c323454316fc454?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1015996,
+                "user_type": "registered",
+                "user_id": 1027550,
+                "link": "https://stackoverflow.com/users/1027550/mrodrigues",
+                "reputation": 2045,
+                "display_name": "MRodrigues",
+                "accept_rate": 50
+            },
+            "edited": false,
+            "creation_date": 1429093180,
+            "comment_id": 47435220
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3b9947f64a2f07c03c323454316fc454?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 1015996,
+                "user_type": "registered",
+                "user_id": 1027550,
+                "link": "https://stackoverflow.com/users/1027550/mrodrigues",
+                "reputation": 2045,
+                "display_name": "MRodrigues",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 29647010,
+            "edited": false,
+            "creation_date": 1429092467,
+            "comment_id": 47434720
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b8b511d8ebd9f74fea567696d58781c3?s=256&d=identicon&r=PG",
+            "account_id": 1031172,
+            "user_type": "registered",
+            "user_id": 1039461,
+            "link": "https://stackoverflow.com/users/1039461/tal-kanel",
+            "reputation": 10825,
+            "display_name": "Tal Kanel",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1429101107,
+        "creation_date": 1429092537,
+        "body": "<blockquote>\n  <p>if i start my app before booting of the device is completed, widgets cannot be created properly.<\/p>\n<\/blockquote>\n\n<p>please explain more what exactly do you mean when you say - \"not properly\" . this might be relevant to understand if you're widget really depends on something related to the boot.<\/p>\n\n<blockquote>\n  <p>I can think of putting the thread to sleep in a while loop until the BroadcastReceiver (BOOT_COMPLETED) is setting a bool-variable in application-data to true<\/p>\n<\/blockquote>\n\n<p>very bad idea.. also from performances and design reasons<\/p>\n\n<p>instead, why not simply register to boot complete broadcast from the manifest, and when you recevice it - simply send the relevant broadcast to update your widget?  AppWidgetProvider is already extends BroadcastReceiver,  so you can simply add it intent filter for boot complete broadcast.<\/p>\n\n<p>this is how to add intent filter to boot complete:<\/p>\n\n<pre><code> &lt;receiver android:name=\"MyWidgetProvider\" &gt;\n        &lt;intent-filter &gt;\n            &lt;action android:name=\"android.appwidget.action.APPWIDGET_UPDATE\"/&gt;\n            &lt;action  android:name=\"android.intent.action.BOOT_COMPLETED\" /&gt;\n        &lt;/intent-filter&gt;\n\n        &lt;meta-data\n         ...\n    &lt;/receiver&gt;\n<\/code><\/pre>\n\n<p>and this is how to react to it from the widget provider implementation:<\/p>\n\n<pre><code>  @Override\n  public void onReceive(Context context, Intent intent) {\n    if(intent.getAction().equals(\"android.intent.action.BOOT_COMPLETED\")){\n        doTheUpdateHereExactlyLikeHowYouUpdateItFromAnywhereElse();\n    } else {\n        super.onReceive(context,intent);\n    }\n}\n<\/code><\/pre>\n\n<p>for more information - follow this tutorial :<a href=\"https://laaptu.wordpress.com/2013/08/12/android-update-app-widget-with-listview-after-phone-reboot/\" rel=\"nofollow\">https://laaptu.wordpress.com/2013/08/12/android-update-app-widget-with-listview-after-phone-reboot/<\/a><\/p>\n",
+        "answer_id": 29647441,
+        "question_id": 29647010,
+        "last_edit_date": 1429101107
+    }],
+    "answer_comments": {"29647441": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7f2cdb46f0f1f67e5d65284fdec353fb?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3418861,
+                "user_type": "registered",
+                "user_id": 2867041,
+                "link": "https://stackoverflow.com/users/2867041/jox",
+                "reputation": 2408,
+                "display_name": "jox"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 29647441,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "edited": false,
+            "creation_date": 1632158006,
+            "comment_id": 122412551
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647441,
+            "edited": false,
+            "creation_date": 1429108097,
+            "comment_id": 47445705
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647441,
+            "edited": false,
+            "creation_date": 1429100894,
+            "comment_id": 47440173
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b8b511d8ebd9f74fea567696d58781c3?s=256&d=identicon&r=PG",
+                "account_id": 1031172,
+                "user_type": "registered",
+                "user_id": 1039461,
+                "link": "https://stackoverflow.com/users/1039461/tal-kanel",
+                "reputation": 10825,
+                "display_name": "Tal Kanel",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647441,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "edited": false,
+            "creation_date": 1429095306,
+            "comment_id": 47436550
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647441,
+            "edited": false,
+            "creation_date": 1429095059,
+            "comment_id": 47436393
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647441,
+            "edited": false,
+            "creation_date": 1429094632,
+            "comment_id": 47436124
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b8b511d8ebd9f74fea567696d58781c3?s=256&d=identicon&r=PG",
+                "account_id": 1031172,
+                "user_type": "registered",
+                "user_id": 1039461,
+                "link": "https://stackoverflow.com/users/1039461/tal-kanel",
+                "reputation": 10825,
+                "display_name": "Tal Kanel",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647441,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "edited": false,
+            "creation_date": 1429094427,
+            "comment_id": 47435993
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8a331d8800488aa0fa032c4ca0a729a4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4122735,
+                "user_type": "registered",
+                "user_id": 3382625,
+                "link": "https://stackoverflow.com/users/3382625/treesoft",
+                "reputation": 295,
+                "display_name": "treesoft",
+                "accept_rate": 47
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 29647441,
+            "edited": false,
+            "creation_date": 1429093890,
+            "comment_id": 47435633
+        }
+    ]}
+}

@@ -1,0 +1,510 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+            "account_id": 12529402,
+            "user_type": "registered",
+            "user_id": 9118154,
+            "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+            "reputation": 53,
+            "display_name": "Romar Jhon Maulana"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/47887880/make-sure-to-call-firebaseapp-initializeappcontext-first",
+        "last_activity_date": 1579589039,
+        "creation_date": 1513689313,
+        "answer_count": 4,
+        "title": "Make sure to call FirebaseApp.initializeApp(Context) first",
+        "body": "<p>It might be really same with other questions already but I don't really know what's wrong in here. Thanks in advance for the help.<\/p>\n\n<p>build.gradle (project)<\/p>\n\n<pre><code>        // Top-level build file where you can add configuration options common to all sub-projects/modules.\n\nbuildscript {\n    repositories {\n        jcenter()\n    }\n    dependencies {\n        classpath 'com.android.tools.build:gradle:2.3.3'\n        classpath 'com.google.gms:google-services:3.1.0'\n\n        // NOTE: Do not place your application dependencies here; they belong\n        // in the individual module build.gradle files\n    }\n}\n\nallprojects {\n    repositories {\n        jcenter()\n        maven {\n            url \"https://maven.google.com\" // Google's Maven repository\n        }\n    }\n}\n\ntask clean(type: Delete) {\n    delete rootProject.buildDir\n}\n<\/code><\/pre>\n\n<p>build.gradle(module)<\/p>\n\n<pre><code>    apply plugin: 'com.android.application'\n\nandroid {\n    compileSdkVersion 25\n    buildToolsVersion \"25.0.3\"\n    defaultConfig {\n        applicationId \"com.bustracker.usc.myapplication\"\n        minSdkVersion 21\n        targetSdkVersion 25\n        versionCode 1\n        versionName \"1.0\"\n        testInstrumentationRunner \"android.support.test.runner.AndroidJUnitRunner\"\n    }\n    buildTypes {\n        release {\n            minifyEnabled false\n            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'\n        }\n    }\n}\n\ndependencies {\n    compile fileTree(include: ['*.jar'], dir: 'libs')\n    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {\n        exclude group: 'com.android.support', module: 'support-annotations'\n    })\n    compile 'com.android.support:appcompat-v7:25.3.1'\n    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'\n    compile 'com.google.android.gms:play-services-maps:10.2.6'\n    compile 'com.google.android.gms:play-services-location:10.2.6'\n    compile 'com.google.firebase:firebase-database:10.2.6'\n    testCompile 'junit:junit:4.12'\n}\n\napply plugin: 'com.google.gms.google-services'\n<\/code><\/pre>\n\n<p>MainActivity.java<\/p>\n\n<pre><code>@Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        FirebaseApp.initializeApp(this);\n        requestWindowFeature(Window.FEATURE_NO_TITLE);\n        setContentView(R.layout.activity_main);\n\n        firebaseDatabase = FirebaseDatabase.getInstance();\n        mRootReference = firebaseDatabase.getReference();\n        mheadingReference = mRootReference.child(\"users\");\n<\/code><\/pre>\n\n<p>ERROR:<\/p>\n\n<pre><code>FATAL EXCEPTION: main\n                                                 Process: com.bustracker.sample.myapplication, PID: 2658\n                                                 java.lang.RuntimeException: Unable to start activity ComponentInfo{com.bustracker.sample.myapplication/com.bustracker.sample.myapplication.MainActivity}: java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process com.bustracker.sample.myapplication. Make sure to call FirebaseApp.initializeApp(Context) first.\n                                                     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2665)\n                                                     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2726)\n                                                     at android.app.ActivityThread.-wrap12(ActivityThread.java)\n                                                     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1477)\n                                                     at android.os.Handler.dispatchMessage(Handler.java:102)\n                                                     at android.os.Looper.loop(Looper.java:154)\n                                                     at android.app.ActivityThread.main(ActivityThread.java:6119)\n                                                     at java.lang.reflect.Method.invoke(Native Method)\n                                                     at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:886)\n                                                     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:776)\n                                                  Caused by: java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process com.bustracker.sample.myapplication. Make sure to call FirebaseApp.initializeApp(Context) first.\n                                                     at com.google.firebase.FirebaseApp.getInstance(Unknown Source)\n                                                     at com.google.firebase.database.FirebaseDatabase.getInstance(Unknown Source)\n                                                     at com.bustracker.sample.myapplication.MainActivity.onCreate(MainActivity.java:53)\n                                                     at android.app.Activity.performCreate(Activity.java:6679)\n                                                     at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1118)\n                                                     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2618)\n                                                     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2726) \n                                                     at android.app.ActivityThread.-wrap12(ActivityThread.java) \n                                                     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1477) \n                                                     at android.os.Handler.dispatchMessage(Handler.java:102) \n                                                     at android.os.Looper.loop(Looper.java:154) \n                                                     at android.app.ActivityThread.main(ActivityThread.java:6119) \n                                                     at java.lang.reflect.Method.invoke(Native Method) \n                                                     at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:886) \n                                                     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:776) \n<\/code><\/pre>\n\n<p>It might be really same with other questions already but I don't really know what's wrong in here. Thanks in advance for the help.<\/p>\n",
+        "question_id": 47887880,
+        "tags": [
+            "java",
+            "android",
+            "firebase",
+            "firebase-realtime-database"
+        ],
+        "score": 5,
+        "accepted_answer_id": 47888149,
+        "is_answered": true,
+        "view_count": 19556,
+        "last_edit_date": 1579589039
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                "account_id": 12529402,
+                "user_type": "registered",
+                "user_id": 9118154,
+                "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                "reputation": 53,
+                "display_name": "Romar Jhon Maulana"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47887880,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/C2IIF.jpg?s=256",
+                "account_id": 9330184,
+                "user_type": "registered",
+                "user_id": 6926168,
+                "link": "https://stackoverflow.com/users/6926168/dharmishtha",
+                "reputation": 1343,
+                "display_name": "Dharmishtha",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1513690241,
+            "comment_id": 82742077
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/C2IIF.jpg?s=256",
+                "account_id": 9330184,
+                "user_type": "registered",
+                "user_id": 6926168,
+                "link": "https://stackoverflow.com/users/6926168/dharmishtha",
+                "reputation": 1343,
+                "display_name": "Dharmishtha",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 47887880,
+            "edited": false,
+            "creation_date": 1513689894,
+            "comment_id": 82741834
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Zvo67.jpg?s=256",
+                "account_id": 369289,
+                "user_type": "registered",
+                "user_id": 716584,
+                "link": "https://stackoverflow.com/users/716584/ammar-bukhari",
+                "reputation": 2132,
+                "display_name": "Ammar Bukhari",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 12,
+            "is_accepted": false,
+            "last_activity_date": 1535883981,
+            "creation_date": 1535883981,
+            "body": "<p>For me none of the solution worked that were given any where. Only this worked.\nJust had to download grade my google services from 4.1.0 to 4.0.0<\/p>\n\n<pre><code>dependencies {\n    classpath 'com.android.tools.build:gradle:3.3.0-alpha08'\n    classpath 'com.google.gms:google-services:4.0.0'\n    /*classpath 'com.google.gms:google-services:4.1.0' &lt;-- this was the problem */\n}\n<\/code><\/pre>\n\n<p>So if you have updated the google services, just try to downgrade or change to an older version.\nHope it helps someone else.<\/p>\n",
+            "answer_id": 52136082,
+            "question_id": 47887880
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                "account_id": 9432262,
+                "user_type": "registered",
+                "user_id": 7015400,
+                "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                "reputation": 81221,
+                "display_name": "Peter Haddad",
+                "accept_rate": 38
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 8,
+            "is_accepted": true,
+            "last_activity_date": 1513690885,
+            "creation_date": 1513690309,
+            "body": "<p>According to the docs:<\/p>\n<blockquote>\n<p>As said in the docs:<\/p>\n<p>Any FirebaseApp initialization must occur only in the main process of the app. Use of Firebase in processes other than the main process is not supported and will likely cause problems related to resource contention.<\/p>\n<\/blockquote>\n<p>you need to initialize it not in the activity.<\/p>\n<p>add an application class to your manifest example:<\/p>\n<pre><code>      &lt;applicaton\n       android:name=&quot;MyApplication&quot;\n       \n<\/code><\/pre>\n<p>then do this:<\/p>\n<pre><code>public class MyApplication extends Application {\n  @Override\npublic void onCreate() {\n    super.onCreate();\n   FirebaseApp.initializeApp(this);\n}\n<\/code><\/pre>\n<p>and remove the initialization from the activity. You need to initialize it in the application class which is the base class.<\/p>\n<p>Edit(about application):<\/p>\n<blockquote>\n<p>Base class for maintaining global application state. You can provide your own implementation by creating a subclass and specifying the fully-qualified name of this subclass as the &quot;android:name&quot; attribute in your AndroidManifest.xml's  tag. The Application class, or your subclass of the Application class, is instantiated before any other class when the process for your application/package is created.<\/p>\n<\/blockquote>\n<p>Useful link: <a href=\"https://developer.android.com/reference/android/app/Application.html\" rel=\"noreferrer\">https://developer.android.com/reference/android/app/Application.html<\/a><\/p>\n",
+            "answer_id": 47888149,
+            "question_id": 47887880,
+            "last_edit_date": 1592644375
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/SjxyA.png?s=256",
+                "account_id": 2079111,
+                "user_type": "registered",
+                "user_id": 1959809,
+                "link": "https://stackoverflow.com/users/1959809/thatbrainiac",
+                "reputation": 395,
+                "display_name": "thatbrainiac"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 5,
+            "is_accepted": false,
+            "last_activity_date": 1543828310,
+            "creation_date": 1543828310,
+            "body": "<p>For me, it was enough to ensure that the google-services plugin is initialized in my <code>app.gradle<\/code>:<\/p>\n\n<pre><code>apply plugin: 'com.google.gms.google-services'\n<\/code><\/pre>\n\n<p>Then I did not even have to call <code>FirebaseApp.initializeApp(Context)<\/code> at all. Maybe it helps someone.<\/p>\n",
+            "answer_id": 53590537,
+            "question_id": 47887880
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/VD2DT.png?s=256",
+                "account_id": 16259458,
+                "user_type": "registered",
+                "user_id": 11741232,
+                "link": "https://stackoverflow.com/users/11741232/kevinlinxc",
+                "reputation": 694,
+                "display_name": "kevinlinxc"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1562368285,
+            "creation_date": 1562368285,
+            "body": "<p>I don't know why this worked for me but removing <\/p>\n\n<pre><code>tools:node=\"replace\" \n<\/code><\/pre>\n\n<p>from my AndroidManifest.xml improved the crash from right away to from some other thing. Hope I helped someone.<\/p>\n",
+            "answer_id": 56910042,
+            "question_id": 47887880
+        }
+    ],
+    "answer_comments": {
+        "47888149": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                    "account_id": 9432262,
+                    "user_type": "registered",
+                    "user_id": 7015400,
+                    "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                    "reputation": 81221,
+                    "display_name": "Peter Haddad",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "reply_to_user": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "edited": false,
+                "creation_date": 1513693571,
+                "comment_id": 82744118
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                    "account_id": 9432262,
+                    "user_type": "registered",
+                    "user_id": 7015400,
+                    "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                    "reputation": 81221,
+                    "display_name": "Peter Haddad",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "reply_to_user": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "edited": false,
+                "creation_date": 1513692793,
+                "comment_id": 82743621
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "edited": false,
+                "creation_date": 1513692468,
+                "comment_id": 82743426
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                    "account_id": 9432262,
+                    "user_type": "registered",
+                    "user_id": 7015400,
+                    "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                    "reputation": 81221,
+                    "display_name": "Peter Haddad",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "reply_to_user": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "edited": false,
+                "creation_date": 1513692054,
+                "comment_id": 82743196
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "edited": false,
+                "creation_date": 1513691914,
+                "comment_id": 82743111
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                    "account_id": 9432262,
+                    "user_type": "registered",
+                    "user_id": 7015400,
+                    "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                    "reputation": 81221,
+                    "display_name": "Peter Haddad",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "reply_to_user": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "edited": false,
+                "creation_date": 1513691447,
+                "comment_id": 82742836
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "edited": false,
+                "creation_date": 1513691361,
+                "comment_id": 82742785
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                    "account_id": 9432262,
+                    "user_type": "registered",
+                    "user_id": 7015400,
+                    "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                    "reputation": 81221,
+                    "display_name": "Peter Haddad",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "reply_to_user": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "edited": false,
+                "creation_date": 1513690895,
+                "comment_id": 82742479
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                    "account_id": 9432262,
+                    "user_type": "registered",
+                    "user_id": 7015400,
+                    "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                    "reputation": 81221,
+                    "display_name": "Peter Haddad",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "reply_to_user": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "edited": false,
+                "creation_date": 1513690825,
+                "comment_id": 82742434
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "edited": false,
+                "creation_date": 1513690710,
+                "comment_id": 82742356
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/x7QLT.png?s=256",
+                    "account_id": 9432262,
+                    "user_type": "registered",
+                    "user_id": 7015400,
+                    "link": "https://stackoverflow.com/users/7015400/peter-haddad",
+                    "reputation": 81221,
+                    "display_name": "Peter Haddad",
+                    "accept_rate": 38
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "reply_to_user": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "edited": false,
+                "creation_date": 1513690569,
+                "comment_id": 82742265
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh4.googleusercontent.com/-GNdoOKy9g_k/AAAAAAAAAAI/AAAAAAAAF8Q/sW_i65SkvAo/s256-rj/photo.jpg",
+                    "account_id": 12529402,
+                    "user_type": "registered",
+                    "user_id": 9118154,
+                    "link": "https://stackoverflow.com/users/9118154/romar-jhon-maulana",
+                    "reputation": 53,
+                    "display_name": "Romar Jhon Maulana"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 47888149,
+                "edited": false,
+                "creation_date": 1513690527,
+                "comment_id": 82742240
+            }
+        ],
+        "52136082": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/06cb39fe475dc95ced604f610da9d836?s=256&d=identicon&r=PG",
+                    "account_id": 2061804,
+                    "user_type": "registered",
+                    "user_id": 1838169,
+                    "link": "https://stackoverflow.com/users/1838169/user1838169",
+                    "reputation": 534,
+                    "display_name": "user1838169",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52136082,
+                "edited": false,
+                "creation_date": 1550158731,
+                "comment_id": 96175556
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7bc1eb93a20872bafc2b872487b8e744?s=256&d=identicon&r=PG",
+                    "account_id": 485176,
+                    "user_type": "registered",
+                    "user_id": 901336,
+                    "link": "https://stackoverflow.com/users/901336/john",
+                    "reputation": 1594,
+                    "display_name": "John",
+                    "accept_rate": 61
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52136082,
+                "edited": false,
+                "creation_date": 1549778282,
+                "comment_id": 96021276
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/2GiR5.png?s=256",
+                    "account_id": 5262943,
+                    "user_type": "registered",
+                    "user_id": 4203903,
+                    "link": "https://stackoverflow.com/users/4203903/always-lucky",
+                    "reputation": 333,
+                    "display_name": "Always Lucky"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 52136082,
+                "edited": false,
+                "creation_date": 1547593168,
+                "comment_id": 95242812
+            }
+        ],
+        "56910042": [{
+            "owner": {
+                "profile_image": "https://i.sstatic.net/C38qo.jpg?s=256",
+                "account_id": 11299340,
+                "user_type": "registered",
+                "user_id": 8285811,
+                "link": "https://stackoverflow.com/users/8285811/akaisteph7",
+                "reputation": 6921,
+                "display_name": "Akaisteph7"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56910042,
+            "edited": false,
+            "creation_date": 1562371398,
+            "comment_id": 100364887
+        }]
+    }
+}

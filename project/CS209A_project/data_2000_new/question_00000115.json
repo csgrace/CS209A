@@ -1,0 +1,145 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user801154"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/11482612/controlling-the-list-of-urls-to-be-crawled-at-runtime",
+        "last_activity_date": 1342680259,
+        "creation_date": 1342258322,
+        "answer_count": 2,
+        "title": "Controlling the list of URL(s) to be crawled at runtime",
+        "body": "<p>In crawler4j we can override a function <code>boolean shouldVisit(WebUrl url)<\/code> and control whether that particular url should be allowed to be crawled by returning 'true' and 'false'. <\/p>\n\n<p>But can we add URL(s) at runtime ? if yes , what are ways to do that ?\nCurrently I can add URL(s) at beginning of program using <code>addSeed(String url)<\/code> function before the <code>start(BasicCrawler.class, numberOfCrawlers)<\/code> in <code>CrawlController<\/code> class and if I try to add new url using <code>addSeed(String url)<\/code>, it gives error. <a href=\"https://i.sstatic.net/RPmaP.jpg\" rel=\"nofollow\">Here<\/a> is error image .<\/p>\n\n<p>Any help will be appreciative and please let me know if any more detail about project is required to answer the question .  <\/p>\n",
+        "question_id": 11482612,
+        "tags": [
+            "java",
+            "web-crawler",
+            "crawler4j"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 1229,
+        "last_edit_date": 1342272986
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/55dfaa0581d04ed45ece000fd326b052?s=256&d=identicon&r=PG",
+                "account_id": 296410,
+                "user_type": "registered",
+                "user_id": 601357,
+                "link": "https://stackoverflow.com/users/601357/samsamara",
+                "reputation": 4760,
+                "display_name": "samsamara",
+                "accept_rate": 58
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1342680259,
+            "creation_date": 1342679940,
+            "body": "<p>You can do this.<\/p>\n\n<p>Use <code>public void schedule(WebURL url)<\/code> to add URLs to the crawler frontier which is a member of the <code>Frontier.java<\/code> class. But for this you need to have your url of type <code>WebURL<\/code>. If you want to make a <code>WebURL<\/code> out of your string. Please have a look at the <code>addSeed()<\/code> (below code) which is in the <code>CrawlController.java<\/code> class to see how it has converted the string (url) into a WebURL.<\/p>\n\n<p>Also use the existing frontier instance.<\/p>\n\n<p>Hope this helps..<\/p>\n\n<pre><code>public void addSeed(String pageUrl, int docId) {\n        String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);\n        if (canonicalUrl == null) {\n            logger.error(\"Invalid seed URL: \" + pageUrl);\n            return;\n        }\n        if (docId &lt; 0) {\n            docId = docIdServer.getDocId(canonicalUrl);\n            if (docId &gt; 0) {\n                // This URL is already seen.\n                return;\n            }\n            docId = docIdServer.getNewDocID(canonicalUrl);\n        } else {\n            try {\n                docIdServer.addUrlAndDocId(canonicalUrl, docId);\n            } catch (Exception e) {\n                logger.error(\"Could not add seed: \" + e.getMessage());\n            }\n        }\n\n        WebURL webUrl = new WebURL();\n        webUrl.setURL(canonicalUrl);\n        webUrl.setDocid(docId);\n        webUrl.setDepth((short) 0);\n        if (!robotstxtServer.allows(webUrl)) {\n            logger.info(\"Robots.txt does not allow this seed: \" + pageUrl);\n        } else {\n            frontier.schedule(webUrl); //method that adds URL to the frontier at run time\n        }\n    } \n<\/code><\/pre>\n",
+            "answer_id": 11555214,
+            "question_id": 11482612,
+            "last_edit_date": 1342680259
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cd62c2e5b65c928086f5c1b58d58f644?s=256&d=identicon&r=PG",
+                "account_id": 59631,
+                "user_type": "registered",
+                "user_id": 178382,
+                "link": "https://stackoverflow.com/users/178382/gian",
+                "reputation": 14015,
+                "display_name": "Gian"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1342258649,
+            "creation_date": 1342258649,
+            "body": "<p>Presumably you can implement this function however you like, and have it depend on a list of URLs that should not be crawled.  The implementation of <code>shouldVisit<\/code> is then going to involve asking if a given URL is in your list of forbidden URLs (or permitted URLs), and returning true or false on that basis.<\/p>\n",
+            "answer_id": 11482646,
+            "question_id": 11482612
+        }
+    ],
+    "answer_comments": {"11482646": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cd62c2e5b65c928086f5c1b58d58f644?s=256&d=identicon&r=PG",
+                "account_id": 59631,
+                "user_type": "registered",
+                "user_id": 178382,
+                "link": "https://stackoverflow.com/users/178382/gian",
+                "reputation": 14015,
+                "display_name": "Gian"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 11482646,
+            "edited": false,
+            "creation_date": 1342260619,
+            "comment_id": 15164136
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user801154"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 11482646,
+            "edited": false,
+            "creation_date": 1342260309,
+            "comment_id": 15164094
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cd62c2e5b65c928086f5c1b58d58f644?s=256&d=identicon&r=PG",
+                "account_id": 59631,
+                "user_type": "registered",
+                "user_id": 178382,
+                "link": "https://stackoverflow.com/users/178382/gian",
+                "reputation": 14015,
+                "display_name": "Gian"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 11482646,
+            "edited": false,
+            "creation_date": 1342259900,
+            "comment_id": 15164035
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cd62c2e5b65c928086f5c1b58d58f644?s=256&d=identicon&r=PG",
+                "account_id": 59631,
+                "user_type": "registered",
+                "user_id": 178382,
+                "link": "https://stackoverflow.com/users/178382/gian",
+                "reputation": 14015,
+                "display_name": "Gian"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 11482646,
+            "edited": false,
+            "creation_date": 1342259712,
+            "comment_id": 15164011
+        },
+        {
+            "owner": {
+                "user_type": "does_not_exist",
+                "display_name": "user801154"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 11482646,
+            "edited": false,
+            "creation_date": 1342259643,
+            "comment_id": 15164000
+        }
+    ]}
+}

@@ -1,0 +1,177 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/aedda0e1b265dee62ebca5a1965c65b8?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5477263,
+            "user_type": "registered",
+            "user_id": 4354938,
+            "link": "https://stackoverflow.com/users/4354938/ercan",
+            "reputation": 11,
+            "display_name": "ercan"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/44937561/weird-multithreading-performance-of-simple-benchmark-java",
+        "last_activity_date": 1499304497,
+        "creation_date": 1499297661,
+        "answer_count": 0,
+        "title": "Weird Multithreading Performance of Simple Benchmark (Java)",
+        "body": "<p>Recently I wrote a really simple code as a benchmark to see performance increase in my machine. It just creates some number of threads and divides some number of spins between those threads. Below is my class which extends Thread in java:<\/p>\n\n<pre><code>public static class LoopThread extends Thread {\n    int index;\n    long numberOfRound;\n    long numberOfSpins;\n\n    public LoopThread(int index, long numberOfRound, long numberOfSpins) {\n        this.index = index;\n        this.numberOfRound = numberOfRound;\n        this.numberOfSpins = numberOfSpins;\n    }\n\n    public void run() {\n        System.out.println(\"Thread \" + index + \" started for \" + numberOfRound + \" rounds and \" + numberOfSpins + \" spins\");\n        for(long i = 0; i &lt; numberOfRound; i++) {\n            for(long j = 0; j &lt; numberOfSpins; j++) {\n\n            }\n        }\n        System.out.println(\"Thread \" + index + \" ended\");\n    }\n<\/code><\/pre>\n\n<p>The weird thing is when I first wrote this piece of code, it was almost scaling linearly until 8 threads. However, it was taking more time with 9 threads and the increase was small after 9 threads although my machine has 16 hardware threads. In order to investigate the problem, I just changed the code in a simple way so I put a time information in the last line of the code like:<\/p>\n\n<pre><code>System.out.println(\"Thread \" + index + \" ended: \" + System.currentTimeMillis());\n<\/code><\/pre>\n\n<p>This change suprisingly made my code more scalable. Since I can't see an obvious reason behind why this change caused this improvement, I tried again and again and here some results which I consistently see:<\/p>\n\n<p>Before the change:<\/p>\n\n<pre><code>time passed for 8 threads and 1000000 rounds and 800000 spins is 63 seconds\ntime passed for 9 threads and 1000000 rounds and 800000 spins is 69 seconds\n<\/code><\/pre>\n\n<p>After the simple change:<\/p>\n\n<pre><code>time passed for 8 threads and 1000000 rounds and 800000 spins is 62 seconds\ntime passed for 9 threads and 1000000 rounds and 800000 spins is 56 seconds\n<\/code><\/pre>\n\n<p>Again, I can't see any obvious reason behind that and it seems very weird to me. Do you have any idea about why this is happening?<\/p>\n\n<p>Thanks<\/p>\n\n<p>Edit(the code which starts threads and times):<\/p>\n\n<pre><code>public static void main(String[] args) {\n    int numberOfThreads = Integer.parseInt(args[0]);\n    long numberOfRounds = Long.parseLong(args[1]);\n    long numberOfSpins = Long.parseLong(args[2]);\n    long startTime = System.currentTimeMillis();\n    Thread[] threads = new Thread[numberOfThreads];\n\n    for( int i = 0; i &lt; numberOfThreads; i++) {\n        threads[i] = new LoopThread(i, numberOfRounds, (long) numberOfSpins/numberOfThreads);\n        threads[i].start();\n    }\n\n    for(Thread t: threads) {\n        try {\n            t.join();\n        } catch (InterruptedException e) {\n            e.printStackTrace();\n        }\n    }\n\n    long endTime = System.currentTimeMillis() - startTime;\n    System.out.println(\"time passed for \" + numberOfThreads + \" threads and \" + numberOfRounds + \" rounds and \" + numberOfSpins + \" spins is \" + endTime/1000 + \" seconds\");\n}\n<\/code><\/pre>\n",
+        "question_id": 44937561,
+        "tags": [
+            "java",
+            "multithreading",
+            "performance",
+            "benchmarking"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 261,
+        "last_edit_date": 1499304497
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aedda0e1b265dee62ebca5a1965c65b8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5477263,
+                "user_type": "registered",
+                "user_id": 4354938,
+                "link": "https://stackoverflow.com/users/4354938/ercan",
+                "reputation": 11,
+                "display_name": "ercan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937561,
+            "edited": false,
+            "creation_date": 1499534970,
+            "comment_id": 76952625
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/t2hoD.jpg?s=256",
+                "account_id": 3211603,
+                "user_type": "registered",
+                "user_id": 2711488,
+                "link": "https://stackoverflow.com/users/2711488/holger",
+                "reputation": 300991,
+                "display_name": "Holger"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937561,
+            "edited": false,
+            "creation_date": 1499425144,
+            "comment_id": 76912850
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/be85f7bc23d6fa1addc8d35e39870579?s=256&d=identicon&r=PG",
+                "account_id": 1680363,
+                "user_type": "registered",
+                "user_id": 1544715,
+                "link": "https://stackoverflow.com/users/1544715/magnus",
+                "reputation": 8318,
+                "display_name": "Magnus",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937561,
+            "edited": false,
+            "creation_date": 1499310705,
+            "comment_id": 76854577
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aedda0e1b265dee62ebca5a1965c65b8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5477263,
+                "user_type": "registered",
+                "user_id": 4354938,
+                "link": "https://stackoverflow.com/users/4354938/ercan",
+                "reputation": 11,
+                "display_name": "ercan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937561,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/be85f7bc23d6fa1addc8d35e39870579?s=256&d=identicon&r=PG",
+                "account_id": 1680363,
+                "user_type": "registered",
+                "user_id": 1544715,
+                "link": "https://stackoverflow.com/users/1544715/magnus",
+                "reputation": 8318,
+                "display_name": "Magnus",
+                "accept_rate": 71
+            },
+            "edited": false,
+            "creation_date": 1499308064,
+            "comment_id": 76853956
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/be85f7bc23d6fa1addc8d35e39870579?s=256&d=identicon&r=PG",
+                "account_id": 1680363,
+                "user_type": "registered",
+                "user_id": 1544715,
+                "link": "https://stackoverflow.com/users/1544715/magnus",
+                "reputation": 8318,
+                "display_name": "Magnus",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937561,
+            "edited": false,
+            "creation_date": 1499306886,
+            "comment_id": 76853683
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/aedda0e1b265dee62ebca5a1965c65b8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5477263,
+                "user_type": "registered",
+                "user_id": 4354938,
+                "link": "https://stackoverflow.com/users/4354938/ercan",
+                "reputation": 11,
+                "display_name": "ercan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937561,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/be85f7bc23d6fa1addc8d35e39870579?s=256&d=identicon&r=PG",
+                "account_id": 1680363,
+                "user_type": "registered",
+                "user_id": 1544715,
+                "link": "https://stackoverflow.com/users/1544715/magnus",
+                "reputation": 8318,
+                "display_name": "Magnus",
+                "accept_rate": 71
+            },
+            "edited": false,
+            "creation_date": 1499304526,
+            "comment_id": 76853058
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/be85f7bc23d6fa1addc8d35e39870579?s=256&d=identicon&r=PG",
+                "account_id": 1680363,
+                "user_type": "registered",
+                "user_id": 1544715,
+                "link": "https://stackoverflow.com/users/1544715/magnus",
+                "reputation": 8318,
+                "display_name": "Magnus",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 44937561,
+            "edited": false,
+            "creation_date": 1499299739,
+            "comment_id": 76851957
+        }
+    ],
+    "answers": [],
+    "answer_comments": {}
+}

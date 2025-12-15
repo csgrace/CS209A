@@ -1,0 +1,316 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+            "account_id": 775068,
+            "user_type": "registered",
+            "user_id": 823393,
+            "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+            "reputation": 66057,
+            "display_name": "OldCurmudgeon",
+            "accept_rate": 86
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8066130/should-i-close-the-filechannel",
+        "last_activity_date": 1343424311,
+        "creation_date": 1320847376,
+        "answer_count": 2,
+        "title": "Should I close the FileChannel?",
+        "body": "<p>I came across an issue with one of our utility classes today. It is a helper for files and contains some static file copy routines. Below are the relevant methods extracted along with a test method.<\/p>\n\n<p>The problem is that sometimes the setLastModified call fails, returning false.<\/p>\n\n<p>On my PC (Windows 7, latest Java) I sometimes get the \"setLastModified failed\" message (About 25 times out of 1000).<\/p>\n\n<p>I have worked around the problem right now by removing the FileChannel.close calls but I would much prefer to understand why this is happening, even if that is the correct solution.<\/p>\n\n<p>Does anyone else get the same problem?<\/p>\n\n<pre><code>private void testCopy() throws FileNotFoundException, IOException {\n  File src = new File(\"C:\\\\Public\\\\Test-Src.txt\");\n  File dst = new File(\"C:\\\\Public\\\\Test-Dst.txt\");\n\n  for (int i = 0; i &lt; 1000; i++) {\n    copyFile(src, dst);\n  }\n}\n\npublic static void copyFile(final File from, final File to) throws FileNotFoundException, IOException {\n  final String tmpName = to.getAbsolutePath() + \".tmp\";\n  // Copy to a .tmp file.\n  final File tmp = new File(tmpName);\n  // Do the transfer.\n  transfer(from, tmp);\n  // Preserve time.\n  if (!tmp.setLastModified(from.lastModified())) {\n    System.err.println(\"setLastModified failed!\");\n  }\n  // In case there's one there already.\n  to.delete();\n  // Rename it in.\n  tmp.renameTo(to);\n}\n\npublic static void transfer(final File from, final File to) throws IOException {\n  FileInputStream in = null;\n  FileOutputStream out = null;\n  try {\n    in = new FileInputStream(from);\n    out = new FileOutputStream(to);\n    transfer(in, out);\n  } finally {\n    if (null != in) {\n      in.close();\n    }\n    if (null != out) {\n      out.close();\n    }\n  }\n}\n\npublic static void transfer(final FileInputStream from, final FileOutputStream to) throws IOException {\n  FileChannel srcChannel = null;\n  FileChannel dstChannel = null;\n  //try {\n    srcChannel = from.getChannel();\n    dstChannel = to.getChannel();\n    srcChannel.transferTo(0, srcChannel.size(), dstChannel);\n  //} finally {\n  //  if (null != dstChannel) {\n  //    dstChannel.close();\n  //  }\n  //  if (null != srcChannel) {\n  //    srcChannel.close();\n  //  }\n  }\n}\n<\/code><\/pre>\n\n<p><strong>Edit:<\/strong> I have changed the code to only close the <code>Streams<\/code>s and not the <code>FileChannel<\/code>s because research suggests closing the <code>FileChannel<\/code> also closes the <code>Stream<\/code>.<\/p>\n",
+        "question_id": 8066130,
+        "tags": [
+            "java",
+            "filechannel"
+        ],
+        "score": 14,
+        "accepted_answer_id": 8210815,
+        "is_answered": true,
+        "view_count": 11076,
+        "last_edit_date": 1343424311
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7df9b99b5d8ac9eda9330768ca1acf09?s=256&d=identicon&r=PG",
+                "account_id": 266709,
+                "user_type": "registered",
+                "user_id": 554431,
+                "link": "https://stackoverflow.com/users/554431/bestsss",
+                "reputation": 12126,
+                "display_name": "bestsss"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8066130,
+            "edited": false,
+            "creation_date": 1321879936,
+            "comment_id": 10095154
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                "account_id": 775068,
+                "user_type": "registered",
+                "user_id": 823393,
+                "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                "reputation": 66057,
+                "display_name": "OldCurmudgeon",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8066130,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/Z2KYN.jpg?s=256",
+                "account_id": 960307,
+                "user_type": "registered",
+                "user_id": 984823,
+                "link": "https://stackoverflow.com/users/984823/joop-eggen",
+                "reputation": 110397,
+                "display_name": "Joop Eggen"
+            },
+            "edited": false,
+            "creation_date": 1320855006,
+            "comment_id": 9884564
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Z2KYN.jpg?s=256",
+                "account_id": 960307,
+                "user_type": "registered",
+                "user_id": 984823,
+                "link": "https://stackoverflow.com/users/984823/joop-eggen",
+                "reputation": 110397,
+                "display_name": "Joop Eggen"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8066130,
+            "edited": false,
+            "creation_date": 1320850652,
+            "comment_id": 9882963
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                "account_id": 775068,
+                "user_type": "registered",
+                "user_id": 823393,
+                "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                "reputation": 66057,
+                "display_name": "OldCurmudgeon",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8066130,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/3e9dfe36513d818c179be3f5c6f57077?s=256&d=identicon&r=PG",
+                "account_id": 51752,
+                "user_type": "registered",
+                "user_id": 154640,
+                "link": "https://stackoverflow.com/users/154640/chris-aldrich",
+                "reputation": 1928,
+                "display_name": "Chris Aldrich",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1320849000,
+            "comment_id": 9882409
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3e9dfe36513d818c179be3f5c6f57077?s=256&d=identicon&r=PG",
+                "account_id": 51752,
+                "user_type": "registered",
+                "user_id": 154640,
+                "link": "https://stackoverflow.com/users/154640/chris-aldrich",
+                "reputation": 1928,
+                "display_name": "Chris Aldrich",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 8066130,
+            "edited": false,
+            "creation_date": 1320847799,
+            "comment_id": 9882001
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                "account_id": 775068,
+                "user_type": "registered",
+                "user_id": 823393,
+                "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                "reputation": 66057,
+                "display_name": "OldCurmudgeon",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8066130,
+            "edited": false,
+            "creation_date": 1320847537,
+            "comment_id": 9881881
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                "account_id": 775068,
+                "user_type": "registered",
+                "user_id": 823393,
+                "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                "reputation": 66057,
+                "display_name": "OldCurmudgeon",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 12,
+            "is_accepted": true,
+            "last_activity_date": 1343424010,
+            "creation_date": 1321873821,
+            "body": "<p>After some research amongst the various sites that hold java library sources it looks very much like <code>FileChannel.close<\/code> ultimately calls the <code>FileInputStream.close<\/code> or <code>FileOutputStream.close<\/code> of its parent object. <\/p>\n\n<p>This suggests to me that you should <strong>either close the FileChannel or the Stream but not both<\/strong>.<\/p>\n\n<p>In view of this I am changing my original post to reflect one correct method, i.e. close the <code>Stream<\/code>s not the <code>Channel<\/code>s.<\/p>\n",
+            "answer_id": 8210815,
+            "question_id": 8066130,
+            "last_edit_date": 1343424010
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/409678a88624be6466e650f389ee8eaa?s=256&d=identicon&r=PG",
+                "account_id": 115659,
+                "user_type": "registered",
+                "user_id": 303598,
+                "link": "https://stackoverflow.com/users/303598/matsev",
+                "reputation": 34005,
+                "display_name": "matsev",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1321124454,
+            "creation_date": 1321122346,
+            "body": "<p>If you are using Java 7, you could use <a href=\"http://download.oracle.com/javase/7/docs/api/java/nio/file/Files.html#copy%28java.nio.file.Path,%20java.nio.file.Path,%20java.nio.file.CopyOption...%29\" rel=\"nofollow\">Files.copy(Path source, Path target, CopyOption... options)<\/a> for this operation to avoid writing, testing and debugging your own implementation.<\/p>\n\n<p>Alternatively, consider using an external library such as <a href=\"http://commons.apache.org/io/\" rel=\"nofollow\">Apache Commons IO<\/a>. Specifically, you will find <a href=\"http://commons.apache.org/io/api-release/org/apache/commons/io/FileUtils.html#copyFile%28java.io.File,%20java.io.File%29\" rel=\"nofollow\">FileUtils.copyFile(File srcFile, File destFile)<\/a> interesting:<\/p>\n\n<pre><code>/** \n * Copies a file to a new location preserving the file date.\n * [...]\n * @param srcFile  an existing file to copy, must not be &lt;code&gt;null&lt;/code&gt;\n * @param destFile  the new file, must not be &lt;code&gt;null&lt;/code&gt;\n * [...]\n */\npublic static void copyFile(File srcFile, File destFile) throws IOException\n<\/code><\/pre>\n",
+            "answer_id": 8106559,
+            "question_id": 8066130,
+            "last_edit_date": 1321124454
+        }
+    ],
+    "answer_comments": {
+        "8106559": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d4288118e4836464de401d53b60466dd?s=256&d=identicon&r=PG",
+                    "account_id": 19463,
+                    "user_type": "registered",
+                    "user_id": 45668,
+                    "link": "https://stackoverflow.com/users/45668/malcolm",
+                    "reputation": 41538,
+                    "display_name": "Malcolm",
+                    "accept_rate": 88
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 8106559,
+                "edited": false,
+                "creation_date": 1343409178,
+                "comment_id": 15504476
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/409678a88624be6466e650f389ee8eaa?s=256&d=identicon&r=PG",
+                    "account_id": 115659,
+                    "user_type": "registered",
+                    "user_id": 303598,
+                    "link": "https://stackoverflow.com/users/303598/matsev",
+                    "reputation": 34005,
+                    "display_name": "matsev",
+                    "accept_rate": 84
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8106559,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                    "account_id": 775068,
+                    "user_type": "registered",
+                    "user_id": 823393,
+                    "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                    "reputation": 66057,
+                    "display_name": "OldCurmudgeon",
+                    "accept_rate": 86
+                },
+                "edited": false,
+                "creation_date": 1321290951,
+                "comment_id": 9967793
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                    "account_id": 775068,
+                    "user_type": "registered",
+                    "user_id": 823393,
+                    "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                    "reputation": 66057,
+                    "display_name": "OldCurmudgeon",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8106559,
+                "edited": false,
+                "creation_date": 1321261361,
+                "comment_id": 9959167
+            }
+        ],
+        "8210815": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/6a37a096cfb6f7b8e40e4950dc1a9658?s=256&d=identicon&r=PG",
+                    "account_id": 775068,
+                    "user_type": "registered",
+                    "user_id": 823393,
+                    "link": "https://stackoverflow.com/users/823393/oldcurmudgeon",
+                    "reputation": 66057,
+                    "display_name": "OldCurmudgeon",
+                    "accept_rate": 86
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8210815,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/7df9b99b5d8ac9eda9330768ca1acf09?s=256&d=identicon&r=PG",
+                    "account_id": 266709,
+                    "user_type": "registered",
+                    "user_id": 554431,
+                    "link": "https://stackoverflow.com/users/554431/bestsss",
+                    "reputation": 12126,
+                    "display_name": "bestsss"
+                },
+                "edited": false,
+                "creation_date": 1321879405,
+                "comment_id": 10094963
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/7df9b99b5d8ac9eda9330768ca1acf09?s=256&d=identicon&r=PG",
+                    "account_id": 266709,
+                    "user_type": "registered",
+                    "user_id": 554431,
+                    "link": "https://stackoverflow.com/users/554431/bestsss",
+                    "reputation": 12126,
+                    "display_name": "bestsss"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 8210815,
+                "edited": false,
+                "creation_date": 1321877607,
+                "comment_id": 10094411
+            }
+        ]
+    }
+}

@@ -1,0 +1,95 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/173d3f124cde4bc3a9b1024660160390?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 16648537,
+            "user_type": "registered",
+            "user_id": 12032184,
+            "link": "https://stackoverflow.com/users/12032184/sagir",
+            "reputation": 19,
+            "display_name": "Sagir"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60025638/java-stream-null-check",
+        "last_activity_date": 1584611218,
+        "creation_date": 1580642985,
+        "answer_count": 1,
+        "title": "java stream null check",
+        "body": "<p><strong>How to better way to check null values inside stream<\/strong><\/p>\n\n<pre><code>List&lt;Employee&gt; employees1= employees.stream().filter(\n                    employee -&gt; students.stream()\n                        .anyMatch(student -&gt;\n                               // checking null\n                                employee!=null &amp;&amp; student!=null &amp;&amp;\n                                employee.getId()!=null &amp;&amp; student.getName()!=null &amp;&amp;\n                                employee.getId()==student.getId() &amp;&amp;\n                                employee.getName().equals(student.getName()))\n                )\n                .collect(Collectors.toList());\n<\/code><\/pre>\n",
+        "question_id": 60025638,
+        "tags": [
+            "java",
+            "stream"
+        ],
+        "score": 0,
+        "accepted_answer_id": 60754533,
+        "is_answered": true,
+        "view_count": 1821,
+        "last_edit_date": 1584609608
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/bb0e9c777abc9a09aa812d9bad887dfd?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11003735,
+            "user_type": "registered",
+            "user_id": 10482740,
+            "link": "https://stackoverflow.com/users/10482740/nimblenavigator",
+            "reputation": 138,
+            "display_name": "NimbleNavigator"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1584611218,
+        "creation_date": 1584611218,
+        "body": "<p>I'm curious to see if your code throws a <code>NullPointerException<\/code> during execution. You are streaming your <code>employees<\/code> collection and then a <code>students<\/code> collection within the <code>Employee<\/code> object. <\/p>\n\n<p>If your parent object, <code>Employee<\/code>, is a null value then you cannot possibly have a <code>student<\/code> collection on that object, as indicated in your inner-stream. <\/p>\n\n<p>Consider introducing: <\/p>\n\n<pre><code>.map(employee -&gt; Optional.ofNullable(employee) \n.filter(Optional::isPresent)\n.map(Optional::get) \n<\/code><\/pre>\n\n<p>before your filter. This will eliminate any null parent objects. <\/p>\n\n<p>For your inner-stream, you still seem concerned that your <code>student<\/code> element is going to be null, so repeat these lines before your <code>.anyMatch<\/code> call. <\/p>\n\n<p>For readability, I would consider extracting your null checks into smaller methods that describe what checks are being performed. For example you have the line: <\/p>\n\n<pre><code>employee.getName().equals(student.getName()\n<\/code><\/pre>\n\n<p>which suggests that you're looking for student elements where the employee and student names match. <code>employeeAndStudentNamesMatch(employee, student)<\/code> would suffice here. <\/p>\n\n<p>For checking null values, you should really use the <code>Optional<\/code> API. This gives you options to wrap something that is potentially null in a safe wrapper to check if there is a value there or not. Extracting an example from your inner stream where you're checking for the presence of a student's name you can replace this with: <\/p>\n\n<pre><code>Optional.ofNullable(student.getName()).isPresent();\n<\/code><\/pre>\n\n<p>This is all the advice that I can really offer. Hope it helps you progress.<\/p>\n",
+        "answer_id": 60754533,
+        "question_id": 60025638
+    }],
+    "answer_comments": {"60754533": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/bb0e9c777abc9a09aa812d9bad887dfd?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 11003735,
+                "user_type": "registered",
+                "user_id": 10482740,
+                "link": "https://stackoverflow.com/users/10482740/nimblenavigator",
+                "reputation": 138,
+                "display_name": "NimbleNavigator"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60754533,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/173d3f124cde4bc3a9b1024660160390?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16648537,
+                "user_type": "registered",
+                "user_id": 12032184,
+                "link": "https://stackoverflow.com/users/12032184/sagir",
+                "reputation": 19,
+                "display_name": "Sagir"
+            },
+            "edited": false,
+            "creation_date": 1584621869,
+            "comment_id": 107496277
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/173d3f124cde4bc3a9b1024660160390?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16648537,
+                "user_type": "registered",
+                "user_id": 12032184,
+                "link": "https://stackoverflow.com/users/12032184/sagir",
+                "reputation": 19,
+                "display_name": "Sagir"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 60754533,
+            "edited": false,
+            "creation_date": 1584616128,
+            "comment_id": 107493433
+        }
+    ]}
+}

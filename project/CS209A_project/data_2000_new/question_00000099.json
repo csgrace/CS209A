@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5086c54bc24f2f32cfd6e1117406871e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 11332829,
+            "user_type": "registered",
+            "user_id": 8309818,
+            "link": "https://stackoverflow.com/users/8309818/rohit",
+            "reputation": 65,
+            "display_name": "Rohit",
+            "accept_rate": 57
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/78812192/ejb3-websphere-custom-jndi-binding",
+        "last_activity_date": 1722373163,
+        "creation_date": 1722348405,
+        "answer_count": 1,
+        "title": "EJB3 Websphere Custom JNDI Binding",
+        "body": "<p>I have an application which I am migrating an application(EJB Application to be specific) to EJB 3.1 from EJB 2.1.<\/p>\n<p>Now, I want a custom JNDI mapping for a Stateless bean.\nI had set the mappingName with the Stateless Annotation, but it only sets the mapped-name XML Tag in the ejb-jar_merged.xml file.<\/p>\n<p>Now, I want to set the following <code>simple-binding-name<\/code> programatically, probably via using the EJB3.1 Annotations. Is that possible to do so?<\/p>\n<p>I except the following, ibm-ejb-jar-bnd.xml to look this way(Potentially without creating this file manually).<\/p>\n<p><code>&lt;session name=&quot;SomeEJBBean&quot; simple-binding-name=&quot;ejb/org.abc.ejbclient.SomeEJBBean&quot;/&gt;<\/code><\/p>\n<p>Any help is greatly appreciated.<\/p>\n",
+        "question_id": 78812192,
+        "tags": [
+            "java",
+            "java-8",
+            "websphere",
+            "ejb",
+            "ejb-3.1"
+        ],
+        "score": 0,
+        "accepted_answer_id": 78813654,
+        "is_answered": true,
+        "view_count": 76
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4e568448cbf3ec91ea6ea8c1bc13d2aa?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6626438,
+            "user_type": "registered",
+            "user_id": 5116519,
+            "link": "https://stackoverflow.com/users/5116519/tracy",
+            "reputation": 1108,
+            "display_name": "Tracy"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1722373163,
+        "creation_date": 1722373163,
+        "body": "<p>For direct EJB lookups, the only way to configure a custom JNDI name for an EJB in WebSphere is through the use of the <code>ibm-ejb-jar-bnd.xml<\/code> file. There is no mechanism for generating this file from annotations, nor is there a way to provide a custom JNDI name with an annotation.<\/p>\n<p>To improve the portability of EJB applications, the EJB 3.1 specification added a well defined JNDI name for all EJBs in java:global, java:app, and java:module, but did not provide a way to customize those binding names.<\/p>\n<p>The EJB specification also introduced the <code>mappedName<\/code> attribute of the <code>@Stateless<\/code> and <code>@Stateful<\/code> annotations. However, this attribute has undefined behavior and is not required, so WebSphere chose not to provide an implementation for this attribute as it would not be portable.<\/p>\n<p>Another option to consider is that an application may provide a &quot;custom&quot; JNDI name for an EJB through the use of an EJB reference (i.e., <code>&lt;ejb-ref&gt;<\/code> or <code>&lt;ejb-local-ref&gt;<\/code> in <code>ejb-jar.xml<\/code> or <code>@EJB<\/code> annotation).<\/p>\n<p>Consider the following example:<\/p>\n<pre><code>@Stateless\n@Remote(ClientRemote.class)\n@EJB(name=&quot;java:global/env/ejb/ClientBeanRef&quot;, beanInterface=ClientRemote.class, beanName=&quot;ClientBean&quot;)\npublic class ClientBean\n\n<\/code><\/pre>\n<p>The specification defined JNDI name for the <code>ClientBean<\/code> would be something like:<\/p>\n<pre><code>java:global/TestApp/TestEJBModule/ClientBean!org.test.ClientRemote\n<\/code><\/pre>\n<p>So, the bean could be looked up directly using this name, or, if using the EJB reference name, it would just be:<\/p>\n<pre><code>java:global/env/ejb/ClientBeanRef\n<\/code><\/pre>\n<p>Or any other name specified on the <code>@EJB<\/code> annotation in the java:global, java:app, or java:module naming contexts.<\/p>\n<p>Note that bindings provided for an EJB reference will not be visible from a thin client, so this may not be an option if that is important for your application.<\/p>\n<p>Full details about other EJB binding related options in WebSphere may be found here:<\/p>\n<ul>\n<li><a href=\"https://www.ibm.com/docs/en/was-nd/8.5.5?topic=beans-ejb-30-ejb-31-application-bindings-overview\" rel=\"nofollow noreferrer\">EJB 3.0 and EJB 3.1 application bindings overview<\/a><\/li>\n<\/ul>\n",
+        "answer_id": 78813654,
+        "question_id": 78812192
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/3b7db14f8681a817e15b6c79ecb45d7b?s=256&d=identicon&r=PG",
+            "account_id": 295267,
+            "user_type": "registered",
+            "user_id": 599585,
+            "link": "https://stackoverflow.com/users/599585/pdinklag",
+            "reputation": 1260,
+            "display_name": "pdinklag",
+            "accept_rate": 81
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/5322413/jni-callobjectmethod-screws-up-the-stack-frame",
+        "last_activity_date": 1339154085,
+        "creation_date": 1300262205,
+        "answer_count": 1,
+        "title": "JNI CallObjectMethod screws up the stack frame?",
+        "body": "<p>I have C++ code invoking a Java method that returns an object:<\/p>\n\n<pre><code>virtual bool OnGetData(sf::SoundStream::Chunk&amp; data) {\n    jobject jchunk = env-&gt;CallObjectMethod(binding, JSoundStream::m_getData);\n    if(jchunk) {\n            //... some processing code will go here in the future\n            return true;\n    }\n    return false;\n}\n<\/code><\/pre>\n\n<p>This method lies inside of a C++ class where <code>binding<\/code> is a valid global Java object reference and <code>JSoundStream::m_getData<\/code> is the method ID of the following method inside of the following Java class:<\/p>\n\n<pre><code>public class TestStream extends JSoundStream {\n    [...]\n\n    @Override\n    public Chunk getData() {\n        return null; //testing\n    }\n}\n<\/code><\/pre>\n\n<p>I <em>randomly<\/em> get access violations inside the JVM when that method is called from C++. Sometimes it just works fine, sometimes I get an access violation. Removing the <code>CallObjectMethod<\/code> line will never cause one, so it must be source of the access violations. Inserting printfs for debug purposes makes those access violations a lot more likely. That rings a bell for me: I'm pretty certain that something is screwing up the stack frame.<\/p>\n\n<p>The question now is: <em>what<\/em> might be screwing up the stack frame? I can't find anything suspicious. It must have something to do with the object method call, because removing it gets rid of any problems.<\/p>\n\n<p>My C++ code is compiled using the <code>__cdecl<\/code> calling convention (which is required for a linking to a key library I'm using), and JNI methods use <code>__stdcall<\/code>, but for what I know the compiler (MSVC++ 2008 Express) should be aware of it and take care of \"conversion\", so I doubt this is the problem. If it is, how would I solve this conflict? If it is not, what is?<\/p>\n",
+        "question_id": 5322413,
+        "tags": [
+            "java",
+            "c++",
+            "stack",
+            "java-native-interface"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 1412
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ea9207087672bb4a67737bf493987979?s=256&d=identicon&r=PG",
+            "account_id": 1427644,
+            "user_type": "registered",
+            "user_id": 1350762,
+            "link": "https://stackoverflow.com/users/1350762/maba",
+            "reputation": 48325,
+            "display_name": "maba"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1339154085,
+        "creation_date": 1339154085,
+        "body": "<p>It is probably the <code>env<\/code> pointer that you are using. You must attach the JVM to the current thread by calling <code>jvm-&gt;AttachCurrentThread(&amp;env);<\/code> where the <code>jvm<\/code> pointer has been cached.<\/p>\n",
+        "answer_id": 10947776,
+        "question_id": 5322413
+    }],
+    "answer_comments": {}
+}

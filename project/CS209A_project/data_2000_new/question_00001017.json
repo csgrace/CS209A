@@ -1,0 +1,66 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Nsrar.png?s=256",
+            "account_id": 20582972,
+            "user_type": "registered",
+            "user_id": 15108579,
+            "link": "https://stackoverflow.com/users/15108579/chris",
+            "reputation": 53,
+            "display_name": "Chris"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/67502267/bukkit-getinstance-is-null",
+        "last_activity_date": 1620831771,
+        "creation_date": 1620816955,
+        "answer_count": 1,
+        "title": "Bukkit: getInstance is null",
+        "body": "<p>I'm currently working on an auction plugin for spigot, which is actually good<\/p>\n<p>However, I keep getting this error when I start  my Minecraft server that my getInstance() method returns null. How would I fix this?\nThe instance is loading before anything else, as you see underneath:<\/p>\n<pre><code>@Override\npublic void onEnable() {\n    instance = this;\n    Objects.requireNonNull(this.getCommand(&quot;fraithorauctions&quot;)).setExecutor(mainCommand);\n    eventListener.load(); //Only needs to be loaded once\n    loadAll();\n}\n<\/code><\/pre>\n<p>The error I get is pasted here: <a href=\"https://pastebin.com/1fQzqcU9\" rel=\"nofollow noreferrer\">https://pastebin.com/1fQzqcU9<\/a><\/p>\n<p>I posted a repository on my <a href=\"https://github.com/Fraithor/FraithorAuctions\" rel=\"nofollow noreferrer\">github<\/a>, so you may read through it.<\/p>\n",
+        "question_id": 67502267,
+        "tags": [
+            "java",
+            "minecraft",
+            "bukkit"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 825
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/tMWFV.jpg?s=256",
+            "account_id": 19042742,
+            "user_type": "registered",
+            "user_id": 13902486,
+            "link": "https://stackoverflow.com/users/13902486/firsttry",
+            "reputation": 74,
+            "display_name": "firsttry"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 67502267,
+        "edited": false,
+        "creation_date": 1620830343,
+        "comment_id": 119317964
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lXNm9.png?s=256",
+            "account_id": 16493669,
+            "user_type": "registered",
+            "user_id": 11916773,
+            "link": "https://stackoverflow.com/users/11916773/lucan",
+            "reputation": 3875,
+            "display_name": "Lucan"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": false,
+        "last_activity_date": 1620831771,
+        "creation_date": 1620831771,
+        "body": "<p>It's null because you're initialising <code>AuctionManager<\/code> before your <code>onEnable()<\/code> is called.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>private static final AuctionManager auctionManager = new AuctionManager();\n<\/code><\/pre>\n<p>Your error then tells you why it being null is an issue:<\/p>\n<blockquote>\n<p>Caused by: java.lang.NullPointerException: Cannot invoke &quot;com.fraithor.fraithorauctions.FraithorAuctions.getDataFolder()&quot; because the return value of &quot;com.fraithor.fraithorauctions.FraithorAuctions.getInstance()&quot; is null<\/p>\n<\/blockquote>\n<p>You could simply move the initialisation to inside the <code>onEnable()<\/code> method like so:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>...\nprivate static AuctionManager auctionManager;\n...\n\n@Override\npublic void onEnable() {\n    instance = this;\n    auctionManager = new AuctionManager();\n    ...\n}\n<\/code><\/pre>\n<p>However, it would be better practice to pass the plugin instance to your <code>AuctionManager<\/code> class constructor instead of relying on static fields.<\/p>\n",
+        "answer_id": 67506208,
+        "question_id": 67502267
+    }],
+    "answer_comments": {}
+}

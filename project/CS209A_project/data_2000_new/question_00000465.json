@@ -1,0 +1,72 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-dK0jQHpJTCs/AAAAAAAAAAI/AAAAAAAAAAA/AGDgw-hsMDVZKPgYwnPCjZ6N9ivkFqT6vw/mo/s256-rj/photo.jpg",
+            "account_id": 4257341,
+            "user_type": "registered",
+            "user_id": 3482675,
+            "link": "https://stackoverflow.com/users/3482675/olly",
+            "reputation": 371,
+            "display_name": "Olly",
+            "accept_rate": 67
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/34388198/mapping-json-with-varying-object-name",
+        "last_activity_date": 1450681745,
+        "creation_date": 1450665217,
+        "answer_count": 2,
+        "title": "Mapping JSON with varying object name",
+        "body": "<p>I'm quite new to JSON, and I've looked around trying to work out what to do but not sure if I fully understand. I am making an external API call returning:<\/p>\n\n<pre><code>2015-12-21 01:22:09 INFO  RiotURLSender:60 - Total json: \n{\"USERNAME\":{\"profileIconId\":984,\"revisionDate\":1450655430000,\"name\":\"USERNAME2\",\"id\":38584682,\"summonerLevel\":30}}\n<\/code><\/pre>\n\n<p>Where 'USERNAME' (And USERNAME2 - which can be very slightly different to USERNAME) will vary depending on what you pass the call's parameters. I was using Jackson Object Mapper to map the individual values within the USERNAME object - but didn't realise I had to map the object as well.<\/p>\n\n<p>I've been using annotations in the DTOs like:<\/p>\n\n<pre><code>@JsonProperty(\"profileIconId\")\nprivate Long profileIconId;\n<\/code><\/pre>\n\n<p>and mapping using:<\/p>\n\n<pre><code>summonerRankedInfoDTO = mapper.readValue(jsonString, SummonerRankedInfoDTO.class);\n<\/code><\/pre>\n\n<p>How do I map using a value of USERNAME which is changing every single time?<\/p>\n\n<p>Also this seems a bit odd, is this bad practice to have the actual varying key rather than just have the same key and different value?<\/p>\n\n<p>Thanks<\/p>\n",
+        "question_id": 34388198,
+        "tags": [
+            "java",
+            "json",
+            "jackson"
+        ],
+        "score": 2,
+        "is_answered": true,
+        "view_count": 3370
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/277f1b5fe0b5b59b9085dca168e0dc59?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 7480553,
+                "user_type": "registered",
+                "user_id": 5685401,
+                "link": "https://stackoverflow.com/users/5685401/sunny",
+                "reputation": 111,
+                "display_name": "Sunny"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1450681745,
+            "creation_date": 1450681745,
+            "body": "<p>you can use following mentioned annotation @JsonAnyGetter And @JsonAnySetter.\nAdd this code into ur domain class. So any non-mapped attribute will get populated into \"nonMappedAttributes\" map while serializing and deserializing the Object.<\/p>\n\n<pre><code>@JsonIgnore\nprotected Map&lt;String, Object&gt; nonMappedAttributes;\n\n@JsonAnyGetter\npublic Map&lt;String, Object&gt; getNonMappedAttributes() {\n    return nonMappedAttributes;\n}\n\n@JsonAnySetter\npublic void setNonMappedAttributes(String key, Object value) {\n    if (nonMappedAttributes == null) {\n        nonMappedAttributes = new HashMap&lt;String, Object&gt;();\n    }\n    if (key != null) {\n        if (value != null) {\n            nonMappedAttributes.put(key, value);\n        } else {\n            nonMappedAttributes.remove(key);\n        }\n    }\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 34390512,
+            "question_id": 34388198
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-W52P3L_hv2Q/AAAAAAAAAAI/AAAAAAAAAiU/Cl3J9ikn_OQ/s256-rj/photo.jpg",
+                "account_id": 7501509,
+                "user_type": "registered",
+                "user_id": 5699651,
+                "link": "https://stackoverflow.com/users/5699651/jonathan-maddox",
+                "reputation": 41,
+                "display_name": "Jonathan Maddox"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1450667977,
+            "creation_date": 1450667977,
+            "body": "<p>You should try to keep the keys the exact same if possible and change values, otherwise you'll have to change your JSON. Since JSON returns a value from the key, the value can change to anything it wants, but you'll be able to return it from the key. This doesn't work the other way around though.<\/p>\n\n<p>Anyway to your question, you may have a little better luck using something like the GSON library, its pretty simple to use.<\/p>\n\n<p>You can create the instance and pass it the JSON string:<\/p>\n\n<pre><code>Gson gson = new Gson();\nJsonObject obj = gson.fromJson(JSON_DOCUMENT, JsonObject.class);\n<\/code><\/pre>\n\n<p>Then you can get certain elements from that now parsed JSON object.<\/p>\n\n<p>For example, in your JSON string, username returns another JSON element, so you can do:<\/p>\n\n<pre><code>JsonObject username = obj.get(\"USERNAME\").getAsJsonObject();\n<\/code><\/pre>\n\n<p>Then just repeat the same steps from there to get whatever value you need.\nSo to get the name which returns \"USERNAME2\":<\/p>\n\n<pre><code>username.get(\"name\").getAsString();\n<\/code><\/pre>\n\n<p>Coming together with:<\/p>\n\n<pre><code>JsonObject obj = gson.fromJson(JSON_DOCUMENT, JsonObject.class);\nJsonObject username = obj.get(\"USERNAME\").getAsJsonObject();\nusername.get(\"name\").getAsString();\n<\/code><\/pre>\n",
+            "answer_id": 34388480,
+            "question_id": 34388198
+        }
+    ],
+    "answer_comments": {}
+}

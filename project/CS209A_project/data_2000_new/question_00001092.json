@@ -1,0 +1,112 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e8b911e7b5217f8981c31fc7ee8b7806?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6383695,
+            "user_type": "registered",
+            "user_id": 4952262,
+            "link": "https://stackoverflow.com/users/4952262/michu93",
+            "reputation": 5871,
+            "display_name": "Michu93",
+            "accept_rate": 71
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48226867/get-value-from-json-with-resttemplate-in-spring-application",
+        "last_activity_date": 1515854783,
+        "creation_date": 1515762248,
+        "answer_count": 2,
+        "title": "Get value from JSON with RestTemplate in Spring application",
+        "body": "<p>I try to parse value from JSON:<\/p>\n\n<pre><code>{\"BTC_BCN\":{\"id\":7,\"last\":\"0.00000086\",\"lowestAsk\":\"0.00000086\",\"highestBid\":\"0.00000085\",\"percentChange\":\"0.14666666\",\"baseVolume\":\"368.86654762\",\"quoteVolume\":\"498378738.00151879\",\"isFrozen\":\"0\",\"high24hr\":\"0.00000086\",\"low24hr\":\"0.00000068\"},\"BTC_ETH\":{\"id\":8,\"last\":\"0.00003800\",\"lowestAsk\":\"0.00003815\",\"highestBid\":\"0.00003800\",\"percentChange\":\"0.12326337\",\"baseVolume\":\"34.17037464\",\"quoteVolume\":\"955538.55551651\",\"isFrozen\":\"0\",\"high24hr\":\"0.00003883\",\"low24hr\":\"0.00003221\"}}\n<\/code><\/pre>\n\n<p>the values which I am interested in is <code>\"id\":8,\"last\":\"0.00003800\"<\/code>.\nI have beans with RestTemplate:<\/p>\n\n<pre><code>@Bean\npublic RestTemplate restTemplate(RestTemplateBuilder builder) {\n    return builder.build();\n}\n<\/code><\/pre>\n\n<p>and the one which ask website by API every 5 seconds <\/p>\n\n<pre><code>@Bean\npublic CommandLineRunner run(RestTemplate restTemplate) throws Exception {\n        return args -&gt; {\n            while(true)\n            {\n                BTC_Poloniex btc_poloniex = restTemplate.getForObject(\n                        \"https://poloniex.com/public?command=returnTicker\", BTC_Poloniex.class);\n                log.info(btc_poloniex.toString());\n                TimeUnit.SECONDS.sleep(5);\n            }           \n        };\n    }\n<\/code><\/pre>\n\n<p>and class to read the values:<\/p>\n\n<pre><code>import com.fasterxml.jackson.annotation.JsonIgnoreProperties;\n\n@JsonIgnoreProperties(ignoreUnknown = true)\npublic class BTC_Poloniex {\nprivate BTC_BCN BTC_BCN;\n\npublic BTC_Poloniex() {}\n\n\npublic BTC_BCN getBTC_BCN() {\n    return BTC_BCN;\n}\n\npublic void setBTC_BCN(BTC_BCN btc_bcn)\n{\n    this.BTC_BCN = btc_bcn;\n}\n\n@Override\npublic String toString() {\n    return \"BTC_Poloniex{\" +\n            \"BTC_BCN=\" + BTC_BCN +\n            '}';\n}\n}\n<\/code><\/pre>\n\n<p>and class (which I think would be better if it were inner class)<\/p>\n\n<pre><code>import com.fasterxml.jackson.annotation.JsonIgnoreProperties;\n\n@JsonIgnoreProperties(ignoreUnknown = true)\npublic class BTC_BCN {\nprivate long id;\nprivate long last;\nprivate long lowestAsk;\n\npublic BTC_BCN(){}\n\npublic long getId() {\n    return id;\n}\n\npublic void setId(long id) {\n    this.id = id;\n}\n\npublic long getLast() {\n    return last;\n}\n\npublic void setLast(long last) {\n    this.last = last;\n}\n\npublic long getLowestAsk() {\n    return lowestAsk;\n}\n\npublic void setLowestAsk(long lowestAsk) {\n    this.lowestAsk = lowestAsk;\n}\n\npublic String toString()\n{\n    return \"BTC_BCN{\" +\n            \" id='\" + id + '\\'' +\n            \" last'= \" + last + '\\'' +\n            \" lowestAsk'= \" + lowestAsk + '\\'' +\n            '}';\n}\n}\n<\/code><\/pre>\n\n<p>when I try to get these values I always have null<\/p>\n\n<pre><code>2018-01-12 14:00:14.829  INFO 18017 --- [           main] com.example.demo.BitbayApplication       : BTC_ETH{BTC_ETH=null}\n<\/code><\/pre>\n\n<p>why is that so? I can easily read simplier JSON but have problem with this one. <\/p>\n",
+        "question_id": 48226867,
+        "tags": [
+            "java",
+            "json",
+            "spring",
+            "resttemplate"
+        ],
+        "score": 2,
+        "accepted_answer_id": 48240952,
+        "is_answered": true,
+        "view_count": 4014,
+        "last_edit_date": 1515767266
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://graph.facebook.com/10204463485702100/picture?type=large",
+                "account_id": 7511329,
+                "user_type": "registered",
+                "user_id": 5706166,
+                "link": "https://stackoverflow.com/users/5706166/karol-p%c5%82oski",
+                "reputation": 159,
+                "display_name": "Karol Płoski"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1515854783,
+            "creation_date": 1515854783,
+            "body": "<p>Simple solution is to use Maps.\nSample is below.<\/p>\n\n<p>Using this code you have access to every field from json :)<\/p>\n\n<p>I hope that my solution is good enough for you :)<\/p>\n\n<pre><code>@Service\npublic class RestTemplateService {\n\n@Autowired\nRestTemplate restTemplate;\n\n\npublic void getInfoFromPoloniex() {\n    HashMap&lt;String,Map&gt; answer = restTemplate.getForObject(\"https://poloniex.com/public?command=returnTicker\",\n            new HashMap&lt;&gt;().getClass());\n\n    answer.values().forEach(a -&gt; System.out.println(a.toString()));\n\n    System.out.println(answer.get(\"BTC_GAME\").getClass().toString());\n\n    answer.get(\"BTC_GAME\").keySet().stream().forEach(k -&gt; System.out.println(k.toString()));\n\n\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n",
+            "answer_id": 48240952,
+            "question_id": 48226867
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/807e6d993dc93665f978ef665e653e21?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8352882,
+                "user_type": "registered",
+                "user_id": 6274306,
+                "link": "https://stackoverflow.com/users/6274306/lakhan-singh",
+                "reputation": 41,
+                "display_name": "Lakhan singh"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1515762714,
+            "creation_date": 1515762714,
+            "body": "<p>The variable defined in BTC_Poloniex class <\/p>\n\n<pre><code>private BTC_ETH BTC_ETH;\n<\/code><\/pre>\n\n<p>should be <\/p>\n\n<pre><code>    private BTC_ETH BTC_BCN;\n<\/code><\/pre>\n\n<p>because the json variable is <\/p>\n\n<blockquote>\n  <p>BTC_BCN<\/p>\n<\/blockquote>\n\n<p>this is should be same as variable name in json CLASS.<\/p>\n",
+            "answer_id": 48227009,
+            "question_id": 48226867
+        }
+    ],
+    "answer_comments": {"48227009": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e8b911e7b5217f8981c31fc7ee8b7806?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6383695,
+                "user_type": "registered",
+                "user_id": 4952262,
+                "link": "https://stackoverflow.com/users/4952262/michu93",
+                "reputation": 5871,
+                "display_name": "Michu93",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48227009,
+            "edited": false,
+            "creation_date": 1515769352,
+            "comment_id": 83439550
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/e8b911e7b5217f8981c31fc7ee8b7806?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 6383695,
+                "user_type": "registered",
+                "user_id": 4952262,
+                "link": "https://stackoverflow.com/users/4952262/michu93",
+                "reputation": 5871,
+                "display_name": "Michu93",
+                "accept_rate": 71
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48227009,
+            "edited": false,
+            "creation_date": 1515763492,
+            "comment_id": 83436100
+        }
+    ]}
+}

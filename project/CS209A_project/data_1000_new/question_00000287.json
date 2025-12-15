@@ -1,0 +1,238 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f416cbeb186346447ce2e22bedd63074?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3441926,
+            "user_type": "registered",
+            "user_id": 2883674,
+            "link": "https://stackoverflow.com/users/2883674/cheloute",
+            "reputation": 923,
+            "display_name": "Cheloute",
+            "accept_rate": 76
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58447842/why-am-i-not-able-to-get-my-bean-definition-available-in-my-spring-context-with",
+        "last_activity_date": 1571414806,
+        "creation_date": 1571390664,
+        "answer_count": 1,
+        "title": "Why am I not able to get my Bean definition available in my Spring context with Spring Boot?",
+        "body": "<p>I'm feeling stupid to ask this, but I can't understand where I'm wrong with my code.<\/p>\n\n<p>The context is :<\/p>\n\n<ul>\n<li>a Spring Boot application (1.5.7) with an embedded Jetty server and a\ncontroller to expose some endpoints <\/li>\n<li>a unique @Configuration class, where some of my beans are defined (Singleton and Prototype scopes)<\/li>\n<li>a @Service that uses some beans defined in my @Configuration class<\/li>\n<\/ul>\n\n<p>The problem is:<\/p>\n\n<ul>\n<li>a NoSuchBeanDefinitionException for one of my @Configuration bean.<\/li>\n<\/ul>\n\n<p>Now the details:<\/p>\n\n<p>My SpringBootApplication :<\/p>\n\n<pre><code>@SpringBootApplication\npublic class HbbTVApplication {\n    public static void main(String[] args) {\n        SpringApplication.run(HbbTVApplication.class, args);\n    }\n}\n<\/code><\/pre>\n\n<p>My @Configuration class:<\/p>\n\n<pre><code>@Configuration\n@Profile(value = { \"dev\", \"int\", \"pre\", \"pro\" })\npublic class StandaloneFrontalConfig extends WebMvcConfigurerAdapter {\n\n@Value(\"${kafka.bootstrap-servers}\")\nprivate String bootstrapServers;\n\n@Bean\npublic Map&lt;String, Object&gt; producerConfigs() {\n    Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();\n    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);\n    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);\n    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);\n    return props;\n}\n\n@Bean\npublic ProducerFactory&lt;String, String&gt; producerFactory() {\n    return new DefaultKafkaProducerFactory&lt;&gt;(producerConfigs());\n}\n\n@Bean\npublic KafkaTemplate&lt;String, String&gt; kafkaTemplate() {\n    return new KafkaTemplate&lt;&gt;(producerFactory());\n}\n\n@Override\npublic void addResourceHandlers(ResourceHandlerRegistry registry) {\n    registry.addResourceHandler(\"/**\").addResourceLocations(\"classpath:/standalone/\");\n}\n\n@Bean\npublic WebMvcConfigurer corsConfigurer() {\n    return new WebMvcConfigurerAdapter() {\n        @Override\n        public void addCorsMappings(CorsRegistry registry) {\n            registry.addMapping(\"/**\").allowedOrigins(\"*\").allowedHeaders(\"*\");\n        }\n    };\n}\n\n@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)\n@Bean\npublic Security securityManager() {\n    return new Security();\n}\n\n@Bean\n@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)\npublic KngAflow getTechnicalCookie() {\n    return new KngAflow();\n}\n\n@Bean\npublic EmbeddedServletContainerCustomizer customizer() {\n    return new EmbeddedServletContainerCustomizer() {\n\n        @Override\n        public void customize(ConfigurableEmbeddedServletContainer container) {\n            if (container instanceof JettyEmbeddedServletContainerFactory) {\n                customizeJetty((JettyEmbeddedServletContainerFactory) container);\n            }\n        }\n\n        private void customizeJetty(JettyEmbeddedServletContainerFactory jetty) {\n            jetty.addServerCustomizers(new JettyServerCustomizer() {\n\n                @Override\n                public void customize(Server server) {\n                    for (Connector connector : server.getConnectors()) {\n                        if (connector instanceof ServerConnector) {\n                            HttpConnectionFactory connectionFactory = ((ServerConnector) connector)\n                                    .getConnectionFactory(HttpConnectionFactory.class);\n                            connectionFactory.getHttpConfiguration().setCookieCompliance(CookieCompliance.RFC2965);\n                        }\n                    }\n                }\n            });\n        }\n    };\n}\n}\n<\/code><\/pre>\n\n<p>My @Service:<\/p>\n\n<pre><code>@Service\npublic class CookieService implements services.CookieService, InitializingBean {\n\n    /**\n     * Serializable\n     */\n    private static final long serialVersionUID = -1997257884335775587L;\n\n    @Autowired\n    ApplicationContext app;\n\n    @Override\n    public Cookie createTechnicalCookie() {\n        return new Cookie(app.getBean(KngAflow.class), null);\n    }\n\n    @Override\n    public void afterPropertiesSet() throws Exception {\n        if (app != null) {\n            for (String bean : app.getBeanDefinitionNames()) {\n                System.out.println(\"Bean: \" + bean);\n            }\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>And the \"non defined\" bean:<\/p>\n\n<pre><code>@JsonInclude(Include.NON_NULL)\n@JsonIgnoreProperties({ \"security\", \"maxAge\", \"domain\", \"updated\" })\npublic class KngAflow implements Serializable, InitializingBean {\n\n    @JsonProperty(value = \"did\")\n    private String did;\n    @JsonProperty(value = \"checksum\")\n    private String checksum;\n    @Autowired\n    private Security security;\n    private Integer maxAge;\n    private String domain;\n    private boolean updated = false;\n\n    public KngAflow() {\n        domain = \".mydomain.com\";\n    }\n\n    @Override\n    public void afterPropertiesSet() throws Exception {\n        did = UUID.randomUUID().toString();\n        maxAge = 365 * 24 * 60 * 60;\n        checksum = security.encrypt(did + security.md5(did));\n    }\n}\n<\/code><\/pre>\n\n<p>NB: Classes are not complete, and there are more classes in my project. I only put what I saw as relevant information.\nIf something else is needed, just ask me please.\nBy the way, all the endpoints are defined into a unique @Controller class, and all the endpoints are working except those needing the getTechCookie @Bean.<\/p>\n\n<p>So, my problem occurs in runtime execution. When I start my Spring Boot app, Jetty is started and listening on the configured port.\nNevertheless, if you look at the CookieService @Service, I'm listing all the bean names defined in the autowired context and my getTechnicalCookie (a.k.a KngAflow) @Bean is missing. I can't understand why.<\/p>\n\n<p>Of course, when I invoke my @controller to execute my @Service code, the NoSuchBeanDefinitionException is thrown executing the line app.getBean(KngAflow.class).<\/p>\n\n<p>I tried to use a bean name instead of bean type, no change.\nFor testing purpose (as it doesn't make sense from a logical point of view), I defined my bean getTechCookie @Bean  as a Singleton scoped bean, and the name is still missing from the ApplicationContext.<\/p>\n\n<p>And the last but not least thing is: Everything works fine with Eclipse!<\/p>\n\n<p>I mean, all my devs are done using Eclipse IDE. My Spring Boot app is built with Maven and executing it inside Eclipse works correctly (and my getTechCookie Bean is defined and listed). <\/p>\n\n<p>When I package my app using the Maven Spring Boot plugin and execute it using java -jar, my getTechCookie (KngAflow.class) bean is missing. Nevertheless, this class is present inside the jar.<\/p>\n\n<p>Spring parameters to launch the spring boot app are spring default values (port 8080, no SSL, ...) and the active.profiles are always between dev, int, pre or pro (those defined in my @Configuration class)<\/p>\n\n<p>What am I doing wrong?<\/p>\n\n<p>Thanks!<\/p>\n\n<p>If it helps, I add my POM definition:<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\"&gt;\n    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;\n\n    &lt;artifactId&gt;my-app&lt;/artifactId&gt;\n    &lt;packaging&gt;jar&lt;/packaging&gt;\n\n    &lt;parent&gt;\n        &lt;groupId&gt;com.mydomain.bigdata&lt;/groupId&gt;\n        &lt;artifactId&gt;mybigapp&lt;/artifactId&gt;\n        &lt;version&gt;1.1-SNAPSHOT&lt;/version&gt;\n    &lt;/parent&gt;\n\n    &lt;dependencies&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;\n            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;\n            &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;\n            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;\n            &lt;scope&gt;test&lt;/scope&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;\n            &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;\n            &lt;optional&gt;true&lt;/optional&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;\n            &lt;artifactId&gt;commons-lang3&lt;/artifactId&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;\n            &lt;artifactId&gt;spring-kafka&lt;/artifactId&gt;\n        &lt;/dependency&gt;\n        &lt;dependency&gt;\n            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;\n            &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;\n            &lt;optional&gt;true&lt;/optional&gt;\n        &lt;/dependency&gt;\n    &lt;/dependencies&gt;\n\n    &lt;build&gt;\n        &lt;resources&gt;\n            &lt;resource&gt;\n                &lt;directory&gt;${basedir}/src/main/resources&lt;/directory&gt;\n                &lt;filtering&gt;true&lt;/filtering&gt;\n                &lt;includes&gt;\n                    &lt;include&gt;**/*&lt;/include&gt;\n                    &lt;include&gt;application.yml&lt;/include&gt;\n                &lt;/includes&gt;\n            &lt;/resource&gt;\n        &lt;/resources&gt;\n\n        &lt;plugins&gt;\n            &lt;plugin&gt;\n                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;\n                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;\n            &lt;/plugin&gt;\n            &lt;plugin&gt;\n                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;\n                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;\n            &lt;/plugin&gt;\n        &lt;/plugins&gt;\n    &lt;/build&gt;\n&lt;/project&gt;\n<\/code><\/pre>\n\n<p><strong><em>EDIT:<\/em><\/strong> I changed my @Service class to \"force\" spring to accept my class as a prototype bean, and it works. It's very ugly but it works. But if someone could help me to find what's wrong, I don't like this workaround:<\/p>\n\n<pre><code>@Override\n    public void afterPropertiesSet() throws Exception {\n        if (!context.containsBeanDefinition(KngAflow.class.getName()))\n            context.registerBeanDefinition(KngAflow.class.getName(),\n                    BeanDefinitionBuilder.genericBeanDefinition(KngAflow.class).setScope(\"prototype\").getBeanDefinition());\n    }\n<\/code><\/pre>\n",
+        "question_id": 58447842,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot"
+        ],
+        "score": 0,
+        "accepted_answer_id": 58454544,
+        "is_answered": true,
+        "view_count": 4564,
+        "last_edit_date": 1571400528
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MuuJL.jpg?s=256",
+                "account_id": 2802397,
+                "user_type": "registered",
+                "user_id": 5339661,
+                "link": "https://stackoverflow.com/users/5339661/marcos-barbero",
+                "reputation": 1119,
+                "display_name": "Marcos Barbero"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 58447842,
+            "edited": false,
+            "creation_date": 1571400663,
+            "comment_id": 103238890
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f416cbeb186346447ce2e22bedd63074?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3441926,
+                "user_type": "registered",
+                "user_id": 2883674,
+                "link": "https://stackoverflow.com/users/2883674/cheloute",
+                "reputation": 923,
+                "display_name": "Cheloute",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447842,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "edited": false,
+            "creation_date": 1571392562,
+            "comment_id": 103234721
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f416cbeb186346447ce2e22bedd63074?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3441926,
+                "user_type": "registered",
+                "user_id": 2883674,
+                "link": "https://stackoverflow.com/users/2883674/cheloute",
+                "reputation": 923,
+                "display_name": "Cheloute",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447842,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/MuuJL.jpg?s=256",
+                "account_id": 2802397,
+                "user_type": "registered",
+                "user_id": 5339661,
+                "link": "https://stackoverflow.com/users/5339661/marcos-barbero",
+                "reputation": 1119,
+                "display_name": "Marcos Barbero"
+            },
+            "edited": false,
+            "creation_date": 1571392229,
+            "comment_id": 103234552
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/qHEzx.png?s=256",
+                "account_id": 3192259,
+                "user_type": "registered",
+                "user_id": 2696260,
+                "link": "https://stackoverflow.com/users/2696260/m-deinum",
+                "reputation": 126828,
+                "display_name": "M. Deinum"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447842,
+            "edited": false,
+            "creation_date": 1571392209,
+            "comment_id": 103234538
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f416cbeb186346447ce2e22bedd63074?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3441926,
+                "user_type": "registered",
+                "user_id": 2883674,
+                "link": "https://stackoverflow.com/users/2883674/cheloute",
+                "reputation": 923,
+                "display_name": "Cheloute",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447842,
+            "edited": false,
+            "creation_date": 1571392164,
+            "comment_id": 103234518
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MuuJL.jpg?s=256",
+                "account_id": 2802397,
+                "user_type": "registered",
+                "user_id": 5339661,
+                "link": "https://stackoverflow.com/users/5339661/marcos-barbero",
+                "reputation": 1119,
+                "display_name": "Marcos Barbero"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 58447842,
+            "edited": false,
+            "creation_date": 1571392004,
+            "comment_id": 103234449
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/f416cbeb186346447ce2e22bedd63074?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3441926,
+                "user_type": "registered",
+                "user_id": 2883674,
+                "link": "https://stackoverflow.com/users/2883674/cheloute",
+                "reputation": 923,
+                "display_name": "Cheloute",
+                "accept_rate": 76
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447842,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/0HpYR.png?s=256",
+                "account_id": 4728704,
+                "user_type": "registered",
+                "user_id": 3824919,
+                "link": "https://stackoverflow.com/users/3824919/tom",
+                "reputation": 17727,
+                "display_name": "Tom"
+            },
+            "edited": false,
+            "creation_date": 1571391805,
+            "comment_id": 103234354
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/0HpYR.png?s=256",
+                "account_id": 4728704,
+                "user_type": "registered",
+                "user_id": 3824919,
+                "link": "https://stackoverflow.com/users/3824919/tom",
+                "reputation": 17727,
+                "display_name": "Tom"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58447842,
+            "edited": false,
+            "creation_date": 1571390995,
+            "comment_id": 103233895
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/nzr6n.jpg?s=256",
+            "account_id": 2552514,
+            "user_type": "registered",
+            "user_id": 2216020,
+            "link": "https://stackoverflow.com/users/2216020/gabor-szabo",
+            "reputation": 195,
+            "display_name": "Gabor Szabo"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1571414806,
+        "creation_date": 1571414806,
+        "body": "<p>I made a following simple application to reproduce issue.<\/p>\n\n<pre><code>@SpringBootApplication\npublic class Application {\n\n    public static void main(String[] args) {\n        run(Application.class, args);\n    }\n\n}\n<\/code><\/pre>\n\n<pre><code>@Configuration\n@Profile(\"dev\")\npublic class BeanConfiguration {\n\n    @Bean\n    @Scope(scopeName = SCOPE_PROTOTYPE)\n    public PrototypeBean prototypeBean() {\n        return new PrototypeBean();\n    }\n\n}\n<\/code><\/pre>\n\n<pre><code>public class PrototypeBean {}\n<\/code><\/pre>\n\n<pre><code>@Service\n@Slf4j\npublic class SingletonBean implements InitializingBean {\n\n    @Autowired\n    private ApplicationContext context;\n\n    public PrototypeBean getPrototypeBean() {\n        return context.getBean(PrototypeBean.class);\n    }\n\n    @Override\n    public void afterPropertiesSet() throws Exception {\n        for (String name : context.getBeanDefinitionNames()) {\n            Class&lt;?&gt; c = context.getBean(name).getClass();\n            log.debug(\"===&gt; Name: {}, Type = {}\", name, c.getTypeName());\n        }\n    }\n\n}\n<\/code><\/pre>\n\n<pre><code>@RestController\n@RequestMapping(\"/bean\")\npublic class BeanRestController {\n\n    @Autowired\n    private SingletonBean singletonBean;\n\n    @GetMapping(\"/name\")\n    public String getName() {\n        return singletonBean.getPrototypeBean().getClass().getName();\n    }\n\n}\n<\/code><\/pre>\n\n<p>When I execute application with <strong>-Dspring.profiles.active=dev<\/strong> setting<\/p>\n\n<p>Then I see in the log without no issue and REST endpoint gives back response properly:<\/p>\n\n<pre><code>===&gt; Name: prototypeBean, Type = PrototypeBean\n<\/code><\/pre>\n\n<p>But if I execute application without profile setting<\/p>\n\n<p>Then I see error in the log and REST endpoint raise exception:<\/p>\n\n<pre><code>org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'PrototypeBean' available\n<\/code><\/pre>\n",
+        "answer_id": 58454544,
+        "question_id": 58447842
+    }],
+    "answer_comments": {"58454544": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/f416cbeb186346447ce2e22bedd63074?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3441926,
+            "user_type": "registered",
+            "user_id": 2883674,
+            "link": "https://stackoverflow.com/users/2883674/cheloute",
+            "reputation": 923,
+            "display_name": "Cheloute",
+            "accept_rate": 76
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 58454544,
+        "edited": false,
+        "creation_date": 1571645383,
+        "comment_id": 103295936
+    }]}
+}

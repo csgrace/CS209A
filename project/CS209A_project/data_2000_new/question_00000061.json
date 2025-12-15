@@ -1,0 +1,138 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/34df2394ed9510554d8a7af61f97e28e?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15627083,
+            "user_type": "registered",
+            "user_id": 11274434,
+            "link": "https://stackoverflow.com/users/11274434/jk3",
+            "reputation": 45,
+            "display_name": "JK3"
+        },
+        "closed_date": 1618177235,
+        "link": "https://stackoverflow.com/questions/67048653/stringbuilder-to-array-to-2d-array-causing-nullpointerexception-java",
+        "last_activity_date": 1619028961,
+        "creation_date": 1618165089,
+        "answer_count": 2,
+        "title": "Stringbuilder to Array to 2D Array causing NullPointerException JAVA",
+        "body": "<p>I have a method reading a .txt file into a 2d Array, this txt file contains rows with a &quot;Y&quot; or &quot;N&quot; and a team number from 1-24 (Rows look like &quot;T# Y&quot; or &quot;T# N&quot;, I then search that 2d Array for a specific element in the rows (&quot;Y&quot;) and return how many rows had a &quot;Y&quot; and count for each team the number of true cases.<\/p>\n<p>24 Teams, should be 24 rows in the 2d array atleast I thought!<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public static String[][] buildTimes(String[][] sub) {\n    StringBuilder scores = new StringBuilder(sub.length);\n\n    for (String[] row : sub) {\n        scores.append(Arrays.stream(row)\n                .filter(str -&gt; str.equalsIgnoreCase(&quot;Y&quot;))\n                .toArray().length);\n        scores.append(&quot;/&quot;);\n    }\n\n    String[] tempArray = scores.toString().split(&quot;&quot;);\n    String[][] finalTimes = new String[24][1];\n\n    for (int i = 0; i &lt; finalTimes.length; i++) {\n        for (int j = 0; j &lt; finalTimes[i].length; j++) {\n            int index = 0;\n            finalTimes[i][j] = tempArray[index];\n            index++;\n        }\n    }\n    return finalTimes;\n}\n<\/code><\/pre>\n<p>I am getting the error:<\/p>\n<pre class=\"lang-none prettyprint-override\"><code>Exception in thread &quot;main&quot; java.lang.NullPointerException\n    at test.lambda$buildTimes$0(test.java:74)\n    at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:176)\n    at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)\n    at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:484)\n    at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)\n    at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:550)\n    at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)\n    at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:517)\n    at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:523)\n    at test.buildTimes(test.java:74)\n    at run.main(run.java:10)\n<\/code><\/pre>\n<p>I have no clue why I am getting these errors, I am definitely inexperienced with StringBuilders, I also tried using an INT ArrayList and same errors.<\/p>\n<p>Example of output:\nTeam 1   (Count of Y's Found for Team1)\nTeam 2   (&quot;&quot; for team2)\nTeam 3   (&quot;&quot; for team 3)<\/p>\n<p>I just need a 2D Array holding Team# and &quot;Y&quot;'s found for each team in rows from file in Column 1 through 24.<\/p>\n",
+        "question_id": 67048653,
+        "tags": [
+            "java",
+            "arrays",
+            "arraylist",
+            "multidimensional-array",
+            "stringbuilder"
+        ],
+        "score": 0,
+        "closed_reason": "Not suitable for this site",
+        "is_answered": true,
+        "view_count": 133,
+        "last_edit_date": 1619028961
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a024ea95c3bbdcbdaef5becfc78b2aa0?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 18243171,
+                "user_type": "registered",
+                "user_id": 13279831,
+                "link": "https://stackoverflow.com/users/13279831/nowhere-man",
+                "reputation": 19670,
+                "display_name": "Nowhere Man"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1618177308,
+            "creation_date": 1618177308,
+            "body": "<p>As long as Stream API is already used in the question, it is better to use its facilities to count the frequencies of elements using <code>Collectors::groupingBy<\/code> instead of <code>StringBuilder<\/code>.  If it is important to count frequency as <code>Integer<\/code>, <code>Collectors::summingInt<\/code> may be used instead of <code>Collectors::counting<\/code> returning <code>Long<\/code>.<\/p>\n<p>And the final result returning a sparse array for each team (including those missing in the input file) can be generated using <code>IntStream::range<\/code> or <code>IntStream::rangeClosed<\/code><\/p>\n<p>The implementation can be as follows:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>public static String[][] countYesPerTeam(String[][] data) {\n    Map&lt;String, Integer&gt; map = Arrays.stream(data)\n            .filter(item -&gt; item.length &gt; 1 &amp;&amp; &quot;Y&quot;.equalsIgnoreCase(item[1]))\n            .collect(Collectors.groupingBy(item -&gt; item[0], Collectors.summingInt(item -&gt; 1)));\n    \n    return IntStream.rangeClosed(1, 24)\n                    .mapToObj(i -&gt; new String[] {\n                        &quot;T&quot; + i, \n                        Integer.toString(map.getOrDefault(&quot;T&quot; + i, 0))\n                    }) // provide [TN, yesCount] per team\n                    .toArray(String[][]::new);\n}\n\n<\/code><\/pre>\n<p>Test<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>String[][] data = {{&quot;T1&quot;, &quot;Y&quot;}, {&quot;T2&quot;, &quot;Y&quot;}, {&quot;T1&quot;, &quot;N&quot;}, {&quot;T2&quot;, &quot;Y&quot;}, {&quot;T4&quot;, &quot;y&quot;}};\nString[][] stat = countYesPerTeam(data);\nSystem.out.println(Arrays.deepToString(stat));\n<\/code><\/pre>\n<p>Output:<\/p>\n<pre><code>[[T1, 1], [T2, 2], [T3, 0], [T4, 1], [T5, 0], [T6, 0], [T7, 0], [T8, 0], [T9, 0], [T10, 0], [T11, 0], [T12, 0], [T13, 0], [T14, 0], [T15, 0], [T16, 0], [T17, 0], [T18, 0], [T19, 0], [T20, 0], [T21, 0], [T22, 0], [T23, 0], [T24, 0]]\n<\/code><\/pre>\n<p>If team names are not needed in the resulting array, it may be created as:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>// ....\n    return IntStream.rangeClosed(1, 24)\n                    .mapToObj(i -&gt; new String[] {\n                        Integer.toString(map.getOrDefault(&quot;T&quot; + i, 0))\n                    }) // provide [yesCount] per team\n                    .toArray(String[][]::new);\n<\/code><\/pre>\n",
+            "answer_id": 67050452,
+            "question_id": 67048653
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-IFCZqfiTt9Y/AAAAAAAAAAI/AAAAAAAAAA8/TlI4NJB0DHE/s256-rj/photo.jpg",
+                "account_id": 6790866,
+                "user_type": "registered",
+                "user_id": 5228065,
+                "link": "https://stackoverflow.com/users/5228065/akif-hadziabdic",
+                "reputation": 2918,
+                "display_name": "Akif Hadziabdic"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1618168840,
+            "creation_date": 1618168840,
+            "body": "<p>You can solve your problem in an easy way:<\/p>\n<pre><code>public static void main(String[] args) {\n    String[][] a = {{&quot;T1&quot;, &quot;Y&quot;}, {&quot;T1&quot;, &quot;Y&quot;}, {&quot;T2&quot;, &quot;N&quot;}, {&quot;T2&quot;, &quot;Y&quot;}};\n    System.out.println(buildTimes(a)); // {T1=2, T2=1}\n}\n\npublic static Map&lt;String, Long&gt; buildTimes(String[][] data){\n    return Stream.of(data)\n            .filter(item -&gt; item.length &gt; 1)\n            .filter(item -&gt; &quot;y&quot;.equalsIgnoreCase(item[1]))\n            .map(item -&gt; item[0])\n            .collect(groupingBy(item -&gt; item, Collectors.counting()));\n}\n<\/code><\/pre>\n",
+            "answer_id": 67049257,
+            "question_id": 67048653
+        }
+    ],
+    "answer_comments": {
+        "67049257": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/34df2394ed9510554d8a7af61f97e28e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 15627083,
+                "user_type": "registered",
+                "user_id": 11274434,
+                "link": "https://stackoverflow.com/users/11274434/jk3",
+                "reputation": 45,
+                "display_name": "JK3"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 67049257,
+            "edited": false,
+            "creation_date": 1618169401,
+            "comment_id": 118515019
+        }],
+        "67050452": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a024ea95c3bbdcbdaef5becfc78b2aa0?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 18243171,
+                    "user_type": "registered",
+                    "user_id": 13279831,
+                    "link": "https://stackoverflow.com/users/13279831/nowhere-man",
+                    "reputation": 19670,
+                    "display_name": "Nowhere Man"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 67050452,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/34df2394ed9510554d8a7af61f97e28e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 15627083,
+                    "user_type": "registered",
+                    "user_id": 11274434,
+                    "link": "https://stackoverflow.com/users/11274434/jk3",
+                    "reputation": 45,
+                    "display_name": "JK3"
+                },
+                "edited": false,
+                "creation_date": 1618208170,
+                "comment_id": 118522449
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/34df2394ed9510554d8a7af61f97e28e?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 15627083,
+                    "user_type": "registered",
+                    "user_id": 11274434,
+                    "link": "https://stackoverflow.com/users/11274434/jk3",
+                    "reputation": 45,
+                    "display_name": "JK3"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 67050452,
+                "edited": false,
+                "creation_date": 1618186025,
+                "comment_id": 118518656
+            }
+        ]
+    }
+}

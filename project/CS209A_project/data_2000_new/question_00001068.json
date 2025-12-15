@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1b79ce0a3ff30bbc7bdf6d3dedbeb945?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 6894511,
+            "user_type": "registered",
+            "user_id": 5296929,
+            "link": "https://stackoverflow.com/users/5296929/l-hummel",
+            "reputation": 43,
+            "display_name": "L. Hummel"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60637994/why-does-notify-wake-up-all-waiting-threads-although-only-one-thread-should-be",
+        "last_activity_date": 1583936835,
+        "creation_date": 1583935760,
+        "answer_count": 1,
+        "title": "Why does &#39;notify&#39; wake up all waiting threads although only one thread should be affected?",
+        "body": "<p>In the following code two consumer threads start and become waiting. The producer thread starts (very likely) after that and calls 'notify'. All threads use the producer as monitor.<\/p>\n\n<pre><code>Thread producer = new Thread() { \n    @Override\n    public void run() {\n        synchronized (this) {\n            System.out.printf(\"notify at %d %n\", getId());\n            notify();\n        }\n    }\n};\n\nRunnable consumer = () -&gt; {\n    try {\n        synchronized (producer) {\n            long id = Thread.currentThread().getId();\n            System.out.printf(\"wait at %d %n\", id);\n            producer.wait();\n            System.out.printf(\"awakened: %d %n\", id);\n        }\n    } catch (InterruptedException e) {\n        e.printStackTrace();\n    }\n};\n\nStream.generate( () -&gt; consumer )\n        .limit(2)\n        .map(Thread::new)\n        .forEach(Thread::start);\n\nThread.sleep(3000); // consumer threads are (likely) waiting\n\nproducer.start();\n<\/code><\/pre>\n\n<p>From javadoc for <a href=\"https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html#notify()\" rel=\"nofollow noreferrer\">Object.notify<\/a>:<\/p>\n\n<blockquote>\n  <p>Wakes up a single thread that is waiting on this object's monitor.<\/p>\n<\/blockquote>\n\n<p>The code produces this (or similar) output:<\/p>\n\n<pre><code>  wait at 13 \n  wait at 14 \n  notify at 12 \n  awakened: 13 \n  awakened: 14 \n<\/code><\/pre>\n\n<p>The point is that both consumer threads are awakened, not just one of them. Why?<\/p>\n\n<p>Compiled and tested with OpenJDK Runtime Environment AdoptOpenJDK (build 11.0.5+10) under Windows 10, 64-bit.<\/p>\n\n<p>Thanks in advance!<\/p>\n",
+        "question_id": 60637994,
+        "tags": [
+            "java",
+            "multithreading",
+            "wait",
+            "notify"
+        ],
+        "score": 4,
+        "accepted_answer_id": 60638345,
+        "is_answered": true,
+        "view_count": 342
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/a648ccb47bbbe9497c073315aac4d33e?s=256&d=identicon&r=PG",
+            "account_id": 17835,
+            "user_type": "registered",
+            "user_id": 40342,
+            "link": "https://stackoverflow.com/users/40342/joachim-sauer",
+            "reputation": 309298,
+            "display_name": "Joachim Sauer",
+            "accept_rate": 62
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 9,
+        "is_accepted": true,
+        "last_activity_date": 1583936835,
+        "creation_date": 1583936835,
+        "body": "<p>The issue is that instead of an arbitrary <code>Object<\/code> you use a <code>Thread<\/code> as the monitor.<\/p>\n\n<p><code>Thread<\/code> uses signals internally as documented in <a href=\"https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Thread.html#join(long)\" rel=\"noreferrer\"><code>Thread.join<\/code><\/a>:<\/p>\n\n<blockquote>\n  <p>As a thread terminates the <code>this.notifyAll<\/code> method is invoked. It is recommended that applications not use <code>wait<\/code>, <code>notify<\/code>, or <code>notifyAll<\/code> on <code>Thread<\/code> instances.<\/p>\n<\/blockquote>\n\n<p>The general suggestion is to always use dedicated objects to <code>wait<\/code>/<code>notify<\/code> on that no other code can get access to to avoid \"spurious\" notifies or waits like this.<\/p>\n",
+        "answer_id": 60638345,
+        "question_id": 60637994
+    }],
+    "answer_comments": {}
+}

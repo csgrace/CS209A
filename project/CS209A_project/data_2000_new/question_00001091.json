@@ -1,0 +1,107 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fe4cdc2587880ad05ae82eeeb6a9750e?s=256&d=identicon&r=PG",
+            "account_id": 1361052,
+            "user_type": "registered",
+            "user_id": 1298426,
+            "link": "https://stackoverflow.com/users/1298426/user1298426",
+            "reputation": 3737,
+            "display_name": "user1298426",
+            "accept_rate": 52
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48226933/understanding-value-to-reference-and-reference-to-value-in-java-refactoring",
+        "last_activity_date": 1515776975,
+        "creation_date": 1515762465,
+        "answer_count": 3,
+        "title": "Understanding value to reference and reference to value in Java refactoring",
+        "body": "<p>I was going through refactoring book and couldn't understand these two techniques.<\/p>\n\n<p><a href=\"https://refactoring.com/catalog/changeValueToReference.html\" rel=\"nofollow noreferrer\">https://refactoring.com/catalog/changeValueToReference.html<\/a><\/p>\n\n<p>And<\/p>\n\n<p><a href=\"https://refactoring.com/catalog/changeReferenceToValue.html\" rel=\"nofollow noreferrer\">https://refactoring.com/catalog/changeReferenceToValue.html<\/a><\/p>\n\n<p>Can you please help me understand with an example in Java?<\/p>\n",
+        "question_id": 48226933,
+        "tags": ["java"],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 1101
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/AZwSk.jpg?s=256",
+            "account_id": 1452062,
+            "user_type": "registered",
+            "user_id": 1368690,
+            "link": "https://stackoverflow.com/users/1368690/hamena314",
+            "reputation": 3147,
+            "display_name": "hamena314",
+            "accept_rate": 98
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 48226933,
+        "edited": false,
+        "creation_date": 1515763067,
+        "comment_id": 83435838
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3c9469eca7b97db6fc36e1571400b200?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12656925,
+                "user_type": "registered",
+                "user_id": 9199167,
+                "link": "https://stackoverflow.com/users/9199167/max",
+                "reputation": 8625,
+                "display_name": "Max"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1515776975,
+            "creation_date": 1515763316,
+            "body": "<p>In it's very simplest form it just means switching between the following two options:<\/p>\n\n<pre><code>class Order\n{\n    // constructor etc...\n    private String customerName;\n    public String getCustomerName() {return customerName;}\n}\n<\/code><\/pre>\n\n<p>or<\/p>\n\n<pre><code>class Customer\n{\n    // constructor etc...\n    private String name;\n    public String getName() {return name;}\n    public String setName(String name) {this.name = name;}\n}\n\nclass Order\n{\n    // constructor etc...\n    private Customer customer;\n    public String getCustomerName() {return customer.getName();}\n}\n<\/code><\/pre>\n\n<p>Now when a customer's name can change, the 2nd solution is prefered, because you don't need to update the customerName member in every order.<\/p>\n\n<p>However if a customer's name never changes, the 1st solution might be prefered, because you don't need to manage Customer objects somewhere.<\/p>\n\n<p>Which version you want to chose and if you need to refactor depends on your actual application.<\/p>\n",
+            "answer_id": 48227171,
+            "question_id": 48226933,
+            "last_edit_date": 1515776975
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Z2KYN.jpg?s=256",
+                "account_id": 960307,
+                "user_type": "registered",
+                "user_id": 984823,
+                "link": "https://stackoverflow.com/users/984823/joop-eggen",
+                "reputation": 110397,
+                "display_name": "Joop Eggen"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": false,
+            "last_activity_date": 1515764700,
+            "creation_date": 1515764700,
+            "body": "<p>Assume you have two Customer objects/instances, customer1 and customer2. They are actually the same customer, with same ID and name. However they were read at different moments from the database or such. A <code>new Customer()<\/code> was called twice.<\/p>\n\n<pre><code>Customer customer1 = new Customer(13L);\n\nCustomer customer2 = new Customer(13L);\n<\/code><\/pre>\n\n<p>The refactoring would involve a factory method:<\/p>\n\n<pre><code>Customer customer1 = customerRepository.findById(13L);\n\nCustomer customer2 = customerRepository.findById(13L);\n<\/code><\/pre>\n\n<p>Examples of the latter is for instance JPA, an O/R mapping.<\/p>\n",
+            "answer_id": 48227538,
+            "question_id": 48226933
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/6pRI7.png?s=256",
+                "account_id": 1894536,
+                "user_type": "registered",
+                "user_id": 1711796,
+                "link": "https://stackoverflow.com/users/1711796/bernhard-barker",
+                "reputation": 55749,
+                "display_name": "Bernhard Barker",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1515765447,
+            "creation_date": 1515764945,
+            "body": "<p>Strictly speaking, I'm not sure whether this conversion is possible in Java, since you don't have both references and values of objects in Java - all objects are references (which are <a href=\"https://stackoverflow.com/questions/40480/is-java-pass-by-reference-or-pass-by-value?rq=1\">passed by value<\/a>).<\/p>\n\n<p>However, one can consider this similar to the following example:<\/p>\n\n<p><strong>\"Value\":<\/strong><\/p>\n\n<pre><code>class Order\n{\n   private int orderNum;\n   private Customer customer;\n   Order(int orderNum, String customerString)\n   {\n      this.orderNum = orderNum;\n      this.customer = new Customer(customerString);\n   }\n}\n\n// elsewhere:\nOrder order1 = new Order(1, \"I am a customer\");\nOrder order2 = new Order(2, \"I am a customer\");\nOrder order3 = new Order(3, \"I am a customer\");\nOrder order4 = new Order(4, \"I am a customer\");\n<\/code><\/pre>\n\n<p>Here each Order has it's own Customer object, even when all or most of those Customer objects are the same.<\/p>\n\n<p>The above is, of course, just an example. Passing all parameters of another object into a constructor is not good design.<\/p>\n\n<p><strong>Reference:<\/strong><\/p>\n\n<pre><code>class Order\n{\n   private int orderNum;\n   private Customer customer;\n   Order(int orderNum, Customer customer)\n   {\n      this.orderNum = orderNum;\n      this.customer = customer;\n   }\n}\n\nCustomer customer = new Customer(\"I am a customer\");\nOrder order1 = new Order(1, customer);\nOrder order2 = new Order(2, customer);\nOrder order3 = new Order(3, customer);\nOrder order4 = new Order(4, customer);\n<\/code><\/pre>\n\n<p>Here we can have a single Customer for many Orders (if we want).<\/p>\n",
+            "answer_id": 48227593,
+            "question_id": 48226933,
+            "last_edit_date": 1515765447
+        }
+    ],
+    "answer_comments": {}
+}

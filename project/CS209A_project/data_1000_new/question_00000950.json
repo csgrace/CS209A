@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cdadcc9d1ef251e7b3ec8435a302fa45?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 16446057,
+            "user_type": "registered",
+            "user_id": 11880836,
+            "link": "https://stackoverflow.com/users/11880836/user11880836",
+            "reputation": 29,
+            "display_name": "user11880836"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/60026137/why-is-scanner-reading-first-before-the-output",
+        "last_activity_date": 1580654694,
+        "creation_date": 1580646940,
+        "answer_count": 1,
+        "title": "Why is scanner reading first before the output?",
+        "body": "<p>I am doing map exercise from Hackerrank. The goal is to enter the total number of entries to input, then put the key and value until the nos of entries are reached. Also to look for the key if it exist or not. However, my code is not running properly. Even though I printout, \"Please enter name to find phone number:\" before the scanner input, the scanner input was reading first. why is that?<\/p>\n\n<pre><code>Scanner scanner = new Scanner(System.in);\nMap&lt;String, Integer&gt; phone = new HashMap&lt;&gt;();\nSystem.out.print(\"Please enter total number of entries: \");\nint n = scanner.nextInt();\nscanner.nextLine();\n\nfor(int x=0;x&lt;n;x++) {\n    System.out.print(\"Please enter name: \");\n    String name = scanner.nextLine();\n    System.out.print(\"Please enter phone number: \");\n    int num = scanner.nextInt();\n    scanner.nextLine();\n    phone.put(name,num);\n}\n\nwhile(scanner.hasNext()) {\n    System.out.println(\"Please enter name to find phone number: \"); //the problem is here\n    String findName = scanner.nextLine(); // this will read first before above line\n    if(phone.containsKey(findName)) {\n        System.out.println(findName + \"=\" + phone.get(findName));\n    } else {\n        System.out.println(\"not found\");\n    }\n}\n<\/code><\/pre>\n",
+        "question_id": 60026137,
+        "tags": [
+            "java",
+            "dictionary",
+            "java.util.scanner"
+        ],
+        "score": 1,
+        "accepted_answer_id": 60026363,
+        "is_answered": true,
+        "view_count": 1107,
+        "last_edit_date": 1580654694
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/16b6783e9b99b1199c75761eaf5c0685?s=256&d=identicon&r=PG",
+            "account_id": 247613,
+            "user_type": "registered",
+            "user_id": 522444,
+            "link": "https://stackoverflow.com/users/522444/hovercraft-full-of-eels",
+            "reputation": 285766,
+            "display_name": "Hovercraft Full Of Eels",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1580648541,
+        "creation_date": 1580648541,
+        "body": "<p>The problem is with the while loop -- the loop won't start until Scanner detects input is available, and so the program blocks waiting for input. Perhaps make that a do-while, so that it starts regardless.<\/p>\n\n<p>You will still need some mechanism to allow you to exit that last loop, perhaps checking the entered String for <code>\"exit\"<\/code> or a similar String<\/p>\n\n<p>In fact, I'd get rid of the <code>scanner.hasNext()<\/code> entirely as it really serves no purpose since <code>scanner.nextLine()<\/code> will do the necessary blocking for you.<\/p>\n\n<p>Instead, I would create a sentinel value, something like:<\/p>\n\n<pre><code>private static final String SENTINEL = \"exit\";\n<\/code><\/pre>\n\n<p>and then loop until that value has been entered:<\/p>\n\n<pre><code>String findName = \"\";\nwhile (!findName.equalsIgnoreCase(SENTINEL)) {\n    System.out.print(\"Please enter name to find phone number or \\\"\" + SENTINEL + \"\\\" to exit: \" );\n    findName = scanner.nextLine();\n\n    if (phone.containsKey(findName)) {\n        System.out.println(findName + \"=\" + phone.get(findName));\n    } else if (!findName.equalsIgnoreCase(SENTINEL)){\n        System.out.println(\"not found\");\n    }\n} \n<\/code><\/pre>\n\n<p>For example:<\/p>\n\n<pre><code>import java.util.*;\n\npublic class Foo {\n    private static final String SENTINEL = \"exit\";\n\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        Map&lt;String, Integer&gt; phone = new HashMap&lt;&gt;();\n        System.out.print(\"Please enter total number of entries: \");\n        int n = scanner.nextInt();\n        scanner.nextLine();\n\n        for (int x = 0; x &lt; n; x++) {\n            System.out.print(\"Please enter name: \");\n            String name = scanner.nextLine();\n            System.out.print(\"Please enter phone number: \");\n            int num = scanner.nextInt();\n            scanner.nextLine();\n            phone.put(name, num);\n        }\n\n        String findName = \"\";\n        while (!findName.equalsIgnoreCase(SENTINEL)) {\n            System.out.print(\"Please enter name to find phone number or \\\"\" + SENTINEL + \"\\\" to exit: \" );\n            findName = scanner.nextLine();\n            if (phone.containsKey(findName)) {\n                System.out.println(findName + \"=\" + phone.get(findName));\n            } else if (!findName.equalsIgnoreCase(SENTINEL)){\n                System.out.println(\"not found\");\n            }\n        } \n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 60026363,
+        "question_id": 60026137
+    }],
+    "answer_comments": {}
+}

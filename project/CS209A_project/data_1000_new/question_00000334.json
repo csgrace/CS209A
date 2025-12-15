@@ -1,0 +1,220 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/O9Vow.png?s=256",
+            "account_id": 7415031,
+            "user_type": "registered",
+            "user_id": 5641165,
+            "link": "https://stackoverflow.com/users/5641165/isaak",
+            "reputation": 41,
+            "display_name": "Isaak"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37586096/why-does-my-bufferedreader-code-leak-memory",
+        "last_activity_date": 1508944567,
+        "creation_date": 1464854846,
+        "answer_count": 5,
+        "title": "Why does my BufferedReader code leak memory?",
+        "body": "<p>I've got wrapper for <code>BufferedReader<\/code> that reads in files one after the other to create an uninterrupted stream across multiple files:<\/p>\n\n<pre><code>import java.io.BufferedReader;\nimport java.io.FileInputStream;\nimport java.io.FileReader;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.InputStreamReader;\nimport java.io.Reader;\nimport java.util.ArrayList;\nimport java.util.zip.GZIPInputStream;\n\n/**\n * reads in a whole bunch of files such that when one ends it moves to the\n * next file.\n * \n * @author isaak\n *\n */\nclass LogFileStream implements FileStreamInterface{\n    private ArrayList&lt;String&gt; fileNames;\n    private BufferedReader br;\n    private boolean done = false;\n\n    /**\n    * \n    * @param files an array list of files to read from, order matters.\n    * @throws IOException\n    */\n    public LogFileStream(ArrayList&lt;String&gt; files) throws IOException {\n        fileNames = new ArrayList&lt;String&gt;();\n        for (int i = 0; i &lt; files.size(); i++) {\n            fileNames.add(files.get(i));\n        }\n        setFile();\n    }\n\n    /**\n     * advances the file that this class is reading from.\n     * \n     * @throws IOException\n     */\n    private void setFile() throws IOException {\n        if (fileNames.size() == 0) {\n            this.done = true;\n            return;\n        }\n        if (br != null) {\n            br.close();\n        }\n        //if the file is a .gz file do a little extra work.\n        //otherwise read it in with a standard file Reader\n        //in either case, set the buffer size to 128kb\n        if (fileNames.get(0).endsWith(\".gz\")) {\n            InputStream fileStream = new FileInputStream(fileNames.get(0));\n            InputStream gzipStream = new GZIPInputStream(fileStream);\n            // TODO this probably needs to be modified to work well on any\n            // platform, UTF-8 is standard for debian/novastar though.\n            Reader decoder = new InputStreamReader(gzipStream, \"UTF-8\");\n            // note that the buffer size is set to 128kb instead of the standard\n            // 8kb.\n            br = new BufferedReader(decoder, 131072);\n            fileNames.remove(0);\n        } else {\n            FileReader filereader = new FileReader(fileNames.get(0));\n            br = new BufferedReader(filereader, 131072);\n            fileNames.remove(0);\n        }\n    }\n\n    /**\n     * returns true if there are more lines available to read.\n     * @return true if there are more lines available to read.\n     */\n    public boolean hasMore() {\n        return !done;\n    }\n\n    /**\n      * Gets the next line from the correct file.\n      * @return the next line from the files, if there isn't one it returns null\n      * @throws IOException\n      */\n    public String nextLine() throws IOException {\n        if (done == true) {\n            return null;\n        }\n        String line = br.readLine();\n        if (line == null) {\n            setFile();\n            return nextLine();\n        }\n        return line;\n    }\n}\n<\/code><\/pre>\n\n<p>If I construct this object on a large list of files (300MB worth of files), then print <code>nextLine()<\/code> over and over again in a while loop performance continually degrades until there is no more RAM to use.  This happens even if I'm reading in files that are ~500kb and using a virtual machine that has 32MB of memory.  <\/p>\n\n<p>I want this code to be able to run on positively massive data-sets (hundreds of gigabytes worth of files) and it is a component of a program that needs to run with 32MB or less of memory.<\/p>\n\n<p>The files that are used are mostly labeled CSV files, hence the use of Gzip to compress them on disk.  This reader needs to handle gzip and uncompressed files.<\/p>\n\n<p>Correct me if I'm wrong, but once a file has been read through and had its lines spat out the data from that file, the objects related to that file, and everything else should be viable for garbage collection?<\/p>\n",
+        "question_id": 37586096,
+        "tags": [
+            "java",
+            "memory-leaks",
+            "gzip",
+            "bufferedreader"
+        ],
+        "score": 4,
+        "is_answered": true,
+        "view_count": 3474,
+        "last_edit_date": 1464855632
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b31ee54d9d3789bf16fe971dbb4a2ef8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 9760,
+                "user_type": "registered",
+                "user_id": 18157,
+                "link": "https://stackoverflow.com/users/18157/jim-garrison",
+                "reputation": 87027,
+                "display_name": "Jim Garrison",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37586096,
+            "edited": false,
+            "creation_date": 1464856827,
+            "comment_id": 62658961
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/53ee9941b3fefef67175daf212e62d41?s=256&d=identicon&r=PG",
+                "account_id": 23121,
+                "user_type": "registered",
+                "user_id": 57695,
+                "link": "https://stackoverflow.com/users/57695/peter-lawrey",
+                "reputation": 535107,
+                "display_name": "Peter Lawrey",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37586096,
+            "edited": false,
+            "creation_date": 1464856731,
+            "comment_id": 62658881
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/7H9TF.png?s=256",
+                "account_id": 2994830,
+                "user_type": "registered",
+                "user_id": 2541560,
+                "link": "https://stackoverflow.com/users/2541560/kayaman",
+                "reputation": 73829,
+                "display_name": "Kayaman"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 37586096,
+            "edited": false,
+            "creation_date": 1464855597,
+            "comment_id": 62658158
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/UEUbF.jpg?s=256",
+                "account_id": 4705420,
+                "user_type": "registered",
+                "user_id": 3807729,
+                "link": "https://stackoverflow.com/users/3807729/galik",
+                "reputation": 48965,
+                "display_name": "Galik"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "post_id": 37586096,
+            "edited": false,
+            "creation_date": 1464855068,
+            "comment_id": 62657851
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9baf701b5b4e92171f13b558514ceaef?s=256&d=identicon&r=PG",
+                "account_id": 382517,
+                "user_type": "registered",
+                "user_id": 737790,
+                "link": "https://stackoverflow.com/users/737790/yves-martin",
+                "reputation": 10410,
+                "display_name": "Yves Martin",
+                "accept_rate": 60
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1508944567,
+            "creation_date": 1508944567,
+            "body": "<p>With Java 8, GZIP support has moved from Java code to native <code>zlib<\/code> usage.<\/p>\n\n<p>Non-closed GZIP streams leak native memory (I really said \"native\" not \"heap\" memory) and it is far from easy to diagnose. Depending of application usage of such streams, operating system may reach its memory limit quite fast.<\/p>\n\n<p>Symptom is that operating system process memory usage is not consistent with JVM memory usage produced by Native Memory Tracking <a href=\"https://docs.oracle.com/javase/8/docs/technotes/guides/vm/nmt-8.html\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/8/docs/technotes/guides/vm/nmt-8.html<\/a><\/p>\n\n<p>You will find full story details at <a href=\"http://www.evanjones.ca/java-native-leak-bug.html\" rel=\"nofollow noreferrer\">http://www.evanjones.ca/java-native-leak-bug.html<\/a><\/p>\n",
+            "answer_id": 46936136,
+            "question_id": 37586096
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/86b252b544ecc188ea1f120e9c2c97ee?s=256&d=identicon&r=PG",
+                "account_id": 2242741,
+                "user_type": "registered",
+                "user_id": 1976843,
+                "link": "https://stackoverflow.com/users/1976843/jey",
+                "reputation": 7173,
+                "display_name": "JEY"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1464856145,
+            "creation_date": 1464856145,
+            "body": "<p>The last call to setFile won't close your BufferedReader so you are leaking ressources. <\/p>\n\n<p>Indeed in nextLine you read the first file until the end. When the end is reached you call setFile and check if there is more file to process. However if there is no more file you return imediatly without closing the last BufferReader user.<\/p>\n\n<p>Furthermore if you don't process all files you will have a ressource still in use.<\/p>\n",
+            "answer_id": 37586506,
+            "question_id": 37586096
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/cecb8a1f3d8a89ea8b7fb236b7b7d031?s=256&d=identicon&r=PG",
+                "account_id": 6858,
+                "user_type": "registered",
+                "user_id": 11662,
+                "link": "https://stackoverflow.com/users/11662/vilmantas-baranauskas",
+                "reputation": 6734,
+                "display_name": "Vilmantas Baranauskas",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1464856723,
+            "creation_date": 1464856723,
+            "body": "<p>There is at least one leak in your code: Method <code>setFile()<\/code> does not close the last <code>BufferedReader<\/code> because the <code>if (fileNames.size() == 0)<\/code> check comes before <code>if (br != null)<\/code> check.<\/p>\n\n<p>However, this could lead to the described effect only if <code>LogFileStream<\/code> is instantiated multiple times.<\/p>\n\n<p>It would also be better to use <code>LinkedList<\/code> instead of ArrayList as <code>fileNames.remove(0)<\/code> is more 'expensive' on the ArrayList than on the LinkedList. You could instantiate it using following single line in the constructor: <code>fileNames = new LinkedList&lt;&gt;(files);<\/code><\/p>\n",
+            "answer_id": 37586707,
+            "question_id": 37586096
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh6.googleusercontent.com/-IK1FMvT_N60/AAAAAAAAAAI/AAAAAAAAAA0/aNAFzx7lnNE/s256-rj/photo.jpg",
+                "account_id": 6073674,
+                "user_type": "registered",
+                "user_id": 4741655,
+                "link": "https://stackoverflow.com/users/4741655/jd9999",
+                "reputation": 426,
+                "display_name": "JD9999",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1464932263,
+            "creation_date": 1464932263,
+            "body": "<p>Every once in a while, you could <code>flush()<\/code> or <code>close()<\/code> the <code>BufferedReader<\/code>. This will clear the reader's contents, so maybe every time you use the <code>setFile()<\/code> method, flush the reader. Then, just before every call like <code>br = new BufferedReader(decoder, 131072)<\/code>, <code>close()<\/code> the <code>BufferedReader<\/code><\/p>\n",
+            "answer_id": 37606677,
+            "question_id": 37586096
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/652077a7921d11ff2c0f96f5ae8ff699?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8477673,
+                "user_type": "registered",
+                "user_id": 6358373,
+                "link": "https://stackoverflow.com/users/6358373/mark-xie",
+                "reputation": 60,
+                "display_name": "Mark Xie"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1464855328,
+            "creation_date": 1464855328,
+            "body": "<p>The GC starts to work after you close your connection/ reader. If you are using Java 7 or above, you may want to consider to use the try-with-resource statement which is a better way to deal with IO operation.<a href=\"https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html\" rel=\"nofollow\">https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html<\/a><\/p>\n",
+            "answer_id": 37586249,
+            "question_id": 37586096
+        }
+    ],
+    "answer_comments": {"37586506": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/O9Vow.png?s=256",
+            "account_id": 7415031,
+            "user_type": "registered",
+            "user_id": 5641165,
+            "link": "https://stackoverflow.com/users/5641165/isaak",
+            "reputation": 41,
+            "display_name": "Isaak"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 37586506,
+        "edited": false,
+        "creation_date": 1464883299,
+        "comment_id": 62678664
+    }]}
+}

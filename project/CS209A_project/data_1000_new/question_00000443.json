@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh6.googleusercontent.com/-3X5ZVMN-ZXI/AAAAAAAAAAI/AAAAAAAAAyk/31JIvJXM7t8/s256-rj/photo.jpg",
+            "account_id": 10118761,
+            "user_type": "registered",
+            "user_id": 7476497,
+            "link": "https://stackoverflow.com/users/7476497/emerson-diego",
+            "reputation": 11,
+            "display_name": "Emerson Diego"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/75166663/why-caching-is-not-working-in-this-code-from-gitlab-ci",
+        "last_activity_date": 1674109019,
+        "creation_date": 1674088208,
+        "answer_count": 1,
+        "title": "why caching is not working in this code from gitlab-ci?",
+        "body": "<p>Given the code below, extracted from my project's .gitlab-ci.xml, I would like to know why the cache is not working.<\/p>\n<p>Notice that there are three stages related to the package_install stage, one for each environment. In each step, a java/maven and an angular project is packaged. Do I need to call the cache or reference the cache within each step? Or is there something else wrong?<\/p>\n<pre><code>image: XXX\n\nstages:\n  - package_install\n  - xxx\n\n  \n\nvariables:\n  PROJECT_NAME_BACK: contaspublicas-backend\n  PROJECT_NAME_FRONT: contaspublicas-frontend\n\n\n\ncache:\n  \n  - key: $PROJECT_NAME_BACK\n    paths:\n      - ${CI_PROJECT_DIR}/.m2/repository/\n  - key: $PROJECT_NAME_FRONT\n    paths:\n      - node_modules\n\n\n\npackage_install_testes: #Skips testes, pois serão executados na fase de teste\n  stage: package_install\n  script:\n    - cd $PROJECT_NAME_BACK\n    - mvn -Ptest install -DskipTests=true \n    - cd ..\n    - cd $PROJECT_NAME_FRONT\n    - npm ci \n    - ng build --configuration test --base-href .\n    - cd dist/contaspublicasng\n    - jar cvf contaspublicasng.war .\n  artifacts:\n    paths:\n    - contaspublicas-backend/target/*.war\n    - contaspublicas-backend/target/*.jar\n    - $PROJECT_NAME_FRONT/dist/contaspublicasng/contaspublicasng.war\n  except:\n    - main\n    - homolog\n\n\n\npackage_install_homolog: #Skips testes, pois serão executados na fase de teste\n  stage: package_install\n  script:\n    - cd $PROJECT_NAME_BACK\n    - mvn -Phml install -DskipTests=true\n    - cd ..\n    - cd $PROJECT_NAME_FRONT\n    - npm ci\n    - ng build --configuration hml --base-href .\n    - cd dist/contaspublicasng\n    - jar cvf contaspublicasng.war .\n  artifacts:\n    paths:\n    - contaspublicas-backend/target/*.war\n    - contaspublicas-backend/target/*.jar\n    - $PROJECT_NAME_FRONT/dist/contaspublicasng/contaspublicasng.war\n  only:\n    - homolog\n\n\n\npackage_install_main: #Skips testes, pois serão executados na fase de teste\n  stage: package_install\n  script:\n    - cd $PROJECT_NAME_BACK\n    - mvn versions:set -DremoveSnapshot\n    - mvn -Pprod install -DskipTests=true\n    - cd ..\n    #- echo versao=$(ls starbackend/target/ | grep war | cut -d '-' -f 2 | sed -e 's/\\.war$//') &gt;&gt; build.env \n    - echo VERSAO=$(ls $PROJECT_NAME_BACK/target/ | find . -type f -name \\*.war | cut -d '-' -f 2 | sed -e 's/\\.war$//') &gt;&gt; build.env\n    - cd $PROJECT_NAME_FRONT\n    - npm ci\n    - ng build --configuration prod --base-href .\n    - cd dist/contaspublicasng\n    - jar cvf contaspublicasng.war .\n  artifacts:\n    paths:\n    - contaspublicas-backend/target/*.war\n    - contaspublicas-backend/target/*.jar\n    - $PROJECT_NAME_FRONT/dist/contaspublicasng/contaspublicasng.war\n    reports:\n      dotenv: build.env\n  only:\n    - main\n\n<\/code><\/pre>\n<p>The way it is the cache does not work in the pipeline<\/p>\n",
+        "question_id": 75166663,
+        "tags": [
+            "java",
+            "angular",
+            "gitlab",
+            "gitlab-ci"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 242,
+        "last_edit_date": 1674109019
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/v58O6.jpg?s=256",
+            "account_id": 4181375,
+            "user_type": "registered",
+            "user_id": 3426309,
+            "link": "https://stackoverflow.com/users/3426309/andrey-b-panfilov",
+            "reputation": 6263,
+            "display_name": "Andrey B. Panfilov"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1674088969,
+        "creation_date": 1674088969,
+        "body": "<p>You need to tell <code>maven<\/code> to use directory configured there:<\/p>\n<pre><code>cache:\n  - key: $PROJECT_NAME_BACK\n    paths:\n      - ${CI_PROJECT_DIR}/.m2/repository/\n<\/code><\/pre>\n<p>smth. like:<\/p>\n<pre><code>variables: \n  MAVEN_OPTS: &quot;-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository&quot;\n<\/code><\/pre>\n",
+        "answer_id": 75166737,
+        "question_id": 75166663
+    }],
+    "answer_comments": {}
+}

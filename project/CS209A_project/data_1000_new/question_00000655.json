@@ -1,0 +1,111 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/25098073ec5c9342b152caa92799ab0f?s=256&d=identicon&r=PG",
+            "account_id": 2290142,
+            "user_type": "registered",
+            "user_id": 2013194,
+            "link": "https://stackoverflow.com/users/2013194/steven-k",
+            "reputation": 441,
+            "display_name": "Steven K",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/56161809/java-generics-type-parameter-k-is-not-within-its-bound-should-implement-x",
+        "last_activity_date": 1557988814,
+        "creation_date": 1557986911,
+        "answer_count": 2,
+        "title": "Java Generics - Type parameter `K` is not within its bound; should implement X",
+        "body": "<p>I am reading the java docs on generics, specifically <a href=\"https://docs.oracle.com/javase/tutorial/java/generics/bounded.html\" rel=\"noreferrer\">this page<\/a> on bounded types and am lost. Here is a simple version of my code, for context I generically want a compare-able key, one with an <code>Integer<\/code> and another abstract class with a <code>Date<\/code>, here is just the base abstract class and the integer implementation:<\/p>\n\n<p>Abstract class:<\/p>\n\n<p><code>public abstract class A&lt;K extends Comparable&lt;K&gt;, V&gt; extends TreeMap&lt;K, V&gt;<\/code><\/p>\n\n<p>Integer Abstract class:<\/p>\n\n<p><code>public abstract class B&lt;K extends Integer, V&gt; extends A&lt;K,V&gt;<\/code><\/p>\n\n<p>The error I get is in the type reference of the second class at the part <code>extends A&lt;K,V&gt;<\/code>. Specifically, my IDE is underlying the K and says <code>Type parameter 'K' is not within its bound; should implement 'java.lang.Comparable&lt;K&gt;'<\/code><\/p>\n\n<p>I am confused on this because in the definition of <code>Integer<\/code>, it implements a <code>Comparable&lt;Integer&gt;<\/code>, is that not enough to satisfy this? Moreover, when I try to do the following, <code>public abstract class B&lt;K extends Integer &amp; Comparable&lt;K&gt;, V&gt; extends A&lt;K,V&gt;<\/code>, that does not work either.<\/p>\n\n<p>Am I misunderstanding something with generics?<\/p>\n",
+        "question_id": 56161809,
+        "tags": [
+            "java",
+            "generics"
+        ],
+        "score": 5,
+        "accepted_answer_id": 56162011,
+        "is_answered": true,
+        "view_count": 1569
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/jXcg4.png?s=256",
+                "account_id": 1263831,
+                "user_type": "registered",
+                "user_id": 1221571,
+                "link": "https://stackoverflow.com/users/1221571/eran",
+                "reputation": 395099,
+                "display_name": "Eran",
+                "accept_rate": 67
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 4,
+            "is_accepted": false,
+            "last_activity_date": 1557987204,
+            "creation_date": 1557987204,
+            "body": "<p>Since <code>Integer<\/code> is a final class, the correct definition of <code>B<\/code> would be:<\/p>\n\n<pre><code>public abstract class B&lt;V&gt; extends A&lt;Integer,V&gt; {\n\n}\n<\/code><\/pre>\n\n<p>You don't need the <code>K<\/code> type parameter.<\/p>\n",
+            "answer_id": 56161879,
+            "question_id": 56161809
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/dfqcw.png?s=256",
+                "account_id": 6651855,
+                "user_type": "registered",
+                "user_id": 5133585,
+                "link": "https://stackoverflow.com/users/5133585/sweeper",
+                "reputation": 292155,
+                "display_name": "Sweeper",
+                "accept_rate": 96
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1557988814,
+            "creation_date": 1557987703,
+            "body": "<p>The compiler error occurs because although <code>Date<\/code> implements <code>Comparable&lt;Date&gt;<\/code>, a subclass of <code>Date<\/code> might not implement <code>Comparable&lt;SubclassOfDate&gt;<\/code>, so the compiler complains.<\/p>\n\n<p>You can fix this by changing <code>A<\/code>'s declaration to use a wildcard:<\/p>\n\n<pre><code>public abstract class A&lt;K extends Comparable&lt;? super K&gt;, V&gt; extends TreeMap&lt;K, V&gt;\n<\/code><\/pre>\n\n<p>However, you probably intended to declare <code>B<\/code> like this:<\/p>\n\n<pre><code>public abstract class B&lt;V&gt; extends A&lt;Integer,V&gt; {\n\n}\n<\/code><\/pre>\n\n<p><code>Integer<\/code> is <code>final<\/code>, no other class can inherit it. So <code>B<\/code> does not have to be generic on <code>K<\/code>.<\/p>\n\n<p>As for the class with <code>Date<\/code> as the key, you probably want to do it like this as well:<\/p>\n\n<pre><code>public abstract class C&lt;V&gt; extends A&lt;Date,V&gt; {\n\n}\n<\/code><\/pre>\n\n<p>But since <code>Date<\/code> is not <code>final<\/code>, you <em>could<\/em> make a generic parameter <code>K extends Date<\/code>:<\/p>\n\n<pre><code>public abstract class C&lt;K extends Date, V&gt; extends A&lt;K,V&gt; {\n\n}\n<\/code><\/pre>\n",
+            "answer_id": 56162011,
+            "question_id": 56161809,
+            "last_edit_date": 1557988814
+        }
+    ],
+    "answer_comments": {
+        "56161879": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2ee5821813e7b3fbcd284a2006f49356?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8928886,
+                "user_type": "registered",
+                "user_id": 9719337,
+                "link": "https://stackoverflow.com/users/9719337/dred",
+                "reputation": 1158,
+                "display_name": "Dred"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 56161879,
+            "edited": false,
+            "creation_date": 1557987247,
+            "comment_id": 98951430
+        }],
+        "56162011": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/25098073ec5c9342b152caa92799ab0f?s=256&d=identicon&r=PG",
+                "account_id": 2290142,
+                "user_type": "registered",
+                "user_id": 2013194,
+                "link": "https://stackoverflow.com/users/2013194/steven-k",
+                "reputation": 441,
+                "display_name": "Steven K",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56162011,
+            "edited": false,
+            "creation_date": 1558016500,
+            "comment_id": 98968022
+        }]
+    }
+}

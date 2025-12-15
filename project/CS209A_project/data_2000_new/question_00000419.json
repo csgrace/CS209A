@@ -1,0 +1,363 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12667610,
+            "user_type": "registered",
+            "user_id": 9206312,
+            "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+            "reputation": 449,
+            "display_name": "CuriousPaul",
+            "accept_rate": 42
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48463276/push-url-doesnt-open",
+        "last_activity_date": 1516985767,
+        "creation_date": 1516976669,
+        "answer_count": 1,
+        "title": "Push URL doesn&#39;t open",
+        "body": "<p>I have a pretty basic <code>PushNotification<\/code> code that should open an activity when no URL is present, and open an URL when there is one. But it doesn't open the URLs when the notification is received. <\/p>\n\n<p>Code below<\/p>\n\n<pre><code>public class MyFirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {\n  private static final String TAG = \"FirebaseMessagingServic\";\n\n  public MyFirebaseMessagingService() {}\n\n  @Override\n  public void onMessageReceived(RemoteMessage remoteMessage) {\n    if (remoteMessage.getData().size() &gt; 0) {\n      Log.d(TAG, \"Message data payload: \" + remoteMessage.getData());\n      try {\n        JSONObject data = new JSONObject(remoteMessage.getData());\n        String jsonMessage = data.getString(\"extra_information\");\n        Log.d(TAG, \"onMessageReceived: \\n\" +\n          \"Extra Information: \" + jsonMessage);\n      } catch (JSONException e) {\n        e.printStackTrace();\n      }\n    }\n    if (remoteMessage.getNotification() != null) {\n      String title = remoteMessage.getNotification().getTitle();\n      String message = remoteMessage.getNotification().getBody();\n      String click_action = remoteMessage.getNotification().getClickAction();\n      Uri uri = remoteMessage.getNotification().getLink();\n\n      Log.d(TAG, \"Message Notification Title: \" + title);\n      Log.d(TAG, \"Message Notification Body: \" + message);\n      Log.d(TAG, \"Message Notification click_action: \" + click_action);\n      Log.d(TAG, \"Message Notification url: \" + uri);\n\n    }\n  }\n\n  @Override\n  public void onDeletedMessages() {}\n\n  private void sendNotification(String title, String messageBody, String click_action, Uri uri) {\n    Intent intent;\n    if (uri != null) {\n      intent = new Intent(Intent.ACTION_VIEW);\n      intent.setData(uri));\n    } else {\n      intent = new Intent(click_action);\n    }\n\n    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */ , intent,\n      0);\n\n    Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);\n    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)\n      .setSmallIcon(R.drawable.app_logo_final)\n      .setContentTitle(\"PushNotification\")\n      .setContentText(messageBody)\n      .setAutoCancel(true)\n      .setSound(defaultSoundUri)\n      .setContentIntent(pendingIntent);\n    NotificationManager notificationManager =\n      (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);\n\n    notificationManager.notify(0 /* ID of notification */ , notificationBuilder.build());\n  }\n}\n<\/code><\/pre>\n\n<p>And I am sending the notification like this:<\/p>\n\n<pre><code>{\n  \"to\": \"/topics/NEWS\",\n  \"data\": {\n    \"extra_information\": \"This is some extra information\"\n  },\n  \"notification\": {\n    \"title\": \"Test title: http://www.google.com\",\n    \"body\": \"Test body: http://www.google.com\",\n    \"uri\": \"http://www.google.com\",\n    \"click_action\": \"MAIN_PAGE\"\n  }\n}\n<\/code><\/pre>\n\n<p>Inspired by other threads, I have:<\/p>\n\n<ol>\n<li>Tried to set <code>Uri.parse(\"http://www.google.com\")<\/code>, to check if it would open www.google.com in any conditions, but it doesn't work.<\/li>\n<li>Added <code>sendNotification(title, message, click_action, uri);<\/code>. Didn't work<\/li>\n<li>Removed the if conditions and set only <code>intent = new intent(Intent.ACTION_VIEW); intent.setData(uri));<\/code>. Didn't work<\/li>\n<li>Replace the ACTIVITY from <code>click_action<\/code> with an URL. Didn't work<\/li>\n<li>Added an extra line with <code>startActivity(intent)<\/code><\/li>\n<\/ol>\n\n<p>In my Manifest, I have:<\/p>\n\n<pre><code>&lt;activity android: name = \".MainScreen\"&gt;\n  &lt;intent-filter&gt;\n    &lt;action android: name = \"android.intent.action.MAIN\"/&gt;\n    &lt;category android: name = \"android.intent.category.LAUNCHER\"/&gt;\n  &lt;/intent-filter&gt; \n  &lt;intent-filter&gt;\n    &lt;action android: name = \"MAIN_PAGE\"/&gt;\n    &lt;category android: name = \"android.intent.category.DEFAULT\"/&gt;\n  &lt;/intent-filter&gt;\n<\/code><\/pre>\n\n<p>What it does right now is to open this MAIN_PAGE. Is there something else I need to add in the Manifest for opening a link?<\/p>\n\n<p>EDIT: I have just discovered that I needed \"link\" instead of \"uri\" in Postman. Still, this didn't solve the problem. By looking at Logcat with the app running in the background, I have this when I click on the notification:<\/p>\n\n<p><div class=\"snippet\" data-lang=\"js\" data-hide=\"false\" data-console=\"true\" data-babel=\"false\">\r\n<div class=\"snippet-code\">\r\n<pre class=\"snippet-code-js lang-js prettyprint-override\"><code>01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.view.Window$Callback.onPointerCaptureChanged, referenced from method android.support.v7.view.WindowCallbackWrapper.onPointerCaptureChanged\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve interface method 16186: Landroid / view / Window$Callback;.onPointerCaptureChanged(Z) V\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x72 at 0x0002\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.view.Window$Callback.onProvideKeyboardShortcuts, referenced from method android.support.v7.view.WindowCallbackWrapper.onProvideKeyboardShortcuts\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve interface method 16188: Landroid / view / Window$Callback;.onProvideKeyboardShortcuts(Ljava / util / List; Landroid / view / Menu; I) V\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x72 at 0x0002\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to find class referenced in signature(Landroid / view / SearchEvent;)\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.view.Window$Callback.onSearchRequested, referenced from method android.support.v7.view.WindowCallbackWrapper.onSearchRequested\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve interface method 16190: Landroid / view / Window$Callback;.onSearchRequested(Landroid / view / SearchEvent;) Z\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x72 at 0x0002\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.view.Window$Callback.onWindowStartingActionMode, referenced from method android.support.v7.view.WindowCallbackWrapper.onWindowStartingActionMode\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve interface method 16194: Landroid / view / Window$Callback;.onWindowStartingActionMode(Landroid / view / ActionMode$Callback; I) Landroid / view / ActionMode;\r\n01 - 26 16: 51: 28.668 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x72 at 0x0002\r\n01 - 26 16: 51: 28.678 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.content.res.TypedArray.getChangingConfigurations, referenced from method android.support.v7.widget.TintTypedArray.getChangingConfigurations\r\n01 - 26 16: 51: 28.678 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 811: Landroid / content / res / TypedArray;.getChangingConfigurations() I\r\n01 - 26 16: 51: 28.678 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6e at 0x0002\r\n01 - 26 16: 51: 28.678 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.content.res.TypedArray.getType, referenced from method android.support.v7.widget.TintTypedArray.getType\r\n01 - 26 16: 51: 28.678 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 833: Landroid / content / res / TypedArray;.getType(I) I\r\n01 - 26 16: 51: 28.678 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6e at 0x0008\r\n01 - 26 16: 51: 28.688 1395 - 1395 / com.tabian.firebasepushnotifications V / FA: onActivityCreated\r\n01 - 26 16: 51: 28.748 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.FrameLayout.startActionModeForChild, referenced from method android.support.v7.widget.ActionBarContainer.startActionModeForChild\r\n01 - 26 16: 51: 28.748 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16655: Landroid / widget / FrameLayout;.startActionModeForChild(Landroid / view / View; Landroid / view / ActionMode$Callback; I) Landroid / view / ActionMode;\r\n01 - 26 16: 51: 28.748 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0002\r\n01 - 26 16: 51: 28.758 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.content.Context.getColorStateList, referenced from method android.support.v7.content.res.AppCompatResources.getColorStateList\r\n01 - 26 16: 51: 28.758 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 560: Landroid / content / Context;.getColorStateList(I) Landroid / content / res / ColorStateList;\r\n01 - 26 16: 51: 28.758 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6e at 0x0006\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to find class referenced in signature(Landroid / graphics / drawable / Icon;)\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.ImageButton.setImageIcon, referenced from method android.support.v7.widget.AppCompatImageButton.setImageIcon\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16678: Landroid / widget / ImageButton;.setImageIcon(Landroid / graphics / drawable / Icon;) V\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0000\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.content.res.Resources.getDrawable, referenced from method android.support.v7.widget.ResourcesWrapper.getDrawable\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 774: Landroid / content / res / Resources;.getDrawable(ILandroid / content / res / Resources$Theme;) Landroid / graphics / drawable / Drawable;\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6e at 0x0002\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.content.res.Resources.getDrawableForDensity, referenced from method android.support.v7.widget.ResourcesWrapper.getDrawableForDensity\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 776: Landroid / content / res / Resources;.getDrawableForDensity(IILandroid / content / res / Resources$Theme;) Landroid / graphics / drawable / Drawable;\r\n01 - 26 16: 51: 28.768 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6e at 0x0002\r\n01 - 26 16: 51: 28.778 1395 - 1395 / com.tabian.firebasepushnotifications E / dalvikvm: Could not find class 'android.graphics.drawable.RippleDrawable', referenced from method android.support.v7.widget.AppCompatImageHelper.hasOverlappingRendering\r\n01 - 26 16: 51: 28.778 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve instanceof 210(Landroid / graphics / drawable / RippleDrawable;) in Landroid / support / v7 / widget / AppCompatImageHelper;\r\n01 - 26 16: 51: 28.778 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x20 at 0x000c\r\n01 - 26 16: 51: 28.788 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.getAutoSizeMaxTextSize, referenced from method android.support.v7.widget.AppCompatTextView.getAutoSizeMaxTextSize\r\n01 - 26 16: 51: 28.788 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16974: Landroid / widget / TextView;.getAutoSizeMaxTextSize() I\r\n01 - 26 16: 51: 28.788 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0006\r\n01 - 26 16: 51: 28.788 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.getAutoSizeMinTextSize, referenced from method android.support.v7.widget.AppCompatTextView.getAutoSizeMinTextSize\r\n01 - 26 16: 51: 28.788 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16975: Landroid / widget / TextView;.getAutoSizeMinTextSize() I\r\n01 - 26 16: 51: 28.788 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0006\r\n01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.getAutoSizeStepGranularity, referenced from method android.support.v7.widget.AppCompatTextView.getAutoSizeStepGranularity\r\n01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16976: Landroid / widget / TextView;.getAutoSizeStepGranularity() I\r\n01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0006\r\n01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.getAutoSizeTextAvailableSizes, referenced from method android.support.v7.widget.AppCompatTextView.getAutoSizeTextAvailableSizes\r\n01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16977: Landroid / widget / TextView;.getAutoSizeTextAvailableSizes()[I 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0006 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.getAutoSizeTextType, referenced from method android.support.v7.widget.AppCompatTextView.getAutoSizeTextType 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16978: Landroid / widget / TextView;.getAutoSizeTextType() I 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0008 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.setAutoSizeTextTypeUniformWithConfiguration, referenced from method android.support.v7.widget.AppCompatTextView.setAutoSizeTextTypeUniformWithConfiguration 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 17021: Landroid / widget / TextView;.setAutoSizeTextTypeUniformWithConfiguration(IIII) V 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0006 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.setAutoSizeTextTypeUniformWithPresetSizes, referenced from method android.support.v7.widget.AppCompatTextView.setAutoSizeTextTypeUniformWithPresetSizes 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 17022: Landroid / widget / TextView;.setAutoSizeTextTypeUniformWithPresetSizes([II) V 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0006 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.setAutoSizeTextTypeWithDefaults, referenced from method android.support.v7.widget.AppCompatTextView.setAutoSizeTextTypeWithDefaults 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 17023: Landroid / widget / TextView;.setAutoSizeTextTypeWithDefaults(I) V 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0006 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.TextView.getAutoSizeStepGranularity, referenced from method android.support.v7.widget.AppCompatTextHelper.loadFromAttributes 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16976: Landroid / widget / TextView;.getAutoSizeStepGranularity() I 01 - 26 16: 51: 28.798 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6e at 0x0197 01 - 26 16: 51: 28.808 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.text.StaticLayout$Builder.obtain, referenced from method android.support.v7.widget.AppCompatTextViewAutoSizeHelper.createStaticLayoutForMeasuring 01 - 26 16: 51: 28.808 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve static method 15457: Landroid / text / StaticLayout$Builder;.obtain(Ljava / lang / CharSequence; IILandroid / text / TextPaint; I) Landroid / text / StaticLayout$Builder; 01 - 26 16: 51: 28.808 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x71 at 0x0014 01 - 26 16: 51: 28.828 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Connecting to remote service 01 - 26 16: 51: 28.848 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Activity resumed, time: 242636715 01 - 26 16: 51: 28.848 1395 - 1409 / com.tabian.firebasepushnotifications I / FA: Tag Manager is not found and thus will not be used 01 - 26 16: 51: 28.848 1395 - 1409 / com.tabian.firebasepushnotifications D / FA: Logging event(FE): screen_view(_vs), Bundle[{\r\n        firebase_event_origin(_o) = auto,\r\n        firebase_screen_class(_sc) = Main_Screen,\r\n        firebase_screen_id(_si) = 6213183756703048966\r\n      }] 01 - 26 16: 51: 28.858 1395 - 1395 / com.tabian.firebasepushnotifications I / Adreno - EGL: &lt; qeglDrvAPI_eglInitialize: 381 &gt;: EGL 1.4 QUALCOMM build: (CL3869936) OpenGL ES Shader Compiler Version: 17.01 .12.SPL Build Date: 03 / 03 / 14 Mon Local Branch: default Remote Branch:\r\n      Local Patches:\r\n      Reconstruct Branch:\r\n      01 - 26 16: 51: 28.918 1395 - 1395 / com.tabian.firebasepushnotifications D / OpenGLRenderer: Enabling debug mode 0 01 - 26 16: 51: 28.948 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to find class referenced in signature(Landroid / graphics / drawable / Icon;) 01 - 26 16: 51: 28.948 1395 - 1395 / com.tabian.firebasepushnotifications I / dalvikvm: Could not find method android.widget.ImageView.setImageIcon, referenced from method android.support.v7.widget.AppCompatImageView.setImageIcon 01 - 26 16: 51: 28.948 1395 - 1395 / com.tabian.firebasepushnotifications W / dalvikvm: VFY: unable to resolve virtual method 16713: Landroid / widget / ImageView;.setImageIcon(Landroid / graphics / drawable / Icon;) V 01 - 26 16: 51: 28.948 1395 - 1395 / com.tabian.firebasepushnotifications D / dalvikvm: VFY: replacing opcode 0x6f at 0x0000 01 - 26 16: 51: 28.948 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Connection attempt already in progress 01 - 26 16: 51: 29.018 1395 - 1409 / com.tabian.firebasepushnotifications D / FA: Connected to remote service 01 - 26 16: 51: 29.018 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Processing queued up service tasks: 2 01 - 26 16: 51: 31.871 1395 - 1395 / com.tabian.firebasepushnotifications I / PersonaManager: getPersonaService() name persona_policy 01 - 26 16: 51: 31.881 1395 - 1395 / com.tabian.firebasepushnotifications V / FA: onActivityCreated 01 - 26 16: 51: 31.911 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Recording user engagement, ms: 2928 01 - 26 16: 51: 31.911 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Activity paused, time: 242639638 01 - 26 16: 51: 31.931 1395 - 1409 / com.tabian.firebasepushnotifications D / FA: Logging event(FE): user_engagement(_e), Bundle[{\r\n        firebase_event_origin(_o) = auto,\r\n        engagement_time_msec(_et) = 2928,\r\n        firebase_screen_class(_sc) = Main_Screen,\r\n        firebase_screen_id(_si) = 6213183756703048966\r\n      }] 01 - 26 16: 51: 31.941 1395 - 1395 / com.tabian.firebasepushnotifications E / ViewRootImpl: sendUserActionEvent() mView == null 01 - 26 16: 51: 32.091 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Activity resumed, time: 242639824 01 - 26 16: 51: 37.097 1395 - 1409 / com.tabian.firebasepushnotifications V / FA: Inactivity, disconnecting from the service<\/code><\/pre>\r\n<\/div>\r\n<\/div>\r\n<\/p>\n\n<p>When the app is opened, when I send the notification, it shows this:<\/p>\n\n<p><div class=\"snippet\" data-lang=\"js\" data-hide=\"false\" data-console=\"true\" data-babel=\"false\">\r\n<div class=\"snippet-code\">\r\n<pre class=\"snippet-code-js lang-js prettyprint-override\"><code>01 - 26 16: 53: 29.096 1395 - 2149 / com.tabian.firebasepushnotifications D / FirebaseMessagingServic: Message data payload: {\r\n  extra_information = This is some extra information\r\n}\r\n01 - 26 16: 53: 29.096 1395 - 2149 / com.tabian.firebasepushnotifications D / FirebaseMessagingServic: onMessageReceived:\r\n  Extra Information: This is some extra information\r\n01 - 26 16: 53: 29.096 1395 - 2149 / com.tabian.firebasepushnotifications D / FirebaseMessagingServic: Message Notification Title: Test title: http: //www.google.com\r\n  01 - 26 16: 53: 29.096 1395 - 2149 / com.tabian.firebasepushnotifications D / FirebaseMessagingServic: Message Notification Body: Test body: http: //www.google.com\r\n  01 - 26 16: 53: 29.096 1395 - 2149 / com.tabian.firebasepushnotifications D / FirebaseMessagingServic: Message Notification click_action: MAIN_PAGE\r\n01 - 26 16: 53: 29.106 1395 - 2149 / com.tabian.firebasepushnotifications D / FirebaseMessagingServic: Message Notification url: http: //www.google.com\r\n  01 - 26 16: 53: 35.293 1395 - 1395 / com.tabian.firebasepushnotifications I / PersonaManager: getPersonaService() name persona_policy\r\n01 - 26 16: 53: 35.313 1395 - 1395 / com.tabian.firebasepushnotifications V / FA: onActivityCreated\r\n01 - 26 16: 53: 35.353 1395 - 1395 / com.tabian.firebasepushnotifications E / ViewRootImpl: sendUserActionEvent() mView == null\r\n01 - 26 16: 53: 35.353 1395 - 1845 / com.tabian.firebasepushnotifications V / FA: Recording user engagement, ms: 16086\r\n01 - 26 16: 53: 35.353 1395 - 1845 / com.tabian.firebasepushnotifications V / FA: Connecting to remote service\r\n01 - 26 16: 53: 35.383 1395 - 1845 / com.tabian.firebasepushnotifications V / FA: Activity paused, time: 242763126\r\n01 - 26 16: 53: 35.383 1395 - 1845 / com.tabian.firebasepushnotifications V / FA: Connection attempt already in progress\r\n01 - 26 16: 53: 35.383 1395 - 1845 / com.tabian.firebasepushnotifications V / FA: Activity resumed, time: 242763247\r\n01 - 26 16: 53: 35.383 1395 - 1845 / com.tabian.firebasepushnotifications D / FA: Logging event(FE): user_engagement(_e), Bundle[{\r\n  firebase_event_origin(_o) = auto,\r\n  engagement_time_msec(_et) = 16086,\r\n  firebase_screen_class(_sc) = Main_Screen,\r\n  firebase_screen_id(_si) = 6213183756703048969\r\n}]\r\n01 - 26 16: 53: 35.423 1395 - 1845 / com.tabian.firebasepushnotifications V / FA: Connection attempt already in progress\r\n01 - 26 16: 53: 35.493 1395 - 1845 / com.tabian.firebasepushnotifications D / FA: Connected to remote service\r\n01 - 26 16: 53: 35.493 1395 - 1845 / com.tabian.firebasepushnotifications V / FA: Processing queued up service tasks: 3<\/code><\/pre>\r\n<\/div>\r\n<\/div>\r\n<\/p>\n",
+        "question_id": 48463276,
+        "tags": [
+            "java",
+            "android",
+            "json",
+            "android-intent",
+            "push-notification"
+        ],
+        "score": 7,
+        "accepted_answer_id": 48464907,
+        "is_answered": true,
+        "view_count": 357,
+        "last_edit_date": 1516982151
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "edited": false,
+            "creation_date": 1516983323,
+            "comment_id": 83923823
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+                "account_id": 2498761,
+                "user_type": "registered",
+                "user_id": 2174489,
+                "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+                "reputation": 2123,
+                "display_name": "Eduardo Herzer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "edited": false,
+            "creation_date": 1516983232,
+            "comment_id": 83923761
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+                "account_id": 2498761,
+                "user_type": "registered",
+                "user_id": 2174489,
+                "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+                "reputation": 2123,
+                "display_name": "Eduardo Herzer"
+            },
+            "edited": false,
+            "creation_date": 1516981634,
+            "comment_id": 83922766
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+                "account_id": 2498761,
+                "user_type": "registered",
+                "user_id": 2174489,
+                "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+                "reputation": 2123,
+                "display_name": "Eduardo Herzer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "edited": false,
+            "creation_date": 1516980927,
+            "comment_id": 83922330
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+                "account_id": 2498761,
+                "user_type": "registered",
+                "user_id": 2174489,
+                "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+                "reputation": 2123,
+                "display_name": "Eduardo Herzer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "edited": false,
+            "creation_date": 1516980690,
+            "comment_id": 83922178
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/22b3a019954e1e8a25f303a5ed555340?s=256&d=identicon&r=PG",
+                "account_id": 88481,
+                "user_type": "registered",
+                "user_id": 244702,
+                "link": "https://stackoverflow.com/users/244702/kevin-robatel",
+                "reputation": 8406,
+                "display_name": "Kevin Robatel",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1516979250,
+            "comment_id": 83921172
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/22b3a019954e1e8a25f303a5ed555340?s=256&d=identicon&r=PG",
+                "account_id": 88481,
+                "user_type": "registered",
+                "user_id": 244702,
+                "link": "https://stackoverflow.com/users/244702/kevin-robatel",
+                "reputation": 8406,
+                "display_name": "Kevin Robatel",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1516979086,
+            "comment_id": 83921075
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/22b3a019954e1e8a25f303a5ed555340?s=256&d=identicon&r=PG",
+                "account_id": 88481,
+                "user_type": "registered",
+                "user_id": 244702,
+                "link": "https://stackoverflow.com/users/244702/kevin-robatel",
+                "reputation": 8406,
+                "display_name": "Kevin Robatel",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48463276,
+            "edited": false,
+            "creation_date": 1516978764,
+            "comment_id": 83920881
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+            "account_id": 2498761,
+            "user_type": "registered",
+            "user_id": 2174489,
+            "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+            "reputation": 2123,
+            "display_name": "Eduardo Herzer"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1516985767,
+        "creation_date": 1516982221,
+        "body": "<p>You are sending <code>notification<\/code> payload in the push json. This will make <code>onMessageReceived<\/code> not being called. <\/p>\n\n<p>From firebase docs (<a href=\"https://firebase.google.com/docs/cloud-messaging/android/receive?hl=en\" rel=\"nofollow noreferrer\">https://firebase.google.com/docs/cloud-messaging/android/receive?hl=en<\/a>):<\/p>\n\n<blockquote>\n  <p><code>onMessageReceived<\/code> is provided for most message types, with the\n  following exceptions:<\/p>\n  \n  <ul>\n  <li><strong>Notification messages delivered when your app is in the background.<\/strong> In this case, the notification is delivered to the device\u2019s system tray. A user tap on a notification opens the app launcher by default.<\/li>\n  <li><strong>Messages with both notification and data payload, both background and foreground.<\/strong> In this case, the notification is delivered to the device\u2019s system tray, and the data payload is delivered in the extras of the intent of your launcher Activity.<\/li>\n  <\/ul>\n<\/blockquote>\n\n<p>So if you want to handle the notification yourself, you should send only <code>data<\/code> payload.<\/p>\n\n<p>Also, at your code, you are not calling <code>sendNotification(String title, String messageBody, String click_action, Uri uri)<\/code> anywhere.<\/p>\n\n<p><code>sendNotification<\/code> implementation is correct and working fine. You just forgot to call it inside <code>onMessageReceived<\/code>!!<\/p>\n\n<p><strong>EDIT:<\/strong><\/p>\n\n<p>To get <code>data<\/code> payload, you should use <code>remoteMessage.getData()<\/code> instead of <code>remoteMessage.getNotification()<\/code><\/p>\n",
+        "answer_id": 48464907,
+        "question_id": 48463276,
+        "last_edit_date": 1516985767
+    }],
+    "answer_comments": {"48464907": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+                "account_id": 2498761,
+                "user_type": "registered",
+                "user_id": 2174489,
+                "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+                "reputation": 2123,
+                "display_name": "Eduardo Herzer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48464907,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "edited": false,
+            "creation_date": 1516987121,
+            "comment_id": 83926102
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48464907,
+            "edited": false,
+            "creation_date": 1516986518,
+            "comment_id": 83925774
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+                "account_id": 2498761,
+                "user_type": "registered",
+                "user_id": 2174489,
+                "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+                "reputation": 2123,
+                "display_name": "Eduardo Herzer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48464907,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "edited": false,
+            "creation_date": 1516985831,
+            "comment_id": 83925341
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48464907,
+            "edited": false,
+            "creation_date": 1516985199,
+            "comment_id": 83924967
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7ceead0f15bb2be9620f4941a6058a96?s=256&d=identicon&r=PG",
+                "account_id": 2498761,
+                "user_type": "registered",
+                "user_id": 2174489,
+                "link": "https://stackoverflow.com/users/2174489/eduardo-herzer",
+                "reputation": 2123,
+                "display_name": "Eduardo Herzer"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48464907,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "edited": false,
+            "creation_date": 1516984373,
+            "comment_id": 83924482
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/276ab17c05c13f1621c3f531f5b5ac3b?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12667610,
+                "user_type": "registered",
+                "user_id": 9206312,
+                "link": "https://stackoverflow.com/users/9206312/curiouspaul",
+                "reputation": 449,
+                "display_name": "CuriousPaul",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48464907,
+            "edited": false,
+            "creation_date": 1516984152,
+            "comment_id": 83924331
+        }
+    ]}
+}

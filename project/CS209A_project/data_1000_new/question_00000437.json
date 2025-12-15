@@ -1,0 +1,99 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/be1815a0a124a8a1935f67426690a3eb?s=256&d=identicon&r=PG",
+            "account_id": 116523,
+            "user_type": "registered",
+            "user_id": 305532,
+            "link": "https://stackoverflow.com/users/305532/thomas-keller",
+            "reputation": 6150,
+            "display_name": "Thomas Keller",
+            "accept_rate": 84
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37433862/per-activity-graphs-with-dagger2",
+        "last_activity_date": 1464179067,
+        "creation_date": 1464170703,
+        "answer_count": 1,
+        "title": "Per-activity graphs with Dagger2",
+        "body": "<p>I'm trying to refactor our DI mess a little in our MVP-architectured app and came up with the idea of not having one big <code>ActivityComponent<\/code> for all activity-related components in my app, but per-activity components. I recently watched a Square presentation where they used argumented scopeds (something like <code>@ActivityScope(ActivityA.class)<\/code>) to distinguish these components and their injectees from one another, without having to declare a separate scope for each of those <code>ActivityComponent<\/code>'s.<\/p>\n\n<p>Now I'm facing a hard problem. Imagine I have a View component <code>ViewAB<\/code> that has its own presenter and possibly other things. <code>ViewAB<\/code> and its things should be shared across <code>ActivityA<\/code> and <code>ActivityB<\/code>, which - with the new style - should be injected with different components <code>ActivityComponentA<\/code> and <code>ActivityComponentB<\/code>.<\/p>\n\n<p><code>ViewAB<\/code> is now actually an Android view, so I can't always control its creation, so I have to use member injection. Since there is not \"one\" single activity component available for injection, but since the view should reside in an \"activity-like\" component, I thought it would be a good idea to move it and its dependencies into its own component <code>ViewABComponent<\/code> and let it \"somehow\" depend on <code>ActivityComponentA<\/code> and <code>ActivityComponentB<\/code>.<\/p>\n\n<p>Now that \"somehow\" is my problem. I figured I basically have two possibilities for that, sub-components and component dependencies.<\/p>\n\n<p>My trials with sub components weren't successful, since I figured the sub component's builder depends on a concrete \"parent component\", so I cannot easily create and inject the sub-component for my view on its own (I tried using <a href=\"http://google.github.io/dagger/subcomponents.html\" rel=\"nofollow\">the builder injection that is described here<\/a>). This is, when you think about it, really ok, because sub-components are per definition \"not complete\" until they are attached to some parent component. But sub-components had the nice notion of \"propagating\" all the parent's components to the sub-component for usage there, so if one thing in my sub-component would for example require the injection of an <code>Activity<\/code>, this could have been easily provided by <code>ActivityComponentA<\/code> or <code>ActivityComponentB<\/code>.<\/p>\n\n<p>Next I checked whether a regular component dependency would work better. The issue here is really that everything is largely detached and that you really deal with separate graphs. Giving <code>ActivityComponentA<\/code> and <code>ActivityComponentB<\/code> a dependency to <code>ViewABComponent<\/code> is not the issue, but what if <code>ViewABComponent<\/code> itself depends on something <code>ActivityComponentA<\/code> and <code>ActivityComponentB<\/code> provide, namely a simple <code>Activity<\/code> instance?<\/p>\n\n<p>So how would you solve an issue like this? Go and mangle subcomponents somehow, go for real dependencies, only use modules to stich different things together? What are your best practices?<\/p>\n",
+        "question_id": 37433862,
+        "tags": [
+            "java",
+            "android",
+            "dagger-2"
+        ],
+        "score": 3,
+        "is_answered": false,
+        "view_count": 67
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/v8XDk.jpg?s=256",
+            "account_id": 2060791,
+            "user_type": "registered",
+            "user_id": 1837367,
+            "link": "https://stackoverflow.com/users/1837367/david-medenjak",
+            "reputation": 34650,
+            "display_name": "David Medenjak",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1464179067,
+        "creation_date": 1464179067,
+        "body": "<p>Since your view is part of your activity, it should also be within the activities scope (and component). Thus having its own component (whether some component dependency, or some SubComponent) does not really seem clean.<\/p>\n\n<p>You have to inject your view once with the dependencies of <code>ActivityAComponent<\/code> and once from <code>ActivityBComponent<\/code>...Why don't you just do that?<\/p>\n\n<p>Those components <em>know<\/em> which presenter to use. They <em>know<\/em> how to inject your view.<\/p>\n\n<pre><code>class ActivityA {\n    onCreate() {\n        ActivityAComponent component = create();\n\n        component.inject(this); // inject activity\n        component.inject(findViewById(R.id.myComplexView); // inject the view\n    }\n}\n<\/code><\/pre>\n\n<p>An object should <em>never<\/em> inject itself. If you let the activity handle the injection, you can just provide the necessary dependencies.<\/p>\n",
+        "answer_id": 37437050,
+        "question_id": 37433862
+    }],
+    "answer_comments": {"37437050": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/v8XDk.jpg?s=256",
+                "account_id": 2060791,
+                "user_type": "registered",
+                "user_id": 1837367,
+                "link": "https://stackoverflow.com/users/1837367/david-medenjak",
+                "reputation": 34650,
+                "display_name": "David Medenjak",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37437050,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/be1815a0a124a8a1935f67426690a3eb?s=256&d=identicon&r=PG",
+                "account_id": 116523,
+                "user_type": "registered",
+                "user_id": 305532,
+                "link": "https://stackoverflow.com/users/305532/thomas-keller",
+                "reputation": 6150,
+                "display_name": "Thomas Keller",
+                "accept_rate": 84
+            },
+            "edited": false,
+            "creation_date": 1464255011,
+            "comment_id": 62413564
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/be1815a0a124a8a1935f67426690a3eb?s=256&d=identicon&r=PG",
+                "account_id": 116523,
+                "user_type": "registered",
+                "user_id": 305532,
+                "link": "https://stackoverflow.com/users/305532/thomas-keller",
+                "reputation": 6150,
+                "display_name": "Thomas Keller",
+                "accept_rate": 84
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 37437050,
+            "edited": false,
+            "creation_date": 1464248413,
+            "comment_id": 62409300
+        }
+    ]}
+}

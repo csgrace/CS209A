@@ -1,0 +1,318 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+            "account_id": 18487232,
+            "user_type": "registered",
+            "user_id": 13467877,
+            "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+            "reputation": 1,
+            "display_name": "Vinayak Satapute"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/61596185/barcode-png-image-printed-on-a-label-of-40mm-x-15mm-size-is-shrunk-to-20mm-x10mm",
+        "last_activity_date": 1589704000,
+        "creation_date": 1588607190,
+        "answer_count": 2,
+        "title": "Barcode png Image printed on a Label of 40mm x 15mm size is shrunk to 20mm x10mm when printed and not getting scanned",
+        "body": "<p>I am facing this issue where I am generating a barcode using code128 and saving it in a PNG file.\nThe same PNG file when supplied to a printer Job with required Document properties for printing on a Label of required size, the size gets reduced and does not get scanned.<\/p>\n\n<p>Actual Size for print supplied - 40mm x 15mm. \nSize printed on the label - 20mm x 10mm<\/p>\n\n<p>I am adding this attribute to PrintRequestAttributeSet - \npras.add(MediaSize.findMedia(40, 15, Size2DSyntax.MM));<\/p>\n\n<p>But it is not effected accurately, I tried to play around the x and y parameter value there, still, the size printed falls within 25mm x 10mm. <\/p>\n\n<p>Any inputs to print the barcode of the required size is highly appreciated.\nI have given the complete code details below.<\/p>\n\n<p>(PS: I am using \"Honeywell PC42t Plus\" Thermal Printer to print and currently my labels are of 700mm x 280mm in size, I am waiting to receive the actual labels of 40mm x 15mm size.\nSo this is to test that, I can print an actual 40mm x 15mm barcode utilizing whole label space once I have the actual labels received)<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>public class One_TestMyBarcode {\n\n    private static final String MIME_TYPE = \"image/x-png\";\n    private static final String DELIMTER = \"-\";\n    static String image_name = \"NewBarcode_One.png\";\n\n    public static void main(String[] args) {\n\n        FileInputStream textStream = null;\n        int lastSeqNo = 001;\n        String roCode= \"ERO\";\n\n        AtomicInteger seqNo = new AtomicInteger(lastSeqNo);\n        Code128Bean code128 = new Code128Bean();\n        code128.setHeight(15f);\n        //code128.setBarHeight(40f);\n        //code128.setModuleWidth(0.3);\n        code128.setModuleWidth(0.2);\n        code128.setQuietZone(10);\n        code128.doQuietZone(true);\n\n        ByteArrayOutputStream baos = new ByteArrayOutputStream();\n        BitmapCanvasProvider canvas = new BitmapCanvasProvider(baos, MIME_TYPE, 300, BufferedImage.TYPE_BYTE_BINARY,\n                false, 0);\n\n        StringBuffer codeData = new StringBuffer();\n        codeData.append(roCode);\n        codeData.append(DELIMTER);\n\n        int currentSeqNo = seqNo.getAndIncrement();\n        String seq = String.format(\"%07d\", currentSeqNo);\n        codeData.append(seq);\n        codeData.append(DELIMTER);\n        Calendar current = Calendar.getInstance();\n        String year = Integer.toString(current.get(Calendar.YEAR)).substring(2);\n        codeData.append(year);\n\n        //logger.debug(\"barcode dimension is \");\n        code128.calcDimensions(codeData.toString());\n        code128.generateBarcode(canvas, codeData.toString());\n\n        try {\n            canvas.finish();\n        } catch (IOException e) {\n            throw new RuntimeException(e);\n\n        }\n\n        FileOutputStream fos = null;\n        try {\n            //fos = new FileOutputStream(\"C:\\\\Users\\\\Vinayak\\\\Desktop\\\\barcode\\\\\" +image_name);\n            fos = new FileOutputStream(image_name);\n            fos.write(baos.toByteArray());\n            fos.flush();\n            fos.close();\n            //textStream = new FileInputStream(\"C:\\\\Users\\\\Vinayak\\\\Desktop\\\\barcode\\\\\" +image_name);\n            textStream = new FileInputStream(image_name);\n        } catch (FileNotFoundException e1) {\n            e1.printStackTrace();\n        } catch (IOException e1) {\n            e1.printStackTrace();\n        }\n\n        DocFlavor flavor = DocFlavor.INPUT_STREAM.PNG;\n\n        // Position the default print service\n        PrintService printService = PrintServiceLookup.lookupDefaultPrintService();\n\n        // Create a print job\n        DocPrintJob job = printService.createPrintJob();\n\n        // Set the print properties\n        PrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();\n\n        //printed a very small size (20mm x 10mm) and does not scan\n        pras.add(MediaSize.findMedia(40, 15, Size2DSyntax.MM));\n\n\n        //DOESN'T Scan Either\n        //pras.add(OrientationRequested.LANDSCAPE);\n        //pras.add(OrientationRequested.PORTRAIT);\n        //pras.add(MediaSizeName.ISO_A10);  \n\n        //Doesn't print at all\n        //pras.add(new MediaPrintableArea(0, 0, 40, 15, MediaPrintableArea.MM));\n\n\n        pras.add(new Copies(1));\n        DocAttributeSet das = new HashDocAttributeSet();\n\n        // Specify print content\n        Doc doc = new SimpleDoc(textStream, flavor, das);\n\n        // Do not display the print dialog, print directly\n        try {\n               System.err.println(\"Loop - print\");\n               job.print(doc, pras); // Make specific print operations for each page\n\n        } catch (PrintException pe) {\n            pe.printStackTrace();\n        }\n\n    }\n\n}\n<\/code><\/pre>\n",
+        "question_id": 61596185,
+        "tags": [
+            "java",
+            "thermal-printer",
+            "barcode-printing",
+            "code128"
+        ],
+        "score": 0,
+        "accepted_answer_id": 61715068,
+        "is_answered": true,
+        "view_count": 854,
+        "last_edit_date": 1588678689
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/240981a43e5c9f40bdcff3de43505093?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12359629,
+                "user_type": "registered",
+                "user_id": 9014308,
+                "link": "https://stackoverflow.com/users/9014308/kunif",
+                "reputation": 4400,
+                "display_name": "kunif"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 61596185,
+            "edited": false,
+            "creation_date": 1588696619,
+            "comment_id": 108995708
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+                "account_id": 18487232,
+                "user_type": "registered",
+                "user_id": 13467877,
+                "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+                "reputation": 1,
+                "display_name": "Vinayak Satapute"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 61596185,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/240981a43e5c9f40bdcff3de43505093?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12359629,
+                "user_type": "registered",
+                "user_id": 9014308,
+                "link": "https://stackoverflow.com/users/9014308/kunif",
+                "reputation": 4400,
+                "display_name": "kunif"
+            },
+            "edited": false,
+            "creation_date": 1588695621,
+            "comment_id": 108995152
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/240981a43e5c9f40bdcff3de43505093?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12359629,
+                "user_type": "registered",
+                "user_id": 9014308,
+                "link": "https://stackoverflow.com/users/9014308/kunif",
+                "reputation": 4400,
+                "display_name": "kunif"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 61596185,
+            "edited": false,
+            "creation_date": 1588695365,
+            "comment_id": 108995006
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+                "account_id": 18487232,
+                "user_type": "registered",
+                "user_id": 13467877,
+                "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+                "reputation": 1,
+                "display_name": "Vinayak Satapute"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 61596185,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/d1fc3a85db4ff7618a7639742f356b3b?s=256&d=identicon&r=PG",
+                "account_id": 25466,
+                "user_type": "registered",
+                "user_id": 65464,
+                "link": "https://stackoverflow.com/users/65464/erich-kitzmueller",
+                "reputation": 37067,
+                "display_name": "Erich Kitzmueller",
+                "accept_rate": 93
+            },
+            "edited": false,
+            "creation_date": 1588695213,
+            "comment_id": 108994923
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+                "account_id": 18487232,
+                "user_type": "registered",
+                "user_id": 13467877,
+                "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+                "reputation": 1,
+                "display_name": "Vinayak Satapute"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 61596185,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/240981a43e5c9f40bdcff3de43505093?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12359629,
+                "user_type": "registered",
+                "user_id": 9014308,
+                "link": "https://stackoverflow.com/users/9014308/kunif",
+                "reputation": 4400,
+                "display_name": "kunif"
+            },
+            "edited": false,
+            "creation_date": 1588694898,
+            "comment_id": 108994754
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d1fc3a85db4ff7618a7639742f356b3b?s=256&d=identicon&r=PG",
+                "account_id": 25466,
+                "user_type": "registered",
+                "user_id": 65464,
+                "link": "https://stackoverflow.com/users/65464/erich-kitzmueller",
+                "reputation": 37067,
+                "display_name": "Erich Kitzmueller",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 61596185,
+            "edited": false,
+            "creation_date": 1588679037,
+            "comment_id": 108984871
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/240981a43e5c9f40bdcff3de43505093?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 12359629,
+                "user_type": "registered",
+                "user_id": 9014308,
+                "link": "https://stackoverflow.com/users/9014308/kunif",
+                "reputation": 4400,
+                "display_name": "kunif"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 61596185,
+            "edited": false,
+            "creation_date": 1588661172,
+            "comment_id": 108976194
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d1fc3a85db4ff7618a7639742f356b3b?s=256&d=identicon&r=PG",
+                "account_id": 25466,
+                "user_type": "registered",
+                "user_id": 65464,
+                "link": "https://stackoverflow.com/users/65464/erich-kitzmueller",
+                "reputation": 37067,
+                "display_name": "Erich Kitzmueller",
+                "accept_rate": 93
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1588921490,
+            "creation_date": 1588753126,
+            "body": "<p>You can make your program shorter and faster, and also make sure it always prints a <em>legible<\/em> barcode, by using the printer language instead of using the barcode printer as if it was a generic printer. <\/p>\n\n<pre><code>import javax.print.*;\n\npublic class PrintUsingZPL {\n  public static void main(String[] args) {\n    StringBuilder codeData = new StringBuilder();\n    codeData.append(\"Stackoverflow\"); // example\n\n    String printCommand = \"^XA^LH0,0^FO50,50^BCN,100,Y,N,N^FD\"+\n                          codeData.toString()+\n                          \"^FS^XZ\";\n    PrintService printService = PrintServiceLookup.lookupDefaultPrintService();\n    try {\n      DocPrintJob job = printService.createPrintJob();\n      Doc doc = new SimpleDoc(printCommand.getBytes(), DocFlavor.BYTE_ARRAY.AUTOSENSE, null);\n      job.print(doc, null);\n    }\n    catch(PrintException e) { /* error handling goes here */ }\n  }\n}\n<\/code><\/pre>\n",
+            "answer_id": 61630502,
+            "question_id": 61596185,
+            "last_edit_date": 1588921490
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+                "account_id": 18487232,
+                "user_type": "registered",
+                "user_id": 13467877,
+                "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+                "reputation": 1,
+                "display_name": "Vinayak Satapute"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": true,
+            "last_activity_date": 1589704000,
+            "creation_date": 1589127340,
+            "body": "<p>Thanks @Erich. I have used your given code and updated the printCommand for both ZPL and DP Language. Your updated code (^LH) was able to print the Barcode but it was not getting scanned (not sure, I tried some variation but did not help), so I tried DPL command there as shown in code here, and it was able to print the Barcode and successfully got scanned too. Thank you so much for your help and guidance.<\/p>\n\n<hr>\n\n<pre><code>package BARCODE;\n\nimport javax.print.*;\nimport javax.print.PrintService;\n\npublic class PrintUsingZPL1 {\n  public static void main(String[] args) {\n    StringBuilder codeData = new StringBuilder();\n    //codeData.append(\"Stackoverflow\"); // example\n    codeData.append(\"CRO-0000100-20\"); // example\n    String printData = codeData.toString();\n    System.out.println(\"Data for Barcode \" +printData);\n\n    /*String printCommand = \"^XA^LH0,0^FO50,50^BCN,100,Y,N,N^FD\"+\n                          codeData.toString()+\n                          \"^FS^XZ\";*/\n\n   /* String printCommand = \"PP65,107:AN7\\r\\n\" + \n            \"BARSET \\\"CODE128B\\\",2,1,1,71\\r\\n\" + \n            \"PB \\\"CRO-0000001-20\\\"\\r\\n\" + \n            \"PP79,37:NASC 8\\r\\n\" + \n            \"FT \\\"CG Triumvirate Condensed Bold\\\",8,0,98\\r\\n\" + \n            \"PT \\\"CRO-0000001-20\\\"\\r\\n\" + \n            \"LAYOUT RUN \\\"\\\"\\r\\n\" + \n            \"PF\"; */\n  String printCommand = \"PP35,90:AN7\\r\\n\" + \n    \"BARSET \\\"CODE39A\\\",3,1,1,67\\r\\n\" + \n    \"PB \" +codeData.toString()+ \"\\r\\n\" + \n    \"PP65,23:NASC 9\\r\\n\" + \n    \"FT \\\"Andale Mono Bold\\\",8,0\\r\\n\" + \n    \"PT \" +codeData.toString()+ \"\\r\\n\" + \n    \"LAYOUT RUN \\\"\\\"\\r\\n\" + \n    \"PF\";\n\n    /*String printCommand = \"PP65,107:AN7\\r\\n\" + \n            \"BARSET \\\"CODE128B\\\",2,1,1,71\\r\\n\" + \n            \"PB \"+printData+\"\\r\\n\" + \n            \"PP79,37:NASC 8\\r\\n\" + \n            \"FT \\\"CG Triumvirate Condensed Bold\\\",8,0,98\\r\\n\" + \n            \"PT \"+printData+\"\\r\\n\" + \n            \"LAYOUT RUN \\\"\\\"\\r\\n\" + \n            \"PF\";*/\n\n    PrintService printService = PrintServiceLookup.lookupDefaultPrintService();\n    try {\n      DocPrintJob job = printService.createPrintJob();\n      Doc doc = new SimpleDoc(printCommand.getBytes(), DocFlavor.BYTE_ARRAY.AUTOSENSE, null);\n      job.print(doc, null);\n    }\n    catch(PrintException e) { /* error handling goes here */ }\n  }\n}\n<\/code><\/pre>\n\n<hr>\n",
+            "answer_id": 61715068,
+            "question_id": 61596185,
+            "last_edit_date": 1589704000
+        }
+    ],
+    "answer_comments": {
+        "61630502": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/d1fc3a85db4ff7618a7639742f356b3b?s=256&d=identicon&r=PG",
+                    "account_id": 25466,
+                    "user_type": "registered",
+                    "user_id": 65464,
+                    "link": "https://stackoverflow.com/users/65464/erich-kitzmueller",
+                    "reputation": 37067,
+                    "display_name": "Erich Kitzmueller",
+                    "accept_rate": 93
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 61630502,
+                "reply_to_user": {
+                    "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+                    "account_id": 18487232,
+                    "user_type": "registered",
+                    "user_id": 13467877,
+                    "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+                    "reputation": 1,
+                    "display_name": "Vinayak Satapute"
+                },
+                "edited": false,
+                "creation_date": 1588921761,
+                "comment_id": 109091335
+            },
+            {
+                "owner": {
+                    "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+                    "account_id": 18487232,
+                    "user_type": "registered",
+                    "user_id": 13467877,
+                    "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+                    "reputation": 1,
+                    "display_name": "Vinayak Satapute"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 61630502,
+                "edited": false,
+                "creation_date": 1588868203,
+                "comment_id": 109072360
+            }
+        ],
+        "61715068": [
+            {
+                "owner": {
+                    "profile_image": "https://lh3.googleusercontent.com/a-/AOh14Ghye7aJhMjPvEqv9MaqpQmOKqVTZQYSwxcO7rhRRA=k-s256",
+                    "account_id": 18487232,
+                    "user_type": "registered",
+                    "user_id": 13467877,
+                    "link": "https://stackoverflow.com/users/13467877/vinayak-satapute",
+                    "reputation": 1,
+                    "display_name": "Vinayak Satapute"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 1,
+                "post_id": 61715068,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/MWKel.jpg?s=256",
+                    "account_id": 2179728,
+                    "user_type": "registered",
+                    "user_id": 10819573,
+                    "link": "https://stackoverflow.com/users/10819573/arvind-kumar-avinash",
+                    "reputation": 81081,
+                    "display_name": "Arvind Kumar Avinash"
+                },
+                "edited": false,
+                "creation_date": 1589704066,
+                "comment_id": 109393798
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/MWKel.jpg?s=256",
+                    "account_id": 2179728,
+                    "user_type": "registered",
+                    "user_id": 10819573,
+                    "link": "https://stackoverflow.com/users/10819573/arvind-kumar-avinash",
+                    "reputation": 81081,
+                    "display_name": "Arvind Kumar Avinash"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 61715068,
+                "edited": false,
+                "creation_date": 1589219579,
+                "comment_id": 109201003
+            }
+        ]
+    }
+}

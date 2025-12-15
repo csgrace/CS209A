@@ -1,0 +1,100 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5622ac8a98c9b61fde5bd52aeebbcd5a?s=256&d=identicon&r=PG",
+            "account_id": 905664,
+            "user_type": "registered",
+            "user_id": 940642,
+            "link": "https://stackoverflow.com/users/940642/vikas27",
+            "reputation": 571,
+            "display_name": "vikas27",
+            "accept_rate": 45
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/27316409/couchdb-view-for-json-array",
+        "last_activity_date": 1418999279,
+        "creation_date": 1417784212,
+        "answer_count": 1,
+        "title": "CouchDB View For JSON Array",
+        "body": "<p>I have a json object of following kind:<\/p>\n\n<pre><code>{\n    \"contentClass\": \"Class\",\n    \"owner\": \"Rambo\",\n    \"links\": {\n        \"Vehicle\": \"aaaaa\", \"Vehicle2\":\"bbbbb\"\n    },\n    \"Date\": {\n        \"extendedTypeName\": \"Date and time\",\n        \"type\": \"DATE\",\n        \"name\": \"Date\",\n        \"defaultValue\": null,\n        \"value\": \"2013-08-09T08:07:00.000Z\",\n        \"position\": 2,\n        \"attributeName\": \"Date\"\n    }   \n}\n<\/code><\/pre>\n\n<p>So To get all the records by matching date and one of the link field(vehicle or vehicle1) I created the following view:<\/p>\n\n<pre><code>function(doc) {\n    if(doc.contentClass == 'Class') { \n        if(doc.links) {\n            for (var linkedTo in doc.links) {\n                emit([doc.Date.value, doc.links[linkedTo]], null);          \n            }\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>This function was not working until I swap the values in emit function:<\/p>\n\n<pre><code>emit([doc.links[linkedTo], doc.Date.value ], null);\n<\/code><\/pre>\n\n<p>Can anyone tell me the reason for this. Also is there any better view for this.\nThanks in advance.<\/p>\n",
+        "question_id": 27316409,
+        "tags": [
+            "java",
+            "couchdb",
+            "couchdb-futon"
+        ],
+        "score": -1,
+        "is_answered": false,
+        "view_count": 559,
+        "last_edit_date": 1417785782
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/5622ac8a98c9b61fde5bd52aeebbcd5a?s=256&d=identicon&r=PG",
+                "account_id": 905664,
+                "user_type": "registered",
+                "user_id": 940642,
+                "link": "https://stackoverflow.com/users/940642/vikas27",
+                "reputation": 571,
+                "display_name": "vikas27",
+                "accept_rate": 45
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 27316409,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/50ab3455f81596e7b1136ce87a0c9104?s=256&d=identicon&r=PG",
+                "account_id": 19721,
+                "user_type": "registered",
+                "user_id": 46450,
+                "link": "https://stackoverflow.com/users/46450/kim-stebel",
+                "reputation": 42085,
+                "display_name": "Kim Stebel",
+                "accept_rate": 78
+            },
+            "edited": false,
+            "creation_date": 1417786329,
+            "comment_id": 43093734
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/50ab3455f81596e7b1136ce87a0c9104?s=256&d=identicon&r=PG",
+                "account_id": 19721,
+                "user_type": "registered",
+                "user_id": 46450,
+                "link": "https://stackoverflow.com/users/46450/kim-stebel",
+                "reputation": 42085,
+                "display_name": "Kim Stebel",
+                "accept_rate": 78
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 27316409,
+            "edited": false,
+            "creation_date": 1417785886,
+            "comment_id": 43093489
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Pjl86.jpg?s=256",
+            "account_id": 343183,
+            "user_type": "registered",
+            "user_id": 674724,
+            "link": "https://stackoverflow.com/users/674724/weslito",
+            "reputation": 76,
+            "display_name": "weslito"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1418999279,
+        "creation_date": 1418975545,
+        "body": "<p>When you you use emit(), the first parameter represent the key of your index.\nif you call the view using startKey and endKey, then these two values should match the indexed key (same order). <\/p>\n\n<p>for example<\/p>\n\n<pre><code>[doc.links[linkedTo], doc.Date.value ]\n<\/code><\/pre>\n\n<p>is you index key so your startKey and endKey should always use the same format (linkedTo first followed by date).<\/p>\n\n<p>Also if you use descending order param for your query, do not forget to invert startKey and endKey.<\/p>\n",
+        "answer_id": 27561796,
+        "question_id": 27316409,
+        "last_edit_date": 1418999279
+    }],
+    "answer_comments": {}
+}

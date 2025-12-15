@@ -1,0 +1,69 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5bfcb75aa0bf7fc166a38c8311713761?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10655388,
+            "user_type": "registered",
+            "user_id": 7845071,
+            "link": "https://stackoverflow.com/users/7845071/lukas-a",
+            "reputation": 153,
+            "display_name": "Lukas A"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/43583977/getting-cmd-output-in-java",
+        "last_activity_date": 1493061110,
+        "creation_date": 1493024962,
+        "answer_count": 1,
+        "title": "Getting Cmd Output in Java",
+        "body": "<p>I got a problem when trying to redirect cmd output to a Java var.<\/p>\n\n<p>My Source:<\/p>\n\n<pre><code>System.out.println(\"Init WAR packaging\");\nProcessBuilder builder = new ProcessBuilder(Arrays.asList(new String[] {\"cmd.exe\", \"/C\", \"start\", \"/wait\", \"new.bat\"}));\nProcess process = builder.start();\nBufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));\nStringBuilder strBuilder = new StringBuilder();\nString line = null;\nwhile (process.isAlive()) {\n    if((line = reader.readLine()) != null) {\n        strBuilder.append(line);\n        strBuilder.append(System.getProperty(\"line.separator\"));\n    } else {\n        System.out.println(\"123\");\n        Thread.sleep(10);\n    }\n}\nString result = strBuilder.toString();\nSystem.out.println(result);\nSystem.out.println(\"Start WAR packaging\");\n<\/code><\/pre>\n\n<p>The Batch contains mainly:<\/p>\n\n<pre><code>jar -cvf test.war *.jsp *.xml\n<\/code><\/pre>\n\n<p>The output I get in the console:<\/p>\n\n<pre><code>Init WAR packaging\n123\n\nStart WAR packaging\n<\/code><\/pre>\n\n<p>So all i get as output from my CMD is null the actual CMD output looks like:<\/p>\n\n<pre><code>asdf.jsp wird hinzugefügt(ein = 17270) (aus = 4693)(72 % verkleinert)\nqwer.jsp wird hinzugefügt(ein = 12969) (aus = 3519)(72 % verkleinert)\nyxcv.jsp wird hinzugefügt(ein = 22463) (aus = 5375)(76 % verkleinert)\nrewq.jsp wird hinzugefügt(ein = 30687) (aus = 6748)(78 % verkleinert)\njhgf.jsp wird hinzugefügt(ein = 47974) (aus = 11005)(77 % verkleinert)\n<\/code><\/pre>\n\n<p>I think thats actually the way it's ment to look like.<\/p>\n\n<p>Really appreciate any kind of help as i couldn't get along with the information found on google / other stackoverflow Questions.<\/p>\n\n<p>Thank you and have a nice day :)<\/p>\n\n<p>EDIT:<\/p>\n\n<p>I modified the whole code as suggested by arataj (hope i got you right):<\/p>\n\n<pre><code>ProcessBuilder builder = new ProcessBuilder(Arrays.asList(new String[] {\"cmd.exe\", \"/C\", \"start\", \"/wait\", \"new.bat\"}));\n        Process process = builder.start();\n        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));\n        StringBuilder strBuilder = new StringBuilder();\n        String line = null;\n        while (process.isAlive()) {\n            Thread.sleep(10);\n            line = reader.readLine();\n            strBuilder.append(line);\n            strBuilder.append(System.getProperty(\"line.separator\"));\n        }\n        line = reader.readLine();\n        strBuilder.append(line);\n        String result = strBuilder.toString();\n        System.out.println(result);\n<\/code><\/pre>\n\n<p>Console output:<\/p>\n\n<pre><code>Init WAR packaging\nnull\nnull\nStart WAR packaging\n<\/code><\/pre>\n",
+        "question_id": 43583977,
+        "tags": [
+            "java",
+            "batch-file",
+            "cmd"
+        ],
+        "score": -1,
+        "accepted_answer_id": 43587880,
+        "is_answered": true,
+        "view_count": 927,
+        "last_edit_date": 1493027441
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5bfcb75aa0bf7fc166a38c8311713761?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10655388,
+            "user_type": "registered",
+            "user_id": 7845071,
+            "link": "https://stackoverflow.com/users/7845071/lukas-a",
+            "reputation": 153,
+            "display_name": "Lukas A"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 43583977,
+        "edited": false,
+        "creation_date": 1493102524,
+        "comment_id": 74256022
+    }],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5bfcb75aa0bf7fc166a38c8311713761?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 10655388,
+            "user_type": "registered",
+            "user_id": 7845071,
+            "link": "https://stackoverflow.com/users/7845071/lukas-a",
+            "reputation": 153,
+            "display_name": "Lukas A"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1493036260,
+        "creation_date": 1493036260,
+        "body": "<p>Solved the problem, the problem was that i did not have access to the output i wanted 'cause it was cause by a command calling another comman.<\/p>\n\n<p>The way i solved it in code:<\/p>\n\n<pre><code>ProcessBuilder builder = new ProcessBuilder(\"cmd.exe\");\nProcess  process = builder.start();\nBufferedWriter out = new BufferedWriter(new \nOutputStreamWriter(process.getOutputStream()));\nInputStream stdout = process.getInputStream();\n\nBufferedReader reader = new BufferedReader(new InputStreamReader(stdout));\n\nout.write(\"start /b new.bat\\n\");\nout.flush();\nout.close();\n\nScanner scanner = new Scanner(stdout);\nwhile (scanner.hasNextLine()) {\n    System.out.println(scanner.nextLine());\n}\nSystem.out.println(\"end\");\nscanner.close();\n<\/code><\/pre>\n\n<p>Awnser based on <a href=\"https://stackoverflow.com/questions/18903549/writing-to-inputstream-of-a-java-process\">this<\/a> .<\/p>\n\n<p>Thanks for the help!<\/p>\n",
+        "answer_id": 43587880,
+        "question_id": 43583977,
+        "last_edit_date": 1495535482
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,87 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e540d4748f64a7432532e42488c4062d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12219796,
+            "user_type": "registered",
+            "user_id": 8919169,
+            "link": "https://stackoverflow.com/users/8919169/brice-harismendy",
+            "reputation": 113,
+            "display_name": "Brice Harismendy"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48992516/set-a-panel-in-background-and-another-in-foregroud",
+        "last_activity_date": 1520242135,
+        "creation_date": 1519661329,
+        "answer_count": 1,
+        "title": "set a panel in background and another in foregroud",
+        "body": "<p>I'have a little problem for my group project, in this project we must make a game. I have 2 panel one for the background with the map (created from a json) and another panel with the character. I 'have tried with jlayeredpane but the map is not centered in my jframe. I've also tried with .setOpaque(true/false)  but it's doesn't work.\nanyone have an Idea ? <\/p>\n\n<p>here is my code :<\/p>\n\n<pre><code>package vue;\n\nimport java.awt.BorderLayout;\nimport java.awt.CardLayout;\nimport java.awt.Color;\nimport java.awt.Component;\nimport java.awt.GridBagLayout;\nimport java.awt.GridLayout;\nimport java.awt.image.BufferedImage;\nimport java.io.File;\nimport java.io.FileNotFoundException;\nimport java.io.FileReader;\nimport java.io.IOException;\nimport java.nio.Buffer;\nimport java.util.ArrayList;\nimport java.util.Hashtable;\n\nimport javax.imageio.ImageIO;\nimport javax.swing.ImageIcon;\nimport javax.swing.JLabel;\nimport javax.swing.JPanel;\nimport javax.swing.JLayeredPane;\nimport org.json.*;\nimport org.json.simple.JSONArray;\nimport org.json.simple.JSONObject;\nimport org.json.simple.parser.JSONParser;\nimport org.json.simple.parser.ParseException;\n\nimport controler.abstractControler;\n\nimport observer.Observer;\n\npublic class gamingArea extends JPanel implements Observer {\n    private String ressourcesImg = \"resources/images/\";\n    private Hashtable &lt;String,String&gt; tile = new Hashtable();\n    private abstractControler controler;\n    private JSONParser parser = new JSONParser();\n    private JSONArray map ;\n\n    private JPanel centerPanel,topPanel,playerPanel,mapPanel,centerContentPanel;\n\n    private GridBagLayout centerLayout,topLayout;\n    private GridLayout mapLayout,playerLayout;\n    private BorderLayout divider;\n    private JLabel banniereLabel;\n    private BufferedImage banniere;\n\n    public gamingArea(abstractControler controler) {\n        this.controler = controler;\n        //getting the image from system file\n        try {\n            banniere = ImageIO.read(new File(ressourcesImg+\"banniere.png\"));\n            banniereLabel = new JLabel(new ImageIcon(banniere));\n        } catch (IOException e) {\n            banniereLabel = new JLabel();\n            banniereLabel.setText(\"error file can't be read\");\n            e.printStackTrace();\n        }\n        //getting the map in json format\n        try {\n            map = (JSONArray) ((JSONObject) parser.parse(new FileReader(\"resources/cartes/carte.json\"))).get(\"boite\");\n        } catch (FileNotFoundException e) {         \n            e.printStackTrace();\n        } catch (IOException e) {\n            e.printStackTrace();\n        } catch (ParseException e) {\n            e.printStackTrace();\n        }\n        //init Jpanel\n        centerPanel = new JPanel();\n        topPanel = new JPanel();\n        playerPanel = new JPanel();\n        mapPanel = new JPanel();\n        centerContentPanel = new JPanel(new CardLayout());\n\n        //init layout\n        centerLayout = new GridBagLayout();\n        topLayout = new GridBagLayout();\n\n        divider = new BorderLayout();\n\n        playerLayout = new GridLayout(map.size(),map.size());\n        mapLayout = new GridLayout(map.size(),map.size());\n\n\n        //setting layout\n        this.setLayout(divider);\n        centerPanel.setLayout(centerLayout);\n        topPanel.setLayout(topLayout);\n        mapPanel.setLayout(mapLayout);\n        playerPanel.setLayout(playerLayout);\n\n\n        //setting the hasmap\n        tile.put(\"1\",ressourcesImg+\"sol.png\");\n        tile.put(\"2\",ressourcesImg+\"mur.png\");\n\n        //defining layout which show the map        \n        for (int i = 0; i &lt; map.size(); i++) {\n            ArrayList&lt;String&gt; line= (ArrayList&lt;String&gt;) map.get(i);\n            for (int j = 0; j &lt; line.size(); j++) {\n                try {\n                    BufferedImage tempBuf = ImageIO.read(new File(tile.get(line.get(j))));\n                    JLabel temp =  new JLabel(new ImageIcon(tempBuf));\n                    mapPanel.add(temp);\n                } catch (Exception e) {\n                    e.printStackTrace();\n                }\n            }\n        }\n\n        //adding a player sample\n        BufferedImage testb;\n        try {\n            testb = ImageIO.read(new File(ressourcesImg+\"snake_tete_invisible.png\"));\n            JLabel test =  new JLabel(new ImageIcon(testb));\n            playerPanel.add(test);\n        } catch (IOException e) {\n            // TODO Auto-generated catch block\n            e.printStackTrace();\n        }\n\n        //setting panels opaque or not\n        mapPanel.setOpaque(true);\n        playerPanel.setOpaque(false);\n        //adding components to main panels \n        //centerContentPanel.add(mapPanel);\n        //centerContentPanel.add(playerPanel);\n        centerPanel.add(centerContentPanel);\n        topPanel.add(banniereLabel);\n        this.add(topPanel,divider.PAGE_START);\n        this.add(mapPanel,divider.CENTER);\n        this.add(playerPanel,divider.CENTER);       \n    }\n    @Override\n    public void update(String str) {\n        // TODO Auto-generated method stub\n    }\n\n    @Override\n    public void changePanel(String nomPanel) {\n        // TODO Auto-generated method stub\n    }\n\n\n}\n<\/code><\/pre>\n",
+        "question_id": 48992516,
+        "tags": [
+            "java",
+            "swing"
+        ],
+        "score": 0,
+        "accepted_answer_id": 48994482,
+        "is_answered": true,
+        "view_count": 46
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2a6375f9e6cc2e5ad451e4c0c5ed74d0?s=256&d=identicon&r=PG",
+                "account_id": 5707766,
+                "user_type": "registered",
+                "user_id": 4510718,
+                "link": "https://stackoverflow.com/users/4510718/mathem",
+                "reputation": 811,
+                "display_name": "MatheM"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48992516,
+            "edited": false,
+            "creation_date": 1519664547,
+            "comment_id": 84992171
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/rHpcO.gif?s=256",
+                "account_id": 2507550,
+                "user_type": "registered",
+                "user_id": 2180785,
+                "link": "https://stackoverflow.com/users/2180785/frakcool",
+                "reputation": 11243,
+                "display_name": "Frakcool",
+                "accept_rate": 90
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 48992516,
+            "edited": false,
+            "creation_date": 1519661874,
+            "comment_id": 84990344
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e540d4748f64a7432532e42488c4062d?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 12219796,
+            "user_type": "registered",
+            "user_id": 8919169,
+            "link": "https://stackoverflow.com/users/8919169/brice-harismendy",
+            "reputation": 113,
+            "display_name": "Brice Harismendy"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1520242135,
+        "creation_date": 1519668210,
+        "body": "<p>I've found the solution, so for those who want to know here the solution to make a tile map without library in Java : create your map with a Json like that :<\/p>\n\n<pre><code>{\"box\":[\n       [\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"2\"]\n       [\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\",\"2\"]\n       ]\n}\n<\/code><\/pre>\n\n<p>create a gridLayout at the size of the box table and where 2 is set to an image of a wall and 1 to an image of grass<\/p>\n\n<p>then get an invisible tile and make a second gridlayout at the size of the first one. at the end you just have to set it over it with a JLayeredPane and replace invisibile tile by your character with cordinate given by the gridlayout.<\/p>\n",
+        "answer_id": 48994482,
+        "question_id": 48992516,
+        "last_edit_date": 1520242135
+    }],
+    "answer_comments": {}
+}

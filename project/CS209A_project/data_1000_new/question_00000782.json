@@ -1,0 +1,95 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GgydCSCooyJlYsWvoddkcJP2veW10DmaKeIllGK7Q=k-s256",
+            "account_id": 18409269,
+            "user_type": "registered",
+            "user_id": 13410058,
+            "link": "https://stackoverflow.com/users/13410058/kushal-chavada",
+            "reputation": 1,
+            "display_name": "Kushal Chavada"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/62976522/how-to-combine-functionalities-of-sourcewithcontext-and-sourcequeue-in-java",
+        "last_activity_date": 1595228611,
+        "creation_date": 1595135234,
+        "answer_count": 1,
+        "title": "How to combine functionalities of SourceWithContext and SourceQueue in Java?",
+        "body": "<p>I want to create a Akka stream <code>Source<\/code> to which I'm able to push data whenever my API endpoint is called. Also, I want to pass context/metadata along with elements. I checked out <code>SourceQueue<\/code> which supports pushing elements. There is <code>SourceWithContext<\/code> which allows passing context/metadata along with elements. <code>SourceWithContext<\/code> supports operations which automatically propagate the context of an element. I want to combine these two functionalities i.e. I want push mechanism along with automatic context propagation.<\/p>\n",
+        "question_id": 62976522,
+        "tags": [
+            "java",
+            "akka-stream"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 192
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GgydCSCooyJlYsWvoddkcJP2veW10DmaKeIllGK7Q=k-s256",
+                "account_id": 18409269,
+                "user_type": "registered",
+                "user_id": 13410058,
+                "link": "https://stackoverflow.com/users/13410058/kushal-chavada",
+                "reputation": 1,
+                "display_name": "Kushal Chavada"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 62976522,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/ce25979397b7e480a1b25c380fb5f0f3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3689978,
+                "user_type": "registered",
+                "user_id": 3072788,
+                "link": "https://stackoverflow.com/users/3072788/alec",
+                "reputation": 32491,
+                "display_name": "Alec",
+                "accept_rate": 82
+            },
+            "edited": false,
+            "creation_date": 1595228408,
+            "comment_id": 111390095
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ce25979397b7e480a1b25c380fb5f0f3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3689978,
+                "user_type": "registered",
+                "user_id": 3072788,
+                "link": "https://stackoverflow.com/users/3072788/alec",
+                "reputation": 32491,
+                "display_name": "Alec",
+                "accept_rate": 82
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 62976522,
+            "edited": false,
+            "creation_date": 1595171649,
+            "comment_id": 111375887
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/a-/AOh14GgydCSCooyJlYsWvoddkcJP2veW10DmaKeIllGK7Q=k-s256",
+            "account_id": 18409269,
+            "user_type": "registered",
+            "user_id": 13410058,
+            "link": "https://stackoverflow.com/users/13410058/kushal-chavada",
+            "reputation": 1,
+            "display_name": "Kushal Chavada"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1595228611,
+        "creation_date": 1595228611,
+        "body": "<p>PFB code based on the approach suggested by @Alec:<\/p>\n<pre><code>    public static void main(String[] args) throws Exception {\n        ActorSystem system = ActorSystem.create();\n        SourceQueueWithComplete&lt;Pair&lt;Integer, String&gt;&gt; sq = Source.&lt;Pair&lt;Integer, String&gt;&gt;queue(10, OverflowStrategy.backpressure())\n                .asSourceWithContext(Pair::second)\n                .map(Pair::first)\n                .to(Sink.foreach(param -&gt; CompletableFuture.completedFuture(param).thenAccept(System.out::println)))\n                .run(system);\n        // Pushing elements in the SourceQueue (sq) created above\n        List&lt;Pair&lt;Integer, String&gt;&gt; list = List.of(Pair.create(1, &quot;one&quot;), Pair.create(2, &quot;two&quot;));\n        list.forEach(pair -&gt; sq.offer(pair));\n    }\n<\/code><\/pre>\n",
+        "answer_id": 62990156,
+        "question_id": 62976522
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,77 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/514791afe5463bb788f1641f66f44606?s=256&d=identicon&r=PG",
+            "account_id": 424920,
+            "user_type": "registered",
+            "user_id": 805195,
+            "link": "https://stackoverflow.com/users/805195/sourajit-basak",
+            "reputation": 693,
+            "display_name": "Sourajit Basak",
+            "accept_rate": 0
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/37586080/contents-of-csv-file-getting-displayed-on-webpage-instead-of-a-proper-file-downl",
+        "last_activity_date": 1598874792,
+        "creation_date": 1464854801,
+        "answer_count": 2,
+        "title": "Contents of csv file getting displayed on webpage instead of a proper file download",
+        "body": "<p>Problem: Contents of a CSV file are getting displayed as page contents if the number of records is large.<\/p>\n\n<p>Expected: File download. <\/p>\n\n<p>The request gets fired from another page via window.open(url); Following is the url handler. <\/p>\n\n<pre><code>@RequestMapping(value = \"/url\", method = RequestMethod.GET)\npublic void handler(HttpServletRequest request,ModelMap map, @RequestParam(\"itemPk\") long pk, HttpServletResponse response) throws Exception {\n    CSVWriter csvWriter = new CSVWriter(new OutputStreamWriter(response.getOutputStream()));\n    try {\n        List&lt;String[]&gt; data = new ArrayList&lt;String[]&gt;();\n        for (int i = 0; i &lt; 500; i++) {\n            String[] row = new String[] {\"asdr\", \"10\", \"sourajit\", \"34.567\", \"06-DEC-2015\", \"awx445\"};\n            data.add(row);\n        }\n        csvWriter.writeAll(data);\n\n        response.setContentType(\"text/csv\"); \n        response.setHeader(\"Content-disposition\", \"attachment; filename=volcs.csv\");\n\n\n    }  finally {\n        csvWriter.flush();\n        csvWriter.close();\n    }\n}\n<\/code><\/pre>\n\n<p>Same behavior for GET or POST. \n(For POST, opening a new window with a html form)<\/p>\n",
+        "question_id": 37586080,
+        "tags": [
+            "java",
+            "file",
+            "csv",
+            "download"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 773,
+        "last_edit_date": 1464929315
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/514791afe5463bb788f1641f66f44606?s=256&d=identicon&r=PG",
+                "account_id": 424920,
+                "user_type": "registered",
+                "user_id": 805195,
+                "link": "https://stackoverflow.com/users/805195/sourajit-basak",
+                "reputation": 693,
+                "display_name": "Sourajit Basak",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1465190276,
+            "creation_date": 1465190276,
+            "body": "<p>This is because a Writer instance is used for generating the response. <\/p>\n\n<p>We need to treat it as bytes. <\/p>\n\n<pre><code>ServletOutputStream out = response.getOutputStream(); \nout.write(baos.toByteArray());\nbaos.writeTo(out);\nout.flush();\n<\/code><\/pre>\n",
+            "answer_id": 37649996,
+            "question_id": 37586080
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/776f5d46e7cb0c0cd1e02bdf75e2bd8f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 877270,
+                "user_type": "registered",
+                "user_id": 153271,
+                "link": "https://stackoverflow.com/users/153271/chendu",
+                "reputation": 857,
+                "display_name": "chendu",
+                "accept_rate": 33
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1598874792,
+            "creation_date": 1465191702,
+            "body": "<p>You need to add headers to tell browser that its attachment in the response. Check the below!<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>String filename = &quot;volcs.csv&quot;;\nresponse.setContentType(&quot;application/force-download&quot;);\nresponse.setContentLength((int)f.length());\n//response.setContentLength(-1);\n//response.setHeader(&quot;Content-Transfer-Encoding&quot;, &quot;binary&quot;);\nresponse.setHeader(&quot;Content-Disposition&quot;,&quot;attachment; filename=&quot; + filename);\n<\/code><\/pre>\n",
+            "answer_id": 37650233,
+            "question_id": 37586080,
+            "last_edit_date": 1598874792
+        }
+    ],
+    "answer_comments": {}
+}

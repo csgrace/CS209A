@@ -1,0 +1,144 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/8acac92f2b592d739e4a14d14c2e4f78?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5582296,
+            "user_type": "registered",
+            "user_id": 4423840,
+            "link": "https://stackoverflow.com/users/4423840/daniel-wojciechowski",
+            "reputation": 83,
+            "display_name": "Daniel Wojciechowski"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/56959625/error-source-propagation-in-micro-service-architecture",
+        "last_activity_date": 1562739777,
+        "creation_date": 1562701689,
+        "answer_count": 1,
+        "title": "Error source propagation in micro-service architecture",
+        "body": "<p>I am implementing a product that consists of <em>n<\/em> microservices (Java, Spring).<\/p>\n\n<p>The problem is when some use case integrates ex. 4 microservices that communicates like that:<\/p>\n\n<p><code>A -&gt; B -&gt; C -&gt; D<\/code> <\/p>\n\n<p>and D throws an exception while doing its task. Service A needs to know that the source of the problem was service D.<\/p>\n\n<p>I know that I can implement a custom exception handler in service D that can return some additional property like <code>exceptionSource=\"D\"<\/code> and propagate this through all services, but it's not really cool and needs a lot of manual implementation.<\/p>\n\n<p>Do you know any way to make it more automatic? Maybe there is some pattern/library/magic-spring-property for that?<\/p>\n",
+        "question_id": 56959625,
+        "tags": [
+            "java",
+            "spring",
+            "rest",
+            "microservices"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 566
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8acac92f2b592d739e4a14d14c2e4f78?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5582296,
+                "user_type": "registered",
+                "user_id": 4423840,
+                "link": "https://stackoverflow.com/users/4423840/daniel-wojciechowski",
+                "reputation": 83,
+                "display_name": "Daniel Wojciechowski"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56959625,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/R8AYO.jpg?s=256",
+                "account_id": 2366187,
+                "user_type": "registered",
+                "user_id": 2071828,
+                "link": "https://stackoverflow.com/users/2071828/boris-the-spider",
+                "reputation": 61396,
+                "display_name": "Boris the Spider",
+                "accept_rate": 88
+            },
+            "edited": false,
+            "creation_date": 1562779165,
+            "comment_id": 100487629
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/R8AYO.jpg?s=256",
+                "account_id": 2366187,
+                "user_type": "registered",
+                "user_id": 2071828,
+                "link": "https://stackoverflow.com/users/2071828/boris-the-spider",
+                "reputation": 61396,
+                "display_name": "Boris the Spider",
+                "accept_rate": 88
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56959625,
+            "edited": false,
+            "creation_date": 1562702176,
+            "comment_id": 100457449
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/LSTUa.png?s=256",
+            "account_id": 100270,
+            "user_type": "registered",
+            "user_id": 270371,
+            "link": "https://stackoverflow.com/users/270371/davidxxx",
+            "reputation": 132455,
+            "display_name": "davidxxx",
+            "accept_rate": 33
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1562739777,
+        "creation_date": 1562704214,
+        "body": "<p>Defining an exception handler and a error message forwarder in each microservice sounds indeed a bad idea.<br>\nIt decouples the microservice implementations in a way that is not necessarily desirable.  We will decouple things that needs to be decoupled (such as data, logic, deployment) but transverse requirements between microservices should not be duplicated in each micro service implementation, overall if they rely on the same technologies.  That is clearly not maintainable.  <\/p>\n\n<p>I see two main ways to accomplish your task :   <\/p>\n\n<ul>\n<li><p>relying on a third application that meshes/enriches the communication and that intercepts the response with the error message (via a specific pattern) and enrich the response of each caller will the source message error until the original invoker.<br>\nThis kind of solution makes sense if you already use it or if you use heterogeneous implementations concerning your microservices. You don't seem to be in this case.<\/p><\/li>\n<li><p>Defining an exception handler (<code>@ControllerAdvice<\/code>) and a HTTP interceptor (<code>ClientHttpRequestInterceptor<\/code>) in a shared library by all Java Spring microservices.<br>\nIn this way, all services will perform the exception handling and the processing of the error coming from responses from other microservices in a similarly way and without any effort.   <\/p><\/li>\n<\/ul>\n\n<p>Just a warn : microservices implementations are not designed to rely <strong>only<\/strong> on the same technology (one may be in Java Spring, the other one may be in Java EE, another in NodeJS and the next one in C#).<br>\nSo relying on a specific feature of Spring may work now but could cause some difficulties if later you use another technology as Java and Spring. <\/p>\n",
+        "answer_id": 56960114,
+        "question_id": 56959625,
+        "last_edit_date": 1562739777
+    }],
+    "answer_comments": {"56960114": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/LSTUa.png?s=256",
+                "account_id": 100270,
+                "user_type": "registered",
+                "user_id": 270371,
+                "link": "https://stackoverflow.com/users/270371/davidxxx",
+                "reputation": 132455,
+                "display_name": "davidxxx",
+                "accept_rate": 33
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56960114,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/8acac92f2b592d739e4a14d14c2e4f78?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5582296,
+                "user_type": "registered",
+                "user_id": 4423840,
+                "link": "https://stackoverflow.com/users/4423840/daniel-wojciechowski",
+                "reputation": 83,
+                "display_name": "Daniel Wojciechowski"
+            },
+            "edited": false,
+            "creation_date": 1562791310,
+            "comment_id": 100492698
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/8acac92f2b592d739e4a14d14c2e4f78?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5582296,
+                "user_type": "registered",
+                "user_id": 4423840,
+                "link": "https://stackoverflow.com/users/4423840/daniel-wojciechowski",
+                "reputation": 83,
+                "display_name": "Daniel Wojciechowski"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 56960114,
+            "edited": false,
+            "creation_date": 1562780258,
+            "comment_id": 100488125
+        }
+    ]}
+}

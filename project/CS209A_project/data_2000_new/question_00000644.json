@@ -1,0 +1,87 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0df44672b8ecf84259005a04acbf5d8f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5581832,
+            "user_type": "registered",
+            "user_id": 4423494,
+            "link": "https://stackoverflow.com/users/4423494/sachin",
+            "reputation": 139,
+            "display_name": "sachin"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59070069/unable-to-locate-the-corresponding-parameter-value-for-in-id-within-the-parame",
+        "last_activity_date": 1575294148,
+        "creation_date": 1574857064,
+        "answer_count": 1,
+        "title": "Unable to locate the corresponding parameter value for &#39;in_id&#39; within the parameter values provided",
+        "body": "<p>I am trying to implement following tutorial  <a href=\"https://www.tutorialspoint.com/spring/calling_stored_procedure.htm\" rel=\"nofollow noreferrer\">https://www.tutorialspoint.com/spring/calling_stored_procedure.htm<\/a>  for simplejdbccall with postgres (need to migrate existing application from Oracle to Postgres which using simplejdbccall) but getting following exception<\/p>\n\n<pre><code> INFO: Unable to locate the corresponding parameter value for 'in_id' within the parameter values provided: [inID]\n Exception in thread \"main\" org.springframework.dao.InvalidDataAccessApiUsageException: Required input parameter 'in_id' is missing\n<\/code><\/pre>\n\n<p>I am using following code to pull information:<\/p>\n\n<pre><code> public void setDataSource(DataSource dataSource) {\n    this.dataSource = dataSource;\n //   this.jdbcCall =  new SimpleJdbcCall(dataSource).withProcedureName(\"getRecord\");\n    this.jdbcCall =  new SimpleJdbcCall(dataSource).withCatalogName(\"public\").withFunctionName(\"getrecord1\");\n}\n\npublic Student getStudent(Integer id) {\n    //SqlParameterSource in = new MapSqlParameterSource().addValue(\"in_id\", id);\n    System.out.println(\"----In getStudent-----\"+id );\n    SqlParameterSource in = new MapSqlParameterSource().addValue(\"inID\", id);\n    /* SqlParameterSource in = new MapSqlParameterSource().addValue(\"id\", id, Types.INTEGER)\n            .addValue(\"name\",Types.VARCHAR)\n            .addValue(\"age\", Types.INTEGER);\n\n\n    */\n\n    Map&lt;String, Object&gt; out = jdbcCall.execute(in);\n\n    Student student = new Student();\n    student.setId(id);\n    student.setName((String) out.get(\"out_name\"));\n    student.setAge((Integer) out.get(\"out_age\"));\n    return student;\n}\n<\/code><\/pre>\n\n<p>and I have following function in postgres database:<\/p>\n\n<pre><code> CREATE function getrecord1 (in_id INTEGER, OUT out_name character, \n                        OUT out_age Integer)\n  as\n\n  $$SELECT name, age from student where id=in_id$$\n   LANGUAGE sql VOLATILE\n   COST 100;\n<\/code><\/pre>\n\n<p>I have tried <a href=\"https://stackoverflow.com/questions/36804032/receiving-message-unable-to-locate-the-corresponding-parameter-when-calling-stor\">Receiving Message Unable to locate the Corresponding Parameter when calling Stored Procedure<\/a> but using below code as well I am getting issue<\/p>\n\n<pre><code>   SqlParameterSource in = new MapSqlParameterSource().addValue(\"id\", id, Types.INTEGER)\n            .addValue(\"name\",Types.VARCHAR)\n            .addValue(\"age\", Types.INTEGER);\n<\/code><\/pre>\n",
+        "question_id": 59070069,
+        "tags": [
+            "java",
+            "spring",
+            "postgresql",
+            "jdbc",
+            "simplejdbccall"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 1179
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d873f397779db38cd510d9ee5416fd43?s=256&d=identicon&r=PG",
+                "account_id": 213468,
+                "user_type": "registered",
+                "user_id": 466862,
+                "link": "https://stackoverflow.com/users/466862/mark-rotteveel",
+                "reputation": 110280,
+                "display_name": "Mark Rotteveel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070069,
+            "edited": false,
+            "creation_date": 1574871518,
+            "comment_id": 104386377
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wQall.png?s=256",
+                "account_id": 9487799,
+                "user_type": "registered",
+                "user_id": 7635569,
+                "link": "https://stackoverflow.com/users/7635569/jgh",
+                "reputation": 18235,
+                "display_name": "JGH"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 2,
+            "post_id": 59070069,
+            "edited": false,
+            "creation_date": 1574857302,
+            "comment_id": 104378215
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0df44672b8ecf84259005a04acbf5d8f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 5581832,
+            "user_type": "registered",
+            "user_id": 4423494,
+            "link": "https://stackoverflow.com/users/4423494/sachin",
+            "reputation": 139,
+            "display_name": "sachin"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1575294148,
+        "creation_date": 1575294148,
+        "body": "<p>I have followed steps to create function from <a href=\"https://www.mkyong.com/jdbc/jdbc-callablestatement-postgresql-stored-function/\" rel=\"nofollow noreferrer\">https://www.mkyong.com/jdbc/jdbc-callablestatement-postgresql-stored-function/<\/a> as shown below<\/p>\n\n<pre><code>public class getConnectionDetails {\n\n    public static void main(String[] args) {\n\n        String createFunction = \"CREATE OR REPLACE FUNCTION environment_management.get_connection_details(p_application_name VARCHAR , OUT lv_conn_record refcursor) \"\n            + \" RETURNS  refcursor \"\n            + \" AS $$ \"\n            + \" BEGIN \"\n            + \" OPEN lv_conn_record FOR SELECT CONNECTION_ID, CONNECTION_TYPE, CONNECTION_NAME, DESCRIPTION, MAX_RETRY_ATTEMPT, RETRY_DELAY_IN_SECONDS,ENABLE_DBMS_OUTPUT from  public.CONNECTION_SPECIFICATION \"\n            + \" where APPLICATION_NAME=p_application_name\"\n            + \" AND ACTIVE_FLAG = 'Y';\"\n            + \" END; \"\n            + \" $$ \"\n            + \" LANGUAGE plpgsql\";\n\n\n\n\n    try (Connection conn = DriverManager.getConnection(\n            \"jdbc:postgresql://a302-3354-7677.ldn.swissbank.com:5453/pg_emea_at28400_dev_177\", \"pgdbo\", \"X9u9CZmgW3b%6AcYHtfESFBf\");\n\n         Statement statement = conn.createStatement();\n\n    ) {\n\n\n\n        // create function\n        statement.execute(createFunction);\n\n\n\n\n    } catch (SQLException e) {\n        System.err.format(\"SQL State: %s\\n%s\", e.getSQLState(), e.getMessage());\n        e.printStackTrace();\n    } catch (Exception e) {\n        e.printStackTrace();\n    }\n\n}\n<\/code><\/pre>\n\n<p>}<\/p>\n\n<p>and call function as shown below:<\/p>\n\n<pre><code>   public final Collection&lt;ConnectionDto&gt; getApplicationConnections(String applicationName) {\n\n        System.out.println(\"Fetch Connections from the database for applicationName: \" + applicationName);\n\n  this.jdbcCall = new SimpleJdbcCall(dataSource).withSchemaName(\"environment_management\").withFunctionName(\"get_connection_details\").withoutProcedureColumnMetaDataAccess()\n            .declareParameters(\n                    new SqlOutParameter(\"lv_conn_record\",  Types.OTHER),\n                    new SqlParameter(\"p_application_name\", Types.VARCHAR));\n\n\n    SqlParameterSource in = new MapSqlParameterSource().addValue(\"lv_conn_record\", Types.REF_CURSOR)\n         .addValue(\"p_application_name\", applicationName);\n\n    Map&lt;String, Object&gt; applicationConnectionsResultMap = jdbcCall.execute(in);\n\n    System.out.println(\"----3333333333333333333 in getApplicationConnections-----\" +applicationConnectionsResultMap);\n\n    return createApplicationConnectionsFromResultMap(applicationConnectionsResultMap);\n}\n<\/code><\/pre>\n\n<p>My Bean.xml look like:<\/p>\n\n<p><\/p>\n\n<pre><code>    &lt;property name=\"driverClassName\" value=\"org.postgresql.Driver\"/&gt;\n    &lt;property name = \"url\" value = \"jdbc:postgresql://a302-3354-7677.ldn:5453/pg\"/&gt;\n    &lt;property name = \"username\" value = \"pgdbo\"/&gt;\n    &lt;property name = \"password\" value = \"abcde\"/&gt;\n\n    &lt;property name=\"initialSize\" value=\"10\"/&gt;\n    &lt;property name=\"maxActive\" value=\"5\"/&gt;\n    &lt;!-- added for postgres --&gt;\n    &lt;property name=\"defaultAutoCommit\" value=\"false\" /&gt;\n\n&lt;/bean&gt;\n\n&lt;bean id = \"studentJDBCTemplate1\"\n      class = \"com.tutorialspoint.StudentJDBCTemplate1\"&gt;\n    &lt;property name = \"dataSource\" ref = \"dataSource\" /&gt;\n&lt;/bean&gt;\n<\/code><\/pre>\n",
+        "answer_id": 59140173,
+        "question_id": 59070069
+    }],
+    "answer_comments": {}
+}

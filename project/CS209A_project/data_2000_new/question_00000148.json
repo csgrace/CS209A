@@ -1,0 +1,89 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rAm4h.jpg?s=256",
+            "account_id": 28977731,
+            "user_type": "registered",
+            "user_id": 22196421,
+            "link": "https://stackoverflow.com/users/22196421/damianbautista",
+            "reputation": 1,
+            "display_name": "DamianBautista"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/76644922/how-can-i-read-and-write-csv-files-and-process-the-data-into-arrays-in-java",
+        "last_activity_date": 1688992679,
+        "creation_date": 1688849810,
+        "answer_count": 2,
+        "title": "How can I read and write CSV files and process the data into arrays in Java?",
+        "body": "<p>I am working on a Java project where I need to handle CSV files. Specifically, I need to read and write CSV files and process the data into arrays for further manipulation. I have researched different libraries and approaches, but I am unsure about the best option and how to correctly implement it, especially when it comes to efficiently storing the CSV data into arrays.<\/p>\n<p>I have explored various libraries and approaches for handling CSV files in Java, but I haven't been able to determine the most efficient and effective solution for reading, writing, and processing CSV data into arrays. I have attempted some implementations, but I'm not getting the desired results or struggling with performance issues.<\/p>\n<p>I would appreciate it if someone could provide me with a simple example and explain the recommended approach to efficiently read, write, and process CSV files into arrays in Java.<\/p>\n",
+        "question_id": 76644922,
+        "tags": [
+            "java",
+            "arrays",
+            "csv",
+            "file-io",
+            "data-processing"
+        ],
+        "score": -1,
+        "is_answered": true,
+        "view_count": 835
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/e12091626d95fd8ff98044e9dc731c31?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 28104689,
+            "user_type": "unregistered",
+            "user_id": 21473475,
+            "link": "https://stackoverflow.com/users/21473475/arfur-narf",
+            "reputation": 565,
+            "display_name": "Arfur Narf"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 76644922,
+        "edited": false,
+        "creation_date": 1688859795,
+        "comment_id": 135130850
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/07129b74cbf0de1a592c7a98224f9e16?s=256&d=identicon&r=PG",
+                "account_id": 957259,
+                "user_type": "registered",
+                "user_id": 982341,
+                "link": "https://stackoverflow.com/users/982341/greybeardedgeek",
+                "reputation": 30307,
+                "display_name": "GreyBeardedGeek"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1688856038,
+            "creation_date": 1688856038,
+            "body": "<p>Welcome to stack overflow!<\/p>\n<p>The guidelines say that questions asking for recommendations for libraries and questions asking for opinions are inappropriate. So your question may get closed for either or both of those reasons.<\/p>\n<p>However, I'll attempt to answer your question, with the caveat that what follows is not necessarily the &quot;best&quot; or &quot;most efficient&quot; way to read CSV data, especially since it reads all of the CSV data into memory in one shot, and could cause out-of-memory problems if you try to read a file that is bigger than available (to your application) memory....YMMV<\/p>\n<p>I use the &quot;opencsv&quot; library<\/p>\n<p>For example,<\/p>\n<pre><code>CSVReader csvReader = new CSVReader(new FileReader(inputFilename));\nList&lt;String[]&gt; data = csvReader.readAll();\n<\/code><\/pre>\n<p>Each item in the list is a row, and each item the row's String[] is a column value for that row.<\/p>\n",
+            "answer_id": 76645218,
+            "question_id": 76644922
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ccd3d2dea07f88ee0c3623c59dc3cec4?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 23740623,
+                "user_type": "registered",
+                "user_id": 17758716,
+                "link": "https://stackoverflow.com/users/17758716/reilas",
+                "reputation": 6276,
+                "display_name": "Reilas"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1688992679,
+            "creation_date": 1688992679,
+            "body": "<p>It depends on your data.<\/p>\n<p>A <em>CSV<\/em> can be trivial if your data may contain commas.<\/p>\n<p>You could implement a <em><a href=\"https://en.wikipedia.org/wiki/Tab-separated_values\" rel=\"nofollow noreferrer\">TSV<\/a><\/em>, which uses the <em>tab<\/em> character.<\/p>\n<p><em><a href=\"https://en.wikipedia.org/wiki/Delimiter-separated_values\" rel=\"nofollow noreferrer\">Wikipedia \u2013 Delimiter-separated values<\/a><\/em>.<\/p>\n<blockquote>\n<p><em>&quot;... I would appreciate it if someone could provide me with a simple example and explain the recommended approach to efficiently read, write, and process CSV files into arrays in Java.&quot;<\/em><\/p>\n<\/blockquote>\n<p>Here is a basic read and write, using a <em>TSV<\/em> structure.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>void append(String[] strings, File file) throws IOException {\n    try (FileWriter writer = new FileWriter(file, true)) {\n        writer.write(String.join(&quot;\\t&quot;, strings));\n        writer.write(System.lineSeparator());\n    }\n}\n\nList&lt;String[]&gt; read(File file) throws IOException {\n    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {\n        List&lt;String[]&gt; list = new ArrayList&lt;&gt;();\n        String line;\n        while ((line = reader.readLine()) != null)\n            list.add(line.split(&quot;\\t&quot;, -1));\n        return list;\n    }\n}\n<\/code><\/pre>\n<p>And, here is a usage.<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>File file = new File(&quot;files/data.tsv&quot;);\nappend(new String[] { &quot;a&quot;, &quot;b&quot;, &quot;c&quot; }, file);\nappend(new String[] { &quot;d&quot;, &quot;e&quot;, &quot;f&quot; }, file);\nList&lt;String[]&gt; list = read(file);\nfor (String[] strings : list)\n    System.out.println(Arrays.toString(strings));\n<\/code><\/pre>\n<p>The contents of <em>data.tsv<\/em>,<\/p>\n<pre class=\"lang-none prettyprint-override\"><code>a   b   c\nd   e   f\n\n<\/code><\/pre>\n<p>Output<\/p>\n<pre class=\"lang-none prettyprint-override\"><code>[a, b, c]\n[d, e, f]\n<\/code><\/pre>\n",
+            "answer_id": 76653819,
+            "question_id": 76644922
+        }
+    ],
+    "answer_comments": {}
+}

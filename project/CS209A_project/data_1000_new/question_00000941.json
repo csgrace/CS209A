@@ -1,0 +1,127 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/Kmszq.jpg?s=256",
+            "account_id": 1613370,
+            "user_type": "registered",
+            "user_id": 1491720,
+            "link": "https://stackoverflow.com/users/1491720/tony-stark",
+            "reputation": 2478,
+            "display_name": "Tony Stark",
+            "accept_rate": 80
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/72776966/how-to-load-kafka-consumer-or-producer-properties-from-application-yaml",
+        "last_activity_date": 1656358517,
+        "creation_date": 1656355388,
+        "answer_count": 1,
+        "title": "How to load Kafka consumer or producer properties from application.yaml?",
+        "body": "<p>Currently I have this code for creating a <code>ConcurrentKafkaListenerContainerFactory<\/code>.<\/p>\n<pre><code>@Bean\npublic ConcurrentKafkaListenerContainerFactory&lt;Object, KafkaExampleRecord&gt; kafkaListenerContainerFactory() {\n    ConcurrentKafkaListenerContainerFactory&lt;Object, KafkaExampleRecord&gt; factory =\n            new ConcurrentKafkaListenerContainerFactory&lt;&gt;();\n    factory.setConsumerFactory(new DefaultKafkaConsumerFactory&lt;&gt;(consumerProps()));\n    factory.setReplyTemplate(kafkaTemplate());\n    return factory;\n}\n<\/code><\/pre>\n<p>How do I create the <code>DefaultKafkaConsumerFactory<\/code> object with properties from <code>application.yaml<\/code>? I don't want to set them inside the <code>consumerProps()<\/code> method.<\/p>\n<p>EDIT:\nMy KafkaConfig class now looks like this.<\/p>\n<pre><code>@Configuration\n@EnableKafka\npublic class KafkaConfig {\n    @Bean\n    public ReplyingKafkaTemplate&lt;Object, KafkaExampleRecord, KafkaExampleRecord&gt; replyingKafkaTemplate(ProducerFactory&lt;Object, KafkaExampleRecord&gt; producerFactory,\n                                                                                                       ConcurrentMessageListenerContainer&lt;Object, KafkaExampleRecord&gt; repliesContainer) {\n        return new ReplyingKafkaTemplate&lt;&gt;(producerFactory, repliesContainer);\n    }\n\n    @Bean\n    public ConcurrentMessageListenerContainer&lt;Object, KafkaExampleRecord&gt; repliesContainer(\n            ConcurrentKafkaListenerContainerFactory&lt;Object, KafkaExampleRecord&gt; kafkaListenerContainerFactory) {\n\n        ConcurrentMessageListenerContainer&lt;Object, KafkaExampleRecord&gt; rc =\n                kafkaListenerContainerFactory.createContainer(&quot;mytopic&quot;);\n        rc.setAutoStartup(false);\n        return rc;\n    }\n\n    @Bean\n    public KafkaTemplate&lt;Object, KafkaExampleRecord&gt; kafkaTemplate(ProducerFactory&lt;Object, KafkaExampleRecord&gt; pf) {\n        return new KafkaTemplate&lt;&gt;(pf);\n    }\n}\n<\/code><\/pre>\n<p>However now I get <code>java.lang.IllegalStateException: a KafkaTemplate is required to support replies<\/code>.<\/p>\n",
+        "question_id": 72776966,
+        "tags": [
+            "java",
+            "spring",
+            "apache-kafka",
+            "spring-kafka"
+        ],
+        "score": -1,
+        "accepted_answer_id": 72777222,
+        "is_answered": true,
+        "view_count": 1719,
+        "last_edit_date": 1656358517
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+            "account_id": 1288095,
+            "user_type": "registered",
+            "user_id": 1240763,
+            "link": "https://stackoverflow.com/users/1240763/gary-russell",
+            "reputation": 175842,
+            "display_name": "Gary Russell"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": true,
+        "last_activity_date": 1656356905,
+        "creation_date": 1656356905,
+        "body": "<p>Spring Boot automatically configures one; simply add it as a parameter to the factory method:<\/p>\n<pre><code>@Bean\npublic ConcurrentKafkaListenerContainerFactory&lt;Object, KafkaExampleRecord&gt; kafkaListenerContainerFactory(\n    ConsumerFactory&lt;Object, KafkaExampleRecord&gt; cf) {\n...\n<\/code><\/pre>\n<p>However, you don't need to declare the container factory bean either; Boot will auto configure it for you and automatically set the KT, if it is defined as a bean.<\/p>\n<p>See Boot's <code>KafkaAnnotationDrivenConfiguration<\/code>.<\/p>\n",
+        "answer_id": 72777222,
+        "question_id": 72776966
+    }],
+    "answer_comments": {"72777222": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 72777222,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/Kmszq.jpg?s=256",
+                "account_id": 1613370,
+                "user_type": "registered",
+                "user_id": 1491720,
+                "link": "https://stackoverflow.com/users/1491720/tony-stark",
+                "reputation": 2478,
+                "display_name": "Tony Stark",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1656359348,
+            "comment_id": 128548351
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/OMgXO.png?s=256",
+                "account_id": 1288095,
+                "user_type": "registered",
+                "user_id": 1240763,
+                "link": "https://stackoverflow.com/users/1240763/gary-russell",
+                "reputation": 175842,
+                "display_name": "Gary Russell"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 72777222,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/Kmszq.jpg?s=256",
+                "account_id": 1613370,
+                "user_type": "registered",
+                "user_id": 1491720,
+                "link": "https://stackoverflow.com/users/1491720/tony-stark",
+                "reputation": 2478,
+                "display_name": "Tony Stark",
+                "accept_rate": 80
+            },
+            "edited": false,
+            "creation_date": 1656358769,
+            "comment_id": 128548181
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/Kmszq.jpg?s=256",
+                "account_id": 1613370,
+                "user_type": "registered",
+                "user_id": 1491720,
+                "link": "https://stackoverflow.com/users/1491720/tony-stark",
+                "reputation": 2478,
+                "display_name": "Tony Stark",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 72777222,
+            "edited": false,
+            "creation_date": 1656358606,
+            "comment_id": 128548129
+        }
+    ]}
+}

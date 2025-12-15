@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/947d47fe730ac32e9798796d1f8feb60?s=256&d=identicon&r=PG",
+            "account_id": 2312297,
+            "user_type": "registered",
+            "user_id": 2030160,
+            "link": "https://stackoverflow.com/users/2030160/user2030160",
+            "reputation": 1,
+            "display_name": "user2030160"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/67047952/spring-boot-unmarshal-xml-with-list-of-lists-fails",
+        "last_activity_date": 1618251829,
+        "creation_date": 1618161070,
+        "answer_count": 1,
+        "title": "Spring boot unmarshal xml with list of lists fails",
+        "body": "<p>I have been stuck with this problem for over a week now, I'm trying to unmarshal the application/xml in the @RequestBody of my Spring Boot endpoint to a POJO. The list of bars in each foo fails to unmarshal and Foo.bars becomes null. If I change my List of Bars field in Foo to just be a Bar, I get the last bar of each foo. However that Bar instance fails to unmarshal the XmlValue Bar.value. Both b and the order of Foo is unmarshalled correctly.<\/p>\n<p>I have an xml like this:<\/p>\n<pre><code>&lt;a&gt;\n    &lt;b&gt;1&lt;/b&gt;\n    &lt;c&gt;\n        &lt;foo order=&quot;1&quot;&gt;\n            &lt;bar order=&quot;11&quot;&gt;1&lt;/bar&gt;\n            &lt;bar order=&quot;22&quot;&gt;2&lt;/bar&gt;\n            &lt;bar order=&quot;33&quot;&gt;3&lt;/bar&gt;\n        &lt;/foo&gt;\n        &lt;foo order=&quot;2&quot;&gt;\n            &lt;bar order=&quot;44&quot;&gt;4&lt;/bar&gt;\n            &lt;bar order=&quot;55&quot;&gt;5&lt;/bar&gt;\n            &lt;bar order=&quot;66&quot;&gt;6&lt;/bar&gt;\n        &lt;/foo&gt;\n    &lt;/c&gt;\n&lt;/a&gt;\n<\/code><\/pre>\n<p>And the following POJOs to unmarshal them:<\/p>\n<p>Bar.java<\/p>\n<pre><code>   @XmlAccessorType(XmlAccessType.FIELD)\n    public class Bar {\n    \n        @XmlAttribute(name = &quot;order&quot;)\n        Integer number;\n    \n        @XmlValue\n        Integer value;\n    \n        public Bar() {}\n    \n        public Bar(int number, int value){\n            this.number = number;\n            this.value = value;\n        }\n    \n        public Integer getNumber() {\n            return number;\n        }\n    \n        public void setNumber(Integer number) {\n            this.number = number;\n        }\n    \n        public Integer getValue() {\n            return value;\n        }\n    \n        public void setValue(Integer value) {\n            this.value = value;\n        }\n    }\n<\/code><\/pre>\n<p>Foo.java<\/p>\n<pre><code>    public class Foo {\n        @XmlAttribute(name = &quot;order&quot;)\n        Integer order;\n    \n        @XmlElement(name = &quot;bar&quot;)\n        List&lt;Bar&gt; bars;\n        \n        public Foo() {}\n    \n        public Foo(int order, List&lt;Bar&gt; bars){\n            this.order = order;\n            this.bars = bars;\n        }\n    \n        public Integer getOrder() {\n            return order;\n        }\n    \n        public void setOrder(Integer order) {\n            this.order = order;\n        }\n    \n        public List&lt;Bar&gt; getBars() {\n            return bars;\n        }\n    \n        public void setBars(List&lt;Bar&gt; bars) {\n            this.bars = bars;\n        }\n        \n    }\n<\/code><\/pre>\n<p>Body.java<\/p>\n<pre><code>@XmlRootElement(name = &quot;a&quot;)\n@XmlAccessorType(XmlAccessType.FIELD)\npublic class Body {\n\n    Integer b;\n    List&lt;Foo&gt; c;\n\n    public Body(){\n    }\n\n    public Body(int b, List&lt;Foo&gt; c){\n\n        this.b = b;\n        this.c = c;\n    }\n\n    public Integer getB() {\n        return b;\n    }\n\n    public void setB(Integer b) {\n        this.b = b;\n    }\n\n    public List&lt;Foo&gt; getC() {\n        return c;\n    }\n\n    public void setC(List&lt;Foo&gt; c) {\n        this.c = c;\n    }\n}\n<\/code><\/pre>\n<p>And my endpoint:<\/p>\n<pre><code>    public Response postData(@RequestBody Body body) {\n    ...\n<\/code><\/pre>\n<p>Any help is appreciated.<\/p>\n",
+        "question_id": 67047952,
+        "tags": [
+            "java",
+            "xml",
+            "spring-boot",
+            "jaxb"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 189
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/RWVBN.png?s=256",
+            "account_id": 9779820,
+            "user_type": "registered",
+            "user_id": 7248342,
+            "link": "https://stackoverflow.com/users/7248342/thomas-fritsch",
+            "reputation": 10253,
+            "display_name": "Thomas Fritsch"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1618251829,
+        "creation_date": 1618251829,
+        "body": "<p>The structure of the <code>&lt;c&gt;<\/code> and <code>&lt;foo&gt;<\/code> XML elements within the <code>&lt;a&gt;<\/code> element\ndoesn't match the Java code in your <code>Body<\/code> class:<\/p>\n<pre><code>List&lt;Foo&gt; c;\n<\/code><\/pre>\n<p>There are two alternatives ways to fix this issue.<\/p>\n<p>First alternative (the straight-forward way):<br />\nIn your <code>Body<\/code>class you replace the line above by<\/p>\n<pre><code>C c;\n<\/code><\/pre>\n<p>(and of course change the constructor, getter and setter accordingly).\nFurthermore, you need to create another Java class <code>C<\/code><\/p>\n<pre><code>@XmlAccessorType(XmlAccessType.FIELD)\npublic class C {\n    @XmlElement(name = &quot;foo&quot;)\n    List&lt;Foo&gt; foos;\n\n    // constructor, getter, setter (omitted here for brevity)\n}\n<\/code><\/pre>\n<p>Or second alternative (much simpler than the above because you don't need to change the class structure):<br />\nIn your <code>Body<\/code> class you replace your code line by<\/p>\n<pre><code>@XmlElementWrapper(name = &quot;c&quot;)\n@XmlElement(name = &quot;foo&quot;)\nList&lt;Foo&gt; c;\n<\/code><\/pre>\n",
+        "answer_id": 67063730,
+        "question_id": 67047952
+    }],
+    "answer_comments": {}
+}

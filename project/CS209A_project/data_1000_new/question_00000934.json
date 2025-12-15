@@ -1,0 +1,92 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/eb1d8fe0a25e7f712bd39e2e50a53a5d?s=256&d=identicon&r=PG",
+            "account_id": 1059,
+            "user_type": "registered",
+            "user_id": 1406,
+            "link": "https://stackoverflow.com/users/1406/thierry-roy",
+            "reputation": 8522,
+            "display_name": "Thierry Roy",
+            "accept_rate": 85
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8604967/maintaining-a-serializable-class-in-java-android",
+        "last_activity_date": 1324572678,
+        "creation_date": 1324562494,
+        "answer_count": 3,
+        "title": "Maintaining a Serializable class in Java/Android",
+        "body": "<p>I'm serializing an object to a blob in a SQLiteOpenHelper like so:<\/p>\n\n<pre><code>final ByteArrayOutputStream bos = new ByteArrayOutputStream();\nfinal ObjectOutputStream out = new ObjectOutputStream(bos);\nout.writeObject(value);\nout.close();\n<\/code><\/pre>\n\n<p>Each class define its own serialVersionUID that never change. <\/p>\n\n<p>How does the serialization/deserialization actually work? Does it remember the name of the field, and the value associated with it? If I keep adding/removing field, is there a chance that an existing field have their value modified?<\/p>\n\n<p>For example, let's say I serialize this class:<\/p>\n\n<pre><code>public class Foo implements Serializable {\n     private static final long serialVersionUID = 4068188167994381987L;\n     String x;\n     int y;\n}\n\nWhere x is \"A\", and y is 1;\n<\/code><\/pre>\n\n<p>Then I modify the class like so:<\/p>\n\n<pre><code>public class Foo implements Serializable {\n     private static final long serialVersionUID = 4068188167994381987L;\n     float f;\n     String x;\n}\n<\/code><\/pre>\n\n<p>If I keep adding/removing field, will each time that I deserialize <code>Foo<\/code> x still be \"A\"?<\/p>\n",
+        "question_id": 8604967,
+        "tags": [
+            "java",
+            "android",
+            "serialization"
+        ],
+        "score": 1,
+        "accepted_answer_id": 8605096,
+        "is_answered": true,
+        "view_count": 2330
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/512daab220ce827055b691f906211ab3?s=256&d=identicon&r=PG",
+                "account_id": 435352,
+                "user_type": "registered",
+                "user_id": 821894,
+                "link": "https://stackoverflow.com/users/821894/thaussma",
+                "reputation": 9876,
+                "display_name": "thaussma"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 3,
+            "is_accepted": true,
+            "last_activity_date": 1324563113,
+            "creation_date": 1324563113,
+            "body": "<p>You cannot delete a field. See <a href=\"http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678\" rel=\"nofollow\">here at Oracle<\/a> for compatible changes to your <code>Serializable<\/code> class.<\/p>\n\n<p>Yes after the change in class <code>Foo<\/code> a deserialization of a older <code>Foo<\/code> would set x to 'A', but because you removed a field this does not work.<\/p>\n\n<p>I suggest keeping the old field <code>y<\/code> and marking it <code>@deprecated<\/code>:<\/p>\n\n<pre><code>public class Foo implements Serializable {\n    private static final long serialVersionUID = 4068188167994381987L;\n    String x;\n    float f;\n    @deprecated int y;\n}\n<\/code><\/pre>\n",
+            "answer_id": 8605096,
+            "question_id": 8604967
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/738a6c2c163857df3a54fe302fe36a7e?s=256&d=identicon&r=PG",
+                "account_id": 886478,
+                "user_type": "registered",
+                "user_id": 925806,
+                "link": "https://stackoverflow.com/users/925806/ashwinee-k-jha",
+                "reputation": 9357,
+                "display_name": "Ashwinee K Jha"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1324563169,
+            "creation_date": 1324563169,
+            "body": "<p>No, if you change order of fields or type of fields the deserialization will not work correctly. It will either lead to exception or read incorrect data.<\/p>\n\n<p>Thats why it is recommended to change the serialVersionUID everytime you make change so that serialized format of class has changed.<\/p>\n\n<p>If you want flexiblity of changing the class internals without breaking the serialization you should use Externalizable interface.<\/p>\n",
+            "answer_id": 8605105,
+            "question_id": 8604967
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/T2Arc.jpg?s=256",
+                "account_id": 107519,
+                "user_type": "registered",
+                "user_id": 285850,
+                "link": "https://stackoverflow.com/users/285850/olivier-croisier",
+                "reputation": 6149,
+                "display_name": "Olivier Croisier"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1324572678,
+            "creation_date": 1324572678,
+            "body": "<p>I would use the \"magic\" serialization methods writeObject and readObject to define a custom serialization stream. That way, the new version of your class could read the old format, and populate the new fields based on some conversion algorithm (here, read the y int and set f's value based on it).<\/p>\n\n<p>For more information on serialization \"magic\" methods, see here :\n<a href=\"http://thecodersbreakfast.net/index.php?post/2011/05/12/Serialization-and-magic-methods\" rel=\"nofollow\">http://thecodersbreakfast.net/index.php?post/2011/05/12/Serialization-and-magic-methods<\/a><\/p>\n",
+            "answer_id": 8607185,
+            "question_id": 8604967
+        }
+    ],
+    "answer_comments": {}
+}

@@ -1,0 +1,164 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/2e2d79b9350ef4ebf04ac0ad5816a5c3?s=256&d=identicon&r=PG",
+            "account_id": 328297,
+            "user_type": "registered",
+            "user_id": 651174,
+            "link": "https://stackoverflow.com/users/651174/david542",
+            "reputation": 112240,
+            "display_name": "David542",
+            "accept_rate": 92
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/51565039/simplest-way-to-send-a-sendgrid-email-in-spring-boot",
+        "last_activity_date": 1532731973,
+        "creation_date": 1532722899,
+        "answer_count": 1,
+        "title": "Simplest way to send a sendgrid email in spring boot",
+        "body": "<p>I am trying to send stacktrace emails in Spring. Here is what I have so far:<\/p>\n\n<pre><code># application.properties\nspring.sendgrid.api-key=\"SG.o1o9MNb_QfqpasdfasdfasdfpLX3Q\"\n<\/code><\/pre>\n\n<p>And in my ErrorController:<\/p>\n\n<pre><code>    // Send Mail\n    Email from = new Email(\"david@no-reply.com\");\n    String subject = \"Exception \" + message.toString();\n    Email to = new Email(\"tom@gmail.com\");\n    Content content = new Content(\"text/plain\", trace);\n    Mail mail = new Mail(from, subject, to, content);\n    Request r = new Request();\n\n    try {\n        SendGrid sendgrid = new SendGrid();\n        r.setMethod(Method.POST);\n        r.setEndpoint(\"mail/send\");\n        r.setBody(mail.build());\n        Response response = sendgrid.api(request);\n        sendgrid.api(r);\n    } catch (IOException ex) {\n\n    }\n<\/code><\/pre>\n\n<p>However, it seems like it's not initializing the <code>SendGrid<\/code> object correctly (with the API key from application.properties). What would be the correct way to do the above?<\/p>\n",
+        "question_id": 51565039,
+        "tags": [
+            "java",
+            "spring",
+            "spring-boot",
+            "sendgrid"
+        ],
+        "score": 1,
+        "accepted_answer_id": 51565841,
+        "is_answered": true,
+        "view_count": 2173,
+        "last_edit_date": 1532724290
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e2d79b9350ef4ebf04ac0ad5816a5c3?s=256&d=identicon&r=PG",
+                "account_id": 328297,
+                "user_type": "registered",
+                "user_id": 651174,
+                "link": "https://stackoverflow.com/users/651174/david542",
+                "reputation": 112240,
+                "display_name": "David542",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565039,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/b2da34156d3fd35c94ecd112298183b3?s=256&d=identicon&r=PG",
+                "account_id": 1758988,
+                "user_type": "registered",
+                "user_id": 1606577,
+                "link": "https://stackoverflow.com/users/1606577/sergii-zhevzhyk",
+                "reputation": 4202,
+                "display_name": "Sergii Zhevzhyk"
+            },
+            "edited": false,
+            "creation_date": 1532729104,
+            "comment_id": 90098973
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b2da34156d3fd35c94ecd112298183b3?s=256&d=identicon&r=PG",
+                "account_id": 1758988,
+                "user_type": "registered",
+                "user_id": 1606577,
+                "link": "https://stackoverflow.com/users/1606577/sergii-zhevzhyk",
+                "reputation": 4202,
+                "display_name": "Sergii Zhevzhyk"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565039,
+            "edited": false,
+            "creation_date": 1532725166,
+            "comment_id": 90097766
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/b2da34156d3fd35c94ecd112298183b3?s=256&d=identicon&r=PG",
+            "account_id": 1758988,
+            "user_type": "registered",
+            "user_id": 1606577,
+            "link": "https://stackoverflow.com/users/1606577/sergii-zhevzhyk",
+            "reputation": 4202,
+            "display_name": "Sergii Zhevzhyk"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1532731973,
+        "creation_date": 1532727387,
+        "body": "<p>The <code>SendGrid<\/code> object should not be created explicitly, but it should be passed as a bean and in this case Spring will initialize it with the API key appropriately (check the <a href=\"https://github.com/spring-projects/spring-boot/blob/v2.0.3.RELEASE/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/sendgrid/SendGridAutoConfiguration.java\" rel=\"nofollow noreferrer\">code<\/a> that is responsible for autoconfiguration). So it should look like this:<\/p>\n\n<pre><code>@Service\nclass MyMailService {\n\n    private final SendGrid sendGrid;\n\n    @Inject\n    public SendGridMailService(SendGrid sendGrid) {\n        this.sendGrid = sendGrid;\n    }\n\n    void sendMail() {\n        Request request = new Request();\n        // .... prepare request\n        Response response = this.sendGrid.api(request);                \n    }\n}\n<\/code><\/pre>\n\n<p>Latter you can use this service in your controller by injecting it, for example:<\/p>\n\n<pre><code>@Controller\npublic class ErrorController {\n\n     private final emailService;\n\n     public ErrorController(MyMailService emailService) {\n           this.emailService = emailService;\n     } \n\n     // Now it is possible to send email \n     // by calling emailService.sendMail in any method\n}\n<\/code><\/pre>\n",
+        "answer_id": 51565841,
+        "question_id": 51565039,
+        "last_edit_date": 1532731973
+    }],
+    "answer_comments": {"51565841": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e2d79b9350ef4ebf04ac0ad5816a5c3?s=256&d=identicon&r=PG",
+                "account_id": 328297,
+                "user_type": "registered",
+                "user_id": 651174,
+                "link": "https://stackoverflow.com/users/651174/david542",
+                "reputation": 112240,
+                "display_name": "David542",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565841,
+            "edited": false,
+            "creation_date": 1532731341,
+            "comment_id": 90099499
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/b2da34156d3fd35c94ecd112298183b3?s=256&d=identicon&r=PG",
+                "account_id": 1758988,
+                "user_type": "registered",
+                "user_id": 1606577,
+                "link": "https://stackoverflow.com/users/1606577/sergii-zhevzhyk",
+                "reputation": 4202,
+                "display_name": "Sergii Zhevzhyk"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565841,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/2e2d79b9350ef4ebf04ac0ad5816a5c3?s=256&d=identicon&r=PG",
+                "account_id": 328297,
+                "user_type": "registered",
+                "user_id": 651174,
+                "link": "https://stackoverflow.com/users/651174/david542",
+                "reputation": 112240,
+                "display_name": "David542",
+                "accept_rate": 92
+            },
+            "edited": false,
+            "creation_date": 1532730802,
+            "comment_id": 90099384
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/2e2d79b9350ef4ebf04ac0ad5816a5c3?s=256&d=identicon&r=PG",
+                "account_id": 328297,
+                "user_type": "registered",
+                "user_id": 651174,
+                "link": "https://stackoverflow.com/users/651174/david542",
+                "reputation": 112240,
+                "display_name": "David542",
+                "accept_rate": 92
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 51565841,
+            "edited": false,
+            "creation_date": 1532729039,
+            "comment_id": 90098956
+        }
+    ]}
+}

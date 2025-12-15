@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-i5QtAR0bqTg/AAAAAAAAAAI/AAAAAAAABGA/IDhUHBTP3tQ/s256-rj/photo.jpg",
+            "account_id": 5538242,
+            "user_type": "registered",
+            "user_id": 4395815,
+            "link": "https://stackoverflow.com/users/4395815/eduardo-santos",
+            "reputation": 7,
+            "display_name": "Eduardo Santos",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/45777817/java-login-with-sso",
+        "last_activity_date": 1503199601,
+        "creation_date": 1503194486,
+        "answer_count": 1,
+        "title": "Java Login with SSO",
+        "body": "<p>I have a servlet with SAML and IS WO2 server that is working. After login, the system gets the user data from LDAP. This library was created for application using JSF (Faces Context).<\/p>\n\n<p>There is a class called LoginUtil which makes user data available to applications through static methods such as: getUserId(), getUserEmail() etc... Each of this method gets HTTP Session via Faces Context to retrive user data previously saved at the login.<\/p>\n\n<p>Now we have some new applications that is being using Spring boot and because of that, LoginUtil class doesnt work anymore.<\/p>\n\n<p>I want suggestions to change the LoginUtil class to make it available to use in any application. At first my idea is to remove faces context and use pure session object, but as the method is statics i wont be able to use a normal variable inside of it. And <strong><em>I cant use static variable because the applications will be deployed in a clustered server.<\/em><\/strong><\/p>\n\n<p>Any ideas?<\/p>\n",
+        "question_id": 45777817,
+        "tags": [
+            "java",
+            "servlets"
+        ],
+        "score": 0,
+        "accepted_answer_id": 45778180,
+        "is_answered": true,
+        "view_count": 671
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/KYyMC.jpg?s=256",
+            "account_id": 2568003,
+            "user_type": "registered",
+            "user_id": 2227535,
+            "link": "https://stackoverflow.com/users/2227535/pgermosen",
+            "reputation": 18,
+            "display_name": "pgermosen"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1503199601,
+        "creation_date": 1503199601,
+        "body": "<p>Your first idea is not that crazy,<\/p>\n\n<p>ContextFaces, uses a threadlocal for request,<\/p>\n\n<p>you can do the same thing, make a ThreadLocal, for every request, by using a servlet filter, then put a theadlocal in loginuser, this will work in every app <\/p>\n\n<pre><code>class LoginUtil {\n private static final ThreadLocal&lt;UserInformation&gt; userInfo = new ThreadLocal();\n\nvoid setUserInfo(UserInformation user){\n\n userInfo.set(user);\n }\n\n\n}\n\nclass UserInformation{\n HttpSession session;\n\nUserInformation(HttpSession session){\n this.session = session;\n}\n}\n\n@WebFilter()\nclass FilterFoo implements Filter{\n\npublic void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {\n  try{\n   LoginUtil.setUserInfo(new UserInformation(request.)\n  chain.doFilter(((HttpServletRequest)request).getSession(),response);\n  }finally{\n   LoginUtil.setUserInfo(null);\n  }\n} \n<\/code><\/pre>\n",
+        "answer_id": 45778180,
+        "question_id": 45777817
+    }],
+    "answer_comments": {}
+}

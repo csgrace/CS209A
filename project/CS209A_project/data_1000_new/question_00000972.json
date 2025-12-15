@@ -1,0 +1,103 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/4fd0c4228c746607d3d34edee12e5ee3?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4110743,
+            "user_type": "registered",
+            "user_id": 3373591,
+            "link": "https://stackoverflow.com/users/3373591/wickytse",
+            "reputation": 39,
+            "display_name": "wickytse"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/22139290/poi-xssf-and-sxssf",
+        "last_activity_date": 1765392065,
+        "creation_date": 1393824514,
+        "answer_count": 1,
+        "title": "POI XSSF and SXSSF",
+        "body": "<p>I am writing an application to use Apache POI to read over 65536 records from oracle table and write to Excel .xlsx via Apache POI library XSSF and SXSSF.<\/p>\n<p>However, the error &quot;out of memory&quot; pops up. We have tried the following ways but the problem still occurs.<\/p>\n<ul>\n<li><p>Load 66000 records into memory and write to .xlsx file.<\/p>\n<ul>\n<li>Larger heap size <code>java.exe  \u2013Xmx4096m \u2013Xmx4096m \u2013XX:MaxPermSize=256m<\/code> is applied<\/li>\n<\/ul>\n<p>Result: It takes about an hour to run and the file cannot be created.<\/p>\n<\/li>\n<li><p>Process  66000 records by region<\/p>\n<ul>\n<li>load each region records' of a season from an Oracle table into memory<\/li>\n<li>append each region records from memory to a single .xlsx file<\/li>\n<li>larger heap size <code>java.exe  \u2013Xmx4096m \u2013Xmx4096m \u2013XX:MaxPermSize=256m<\/code> is applied<\/li>\n<\/ul>\n<p>Result: When it processes about 30000 records, the Java memory error still pops up.<\/p>\n<\/li>\n<\/ul>\n<p>Except rewriting the program by using XML, is there any chance of fixing the memory error issue of Apache POI XSSF and SXSSF?<\/p>\n",
+        "question_id": 22139290,
+        "tags": [
+            "java",
+            "apache-poi"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 1065,
+        "last_edit_date": 1765392065
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/4fd0c4228c746607d3d34edee12e5ee3?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4110743,
+                "user_type": "registered",
+                "user_id": 3373591,
+                "link": "https://stackoverflow.com/users/3373591/wickytse",
+                "reputation": 39,
+                "display_name": "wickytse"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 22139290,
+            "edited": false,
+            "creation_date": 1393919323,
+            "comment_id": 33640077
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/598aa6e391b96b1ec24f1c34b58edcd9?s=256&d=identicon&r=PG",
+                "account_id": 350017,
+                "user_type": "registered",
+                "user_id": 685641,
+                "link": "https://stackoverflow.com/users/685641/gagravarr",
+                "reputation": 48546,
+                "display_name": "Gagravarr"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22139290,
+            "edited": false,
+            "creation_date": 1393917712,
+            "comment_id": 33639257
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fdba20b4d9ddc64d4be25d613c89bd62?s=256&d=identicon&r=PG",
+                "account_id": 2257141,
+                "user_type": "registered",
+                "user_id": 1988097,
+                "link": "https://stackoverflow.com/users/1988097/darius-x",
+                "reputation": 2937,
+                "display_name": "Darius X.",
+                "accept_rate": 53
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "post_id": 22139290,
+            "edited": false,
+            "creation_date": 1393876580,
+            "comment_id": 33622969
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/fe2aa2028d8707dd7da2b2625568befc?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 15454023,
+            "user_type": "registered",
+            "user_id": 11148662,
+            "link": "https://stackoverflow.com/users/11148662/chaunmt",
+            "reputation": 11,
+            "display_name": "chaunmt"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1765386560,
+        "creation_date": 1765386560,
+        "body": "<p>You need to do everything in chunk, so read in chunk and write in chunk. XSSF is not recommended here unless it is a small file (for template e.g.).<\/p>\n<p>SXSSF allows you to set a fix rowAccessWindowSize so you can use that to write in chunk:<\/p>\n<pre class=\"lang-java prettyprint-override\"><code>SXSSFWorkbook outputWorkbook = new SXSSFWorkbook(100);\n<\/code><\/pre>\n<p>For reading in chunk, there are a couple options but I recommend adding a new library if you want to keep it simple and straightforward. You can choose 1 of the below depended on your dependencies' version.<br />\n<a href=\"https://mvnrepository.com/artifact/com.monitorjbl/xlsx-streamer\" rel=\"nofollow noreferrer\">https://mvnrepository.com/artifact/com.monitorjbl/xlsx-streamer<\/a><br />\n<a href=\"https://mvnrepository.com/artifact/com.github.pjfanning/excel-streaming-reader\" rel=\"nofollow noreferrer\">https://mvnrepository.com/artifact/com.github.pjfanning/excel-streaming-reader<\/a><\/p>\n<pre class=\"lang-java prettyprint-override\"><code>Workbook inputWorkbook = StreamingReader.builder()\n        .rowCacheSize(100)      // Number of rows in memory\n        .bufferSize(4096)       // Buffer size used when reading input\n        .open(fileInputStream); // InputStream or File for XLSX file\n<\/code><\/pre>\n<p>If you prefer the harder way:<br />\n<a href=\"https://stackoverflow.com/questions/10053421/how-to-use-poi-sxssf-to-read-a-large-spreadsheet\">How to use POI SXSSF to read a large spreadsheet<\/a><\/p>\n",
+        "answer_id": 79843243,
+        "question_id": 22139290
+    }],
+    "answer_comments": {}
+}

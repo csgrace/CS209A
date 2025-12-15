@@ -1,0 +1,136 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/WG5q2.jpg?s=256",
+            "account_id": 249846,
+            "user_type": "registered",
+            "user_id": 526196,
+            "link": "https://stackoverflow.com/users/526196/s-yavari",
+            "reputation": 886,
+            "display_name": "S.Yavari",
+            "accept_rate": 94
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/59070449/how-can-i-completely-disable-the-spring-boot-database-related-configuration",
+        "last_activity_date": 1574859423,
+        "creation_date": 1574858344,
+        "answer_count": 1,
+        "title": "How can I completely disable the Spring Boot database related configuration",
+        "body": "<p>I have a Spring Boot service that must work with or without a database based on the configuration. I want to disable the database related configuration when a property is <code>false<\/code>.<\/p>\n\n<p>This is my <code>@Configuration<\/code> class:<\/p>\n\n<pre><code>@Configuration\n@EnableScheduling\n@Import({WithDatabase.class, WithoutDatabase.class})\npublic class ServiceConfig {\n\n    private static final String MANAGEMENT_ENABLED_PROPERTY = \"database.enabled\";\n\n    @ConditionalOnProperty(name = MANAGEMENT_ENABLED_PROPERTY, havingValue = \"false\", matchIfMissing = true)\n    @EnableAutoConfiguration(exclude = {JpaRepositoriesAutoConfiguration.class, HibernateJpaAutoConfiguration.class,\n        DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})\n    static class WithoutDatabase {\n\n    }\n\n    @ConditionalOnProperty(name = MANAGEMENT_ENABLED_PROPERTY, havingValue = \"true\")\n    @EnableAutoConfiguration\n    @EnableJpaRepositories(basePackages = {\"com.base.cm.categories.repository\"})\n    @EntityScan(basePackages = {\"com.base.cm.categories.repository.entity\"})\n    @EnableJpaAuditing\n    static class WithDatabase {\n\n    }\n}\n<\/code><\/pre>\n\n<p>and this is the <code>application.yml<\/code>:<\/p>\n\n<pre><code>spring:\n  datasource:\n    url: jdbc:mysql://localhost:3306/database\n    username: root\n    password: root\n  jpa:\n    generate-ddl: false\n    show-sql: true\n<\/code><\/pre>\n\n<p>This code works fine with both <code>true<\/code> and <code>false<\/code> configurations when the MySql server is up and running. I mean, I can enable or disable work with the database but, when I stop the MySql server, I get the following exception:<\/p>\n\n<pre><code>org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Invocation of init method failed; nested exception is org.hibernate.service.spi.ServiceException: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment]\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1778)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:593)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:515)\n    at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:320)\n    at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:222)\n    at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:318)\n    at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)\n    at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1105)\n    at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:867)\n    at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:549)\n    at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:141)\n    at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:744)\n    at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:391)\n    at org.springframework.boot.SpringApplication.run(SpringApplication.java:312)\n    at org.springframework.boot.SpringApplication.run(SpringApplication.java:1215)\n    at org.springframework.boot.SpringApplication.run(SpringApplication.java:1204)\n    at com.base.cm.Application.main(Application.java:23)\nCaused by: org.hibernate.service.spi.ServiceException: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment]\n    at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:275)\n    at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:237)\n    at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:214)\n    at org.hibernate.id.factory.internal.DefaultIdentifierGeneratorFactory.injectServices(DefaultIdentifierGeneratorFactory.java:152)\n    at org.hibernate.service.internal.AbstractServiceRegistryImpl.injectDependencies(AbstractServiceRegistryImpl.java:286)\n    at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:243)\n    at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:214)\n    at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.&lt;init&gt;(InFlightMetadataCollectorImpl.java:179)\n    at org.hibernate.boot.model.process.spi.MetadataBuildingProcess.complete(MetadataBuildingProcess.java:119)\n    at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.metadata(EntityManagerFactoryBuilderImpl.java:904)\n    at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:935)\n    at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:58)\n    at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:365)\n    at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:391)\n    at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:378)\n    at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:341)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1837)\n    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1774)\n    ... 16 common frames omitted\nCaused by: org.hibernate.HibernateException: Access to DialectResolutionInfo cannot be null when 'hibernate.dialect' not set\n    at org.hibernate.engine.jdbc.dialect.internal.DialectFactoryImpl.determineDialect(DialectFactoryImpl.java:100)\n    at org.hibernate.engine.jdbc.dialect.internal.DialectFactoryImpl.buildDialect(DialectFactoryImpl.java:54)\n    at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:137)\n    at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:35)\n    at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.initiateService(StandardServiceRegistryImpl.java:94)\n    at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:263)\n    ... 33 common frames omitted\n<\/code><\/pre>\n\n<p>Now my question is, how can I completely disable the database related configuration based on my configuration?<\/p>\n",
+        "question_id": 59070449,
+        "tags": [
+            "java",
+            "spring",
+            "hibernate",
+            "spring-boot",
+            "jpa"
+        ],
+        "score": 1,
+        "is_answered": false,
+        "view_count": 1050,
+        "last_edit_date": 1574859105
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MmX9S.jpg?s=256",
+                "account_id": 1212711,
+                "user_type": "registered",
+                "user_id": 1180963,
+                "link": "https://stackoverflow.com/users/1180963/eduyayo",
+                "reputation": 2038,
+                "display_name": "eduyayo",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070449,
+            "edited": false,
+            "creation_date": 1574861033,
+            "comment_id": 104380306
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/WG5q2.jpg?s=256",
+                "account_id": 249846,
+                "user_type": "registered",
+                "user_id": 526196,
+                "link": "https://stackoverflow.com/users/526196/s-yavari",
+                "reputation": 886,
+                "display_name": "S.Yavari",
+                "accept_rate": 94
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070449,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/MmX9S.jpg?s=256",
+                "account_id": 1212711,
+                "user_type": "registered",
+                "user_id": 1180963,
+                "link": "https://stackoverflow.com/users/1180963/eduyayo",
+                "reputation": 2038,
+                "display_name": "eduyayo",
+                "accept_rate": 75
+            },
+            "edited": false,
+            "creation_date": 1574859144,
+            "comment_id": 104379273
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/MmX9S.jpg?s=256",
+                "account_id": 1212711,
+                "user_type": "registered",
+                "user_id": 1180963,
+                "link": "https://stackoverflow.com/users/1180963/eduyayo",
+                "reputation": 2038,
+                "display_name": "eduyayo",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 59070449,
+            "edited": false,
+            "creation_date": 1574858875,
+            "comment_id": 104379114
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://graph.facebook.com/2133159033598057/picture?type=large",
+            "account_id": 13478284,
+            "user_type": "registered",
+            "user_id": 9724432,
+            "link": "https://stackoverflow.com/users/9724432/sushil-mittal",
+            "reputation": 524,
+            "display_name": "Sushil Mittal"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1574859423,
+        "creation_date": 1574859423,
+        "body": "<p>As my assumption this happen due to you added dependency in pom.xml<\/p>\n\n<p>set below in mavan dependency those related to database:<\/p>\n\n<pre><code>&lt;optional&gt;true&lt;/optional&gt;\n<\/code><\/pre>\n\n<p>Example:<\/p>\n\n<pre><code>   &lt;dependency&gt;\n        &lt;groupId&gt;org.hibernate&lt;/groupId&gt;\n        &lt;artifactId&gt;hibernate-entitymanager&lt;/artifactId&gt;\n       &lt;version&gt;5.2.3.Final&lt;/version&gt;\n       &lt;optional&gt;true&lt;/optional&gt;\n    &lt;/dependency&gt;\n<\/code><\/pre>\n",
+        "answer_id": 59070782,
+        "question_id": 59070449
+    }],
+    "answer_comments": {"59070782": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/WG5q2.jpg?s=256",
+            "account_id": 249846,
+            "user_type": "registered",
+            "user_id": 526196,
+            "link": "https://stackoverflow.com/users/526196/s-yavari",
+            "reputation": 886,
+            "display_name": "S.Yavari",
+            "accept_rate": 94
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 59070782,
+        "edited": false,
+        "creation_date": 1574860427,
+        "comment_id": 104379956
+    }]}
+}

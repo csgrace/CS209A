@@ -1,0 +1,53 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ZN3HC.png?s=256",
+            "account_id": 4657354,
+            "user_type": "registered",
+            "user_id": 3772575,
+            "link": "https://stackoverflow.com/users/3772575/user1",
+            "reputation": 709,
+            "display_name": "user1"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/56959660/alarmmanager-inconsistent-behavior-alarm-firing-multiple-times-or-not-at-all",
+        "last_activity_date": 1562785030,
+        "creation_date": 1562701887,
+        "answer_count": 1,
+        "title": "AlarmManager inconsistent behavior (alarm firing multiple times, or not at all)",
+        "body": "<p>I have a button that sets an Alarm using the AlarmManager.setRepeating and another button that removes it, every time an alarm is set the requestCode in the PendingIntent is iterated as to not confuse it with one that has already been set and canceled (the app will have multiple alarms set at the same time in the future). when i set the alarm (setRepeating) sometimes it works as intended sometimes it will fire off twice really quickly than at the time it was intended to go off 2-3 minutes later (i'm setting the alarm 3-5 minutes in the future for my test).<\/p>\n\n<p>Also note: I have the device plugged in and the screen is set to stay a wake, during testing the app is usually always in foreground, sometimes i put it to background or rotate the screen (usually by mistake).<\/p>\n\n<p>I have tried setExact() but i don't mind if its off by 0-5 minutes but i do need it to go off and not repeat. <\/p>\n\n<p>i have played around with the initial time setting it to have started the day before at the hour and minute i want it to go off, same thing with ten days back and a hundred (just to see what would happen) similar results.<\/p>\n\n<p>I am using Joda DateTime to get the milliseconds of the alarm time for the setRepeating method, and using AlarmManager.INTERVAL_DAY to set the intervals for the next alarm (my alarms need to go off every 24 hours)<\/p>\n\n<p>requestCode is a constant int that i increment and track during testing.\ncontext i get from getBaseContext() in the activity<\/p>\n\n<p>My code to set the alarm:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>\n        Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);\n        intent.putExtra(ALARMS_INDEX_KEY,requestCode);\n        PendingIntent sender = PendingIntent.getBroadcast(context, requestCode, intent, 0);\n        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);//After after 5 seconds\n        addAlarmIndex(context, requestCode);\n        //test: DateTime.now().minusDays(10).withTimeAtStartOfDay()\n        DateTime set_for = DateTime.now().withTimeAtStartOfDay().withHourOfDay(14).\n                withMinuteOfHour(34).withSecondOfMinute(0).\n                withMillisOfSecond(0);\n\n\n        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, set_for.getMillis(), AlarmManager.INTERVAL_DAY , sender);\n\n<\/code><\/pre>\n\n<p>My code to cancel the alarm:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>\n            Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);\n            PendingIntent sender = PendingIntent.getBroadcast(context, requestCode, intent, 0);\n            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);\n            alarmManager.cancel(sender);\n\n<\/code><\/pre>\n\n<p>My code in AlarmManagerBroadcastReceiver extends BroadcastReceiver<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>\n    @Override\n    public void onReceive(Context context, Intent intent) {\n        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);\n        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, \"test_alarm:\");\n        wl.acquire();\n\n\n        int alarm_index = -1;\n        if(intent.hasExtra(ALARMS_INDEX_KEY)){\n            alarm_index = intent.getIntExtra(ALARMS_INDEX_KEY,-1);\n        }\n        Log.i(\"medic_debug_timertest\",\"Alarm !!!, fired @: \"+DateTime.now().toString(\"YYYY/MM/dd @ HH:mm:ss\") + \" alarm_index: \" + requestCode);\n\n\n        wl.release();\n    }\n\n<\/code><\/pre>\n\n<p>What i'm expecting is the alarm gets set before the time it is meant to go off, than the alarm going off at the time it was set to go off at (withing several minutes of that time)<\/p>\n\n<p>what happens is sometimes it dose not go off at all (perhaps I set the alarm to go off to close to when i am setting it) this may not be a problem but other times it goes off shortly after i set it and it will go off twice within 0-1 seconds apart that 1-2 minutes later it will go off again at the correct time it was set to go off at.<\/p>\n\n<p>from what i observed so far it is always one of the three scenarios:\ngoes off at the correct time.\ngoes off not at all.\ngoes off three times, twice right away (1-2 minutes before the scheduled time) and than a third time at the correct time.<\/p>\n\n<p>What am i doing wrong? how can I get the alarm to go off once at approximately the right time<\/p>\n\n<p>UPDATE:<\/p>\n\n<p>ok so... first of all I changed changed the line that sets up the timer from:<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>        DateTime set_for = DateTime.now().minusDays(10).withTimeAtStartOfDay().withHourOfDay(14).\n                withMinuteOfHour(34).withSecondOfMinute(0).\n                withMillisOfSecond(0);\n<\/code><\/pre>\n\n<p>to<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>        DateTime set_for = DateTime.now().plusMinutes(5).withSecondOfMinute(0).withMillisOfSecond(0);\n<\/code><\/pre>\n\n<p>so that it will go off exactly 5 minutes from when i set it and i can make multiple test without re running the app. I was concerned I was setting the alarm to close to when i set it up.<\/p>\n\n<p>Something to remember is the AlarmManager bunches the alarms up and fires them at the same time if they are close together (with the setRepeating method not setExact), this is to save batteries and no wake the phone up every minute or two.<\/p>\n\n<p>i did the test with the above code and it started to work more normally. set up 4 alarms 1 minute apart, 3 of them went off at the same tome when the 3rd one was supposed to go off (which is correct behavior because they get bunched up to one to save batteries) and the last one went off very late 3-5 minutes after it was supposed to (which is fine, no problem).<\/p>\n\n<p>So perhaps the problem is after i canceled an alarm and start a new one the AlarmManager is getting confused (when i was setting the alarm before, to close to when i set it up) and trying to group the canceled one and the one that is supposed to go off and making the not canceled one go off twice? sounds odd but perhaps Alarm are somewhat bugged??? <\/p>\n",
+        "question_id": 56959660,
+        "tags": [
+            "java",
+            "android",
+            "alarmmanager"
+        ],
+        "score": 7,
+        "accepted_answer_id": 56960536,
+        "is_answered": true,
+        "view_count": 1132,
+        "last_edit_date": 1562704315
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/ZN3HC.png?s=256",
+            "account_id": 4657354,
+            "user_type": "registered",
+            "user_id": 3772575,
+            "link": "https://stackoverflow.com/users/3772575/user1",
+            "reputation": 709,
+            "display_name": "user1"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 2,
+        "is_accepted": true,
+        "last_activity_date": 1562785030,
+        "creation_date": 1562706529,
+        "body": "<p>Ok Im not 100% sure why the alarm was triggering the same one three times, but when i give more time for the alarm to run (say 5 minutes in the future apposed to 3 minutes), giving it more time seemed to solve lot of problems. feeling a little silly now for not giving it more time in the first place but every test takes 5 minutes to run, lots of waiting, which is annoying but works better now. <\/p>\n\n<p>in the post:\n<a href=\"https://stackoverflow.com/questions/34585381/setrepeating-of-alarmmanager-repeats-after-1-minute-no-matter-what-the-time-is\">setRepeating() of AlarmManager repeats after 1 minute no matter what the time is set (5 seconds in this case, API 18+)<\/a><\/p>\n\n<p>it is mentioned:\n\"As of I think Android 5.1 (API version 22) there is a minimum period of 1 minute for repeating alarms, and alarms cannot be set less than 5 seconds in the future\"<\/p>\n\n<p>I was definitely within that time(or not within that time rather, more that 5 seconds), but increasing the alarm set further in the future fixed my issue.<\/p>\n\n<p>UPDATE: during testing I set my initial timer time to several days in the past, I have noticed that if it passed the interval even if the timer was not set than it will trigger a notification as several times as it passed those intervals from the time it was set from even if the alarm was not actually set at or before that time, so that's why i was getting those extra notifications, i assume there is a limit of 2 alarms (with the same requestCode) that it can go off like this.<\/p>\n",
+        "answer_id": 56960536,
+        "question_id": 56959660,
+        "last_edit_date": 1562785030
+    }],
+    "answer_comments": {}
+}

@@ -1,0 +1,77 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/lKpl6.jpg?s=256",
+            "account_id": 10052,
+            "user_type": "registered",
+            "user_id": 18811,
+            "link": "https://stackoverflow.com/users/18811/jason-miesionczek",
+            "reputation": 14468,
+            "display_name": "Jason Miesionczek",
+            "accept_rate": 93
+        },
+        "content_license": "CC BY-SA 2.5",
+        "link": "https://stackoverflow.com/questions/3299336/play-siena-gae-junit",
+        "last_activity_date": 1328267411,
+        "creation_date": 1279716400,
+        "answer_count": 2,
+        "title": "Play! + Siena + GAE + JUnit",
+        "body": "<p>I am trying to get some basic unit tests up and running on the Play! framework using the Siena persistence library with GAE as the intended deployment target.<\/p>\n\n<p>I have the project configured properly and can deploy the app to GAE. I created a basic domain object:<\/p>\n\n<pre><code>public class User extends Model {\n\n    @Id(Generator.AUTO_INCREMENT)\n    public Long id;\n\n    @Column(\"first_name\")\n    public String firstName;\n\n    @Column(\"last_name\")\n    public String lastName;\n\n    @Column(\"email\")\n    public String email;\n\n    public User(String firstName, String lastName, String email) {\n        this.firstName = firstName;\n        this.lastName = lastName;\n        this.email = email;\n    }\n\n    public static Query&lt;User&gt; all() {\n        return Model.all(User.class);\n    }\n\n}\n<\/code><\/pre>\n\n<p>and a basic unit test:<\/p>\n\n<pre><code>public class BasicTest extends UnitTest {\n\n    @Before\n    public void setup() {\n        Fixtures.deleteAll();\n    }\n\n\n    @Test\n    public void canCreateUser() {\n        new User(\"Jason\",\"Miesionczek\",\"atmospherian@gmail.com\").insert();\n\n        User user = User.all().fetch().get(0);\n\n        assertNotNull(user);\n        assertEquals(1,User.all().count());\n    }\n\n}\n<\/code><\/pre>\n\n<p>I understand that in Play! 1.0.3, Fixtures support for Siena is not there yet, which should be fixed in 1.1, but in the mean time, what should i use instead of Fixtures.deleteAll() to clear the test db before each test?<\/p>\n\n<p>Right now my second assertion fails because the database retains the previously inserted records.<\/p>\n",
+        "question_id": 3299336,
+        "tags": [
+            "java",
+            "google-app-engine",
+            "junit",
+            "playframework",
+            "siena"
+        ],
+        "score": 3,
+        "accepted_answer_id": 3524949,
+        "is_answered": true,
+        "view_count": 1532,
+        "last_edit_date": 1282918598
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/79472daa31ea8050b09fbc6893c9dc50?s=256&d=identicon&r=PG",
+                "account_id": 187493,
+                "user_type": "registered",
+                "user_id": 425579,
+                "link": "https://stackoverflow.com/users/425579/plunchete",
+                "reputation": 486,
+                "display_name": "plunchete"
+            },
+            "content_license": "CC BY-SA 2.5",
+            "score": 2,
+            "is_accepted": true,
+            "last_activity_date": 1282242076,
+            "creation_date": 1282242076,
+            "body": "<p>You would need to do a delete per table. E.g:<\/p>\n\n<pre><code>Model.all(User.class).delete();\n<\/code><\/pre>\n",
+            "answer_id": 3524949,
+            "question_id": 3299336
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/3a5491f20d206e18fa8e165d26bf54c7?s=256&d=identicon&r=PG",
+                "account_id": 212444,
+                "user_type": "registered",
+                "user_id": 465260,
+                "link": "https://stackoverflow.com/users/465260/spreiter301",
+                "reputation": 315,
+                "display_name": "spreiter301"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1328267411,
+            "creation_date": 1292078672,
+            "body": "<p>I don't know if it's already to late but I've added some Fixture support for Siena (tested with play 1.1, gae 1.4, siena 1.3, crudsiena 1.2).<\/p>\n\n<p>It supports <code>deleteAll()<\/code> and <code>load()<\/code>:<\/p>\n\n<p><em>SienaFixture.java<\/em> <a href=\"http://pastie.org/1367878\" rel=\"nofollow\">http://pastie.org/1367878<\/a><\/p>\n\n<p>I am pretty new to play and siena (1 week) so there is probably a better way of doing it (especially <code>deleteAll()<\/code>).<\/p>\n",
+            "answer_id": 4417246,
+            "question_id": 3299336,
+            "last_edit_date": 1328267411
+        }
+    ],
+    "answer_comments": {}
+}

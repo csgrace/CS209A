@@ -1,0 +1,108 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/44dd9974ddafa2eede636f1b481fc4ae?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4137250,
+            "user_type": "registered",
+            "user_id": 3393623,
+            "link": "https://stackoverflow.com/users/3393623/user3393623",
+            "reputation": 41,
+            "display_name": "user3393623"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/22261673/problems-creating-a-camera-to-follow-the-player-in-a-java-applet",
+        "last_activity_date": 1520746306,
+        "creation_date": 1394230182,
+        "answer_count": 1,
+        "title": "Problems creating a &quot;camera&quot; to follow the player in a Java Applet",
+        "body": "<p>I'm working on a simple game using a Java Applet, and I can't seem to get the screen to move properly with my player object. The problem seems to be the result of the so-called \"double-buffer\" that is recommended in many guides for use with Applets. I copied the implementation of the double buffer from one such guide but as far as I understand it the point is to have two separate objects of the Java Graphics class, where one draws all the game objects etc. offscreen and then the other displays that image on screen.<\/p>\n\n<p>The relevant parts of code from the Level class which is the \"main\" class of my Applet:<\/p>\n\n<pre><code>public class Level extends Applet implements Runnable, KeyListener {\n\n    public Image offscreen;\n    public Graphics d;\n    private Thread th;\n    // also a bunch of game mechanic related stuff I'm not including here\n\n    public void init(){\n        th = new Thread(this);\n        th.start();\n        offscreen = createImage(480,800);\n        d = offscreen.getGraphics();\n        initObjects(); // a method that intialises all game objects to be drawn\n        // again, a bunch of other nonimportant stuff\n    }\n\n    public void run(){}  // run is the method an Applet automatically calls after init() is done, for me it basically contains the game\n    //loop which works just fine apart from the camera and is ran 60 times per second using Thread.sleep()\n\n    // offSetY is set here as the player moves up or down (the camera only needs to scroll on the y-axis)\n    //as offSetY = player.y -750; The player is supposed to always be 50 pixels from the bottom of the screen which is 800 pixels high.\n    //The purpose of offSetY is to provide the delta of the players position on y axis since the last update in order to\n    //determine in which direction and how much we need to move the screen.\n\n    repaint() // calls update(), which is where the truly relevant part starts.\n\n\n    public void update(Graphics g){\n        d.clearRect(0, 0, 480, 800); // clears the offscreen area of whatever was there last time update() was called\n        d.drawImage(background, 0, 0, this); // draws the background image on the offscreen area\n        g.translate(0, -offSetY); // translate to change coordinates according to player movement, offSetY is determined by player position\n        //in the game loop and is getting the \"correct\" value (as many units as the player has moved on the Y axis so far)\n        paint(d);\n        g.drawImage(offscreen, 0, 0, this); // after paint() has drawn everything offscreen, the graphics object g draws that image on the screen\n    }\n\n    public void paint(Graphics d){\n        d.translate(0, -offSetY); // this is where things get complicated, I'll discuss this translate in more detail below the code\n        d.drawImage(background, 0, 0, this); // I'm not entirely sure why the background is drawn both here and in the \"on screen\" Graphics object,\n        //it's inherited from the double buffer example. Removing it seems to have no effect on anything.\n\n        // I have a for-loop drawing all my game objects here. I've tested this separately and it works just fine without the translates\n        //(e.g. if I'm moving the objects down instead of moving the \"screen\".\n\n    }\n}\n<\/code><\/pre>\n\n<p>So, essentially my problem is that if I only have the <code>translate()<\/code> in <code>update()<\/code> which moves the origin of the \"on-screen\" stuff it works perfectly for everything that is visible on the original area of the screen but as soon as objects out of that area get drawn things get funky. Also if the player object is moved outside these boundaries it appears only as a \"ghost\", getting drawn at the coordinates where it entered every frame instead of where it actually is (sideways movement is not shown but if you come back to the working area the player position has changed on the x-axis). Imgur album with some images <a href=\"https://i.sstatic.net/tbN5p.jpg\" rel=\"nofollow\">here<\/a>, orange balloon is the player object, everything else is other game objects.<\/p>\n\n<p>On the other hand, if I add the other translate() inside paint(), the problem becomes apparent \"double-dipping\" of the translate function, meaning that the screen is moved far faster than the player moves and the movement does not stop even if the player is no longer moving. This is frankly quite perplexing to me, as the value of offSetY should always be dependant on the players position and therefore self-correcting if the player is \"left behind\" of the screen. Imgur album with some pics <a href=\"https://i.sstatic.net/vtLyt.jpg\" rel=\"nofollow\">here<\/a>.<\/p>\n\n<p>Any ideas on how to implement this properly are welcome, or if someone knows a different way to implement the same functionality. Feel free to ask any further questions and I'll try to provide answers ASAP.<\/p>\n",
+        "question_id": 22261673,
+        "tags": [
+            "java",
+            "camera",
+            "applet",
+            "translate"
+        ],
+        "score": 1,
+        "accepted_answer_id": 22269560,
+        "is_answered": true,
+        "view_count": 816,
+        "last_edit_date": 1520746306
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/yOfDr.png?s=256",
+                "account_id": 183279,
+                "user_type": "registered",
+                "user_id": 418556,
+                "link": "https://stackoverflow.com/users/418556/andrew-thompson",
+                "reputation": 168989,
+                "display_name": "Andrew Thompson",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22261673,
+            "edited": false,
+            "creation_date": 1394249383,
+            "comment_id": 33818927
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/yOfDr.png?s=256",
+                "account_id": 183279,
+                "user_type": "registered",
+                "user_id": 418556,
+                "link": "https://stackoverflow.com/users/418556/andrew-thompson",
+                "reputation": 168989,
+                "display_name": "Andrew Thompson",
+                "accept_rate": 98
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22261673,
+            "edited": false,
+            "creation_date": 1394249301,
+            "comment_id": 33818915
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a0d6c72fc52493dce1c9bde30cdce946?s=256&d=identicon&r=PG",
+                "account_id": 3392345,
+                "user_type": "registered",
+                "user_id": 2846923,
+                "link": "https://stackoverflow.com/users/2846923/the-guy-with-the-hat",
+                "reputation": 11162,
+                "display_name": "The Guy with The Hat",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 22261673,
+            "edited": false,
+            "creation_date": 1394231498,
+            "comment_id": 33814058
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/44dd9974ddafa2eede636f1b481fc4ae?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 4137250,
+            "user_type": "registered",
+            "user_id": 3393623,
+            "link": "https://stackoverflow.com/users/3393623/user3393623",
+            "reputation": 41,
+            "display_name": "user3393623"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1394283154,
+        "creation_date": 1394283154,
+        "body": "<p>So today, after staring at the problem for another half an hour, I finally managed to fix it. Turns out there were two separate problems, I'll try to explain both of them here.<\/p>\n\n<p>The first problem was the \"camera\" scrolling way faster than the player was moving. This was caused by my failure to understand how exactly the <code>translate()<\/code> function works. The offSetY variable, which tracked how much the player had moved, was getting its value calculated as an absolute value of how much the player had moved from its original position. This meant that for the first pixel moved, the camera was also moved one pixel, but for the second one the camera was moved two pixels and so on. The cumulative effect caused the camera to scroll up/down uncontrollably with extended periods of movement. I fixed this by adding a variable  <code>int offSetHelper<\/code>, the value of which is always the value of offSetY on the previous iteration of the game loop. The <code>translate()<\/code> function is then called with the parameters <code>(0, -offSetY + offSetHelper)<\/code>, meaning that its parameters can only ever be either <code>(0,0)<\/code> or <code>(0,1)<\/code>, depending on whether the players absolute position (a float) has changed one full pixels worth or not.<\/p>\n\n<p>The second problem was objects outside the initially visible screen area <code>(0,0)<\/code> to <code>(480,800)<\/code> getting drawn multiple times in the same image, aka the offscreen area where the <code>paint()<\/code> method runs not getting cleared properly. The fix to this was simple: instead of <code>d.clearRect(0, 0, 480, 800);<\/code> I used <code>d.clearRect(0, -100000, 480, 100800);<\/code>, which covers the entire levels area. It's likely there is a more elegant solution which only clears the area that will actually get drawn, but this solution works for me.<\/p>\n\n<p>Thank you to the commenters, I hope I didn't waste too much of your time. I'd already been staring at this problem about three evenings before posting here, just happened to finally look at it the right way today.<\/p>\n",
+        "answer_id": 22269560,
+        "question_id": 22261673
+    }],
+    "answer_comments": {}
+}

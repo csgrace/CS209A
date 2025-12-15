@@ -1,0 +1,102 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/716e3199eb71f98a0b1d7a947f58b5c2?s=256&d=identicon&r=PG",
+            "account_id": 1068241,
+            "user_type": "registered",
+            "user_id": 1068178,
+            "link": "https://stackoverflow.com/users/1068178/colling",
+            "reputation": 67,
+            "display_name": "CollinG",
+            "accept_rate": 89
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/8302124/groovy-list-pop-does-not-work",
+        "last_activity_date": 1322517911,
+        "creation_date": 1322513386,
+        "answer_count": 1,
+        "title": "Groovy: list.pop() does not work",
+        "body": "<p>I have sticky point with a list. After some work I could generate my list and make an xml result. \nBut in my list are entries with tabulators or line breaks (the last entry)<\/p>\n\n<p>If I execute the script, the result is the following:<\/p>\n\n<pre><code>[100, 0100045395, Kurzstrasse, 0502028767496, , 8050, 100, Zürich, 05.07.2010, \n100, 0100045395, 0400053113, 0000356988, , TPS, ZL1, 1549820, 02.06.2010, \n100, 0100045395, 0400053113, 0000356988, , TPS, ZL1, 1549820, 02.06.2010, \n]\n<\/code><\/pre>\n\n<p>First of all I will try to remove the last line break with pop()\nBut I allways get this message:<\/p>\n\n<pre><code>Caught: groovy.lang.MissingMethodException: No signature of method:   Ljava.lang.String;.pop() is applicable for argument types: () values: []\n    Possible solutions: sum(), dump(), min(), max(), any(), sort()\n       at auslesenzwei.xmlGenerieren(auslesenzwei.groovy:44)\n        at auslesenzwei.run(auslesenzwei.groovy:37)\n<\/code><\/pre>\n\n<p>What I'am doing wrong? <\/p>\n\n<p>Code:<\/p>\n\n<pre><code> import groovy.util.CharsetToolkit;\n import java.lang.Object\n\n //Generate pathname\n //Pfadname generiert für einfacheres ändern des Speicherortes\n def pathname = \"C:/mySupport-eclipse/trackandtrace.txt\"\n //Define Error Status\n //Error Status definieren für Weiterverabeitung in mySupport\n int errorCode = 0\n def errorMessage = \"\"\n\n def linesAsList = []\n\n\n def bsknr = \"0100045395\"\n //Define new File\n //Neue Datei definieren\n def file = new File(pathname)\n\n if(!file.exists())\n{\n    errorCode = 1\n    errorMessage = \"File not found\"\n    out_xml = xmlGenerieren()   \n}\nelse\n{\n    //Read Roews and look for BSK Number, split after tab\n    //Zeilen einlesen und nach der BSK Nummer suchen, nach dem Tabulator trennen\n    def lines = file.filterLine { \n        line -&gt; line ==~ /.*\\t${bsknr}\\t.*/ \n\n        }\n    //Split the result after tab and enter, give back as String\n    //Das Ergebnis aufteilen bei Tabulator und Enter und zugleich als String zurückgeben\n    linesAsList = lines.toString().split('\\t|\\r')\n    xmlGenerieren(linesAsList)\n        //println linesAsList\n    }\n\n def xmlGenerieren(givenlist) {\n     def writer = new StringWriter()\n     def builder = new groovy.xml.MarkupBuilder(writer)\n        //givenlist.pop()\n     println givenlist\n     def listsize = givenlist.size()\n\n\n    //Test if is empty\n//Prüfen ob ein Ergebnis gefunden wurde\nif (listsize == 0)\n{\n    builder.result() \n    {\n        entry(wert:\"0\")\n        {\n            paketnr(\"(empty)\")\n        }\n    }\n    println writer.toString()\n    errorCode = 0\n    }\nelse {\n\n\n//i = listsize / 8\n//println i\n\n}\n\n}\n<\/code><\/pre>\n\n<p>thanks for the help<\/p>\n",
+        "question_id": 8302124,
+        "tags": [
+            "java",
+            "list",
+            "groovy"
+        ],
+        "score": 0,
+        "accepted_answer_id": 8302706,
+        "is_answered": true,
+        "view_count": 1210,
+        "last_edit_date": 1322516092
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/142c3537ba70a0cadb1b241f9eb69540?s=256&d=identicon&r=PG",
+            "account_id": 64432,
+            "user_type": "registered",
+            "user_id": 190201,
+            "link": "https://stackoverflow.com/users/190201/ataylor",
+            "reputation": 66369,
+            "display_name": "ataylor",
+            "accept_rate": 83
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": true,
+        "last_activity_date": 1322517911,
+        "creation_date": 1322516300,
+        "body": "<p><code>String.split()<\/code> returns an array of Strings, not a List.  Use <code>String.tokenize()<\/code>, or cast the result of split to a list like <code>linesAsList = lines.toString().split('\\t|\\r') as List<\/code>.<\/p>\n",
+        "answer_id": 8302706,
+        "question_id": 8302124,
+        "last_edit_date": 1322517911
+    }],
+    "answer_comments": {"8302706": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/716e3199eb71f98a0b1d7a947f58b5c2?s=256&d=identicon&r=PG",
+                "account_id": 1068241,
+                "user_type": "registered",
+                "user_id": 1068178,
+                "link": "https://stackoverflow.com/users/1068178/colling",
+                "reputation": 67,
+                "display_name": "CollinG",
+                "accept_rate": 89
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8302706,
+            "edited": false,
+            "creation_date": 1322517911,
+            "comment_id": 10230035
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/142c3537ba70a0cadb1b241f9eb69540?s=256&d=identicon&r=PG",
+                "account_id": 64432,
+                "user_type": "registered",
+                "user_id": 190201,
+                "link": "https://stackoverflow.com/users/190201/ataylor",
+                "reputation": 66369,
+                "display_name": "ataylor",
+                "accept_rate": 83
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 8302706,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/716e3199eb71f98a0b1d7a947f58b5c2?s=256&d=identicon&r=PG",
+                "account_id": 1068241,
+                "user_type": "registered",
+                "user_id": 1068178,
+                "link": "https://stackoverflow.com/users/1068178/colling",
+                "reputation": 67,
+                "display_name": "CollinG",
+                "accept_rate": 89
+            },
+            "edited": false,
+            "creation_date": 1322517815,
+            "comment_id": 10230007
+        }
+    ]}
+}

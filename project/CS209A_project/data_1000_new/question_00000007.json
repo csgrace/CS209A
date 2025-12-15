@@ -1,0 +1,72 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/1b60bc2f42e9ae8227716dff42e93a55?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 9041581,
+            "user_type": "registered",
+            "user_id": 6735646,
+            "link": "https://stackoverflow.com/users/6735646/eric",
+            "reputation": 83,
+            "display_name": "Eric"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/66807034/axon-framework-handling-database-exceptions-in-state-stored-aggregates",
+        "last_activity_date": 1619080167,
+        "creation_date": 1616703754,
+        "answer_count": 2,
+        "title": "Axon framework: Handling database exceptions in state-stored aggregates",
+        "body": "<p>I am new to Axon framework and am trying to implement an application using CQRS with state-stored aggregates.  The application relies on a database constraint (using H2 for now) to enforce uniqueness on a name attribute.  I would like to catch this exception and rethrow it as a user-friendly domain exception.<\/p>\n<p>Per the Axon documentation:<\/p>\n<ul>\n<li><a href=\"https://docs.axoniq.io/reference-guide/axon-framework/messaging-concepts/exception-handling\" rel=\"nofollow noreferrer\">Exception Handling<\/a> says &quot;an <code>@ExceptionHandler<\/code> will only handle exceptions thrown from message handling functions in the same class&quot;<\/li>\n<li><a href=\"https://docs.axoniq.io/reference-guide/axon-framework/messaging-concepts/message-intercepting#exceptionhandler\" rel=\"nofollow noreferrer\">Message Intercepting<\/a> documentation says &quot;A function annotated with <code>@ExceptionHandler<\/code> will be regarded as a handler interceptor which will only be invoked for exceptional results. Using annotated functions to this end for example allow you to throw a more domain specific exception as a result of a thrown database/service exception.&quot;<\/li>\n<\/ul>\n<p>But I cannot get this to work.  I have tried adding exception handlers as follows:<\/p>\n<pre><code>    @ExceptionHandler\n    public void handle(ConstraintViolationException ex) throws Exception {\n        if (ex.getMessage().contains(&quot;UNQ_COMPANY_ID&quot;) || ex.getMessage().contains(&quot;UNQ_PLAN_NAME&quot;)) {\n            throw new DomainException(&quot;Plan name and company id must be unique&quot;);\n        }\n        throw ex;\n    }\n<\/code><\/pre>\n<p>but this method is not called.  I have tried putting the exception handler method on the aggregate and on a separate command handler class, tried adding <code>resultType=ConstraintViolationException.class<\/code>, and tried catching other types of exceptions including <code>Exception<\/code>, <code>RuntimeException<\/code>, <code>AxonServerRemoteCommandHandlingException<\/code>, etc. but this method is never called.<\/p>\n<p>I can see the error in the log output:<\/p>\n<blockquote>\n<p>org.axonframework.axonserver.connector.command.AxonServerRemoteCommandHandlingException: An exception was thrown by the remote message handling component: org.hibernate.exception.ConstraintViolationException: could not execute statement<\/p>\n<\/blockquote>\n<p>Is it possible to catch database exceptions in state-stored aggregates?  If it is, can someone point me towards what I am doing wrong?<\/p>\n<p>The statement &quot;an @ExceptionHandler will only handle exceptions thrown from message handling functions in the same class&quot; makes me wonder whether I need to create a custom repository class (rather than using the default <code>GenericJpaRepository<\/code>) but that seems like a lot more work than should be necessary.<\/p>\n<p>Thank you!<\/p>\n<hr />\n<p>Update: I was able to roughly accomplish what I want by adding a <code>UnitOfWork<\/code> parameter to the <code>@CommandHandler<\/code> method and using it to registering a rollback callback on it as follows:<\/p>\n<pre><code>        uow.onRollback(unit -&gt; {\n            DefaultUnitOfWork duow = (DefaultUnitOfWork) unit;\n            Throwable ex = duow.getExecutionResult().getExceptionResult();\n            while (ex != null) {\n                if (ex.getMessage().contains(&quot;UNQ_PLAN_NAME&quot;)) {\n                    throw new RuntimeException(&quot;Plan name must be unique&quot;);\n                }\n                ex = ex.getCause();\n            }\n        });\n<\/code><\/pre>\n<p>But this seems kind of verbose, as well as limiting me to throwing unchecked exceptions only.  This also doesn't feel like the right way to do this though because I assume the purpose of the <code>@ExceptionHandler<\/code> annotation is to eliminate need for code like the above.<\/p>\n",
+        "question_id": 66807034,
+        "tags": [
+            "java",
+            "axon"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 740,
+        "last_edit_date": 1616706780
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-Mp2jHJBdk8s/AAAAAAAAAAI/AAAAAAAAAlo/pkmywM832sA/s256-rj/photo.jpg",
+                "account_id": 5601961,
+                "user_type": "registered",
+                "user_id": 4437909,
+                "link": "https://stackoverflow.com/users/4437909/lucas-campos",
+                "reputation": 1930,
+                "display_name": "Lucas Campos"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1619079968,
+            "creation_date": 1617133312,
+            "body": "<p>This is doable of course.<\/p>\n<p>Actually, the best pointer I could give you if the <a href=\"https://github.com/AxonIQ/code-samples/tree/master/distributed-exceptions\" rel=\"nofollow noreferrer\">code-samples<\/a> repo where you can see a sample about distributed exceptions.<\/p>\n<p>In general, as you could see in your shared log, the 'original' exception is wrapped into an <code>AxonServerRemoteCommandHandlingException<\/code> meaning you will have to handle that. Doing that, you can pretty much add anything to the <code>detail<\/code>s  field of this class, adding the indication you had a <code>ConstraintViolationException<\/code> for example (or an ERROR_CODE, like HTTP protocol does) and you are fine to unwrap it on the other side.<\/p>\n",
+            "answer_id": 66877491,
+            "question_id": 66807034,
+            "last_edit_date": 1619079968
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/035084fa9055770efead47147882054c?s=256&d=identicon&r=PG",
+                "account_id": 2552081,
+                "user_type": "registered",
+                "user_id": 2215649,
+                "link": "https://stackoverflow.com/users/2215649/steven",
+                "reputation": 7445,
+                "display_name": "Steven"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1619080167,
+            "creation_date": 1619080167,
+            "body": "<p>What might be the &quot;gotcha&quot; you require, is to know that an <code>@ExceptionHandler<\/code> annotated method should reside in the object handling the message. So if you want to react to a failing command handling operation (which would be the case in your sample), you will need to place the exception handler in the Aggregate, next to the Command Handler.<\/p>\n<p>That fact you get an <code>AxonServerRemoteCommandHandlingException<\/code> to me suggests the exception is caught on the command dispatching end. So, prior to dispatching a command on the <code>CommandGateway<\/code>/<code>CommandBus<\/code>.<\/p>\n<p>However, whether this is the problem at hand, isn't clear to me right now, since the sample only shows the exception handler and not where it resides. Please share whether my assumption on the placement of the exception handler is correct. If not, we'll dive into this deeper to get to the cause.<\/p>\n",
+            "answer_id": 67209556,
+            "question_id": 66807034
+        }
+    ],
+    "answer_comments": {}
+}

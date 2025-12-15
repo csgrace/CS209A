@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/c0b42fede7f13ceae94b1aefd4f45972?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 9679571,
+            "user_type": "registered",
+            "user_id": 7181771,
+            "link": "https://stackoverflow.com/users/7181771/theglobalvariable",
+            "reputation": 23,
+            "display_name": "theGlobalVariable"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/50549053/cannot-set-values-to-jxbrowser-localstorage-using-java",
+        "last_activity_date": 1527607251,
+        "creation_date": 1527395983,
+        "answer_count": 1,
+        "title": "Cannot set values to JxBrowser localstorage using java",
+        "body": "<p>I want to set the language to the browser when it's loading and for that I'm setting the 'language' value to the browser's local storage.<\/p>\n\n<p>Here is the browser initializing code.<\/p>\n\n<pre><code>BrowserPreferences.setChromiumSwitches(\"--disable-web-security\",\n        \"--allow-file-access-from-files\");\n\nString randomStr = UUID.randomUUID().toString();\njxbrowserDataDirPath = BrowserPreferences.getDefaultChromiumDir() + \"\\\\\" + randomStr;\n\nbrowser = new Browser(BrowserType.LIGHTWEIGHT, new BrowserContext(new BrowserContextParams(jxbrowserDataDirPath)));\nfinal BrowserView browserView = new BrowserView(browser);\nbrowser.setDialogHandler(new DefaultDialogHandler(browserView));\nbrowser.setPopupHandler(new DefaultPopupHandler());\n\nbrowser.getCacheStorage().clearCache();\nthis.add(browserView, BorderLayout.CENTER);\n<\/code><\/pre>\n\n<p>and after initializing the browser I'm loading the web page by URL and then set the value to local storage.<\/p>\n\n<pre><code>browser.loadURL(\"file:///\" + FILE_LOCATION + File.separator + \"setting.html\"); \nbrowser.getLocalWebStorage().setItem(\"language\", \"en\");\n<\/code><\/pre>\n\n<p>But that value is not setting to local storage and I want to know the reason for this behavior ?<\/p>\n\n<hr>\n\n<p>Furthermore when I use a browser loadListner it works fine<\/p>\n\n<pre><code>browser.addLoadListener(new LoadAdapter()\n    {\n      @Override\n      public void onDocumentLoadedInFrame(FrameLoadEvent arg0)\n      {\n        setLocalStorageValue(key, value);\n      }\n    });\n<\/code><\/pre>\n\n<p>but I cannot use the loadListner to my code for some reasons so that I'm trying to set the value after loading the browser.<\/p>\n",
+        "question_id": 50549053,
+        "tags": [
+            "java",
+            "web",
+            "local-storage",
+            "jxbrowser"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 589
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-0gtr85ryLA0/AAAAAAAAAAI/AAAAAAAAAHo/pjdJHfRrchY/s256-rj/photo.jpg",
+            "account_id": 8319508,
+            "user_type": "registered",
+            "user_id": 6251714,
+            "link": "https://stackoverflow.com/users/6251714/vitaly-eremenko",
+            "reputation": 341,
+            "display_name": "Vitaly Eremenko"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1527607251,
+        "creation_date": 1527607251,
+        "body": "<p>Web Local Storage is accessible only after an HTML page is fully loaded and JavaScript context initialized on it. So to use Web Local Storage you need to be sure that HTML page is loaded.<\/p>\n\n<p>In the same time, the <code>Browser.loadURL<\/code> method is invoked asynchronously. To make sure that the web page is loaded completely, you have to use the <code>LoadListener.onFinishLoadingFrame()<\/code> event. <\/p>\n\n<p>So, your issue happens because <code>browser.getLocalWebStorage().setItem(\"language\", \"en\");<\/code> was called before page loading.<\/p>\n",
+        "answer_id": 50587884,
+        "question_id": 50549053
+    }],
+    "answer_comments": {}
+}

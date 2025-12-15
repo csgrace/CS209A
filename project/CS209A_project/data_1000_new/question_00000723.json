@@ -1,0 +1,168 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh4.googleusercontent.com/-GTH05UOWyFU/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3reaap0Kq1al2PbMS5vE840XWZBOSg/mo/s256-rj/photo.jpg",
+            "account_id": 15439223,
+            "user_type": "registered",
+            "user_id": 11138363,
+            "link": "https://stackoverflow.com/users/11138363/sam-harding",
+            "reputation": 3,
+            "display_name": "Sam Harding"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/57818992/javafx-not-rendering-earlier-items-in-an-array-unable-to-find-issue-believe-th",
+        "last_activity_date": 1567786150,
+        "creation_date": 1567760941,
+        "answer_count": 1,
+        "title": "JavaFX not rendering earlier items in an array, unable to find issue, believe threading might be the issue",
+        "body": "<p>I wrote a line drawing algorithm that functions correctly when calculating each point, however when it gets rendered the program skips nearly 20 points, unable to find the issue. <\/p>\n\n<p>I have tried to mess with the algorithm, specifically the for loop that adds the points to the positions list where the line gets calculated as I have had problems with that in other versions of the code. I just cannot for the life of me find the issue with the code, I am pretty new to Java as you will probably tell from the mess of code below. It says not to post an entire file but I am unable to pinpoint where it is going wrong. I am so incredibly sorry for the mess of code below I just am at that point where I have no clue what is wrong. <\/p>\n\n<pre><code>package sample;\n\nimport com.sun.jdi.ArrayReference;\nimport javafx.application.Application;\nimport javafx.application.Platform;\nimport javafx.scene.Group;\nimport javafx.scene.canvas.Canvas;\nimport javafx.scene.canvas.GraphicsContext;\nimport javafx.scene.paint.Color;\nimport javafx.scene.Scene;\nimport javafx.stage.Stage;\n\nimport java.util.ArrayList;\n\nclass PositionCounter {\n    public int position;\n\n    public void setPosition(int newPos){\n        position = newPos;\n    }\n}\n\npublic class Main extends Application {\n\n//    public void drawRectangle(int x1, int y1, int x2, int y2, Stage primStage, GraphicsContext gc){\n//        drawLine(x1, y2, x2, y2 , primStage, gc);\n//        drawLine(x1, y1, x2, y2, primStage, gc);\n//        drawLine(x1, y1, x1 , y2, primStage, gc);\n//        drawLine(x2, y1, x2 , y2, primStage, gc);\n//        drawLine(x1, y1, x2, y1 , primStage, gc);\n//\n//    }\n//\n\n    public void fillPosition(ArrayList&lt;Integer[]&gt; points, GraphicsContext gc, int positionInArray ){\n        gc.fillRect(points.get(positionInArray)[0], points.get(positionInArray)[1], squareWidth / 2, squareWidth / 2);\n        //System.out.println(\"(\" + points.get(positionInArray)[0] + \", \" + points.get(positionInArray)[1]);\n    }\n\n    public void drawLine(int x1, int y1, int x2, int y2, Stage primStage, GraphicsContext gc){\n\n        ArrayList&lt;Integer[]&gt; points = calculateLine(x1, y1, x2, y2, gc);\n        PositionCounter position = new PositionCounter();\n\n        Thread thread = new Thread(new Runnable() {\n\n            @Override\n            public void run() {\n\n                    Runnable updater = new Runnable() {\n\n                        @Override\n                        public void run() {\n\n                            fillPosition(points, gc, position.position);\n\n                        }\n                    };\n\n                    int dy = Math.abs(y2 - y1);\n                    int dx = Math.abs(x2 - x1);\n                    int m = (dy &gt;= dx) ? dy : dx;\n\n                    for (int i = 0; i &lt;= points.size(); i++) {\n\n                        position.setPosition(i);\n\n                        try {\n                            Thread.sleep(20);\n                        } catch (InterruptedException ex) {\n                        }\n\n                        Platform.runLater(updater);\n\n                    }\n\n\n            }\n        });\n\n        thread.setDaemon(true);\n        thread.start();\n\n    }\n\n    @Override\n    public void start(Stage primaryStage) throws Exception{\n\n        //STUFF\n        Group root = new Group();\n        Scene scene = new Scene(root, 400, 400);\n        scene.setFill(Color.GOLD);\n\n        Canvas canvas = new Canvas(400, 400);\n        GraphicsContext gc = canvas.getGraphicsContext2D();\n\n        root.getChildren().add(canvas);\n        //////////\n\n        gc.fillRect(0, 200, 400, 1);\n        gc.fillRect(0, 100, 400, 1);\n        gc.fillRect(0, 300, 400, 1);\n        gc.fillRect(200, 0, 1, 400);\n        gc.fillRect(100, 0, 1, 400);\n        gc.fillRect(300, 0, 1, 400);\n\n\n       // drawRectangle(50, 50, 350, 250, primaryStage, gc);\n\n\n        //drawLine(50, 250, 350, 250 , primaryStage, gc);\n        //drawLine(50, 50, 350, 250, primaryStage, gc);\n        //drawLine(50, 50, 50 , 250, primaryStage, gc);\n        //drawLine(350, 50, 350 , 250, primaryStage, gc);\n        drawLine(50, 50, 350, 50 , primaryStage, gc);\n\n\n\n        //////////\n        primaryStage.setScene(scene);\n        primaryStage.show();\n        /////////\n    }\n\n    int squareWidth = 2;\n\n    public ArrayList&lt;Integer[]&gt; calculateLine(int x1, int y1, int x2, int y2, GraphicsContext gc){\n\n        ArrayList&lt;Integer[]&gt; points = new ArrayList&lt;Integer[]&gt;();\n\n        int dy = Math.abs(y2 - y1);\n        int dx = Math.abs(x2 - x1);\n\n        int sx = (x1 &lt; x2) ? 1 : -1;\n        int sy = (y1 &lt; y2) ? 1 : -1;\n\n        int err = dx-dy;\n        int x = x1;\n        int y = y1;\n        int e2 = 0;\n\n        Integer[] pos = new Integer[2];\n        pos[0] = x;\n        pos[1] = y;\n        points.add(pos);\n\n        int m = (dy &gt;= dx) ? dy  : dx ;\n\n        for (int i = 0; i &lt;= m; i++) {\n\n                e2 = 2 * err;\n                if (e2 &gt; -dy) {\n                    err = err - dy;\n                    x = x + sx;\n                    Integer[] position = new Integer[2];\n                    position[0] = x;\n                    position[1] = y;\n                    points.add(position);\n                }\n\n                if (e2 &lt; dx) {\n                    err = err + dx;\n                    y = y + sy;\n                    Integer[] position = new Integer[2];\n                    position[0] = x;\n                    position[1] = y;\n                    points.add(position);\n                }\n\n        }\n\n        return points;\n    }\n\n\n    public static void main(String[] args) {\n        launch(args);\n    }\n}\n<\/code><\/pre>\n\n<p>The problem is that the calculate line function returns the correct points, it just doesnt render them properly.<\/p>\n",
+        "question_id": 57818992,
+        "tags": [
+            "java",
+            "javafx",
+            "graphics",
+            "bresenham"
+        ],
+        "score": 0,
+        "accepted_answer_id": 57825353,
+        "is_answered": true,
+        "view_count": 136
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-GTH05UOWyFU/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3reaap0Kq1al2PbMS5vE840XWZBOSg/mo/s256-rj/photo.jpg",
+                "account_id": 15439223,
+                "user_type": "registered",
+                "user_id": 11138363,
+                "link": "https://stackoverflow.com/users/11138363/sam-harding",
+                "reputation": 3,
+                "display_name": "Sam Harding"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 57818992,
+            "edited": false,
+            "creation_date": 1567817491,
+            "comment_id": 102089655
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d3f3f4320c25d18603de3bb3476fa6fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3583958,
+                "user_type": "registered",
+                "user_id": 2991525,
+                "link": "https://stackoverflow.com/users/2991525/fabian",
+                "reputation": 82886,
+                "display_name": "fabian"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 57818992,
+            "edited": false,
+            "creation_date": 1567790527,
+            "comment_id": 102082650
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/d3f3f4320c25d18603de3bb3476fa6fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3583958,
+                "user_type": "registered",
+                "user_id": 2991525,
+                "link": "https://stackoverflow.com/users/2991525/fabian",
+                "reputation": 82886,
+                "display_name": "fabian"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57818992,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/rkpYv.jpg?s=256",
+                "account_id": 2819940,
+                "user_type": "registered",
+                "user_id": 2423906,
+                "link": "https://stackoverflow.com/users/2423906/sedj601",
+                "reputation": 14002,
+                "display_name": "SedJ601",
+                "accept_rate": 100
+            },
+            "edited": false,
+            "creation_date": 1567790524,
+            "comment_id": 102082648
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/rkpYv.jpg?s=256",
+                "account_id": 2819940,
+                "user_type": "registered",
+                "user_id": 2423906,
+                "link": "https://stackoverflow.com/users/2423906/sedj601",
+                "reputation": 14002,
+                "display_name": "SedJ601",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57818992,
+            "edited": false,
+            "creation_date": 1567785104,
+            "comment_id": 102080477
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/af0f9bfe593f36642a032cd7ea611e7d?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8532578,
+                "user_type": "registered",
+                "user_id": 6395627,
+                "link": "https://stackoverflow.com/users/6395627/slaw",
+                "reputation": 49904,
+                "display_name": "Slaw"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "post_id": 57818992,
+            "edited": false,
+            "creation_date": 1567777970,
+            "comment_id": 102076845
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh4.googleusercontent.com/-GTH05UOWyFU/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3reaap0Kq1al2PbMS5vE840XWZBOSg/mo/s256-rj/photo.jpg",
+                "account_id": 15439223,
+                "user_type": "registered",
+                "user_id": 11138363,
+                "link": "https://stackoverflow.com/users/11138363/sam-harding",
+                "reputation": 3,
+                "display_name": "Sam Harding"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 57818992,
+            "edited": false,
+            "creation_date": 1567761168,
+            "comment_id": 102068441
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/rkpYv.jpg?s=256",
+            "account_id": 2819940,
+            "user_type": "registered",
+            "user_id": 2423906,
+            "link": "https://stackoverflow.com/users/2423906/sedj601",
+            "reputation": 14002,
+            "display_name": "SedJ601",
+            "accept_rate": 100
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1567786150,
+        "creation_date": 1567785838,
+        "body": "<p>I would suggest you use <a href=\"https://docs.oracle.com/javase/8/javafx/api/javafx/animation/Timeline.html\" rel=\"nofollow noreferrer\"><code>Timeline<\/code><\/a> instead of <a href=\"https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html\" rel=\"nofollow noreferrer\"><code>Thread<\/code><\/a>. It can be done using a <code>Thread<\/code>, but <code>Timeline<\/code> is designed for cases like this.<\/p>\n\n<blockquote>\n  <p>Draw Line Method:<\/p>\n<\/blockquote>\n\n<pre><code>public void drawLine(int x1, int y1, int x2, int y2, Stage primStage, GraphicsContext gc)\n{\n\n    ArrayList&lt;Integer[]&gt; points = calculateLine(x1, y1, x2, y2, gc);\n    PositionCounter position = new PositionCounter();\n\n    int dy = Math.abs(y2 - y1);\n    int dx = Math.abs(x2 - x1);\n    int m = (dy &gt;= dx) ? dy : dx;\n\n    AtomicInteger counter = new AtomicInteger();\n    Timeline animationTimeline = new Timeline(new KeyFrame(Duration.millis(20), (ActionEvent t) -&gt; {\n        position.setPosition(counter.getAndIncrement());\n        fillPosition(points, gc, position.position);\n    }));\n    animationTimeline.setCycleCount(points.size());\n    animationTimeline.play();\n\n}\n<\/code><\/pre>\n\n<blockquote>\n  <p>Full Code:    <\/p>\n<\/blockquote>\n\n<pre><code>import com.sun.jdi.ArrayReference;\nimport javafx.application.Application;\nimport javafx.application.Platform;\nimport javafx.scene.Group;\nimport javafx.scene.canvas.Canvas;\nimport javafx.scene.canvas.GraphicsContext;\nimport javafx.scene.paint.Color;\nimport javafx.scene.Scene;\nimport javafx.stage.Stage;\n\nimport java.util.ArrayList;\nimport java.util.concurrent.atomic.AtomicInteger;\nimport javafx.animation.KeyFrame;\nimport javafx.animation.Timeline;\nimport javafx.event.ActionEvent;\nimport javafx.event.EventHandler;\nimport javafx.util.Duration;\n\nclass PositionCounter\n{\n\n    public int position;\n\n    public void setPosition(int newPos)\n    {\n        position = newPos;\n    }\n}\n\npublic class JavaFXTestingGround extends Application\n{\n\n//    public void drawRectangle(int x1, int y1, int x2, int y2, Stage primStage, GraphicsContext gc){\n//        drawLine(x1, y2, x2, y2 , primStage, gc);\n//        drawLine(x1, y1, x2, y2, primStage, gc);\n//        drawLine(x1, y1, x1 , y2, primStage, gc);\n//        drawLine(x2, y1, x2 , y2, primStage, gc);\n//        drawLine(x1, y1, x2, y1 , primStage, gc);\n//\n//    }\n//\n    public void fillPosition(ArrayList&lt;Integer[]&gt; points, GraphicsContext gc, int positionInArray)\n    {\n        gc.fillRect(points.get(positionInArray)[0], points.get(positionInArray)[1], squareWidth / 2, squareWidth / 2);\n        //System.out.println(\"(\" + points.get(positionInArray)[0] + \", \" + points.get(positionInArray)[1]);\n    }\n\n    public void drawLine(int x1, int y1, int x2, int y2, Stage primStage, GraphicsContext gc)\n    {\n\n        ArrayList&lt;Integer[]&gt; points = calculateLine(x1, y1, x2, y2, gc);\n        PositionCounter position = new PositionCounter();\n\n        int dy = Math.abs(y2 - y1);\n        int dx = Math.abs(x2 - x1);\n        int m = (dy &gt;= dx) ? dy : dx;\n\n        AtomicInteger counter = new AtomicInteger();\n        Timeline animationTimeline = new Timeline(new KeyFrame(Duration.millis(20), (ActionEvent t) -&gt; {\n            position.setPosition(counter.getAndIncrement());\n            fillPosition(points, gc, position.position);\n        }));\n        animationTimeline.setCycleCount(points.size());\n        animationTimeline.play();\n\n    }\n\n    @Override\n    public void start(Stage primaryStage) throws Exception\n    {\n\n        //STUFF\n        Group root = new Group();\n        Scene scene = new Scene(root, 400, 400);\n        scene.setFill(Color.GOLD);\n\n        Canvas canvas = new Canvas(400, 400);\n        GraphicsContext gc = canvas.getGraphicsContext2D();\n\n        root.getChildren().add(canvas);\n        //////////\n\n        gc.fillRect(0, 200, 400, 1);\n        gc.fillRect(0, 100, 400, 1);\n        gc.fillRect(0, 300, 400, 1);\n        gc.fillRect(200, 0, 1, 400);\n        gc.fillRect(100, 0, 1, 400);\n        gc.fillRect(300, 0, 1, 400);\n\n        // drawRectangle(50, 50, 350, 250, primaryStage, gc);\n        //drawLine(50, 250, 350, 250 , primaryStage, gc);\n        //drawLine(50, 50, 350, 250, primaryStage, gc);\n        //drawLine(50, 50, 50 , 250, primaryStage, gc);\n        //drawLine(350, 50, 350 , 250, primaryStage, gc);\n        drawLine(50, 50, 350, 50, primaryStage, gc);\n\n        //////////\n        primaryStage.setScene(scene);\n        primaryStage.show();\n        /////////\n    }\n\n    int squareWidth = 2;\n\n    public ArrayList&lt;Integer[]&gt; calculateLine(int x1, int y1, int x2, int y2, GraphicsContext gc)\n    {\n\n        ArrayList&lt;Integer[]&gt; points = new ArrayList&lt;Integer[]&gt;();\n\n        int dy = Math.abs(y2 - y1);\n        int dx = Math.abs(x2 - x1);\n\n        int sx = (x1 &lt; x2) ? 1 : -1;\n        int sy = (y1 &lt; y2) ? 1 : -1;\n\n        int err = dx - dy;\n        int x = x1;\n        int y = y1;\n        int e2 = 0;\n\n        Integer[] pos = new Integer[2];\n        pos[0] = x;\n        pos[1] = y;\n        points.add(pos);\n\n        int m = (dy &gt;= dx) ? dy : dx;\n\n        for (int i = 0; i &lt;= m; i++) {\n\n            e2 = 2 * err;\n            if (e2 &gt; -dy) {\n                err = err - dy;\n                x = x + sx;\n                Integer[] position = new Integer[2];\n                position[0] = x;\n                position[1] = y;\n                points.add(position);\n            }\n\n            if (e2 &lt; dx) {\n                err = err + dx;\n                y = y + sy;\n                Integer[] position = new Integer[2];\n                position[0] = x;\n                position[1] = y;\n                points.add(position);\n            }\n\n        }\n\n        return points;\n    }\n\n    public static void main(String[] args)\n    {\n        launch(args);\n    }\n}\n<\/code><\/pre>\n",
+        "answer_id": 57825353,
+        "question_id": 57818992,
+        "last_edit_date": 1567786150
+    }],
+    "answer_comments": {}
+}

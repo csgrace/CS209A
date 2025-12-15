@@ -1,0 +1,220 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dde32d7fd47645e39a95a5a22928c30f?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 16830843,
+            "user_type": "registered",
+            "user_id": 12168859,
+            "link": "https://stackoverflow.com/users/12168859/zluaaatttaaaan",
+            "reputation": 3,
+            "display_name": "Zluaaatttaaaan"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/58281235/asynctask-does-not-display-contents-of-html",
+        "last_activity_date": 1570640813,
+        "creation_date": 1570516629,
+        "answer_count": 3,
+        "title": "AsyncTask does not display contents of HTML",
+        "body": "<p>I tried to use AsyncTask to download web data. The app crashed without running and I can't find out where the error is. I will give the code below and the error in the logcat below it. I have already tried out different methods of solving this before but nothing seems to work.\nThe code is :<\/p>\n\n<pre class=\"lang-java prettyprint-override\"><code>package com.example.celebguess;\n\nimport androidx.appcompat.app.AppCompatActivity;\n\nimport android.os.AsyncTask;\nimport android.os.Bundle;\nimport android.util.Log;\nimport android.widget.Button;\nimport android.widget.TextView;\n\nimport java.io.InputStream;\nimport java.io.InputStreamReader;\nimport java.net.HttpURLConnection;\nimport java.net.URL;\n\npublic class MainActivity extends AppCompatActivity {\n\n    public class DownloadTask extends AsyncTask&lt;String, Void, String&gt; {\n\n        @Override\n        protected String doInBackground(String... urls) {\n\n            String result = \"\";\n            URL url;\n            HttpURLConnection urlConnection = null;\n\n            try {\n\n                url = new URL(urls[0]);\n                urlConnection = (HttpURLConnection) url.openConnection();\n                InputStream in = urlConnection.getInputStream();\n                InputStreamReader reader = new InputStreamReader(in);\n                int data = reader.read();\n\n                while (data != -1) {\n                    char current = (char) data;\n                    result += current;\n                    data = reader.read();\n                }\n\n                return result;\n\n            } catch (Exception e) {\n                e.printStackTrace();\n                return null;\n            }\n\n        }\n    }\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.activity_main);\n\n        DownloadTask task = new DownloadTask();\n        String result = null;\n        String result1 = null;\n        try {\n            result = task.execute(\n                    \"https://samples.openweathermap.org/data/2.5/weather?q=London,uk&amp;appid=b6907d289e10d714a6e88b30761fae22\")\n                    .get();\n\n            Log.i(\"2j\", \"\" + result);\n        } catch (Exception e) {\n            e.printStackTrace();\n            result = \"Wrong \";\n        }\n\n        Log.i(\"2j\", \"\" + result);\n    }\n}\n<\/code><\/pre>\n\n<p>The logcat is :<\/p>\n\n<pre><code>    2019-10-08 12:03:15.269 16333-16333/? I/mple.celebgues: Not late-enabling -Xcheck:jni (already on)\n    2019-10-08 12:03:15.359 16333-16333/? E/mple.celebgues: Unknown bits set in runtime_flags: 0x8000\n    2019-10-08 12:03:15.376 16333-16333/? W/mple.celebgues: Unexpected CPU variant for X86 using defaults: x86\n    2019-10-08 12:03:15.916 16333-16384/com.example.celebguess D/libEGL: Emulator has host GPU support, qemu.gles is set to 1.\n    2019-10-08 12:03:15.914 16333-16333/com.example.celebguess W/RenderThread: type=1400 audit(0.0:75): avc: denied { write } for name=\"property_service\" dev=\"tmpfs\" ino=8368 scontext=u:r:untrusted_app:s0:c147,c256,c512,c768 tcontext=u:object_r:property_socket:s0 tclass=sock_file permissive=0 app=com.example.celebguess\n    2019-10-08 12:03:15.926 16333-16384/com.example.celebguess W/libc: Unable to set property \"qemu.gles\" to \"1\": connection failed; errno=13 (Permission denied)\n    2019-10-08 12:03:16.011 16333-16384/com.example.celebguess D/libEGL: loaded /vendor/lib/egl/libEGL_emulation.so\n    2019-10-08 12:03:16.043 16333-16384/com.example.celebguess D/libEGL: loaded /vendor/lib/egl/libGLESv1_CM_emulation.so\n    2019-10-08 12:03:16.048 16333-16384/com.example.celebguess D/libEGL: loaded /vendor/lib/egl/libGLESv2_emulation.so\n    2019-10-08 12:03:16.421 16333-16333/com.example.celebguess W/mple.celebgues: Accessing hidden method Landroid/view/View;-&gt;computeFitSystemWindows(Landroid/graphics/Rect;Landroid/graphics/Rect;)Z (greylist, reflection, allowed)\n    2019-10-08 12:03:16.422 16333-16333/com.example.celebguess W/mple.celebgues: Accessing hidden method Landroid/view/ViewGroup;-&gt;makeOptionalFitsSystemWindows()V (greylist, reflection, allowed)\n    2019-10-08 12:03:16.657 16333-16389/com.example.celebguess D/NetworkSecurityConfig: No Network Security Config specified, using platform default\n    2019-10-08 12:03:56.733 16333-16389/com.example.celebguess W/System.err: java.net.UnknownHostException: Unable to resolve host \"samples.openweathermap.org\": No address associated with hostname\n    2019-10-08 12:03:56.733 16333-16389/com.example.celebguess W/System.err:     at java.net.Inet6AddressImpl.lookupHostByName(Inet6AddressImpl.java:156)\n    2019-10-08 12:03:56.734 16333-16389/com.example.celebguess W/System.err:     at java.net.Inet6AddressImpl.lookupAllHostAddr(Inet6AddressImpl.java:103)\n    2019-10-08 12:03:56.734 16333-16389/com.example.celebguess W/System.err:     at java.net.InetAddress.getAllByName(InetAddress.java:1152)\n    2019-10-08 12:03:56.734 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.Dns$1.lookup(Dns.java:41)\n    2019-10-08 12:03:56.735 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.RouteSelector.resetNextInetSocketAddress(RouteSelector.java:178)\n    2019-10-08 12:03:56.735 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.RouteSelector.nextProxy(RouteSelector.java:144)\n    2019-10-08 12:03:56.735 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.RouteSelector.next(RouteSelector.java:86)\n    2019-10-08 12:03:56.735 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.StreamAllocation.findConnection(StreamAllocation.java:176)\n    2019-10-08 12:03:56.736 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.StreamAllocation.findHealthyConnection(StreamAllocation.java:128)\n    2019-10-08 12:03:56.736 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.StreamAllocation.newStream(StreamAllocation.java:97)\n    2019-10-08 12:03:56.738 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.HttpEngine.connect(HttpEngine.java:289)\n    2019-10-08 12:03:56.738 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.http.HttpEngine.sendRequest(HttpEngine.java:232)\n    2019-10-08 12:03:56.740 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.huc.HttpURLConnectionImpl.execute(HttpURLConnectionImpl.java:465)\n    2019-10-08 12:03:56.740 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getResponse(HttpURLConnectionImpl.java:411)\n    2019-10-08 12:03:56.740 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getInputStream(HttpURLConnectionImpl.java:248)\n    2019-10-08 12:03:56.740 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.huc.DelegatingHttpsURLConnection.getInputStream(DelegatingHttpsURLConnection.java:211)\n    2019-10-08 12:03:56.740 16333-16389/com.example.celebguess W/System.err:     at com.android.okhttp.internal.huc.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:30)\n    2019-10-08 12:03:56.742 16333-16389/com.example.celebguess W/System.err:     at com.example.celebguess.MainActivity$DownloadTask.doInBackground(MainActivity.java:32)\n    2019-10-08 12:03:56.743 16333-16389/com.example.celebguess W/System.err:     at com.example.celebguess.MainActivity$DownloadTask.doInBackground(MainActivity.java:18)\n    2019-10-08 12:03:56.743 16333-16389/com.example.celebguess W/System.err:     at android.os.AsyncTask$3.call(AsyncTask.java:378)\n    2019-10-08 12:03:56.745 16333-16389/com.example.celebguess W/System.err:     at java.util.concurrent.FutureTask.run(FutureTask.java:266)\n    2019-10-08 12:03:56.745 16333-16389/com.example.celebguess W/System.err:     at android.os.AsyncTask$SerialExecutor$1.run(AsyncTask.java:289)\n    2019-10-08 12:03:56.748 16333-16389/com.example.celebguess W/System.err:     at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)\n    2019-10-08 12:03:56.748 16333-16389/com.example.celebguess W/System.err:     at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)\n    2019-10-08 12:03:56.748 16333-16389/com.example.celebguess W/System.err:     at java.lang.Thread.run(Thread.java:919)\n    2019-10-08 12:03:56.750 16333-16389/com.example.celebguess W/System.err: Caused by: android.system.GaiException: android_getaddrinfo failed: EAI_NODATA (No address associated with hostname)\n    2019-10-08 12:03:56.750 16333-16389/com.example.celebguess W/System.err:     at libcore.io.Linux.android_getaddrinfo(Native Method)\n    2019-10-08 12:03:56.750 16333-16389/com.example.celebguess W/System.err:     at libcore.io.ForwardingOs.android_getaddrinfo(ForwardingOs.java:74)\n    2019-10-08 12:03:56.750 16333-16389/com.example.celebguess W/System.err:     at libcore.io.BlockGuardOs.android_getaddrinfo(BlockGuardOs.java:200)\n    2019-10-08 12:03:56.750 16333-16389/com.example.celebguess W/System.err:     at libcore.io.ForwardingOs.android_getaddrinfo(ForwardingOs.java:74)\n    2019-10-08 12:03:56.750 16333-16389/com.example.celebguess W/System.err:     at java.net.Inet6AddressImpl.lookupHostByName(Inet6AddressImpl.java:135)\n    2019-10-08 12:03:56.751 16333-16389/com.example.celebguess W/System.err:    ... 24 more\n    2019-10-08 12:03:56.752 16333-16333/com.example.celebguess I/2j: null\n    2019-10-08 12:03:56.752 16333-16333/com.example.celebguess I/2j: null\n    2019-10-08 12:03:57.076 16333-16382/com.example.celebguess W/OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...\n    2019-10-08 12:03:57.080 16333-16382/com.example.celebguess D/eglCodecCommon: setVertexArrayObject: set vao to 0 (0) 0 0\n    2019-10-08 12:03:57.081 16333-16382/com.example.celebguess D/EGL_emulation: eglCreateContext: 0xddfeaa80: maj 3 min 1 rcv 4\n    2019-10-08 12:03:57.118 16333-16382/com.example.celebguess D/EGL_emulation: eglMakeCurrent: 0xddfeaa80: ver 3 1 (tinfo 0xe9389330)\n    2019-10-08 12:03:57.120 16333-16382/com.example.celebguess E/eglCodecCommon: glUtilsParamSize: unknow param 0x000082da\n    2019-10-08 12:03:57.120 16333-16382/com.example.celebguess E/eglCodecCommon: glUtilsParamSize: unknow param 0x000082da\n    2019-10-08 12:03:57.176 16333-16382/com.example.celebguess W/Gralloc3: mapper 3.x is not supported\n    2019-10-08 12:03:57.178 16333-16382/com.example.celebguess D/eglCodecCommon: allocate: Ask for block of size 0x1000\n    2019-10-08 12:03:57.178 16333-16382/com.example.celebguess D/eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000\n    2019-10-08 12:03:57.200 16333-16382/com.example.celebguess D/EGL_emulation: eglMakeCurrent: 0xddfeaa80: ver 3 1 (tinfo 0xe9389330)\n    2019-10-08 12:03:57.203 16333-16382/com.example.celebguess D/eglCodecCommon: setVertexArrayObject: set vao to 0 (0) 1 0\n<\/code><\/pre>\n",
+        "question_id": 58281235,
+        "tags": [
+            "java",
+            "android"
+        ],
+        "score": 0,
+        "accepted_answer_id": 58293527,
+        "is_answered": true,
+        "view_count": 266,
+        "last_edit_date": 1570518164
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dde32d7fd47645e39a95a5a22928c30f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16830843,
+                "user_type": "registered",
+                "user_id": 12168859,
+                "link": "https://stackoverflow.com/users/12168859/zluaaatttaaaan",
+                "reputation": 3,
+                "display_name": "Zluaaatttaaaan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58281235,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/XSYdQ.jpg?s=256",
+                "account_id": 2361204,
+                "user_type": "registered",
+                "user_id": 2067853,
+                "link": "https://stackoverflow.com/users/2067853/rupesh",
+                "reputation": 2901,
+                "display_name": "rupesh",
+                "accept_rate": 68
+            },
+            "edited": false,
+            "creation_date": 1570537253,
+            "comment_id": 102937238
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/XSYdQ.jpg?s=256",
+                "account_id": 2361204,
+                "user_type": "registered",
+                "user_id": 2067853,
+                "link": "https://stackoverflow.com/users/2067853/rupesh",
+                "reputation": 2901,
+                "display_name": "rupesh",
+                "accept_rate": 68
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58281235,
+            "edited": false,
+            "creation_date": 1570536880,
+            "comment_id": 102937058
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/BVpV8.png?s=256",
+                "account_id": 4972497,
+                "user_type": "registered",
+                "user_id": 3999808,
+                "link": "https://stackoverflow.com/users/3999808/zun",
+                "reputation": 1731,
+                "display_name": "Zun",
+                "accept_rate": 0
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58281235,
+            "edited": false,
+            "creation_date": 1570519093,
+            "comment_id": 102928959
+        }
+    ],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fc73ded77fc8c7010ca1771624ca54fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 15533184,
+                "user_type": "registered",
+                "user_id": 11206049,
+                "link": "https://stackoverflow.com/users/11206049/skhn",
+                "reputation": 26,
+                "display_name": "skhn"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": true,
+            "last_activity_date": 1570640813,
+            "creation_date": 1570565934,
+            "body": "<p>In android 9, cleartext support is \"false\" by default. You need to change it to \"true\" in Manifest.xml start your url with \"http\" instead of \"https\":<\/p>\n\n<pre><code>\"\"&lt;application\n    ...\n    android:usesCleartextTraffic=\"true\"\n    ...&gt;\n    ...\n&lt;/application&gt;\n<\/code><\/pre>\n",
+            "answer_id": 58293527,
+            "question_id": 58281235,
+            "last_edit_date": 1570640813
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/lnFSb.png?s=256",
+                "account_id": 16026964,
+                "user_type": "registered",
+                "user_id": 11566969,
+                "link": "https://stackoverflow.com/users/11566969/abel",
+                "reputation": 1467,
+                "display_name": "Abel"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1570518912,
+            "creation_date": 1570518605,
+            "body": "<p>Make sure you have added the internet permission in your Manifest file<\/p>\n\n<pre><code>&lt;uses-permission android:name=\"android.permission.INTERNET\" /&gt;\n<\/code><\/pre>\n\n<p>Also any manipulation of the Asynk task result should be in the method onPostExecute(), so try to override that one in your DownloadTask and have the log to print your results inside there.<\/p>\n\n<p>Also as a dismissible advice, avoid using Asynk tasks if you have a lot of chained callbacks and refer to RXJava or if you know how to code in Kotlin, use coroutines.<\/p>\n",
+            "answer_id": 58281654,
+            "question_id": 58281235,
+            "last_edit_date": 1570518912
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh5.googleusercontent.com/-3ZiaPSSVtqI/AAAAAAAAAAI/AAAAAAAAAZE/Bpxg5UxWaP0/s256-rj/photo.jpg",
+                "account_id": 12213088,
+                "user_type": "registered",
+                "user_id": 8914336,
+                "link": "https://stackoverflow.com/users/8914336/apksherlock",
+                "reputation": 8421,
+                "display_name": "apksherlock"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1570519070,
+            "creation_date": 1570519070,
+            "body": "<p>Your url should have the <code>https://<\/code> and make sure you need/don't need <code>www<\/code> before that. Also tha answer of @Abel could be correct. Check internet permission.<\/p>\n\n<pre><code>&lt;uses-permission android:name=\"android.permission.INTERNET\" /&gt;\n<\/code><\/pre>\n",
+            "answer_id": 58281760,
+            "question_id": 58281235
+        }
+    ],
+    "answer_comments": {"58293527": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dde32d7fd47645e39a95a5a22928c30f?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 16830843,
+                "user_type": "registered",
+                "user_id": 12168859,
+                "link": "https://stackoverflow.com/users/12168859/zluaaatttaaaan",
+                "reputation": 3,
+                "display_name": "Zluaaatttaaaan"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58293527,
+            "edited": false,
+            "creation_date": 1570639180,
+            "comment_id": 102978873
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fc73ded77fc8c7010ca1771624ca54fe?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 15533184,
+                "user_type": "registered",
+                "user_id": 11206049,
+                "link": "https://stackoverflow.com/users/11206049/skhn",
+                "reputation": 26,
+                "display_name": "skhn"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58293527,
+            "reply_to_user": {
+                "profile_image": "https://i.sstatic.net/C010X.png?s=256",
+                "account_id": 4050173,
+                "user_type": "registered",
+                "user_id": 3330058,
+                "link": "https://stackoverflow.com/users/3330058/giorgos-neokleous",
+                "reputation": 1787,
+                "display_name": "Giorgos Neokleous",
+                "accept_rate": 86
+            },
+            "edited": false,
+            "creation_date": 1570611798,
+            "comment_id": 102963832
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/C010X.png?s=256",
+                "account_id": 4050173,
+                "user_type": "registered",
+                "user_id": 3330058,
+                "link": "https://stackoverflow.com/users/3330058/giorgos-neokleous",
+                "reputation": 1787,
+                "display_name": "Giorgos Neokleous",
+                "accept_rate": 86
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 58293527,
+            "edited": false,
+            "creation_date": 1570566127,
+            "comment_id": 102951149
+        }
+    ]}
+}

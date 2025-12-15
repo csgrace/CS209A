@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0f825da520f6a62e5b51d19da2877914?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7465223,
+            "user_type": "registered",
+            "user_id": 5675069,
+            "link": "https://stackoverflow.com/users/5675069/ivan-gorbunov",
+            "reputation": 21,
+            "display_name": "Ivan Gorbunov"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/77773158/eureka-server-doesnt-see-its-properties-from-running-spring-cloud-config-ser",
+        "last_activity_date": 1704789104,
+        "creation_date": 1704632500,
+        "answer_count": 1,
+        "title": "&quot;Eureka-Server&quot; doesn&#39;t see its properties from running &quot;Spring Cloud Config Server&quot;",
+        "body": "<p>In &quot;Eureka-Server&quot; the &quot;application.properties&quot; file contains the following properties:<\/p>\n<pre><code>spring.config.import=configserver:http://localhost:8888\nspring.application.name=eserver\n<\/code><\/pre>\n<p>My &quot;Spring Cloud Config Server&quot; has the following properties in its application.properties file:<\/p>\n<pre><code>server.port=8888\nspring.application.name=spring-cloud-config-server\nspring.cloud.config.server.git.uri=file:///D:/&lt;path-to-folder&gt;/config-repo\nspring.cloud.config.server.git.default-label=main\nspring.profiles.active=native\n<\/code><\/pre>\n<p>The &quot;config-repo&quot; folder contains a &quot;server&quot; folder containing an &quot;application.properties&quot; file with the following properties:<\/p>\n<pre><code>server.port=8761\nspring.application.name=eserver\neureka.client.service-url.defaultZone=http://localhost:8761/eureka\neureka.client.register-with-eureka=false\neureka.client.fetch-registry=false\n<\/code><\/pre>\n<p>So, when i run &quot;spring-cloud-config-server&quot; (config-server) everything is just OK, i don't see the errors or warnings.\nBut when i try to run my &quot;Eureka-Server&quot; (eserver) it starts on port 8080 and throws the error like:<\/p>\n<pre><code>Request execution error. endpoint=DefaultEndpoint{ serviceUrl='http://localhost:8761/eureka/}, exception=java.net.ConnectException: Connection refused: no further information stacktrace=jakarta.ws.rs.ProcessingException: java.net.ConnectException: Connection refused: no further information\n<\/code><\/pre>\n<p>So, eureka-server cannot not read its own properties from config-server. What i do wrong?<\/p>\n<p>P.S. If I put all the properties from &quot;config-repo\\eserver\\application.properties&quot; back into eureka-server's &quot;application.properties&quot; then everything is fine. But I want to extract the configuration to config-server.<\/p>\n<p>P.S. &quot;spring-boot version&quot; is 3.2.1, &quot;spring-cloud version&quot; is 2023.0.0<\/p>\n",
+        "question_id": 77773158,
+        "tags": [
+            "java",
+            "microservices",
+            "spring-cloud",
+            "netflix-eureka",
+            "spring-cloud-config"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 513,
+        "last_edit_date": 1704697301
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/0f825da520f6a62e5b51d19da2877914?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 7465223,
+            "user_type": "registered",
+            "user_id": 5675069,
+            "link": "https://stackoverflow.com/users/5675069/ivan-gorbunov",
+            "reputation": 21,
+            "display_name": "Ivan Gorbunov"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1704789104,
+        "creation_date": 1704785801,
+        "body": "<p>So, the problem was in the connection to the local repository of config-server. Eureka-server works fine if I use a remote GitHub repository.\nSo, for the &quot;Spring Cloud Config Server&quot; i left only:<\/p>\n<pre><code>server.port=8888\nspring.cloud.config.server.git.uri=file:///D:/&lt;path-to-folder&gt;/config-repo\n<\/code><\/pre>\n<p>and it worked<\/p>\n",
+        "answer_id": 77785017,
+        "question_id": 77773158,
+        "last_edit_date": 1704789104
+    }],
+    "answer_comments": {}
+}

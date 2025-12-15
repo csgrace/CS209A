@@ -1,0 +1,51 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/cce2fe8e5d169a4535430b0e1b5ac562?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 2192818,
+            "user_type": "registered",
+            "user_id": 1939362,
+            "link": "https://stackoverflow.com/users/1939362/user1939362",
+            "reputation": 93,
+            "display_name": "user1939362"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/61596112/show-media-player-notification-on-lock-screen",
+        "last_activity_date": 1588606960,
+        "creation_date": 1588606960,
+        "answer_count": 0,
+        "title": "Show Media Player Notification on Lock Screen",
+        "body": "<p>Hello there I am learning the Media Play to my own and curious about if I can show the Media Player Progress Notification on Lock Screen. For this I have this Activity Class:<\/p>\n\n<pre><code>@Suppress(\"DEPRECATION\")\nclass MainActivity : Activity() {\n\n    private var mediaPlayer: MediaPlayer? = null\n\n    override fun onPause() {\n        super.onPause()\n        killMediaPlayer()\n    }//onPause ends\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        setContentView(R.layout.activity_main)\n        showNotification(0, 0)\n\n        playButton.setOnClickListener {\n            if (mediaPlayer != null &amp;&amp;\n                    mediaPlayer!!.isPlaying) {\n                Toast.makeText(applicationContext, \"Already Playing!\", Toast.LENGTH_SHORT).show()\n            } else {\n                initMediaPlayer()\n            }\n        }//playButton.setOnClickListener ends\n    }//onCreate ends\n\n    private fun initMediaPlayer() {\n        mediaPlayer = MediaPlayer().apply {\n            setAudioStreamType(AudioManager.STREAM_MUSIC)\n            setDataSource(\"https://www.radiantmediaplayer.com/media/bbb-360p.mp4\")\n            prepare() // might take long! (for buffering, etc)\n            start()\n        }//apply ends\n\n        initMediaPlayerListenerEvents()\n    }//initMediaPlayer ends\n\n    private fun initMediaPlayerListenerEvents() {\n        if (mediaPlayer != null) {\n            mediaPlayer!!.setOnInfoListener { mp, what, extra -&gt;\n                Log.e(\"streaX\", \"mediaPlayerInfo:::what:::$what\".plus(\" extra:::$extra\"))\n                false\n            }\n\n            mediaPlayer!!.setOnBufferingUpdateListener { mp, percent -&gt;\n//                Log.e(\"streaX\", \"mediaPlayerPercent:::$percent\")\n//                showOreoBasedNotification(applicationContext, \"Singing\", \"Percent:::\" + percent)\n            }\n\n            mediaPlayer!!.setOnErrorListener { mp, what, extra -&gt;\n                Log.e(\"streaX\", \"mediaPlayerError:::what:::$what\".plus(\" extra:::$extra\"))\n                true\n            }\n\n            Log.e(\"streaX\", \"mediaPlayerDuration:::${mediaPlayer!!.duration}\")\n\n            val mHandler = Handler()\n            runOnUiThread(object : Runnable {\n                override fun run() {\n                    if (mediaPlayer != null) {\n                        val mCurrentPosition: Int = mediaPlayer!!.currentPosition / 1000\n                        Log.e(\"streaX\", \"mediaPlayerPosition:::$mCurrentPosition\")\n                        notification!!.setProgress((mediaPlayer!!.duration) / 1000, mCurrentPosition, false)\n                        notificationManager.notify(1289, notification!!.build())\n                    }\n                    mHandler.postDelayed(this, 1000)\n                }\n            })\n        }//media player not null\n    }//initMediaPlayerListenerEvents ends\n\n    private var notification: NotificationCompat.Builder? = null\n    private val notificationId = \"AudioStreamer12891226-3\"\n    private val notificationName = \"AudioStreamer-Test-3\"\n    private lateinit var notificationManager: NotificationManager\n\n    private fun showNotification(durationTotal: Int, mCurrentPosition: Int) {\n        createNotificationChannel()\n        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager\n\n        notification = NotificationCompat.Builder(applicationContext, notificationId)\n                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)\n                .setSmallIcon(R.drawable.ic_launcher_background)\n                .setContentTitle(\"Playing BG Music\")\n                .setContentText(\"Media Player Playing...\")\n                .setSound(null)\n                .setOnlyAlertOnce(true)\n                .setProgress(durationTotal, mCurrentPosition, false)\n                .setPriority(NotificationCompat.PRIORITY_LOW)\n\n        notificationManager.notify(1289, notification!!.build())\n    }//showNotification ends\n\n    private fun createNotificationChannel() {\n        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {\n            val serviceChannel = NotificationChannel(\n                    notificationId,\n                    notificationName,\n                    NotificationManager.IMPORTANCE_DEFAULT\n            )\n            val manager = getSystemService(NotificationManager::class.java)\n            manager!!.createNotificationChannel(serviceChannel)\n        }\n    }//createNotificationChannel ends\n\n    private fun killMediaPlayer() {\n        if (mediaPlayer != null &amp;&amp;\n                mediaPlayer!!.isPlaying) {\n            mediaPlayer!!.stop()\n            mediaPlayer!!.release()\n            mediaPlayer = null\n        }//media player null check ends\n    }//killMediaPlayer ends\n}//class ends\n<\/code><\/pre>\n\n<p>Everything working fine and the notification appears when app runs and when I click the button the progress updates as per Media Player Streams. But the problem is when I lock the device the notification won't appear at all. I am using Samsung J5 for testing my app code.<\/p>\n\n<p>Can somebody please tell me what I am doing wrong and if it is possible that the Samsung J5 device having Oreo Android will show the notification on lock screen?<\/p>\n\n<p>(I want to show this type of notification)<\/p>\n\n<p><a href=\"https://i.sstatic.net/d1Zaw.png\" rel=\"nofollow noreferrer\"><img src=\"https://i.sstatic.net/d1Zaw.png\" alt=\"enter image description here\"><\/a><\/p>\n",
+        "question_id": 61596112,
+        "tags": [
+            "java",
+            "android",
+            "kotlin",
+            "android-mediaplayer",
+            "android-notifications"
+        ],
+        "score": 3,
+        "is_answered": false,
+        "view_count": 407
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://lh5.googleusercontent.com/-YEREXAwOplU/AAAAAAAAAAI/AAAAAAAAAFA/NQ4Tpx620kI/s256-rj/photo.jpg",
+            "account_id": 6264960,
+            "user_type": "registered",
+            "user_id": 4870992,
+            "link": "https://stackoverflow.com/users/4870992/aya-salama",
+            "reputation": 972,
+            "display_name": "aya salama",
+            "accept_rate": 25
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 61596112,
+        "edited": false,
+        "creation_date": 1649688276,
+        "comment_id": 126933372
+    }],
+    "answers": [],
+    "answer_comments": {}
+}

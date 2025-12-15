@@ -1,0 +1,147 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://lh3.googleusercontent.com/-GyZsGRAQwqM/AAAAAAAAAAI/AAAAAAAAD_w/MWyKVyEARfE/s256-rj/photo.jpg",
+            "account_id": 9544135,
+            "user_type": "registered",
+            "user_id": 7090926,
+            "link": "https://stackoverflow.com/users/7090926/mohammad-umer",
+            "reputation": 1,
+            "display_name": "Mohammad Umer"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/53442734/android-how-to-hide-sign-in-and-sign-up-option-and-enabled-logout-option-in-nav",
+        "last_activity_date": 1542961622,
+        "creation_date": 1542960266,
+        "answer_count": 1,
+        "title": "Android: How to hide sign-in and sign-up option and enabled logout option in Navigation View using **Volley**",
+        "body": "<p>The process for login and sign up is <em>Volley<\/em>. I want to remove sign in and sign up option when user perform anyone successfully and want to visible <strong>log_out<\/strong> menu item which I declared as invisible. Is there any way to make sign in and up invisible through out all the navigation drawers in this app? <\/p>\n\n<p>This activity getting successful response in  <strong>jsonObject form<\/strong><\/p>\n\n<p><strong>LogIn.java<\/strong><\/p>\n\n<pre><code> public class LogIn extends AppCompatActivity\n    implements NavigationView.OnNavigationItemSelectedListener {\n\n// declare the variables\n\nprivate EditText email ,password;\nprivate Button btn_login;\nprivate ProgressBar loading;\n\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_log_in2);\n    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);\n    setSupportActionBar(toolbar);\n\n    // setting variables\n\n    loading = findViewById(R.id.loading);\n    email = findViewById(R.id.email);\n    password = findViewById(R.id.password);\n    btn_login = findViewById(R.id.btn_login);\n    //btn_log_out = findViewById(R.id.log_out);\n    TextView link_register = findViewById(R.id.link_regist);\n\n\n\n\n    // click listenr for logging a user\n\n    btn_login.setOnClickListener(new View.OnClickListener() {\n        @Override\n        public void onClick(View v) {\n            String mEmail = email.getText().toString().trim();\n            String mPass = password.getText().toString().trim();\n\n            if(!mEmail.isEmpty() || !mPass.isEmpty()){\n                LogIn(mEmail, mPass);\n            }else {\n                email.setError(\"Please insert an e-mail\");\n                password.setError(\"Please insert a password\");\n            }\n        }\n    });\n\n    link_register.setOnClickListener(new View.OnClickListener() {\n        @Override\n        public void onClick(View v) {\n            startActivity(new Intent(LogIn.this,Registration.class));\n        }\n    });\n\n    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);\n    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(\n            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);\n    drawer.addDrawerListener(toggle);\n    toggle.syncState();\n\n    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);\n    navigationView.setNavigationItemSelectedListener(this);\n\n\n}\n\n\n\nprivate void LogIn(final String email, final String password) {\n\n    loading.setVisibility(View.VISIBLE);\n    btn_login.setVisibility(View.GONE);\n\n    String URL_LOGIN = \"https://maknam.com/Portal2/apis/login.php\";\n    StringRequest stringRequest = new StringRequest(Request.Method.POST, URL_LOGIN,\n            new Response.Listener&lt;String&gt;() {\n                @Override\n                public void onResponse(String response) {\n                    try {\n\n                        JSONObject jsonObject = new JSONObject(response);\n                        String success = jsonObject.getString(\"success\");\n                        JSONArray jsonArray = jsonObject.getJSONArray(\"login\");\n\n                        if (success.equals(\"1\")) {\n                            for (int i = 0; i &lt; jsonArray.length(); i++)\n                            {\n\n                                JSONObject object = jsonArray.getJSONObject(i);\n\n                                //noinspection unused\n                                String name = object.getString(\"name\").trim();\n                                //noinspection unused,unused\n                                String email = object.getString(\"email\").trim();\n\n                                Intent lg = new Intent(LogIn.this,\n                                        Home.class);\n                                startActivity(lg);\n\n                                loading.setVisibility(View.GONE);\n                            }\n                        }\n                    } catch (JSONException e) {\n                        e.printStackTrace();\n                        loading.setVisibility(View.GONE);\n                        btn_login.setVisibility(View.VISIBLE);\n                        Toast.makeText(LogIn.this, \"Error\"+ e.toString(), Toast.LENGTH_SHORT).show();\n\n                    }\n                }\n            },\n            new Response.ErrorListener() {\n                @Override\n                public void onErrorResponse(VolleyError error) {\n\n                    loading.setVisibility(View.GONE);\n                    btn_login.setVisibility(View.VISIBLE);\n                    Toast.makeText(LogIn.this, \"Error\"+ error.toString(), Toast.LENGTH_SHORT).show();\n                }\n            }\n    )\n\n\n    {\n        @Override\n        protected Map&lt;String, String&gt; getParams() {\n            Map&lt;String, String&gt; params = new HashMap&lt;&gt;();\n            params.put(\"email\", email);\n            params.put(\"password\", password);\n            return params;\n\n        }\n    };\n\n    RequestQueue requestQueue = Volley.newRequestQueue(this);\n    requestQueue.add(stringRequest);\n\n\n\n\n}\n\n@Override\npublic void onBackPressed() {\n    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);\n    if (drawer.isDrawerOpen(GravityCompat.START)) {\n        drawer.closeDrawer(GravityCompat.START);\n    } else {\n        super.onBackPressed();\n    }\n}\n\n@Override\npublic boolean onCreateOptionsMenu(Menu menu) {\n    // Inflate the menu; this adds items to the action bar if it is present.\n    getMenuInflater().inflate(R.menu.log_in, menu);\n    return true;\n}\n\n@Override\npublic boolean onOptionsItemSelected(MenuItem item) {\n    // Handle action bar item clicks here. The action bar will\n    // automatically handle clicks on the Home/Up button, so long\n    // as you specify a parent activity in AndroidManifest.xml.\n    int id = item.getItemId();\n\n    //noinspection SimplifiableIfStatement\n    if (id == R.id.action_settings) {\n        return true;\n    }\n\n    return super.onOptionsItemSelected(item);\n}\n<\/code><\/pre>\n\n<p>This activity also registered in <strong>jsonObject<\/strong> which shows the <em>error<\/em> or\n<em>successfully<\/em> event <\/p>\n\n<p><strong>Registration.Java<\/strong><\/p>\n\n<pre><code>   public class Registration extends AppCompatActivity\n    implements NavigationView.OnNavigationItemSelectedListener {\n\n// declare variables\nprivate EditText name;\nprivate EditText email;\nprivate EditText password;\nprivate Button btn_register;\nprivate ProgressBar loading;\n\n\n@Override\nprotected void onCreate(Bundle savedInstanceState) {\n    super.onCreate(savedInstanceState);\n    setContentView(R.layout.activity_registration);\n    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);\n    setSupportActionBar(toolbar);\n\n\n    loading = findViewById(R.id.loading);\n    name = findViewById(R.id.name);\n    email = findViewById(R.id.email);\n    password = findViewById(R.id.password);\n    EditText c_password = findViewById(R.id.c_password);\n    btn_register = findViewById(R.id.btn_register);\n    // click view for register a new user\n\n    btn_register.setOnClickListener(new View.OnClickListener() {\n        @Override\n        public void onClick(View view) {\n            Register();\n        }\n    });\n\n    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);\n    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(\n            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);\n    drawer.addDrawerListener(toggle);\n    toggle.syncState();\n\n    NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);\n    navigationView.setNavigationItemSelectedListener(this);\n}\n\n\nprivate void Register(){\n    loading.setVisibility(View.VISIBLE);\n    btn_register.setVisibility(View.GONE);\n\n\n\n    final String name = this.name.getText().toString().trim();\n    final String email = this.email.getText().toString().trim();\n    final String password = this.password.getText().toString().trim();\n\n    String URL_REGST = \"http://maknam.com/Portal2/apis/register.php\";\n    //String URL_REGST = \"http://192.168.1.103/android_register_login/register.php\";\n    StringRequest stringRequest = new StringRequest(Request.Method.POST, URL_REGST, new Response.Listener&lt;String&gt;() {\n        @Override\n        public void onResponse(String response) {\n            try {\n                JSONObject jsonObject = new JSONObject(response);\n                String success = jsonObject.getString(\"success\");\n                if (success.equals(\"1\")) {\n\n                    Toast.makeText(Registration.this, \"Registration Successful!\", Toast.LENGTH_SHORT).show();\n                }\n            } catch (JSONException e) {\n                e.printStackTrace();\n                Toast.makeText(Registration.this, \"Registration Error\" + e.toString(), Toast.LENGTH_SHORT).show();\n                loading.setVisibility(View.GONE);\n                btn_register.setVisibility(View.VISIBLE);\n            }\n        }\n    },\n            new Response.ErrorListener() {\n                @Override\n                public void onErrorResponse(VolleyError error) {\n\n                    Toast.makeText(Registration.this, \"Registration Error\" + error.toString(), Toast.LENGTH_SHORT).show();\n                    loading.setVisibility(View.GONE);\n                    btn_register.setVisibility(View.VISIBLE);\n\n                }\n            })\n\n    {\n        @Override\n        protected Map&lt;String, String&gt; getParams() throws AuthFailureError {\n\n            Map&lt;String, String&gt; params = new HashMap&lt;&gt;();\n            params.put(\"name\",name);\n            params.put(\"email\", email);\n            params.put(\"password\", password);\n            return params;\n\n        }\n    };\n\n    RequestQueue requestQueue = Volley.newRequestQueue(this);\n    requestQueue.add(stringRequest);\n\n}\n\n@Override\npublic void onBackPressed() {\n   //functionality for backpress\n}\n\n@Override\npublic boolean onCreateOptionsMenu(Menu menu) {\n    // Inflate the menu; this adds items to the action bar if it is present.\n    getMenuInflater().inflate(R.menu.registration, menu);\n    return true;\n}\n<\/code><\/pre>\n\n<p><strong>Log Out<\/strong> menu is <em>invisible<\/em> by default.<\/p>\n\n<p><strong>activity_login.drawer<\/strong><\/p>\n\n<pre><code> &lt;group android:checkableBehavior=\"single\"&gt;\n    &lt;item\n\n        android:id=\"@+id/nav_products\"\n        android:icon=\"@drawable/ic_shopping_cart_black_24px_product\"\n        android:title=\"Products\"\n        tools:ignore=\"HardcodedText\" /&gt;\n    &lt;item\n        android:id=\"@+id/verify_product\"\n        android:icon=\"@drawable/ic_search_black_48dp\"\n        android:title=\"Verify A Product\"\n        tools:ignore=\"HardcodedText\" /&gt;\n\n    &lt;item android:id=\"@+id/log_in\"\n        android:icon=\"@drawable/ic_account_box_black_48dp\"\n        android:title=\"Log In\"\n        tools:ignore=\"HardcodedText\"/&gt;\n\n    &lt;item\n        android:id=\"@+id/register\"\n        android:icon=\"@drawable/reg_black_48dp\"\n        android:title=\"Sign Up\"\n        tools:ignore=\"HardcodedText\"/&gt;\n\n    &lt;item\n        android:id=\"@+id/recent_verified\"\n        android:icon=\"@drawable/ic_history_black_48dp\"\n        android:title=\"History\"\n        tools:ignore=\"HardcodedText\" /&gt;\n\n\n    &lt;item\n        android:id=\"@+id/discussion\"\n        android:icon=\"@drawable/ic_forum_black_48dp\"\n        android:title=\"Ulema's Discussion\"\n        tools:ignore=\"HardcodedText\" /&gt;\n\n    &lt;item\n        android:id=\"@+id/notifications\"\n        android:icon=\"@drawable/ic_notifications_black_48dp\"\n        android:title=\"Notifications\"\n        tools:ignore=\"HardcodedText\" /&gt;\n\n    &lt;item\n        android:id=\"@+id/contact_us\"\n        android:icon=\"@drawable/ic_contacts_black_48dp\"\n        android:title=\"Contact Us\"\n        tools:ignore=\"HardcodedText\" /&gt;\n\n\n    &lt;item\n        android:id=\"@+id/settings\"\n        android:icon=\"@drawable/ic_settings_black_48dp\"\n        android:title=\"Settings\"\n        tools:ignore=\"HardcodedText\" /&gt;\n    &lt;item\n        android:id=\"@+id/report_problem\"\n        android:icon=\"@drawable/ic_report_black_48dp\"\n        android:title=\"Report A Problem\"\n        tools:ignore=\"HardcodedText\" /&gt;\n\n    &lt;item\n        android:id=\"@+id/log_out\"\n        android:icon=\"@drawable/product_5\"\n        android:title=\"@string/logout\"\n        android:visible=\"false\" /&gt;\n&lt;/group&gt;\n<\/code><\/pre>\n\n<p><strong>activity_registration.drawer<\/strong><\/p>\n\n<pre><code>same as acitvity_login.drawer\n<\/code><\/pre>\n",
+        "question_id": 53442734,
+        "tags": [
+            "java",
+            "android",
+            "android-volley"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 290,
+        "last_edit_date": 1542961015
+    },
+    "question_comments": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/iA23w.jpg?s=256",
+                "account_id": 11981103,
+                "user_type": "registered",
+                "user_id": 8766958,
+                "link": "https://stackoverflow.com/users/8766958/harkal",
+                "reputation": 1828,
+                "display_name": "Harkal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53442734,
+            "edited": false,
+            "creation_date": 1542961380,
+            "comment_id": 93758737
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/iA23w.jpg?s=256",
+                "account_id": 11981103,
+                "user_type": "registered",
+                "user_id": 8766958,
+                "link": "https://stackoverflow.com/users/8766958/harkal",
+                "reputation": 1828,
+                "display_name": "Harkal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53442734,
+            "edited": false,
+            "creation_date": 1542961353,
+            "comment_id": 93758727
+        }
+    ],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/iA23w.jpg?s=256",
+            "account_id": 11981103,
+            "user_type": "registered",
+            "user_id": 8766958,
+            "link": "https://stackoverflow.com/users/8766958/harkal",
+            "reputation": 1828,
+            "display_name": "Harkal"
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "is_accepted": false,
+        "last_activity_date": 1542961622,
+        "creation_date": 1542961622,
+        "body": "<p>try this code<\/p>\n\n<pre><code>private Menu menu;\n\n@Override\npublic boolean onCreateOptionsMenu(Menu menu) {\n    this.menu = menu;\n    getMenuInflater().inflate(R.menu.menu_layout, menu);\n    return true;\n}\n\nprivate void toogleVisiblityOfMenuItem(boolean isVisible, int itemId){\n    menu.findItem(itemId).setVisible(isVisible);\n}\n<\/code><\/pre>\n",
+        "answer_id": 53443016,
+        "question_id": 53442734
+    }],
+    "answer_comments": {"53443016": [
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-GyZsGRAQwqM/AAAAAAAAAAI/AAAAAAAAD_w/MWyKVyEARfE/s256-rj/photo.jpg",
+                "account_id": 9544135,
+                "user_type": "registered",
+                "user_id": 7090926,
+                "link": "https://stackoverflow.com/users/7090926/mohammad-umer",
+                "reputation": 1,
+                "display_name": "Mohammad Umer"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53443016,
+            "edited": false,
+            "creation_date": 1543898375,
+            "comment_id": 94073622
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/iA23w.jpg?s=256",
+                "account_id": 11981103,
+                "user_type": "registered",
+                "user_id": 8766958,
+                "link": "https://stackoverflow.com/users/8766958/harkal",
+                "reputation": 1828,
+                "display_name": "Harkal"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53443016,
+            "reply_to_user": {
+                "profile_image": "https://lh3.googleusercontent.com/-GyZsGRAQwqM/AAAAAAAAAAI/AAAAAAAAD_w/MWyKVyEARfE/s256-rj/photo.jpg",
+                "account_id": 9544135,
+                "user_type": "registered",
+                "user_id": 7090926,
+                "link": "https://stackoverflow.com/users/7090926/mohammad-umer",
+                "reputation": 1,
+                "display_name": "Mohammad Umer"
+            },
+            "edited": false,
+            "creation_date": 1543001531,
+            "comment_id": 93776674
+        },
+        {
+            "owner": {
+                "profile_image": "https://lh3.googleusercontent.com/-GyZsGRAQwqM/AAAAAAAAAAI/AAAAAAAAD_w/MWyKVyEARfE/s256-rj/photo.jpg",
+                "account_id": 9544135,
+                "user_type": "registered",
+                "user_id": 7090926,
+                "link": "https://stackoverflow.com/users/7090926/mohammad-umer",
+                "reputation": 1,
+                "display_name": "Mohammad Umer"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 53443016,
+            "edited": false,
+            "creation_date": 1542975412,
+            "comment_id": 93765929
+        }
+    ]}
+}

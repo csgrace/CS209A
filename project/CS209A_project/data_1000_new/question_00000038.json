@@ -1,0 +1,100 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/7cffe3cc36f65529fa2cc6841f532ac5?s=256&d=identicon&r=PG",
+            "account_id": 286681,
+            "user_type": "registered",
+            "user_id": 586086,
+            "link": "https://stackoverflow.com/users/586086/andrew-mao",
+            "reputation": 37030,
+            "display_name": "Andrew Mao",
+            "accept_rate": 49
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/13708918/using-guice-for-a-framework-with-injected-classes-proper-way-to-initialize",
+        "last_activity_date": 1354671411,
+        "creation_date": 1354643514,
+        "answer_count": 1,
+        "title": "Using guice for a framework with injected classes, proper way to initialize?",
+        "body": "<p>I'm trying to write a framework where arbitrary bean classes are injected with classes from my API, and they can interact with both those classes as well have triggered callbacks based on defined annotations. Here's an example bean:<\/p>\n\n<pre><code>@Experiment\nstatic class TestExperiment {\n    private final HITWorker worker;\n    private final ExperimentLog log;\n    private final ExperimentController controller;\n\n    @Inject\n    public TestExperiment(\n        HITWorker worker,\n        ExperimentLog expLog,\n        ExperimentController controller\n        ) {         \n        this.worker = worker;\n        this.expLog = expLog;\n        this.controller = controller;\n    }\n\n    @SomeCallback\n    void callMeBack() {\n        ... do something\n\n        log.print(\"I did something\");\n    }\n\n}\n<\/code><\/pre>\n\n<p>I'm trying to use Guice to inject these beans and handle the interdependencies between the injected classes. However, I have two problems:<\/p>\n\n<ul>\n<li>One of the classes I pass in (<code>HITWorker<\/code>) is already instantiated. I couldn't see how to move this to a <code>Provider<\/code> without significantly complicating my code. It is also persistent, but not to the Guice-defined session or request scope, so I am managing it myself for now. (Maybe if the other issues are overcome I can try to put this in a provider.)<\/li>\n<li>More importantly, I need a reference to the other injected classes so I can do appropriate things to them. When Guice injects them, I can't access them because the bean class is arbitrary.<\/li>\n<\/ul>\n\n<p>Here's some really bad code for what I basically need to do, which I am sure is violating all the proper dependency injection concepts. Note that <code>hitw<\/code> is the only instance that I need to pass in, but I'm creating the other dependent objects as well because I need references to them. With this code, I'm basically only using Guice for its reflection code, not its dependency resolution.<\/p>\n\n<pre><code>private void initExperiment(final HITWorkerImpl hitw, final String expId) {         \n    final ExperimentLogImpl log = new ExperimentLogImpl();\n    final ExperimentControllerImpl cont = new ExperimentControllerImpl(log, expManager);\n\n    // Create an experiment instance with specific binding to this HITWorker\n    Injector child = injector.createChildInjector(new AbstractModule() {\n        @Override\n        protected void configure() {\n            bind(HITWorker.class).toInstance(hitw);\n            bind(ExperimentLog.class).toInstance(log);\n            bind(ExperimentController.class).toInstance(cont);\n        }           \n    });     \n\n    Object experimentBean = child.getInstance(expClass);        \n\n    expManager.processExperiment(expId, experimentBean);\n\n    // Initialize controller, which also initializes the log\n    cont.initialize(expId);\n\n    expManager.triggerStart(expId);\n\n    tracker.newExperimentStarted(expId, hitw, cont.getStartTime());\n}\n<\/code><\/pre>\n\n<p>Am I screwed and just have to write my own injection code, or is there a way to do this properly? Also, should I just forget about constructor injection for these bean classes, since I don't know what they contain exactly anyway? Is there any way to get the dependencies if I am asking Guice to inject the bean instead of doing it myself?<\/p>\n\n<p>For context, I've been reading the Guice docs and looking at examples for several days about this, to no avail. I don't think I'm a complete programming idiot, but I can't figure out how to do this properly!<\/p>\n",
+        "question_id": 13708918,
+        "tags": [
+            "java",
+            "dependency-injection",
+            "guice"
+        ],
+        "score": 3,
+        "is_answered": true,
+        "view_count": 812,
+        "last_edit_date": 1354671411
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/wW1C6.png?s=256",
+            "account_id": 911998,
+            "user_type": "registered",
+            "user_id": 947357,
+            "link": "https://stackoverflow.com/users/947357/a-h",
+            "reputation": 66773,
+            "display_name": "A.H.",
+            "accept_rate": 75
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 1,
+        "is_accepted": false,
+        "last_activity_date": 1354649835,
+        "creation_date": 1354649835,
+        "body": "<p>Your \"experiment\" seems to be something like a \"request\" in the sense that it has a defined lifecycle and some associated stuff the experiment can pull in at will.<\/p>\n\n<p>Therefore I think you should wrap all that into a custom scope as described in the docs about <a href=\"http://code.google.com/p/google-guice/wiki/CustomScopes\" rel=\"nofollow\">Custom Scopes<\/a>. This matches your case in several points:<\/p>\n\n<ul>\n<li>You can \"seed\" the scope with some objects (your <code>HITWorker<\/code>)<\/li>\n<li>The lifecycle: do \"enter scope\" before you setup the experiment and \"exit scope\" after you finished your work. <\/li>\n<li>Access to \"shared\" stuff like <code>ExperimentLog<\/code> and <code>ExperimentController<\/code>: Bind them to the scope. Then both the framework and the experiment instance can simple <code>@Inject<\/code> them and get the same instance.<\/li>\n<\/ul>\n",
+        "answer_id": 13710542,
+        "question_id": 13708918
+    }],
+    "answer_comments": {"13710542": [
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/wW1C6.png?s=256",
+                "account_id": 911998,
+                "user_type": "registered",
+                "user_id": 947357,
+                "link": "https://stackoverflow.com/users/947357/a-h",
+                "reputation": 66773,
+                "display_name": "A.H.",
+                "accept_rate": 75
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13710542,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/7cffe3cc36f65529fa2cc6841f532ac5?s=256&d=identicon&r=PG",
+                "account_id": 286681,
+                "user_type": "registered",
+                "user_id": 586086,
+                "link": "https://stackoverflow.com/users/586086/andrew-mao",
+                "reputation": 37030,
+                "display_name": "Andrew Mao",
+                "accept_rate": 49
+            },
+            "edited": false,
+            "creation_date": 1354657034,
+            "comment_id": 18833547
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/7cffe3cc36f65529fa2cc6841f532ac5?s=256&d=identicon&r=PG",
+                "account_id": 286681,
+                "user_type": "registered",
+                "user_id": 586086,
+                "link": "https://stackoverflow.com/users/586086/andrew-mao",
+                "reputation": 37030,
+                "display_name": "Andrew Mao",
+                "accept_rate": 49
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 13710542,
+            "edited": false,
+            "creation_date": 1354654660,
+            "comment_id": 18832438
+        }
+    ]}
+}

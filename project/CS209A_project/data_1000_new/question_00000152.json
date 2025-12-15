@@ -1,0 +1,85 @@
+{
+    "question": {
+        "owner": {
+            "user_type": "does_not_exist",
+            "display_name": "user6827252"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/39810604/how-to-make-an-image-fit-into-an-imagebutton-using-onactivityresult-method",
+        "last_activity_date": 1478073054,
+        "creation_date": 1475349673,
+        "answer_count": 2,
+        "title": "How to make an Image fit into an ImageButton using onActivityResult method",
+        "body": "<p>I want to set any image from my phone gallery <strong>fit<\/strong> the imageButton , and also without it being <strong>rotated<\/strong>. When i try to access the image from my gallery it doesnt fit well and my imageButton comes while it's rotated. How can i get rid of this.<\/p>\n\n<p>Below is <code>java<\/code> code<\/p>\n\n<pre><code>import android.app.ProgressDialog;\nimport android.content.Intent;\nimport android.net.Uri;\nimport android.os.Bundle;\nimport android.support.design.widget.FloatingActionButton;\nimport android.support.design.widget.Snackbar;\nimport android.support.v7.app.AppCompatActivity;\nimport android.support.v7.widget.Toolbar;\nimport android.text.TextUtils;\nimport android.view.View;\nimport android.widget.Button;\nimport android.widget.EditText;\nimport android.widget.ImageButton;\n\nimport com.google.android.gms.appindexing.Action;\nimport com.google.android.gms.appindexing.AppIndex;\nimport com.google.android.gms.common.api.GoogleApiClient;\nimport com.google.android.gms.tasks.OnSuccessListener;\nimport com.google.firebase.auth.FirebaseAuth;\nimport com.google.firebase.database.DatabaseReference;\nimport com.google.firebase.database.FirebaseDatabase;\nimport com.google.firebase.storage.FirebaseStorage;\nimport com.google.firebase.storage.StorageReference;\nimport com.google.firebase.storage.UploadTask;\n\npublic class PostActivity extends AppCompatActivity {\n\n    private ImageButton imageSelect;\n    private static final int GALLERY_REQUEST = 1;\n    private EditText mPostTitle;\n    private EditText mPostDesc;\n    private Button postButton;\n    private  Uri imageUri = null;\n    private ProgressDialog mProgress;\n    private StorageReference mStorage;\n    private DatabaseReference mDatabase;\n\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        setContentView(R.layout.post_activity);\n\n        mStorage = FirebaseStorage.getInstance().getReference();\n        mDatabase = FirebaseDatabase.getInstance().getReference().child(\"Blog\");\n /*        getSupportActionBar().setDisplayShowHomeEnabled(true);\n        android.support.v7.app.ActionBar actionBar = getSupportActionBar();\n        actionBar.setDisplayHomeAsUpEnabled(true);\n        getSupportActionBar().setTitle(\"Post a Picture\");*/\n        mProgress = new ProgressDialog(this);\n        imageSelect = (ImageButton) findViewById(R.id.imageSelect);\n        mPostTitle = (EditText) findViewById(R.id.mPostTitle);\n        mPostDesc = (EditText) findViewById(R.id.mPostDesc);\n        postButton = (Button) findViewById(R.id.postButton);\n        imageSelect.setOnClickListener(new View.OnClickListener() {\n            @Override\n            public void onClick(View v) {\n                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);\n                galleryIntent.setType(\"image/\");\n                startActivityForResult(galleryIntent, GALLERY_REQUEST);\n            }\n        });\n\n\n        postButton.setOnClickListener(new View.OnClickListener() {\n            @Override\n            public void onClick(View v) {\n                startPosting();\n            }\n        });\n\n\n    }\n\n    private void startPosting() {\n        mProgress.setMessage(\"Uploading Image...\");\n        mProgress.show();\n\n        final String title_val = mPostTitle.getText().toString().trim();\n        final String desc_val = mPostDesc.getText().toString().trim();\n  if(!TextUtils.isEmpty(title_val) &amp;&amp;!TextUtils.isEmpty(desc_val) &amp;&amp; imageUri!=null){\n\n      StorageReference filepath = mStorage.child(\"BlogImages\").child(imageUri.getLastPathSegment());\n      filepath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener&lt;UploadTask.TaskSnapshot&gt;() {\n          @Override\n          public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {\n\n\n              Uri downloadUri = taskSnapshot.getDownloadUrl();\n              DatabaseReference newPost = mDatabase.push();\n              newPost.child(\"title\").setValue(title_val);\n              newPost.child(\"description\").setValue(desc_val);\n              newPost.child(\"imageUrl\").setValue(downloadUri.toString());\n            //  newPost.child(\"uid\").setValue(FirebaseAuth.getc);\n\n\n              mProgress.dismiss();\n\n              startActivity(new Intent(PostActivity.this,MainActivity.class));\n          }\n      });\n\n\n  }\n\n\n\n    }\n\n\n    @Override\n    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\n        super.onActivityResult(requestCode, resultCode, data);\n        if (requestCode == GALLERY_REQUEST &amp;&amp; resultCode == RESULT_OK) {\n\n\n             imageUri = data.getData();\n            imageSelect.setImageURI(imageUri);\n        }\n    }\n\n\n}\n<\/code><\/pre>\n\n<p>so my <code>onActivityResult<\/code> result is also included above.<\/p>\n\n<p>Below is my <code>xml<\/code> <\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n&lt;LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:orientation=\"vertical\" android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    android:weightSum=\"1\"&gt;\n&lt;ScrollView\n    android:layout_width=\"wrap_content\"\n    android:layout_height=\"wrap_content\"&gt;\n    &lt;LinearLayout\n        android:layout_width=\"wrap_content\"\n        android:orientation=\"vertical\"\n        android:layout_height=\"wrap_content\"&gt;\n    &lt;ImageButton\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"wrap_content\"\n        android:id=\"@+id/imageSelect\"\n        android:layout_gravity=\"center_horizontal\"\n        android:background=\"#00ffffff\"\n        android:src=\"@mipmap/add_btn\"\n        android:scaleType=\"centerCrop\" /&gt;\n        &lt;include layout=\"@layout/content_post\" /&gt;\n    &lt;/LinearLayout&gt;\n&lt;/ScrollView&gt;\n&lt;/LinearLayout&gt;\n<\/code><\/pre>\n",
+        "question_id": 39810604,
+        "tags": [
+            "java",
+            "android",
+            "onactivityresult",
+            "android-imagebutton"
+        ],
+        "score": 0,
+        "is_answered": false,
+        "view_count": 99
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/ed07116d68b9557b7dc76b3faa165916?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 8347483,
+            "user_type": "registered",
+            "user_id": 6270761,
+            "link": "https://stackoverflow.com/users/6270761/namlik",
+            "reputation": 192,
+            "display_name": "namlik"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "post_id": 39810604,
+        "edited": false,
+        "creation_date": 1475349996,
+        "comment_id": 66912666
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/fee7ee356008015251274c38b46fc8ea?s=256&d=identicon&r=PG",
+                "account_id": 224075,
+                "user_type": "registered",
+                "user_id": 483658,
+                "link": "https://stackoverflow.com/users/483658/erik",
+                "reputation": 125,
+                "display_name": "Erik"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1475351215,
+            "creation_date": 1475351215,
+            "body": "<p>If I understand your question correctly, you want the image to fill the bounds of the <code>ImageButton<\/code>. You could do this with the attribute <a href=\"https://developer.android.com/reference/android/widget/ImageView.html#attr_android:adjustViewBounds\" rel=\"nofollow\"><code>android:adjustViewBounds<\/code><\/a>.<\/p>\n\n<p>If you want to disable screen roatation, set the <code>android:screenOrientation<\/code> to portrait or landscape in the <code>activity<\/code> element in your <code>Manifest.xml<\/code>. <\/p>\n\n<p><code>android:screenOrientation=\"portrait\"<\/code><\/p>\n",
+            "answer_id": 39810810,
+            "question_id": 39810604
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/gT1Ja.jpg?s=256",
+                "account_id": 4062001,
+                "user_type": "registered",
+                "user_id": 3338287,
+                "link": "https://stackoverflow.com/users/3338287/rana-sadam",
+                "reputation": 1226,
+                "display_name": "rana_sadam",
+                "accept_rate": 43
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1478073054,
+            "creation_date": 1478073054,
+            "body": "<p>I have already answered your question that solve the rotation issue as well you can try that for this problem also.<\/p>\n\n<p><a href=\"https://stackoverflow.com/questions/40373093/compressing-an-image-before-uploading-it-to-firebase-storage/40374731#40374731\">Compression and rotation of image picked from gallery is solved<\/a><\/p>\n",
+            "answer_id": 40374838,
+            "question_id": 39810604,
+            "last_edit_date": 1495540098
+        }
+    ],
+    "answer_comments": {}
+}

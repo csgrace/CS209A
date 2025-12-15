@@ -1,0 +1,164 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/9b86e08b182fc3d6d7b39ca02619e7d6?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 3512719,
+            "user_type": "registered",
+            "user_id": 2936667,
+            "link": "https://stackoverflow.com/users/2936667/sandra-mladenovic",
+            "reputation": 202,
+            "display_name": "Sandra Mladenovic",
+            "accept_rate": 42
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/19743251/android-how-to-savestate-arraylist",
+        "last_activity_date": 1383406074,
+        "creation_date": 1383404589,
+        "answer_count": 1,
+        "title": "Android how to savestate arraylist",
+        "body": "<p>I am making a 3 fragment pages application, on 1st fragment its load json from http, but when i go to fragment3  and back to fragment1 its disapears and load it again from http. How can i set correcly the save/restore state in fragments. <\/p>\n\n<p>Fragment1 code: <\/p>\n\n<pre><code>    public class Fragment1 extends Fragment  {\n private ArrayList&lt;FeedItem&gt; feedList = null;\n    private ProgressBar progressbar = null;\n    private ListView feedListView = null;\n\n\n\n  @Override  \n        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {  \n      View rootView = inflater.inflate(R.layout.activity_post_list, container, false);\n\n      progressbar = (ProgressBar)rootView.findViewById(R.id.progressBar);\n      String url = \"\";\n      new DownloadFilesTask().execute(url);\n    return rootView;\n\n\n  } \n\n\n  public void updateList() {\n      feedListView= (ListView)getActivity().findViewById(R.id.custom_list);\n\n      feedListView.setVisibility(View.VISIBLE);\n      if (progressbar.isShown()) {\n          progressbar.setVisibility(View.GONE); \n      }\n\n\n      feedListView.setAdapter(new CustomListAdapter(getActivity(), feedList));\n      feedListView.setOnItemClickListener(new OnItemClickListener() {\n\n\n\n              @Override\n              public void onItemClick(AdapterView&lt;?&gt; a, View v, int position, long id) {\n                      Object o = feedListView.getItemAtPosition(position);\n                      FeedItem newsData = (FeedItem) o;\n\n\n                      Intent intent = new Intent(getActivity(), FeedDetailsActivity.class);\n                      intent.putExtra(\"feed\", newsData);\n                      startActivity(intent);\n              }\n      });\n        }\n\n       public class DownloadFilesTask extends AsyncTask&lt;String, Integer, Void&gt; {\n\n      @Override\n      protected void onProgressUpdate(Integer... values) {\n      }\n\n      @Override\n      protected void onPostExecute(Void result) {\n              if (null != feedList) {\n                      updateList();\n              }\n      }\n\n      @Override\n      protected Void doInBackground(String... params) {\n              String url = params[0];\n\n              // getting JSON string from URL\n              JSONObject json = getJSONFromUrl(url);\n\n              //parsing json data\n              parseJson(json);\n              return null;\n      }\n        }\n\n\n       public JSONObject getJSONFromUrl(String url) {\n      InputStream is = null;\n      JSONObject jObj = null;\n      String json = null;\n\n      // Making HTTP request\n      try {\n              // defaultHttpClient\n              DefaultHttpClient httpClient = new DefaultHttpClient();\n              HttpPost httpPost = new HttpPost(url);\n\n              HttpResponse httpResponse = httpClient.execute(httpPost);\n              HttpEntity httpEntity = httpResponse.getEntity();\n              is = httpEntity.getContent();\n\n              BufferedReader reader = new BufferedReader(new InputStreamReader(\n                              is, \"iso-8859-1\"), 8);\n              StringBuilder sb = new StringBuilder();\n              String line = null;\n              while ((line = reader.readLine()) != null) {\n                      sb.append(line + \"\\n\");\n              }\n              is.close();\n              json = sb.toString();\n      } catch (UnsupportedEncodingException e) {\n              e.printStackTrace();\n      } catch (ClientProtocolException e) {\n              e.printStackTrace();\n      } catch (IOException e) {\n              e.printStackTrace();\n      }\n\n      try {\n              jObj = new JSONObject(json);\n       } catch (JSONException e) {\n              Log.e(\"JSON Parser\", \"Error parsing data \" + e.toString());\n       }\n\n             // return JSON String\n           return jObj;\n\n          }\n\n             public void parseJson(JSONObject json) {\n            try {\n\n              // parsing json object\n              if (json.getString(\"status\").equalsIgnoreCase(\"ok\")) {\n                      JSONArray posts = json.getJSONArray(\"posts\");\n\n\n                      feedList = new ArrayList&lt;FeedItem&gt;();\n\n                      for (int i = 0; i &lt; posts.length(); i++) {\n                              JSONObject post = (JSONObject) posts.getJSONObject(i);\n                              FeedItem item = new FeedItem();\n                              item.setTitle(post.getString(\"title\"));\n                              item.setDate(post.getString(\"description\"));\n                              item.setId(post.getString(\"id\"));\n                              item.setUrl(post.getString(\"url\"));\n                              item.setContent(post.getString(\"description\"));\n                              item.setInfoz(post.getString(\"description\"));\n                              JSONArray attachments = post.getJSONArray(\"attachments\");\n\n                              if (null != attachments &amp;&amp; attachments.length() &gt; 0) {\n                                      JSONObject attachment = attachments.getJSONObject(0);\n                                      if (attachment != null)\n                                              item.setAttachmentUrl(attachment.getString(\"url\"));\n                              }\n\n                              feedList.add(item); \n\n                      }\n              }\n      } catch (JSONException e) {\n              e.printStackTrace();\n      }\n       }\n<\/code><\/pre>\n",
+        "question_id": 19743251,
+        "tags": [
+            "java",
+            "android",
+            "save",
+            "fragment",
+            "restore"
+        ],
+        "score": 2,
+        "accepted_answer_id": 19743491,
+        "is_answered": true,
+        "view_count": 701,
+        "last_edit_date": 1383405015
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dddbaad8e8cc991d4b9120c10b801963?s=256&d=identicon&r=PG",
+            "account_id": 1867908,
+            "user_type": "registered",
+            "user_id": 1690982,
+            "link": "https://stackoverflow.com/users/1690982/ddmps",
+            "reputation": 4390,
+            "display_name": "ddmps"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 0,
+        "is_accepted": true,
+        "last_activity_date": 1383406074,
+        "creation_date": 1383406074,
+        "body": "<p>It's simple: you can override the method <a href=\"http://developer.android.com/reference/android/app/Fragment.html#onSaveInstanceState%28android.os.Bundle%29\" rel=\"nofollow\"><code>onSaveInstanceState(bundle outState)<\/code><\/a> and save any state that you want to to <code>outState<\/code>. Then, in <code>onCreateView()<\/code> you can read the state (if any - it may and will be null when first started) from the object <code>savedInstanceState<\/code>,<\/p>\n",
+        "answer_id": 19743491,
+        "question_id": 19743251
+    }],
+    "answer_comments": {"19743491": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b86e08b182fc3d6d7b39ca02619e7d6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3512719,
+                "user_type": "registered",
+                "user_id": 2936667,
+                "link": "https://stackoverflow.com/users/2936667/sandra-mladenovic",
+                "reputation": 202,
+                "display_name": "Sandra Mladenovic",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743491,
+            "edited": false,
+            "creation_date": 1383409985,
+            "comment_id": 29337679
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dddbaad8e8cc991d4b9120c10b801963?s=256&d=identicon&r=PG",
+                "account_id": 1867908,
+                "user_type": "registered",
+                "user_id": 1690982,
+                "link": "https://stackoverflow.com/users/1690982/ddmps",
+                "reputation": 4390,
+                "display_name": "ddmps"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743491,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/9b86e08b182fc3d6d7b39ca02619e7d6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3512719,
+                "user_type": "registered",
+                "user_id": 2936667,
+                "link": "https://stackoverflow.com/users/2936667/sandra-mladenovic",
+                "reputation": 202,
+                "display_name": "Sandra Mladenovic",
+                "accept_rate": 42
+            },
+            "edited": false,
+            "creation_date": 1383409225,
+            "comment_id": 29337473
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b86e08b182fc3d6d7b39ca02619e7d6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3512719,
+                "user_type": "registered",
+                "user_id": 2936667,
+                "link": "https://stackoverflow.com/users/2936667/sandra-mladenovic",
+                "reputation": 202,
+                "display_name": "Sandra Mladenovic",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743491,
+            "edited": false,
+            "creation_date": 1383408915,
+            "comment_id": 29337392
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dddbaad8e8cc991d4b9120c10b801963?s=256&d=identicon&r=PG",
+                "account_id": 1867908,
+                "user_type": "registered",
+                "user_id": 1690982,
+                "link": "https://stackoverflow.com/users/1690982/ddmps",
+                "reputation": 4390,
+                "display_name": "ddmps"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743491,
+            "reply_to_user": {
+                "profile_image": "https://www.gravatar.com/avatar/9b86e08b182fc3d6d7b39ca02619e7d6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3512719,
+                "user_type": "registered",
+                "user_id": 2936667,
+                "link": "https://stackoverflow.com/users/2936667/sandra-mladenovic",
+                "reputation": 202,
+                "display_name": "Sandra Mladenovic",
+                "accept_rate": 42
+            },
+            "edited": false,
+            "creation_date": 1383407665,
+            "comment_id": 29337022
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/9b86e08b182fc3d6d7b39ca02619e7d6?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 3512719,
+                "user_type": "registered",
+                "user_id": 2936667,
+                "link": "https://stackoverflow.com/users/2936667/sandra-mladenovic",
+                "reputation": 202,
+                "display_name": "Sandra Mladenovic",
+                "accept_rate": 42
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 19743491,
+            "edited": false,
+            "creation_date": 1383406191,
+            "comment_id": 29336567
+        }
+    ]}
+}

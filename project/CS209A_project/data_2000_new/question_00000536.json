@@ -1,0 +1,52 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/942daaedb0307d521d76eeae5d3e5d78?s=256&d=identicon&r=PG&f=y&so-version=2",
+            "account_id": 1260210,
+            "user_type": "registered",
+            "user_id": 1218699,
+            "link": "https://stackoverflow.com/users/1218699/sin%ce%b8",
+            "reputation": 11503,
+            "display_name": "sinθ",
+            "accept_rate": 71
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/18070151/setting-read-only-with-a-javafx-property",
+        "last_activity_date": 1375755184,
+        "creation_date": 1375750442,
+        "answer_count": 1,
+        "title": "Setting read only with a JavaFx property",
+        "body": "<p>I'm using a JavaFx ObjectProperty in one of my classes. I'm using it for the bind features. The issues is that I want people to be able to bind to it, but not to change the value. I can't think of a caste proof way to do this (where people won't have ANY way to change it from outside), but there must be some way to do it.<\/p>\n",
+        "question_id": 18070151,
+        "tags": [
+            "java",
+            "javafx"
+        ],
+        "score": 8,
+        "accepted_answer_id": 18070639,
+        "is_answered": true,
+        "view_count": 3421
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/5192e7cbcf2f72a847d6fb0d1552f049?s=256&d=identicon&r=PG",
+            "account_id": 1180113,
+            "user_type": "registered",
+            "user_id": 1155209,
+            "link": "https://stackoverflow.com/users/1155209/jewelsea",
+            "reputation": 160467,
+            "display_name": "jewelsea"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 9,
+        "is_accepted": true,
+        "last_activity_date": 1375755184,
+        "creation_date": 1375754295,
+        "body": "<p><em>Solution<\/em><\/p>\n\n<p>You are looking for the <a href=\"http://docs.oracle.com/javafx/2/api/javafx/beans/property/ReadOnlyObjectWrapper.html\" rel=\"noreferrer\">ReadOnlyObjectWrapper<\/a>.<\/p>\n\n<p><em>Sample<\/em><\/p>\n\n<p>Here is an example usage taken from a <a href=\"https://gist.github.com/jewelsea/5115901/\" rel=\"noreferrer\">sample tic tac toe game<\/a> which I wrote:<\/p>\n\n<pre><code>class Square {\n\n  enum State { EMPTY, NOUGHT, CROSS }\n\n  private ReadOnlyObjectWrapper&lt;State&gt; state = \n    new ReadOnlyObjectWrapper&lt;&gt;(State.EMPTY);\n\n  public ReadOnlyObjectProperty&lt;State&gt; stateProperty() {\n    return state.getReadOnlyProperty();\n  }\n\n  public State getState() {\n    return state.get();\n  }\n\n  public void pressed() {\n    if (!game.isGameOver() &amp;&amp; state.get() == State.EMPTY) {\n      state.set(game.getCurrentPlayer());\n      ...\n    }\n  }\n}\n<\/code><\/pre>\n\n<p><em>Explanation<\/em><\/p>\n\n<p>This allows the state of the Square to be a represented by a property so that external users of the Square can bind to the Square's state, yet the state itself is encapsulated in the Square so only the Square can change it's own state.  <\/p>\n\n<p>An example of a usage for this pattern is a SquareSkin object which contains the visible nodes to represent the Square.  The skin can listen for changes to the associated square's state property and update the image it uses to display the square appropriately.<\/p>\n\n<p>To really ensure that the Object values enclosed in the ReadOnlyWrapper cannot be changed externally, it is best to make those Object values <a href=\"http://docs.oracle.com/javase/tutorial/essential/concurrency/imstrat.html\" rel=\"noreferrer\">immutable<\/a> (e.g. the Objects have no setter functions, only getter functions).<\/p>\n\n<p><em>Further Examples<\/em><\/p>\n\n<p>The game code I linked contains many other examples of different binding patterns and usages (I wrote it partially as a binding exercise to see what would happen if you use a lot of bindings in an app).<\/p>\n",
+        "answer_id": 18070639,
+        "question_id": 18070151,
+        "last_edit_date": 1375755184
+    }],
+    "answer_comments": {}
+}

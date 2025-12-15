@@ -1,0 +1,178 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/CoLJT.png?s=256",
+            "account_id": 7529817,
+            "user_type": "registered",
+            "user_id": 5718469,
+            "link": "https://stackoverflow.com/users/5718469/atul",
+            "reputation": 66,
+            "display_name": "atul",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/63315523/lazy-loading-not-working-with-specification",
+        "last_activity_date": 1596955789,
+        "creation_date": 1596890417,
+        "answer_count": 2,
+        "title": "Lazy loading not working with Specification",
+        "body": "<p>I have migrated to spring v2.1.2.RELEASE and using hibernate version 5.3.7.FINAL<\/p>\n<p>We have @OneToOne bi directional relationship between entity as follows<\/p>\n<pre><code>class Parent{\n\n    @OneToOne(fetch = FetchType.LAZY, mappedBy = &quot;parent&quot;, optional = false)\n    @NotAudited\n    private Child child; \n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Integer id;\n}\n\nclass Child{\n    @OneToOne(fetch = FetchType.LAZY)\n    @JoinColumn(name = &quot;parent_id&quot;)\n    @MapsId\n    @NotNull\n    private Parent parent;\n\n    @Id\n    @Column(name = &quot;indent_id&quot;, insertable = false, updatable = false)\n    private Integer parentId;\n\n}\n<\/code><\/pre>\n<p>calling<\/p>\n<pre><code>parentRepository.findByIdIn(Collections.singletonList(1));\n<\/code><\/pre>\n<p>makes db call as:\nHibernate:<\/p>\n<pre><code>select parent0_.id as id1_19_ from  parent parent0_ where parent0_.id in (?)\n<\/code><\/pre>\n<p>Which is working fine, now consider use case,<\/p>\n<pre><code>public class Filter implements Specification&lt;Parent&gt; {\n\n        @Override\n        public Predicate toPredicate(Root&lt;Indent&gt; root, CriteriaQuery&lt;?&gt; query, CriteriaBuilder criteriaBuilder) {\n            // TODO Auto-generated method stub\n            List&lt;Integer&gt; parentIdList = new ArrayList&lt;&gt;();\n            parentIdList.add(1);\n            ArrayList&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();\n            predicates.add(root.get(&quot;id&quot;).in(parentIdList));\n            return predicates.size() == 0 ? null\n                    : criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));\n\n        }\n\n    } \n\n\n\n    PageRequest pageRequest = PageRequest.of(page - 1, pageSize, Sort.Direction.DESC, &quot;id&quot;);\n    Filter filter = new Filter();\n    Page&lt;Indent&gt; indentPage = indentRepository.findAll(filter, pageRequest);\n<\/code><\/pre>\n<p>makes DB call to Child entity as well<\/p>\n<pre><code>Hibernate:\nselect parent0_.id as id1_19_ from  parent parent0_ where parent0_.id in (?)\nselect child0_.parent_id as parent_i1_29_ from child child0_ where child0_.indent_id in (?)\n<\/code><\/pre>\n<p>Is there any way to avoid Db call to child entity here?<\/p>\n",
+        "question_id": 63315523,
+        "tags": [
+            "java",
+            "mysql",
+            "hibernate",
+            "jpa",
+            "spring-data-jpa"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 2410,
+        "last_edit_date": 1596892414
+    },
+    "question_comments": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/CoLJT.png?s=256",
+            "account_id": 7529817,
+            "user_type": "registered",
+            "user_id": 5718469,
+            "link": "https://stackoverflow.com/users/5718469/atul",
+            "reputation": 66,
+            "display_name": "atul",
+            "accept_rate": 50
+        },
+        "content_license": "CC BY-SA 4.0",
+        "score": 0,
+        "post_id": 63315523,
+        "edited": false,
+        "creation_date": 1597900321,
+        "comment_id": 112283989
+    }],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a6eda20c88c2dac406366b0f6c5fc790?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 8186124,
+                "user_type": "registered",
+                "user_id": 6161898,
+                "link": "https://stackoverflow.com/users/6161898/fg78nc",
+                "reputation": 5262,
+                "display_name": "fg78nc"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1596896763,
+            "creation_date": 1596895703,
+            "body": "<p>You can define an entity graph to specify a pattern that can be passed to a query to determine which attributes you want to be fetched. Attributes that are not included in the graph will be treated as LAZY by persistence provider.<\/p>\n<pre><code>    @Entity\n    @NamedEntityGraph(name = &quot;only_id&quot;, attributeNodes={@NamedAttributeNode(&quot;id&quot;)})\n    class Parent{\n    \n        @OneToOne(fetch = FetchType.LAZY, mappedBy = &quot;parent&quot;, optional = false)\n        @NotAudited\n        private Child child; \n    \n        @Id\n        @GeneratedValue(strategy = GenerationType.IDENTITY)\n        private Integer id;\n    }\n<\/code><\/pre>\n<p>JPA API:<\/p>\n<pre><code>EntityGraph entityGraph = entityManager.getEntityGraph(&quot;only_idh&quot;);\n// define your query\nquery.setHint(&quot;javax.persistence.fetchgraph&quot;,graph);\n<\/code><\/pre>\n<p>More details : <a href=\"https://docs.oracle.com/javaee/7/tutorial/persistence-entitygraphs002.htm\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javaee/7/tutorial/persistence-entitygraphs002.htm<\/a><\/p>\n<p>With Spring Data JPA<\/p>\n<pre><code> public interface MyRepository extends JpaRepository&lt;Parent, Integer&gt; {\n \n    @EntityGraph(value = &quot;only id&quot;)\n    Parent findById(Integer id)\n<\/code><\/pre>\n<p>More details : <a href=\"https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.entity-graph\" rel=\"nofollow noreferrer\">https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.entity-graph<\/a><\/p>\n<p>JpaSpecificationExecutor :<\/p>\n<pre><code>public interface MyRepository extends JpaSpecificationExecutor&lt;Parent&gt; {\n   @Override\n   @EntityGraph(attributePaths = {&quot;only_id&quot;}, type=EntityGraphType.FETCH)\n   Parent findByOne(Specification&lt;Parent&gt; spec);\n}\n<\/code><\/pre>\n<p>More details : <a href=\"https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaSpecificationExecutor.html\" rel=\"nofollow noreferrer\">https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaSpecificationExecutor.html<\/a><\/p>\n",
+            "answer_id": 63316318,
+            "question_id": 63315523,
+            "last_edit_date": 1596896763
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/62a11d6832e4c13f7dab2a3735e3c2a5?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5825507,
+                "user_type": "registered",
+                "user_id": 4592066,
+                "link": "https://stackoverflow.com/users/4592066/rahul-sawant",
+                "reputation": 1264,
+                "display_name": "Rahul Sawant"
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1596955789,
+            "creation_date": 1596893274,
+            "body": "<p>JPA provider usually takes fetch type Lazy as a hint,  so may be in your case its not considering it at all.  check below<\/p>\n<blockquote>\n<p>fetch public abstract FetchType fetch (Optional) Defines whether the\nvalue of the field or property should be lazily loaded or must be\neagerly fetched. The EAGER strategy is a requirement on the\npersistence provider runtime that the value must be eagerly fetched.\nThe LAZY strategy is a hint to the persistence provider runtime. If\nnot specified, defaults to EAGER. Default: EAGER<\/p>\n<\/blockquote>\n<p><a href=\"https://docs.oracle.com/javaee/5/api/javax/persistence/Basic.html#fetch%28%29\" rel=\"nofollow noreferrer\">JPA Doc<\/a><\/p>\n",
+            "answer_id": 63315929,
+            "question_id": 63315523,
+            "last_edit_date": 1596955789
+        }
+    ],
+    "answer_comments": {
+        "63315929": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/a4e7ce5e565fdfe6cec5b3660843a1a8?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 4427703,
+                "user_type": "registered",
+                "user_id": 3605712,
+                "link": "https://stackoverflow.com/users/3605712/malakai",
+                "reputation": 3141,
+                "display_name": "Malakai",
+                "accept_rate": 97
+            },
+            "content_license": "CC BY-SA 4.0",
+            "score": 0,
+            "post_id": 63315929,
+            "edited": false,
+            "creation_date": 1596901945,
+            "comment_id": 111962590
+        }],
+        "63316318": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/CoLJT.png?s=256",
+                    "account_id": 7529817,
+                    "user_type": "registered",
+                    "user_id": 5718469,
+                    "link": "https://stackoverflow.com/users/5718469/atul",
+                    "reputation": 66,
+                    "display_name": "atul",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 2,
+                "post_id": 63316318,
+                "edited": false,
+                "creation_date": 1596952638,
+                "comment_id": 111972512
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/a6eda20c88c2dac406366b0f6c5fc790?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 8186124,
+                    "user_type": "registered",
+                    "user_id": 6161898,
+                    "link": "https://stackoverflow.com/users/6161898/fg78nc",
+                    "reputation": 5262,
+                    "display_name": "fg78nc"
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 63316318,
+                "reply_to_user": {
+                    "profile_image": "https://i.sstatic.net/CoLJT.png?s=256",
+                    "account_id": 7529817,
+                    "user_type": "registered",
+                    "user_id": 5718469,
+                    "link": "https://stackoverflow.com/users/5718469/atul",
+                    "reputation": 66,
+                    "display_name": "atul",
+                    "accept_rate": 50
+                },
+                "edited": false,
+                "creation_date": 1596896803,
+                "comment_id": 111961102
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/CoLJT.png?s=256",
+                    "account_id": 7529817,
+                    "user_type": "registered",
+                    "user_id": 5718469,
+                    "link": "https://stackoverflow.com/users/5718469/atul",
+                    "reputation": 66,
+                    "display_name": "atul",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 4.0",
+                "score": 0,
+                "post_id": 63316318,
+                "edited": false,
+                "creation_date": 1596896441,
+                "comment_id": 111960971
+            }
+        ]
+    }
+}

@@ -1,0 +1,54 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/45d5523d9aa75bc676a3c02c4f01c4e6?s=256&d=identicon&r=PG",
+            "account_id": 2117474,
+            "user_type": "registered",
+            "user_id": 1881401,
+            "link": "https://stackoverflow.com/users/1881401/user1881401",
+            "reputation": 85,
+            "display_name": "user1881401",
+            "accept_rate": 12
+        },
+        "content_license": "CC BY-SA 4.0",
+        "link": "https://stackoverflow.com/questions/15192610/java-object-movement",
+        "last_activity_date": 1532824787,
+        "creation_date": 1362356246,
+        "answer_count": 1,
+        "title": "Java object movement",
+        "body": "<p>I am trying to get a circle to move through the input of a keyboard. I am not able to move the object at all. Can someone help me figure out what is wrong? Here is my code:<\/p>\n\n<pre><code>import java.awt.Color;\nimport java.awt.Graphics;\nimport java.awt.event.KeyEvent;\nimport java.awt.event.KeyListener;\n\nimport javax.swing.JPanel;\n\n\npublic class AlienInvader extends JPanel implements KeyListener{\n\n    Constants constant = new Constants();\n\n    public void update() {\n        constant.x += constant.xvel;\n        addKeyListener(this);\n    }\n\n    public void paintComponent(Graphics g) {\n        super.paintComponent(g);\n        g.setColor(Color.MAGENTA);\n        g.fillOval(constant.x, constant.y, 30, 30);\n        repaint();\n    }\n\n    @Override\n    public void keyPressed(KeyEvent e) {\n        System.out.println(constant.x);\n        switch(e.getKeyCode()) {\n        case KeyEvent.VK_LEFT:\n            constant.xvel = -1;\n            break;\n        case KeyEvent.VK_RIGHT:\n            constant.xvel = 1;\n            break;\n        }\n    }\n\n    @Override\n    public void keyReleased(KeyEvent e) {\n        switch(e.getKeyCode()) {\n        case KeyEvent.VK_LEFT:\n            constant.xvel = -1;\n            break;\n        case KeyEvent.VK_RIGHT:\n            constant.xvel = 1;\n            break;\n        }\n    }\n\n    @Override\n    public void keyTyped(KeyEvent arg0) {\n        // TODO Auto-generated method stub\n\n    }\n\n\n}\n<\/code><\/pre>\n\n<p>I am not sure what I am doing wrong. I thought it was because I wasn't calling the update method, but when I added a if statement in paintComponent (so it only calls itself once) and tried it, I had no luck. <\/p>\n",
+        "question_id": 15192610,
+        "tags": [
+            "java",
+            "keyboard",
+            "path-finding"
+        ],
+        "score": 0,
+        "is_answered": true,
+        "view_count": 9069,
+        "last_edit_date": 1532824787
+    },
+    "question_comments": [],
+    "answers": [{
+        "owner": {
+            "profile_image": "https://i.sstatic.net/K1mTV.jpg?s=256",
+            "account_id": 969721,
+            "user_type": "registered",
+            "user_id": 992484,
+            "link": "https://stackoverflow.com/users/992484/madprogrammer",
+            "reputation": 347645,
+            "display_name": "MadProgrammer",
+            "accept_rate": 60
+        },
+        "content_license": "CC BY-SA 3.0",
+        "score": 3,
+        "is_accepted": false,
+        "last_activity_date": 1362357600,
+        "creation_date": 1362356551,
+        "body": "<p>To start with, don't call <code>repaint<\/code> within any <code>paintXxx<\/code> method.  Paint methods are typically called in response to a call to <code>repaint<\/code>, therefore you are creating a nasty, never ending, ever consuming loop of resource hell.<\/p>\n\n<p>Secondly, <code>KeyListener<\/code>s only respond to key events when 1- The component the are registered to are focusable 2- When the component they are registered to have focus.<\/p>\n\n<p>They are a poor choice in this case.  Use <a href=\"http://docs.oracle.com/javase/tutorial/uiswing/misc/keybinding.html\" rel=\"nofollow\">Key bindings<\/a> instead<\/p>\n\n<p>Thirdly, you are not providing a <code>preferredSize<\/code> hint for layout managers to use.  This may or may not be a bad thing in your case, but it's possible that you component will be laid out with a size of 0x0<\/p>\n\n<p><strong>Example<\/strong><\/p>\n\n<p>Something like....<\/p>\n\n<pre><code>import java.awt.BorderLayout;\nimport java.awt.Color;\nimport java.awt.Dimension;\nimport java.awt.EventQueue;\nimport java.awt.Graphics;\nimport java.awt.Graphics2D;\nimport java.awt.event.ActionEvent;\nimport java.awt.event.ActionListener;\nimport java.awt.event.KeyEvent;\nimport javax.swing.AbstractAction;\nimport javax.swing.ActionMap;\nimport javax.swing.InputMap;\nimport javax.swing.JFrame;\nimport javax.swing.JPanel;\nimport javax.swing.KeyStroke;\nimport javax.swing.Timer;\nimport javax.swing.UIManager;\nimport javax.swing.UnsupportedLookAndFeelException;\n\npublic class MoveCircle {\n\n    public static void main(String[] args) {\n        new MoveCircle();\n    }\n\n    public MoveCircle() {\n        EventQueue.invokeLater(new Runnable() {\n            @Override\n            public void run() {\n                try {\n                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());\n                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {\n                }\n\n                JFrame frame = new JFrame(\"Testing\");\n                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n                frame.setLayout(new BorderLayout());\n                frame.add(new TestPane());\n                frame.pack();\n                frame.setLocationRelativeTo(null);\n                frame.setVisible(true);\n            }\n        });\n    }\n\n    public class TestPane extends JPanel {\n\n        private int xDelta = 0;\n        private int keyPressCount = 0;\n        private Timer repaintTimer;\n        private int xPos = 0;\n        private int radius = 10;\n\n        public TestPane() {\n            InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);\n            ActionMap am = getActionMap();\n\n            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, false), \"pressed.left\");\n            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, false), \"pressed.right\");\n            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, true), \"released.left\");\n            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, true), \"released.right\");\n\n            am.put(\"pressed.left\", new MoveAction(-2, true));\n            am.put(\"pressed.right\", new MoveAction(2, true));\n            am.put(\"released.left\", new MoveAction(0, false));\n            am.put(\"released.right\", new MoveAction(0, false));\n\n            repaintTimer = new Timer(40, new ActionListener() {\n                @Override\n                public void actionPerformed(ActionEvent e) {\n                    xPos += xDelta;\n                    if (xPos &lt; 0) {\n                        xPos = 0;\n                    } else if (xPos + radius &gt; getWidth()) {\n                        xPos = getWidth() - radius;\n                    }\n                    repaint();\n                }\n            });\n            repaintTimer.setInitialDelay(0);\n            repaintTimer.setRepeats(true);\n            repaintTimer.setCoalesce(true);\n\n        }\n\n        @Override\n        public Dimension getPreferredSize() {\n            return new Dimension(200, 200);\n        }\n\n        @Override\n        protected void paintComponent(Graphics g) {\n            super.paintComponent(g);\n            Graphics2D g2d = (Graphics2D) g.create();\n            g2d.setColor(Color.RED);\n            g2d.drawOval(xPos, 0, radius, radius);\n            g2d.dispose();\n        }\n\n        public class MoveAction extends AbstractAction {\n\n            private int direction;\n            private boolean keyDown;\n\n            public MoveAction(int direction, boolean down) {\n                this.direction = direction;\n                keyDown = down;\n            }\n\n            @Override\n            public void actionPerformed(ActionEvent e) {\n                xDelta = direction;\n                if (keyDown) {\n                    if (!repaintTimer.isRunning()) {\n                        repaintTimer.start();\n                    }\n                } else {\n                    repaintTimer.stop();\n                }\n            }\n        }\n    }\n}\n<\/code><\/pre>\n\n<p>For example...<\/p>\n",
+        "answer_id": 15192656,
+        "question_id": 15192610,
+        "last_edit_date": 1362357600
+    }],
+    "answer_comments": {}
+}

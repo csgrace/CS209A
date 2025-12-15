@@ -1,0 +1,246 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://www.gravatar.com/avatar/dd9c2cf763e7348423939744b5400711?s=256&d=identicon&r=PG",
+            "account_id": 2130290,
+            "user_type": "registered",
+            "user_id": 1891269,
+            "link": "https://stackoverflow.com/users/1891269/thilo",
+            "reputation": 127,
+            "display_name": "thilo",
+            "accept_rate": 44
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/14272453/xml-parsing-using-jaxb",
+        "last_activity_date": 1357903435,
+        "creation_date": 1357883330,
+        "answer_count": 4,
+        "title": "XML parsing using JAXB",
+        "body": "<p>I'm new to xml parsing. I worked with DOM to parse the xml for practice. Now I thought to move some to other xml parsing framework. So I have chosen JAXB parser.For my requirement, I could not create getter setter for all xml tags. Because the xml which I will get is dynamic. So I do not know the tags before hand to create getter/setter.I've referred this link <a href=\"http://www.mkyong.com/java/jaxb-hello-world-example/\" rel=\"nofollow\">http://www.mkyong.com/java/jaxb-hello-world-example/<\/a>. Is there any way to do parsing without creating getter and setter.Please make me clear.<\/p>\n",
+        "question_id": 14272453,
+        "tags": [
+            "java",
+            "xml",
+            "xml-parsing",
+            "jaxb",
+            "xsd"
+        ],
+        "score": 1,
+        "is_answered": true,
+        "view_count": 5677,
+        "last_edit_date": 1357883782
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dc3ee2f4f742fbbafeeb0b7414cb6fd2?s=256&d=identicon&r=PG",
+                "account_id": 162425,
+                "user_type": "registered",
+                "user_id": 383861,
+                "link": "https://stackoverflow.com/users/383861/bdoughan",
+                "reputation": 149227,
+                "display_name": "bdoughan"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 2,
+            "is_accepted": false,
+            "last_activity_date": 1357903435,
+            "creation_date": 1357902352,
+            "body": "<p>You could leverage the <code>@XmlAnyElement<\/code> and <code>XmlAnyAttribute<\/code> annotations to map the extra content.  If you don't want <code>get<\/code>/<code>set<\/code> methods just add <code>@XmlAccessorType(XmlAccessType.FIELD)<\/code> on your class.<\/p>\n\n<p><strong>Customer<\/strong><\/p>\n\n<p>In the class below we map a specific XML attribute and element, and then use the <code>@XmlAnyElement<\/code> annotation to map any other elements that may appear, and <code>@XmlAnyAttribute<\/code> to map any other attributes that may appear.<\/p>\n\n<pre><code>import java.util.*;\nimport javax.xml.bind.annotation.*;\nimport javax.xml.namespace.QName;\n\n@XmlRootElement\n@XmlAccessorType(XmlAccessType.FIELD)\npublic class Customer {\n\n    @XmlAttribute\n    int id;\n\n    @XmlAnyAttribute\n    Map&lt;QName, String&gt; otherAttributes;\n\n    String name;\n\n    @XmlAnyElement(lax=true)\n    List&lt;Object&gt; otherElements;\n\n}\n<\/code><\/pre>\n\n<p><strong>input.xml<\/strong><\/p>\n\n<p>We will unmarshal the following XML document in the demo code.<\/p>\n\n<pre><code>&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n&lt;customer id=\"123\" status=\"good\"&gt;\n    &lt;name&gt;Jane Doe&lt;/name&gt;\n    &lt;address&gt;\n        &lt;street&gt;1 A Street&lt;/street&gt;\n        &lt;city&gt;Any Town&lt;/city&gt;\n    &lt;/address&gt;\n    &lt;phone-number&gt;555-1111&lt;/phone-number&gt;\n&lt;/customer&gt;\n<\/code><\/pre>\n\n<p><strong>Demo<\/strong><\/p>\n\n<p>The following document will unmarshal the XML input, dump all the resulting objects contents to <code>System.out<\/code> and the marshal the object back to XML.<\/p>\n\n<pre><code>import java.io.File;\nimport java.util.Map.Entry;\nimport javax.xml.bind.*;\nimport javax.xml.namespace.QName;\n\npublic class Demo {\n\n    public static void main(String[] args) throws Exception {\n        JAXBContext jc = JAXBContext.newInstance(Customer.class, Address.class);\n\n        Unmarshaller unmarshaller = jc.createUnmarshaller();\n        File xml = new File(\"src/forum14272453/input.xml\");\n        Customer customer  = (Customer) unmarshaller.unmarshal(xml);\n\n\n        // Mapped XML Attribute\n        System.out.println(\"customer.id\");\n        System.out.println(\"    \" + customer.id);\n\n        // Other XML Attributes\n        System.out.println(\"customer.otherAttributes\");\n        for(Entry&lt;QName, String&gt; entry : customer.otherAttributes.entrySet()) {\n            System.out.println(\"    \" + entry);\n        }\n\n        // Mapped XML Element\n        System.out.println(\"customer.name\");\n        System.out.println(\"    \" + customer.name);\n\n        // Other XML Elements\n        System.out.println(customer.otherElements);\n        for(Object object : customer.otherElements) {\n            System.out.println(\"    \" + object);\n        }\n\n        Marshaller marshaller = jc.createMarshaller();\n        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);\n        marshaller.marshal(customer, System.out);\n    }\n\n}\n<\/code><\/pre>\n\n<p><strong>Output<\/strong><\/p>\n\n<p>Below is the output from running the demo code, note how all the fields are populated with data from the XML document.<\/p>\n\n<pre><code>customer.id\n    123\ncustomer.otherAttributes\n    status=good\ncustomer.name\n    Jane Doe\ncustomer.otherElements\n    forum14272453.Address@24f454e4\n    [phone-number: null]\n&lt;?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?&gt;\n&lt;customer id=\"123\" status=\"good\"&gt;\n    &lt;name&gt;Jane Doe&lt;/name&gt;\n    &lt;address&gt;\n        &lt;street&gt;1 A Street&lt;/street&gt;\n        &lt;city&gt;Any Town&lt;/city&gt;\n    &lt;/address&gt;\n    &lt;phone-number&gt;555-1111&lt;/phone-number&gt;\n&lt;/customer&gt;\n<\/code><\/pre>\n\n<p><strong>For More Information<\/strong><\/p>\n\n<ul>\n<li><a href=\"http://blog.bdoughan.com/2012/12/jaxbs-xmlanyelementlaxtrue-explained.html\" rel=\"nofollow\">http://blog.bdoughan.com/2012/12/jaxbs-xmlanyelementlaxtrue-explained.html<\/a><\/li>\n<li><a href=\"http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html\" rel=\"nofollow\">http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html<\/a><\/li>\n<\/ul>\n",
+            "answer_id": 14276830,
+            "question_id": 14272453,
+            "last_edit_date": 1357903435
+        },
+        {
+            "owner": {
+                "profile_image": "https://i.sstatic.net/5FhzS.png?s=256",
+                "account_id": 1238100,
+                "user_type": "registered",
+                "user_id": 1201272,
+                "link": "https://stackoverflow.com/users/1201272/aura",
+                "reputation": 12423,
+                "display_name": "AurA",
+                "accept_rate": 80
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1357883693,
+            "creation_date": 1357883693,
+            "body": "<p>For JAXB you should create variables and corresponding getters and setters for all XML tags that you might get dynamically. \nIn case you have a tag (that you get dynamically) but you don't have a corresponding mapped variable in the Java class then you will get JAXB Exception. <\/p>\n\n<p>Hence, you can have a tag defined in JAXB Java Class but comming in request, but the reverse a tag not defined in JAXB Class but comming in XML will give you an exception.<\/p>\n",
+            "answer_id": 14272509,
+            "question_id": 14272453
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/211d2bf95f33f27eb4fdcc136b6d6c32?s=256&d=identicon&r=PG",
+                "account_id": 2052678,
+                "user_type": "registered",
+                "user_id": 1831293,
+                "link": "https://stackoverflow.com/users/1831293/evgeniy-dorofeev",
+                "reputation": 136615,
+                "display_name": "Evgeniy Dorofeev",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "is_accepted": false,
+            "last_activity_date": 1357888666,
+            "creation_date": 1357885762,
+            "body": "<p>This is going to be dynamic. unmarshal calls Customer.setElements; marshal calls Customer.getElements<\/p>\n\n<pre><code>@XmlRootElement\nclass Customer {\n    @XmlAnyElement\n    public void setElements(List&lt;Element&gt; list) {\n        for (Element e : list) {\n            String name = e.getNodeName();\n            String value = e.getTextContent();\n        }\n    }\n\n    public List&lt;Element&gt; getElements() throws ParserConfigurationException {\n        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();\n        List&lt;Element&gt; list = new ArrayList&lt;&gt;();\n        Element e = doc.createElement(\"e1\");\n        e.setTextContent(\"v1\");\n        list.add(e);\n        return list;\n    }\n}\n<\/code><\/pre>\n",
+            "answer_id": 14272893,
+            "question_id": 14272453,
+            "last_edit_date": 1357888666
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/df2378b35292cebde2b60c9365b0aa1b?s=256&d=identicon&r=PG",
+                "account_id": 187693,
+                "user_type": "registered",
+                "user_id": 425943,
+                "link": "https://stackoverflow.com/users/425943/lyomi",
+                "reputation": 4380,
+                "display_name": "lyomi",
+                "accept_rate": 91
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": -1,
+            "is_accepted": false,
+            "last_activity_date": 1357883568,
+            "creation_date": 1357883568,
+            "body": "<p><a href=\"http://jackson.codehaus.org/\" rel=\"nofollow\">Jackson<\/a>, renowned for its JSON processor, also has <a href=\"https://github.com/FasterXML/jackson-dataformat-xml\" rel=\"nofollow\">XML parsing support<\/a>, and it does a great job of reflection so that it does the parsing even when there are no getters and setters. Give it a try.<\/p>\n",
+            "answer_id": 14272490,
+            "question_id": 14272453
+        }
+    ],
+    "answer_comments": {
+        "14272893": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/dd9c2cf763e7348423939744b5400711?s=256&d=identicon&r=PG",
+                "account_id": 2130290,
+                "user_type": "registered",
+                "user_id": 1891269,
+                "link": "https://stackoverflow.com/users/1891269/thilo",
+                "reputation": 127,
+                "display_name": "thilo",
+                "accept_rate": 44
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 0,
+            "post_id": 14272893,
+            "edited": false,
+            "creation_date": 1357887905,
+            "comment_id": 19814980
+        }],
+        "14272509": [
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dc3ee2f4f742fbbafeeb0b7414cb6fd2?s=256&d=identicon&r=PG",
+                    "account_id": 162425,
+                    "user_type": "registered",
+                    "user_id": 383861,
+                    "link": "https://stackoverflow.com/users/383861/bdoughan",
+                    "reputation": 149227,
+                    "display_name": "bdoughan"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 14272509,
+                "edited": false,
+                "creation_date": 1357913391,
+                "comment_id": 19826425
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/5FhzS.png?s=256",
+                    "account_id": 1238100,
+                    "user_type": "registered",
+                    "user_id": 1201272,
+                    "link": "https://stackoverflow.com/users/1201272/aura",
+                    "reputation": 12423,
+                    "display_name": "AurA",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 14272509,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/dc3ee2f4f742fbbafeeb0b7414cb6fd2?s=256&d=identicon&r=PG",
+                    "account_id": 162425,
+                    "user_type": "registered",
+                    "user_id": 383861,
+                    "link": "https://stackoverflow.com/users/383861/bdoughan",
+                    "reputation": 149227,
+                    "display_name": "bdoughan"
+                },
+                "edited": false,
+                "creation_date": 1357906110,
+                "comment_id": 19822639
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dc3ee2f4f742fbbafeeb0b7414cb6fd2?s=256&d=identicon&r=PG",
+                    "account_id": 162425,
+                    "user_type": "registered",
+                    "user_id": 383861,
+                    "link": "https://stackoverflow.com/users/383861/bdoughan",
+                    "reputation": 149227,
+                    "display_name": "bdoughan"
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 14272509,
+                "edited": false,
+                "creation_date": 1357904395,
+                "comment_id": 19821803
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/5FhzS.png?s=256",
+                    "account_id": 1238100,
+                    "user_type": "registered",
+                    "user_id": 1201272,
+                    "link": "https://stackoverflow.com/users/1201272/aura",
+                    "reputation": 12423,
+                    "display_name": "AurA",
+                    "accept_rate": 80
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 14272509,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/dd9c2cf763e7348423939744b5400711?s=256&d=identicon&r=PG",
+                    "account_id": 2130290,
+                    "user_type": "registered",
+                    "user_id": 1891269,
+                    "link": "https://stackoverflow.com/users/1891269/thilo",
+                    "reputation": 127,
+                    "display_name": "thilo",
+                    "accept_rate": 44
+                },
+                "edited": false,
+                "creation_date": 1357884813,
+                "comment_id": 19814085
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/dd9c2cf763e7348423939744b5400711?s=256&d=identicon&r=PG",
+                    "account_id": 2130290,
+                    "user_type": "registered",
+                    "user_id": 1891269,
+                    "link": "https://stackoverflow.com/users/1891269/thilo",
+                    "reputation": 127,
+                    "display_name": "thilo",
+                    "accept_rate": 44
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 14272509,
+                "edited": false,
+                "creation_date": 1357884425,
+                "comment_id": 19813987
+            }
+        ]
+    }
+}

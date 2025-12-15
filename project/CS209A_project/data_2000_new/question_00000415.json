@@ -1,0 +1,196 @@
+{
+    "question": {
+        "owner": {
+            "profile_image": "https://i.sstatic.net/3bwxJ.png?s=256",
+            "account_id": 9553448,
+            "user_type": "registered",
+            "user_id": 7096769,
+            "link": "https://stackoverflow.com/users/7096769/emre-akcan",
+            "reputation": 1180,
+            "display_name": "Emre Akcan"
+        },
+        "content_license": "CC BY-SA 3.0",
+        "link": "https://stackoverflow.com/questions/48463401/java-cant-adding-object-in-list-without-generic",
+        "last_activity_date": 1516977973,
+        "creation_date": 1516977062,
+        "answer_count": 2,
+        "title": "Java cant adding object in list without generic",
+        "body": "<p>I have those classes.<\/p>\n\n<pre><code>public class Flight {\n    public List&lt;FlightOffer&gt; flightOffers;\n}\n\npublic class Hotel&lt;T&gt; {\n    public List&lt;HotelOffer&gt; hotelOffers;\n    public T address\n}\n\npublic class FlightOffer extends BaseOffer{\n}\n\npublic class HotelOffer extends BaseOffer{\n}\n\npublic class BaseOffer{\n    public String id;\n}\n<\/code><\/pre>\n\n<p>flightOffers and hotelOffers returns a list.<\/p>\n\n<pre><code>Flight flightObject = new Flight();\nflightObject.flightOffers.add(new BaseOffer()); // not working \n//(add (FlightOffer) List  cannot be applied to (BaseOffer))\n\nHotel hotelObject = new Hotel&lt;String&gt;();\nhotelObject.hotelOffers.add(new BaseOffer()); // working\n<\/code><\/pre>\n\n<p>but if i convert <code>Flight<\/code> to <code>Flight&lt;T&gt;<\/code> its working, why?<\/p>\n",
+        "question_id": 48463401,
+        "tags": [
+            "java",
+            "generics"
+        ],
+        "score": 4,
+        "accepted_answer_id": 48463548,
+        "is_answered": true,
+        "view_count": 238,
+        "last_edit_date": 1516977365
+    },
+    "question_comments": [],
+    "answers": [
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/72baa38005eb8de126b2dd2e6fa1d660?s=256&d=identicon&r=PG",
+                "account_id": 319873,
+                "user_type": "registered",
+                "user_id": 637853,
+                "link": "https://stackoverflow.com/users/637853/thomas",
+                "reputation": 88895,
+                "display_name": "Thomas",
+                "accept_rate": 50
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 9,
+            "is_accepted": true,
+            "last_activity_date": 1516977921,
+            "creation_date": 1516977506,
+            "body": "<p><code>List&lt;FlightOffer&gt; flightOffers<\/code> defines quite clearly what you can add to the list: instances of <code>FlightOffer<\/code>. <code>flightOffers.add(new BaseOffer());<\/code> hence can't work since a <code>BaseOffer<\/code> <em>is not<\/em> a <code>FlightOffer<\/code>.<\/p>\n\n<p>So why does <code>hotelOffers.add(new BaseOffer());<\/code> work? Because you are disabling generic type checks by using the raw type <code>Hotel<\/code> in <code>Hotel hotelObject = new Hotel&lt;String&gt;();<\/code>. <\/p>\n\n<p>You should get a warning about that as well which conveys another lesson: don't ignore the warnings. The compiler doesn't know that something <em>will<\/em> fail but more often than not it \"guesses\" correctly and warns you about that.<\/p>\n\n<p><strong>Edit:<\/strong><\/p>\n\n<p>Note what the <a href=\"https://docs.oracle.com/javase/specs/jls/se8/html/jls-4.html#jls-4.8\" rel=\"nofollow noreferrer\">JLS<\/a> states on raw types (in the first box of section 4.8):<\/p>\n\n<blockquote>\n  <p>Another implication of the rules above is that a generic inner class of a raw type can itself only be used as a raw type.<\/p>\n<\/blockquote>\n\n<p>That means that because <code>Hotel<\/code> is a raw type, every generic type inside it can also only be a raw type, i.e. <code>hotelOffers<\/code> is treated as if it were a raw <code>List<\/code> which allows any type of object (thus even this should work in your code <code>hotelObject.hotelOffers.add(\"I'm not a hotel offer\");<\/code>)<\/p>\n",
+            "answer_id": 48463548,
+            "question_id": 48463401,
+            "last_edit_date": 1516977921
+        },
+        {
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/ab7639c8c2d707deb0b8781bacb28058?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 444874,
+                "user_type": "registered",
+                "user_id": 836967,
+                "link": "https://stackoverflow.com/users/836967/giancarlo-romeo",
+                "reputation": 661,
+                "display_name": "Giancarlo Romeo"
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 1,
+            "is_accepted": false,
+            "last_activity_date": 1516977973,
+            "creation_date": 1516977320,
+            "body": "<p>You're trying to add a <code>BaseOffer<\/code> object (superclass) in a <code>List<\/code> of <code>FlightOffer<\/code> (subclass) objects.<\/p>\n\n<p><a href=\"https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html\" rel=\"nofollow noreferrer\">https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html<\/a><\/p>\n\n<pre><code>Flight flightObject = new Flight();\nflightObject.flightOffers.add(new FlightOffer());    // that's correct\n<\/code><\/pre>\n",
+            "answer_id": 48463484,
+            "question_id": 48463401,
+            "last_edit_date": 1516977973
+        }
+    ],
+    "answer_comments": {
+        "48463484": [{
+            "owner": {
+                "profile_image": "https://www.gravatar.com/avatar/14f5bdcc5bb815c8a6144b0f2e923ac9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                "account_id": 5168089,
+                "user_type": "registered",
+                "user_id": 4137489,
+                "link": "https://stackoverflow.com/users/4137489/marstran",
+                "reputation": 28374,
+                "display_name": "marstran",
+                "accept_rate": 100
+            },
+            "content_license": "CC BY-SA 3.0",
+            "score": 5,
+            "post_id": 48463484,
+            "edited": false,
+            "creation_date": 1516977378,
+            "comment_id": 83919895
+        }],
+        "48463548": [
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/8bvKDZTK.png?s=256",
+                    "account_id": 5644665,
+                    "user_type": "registered",
+                    "user_id": 4467208,
+                    "link": "https://stackoverflow.com/users/4467208/murat-karag%c3%b6z",
+                    "reputation": 37840,
+                    "display_name": "Murat Karag&#246;z",
+                    "accept_rate": 51
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 48463548,
+                "edited": false,
+                "creation_date": 1516978136,
+                "comment_id": 83920421
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/72baa38005eb8de126b2dd2e6fa1d660?s=256&d=identicon&r=PG",
+                    "account_id": 319873,
+                    "user_type": "registered",
+                    "user_id": 637853,
+                    "link": "https://stackoverflow.com/users/637853/thomas",
+                    "reputation": 88895,
+                    "display_name": "Thomas",
+                    "accept_rate": 50
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 1,
+                "post_id": 48463548,
+                "reply_to_user": {
+                    "profile_image": "https://www.gravatar.com/avatar/14f5bdcc5bb815c8a6144b0f2e923ac9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5168089,
+                    "user_type": "registered",
+                    "user_id": 4137489,
+                    "link": "https://stackoverflow.com/users/4137489/marstran",
+                    "reputation": 28374,
+                    "display_name": "marstran",
+                    "accept_rate": 100
+                },
+                "edited": false,
+                "creation_date": 1516978011,
+                "comment_id": 83920335
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/14f5bdcc5bb815c8a6144b0f2e923ac9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5168089,
+                    "user_type": "registered",
+                    "user_id": 4137489,
+                    "link": "https://stackoverflow.com/users/4137489/marstran",
+                    "reputation": 28374,
+                    "display_name": "marstran",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 48463548,
+                "edited": false,
+                "creation_date": 1516977783,
+                "comment_id": 83920191
+            },
+            {
+                "owner": {
+                    "profile_image": "https://i.sstatic.net/8bvKDZTK.png?s=256",
+                    "account_id": 5644665,
+                    "user_type": "registered",
+                    "user_id": 4467208,
+                    "link": "https://stackoverflow.com/users/4467208/murat-karag%c3%b6z",
+                    "reputation": 37840,
+                    "display_name": "Murat Karag&#246;z",
+                    "accept_rate": 51
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 48463548,
+                "edited": false,
+                "creation_date": 1516977649,
+                "comment_id": 83920074
+            },
+            {
+                "owner": {
+                    "profile_image": "https://www.gravatar.com/avatar/14f5bdcc5bb815c8a6144b0f2e923ac9?s=256&d=identicon&r=PG&f=y&so-version=2",
+                    "account_id": 5168089,
+                    "user_type": "registered",
+                    "user_id": 4137489,
+                    "link": "https://stackoverflow.com/users/4137489/marstran",
+                    "reputation": 28374,
+                    "display_name": "marstran",
+                    "accept_rate": 100
+                },
+                "content_license": "CC BY-SA 3.0",
+                "score": 0,
+                "post_id": 48463548,
+                "edited": false,
+                "creation_date": 1516977611,
+                "comment_id": 83920051
+            }
+        ]
+    }
+}
