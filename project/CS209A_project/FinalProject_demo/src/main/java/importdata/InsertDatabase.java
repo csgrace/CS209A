@@ -10,17 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InsertDatabase {
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/";
-    private static final String DB_NAME = "cs209a_grace";
-    //cs209_final
-    private static final String FULL_DB_URL = "jdbc:postgresql://localhost:5432/" + DB_NAME;
-    private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "huarui66";
-    // post2053
-    // huarui66
-    private static final String DATA_DIR = "D:\\E\\SUSTECH\\grade3\\3_up\\CS\\CS209A\\project\\CS209A_project\\data_1000_new";
-    // C:\GitHub\CS209A_project\data_1000_new"
-    // D:\E\SUSTECH\grade3\3_up\CS\CS209A\project\CS209A_project\data_1000_new
+    private static final String FULL_DB_URL = getEnv("JDBC_DATABASE_URL", "jdbc:postgresql://localhost:5432/cs209a_grace");
+    private static final String DB_USER = getEnv("DB_USERNAME", "postgres");
+    private static final String DB_PASSWORD = getEnv("DB_PASSWORD", "");
+    private static final String DATA_DIR = getEnv("DATA_DIRECTORY", "../data_2000_new");
+
+    private static String getEnv(String key, String fallback) {
+        String value = System.getenv(key);
+        return value == null || value.isBlank() ? fallback : value;
+    }
 
     private Connection connection;
     private Map<Long, Boolean> existingUsers = new HashMap<>();
@@ -29,35 +27,13 @@ public class InsertDatabase {
 
 
     public InsertDatabase() throws SQLException {
-        Connection totalcon = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        createdatabase(totalcon);
-        totalcon.close();
         this.connection = DriverManager.getConnection(FULL_DB_URL, DB_USER, DB_PASSWORD);
-        System.out.println("successfully connect: " + FULL_DB_URL);
+        createSchema(this.connection);
+        System.out.println("successfully connected to analysis database");
     }
 
-    public void createdatabase(Connection connection) throws SQLException {
+    public void createSchema(Connection connection) throws SQLException {
         try (Statement stmt = connection.createStatement()) {
-            String createDbSql = "CREATE DATABASE " + DB_NAME +
-                    " WITH ENCODING = 'UTF8' " +
-                    "LC_COLLATE = 'en_US.UTF-8' " +
-                    "LC_CTYPE = 'en_US.UTF-8' " +
-                    "TEMPLATE = template0";
-
-            try {
-                stmt.executeUpdate(createDbSql);
-                System.out.println("数据库创建成功: " + DB_NAME);
-            } catch (SQLException e) {
-                if (e.getMessage().contains("already exists")) {
-                    System.out.println("数据库已存在，跳过创建");
-                } else {
-                    throw e;
-                }
-            }
-        }
-
-        try (Connection dbConn = DriverManager.getConnection(FULL_DB_URL, DB_USER, DB_PASSWORD);
-             Statement stmt = dbConn.createStatement()) {
 
             String createUsersTable = "CREATE TABLE IF NOT EXISTS users (" +
                     "user_id BIGINT PRIMARY KEY," +
@@ -148,7 +124,10 @@ public class InsertDatabase {
 
     public void importAllData() throws Exception {
         File dir = new File(DATA_DIR);
-        File[] files = dir.listFiles();
+        File[] files = dir.listFiles((currentDir, name) -> name.endsWith(".json"));
+        if (files == null) {
+            throw new IllegalStateException("Data directory does not exist or cannot be read: " + dir.getAbsolutePath());
+        }
 
         for (File file : files) {
             try{
