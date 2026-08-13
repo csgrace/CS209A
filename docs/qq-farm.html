@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CS209A QQ Farm 网页试玩版">
-  <title>QQ Farm Playground — Yuqing Wei</title>
+  <meta name="description" content="CS209A QQ Farm 网页试玩版 — 从 JavaFX 课程作业迁移而来">
+  <title>QQ Farm Playground — CS209A</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/demos.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,12 +12,135 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <nav class="navbar"><div class="nav-inner"><a href="index.html" class="nav-logo">CS209A</a><ul class="nav-links"><li><a href="index.html">Course Demos</a></li><li><a href="https://github.com/csgrace/CS209A" target="_blank" rel="noopener">Repository</a></li></ul><div class="nav-right"><a class="demo-back" href="index.html">← 返回演示首页</a></div></div></nav>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">CS209A</a>
+      <ul class="nav-links">
+        <li><a href="index.html">← 返回首页</a></li>
+        <li><a href="data-lab.html">Data Lab</a></li>
+        <li><a href="https://github.com/csgrace/CS209A" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <main class="demo-page">
-    <section class="demo-hero farm-hero"><div class="demo-kicker">CS209A · JAVA II · INTERACTIVE GAME</div><h1>QQ 农场 · Web 试玩版</h1><p>从 JavaFX 课程作业迁移而来的轻量网页互动版本。选择土地、种植作物，等待 10 秒成熟并收获金币；游戏进度自动保存在你的浏览器中。</p><div class="demo-jump-links"><a href="data-lab.html">📊 前往数据分析实验室</a><a href="https://github.com/csgrace/CS209A/tree/main/assignment/assignment2" target="_blank" rel="noopener">查看 JavaFX 源码 ↗</a></div></section>
-    <section class="demo-section"><div class="demo-section-heading"><div><span class="eyebrow">FARM PLAYGROUND</span><h2>开始耕种</h2><p>点击一个地块将其选中，再选择种植或收获。每次种植花费 5 金币，成熟后可获得 12 金币。</p></div><div class="farm-legend"><span><i class="legend-dot soil"></i>空地</span><span><i class="legend-dot growing"></i>生长中</span><span><i class="legend-dot ripe"></i>可收获</span></div></div><div class="farm-layout"><aside class="farm-panel"><div class="farm-player"><span class="avatar">🌻</span><div><strong>Grace 的农场</strong><small id="farm-status" aria-live="polite">选择一块土地开始耕种</small></div></div><div class="coin-card"><span>🪙</span><div><small>我的金币</small><strong id="coin-count">40</strong></div></div><div class="farm-actions"><button class="farm-action plant" id="plant-btn">🌱 种植 <em>-5</em></button><button class="farm-action harvest" id="harvest-btn">🧺 收获 <em>+12</em></button><button class="farm-action reset" id="reset-btn">↻ 重新开始</button></div><p class="farm-tip">提示：成熟的作物会闪烁。点击地块可切换选中状态。</p></aside><div class="farm-board-wrap"><div class="farm-board-header"><span>我的土地</span><strong id="farm-progress">0 / 16 已种植</strong></div><div id="farm-board" class="farm-board" aria-label="QQ 农场地块" role="grid"></div></div></div></section>
+    <!-- Hero -->
+    <section class="demo-hero farm-hero">
+      <div class="hero-content">
+        <div class="demo-kicker">CS209A · ASSIGNMENT 2 · JAVAFX</div>
+        <h1>QQ 农场 · Web 试玩版</h1>
+        <p class="hero-desc">从 JavaFX 课程作业迁移而来的轻量网页互动版本。选择土地、种植作物，等待 10 秒成熟并收获金币；游戏进度自动保存在你的浏览器中。</p>
+        <div class="demo-jump-links">
+          <a href="data-lab.html" class="jump-btn data-btn">📊 前往数据分析实验室</a>
+          <a href="https://github.com/csgrace/CS209A/tree/main/assignment/assignment2" target="_blank" rel="noopener" class="jump-btn outline-btn">☕ 查看 JavaFX 源码 ↗</a>
+        </div>
+      </div>
+      <div class="hero-visual farm-visual">
+        <div class="floating-card card-sun">
+          <span class="card-icon">☀️</span>
+        </div>
+        <div class="floating-card card-wheat">
+          <span class="card-icon">🌻</span>
+        </div>
+        <div class="floating-card card-tree">
+          <span class="card-icon">🌳</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game Section -->
+    <section class="demo-section">
+      <div class="game-container">
+        <!-- Side Panel -->
+        <aside class="game-panel">
+          <div class="panel-header">
+            <div class="player-info">
+              <span class="player-avatar">🌻</span>
+              <div>
+                <strong>Grace 的农场</strong>
+                <small id="farm-status">选择一块土地开始耕种</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-card coins-card">
+              <span class="stat-icon">🪙</span>
+              <div class="stat-info">
+                <small>金币</small>
+                <strong id="coin-count">40</strong>
+              </div>
+            </div>
+            <div class="stat-card plots-card">
+              <span class="stat-icon">🌱</span>
+              <div class="stat-info">
+                <small>已种植</small>
+                <strong id="farm-progress">0/16</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-section">
+            <h4>操作</h4>
+            <div class="game-actions">
+              <button class="farm-action plant" id="plant-btn">
+                <span class="action-icon">🌱</span>
+                <span class="action-text">种植</span>
+                <span class="action-cost">-5 🪙</span>
+              </button>
+              <button class="farm-action harvest" id="harvest-btn">
+                <span class="action-icon">🧺</span>
+                <span class="action-text">收获</span>
+                <span class="action-cost">+12 🪙</span>
+              </button>
+              <button class="farm-action reset" id="reset-btn">
+                <span class="action-icon">↻</span>
+                <span class="action-text">重新开始</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="game-tips">
+            <h4>💡 游戏提示</h4>
+            <ul>
+              <li>点击地块选中土地</li>
+              <li>每次种植花费 5 金币</li>
+              <li>作物 10 秒后成熟</li>
+              <li>成熟作物会闪烁提醒</li>
+              <li>收获可获得 12 金币</li>
+            </ul>
+          </div>
+
+          <div class="legend-box">
+            <h4>图例</h4>
+            <div class="legend-items">
+              <span class="legend-item"><i class="legend-dot soil"></i>空地</span>
+              <span class="legend-item"><i class="legend-dot growing"></i>生长中</span>
+              <span class="legend-item"><i class="legend-dot ripe"></i>可收获</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Game Board -->
+        <div class="game-board-container">
+          <div class="board-header">
+            <h3>🏡 我的农场</h3>
+            <span class="board-subtitle">点击土地进行种植或收获</span>
+          </div>
+          <div id="farm-board" class="farm-board" aria-label="QQ 农场地块" role="grid"></div>
+        </div>
+      </div>
+    </section>
   </main>
-  <footer class="footer"><p>CS209A · QQ Farm Playground</p></footer>
-  <script src="js/main.js"></script><script src="js/qq-farm.js"></script>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>CS209A · QQ Farm Playground · JavaFX Assignment</span>
+      <a href="https://github.com/csgrace/CS209A" target="_blank" rel="noopener">View on GitHub ↗</a>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/qq-farm.js"></script>
 </body>
 </html>
