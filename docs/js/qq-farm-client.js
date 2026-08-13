@@ -80,7 +80,14 @@
 
     createGrid();
     startGrowthTicker();
-    switchTab('concurrent');
+    // Setup demo players with crops so the farm isn't empty
+    setupDemoPlayers();
+    // Show initial log messages
+    server.logMsg('SERVER', '🌾 QQ Farm 服务器已启动', 'MAIN');
+    server.logMsg('SERVER', '📡 模拟 Java synchronized 互斥锁 + ConcurrentHashMap', 'MAIN');
+    server.logMsg('INFO', '💡 点击 "去别人家" 选择一个玩家，然后就可以偷菜了！', 'MAIN');
+    server.logMsg('INFO', '💡 点击 "并发测试" 可以看到 CountDownLatch 并发演示', 'MAIN');
+    switchTab('log');
   }
 
   // ── Login ──────────────────────────────────────────────────
@@ -177,15 +184,39 @@
     if (currentAction) setStatus(`模式: ${action === 'plant' ? '种植' : '收获'} — 点击地块`);
   }
 
+  // ── Setup Demo Players with Crops ────────────────────────────
+  function setupDemoPlayers() {
+    const demoNames = ['alice', 'bob', 'victim'];
+    demoNames.forEach(name => {
+      const isNew = !server.getPlayers().includes(name);
+      if (isNew) {
+        server.login(name);
+      }
+      const farm = server.getFarm(name);
+      // Auto-plant some ripe crops if the farm is empty
+      if (farm.getRipeCount() === 0) {
+        let planted = 0;
+        for (let i = 0; i < 16 && planted < 6; i++) {
+          if (farm.board[i] === 'EMPTY') {
+            farm.board[i] = 'RIPE';
+            farm.timestamps[i] = 0;
+            planted++;
+          }
+        }
+        if (isNew && planted > 0) {
+          server.logMsg('SETUP', `🌻 ${name} 的农场种了 ${planted} 棵成熟作物`, 'INIT');
+        }
+      }
+      // Make NPC players "away from home" so they can be stolen
+      server.currentView.set(name, '_away_');
+    });
+  }
+
   // ── Visit Other Players ─────────────────────────────────────
   function openVisitModal() {
     if (!playerName) return;
-    const players = server.getPlayers();
-    // Auto-create demo players if needed
-    if (players.length <= 1) {
-      server.login('alice');
-      server.login('bob');
-    }
+    // Ensure demo players exist with crops
+    setupDemoPlayers();
     const otherPlayers = server.getPlayers().filter(p => p !== playerName);
     if (otherPlayers.length === 0) {
       setStatus('没有其他玩家可以访问');
@@ -201,7 +232,7 @@
       item.className = 'player-list-item';
       item.innerHTML = `
         <span class="pli-name">🌻 ${name}</span>
-        <span class="pli-info">🌻×${ripeCount} 成熟</span>
+        <span class="pli-info">🌻×${ripeCount} 成熟 — 可偷！</span>
       `;
       item.addEventListener('click', () => {
         els.visitModal.classList.add('hidden');
@@ -315,7 +346,10 @@
       <p class="hint">synchronized 锁保证同一时刻只有一个线程能偷</p>
     `;
 
-    document.getElementById('concurrent-result').innerHTML = '';
+    document.getElementById('concurrent-result').innerHTML = `
+      <p class="concurrent-hint">👆 点击 "开始并发测试" 按钮运行 CountDownLatch 并发演示</p>
+    `;
+    server.logMsg('CONCURRENT-SETUP', '⚡ 并发测试就绪: alice + bob → victim (8 作物, maxSteal=2)', 'MAIN');
     els.concurrentModal.classList.remove('hidden');
   }
 
