@@ -1,299 +1,405 @@
 /**
- * QQ Farm Web Client — WebSocket frontend for the Java server
- * Connects to websocket_proxy.py (port 8765) → Java Server (port 5050)
+ * QQ Farm Interactive Client — connects to the in-browser FarmServer engine.
+ * Handles all UI rendering, user interactions, and the concurrency demo.
  */
 (() => {
-  const WS_URL = 'ws://localhost:8765';
-  const els = {};
-  let ws = null;
+  'use strict';
+
+  let server = null;
   let playerName = null;
   let viewingPlayer = null;
-  let myCoins = 0;
-  let selectedPlot = null;
-  let isOwnFarm = true;
+  let selectedPlot = -1;
+  let growthTimer = null;
+  const els = {};
 
-  // ── DOM ready ──────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', init);
 
   function init() {
+    server = new window.FarmServer();
+    server.onEvent(onServerEvent);
+
+    // Cache DOM elements
     els.loginOverlay = document.getElementById('login-overlay');
     els.loginBtn = document.getElementById('login-btn');
     els.usernameInput = document.getElementById('username-input');
     els.loginError = document.getElementById('login-error');
-    els.terminal = document.getElementById('terminal');
-    els.terminalOutput = document.getElementById('terminal-output');
-    els.cmdInput = document.getElementById('cmd-input');
-    els.cmdSubmit = document.getElementById('cmd-submit');
-    els.farmGrid = document.getElementById('farm-grid');
     els.playerLabel = document.getElementById('player-label');
     els.viewingLabel = document.getElementById('viewing-label');
     els.coinsDisplay = document.getElementById('coins-display');
     els.statusBar = document.getElementById('status-bar');
-    els.quickBtns = document.querySelectorAll('.quick-btn');
-    els.connDot = document.getElementById('conn-dot');
-    els.connText = document.getElementById('conn-text');
+    els.gridOwner = document.getElementById('grid-owner');
+    els.farmGrid = document.getElementById('farm-grid');
+    els.logPanel = document.getElementById('log-panel');
+    els.logContent = document.getElementById('log-content');
+    els.playerTabs = document.getElementById('player-tabs');
+    els.stealModal = document.getElementById('steal-modal');
+    els.concurrentModal = document.getElementById('concurrent-modal');
 
     els.loginBtn.addEventListener('click', handleLogin);
     els.usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-    els.cmdSubmit.addEventListener('click', submitCommand);
-    els.cmdInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitCommand(); });
 
-    els.quickBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const cmd = btn.dataset.cmd;
-        if (cmd) sendCommand(cmd);
-      });
+    document.getElementById('btn-refresh').addEventListener('click', () => refreshFarm());
+    document.getElementById('btn-players').addEventListener('click', showPlayers);
+
+    document.getElementById('btn-plant-mode').addEventListener('click', () => { setSelectedAction('plant'); });
+    document.getElementById('btn-harvest-mode').addEventListener('click', () => { setSelectedAction('harvest'); });
+    document.getElementById('btn-steal-mode').addEventListener('click', openStealModal);
+    document.getElementById('btn-concurrent').addEventListener('click', openConcurrentModal);
+
+    document.getElementById('btn-view-home').addEventListener('click', () => {
+      if (!playerName) return;
+      viewingPlayer = playerName;
+      renderFarm(server.get(playerName));
+      updateUI();
+      setStatus(`回到自己的农场`);
+    });
+
+    document.getElementById('tabs-btn-game').addEventListener('click', () => switchTab('game'));
+    document.getElementById('tabs-btn-log').addEventListener('click', () => switchTab('log'));
+    document.getElementById('tabs-btn-concurrent').addEventListener('click', () => switchTab('concurrent'));
+
+    // Steal modal
+    document.getElementById('steal-confirm-btn').addEventListener('click', executeSteal);
+    document.getElementById('steal-cancel-btn').addEventListener('click', () => {
+      els.stealModal.classList.add('hidden');
+    });
+
+    // Concurrent modal
+    document.getElementById('concurrent-start-btn').addEventListener('click', executeConcurrentTest);
+    document.getElementById('concurrent-close-btn').addEventListener('click', () => {
+      els.concurrentModal.classList.add('hidden');
     });
 
     createGrid();
-    connectWebSocket();
+    startGrowthTicker();
+    switchTab('concurrent');
   }
 
-  // ── WebSocket ──────────────────────────────────────────────
-  function connectWebSocket() {
-    try {
-      ws = new WebSocket(WS_URL);
-    } catch {
-      setConnectionStatus('error', '连接失败');
-      printOutput('系统', '无法连接到 WebSocket 代理。请确认：\n  1. Java 服务器已启动 (端口 5050)\n  2. websocket_proxy.py 已启动 (端口 8765)', 'error');
-      return;
-    }
-
-    ws.onopen = () => {
-      setConnectionStatus('connected', '已连接');
-      printOutput('系统', '已连接到服务器代理。请输入用户名登录。', 'info');
-    };
-
-    ws.onmessage = (event) => handleServerMessage(event.data);
-
-    ws.onclose = () => {
-      setConnectionStatus('disconnected', '已断开');
-      printOutput('系统', '与服务器断开连接。', 'error');
-    };
-
-    ws.onerror = () => {
-      setConnectionStatus('error', '连接错误');
-      printOutput('系统', 'WebSocket 连接错误。请确认代理服务器正在运行。', 'error');
-    };
+  // ── Login ──────────────────────────────────────────────────
+  function handleLogin() {
+    const name = els.usernameInput.value.trim();
+    if (!name) { els.loginError.textContent = '请输入用户名'; return; }
+    playerName = name;
+    viewingPlayer = playerName;
+    const result = server.login(name);
+    els.loginOverlay.classList.add('hidden');
+    renderFarm(result.snapshot);
+    updateUI();
+    setStatus(`登录成功！欢迎 ${name}`);
   }
 
-  function sendCommand(cmd) {
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      printOutput('系统', '未连接到服务器。', 'error');
-      return;
-    }
-    ws.send(cmd);
-    els.cmdInput.value = '';
-  }
-
-  // ── Server message handling ────────────────────────────────
-  function handleServerMessage(raw) {
-    const lines = raw.split('\n').filter(l => l.trim());
-    for (const line of lines) {
-      parseLine(line.trim());
-    }
-  }
-
-  function parseLine(line) {
-    if (line.startsWith('OK WELCOME')) {
-      printOutput('服务器', line, 'success');
-    } else if (line.startsWith('OK LOGGED_IN')) {
-      playerName = line.split(' ')[2];
-      viewingPlayer = playerName;
-      isOwnFarm = true;
-      els.loginOverlay.classList.add('hidden');
-      printOutput('服务器', `登录成功！欢迎, ${playerName}`, 'success');
-      updateLabels();
-      sendCommand('GET');
-    } else if (line.startsWith('OK {')) {
-      const json = line.substring(3);
-      updateFarmFromJson(json);
-      const cmd = getLastCommand();
-      if (cmd.startsWith('VIEW ')) {
-        viewingPlayer = cmd.split(' ')[1];
-        isOwnFarm = viewingPlayer === playerName;
-        printOutput('服务器', `正在查看 ${viewingPlayer} 的农场`, 'info');
-      } else if (cmd === 'GET') {
-        viewingPlayer = playerName;
-        isOwnFarm = true;
-      }
-      updateLabels();
-    } else if (line.startsWith('OK ')) {
-      printOutput('服务器', line.substring(3), 'success');
-      // PlayERS list etc
-      if (!line.includes('{')) {
-        // Simple OK response, refresh own farm
-        sendCommand('GET');
-      }
-    } else if (line.startsWith('ERR ')) {
-      printOutput('错误', line.substring(4), 'error');
-      setStatus(line.substring(4));
-    } else if (line.startsWith('UPDATE ')) {
-      handleUpdate(line);
-    } else {
-      printOutput('服务器', line, 'info');
-    }
-  }
-
-  let lastCmd = '';
-  function getLastCommand() { return lastCmd; }
-
-  function handleUpdate(line) {
-    // UPDATE <player> {"coins":...,"board":[...]}
-    const match = line.match(/UPDATE (\S+) (.+)/);
-    if (!match) return;
-    const [, player, json] = match;
-    if (player === viewingPlayer || (isOwnFarm && player === playerName)) {
-      updateFarmFromJson(json);
-    }
-    if (player === playerName) {
-      myCoins = parseCoins(json);
-      updateCoinsDisplay();
-    }
-    // Show brief notification
-    if (player !== playerName) {
-      setStatus(`${player} 的农场有更新`);
-    }
-  }
-
-  // ── JSON parsing ───────────────────────────────────────────
-  function parseCoins(json) {
-    const m = json.match(/"coins":(\d+)/);
-    return m ? parseInt(m[1]) : myCoins;
-  }
-
-  function updateFarmFromJson(json) {
-    try {
-      const data = JSON.parse(json);
-      myCoins = data.coins;
-      updateCoinsDisplay();
-      if (Array.isArray(data.board)) {
-        data.board.forEach((row, r) => {
-          if (Array.isArray(row)) {
-            row.forEach((cell, c) => {
-              const idx = r * 4 + c;
-              const cellEl = els.farmGrid.children[idx];
-              if (cellEl) updateCell(cellEl, cell);
-            });
-          }
-        });
-      }
-      // Update selected state
-      Array.from(els.farmGrid.children).forEach(c => c.classList.remove('selected'));
-    } catch (e) {
-      console.warn('JSON parse error:', e);
-    }
-  }
-
-  function updateCell(cellEl, state) {
-    cellEl.classList.remove('empty', 'growing', 'ripe');
-    const plotIdx = parseInt(cellEl.dataset.idx);
-    if (state === 'EMPTY') {
-      cellEl.classList.add('empty');
-      cellEl.innerHTML = '<span class="cell-icon">🟫</span><span class="cell-text">空地</span>';
-    } else if (state === 'GROWING') {
-      cellEl.classList.add('growing');
-      cellEl.innerHTML = '<span class="cell-icon">🌱</span><span class="cell-text">生长中</span>';
-    } else if (state === 'RIPE') {
-      cellEl.classList.add('ripe');
-      cellEl.innerHTML = '<span class="cell-icon">🌻</span><span class="cell-text">成熟!</span>';
-    }
-    cellEl.dataset.state = state;
-  }
-
-  // ── Grid ───────────────────────────────────────────────────
+  // ── Farm Grid ──────────────────────────────────────────────
   function createGrid() {
     els.farmGrid.innerHTML = '';
     for (let i = 0; i < 16; i++) {
       const cell = document.createElement('button');
       cell.className = 'farm-cell empty';
       cell.dataset.idx = i;
-      cell.dataset.state = 'EMPTY';
       cell.innerHTML = '<span class="cell-icon">🟫</span><span class="cell-text">空地</span>';
-      cell.addEventListener('click', () => selectPlot(i));
+      cell.addEventListener('click', () => onPlotClick(i));
       els.farmGrid.appendChild(cell);
     }
   }
 
-  function selectPlot(idx) {
-    selectedPlot = idx;
-    Array.from(els.farmGrid.children).forEach(c => c.classList.remove('selected'));
-    els.farmGrid.children[idx].classList.add('selected');
+  function renderFarm(snapshot) {
+    if (!snapshot) return;
+    els.coinsDisplay.textContent = snapshot.coins;
+    snapshot.board.forEach((state, i) => {
+      const cell = els.farmGrid.children[i];
+      if (!cell) return;
+      cell.classList.remove('empty', 'growing', 'ripe');
+      cell.dataset.state = state;
+      if (state === 'EMPTY') {
+        cell.classList.add('empty');
+        cell.innerHTML = '<span class="cell-icon">🟫</span><span class="cell-text">空地</span>';
+      } else if (state === 'GROWING') {
+        cell.classList.add('growing');
+        cell.innerHTML = '<span class="cell-icon">🌱</span><span class="cell-text">生长中</span>';
+      } else if (state === 'RIPE') {
+        cell.classList.add('ripe');
+        cell.innerHTML = '<span class="cell-icon">🌻</span><span class="cell-text">成熟!</span>';
+      }
+    });
+  }
+
+  function onPlotClick(idx) {
+    const cell = els.farmGrid.children[idx];
+    const state = cell.dataset.state;
+    const isOwn = viewingPlayer === playerName;
     const r = Math.floor(idx / 4);
     const c = idx % 4;
-    setStatus(`已选中地块 (${r},${c})`);
-    // If viewing own farm and cell is ripe, suggest harvest
-    const state = els.farmGrid.children[idx].dataset.state;
-    if (isOwnFarm && state === 'EMPTY') {
-      setStatus(`已选中空地 (${r},${c}) — 可种植`);
-    } else if (isOwnFarm && state === 'RIPE') {
-      setStatus(`已选成熟地块 (${r},${c}) — 可收获`);
-    } else if (!isOwnFarm && state === 'RIPE') {
-      setStatus(`已选 ${viewingPlayer} 的成熟作物 (${r},${c})`);
+
+    // Clear selection
+    Array.from(els.farmGrid.children).forEach(c => c.classList.remove('selected'));
+
+    if (currentAction === 'plant') {
+      if (!isOwn) { setStatus('只能在自己的农场种植'); return; }
+      if (state !== 'EMPTY') { setStatus('这块地不是空地'); return; }
+      try {
+        const snap = server.plant(playerName, r, c);
+        renderFarm(snap);
+        setStatus(`在 (${r},${c}) 种下种子，10秒后成熟`);
+      } catch (e) { setStatus(e.message); }
+    } else if (currentAction === 'harvest') {
+      if (!isOwn) { setStatus('只能收获自己的作物'); return; }
+      if (state !== 'RIPE') { setStatus('这块地的作物还没熟'); return; }
+      try {
+        const snap = server.harvest(playerName, r, c);
+        renderFarm(snap);
+        setStatus(`收获成功！+12 金币`);
+      } catch (e) { setStatus(e.message); }
+    } else {
+      // Selection mode
+      selectedPlot = idx;
+      cell.classList.add('selected');
+      if (state === 'EMPTY') setStatus(`选中空地 (${r},${c})`);
+      else if (state === 'GROWING') setStatus(`选中生长中 (${r},${c})`);
+      else if (state === 'RIPE') {
+        if (isOwn) setStatus(`选中成熟作物 (${r},${c}) — 可收获`);
+        else setStatus(`选中 ${viewingPlayer} 的成熟作物 (${r},${c}) — 可偷！`);
+      }
     }
   }
 
-  // ── Command interface ──────────────────────────────────────
-  function submitCommand() {
-    const cmd = els.cmdInput.value.trim();
-    if (!cmd) return;
-    lastCmd = cmd;
-    printOutput('>', cmd, 'command');
-    sendCommand(cmd);
-    // Handle GET locally to refresh
-    if (cmd.toUpperCase() === 'GET') {
-      viewingPlayer = playerName;
-      isOwnFarm = true;
-      updateLabels();
-    } else if (cmd.toUpperCase().startsWith('GET ')) {
-      viewingPlayer = playerName;
-      isOwnFarm = true;
-      updateLabels();
-    }
+  let currentAction = null;
+  function setSelectedAction(action) {
+    currentAction = currentAction === action ? null : action;
+    document.getElementById('btn-plant-mode').classList.toggle('active', currentAction === 'plant');
+    document.getElementById('btn-harvest-mode').classList.toggle('active', currentAction === 'harvest');
+    if (currentAction) setStatus(`模式: ${action === 'plant' ? '种植' : '收获'} — 点击地块`);
   }
 
-  function handleLogin() {
-    const name = els.usernameInput.value.trim();
-    if (!name) {
-      els.loginError.textContent = '请输入用户名';
+  // ── Visit Other Players ─────────────────────────────────────
+  function showPlayers() {
+    const players = server.getPlayers();
+    if (players.length <= 1) {
+      setStatus('目前还没有其他玩家，先用 ConcurrencyTest 按钮创建');
+      // Auto-create demo players
+      server.login('alice');
+      server.login('bob');
+      players.push('alice', 'bob');
+    }
+    const otherPlayers = players.filter(p => p !== playerName);
+    if (otherPlayers.length === 0) {
+      setStatus('没有其他玩家可以访问');
       return;
     }
-    lastCmd = 'LOGIN ' + name;
-    printOutput('>', `LOGIN ${name}`, 'command');
-    sendCommand('LOGIN ' + name);
+    // Show a simple selection dialog
+    const name = prompt(`输入要查看的玩家名: ${otherPlayers.join(', ')}`);
+    if (name && otherPlayers.includes(name)) {
+      visitPlayer(name);
+    }
   }
 
-  // ── UI helpers ─────────────────────────────────────────────
-  function printOutput(prefix, text, type) {
-    const line = document.createElement('div');
-    line.className = `output-line ${type}`;
-    const prefixSpan = document.createElement('span');
-    prefixSpan.className = 'output-prefix';
-    prefixSpan.textContent = prefix;
-    const textSpan = document.createElement('span');
-    textSpan.className = 'output-text';
-    textSpan.textContent = text;
-    line.appendChild(prefixSpan);
-    line.appendChild(textSpan);
-    els.terminalOutput.appendChild(line);
-    els.terminal.scrollTop = els.terminal.scrollHeight;
+  function visitPlayer(name) {
+    // Make sure target has been viewed by current player (start session)
+    const result = server.view(playerName, name);
+    viewingPlayer = name;
+    selectedPlot = -1;
+    renderFarm(result.snapshot);
+    updateUI();
+    setStatus(`正在查看 ${name} 的农场 — 可以偷菜了！`);
   }
 
-  function setStatus(text) {
-    els.statusBar.textContent = text;
+  function refreshFarm() {
+    const snap = server.get(playerName);
+    viewingPlayer = playerName;
+    renderFarm(snap);
+    updateUI();
+    setStatus('已刷新自己的农场');
   }
 
-  function setConnectionStatus(status, text) {
-    els.connDot.className = `conn-dot ${status}`;
-    els.connText.textContent = text;
+  // ── Steal ──────────────────────────────────────────────────
+  function openStealModal() {
+    if (!playerName) return;
+    const players = server.getPlayers().filter(p => p !== playerName);
+    if (players.length === 0) {
+      // Auto-create
+      server.login('alice');
+      server.login('bob');
+      players.push('alice', 'bob');
+    }
+    const select = document.getElementById('steal-target');
+    select.innerHTML = players.map(p => `<option value="${p}">${p}</option>`).join('');
+    document.getElementById('steal-info').innerHTML = `
+      <p><strong>规则：</strong></p>
+      <ul>
+        <li>受害者必须不在家（不能正在查看自己的农场）</li>
+        <li>每次 session 最多偷 25% 的成熟作物</li>
+        <li>偷一次后本轮禁止再偷（需等对方种新作物）</li>
+      </ul>
+    `;
+    els.stealModal.classList.remove('hidden');
   }
 
-  function updateLabels() {
+  async function executeSteal() {
+    const target = document.getElementById('steal-target').value;
+    if (!target) return;
+    els.stealModal.classList.add('hidden');
+
+    // Step 1: View the victim first (required by server)
+    try {
+      server.view(playerName, target);
+    } catch (e) { /* ok if already viewing */ }
+
+    // Step 2: Make victim "away from home"
+    server.currentView.set(target, '_away_');
+    server.logMsg('STATUS', `${target} 离开了家（ victim is away ）`, 'SYSTEM');
+
+    try {
+      const result = await server.steal(playerName, target);
+      // Show the victim's farm after stealing
+      const victimSnap = server.getFarm(target).snapshot();
+      viewingPlayer = target;
+      renderFarm(victimSnap);
+      updateUI();
+      setStatus(`偷菜成功！偷了 ${target} 的地块 #${result.stolenIdx}，+3 金币 | session: ${result.sessionCount}/${result.maxSteal}`);
+    } catch (e) {
+      setStatus(`偷菜失败: ${e.message}`);
+    }
+  }
+
+  // ── Concurrent Test ─────────────────────────────────────────
+  function openConcurrentModal() {
+    // Ensure we have enough players
+    const existing = server.getPlayers();
+    if (!existing.includes('alice')) server.login('alice');
+    if (!existing.includes('bob')) server.login('bob');
+    if (!existing.includes('victim')) server.login('victim');
+
+    const victim = server.getFarm('victim');
+
+    // Plant some ripe crops on victim's farm
+    let planted = 0;
+    for (let i = 0; i < 16 && planted < 8; i++) {
+      if (victim.board[i] === 'EMPTY') {
+        victim.board[i] = 'RIPE';
+        victim.timestamps[i] = 0;
+        planted++;
+      }
+    }
+
+    // Make victim away from home
+    server.currentView.set('victim', '_away_');
+
+    // Setup thieves: both view victim
+    server.view('alice', 'victim');
+    server.view('bob', 'victim');
+
+    document.getElementById('concurrent-setup').innerHTML = `
+      <p><strong>Victim:</strong> victim (8 个成熟作物)</p>
+      <p><strong>Thief A:</strong> alice</p>
+      <p><strong>Thief B:</strong> bob</p>
+      <p><strong>规则:</strong> 两人同时发起 steal，maxSteal = floor(8 × 25%) = 2</p>
+      <p class="hint">synchronized 锁保证同一时刻只有一个线程能偷</p>
+    `;
+
+    document.getElementById('concurrent-result').innerHTML = '';
+    els.concurrentModal.classList.remove('hidden');
+  }
+
+  async function executeConcurrentTest() {
+    const btn = document.getElementById('concurrent-start-btn');
+    btn.disabled = true;
+    btn.textContent = '运行中...';
+
+    const result = await server.runConcurrentSteal('alice', 'bob', 'victim');
+
+    const resultDiv = document.getElementById('concurrent-result');
+    resultDiv.innerHTML = `
+      <div class="concurrent-results">
+        <div class="concurrent-result-card ${result.resultA.success ? 'success' : 'fail'}">
+          <h4>Alice</h4>
+          <p>${result.resultA.success
+            ? `✓ 偷到了！地块#${result.resultA.stolenIdx}，+3金币`
+            : `✗ 失败: ${result.resultA.reason}`}</p>
+        </div>
+        <div class="concurrent-result-card ${result.resultB.success ? 'success' : 'fail'}">
+          <h4>Bob</h4>
+          <p>${result.resultB.success
+            ? `✓ 偷到了！地块#${result.resultB.stolenIdx}，+3金币`
+            : `✗ 失败: ${result.resultB.reason}`}</p>
+        </div>
+      </div>
+      <p class="concurrent-summary">
+        victim 剩余成熟作物: ${server.getFarm('victim').getRipeCount()}
+        | victim金币: ${server.getFarm('victim').coins}
+        | alice金币: ${server.getFarm('alice').coins}
+        | bob金币: ${server.getFarm('bob').coins}
+      </p>
+    `;
+
+    btn.disabled = false;
+    btn.textContent = '开始并发测试';
+  }
+
+  // ── Growth Ticker ───────────────────────────────────────────
+  function startGrowthTicker() {
+    growthTimer = setInterval(() => {
+      let changed = false;
+      for (const [name, farm] of server.farms) {
+        farm.board.forEach((state, i) => {
+          if (state === 'GROWING' && Date.now() - farm.timestamps[i] >= window.FARM_CONFIG.GROW_TIME_MS) {
+            farm.board[i] = 'RIPE';
+            farm.timestamps[i] = 0;
+            changed = true;
+          }
+        });
+      }
+      // Refresh if the currently viewing farm changed
+      if (changed && viewingPlayer) {
+        const farm = server.getFarm(viewingPlayer);
+        renderFarm(farm.snapshot());
+      }
+    }, 500);
+  }
+
+  // ── Server Event Log ────────────────────────────────────────
+  function onServerEvent(evt) {
+    const div = document.createElement('div');
+    div.className = `log-entry log-${getTagClass(evt.tag)}`;
+
+    const time = new Date(evt.time);
+    const ts = `${time.getMinutes().toString().padStart(2, '0')}:${time.getSeconds().toString().padStart(2, '0')}.${Math.floor(time.getMilliseconds()).toString().padStart(3, '0')}`;
+
+    div.innerHTML = `
+      <span class="log-time">${ts}</span>
+      <span class="log-tag">${evt.tag}</span>
+      <span class="log-thread">[${evt.thread}]</span>
+      <span class="log-msg">${escapeHtml(evt.msg)}</span>
+    `;
+    els.logContent.appendChild(div);
+    els.logContent.scrollTop = els.logContent.scrollHeight;
+  }
+
+  function getTagClass(tag) {
+    if (tag.includes('STEAL-SUCCESS')) return 'success';
+    if (tag.includes('STEAL-DENY') || tag.includes('STEAL-FAIL')) return 'error';
+    if (tag.includes('CONCURRENT')) return 'info';
+    if (tag.includes('ENTER') || tag.includes('EXIT')) return 'warn';
+    return '';
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ── UI Helpers ──────────────────────────────────────────────
+  function updateUI() {
     els.playerLabel.textContent = playerName || '未登录';
     els.viewingLabel.textContent = viewingPlayer || '-';
+    els.gridOwner.textContent = viewingPlayer ? `(${viewingPlayer})` : '';
   }
 
-  function updateCoinsDisplay() {
-    els.coinsDisplay.textContent = myCoins;
+  function setStatus(text) { els.statusBar.textContent = text; }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tabs-btn-${tab}`).classList.add('active');
+    document.getElementById('panel-game').classList.toggle('hidden', tab !== 'game');
+    document.getElementById('panel-log').classList.toggle('hidden', tab !== 'log');
+    document.getElementById('panel-concurrent').classList.toggle('hidden', tab !== 'concurrent');
   }
 })();
