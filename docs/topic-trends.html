@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Topic Trends — Java Analysis</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}</style>
+</head>
+<body class="bg-slate-50">
+<div class="w-full bg-blue-100">
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Topic Trends</h1>
+                <p class="text-sm text-slate-700 mt-1">Track activity & engagement of Java topics over time. Select topics and metric to visualize trends for the chosen time window.</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a id="backBtn" href="data-lab.html"
+                   class="inline-flex items-center gap-2 px-3 py-1 rounded bg-white border border-slate-200 text-sm shadow-sm hover:shadow transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back
+                </a>
+
+                <button id="downloadBtn" type="button"
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded bg-white border border-slate-200 text-sm shadow-sm transition opacity-50 cursor-not-allowed"
+                        aria-disabled="true" title="Generate charts first to enable download">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 5v10" />
+                    </svg>
+                    Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto p-6">
+    <div class="bg-white p-5 rounded-xl shadow mb-6">
+        <form id="controls" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-700">Topics (comma separated) e.g. collections,I/O,lambda,socket... </label>
+                <input id="topics" placeholder="e.g. generics,collections,concurrency"
+                       class="mt-1 p-2 w-full rounded border"
+                       value="generics,lambda,android,spring-boot" />
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-700">Years back(1~40)</label>
+                <input id="years" type="number" value="10" min="1" max="40" step="1" class="mt-1 p-2 w-full rounded border" />
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-700">Metric</label>
+                <select id="metric" class="mt-1 p-2 w-full rounded border">
+                    <option value="questionCount">Questions (count)</option>
+                    <option value="answerCount">Answers (count)</option>
+                    <option value="commentCount">Comments (count)</option>
+                    <option value="avgAnswerCount">Avg answers per question</option>
+                    <option value="avgScore">Avg question score</option>
+                    <option value="avgViewCount">Avg view count</option>
+                </select>
+            </div>
+
+            <div>
+                <button id="loadBtn" type="button" class="w-full bg-blue-200 text-blue-800 py-2 rounded shadow-sm hover:bg-blue-300 transition">
+                    Load Trends
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-md font-semibold text-slate-800" id="chartTitle">Trends</h3>
+                    <p id="chartSubtitle" class="text-xs text-slate-500 mt-1">Select topics and metric then click Load Trends.</p>
+                </div>
+                <div class="text-sm text-slate-500" id="rangeInfo"></div>
+            </div>
+
+            <div class="mt-4">
+                <canvas id="trendChart" height="200"></canvas>
+            </div>
+
+            <div id="metricNote" class="mt-3 text-xs text-slate-500"></div>
+
+            <div id="trendInsights" class="mt-4 bg-blue-50 p-3 rounded text-sm text-slate-700 hidden"></div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow">
+            <h3 class="text-sm font-semibold text-slate-700">Per-topic summary</h3>
+            <div id="summaryList" class="mt-3 space-y-3 text-sm text-slate-600">
+            </div>
+            <div id="insights" class="mt-4 text-sm text-slate-600"></div>
+        </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow mt-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-md font-semibold text-slate-800">Popular Tags</h3>
+                <p id="popularSubtitle" class="text-xs text-slate-500 mt-1">Top tags by question count. Enter a number and click Check.</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-blue-50 p-2 rounded">
+                    <label for="popularLimit" class="text-xs text-slate-600">Limit</label>
+                    <input id="popularLimit" type="number" min="1" max="40" value="20" class="w-20 p-1 rounded border text-sm" />
+                </div>
+                <button id="loadPopularBtn" class="inline-flex items-center gap-2 px-4 py-2 rounded bg-blue-200 text-blue-800 shadow-sm hover:bg-blue-300 transition">
+                    Check
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <canvas id="popularChart" height="240"></canvas>
+            <div id="popularNote" class="mt-3 text-xs text-slate-500">Each bar shows the question count; the numeric value is displayed at the end of the bar.</div>
+
+            <div id="popularInsights" class="mt-4 bg-blue-50 p-3 rounded text-sm text-slate-700">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/static-api.js"></script>
+<script>
+    const colorPalette = [
+        '#2563EB','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#F472B6','#84CC16','#FB7185','#334155'
+    ];
+    function pickColor(i){ return colorPalette[i % colorPalette.length]; }
+
+    const blueShades = ['#102e68','#1E3A8A','#2563EB','#3B82F6','#60A5FA','#93C5FD','#BFDBFE','#DBEAFE','#E0F2FE','#EFF6FF'];
+    function pickBlue(i){ return blueShades[i % blueShades.length]; }
+
+    async function fetchTagYearly(tag, years) {
+        return window.staticAnalysisApi.tagYearly(tag, years);
+    }
+
+    async function fetchTagMetrics(tags) {
+        return window.staticAnalysisApi.tagFeatures(tags);
+    }
+
+    async function fetchPopularTags(limit) {
+        return window.staticAnalysisApi.popularTags(limit);
+    }
+
+    function percentChange(first, last) {
+        if (first === 0) {
+            if (last === 0) return 0;
+            return 100;
+        }
+        return ((last - first) / Math.abs(first)) * 100;
+    }
+
+    function downloadCanvasWithWhiteBackground(canvasEl, filename) {
+        return new Promise((resolve, reject) => {
+            try {
+                const w = canvasEl.width;
+                const h = canvasEl.height;
+                const tmp = document.createElement('canvas');
+                tmp.width = w;
+                tmp.height = h;
+                const ctx = tmp.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0,0,w,h);
+
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const dataURL = tmp.toDataURL('image/png');
+                    const a = document.createElement('a');
+                    a.href = dataURL;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    resolve();
+                };
+                img.onerror = (e) => {
+                    try {
+                        const dataURL = canvasEl.toDataURL('image/png');
+                        const a = document.createElement('a');
+                        a.href = dataURL;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        resolve();
+                    } catch (ee) { reject(ee); }
+                };
+                img.src = canvasEl.toDataURL('image/png');
+            } catch (err) { reject(err); }
+        });
+    }
+
+    async function downloadAllCharts() {
+        const downloads = [];
+        const trendCanvas = document.getElementById('trendChart');
+        const popularCanvas = document.getElementById('popularChart');
+
+        if (trendCanvas && typeof trendCanvas.toDataURL === 'function') {
+            downloads.push(downloadCanvasWithWhiteBackground(trendCanvas, `topic-trends-${document.getElementById('metric').value || 'metric'}-${Date.now()}.png`));
+        }
+        if (popularCanvas && typeof popularCanvas.toDataURL === 'function') {
+            downloads.push(downloadCanvasWithWhiteBackground(popularCanvas, `popular-tags-${Date.now()}.png`));
+        }
+
+        if (downloads.length === 0) {
+            alert('No charts available to download.');
+            return;
+        }
+
+        try {
+            for (const p of downloads) {
+                await p;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Download failed: ' + (e.message || e));
+        }
+    }
+
+    let trendChart = null;
+    let popularChart = null;
+
+    function enableDownloadButton() {
+        const btn = document.getElementById('downloadBtn');
+        btn.classList.remove('opacity-50','cursor-not-allowed');
+        btn.setAttribute('aria-disabled','false');
+        btn.title = 'Download charts';
+        btn.onclick = downloadAllCharts;
+    }
+    function disableDownloadButton() {
+        const btn = document.getElementById('downloadBtn');
+        btn.classList.add('opacity-50','cursor-not-allowed');
+        btn.setAttribute('aria-disabled','true');
+        btn.title = 'Generate charts first to enable download';
+        btn.onclick = null;
+    }
+    disableDownloadButton();
+    (function(){
+        const yearsInput = document.getElementById('years');
+        if (yearsInput) {
+            yearsInput.setAttribute('min', '1');
+            yearsInput.setAttribute('max', '40');
+            yearsInput.setAttribute('step', '1');
+
+            yearsInput.addEventListener('input', () => {
+                const v = parseInt(yearsInput.value, 10);
+                if (Number.isNaN(v)) return;
+                if (v < 0) yearsInput.value = '1';
+                if (v > 40) yearsInput.value = '40';
+            });
+
+            yearsInput.addEventListener('change', () => {
+                let v = parseInt(yearsInput.value, 10);
+                if (Number.isNaN(v) || v < 0) yearsInput.value = '1';
+                else if (v > 40) yearsInput.value = '40';
+            });
+        }
+    })();
+    (function(){
+        const popularLimit = document.getElementById('popularLimit');
+        if (!popularLimit) return;
+
+        popularLimit.setAttribute('min', '1');
+        popularLimit.setAttribute('max', '40');
+        popularLimit.setAttribute('step', '1');
+
+        popularLimit.addEventListener('input', () => {
+            const v = parseInt(popularLimit.value, 10);
+            if (Number.isNaN(v)) return;
+            if (v < 1) popularLimit.value = '1';
+            else if (v > 40) popularLimit.value = '40';
+        });
+
+        popularLimit.addEventListener('change', () => {
+            let v = parseInt(popularLimit.value, 10);
+            if (Number.isNaN(v) || v < 1) popularLimit.value = '1';
+            else if (v > 40) popularLimit.value = '40';
+        });
+    })();
+    function metricLabel(metric) {
+        switch(metric){
+            case 'questionCount': return 'Question Count';
+            case 'answerCount': return 'Answer Count';
+            case 'commentCount': return 'Comment Count';
+            case 'avgAnswerCount': return 'Avg Answers / Question';
+            case 'avgScore': return 'Average Question Score';
+            case 'avgViewCount': return 'Average View Count';
+            default: return metric;
+        }
+    }
+
+    function metricNotes(metric) {
+        switch(metric){
+            case 'questionCount': return 'Shows number of questions tagged per year (activity).';
+            case 'answerCount': return 'Total answers associated with questions of this tag in the year.';
+            case 'commentCount': return 'Total comments (question + answer) associated with this tag in the year.';
+            case 'avgAnswerCount': return 'Average answers per question (per-year average answer_count).';
+            case 'avgScore': return 'Average score of questions — a proxy for engagement/quality signals.';
+            case 'avgViewCount': return 'Average views per question — indicates attention.';
+            default: return '';
+        }
+    }
+
+    function metricValue(row, metric) {
+        if (!row) return 0;
+        switch(metric){
+            case 'questionCount': return Number(row.questionCount || 0);
+            case 'answerCount': return Number(row.answerCount || 0);
+            case 'commentCount': return Number(row.commentCount || 0);
+            case 'avgAnswerCount': return Number(row.avgAnswerCount || 0);
+            case 'avgScore': return Number(row.avgScore || 0);
+            case 'avgViewCount': return Number(row.avgViewCount || 0);
+            default: return Number(row.questionCount || 0);
+        }
+    }
+
+    function generateTrendInsights(summaries, metric) {
+        if (!Array.isArray(summaries) || summaries.length === 0) return '';
+
+        const byChange = summaries.slice().sort((a,b) => b.changePct - a.changePct);
+        const topRiser = byChange.find(s => s.changePct > 0) || byChange[0];
+        const topFaller = byChange.slice().reverse().find(s => s.changePct < 0) || byChange[byChange.length-1];
+
+        const lines = [];
+
+        if (topRiser) {
+            const fr = Math.round(topRiser.firstVal);
+            const la = Math.round(topRiser.lastVal);
+            lines.push(` "${topRiser.tag}" — ${formatNumeric(fr)} → ${formatNumeric(la)} (${topRiser.changePct.toFixed(1)}% change) on metric "${metricLabel(metric)}".`);
+        }
+
+        if (topFaller && topFaller.changePct < 0) {
+            const fr = Math.round(topFaller.firstVal);
+            const la = Math.round(topFaller.lastVal);
+            lines.push(`"${topFaller.tag}" — ${formatNumeric(fr)} → ${formatNumeric(la)} (${topFaller.changePct.toFixed(1)}% change) on metric "${metricLabel(metric)}".`);
+        }
+
+        const viewChanges = [];
+        const answerChanges = [];
+        const scoreChanges = [];
+
+        summaries.forEach(s => {
+            const rows = s.rawRows.slice().sort((a,b) => String(a.year).localeCompare(String(b.year)));
+            const firstR = rows[0] || {};
+            const lastR = rows[rows.length-1] || {};
+            const vFirst = Number(firstR.avgViewCount || 0);
+            const vLast = Number(lastR.avgViewCount || 0);
+            const aFirst = Number(firstR.avgAnswerCount || 0);
+            const aLast = Number(lastR.avgAnswerCount || 0);
+            const scFirst = Number(firstR.avgScore || 0);
+            const scLast = Number(lastR.avgScore || 0);
+
+            const vPct = (vFirst === 0) ? (vLast === 0 ? 0 : 100) : ((vLast - vFirst) / Math.abs(vFirst) * 100);
+            const aPct = (aFirst === 0) ? (aLast === 0 ? 0 : 100) : ((aLast - aFirst) / Math.abs(aFirst) * 100);
+            const scPct = (scFirst === 0) ? (scLast === 0 ? 0 : 100) : ((scLast - scFirst) / Math.abs(scFirst) * 100);
+
+            if (Math.abs(vPct) >= 10) viewChanges.push({ tag: s.tag, pct: vPct, first: vFirst, last: vLast });
+            if (Math.abs(aPct) >= 10) answerChanges.push({ tag: s.tag, pct: aPct, first: aFirst, last: aLast });
+            if (Math.abs(scPct) >= 10) scoreChanges.push({ tag: s.tag, pct: scPct, first: scFirst, last: scLast });
+        });
+
+        if (viewChanges.length) {
+            const parts = viewChanges.map(v => `"${v.tag}" (${v.first.toFixed(0)} → ${v.last.toFixed(0)} views, ${v.pct.toFixed(0)}%)`);
+            lines.push(`<strong>Attention (views) shifts</strong>: ${parts.join('; ')} — topics with notable change in average views per question.`);
+        }
+
+        if (answerChanges.length) {
+            const parts = answerChanges.map(a => `"${a.tag}" (${a.first.toFixed(1)} → ${a.last.toFixed(1)} avg answers, ${a.pct.toFixed(0)}%)`);
+            lines.push(`<strong>Answering behavior</strong>: ${parts.join('; ')} — average answers per question changed significantly, indicating shifts in how questions are being engaged.`);
+        }
+
+        if (scoreChanges.length) {
+            const parts = scoreChanges.map(s => `"${s.tag}" (${s.first.toFixed(2)} → ${s.last.toFixed(2)} score, ${s.pct.toFixed(0)}%)`);
+            lines.push(`<strong>Perceived quality</strong>: ${parts.join('; ')} — average question scores moved notably.`);
+        }
+        lines.push('');
+        lines.push('<strong>Why topics trend up or down (general reasons):</strong> ');
+        lines.push('Technology lifecycle and maturity: New tools, libraries and language features cause spikes when adoption or migration is active. As a technology matures, fewer basic usage questions are asked and overall question volume tends to decline.' );
+        lines.push('Shifts in best practices and ecosystems: When a new recommended approach or framework becomes dominant (for example, Spring Boot simplifying Spring setup), questions shift from core topics to integration/usage topics for the new approach.' );
+        lines.push('Tooling and documentation improvements: Better docs, tutorials, IDE support and community resources reduce the frequency of beginner or troubleshooting questions over time.' );
+        lines.push('Platform and market changes: Mobile vs server trends, cloud adoption, or shifts to other languages/platforms (Kotlin for Android, JavaScript/TypeScript for web backends) change where developers ask questions.' );
+
+        return `<div class="space-y-2">
+                  ${lines.map(l => `<div>${l}</div>`).join('')}
+                </div>`;
+    }
+
+    function formatNumeric(n) {
+        if (n >= 1000) return Number(n).toLocaleString();
+        return String(n);
+    }
+
+    document.getElementById('loadBtn').addEventListener('click', async () => {
+        const topicsRaw = document.getElementById('topics').value;
+        const years = parseInt(document.getElementById('years').value) || 3;
+        const metric = document.getElementById('metric').value;
+
+        const topics = topicsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+        if (topics.length === 0) return alert('Please enter one or more topics.');
+
+        document.getElementById('chartSubtitle').textContent = 'Loading...';
+        document.getElementById('metricNote').textContent = '';
+        document.getElementById('summaryList').innerHTML = '';
+        document.getElementById('rangeInfo').textContent = '';
+        document.getElementById('insights').innerHTML = '';
+        document.getElementById('trendInsights').classList.add('hidden');
+        document.getElementById('trendInsights').innerHTML = '';
+        disableDownloadButton();
+
+        try {
+            const fetches = topics.map(t => fetchTagYearly(t, years).then(data => ({ tag: t, data })).catch(err => ({ tag: t, error: err })));
+            const results = await Promise.all(fetches);
+            const good = results.filter(r => !r.error && Array.isArray(r.data));
+            if (good.length === 0) throw new Error('No valid topic data returned.');
+
+            const allYearsSet = new Set();
+            good.forEach(r => r.data.forEach(row => allYearsSet.add(String(row.year))));
+            const labels = Array.from(allYearsSet).sort((a,b)=>a-b);
+
+            const datasets = good.map((r, idx) => {
+                const yearMap = new Map(r.data.map(row => [String(row.year), row]));
+                const values = labels.map(y => {
+                    const row = yearMap.get(y);
+                    if (!row) return 0;
+                    return metricValue(row, metric);
+                });
+                return {
+                    label: r.tag,
+                    data: values,
+                    borderColor: pickColor(idx),
+                    backgroundColor: pickColor(idx) + '33',
+                    tension: 0.25,
+                    pointRadius: 3,
+                    fill: true,
+
+                };
+            });
+
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            if (trendChart) trendChart.destroy();
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } },
+                    scales: { x: { title: { display: true, text: 'Year' } }, y: { title: { display: true, text: metricLabel(metric) }, beginAtZero: true } },
+                }
+            });
+
+            enableDownloadButton();
+
+            document.getElementById('chartTitle').textContent = `Trends — ${metricLabel(metric)}`;
+            document.getElementById('chartSubtitle').textContent = `${topics.length} topic(s) · last ${years} year(s)`;
+            document.getElementById('metricNote').textContent = metricNotes(metric);
+
+            const metricsResp = await fetchTagMetrics(topics);
+            const metricsMap = new Map((metricsResp || []).map(m => [m.tag, m]));
+
+            const summaries = good.map((r, idx) => {
+                const yearMap = new Map(r.data.map(row => [String(row.year), row]));
+                const sortedYears = Array.from(yearMap.keys()).sort((a,b)=>a-b);
+                const firstYear = sortedYears[0];
+                const lastYear = sortedYears[sortedYears.length - 1];
+                const firstRow = yearMap.get(firstYear) || {};
+                const lastRow = yearMap.get(lastYear) || {};
+                const firstVal = metricValue(firstRow, metric);
+                const lastVal = metricValue(lastRow, metric);
+                const changePct = percentChange(firstVal, lastVal);
+                return {
+                    tag: r.tag,
+                    firstYear, lastYear,
+                    firstVal, lastVal,
+                    changePct,
+                    color: pickColor(idx),
+                    rawRows: r.data,
+                    metrics: metricsMap.get(r.tag) || null
+                };
+            });
+
+            summaries.sort((a,b) => b.lastVal - a.lastVal);
+
+            const container = document.getElementById('summaryList');
+            container.innerHTML = '';
+            summaries.forEach(s => {
+                const m = s.metrics;
+                const questionsCount = Number(m?.questionCount ?? (s.rawRows.length ? (s.rawRows[s.rawRows.length-1].questionCount || 0) : 0));
+                const answersCount = Number(m?.answerCount ?? (s.rawRows.length ? (s.rawRows[s.rawRows.length-1].answerCount || 0) : 0));
+
+                let detailsHtml;
+                if (m) {
+                    detailsHtml = `
+                      <div class="grid grid-cols-2 gap-2">
+                        <div>Questions: <strong>${Number(m.questionCount || 0).toLocaleString()}</strong></div>
+                        <div>Answers: <strong>${Number(m.answerCount || 0).toLocaleString()}</strong></div>
+                        <div>Comments: <strong>${Number(m.totalComments || 0).toLocaleString()}</strong></div>
+                        <div>Avg score: <strong>${Number(m.avgScore || 0).toFixed(2)}</strong></div>
+                        <div>Avg views: <strong>${Number(m.avgViewCount || 0).toFixed(1)}</strong></div>
+                        <div>Avg answers/q: <strong>${Number(m.avgAnswerCount || 0).toFixed(2)}</strong></div>
+                        <div>Upvotes: <strong>${Number(m.totalUpvotes || 0).toLocaleString()}</strong></div>
+                        <div>Downvotes: <strong>${Number(m.totalDownvotes || 0).toLocaleString()}</strong></div>
+                      </div>
+                    `;
+                } else {
+                    const lastRow = s.rawRows.length ? s.rawRows[s.rawRows.length-1] : {};
+                    detailsHtml = `
+                      <div>Questions (latest year): <strong>${Number(lastRow.questionCount || 0).toLocaleString()}</strong></div>
+                      <div>Answers (latest year): <strong>${Number(lastRow.answerCount || 0).toLocaleString()}</strong></div>
+                      <div>Comments (latest year): <strong>${Number(lastRow.commentCount || 0).toLocaleString()}</strong></div>
+                      <div>Avg score: <strong>${Number(lastRow.avgScore || 0).toFixed(2)}</strong></div>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'p-3 border rounded flex items-start gap-3 cursor-pointer';
+
+                card.innerHTML = `
+                  <div class="w-2.5 h-8 rounded" style="background:${s.color}"></div>
+                  <div class="flex-1">
+                    <div class="flex justify-between items-baseline">
+                      <div><strong class="text-slate-800">${s.tag}</strong> <span class="text-xs text-slate-500">(${s.firstYear}→${s.lastYear})</span></div>
+                    </div>
+
+                    <div class="mt-1 compact-metrics text-xs text-slate-600">
+                      Questions: <strong>${questionsCount.toLocaleString()}</strong>
+                      &nbsp;&nbsp;&nbsp;
+                      Answers: <strong>${answersCount.toLocaleString()}</strong>
+                    </div>
+
+                    <div class="mt-2 details hidden text-xs text-slate-600">
+                      ${detailsHtml}
+                    </div>
+
+                    <div class="mt-2 text-xs text-slate-400">
+                      <span class="mini-trend-link underline text-sky-600">Click for mini trend</span>
+                    </div>
+                  </div>
+                `;
+
+
+                card.addEventListener('click', (ev) => {
+                    const target = ev.target;
+                    const path = (typeof ev.composedPath === 'function') ? ev.composedPath() : (ev.path || []);
+                    if (path && path.some(el => el && el.classList && el.classList.contains && el.classList.contains('mini-trend-link'))) return;
+                    const detailsEl = card.querySelector('.details');
+                    const compactEl = card.querySelector('.compact-metrics');
+                    if (detailsEl.classList.contains('hidden')) {
+                        detailsEl.classList.remove('hidden');
+                        compactEl.classList.add('hidden');
+                    } else {
+                        detailsEl.classList.add('hidden');
+                        compactEl.classList.remove('hidden');
+                    }
+                });
+
+                const miniLink = card.querySelector('.mini-trend-link');
+                if (miniLink) {
+                    miniLink.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+
+                        if (typeof window.showMiniTrendModal === 'function') {
+                            return window.showMiniTrendModal(s);
+                        }
+
+                        const modal = document.createElement('div');
+                        modal.className = 'fixed inset-0 z-50 flex items-center justify-center';
+                        modal.innerHTML = `
+                          <div class="fixed inset-0 bg-black/50"></div>
+                          <div class="bg-white rounded-lg p-4 max-w-lg w-full z-10">
+                            <div class="flex justify-between items-center mb-2">
+                              <strong>Mini trend: ${s.tag}</strong>
+                              <button type="button" class="close-btn text-slate-500">✕</button>
+                            </div>
+                            <canvas id="miniTrendCanvas" height="180"></canvas>
+                          </div>
+                        `;
+                        document.body.appendChild(modal);
+
+                        let miniChart = null;
+                        const closeBtn = modal.querySelector('.close-btn');
+                        const backdrop = modal.querySelector('.fixed');
+
+                        const removeModal = () => {
+                            try { if (miniChart) miniChart.destroy(); } catch (e) { /* ignore */ }
+                            if (document.body.contains(modal)) document.body.removeChild(modal);
+                        };
+
+                        closeBtn.addEventListener('click', removeModal);
+                        backdrop.addEventListener('click', removeModal);
+
+                        try {
+                            const rows = (s.rawRows || []).slice().sort((a,b) => String(a.year).localeCompare(String(b.year)));
+                            const labels = rows.map(r => String(r.year));
+                            const metric = document.getElementById('metric') ? document.getElementById('metric').value : 'questionCount';
+                            const data = rows.map(r => metricValue(r, metric));
+
+                            const ctx = modal.querySelector('#miniTrendCanvas').getContext('2d');
+                            miniChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels,
+                                    datasets: [{
+                                        label: s.tag,
+                                        data,
+                                        borderColor: s.color || pickColor(0),
+                                        backgroundColor: (s.color || pickColor(0)) + '33',
+                                        tension: 0.25,
+                                        fill: true,
+                                        pointRadius: 4
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                                    scales: { x: { title: { display: false } }, y: { beginAtZero: true } }
+                                }
+                            });
+                        } catch (err) {
+                            console.error('Failed to render mini trend', err);
+                        }
+                    });
+                }
+
+                container.appendChild(card);
+            });
+
+            const trendInsightHtml = generateTrendInsights(summaries, metric);
+            if (trendInsightHtml) {
+                const el = document.getElementById('trendInsights');
+                el.innerHTML = trendInsightHtml;
+                el.classList.remove('hidden');
+            } else {
+                document.getElementById('trendInsights').classList.add('hidden');
+            }
+
+            document.getElementById('insights').innerHTML = '';
+
+            document.getElementById('rangeInfo').textContent = `Years: ${labels[0]} — ${labels[labels.length-1]}`;
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load trends: ' + (err.message || err));
+            document.getElementById('chartSubtitle').textContent = 'Failed to load data';
+            disableDownloadButton();
+        }
+    });
+
+    const popularLimitInput = document.getElementById('popularLimit');
+    const loadPopularBtn = document.getElementById('loadPopularBtn');
+    const popularChartEl = document.getElementById('popularChart');
+
+    const barEndLabelPlugin = {
+        id: 'barEndLabel',
+        afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            chart.data.datasets.forEach((dataset, dsIndex) => {
+                const meta = chart.getDatasetMeta(dsIndex);
+                meta.data.forEach((bar, index) => {
+                    const value = dataset.data[index];
+                    const x = bar.x + 8;
+                    const y = bar.y;
+                    ctx.save();
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = '12px Inter, system-ui, -apple-system';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(Number(value).toLocaleString(), x, y);
+                    ctx.restore();
+                });
+            });
+        }
+    };
+
+    function renderPopularChart(items){
+        const labels = items.map(i => i.tag);
+        const counts = items.map(i => Number(i.questionCount || i.count || 0));
+        const maxVal = counts.length ? Math.max(...counts) : 0;
+        const suggestedMax = maxVal > 0 ? Math.ceil(maxVal * 1.1) : 5;
+        const bluePalette = labels.map((_,i) => pickBlue(i));
+
+        const ctx = popularChartEl.getContext('2d');
+        if(popularChart) popularChart.destroy();
+        popularChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Questions',
+                    data: counts,
+                    backgroundColor: bluePalette,
+                    borderColor: bluePalette,
+                    borderWidth: 1,
+                    barThickness: 20
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${Number(ctx.parsed.x).toLocaleString()}` } }
+                },
+                scales: { x: { beginAtZero: true, suggestedMax: suggestedMax, title: { display: true, text: 'Question count' } }, y: { ticks: { autoSkip: false } } },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart',
+                    delay: (context) => {
+                        if (context.type === 'data' && context.mode === 'default') {
+                            return context.dataIndex * 100;
+                        }
+                        return 0;
+                    }
+                },
+                animations: {
+                    x: { from: 0, easing: 'easeOutQuart', duration: 1000 }  // 条形从左边（x=0）向右增长
+                }
+            },
+            plugins: [barEndLabelPlugin]
+
+        });
+    }
+
+    function generatePopularInsights(items) {
+        return `
+          <div class="space-y-2">
+            <p><strong>Java dominance:</strong> The high total for "java" (907) indicates Java remains the largest topic in your sample, acting as a base language tag for many questions. Because it is so common, analyses that include java paired with everything else can be dominated by trivial co-occurrences; that’s why many pipelines intentionally exclude the base language tag when looking for cross-cutting topic pairs.</p>
+
+            <p><strong>Android & Android Studio:</strong> Android being second (157) reflects a large mobile ecosystem. High co-occurrence with "android-studio" is expected because IDE, build and deployment issues are tightly coupled with Android development. If Android counts decline over time, it could reflect migration to Kotlin, improved tooling, or fewer beginner questions.</p>
+
+            <p><strong>Spring / Spring Boot / Spring MVC:</strong> The presence of spring, spring-boot and spring-mvc in the top tags shows the Spring ecosystem is a significant subdomain. Co-occurrence among these tags is natural: Spring is the umbrella framework, Spring MVC is the web submodule, and Spring Boot is the opinionated starter for Spring apps. Trends here typically follow major framework releases and shifts in recommended practices.</p>
+
+            <p><strong>Other infra/tools (maven, eclipse, hibernate):</strong> These reflect build tools, IDEs and persistence layers. Changes in their counts often reflect tooling updates (e.g., Gradle adoption, move from Eclipse to IntelliJ) more than language-level changes.</p>
+          </div>
+        `;
+    }
+
+    function renderPopularChartAndInsights(items){
+        renderPopularChart(items);
+        const popularInsightsHtml = generatePopularInsights(items);
+        const insEl = document.getElementById('popularInsights');
+        if (insEl) insEl.innerHTML = popularInsightsHtml;
+    }
+
+    loadPopularBtn.addEventListener('click', async () => {
+        const limit = parseInt(popularLimitInput.value) || 20;
+        document.getElementById('popularSubtitle').textContent = 'Loading...';
+        try {
+            const resp = await fetchPopularTags(limit);
+            const items = Array.isArray(resp) ? resp.map(r => ({ tag: r.tag || r.name || '', questionCount: Number(r.questionCount || r.count || 0) })) : [];
+            renderPopularChartAndInsights(items);
+            document.getElementById('popularSubtitle').textContent = `${items.length} tag(s) · top ${limit}`;
+        } catch (e) {
+            console.error(e);
+            document.getElementById('popularSubtitle').textContent = 'Failed to load popular tags';
+            alert('Failed to load popular tags: ' + (e.message || e));
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(()=> { document.getElementById('loadBtn').click(); document.getElementById('loadPopularBtn').click(); }, 200);
+    });
+</script>
+</body>
+</html>
