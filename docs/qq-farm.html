@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CS209A QQ Farm 网页试玩版 — 从 JavaFX 课程作业迁移而来">
-  <title>QQ Farm Playground — CS209A</title>
+  <meta name="description" content="CS209A QQ Farm — 并发偷菜演示客户端，通过 WebSocket 连接 Java 后端服务器">
+  <title>QQ Farm · Concurrency Demo — CS209A</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/demos.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar">
@@ -23,13 +23,13 @@
     </div>
   </nav>
 
-  <main class="demo-page">
+  <main class="demo-page farm-terminal-page">
     <!-- Hero -->
     <section class="demo-hero farm-hero">
       <div class="hero-content">
-        <div class="demo-kicker">CS209A · ASSIGNMENT 2 · JAVAFX</div>
-        <h1>QQ 农场 · Web 试玩版</h1>
-        <p class="hero-desc">从 JavaFX 课程作业迁移而来的轻量网页互动版本。选择土地、种植作物，等待 10 秒成熟并收获金币；游戏进度自动保存在你的浏览器中。</p>
+        <div class="demo-kicker">CS209A · ASSIGNMENT 2 · CONCURRENCY FOCUS</div>
+        <h1>QQ 农场 · 并发偷菜演示</h1>
+        <p class="hero-desc">通过 WebSocket 直连 Java 后端，完整实现多人种植-偷菜-并发控制。核心验证：<code>synchronized</code> 锁、session 限制、CountDownLatch 并发测试。</p>
         <div class="demo-jump-links">
           <a href="data-lab.html" class="jump-btn data-btn">📊 前往数据分析实验室</a>
           <a href="https://github.com/csgrace/CS209A/tree/main/assignment/assignment2" target="_blank" rel="noopener" class="jump-btn outline-btn">☕ 查看 JavaFX 源码 ↗</a>
@@ -37,97 +37,187 @@
       </div>
       <div class="hero-visual farm-visual">
         <div class="floating-card card-sun">
-          <span class="card-icon">☀️</span>
+          <span class="card-icon">🔒</span>
         </div>
         <div class="floating-card card-wheat">
           <span class="card-icon">🌻</span>
         </div>
         <div class="floating-card card-tree">
-          <span class="card-icon">🌳</span>
+          <span class="card-icon">⚡</span>
         </div>
       </div>
     </section>
 
-    <!-- Game Section -->
+    <!-- Concurrency Info -->
+    <section class="demo-section concurrency-info">
+      <div class="concurrency-cards">
+        <div class="concurrency-card">
+          <span class="cc-icon">🔐</span>
+          <h3>互斥锁</h3>
+          <p><code>synchronized(victim)</code> 保证同一时刻只有一个线程能偷取目标农场的成熟作物</p>
+        </div>
+        <div class="concurrency-card">
+          <span class="cc-icon">📊</span>
+          <h3>偷菜上限</h3>
+          <p>每次 session 最多偷取目标 25% 的成熟作物，防止并发下的资源耗尽</p>
+        </div>
+        <div class="concurrency-card">
+          <span class="cc-icon">⏱️</span>
+          <h3> CountDownLatch </h3>
+          <p>ConcurrencyTest 模拟两个小偷同时发起偷菜请求的真实并发场景</p>
+        </div>
+        <div class="concurrency-card">
+          <span class="cc-icon">🏠</span>
+          <h3>在家保护</h3>
+          <p>受害者正在查看自己农场时，任何偷菜请求都会被拒绝</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Terminal / Game Client -->
     <section class="demo-section">
-      <div class="game-container">
-        <!-- Side Panel -->
-        <aside class="game-panel">
-          <div class="panel-header">
-            <div class="player-info">
-              <span class="player-avatar">🌻</span>
-              <div>
-                <strong>Grace 的农场</strong>
-                <small id="farm-status">选择一块土地开始耕种</small>
-              </div>
+      <div class="terminal-container">
+        <!-- Terminal Header -->
+        <div class="terminal-header">
+          <div class="terminal-title">
+            <span class="terminal-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </span>
+            <span>QQ Farm Client — <span id="player-label">未登录</span></span>
+          </div>
+          <div class="terminal-conn">
+            <span id="conn-dot" class="conn-dot disconnected"></span>
+            <span id="conn-text">未连接</span>
+          </div>
+        </div>
+
+        <!-- Login Overlay -->
+        <div id="login-overlay" class="login-overlay">
+          <div class="login-box">
+            <h2>🌱 QQ Farm 登录</h2>
+            <p>输入用户名连接服务器</p>
+            <div class="login-input-row">
+              <input type="text" id="username-input" placeholder="输入用户名 (如 alice, bob)" autocomplete="off" />
+              <button id="login-btn" class="btn-login">连接</button>
+            </div>
+            <p id="login-error" class="login-error"></p>
+            <div class="login-hint">
+              <strong>提示：</strong>确保 Java 服务器已启动 (<code>mvn exec:java</code>)，且 WebSocket 代理已运行 (<code>python websocket_proxy.py</code>)
             </div>
           </div>
+        </div>
 
-          <div class="stats-row">
-            <div class="stat-card coins-card">
-              <span class="stat-icon">🪙</span>
-              <div class="stat-info">
-                <small>金币</small>
-                <strong id="coin-count">40</strong>
-              </div>
-            </div>
-            <div class="stat-card plots-card">
-              <span class="stat-icon">🌱</span>
-              <div class="stat-info">
-                <small>已种植</small>
-                <strong id="farm-progress">0/16</strong>
-              </div>
-            </div>
+        <!-- Terminal Body -->
+        <div class="terminal-body">
+          <div id="terminal-output" class="terminal-output"></div>
+          <div class="terminal-input-row">
+            <span class="prompt">&gt;</span>
+            <input type="text" id="cmd-input" placeholder="输入命令: GET | VIEW &lt;player&gt; | PLANT &lt;r&gt; &lt;c&gt; | HARVEST &lt;r&gt; &lt;c&gt; | STEAL &lt;player&gt; | PLAYERS" autocomplete="off" />
+            <button id="cmd-submit" class="btn-send">↵</button>
           </div>
+        </div>
+      </div>
 
-          <div class="actions-section">
-            <h4>操作</h4>
-            <div class="game-actions">
-              <button class="farm-action plant" id="plant-btn">
-                <span class="action-icon">🌱</span>
-                <span class="action-text">种植</span>
-                <span class="action-cost">-5 🪙</span>
-              </button>
-              <button class="farm-action harvest" id="harvest-btn">
-                <span class="action-icon">🧺</span>
-                <span class="action-text">收获</span>
-                <span class="action-cost">+12 🪙</span>
-              </button>
-              <button class="farm-action reset" id="reset-btn">
-                <span class="action-icon">↻</span>
-                <span class="action-text">重新开始</span>
-              </button>
+      <!-- Side Panel: Farm Grid + Quick Actions -->
+      <div class="side-panel">
+        <!-- Status Bar -->
+        <div class="status-bar" id="status-bar">等待连接...</div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card coins-card">
+            <span class="stat-icon">🪙</span>
+            <div class="stat-info">
+              <small>金币</small>
+              <strong id="coins-display">0</strong>
             </div>
           </div>
-
-          <div class="game-tips">
-            <h4>💡 游戏提示</h4>
-            <ul>
-              <li>点击地块选中土地</li>
-              <li>每次种植花费 5 金币</li>
-              <li>作物 10 秒后成熟</li>
-              <li>成熟作物会闪烁提醒</li>
-              <li>收获可获得 12 金币</li>
-            </ul>
-          </div>
-
-          <div class="legend-box">
-            <h4>图例</h4>
-            <div class="legend-items">
-              <span class="legend-item"><i class="legend-dot soil"></i>空地</span>
-              <span class="legend-item"><i class="legend-dot growing"></i>生长中</span>
-              <span class="legend-item"><i class="legend-dot ripe"></i>可收获</span>
+          <div class="stat-card">
+            <span class="stat-icon">👁️</span>
+            <div class="stat-info">
+              <small>查看中</small>
+              <strong id="viewing-label">-</strong>
             </div>
           </div>
-        </aside>
+        </div>
 
-        <!-- Game Board -->
-        <div class="game-board-container">
-          <div class="board-header">
-            <h3>🏡 我的农场</h3>
-            <span class="board-subtitle">点击土地进行种植或收获</span>
+        <!-- Farm Grid -->
+        <div class="farm-grid-wrap">
+          <div class="grid-header">
+            <h4>农场 <span id="grid-owner">(未登录)</span></h4>
           </div>
-          <div id="farm-board" class="farm-board" aria-label="QQ 农场地块" role="grid"></div>
+          <div id="farm-grid" class="farm-grid"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <h4>快捷操作</h4>
+          <div class="quick-grid">
+            <button class="quick-btn" data-cmd="GET">🔄 刷新</button>
+            <button class="quick-btn" data-cmd="PLAYERS">👥 玩家列表</button>
+            <button class="quick-btn" id="btn-plant" data-cmd="PLANT">🌱 种植</button>
+            <button class="quick-btn" id="btn-harvest" data-cmd="HARVEST">🧺 收获</button>
+            <button class="quick-btn btn-steal" id="btn-steal" data-cmd="STEAL">🦹 偷菜</button>
+          </div>
+        </div>
+
+        <!-- Reference -->
+        <div class="cmd-reference">
+          <h4>命令参考</h4>
+          <ul>
+            <li><code>GET</code> — 查看自己的农场</li>
+            <li><code>VIEW &lt;player&gt;</code> — 查看别人的农场</li>
+            <li><code>PLANT &lt;r&gt; &lt;c&gt;</code> — 在选定地块种植 (-5币)</li>
+            <li><code>HARVEST &lt;r&gt; &lt;c&gt;</code> — 收获成熟作物 (+12币)</li>
+            <li><code>STEAL &lt;player&gt;</code> — 偷菜 (+3币)</li>
+            <li><code>PLAYERS</code> — 列出所有玩家</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- How to Run -->
+    <section class="demo-section how-to-run">
+      <div class="section-header">
+        <span class="eyebrow">HOW TO RUN</span>
+        <h2>本地部署指南</h2>
+        <p>在本地运行服务器 + 代理，即可在浏览器内体验完整并发偷菜</p>
+      </div>
+      <div class="run-steps">
+        <div class="run-step">
+          <span class="step-num">1</span>
+          <div>
+            <h4>启动 Java 服务器</h4>
+            <pre><code>cd assignment/assignment2/CS209A_2025Fall_Assignment2-main
+mvn compile exec:java "-Dexec.mainClass=org.example.demo.server.Server"</code></pre>
+          </div>
+        </div>
+        <div class="run-step">
+          <span class="step-num">2</span>
+          <div>
+            <h4>启动 WebSocket 代理</h4>
+            <pre><code>pip install websockets
+python websocket_proxy.py</code></pre>
+          </div>
+        </div>
+        <div class="run-step">
+          <span class="step-num">3</span>
+          <div>
+            <h4>打开客户端页面</h4>
+            <pre><code># 直接用浏览器打开本页，或启动本地服务器
+python -m http.server 8080 --directory docs
+# 然后访问 http://localhost:8080/qq-farm.html</code></pre>
+          </div>
+        </div>
+        <div class="run-step">
+          <span class="step-num">4</span>
+          <div>
+            <h4>运行并发测试</h4>
+            <pre><code># 打开新终端，运行 ConcurrencyTest
+mvn compile exec:java "-Dexec.mainClass=org.example.demo.ConcurrencyTest"</code></pre>
+          </div>
         </div>
       </div>
     </section>
@@ -135,12 +225,12 @@
 
   <footer class="footer">
     <div class="footer-content">
-      <span>CS209A · QQ Farm Playground · JavaFX Assignment</span>
+      <span>CS209A · QQ Farm Concurrency Demo · Java WebSocket Client</span>
       <a href="https://github.com/csgrace/CS209A" target="_blank" rel="noopener">View on GitHub ↗</a>
     </div>
   </footer>
 
   <script src="js/main.js"></script>
-  <script src="js/qq-farm.js"></script>
+  <script src="js/qq-farm-client.js"></script>
 </body>
 </html>
