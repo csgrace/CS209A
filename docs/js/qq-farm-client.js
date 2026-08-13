@@ -27,19 +27,22 @@
     els.viewingLabel = document.getElementById('viewing-label');
     els.coinsDisplay = document.getElementById('coins-display');
     els.statusBar = document.getElementById('status-bar');
-    els.gridOwner = document.getElementById('grid-owner');
     els.farmGrid = document.getElementById('farm-grid');
     els.logPanel = document.getElementById('log-panel');
     els.logContent = document.getElementById('log-content');
     els.playerTabs = document.getElementById('player-tabs');
     els.stealModal = document.getElementById('steal-modal');
     els.concurrentModal = document.getElementById('concurrent-modal');
+    els.visitModal = document.getElementById('visit-modal');
+    els.locationBanner = document.getElementById('location-banner');
+    els.locText = document.getElementById('loc-text');
+    els.locStatus = document.getElementById('loc-status');
+    els.stealBtn = document.getElementById('btn-steal-mode');
 
     els.loginBtn.addEventListener('click', handleLogin);
     els.usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 
-    document.getElementById('btn-refresh').addEventListener('click', () => refreshFarm());
-    document.getElementById('btn-players').addEventListener('click', showPlayers);
+    document.getElementById('btn-players').addEventListener('click', openVisitModal);
 
     document.getElementById('btn-plant-mode').addEventListener('click', () => { setSelectedAction('plant'); });
     document.getElementById('btn-harvest-mode').addEventListener('click', () => { setSelectedAction('harvest'); });
@@ -68,6 +71,11 @@
     document.getElementById('concurrent-start-btn').addEventListener('click', executeConcurrentTest);
     document.getElementById('concurrent-close-btn').addEventListener('click', () => {
       els.concurrentModal.classList.add('hidden');
+    });
+
+    // Visit modal
+    document.getElementById('visit-close-btn').addEventListener('click', () => {
+      els.visitModal.classList.add('hidden');
     });
 
     createGrid();
@@ -170,25 +178,38 @@
   }
 
   // ── Visit Other Players ─────────────────────────────────────
-  function showPlayers() {
+  function openVisitModal() {
+    if (!playerName) return;
     const players = server.getPlayers();
+    // Auto-create demo players if needed
     if (players.length <= 1) {
-      setStatus('目前还没有其他玩家，先用 ConcurrencyTest 按钮创建');
-      // Auto-create demo players
       server.login('alice');
       server.login('bob');
-      players.push('alice', 'bob');
     }
-    const otherPlayers = players.filter(p => p !== playerName);
+    const otherPlayers = server.getPlayers().filter(p => p !== playerName);
     if (otherPlayers.length === 0) {
       setStatus('没有其他玩家可以访问');
       return;
     }
-    // Show a simple selection dialog
-    const name = prompt(`输入要查看的玩家名: ${otherPlayers.join(', ')}`);
-    if (name && otherPlayers.includes(name)) {
-      visitPlayer(name);
-    }
+    // Build player list
+    const list = document.getElementById('visit-player-list');
+    list.innerHTML = '';
+    otherPlayers.forEach(name => {
+      const farm = server.getFarm(name);
+      const ripeCount = farm.getRipeCount();
+      const item = document.createElement('button');
+      item.className = 'player-list-item';
+      item.innerHTML = `
+        <span class="pli-name">🌻 ${name}</span>
+        <span class="pli-info">🌻×${ripeCount} 成熟</span>
+      `;
+      item.addEventListener('click', () => {
+        els.visitModal.classList.add('hidden');
+        visitPlayer(name);
+      });
+      list.appendChild(item);
+    });
+    els.visitModal.classList.remove('hidden');
   }
 
   function visitPlayer(name) {
@@ -198,7 +219,7 @@
     selectedPlot = -1;
     renderFarm(result.snapshot);
     updateUI();
-    setStatus(`正在查看 ${name} 的农场 — 可以偷菜了！`);
+    setStatus(`🔓 进入 ${name} 的农场 — 偷菜按钮已解锁！`);
   }
 
   function refreshFarm() {
@@ -389,8 +410,31 @@
   // ── UI Helpers ──────────────────────────────────────────────
   function updateUI() {
     els.playerLabel.textContent = playerName || '未登录';
-    els.viewingLabel.textContent = viewingPlayer || '-';
-    els.gridOwner.textContent = viewingPlayer ? `(${viewingPlayer})` : '';
+    // Update location banner & viewing label
+    if (!playerName) {
+      els.viewingLabel.textContent = '未登录';
+      els.locText.textContent = '请先登录';
+      els.locStatus.textContent = '';
+      els.locationBanner.className = 'location-banner';
+    } else if (viewingPlayer === playerName) {
+      els.viewingLabel.textContent = '自家 🏠';
+      els.locText.textContent = '自家农场';
+      els.locStatus.textContent = '🌱 安全—种植/收获模式';
+      els.locationBanner.className = 'location-banner at-home';
+      // Disable steal button at own farm
+      els.stealBtn.disabled = true;
+      els.stealBtn.title = '不能偷自己的菜，先去别人家！';
+      els.stealBtn.textContent = '🦹 偷菜 🔒';
+    } else {
+      els.viewingLabel.textContent = `${viewingPlayer} 的家`;
+      els.locText.textContent = `正在访问 ${viewingPlayer} 的农场`;
+      els.locStatus.textContent = '🔓 可以偷菜！';
+      els.locationBanner.className = 'location-banner at-other';
+      // Enable steal button when visiting others
+      els.stealBtn.disabled = false;
+      els.stealBtn.title = '';
+      els.stealBtn.textContent = '🦹 偷菜';
+    }
   }
 
   function setStatus(text) { els.statusBar.textContent = text; }
