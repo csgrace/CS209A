@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CS209A QQ Farm — 终端风格并发演示，模拟 Java Socket + synchronized + CountDownLatch">
-  <title>QQ Farm · Terminal Demo — CS209A</title>
+  <title>QQ Farm · Terminal + JavaFX GUI — CS209A</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/demos.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,105 +22,155 @@
     </div>
   </nav>
 
-  <main class="demo-page terminal-page">
+  <main class="demo-page hybrid-page">
     <!-- Hero -->
-    <section class="demo-hero terminal-hero">
+    <section class="demo-hero hybrid-hero">
       <div class="hero-content">
         <div class="demo-kicker">CS209A · ASSIGNMENT 2 · CONCURRENCY IN ACTION</div>
-        <h1>QQ 农场 · 终端演示</h1>
-        <p class="hero-desc">在浏览器中模拟 Java 终端体验。输入命令，连接服务器，种植、偷菜、并发测试——所有操作都展示真实的线程同步日志。</p>
+        <h1>QQ 农场 · Terminal + JavaFX GUI</h1>
+        <p class="hero-desc">左边终端输入命令，右边 JavaFX 风格窗口实时显示农场状态。体验 synchronized 互斥锁、session 限制、CountDownLatch 并发测试。</p>
         <div class="demo-jump-links">
-          <a href="#terminal-area" class="jump-btn farm-btn">🖥️ 打开终端</a>
+          <a href="#demo-main" class="jump-btn farm-btn">🖥️ 开始体验</a>
           <a href="https://github.com/csgrace/CS209A/tree/main/assignment/assignment2" target="_blank" rel="noopener" class="jump-btn outline-btn">☕ Java 源码 ↗</a>
         </div>
       </div>
-      <div class="hero-visual terminal-visual">
-        <div class="terminal-mini">
-          <div class="tm-header"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span> Server.java</div>
-          <div class="tm-body">
-            <span class="t-line">$ java -jar Server.jar</span>
-            <span class="t-line ok">[Server] Listening on port 5050</span>
-            <span class="t-line ok">[Server] 3 players connected</span>
-            <span class="t-line">[Thread-5] synchronized(victim) ENTER</span>
+      <div class="hero-visual hybrid-visual">
+        <div class="hybrid-preview">
+          <div class="hp-terminal">
+            <div class="hp-term-h"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="hp-term-line">$ login alice</div>
+            <div class="hp-term-line ok">$ steal bob</div>
+            <div class="hp-term-line">[Thread-5] synchronized ENTER</div>
+          </div>
+          <div class="hp-javafx">
+            <div class="hp-jfx-h">🌻 QQ Farm - alice</div>
+            <div class="hp-jfx-grid">
+              <span class="hp-cell ripe">🌻</span><span class="hp-cell ripe">🌻</span><span class="hp-cell">⬛</span><span class="hp-cell">⬛</span>
+              <span class="hp-cell">🌱</span><span class="hp-cell">⬛</span><span class="hp-cell ripe">🌻</span><span class="hp-cell">⬛</span>
+              <span class="hp-cell">⬛</span><span class="hp-cell">🌱</span><span class="hp-cell">⬛</span><span class="hp-cell ripe">🌻</span>
+              <span class="hp-cell">⬛</span><span class="hp-cell">⬛</span><span class="hp-cell">⬛</span><span class="hp-cell">🌱</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Terminal Area -->
-    <section id="terminal-area" class="demo-section terminal-section">
-      <div class="terminal-container">
-        <!-- Terminal Header -->
-        <div class="term-header">
-          <span class="term-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
-          <span class="term-title">QQ Farm — Java Terminal Simulator</span>
+    <!-- Main Demo Area -->
+    <section id="demo-main" class="demo-section hybrid-section">
+      <div class="hybrid-layout">
+        <!-- Left: Terminal -->
+        <div class="hybrid-terminal">
+          <div class="term-box">
+            <div class="term-box-header">
+              <span class="term-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
+              <span class="term-box-title">Client.java — alice@localhost</span>
+            </div>
+            <div id="terminal-output" class="terminal-output">
+              <div class="term-line welcome">
+                <span class="term-welcome">╔══════════════════════════════════════════════════╗</span>
+              </div>
+              <div class="term-line welcome">
+                <span class="term-welcome">║  CS209A Assignment 2 — QQ Farm Terminal v1.0     ║</span>
+              </div>
+              <div class="term-line welcome">
+                <span class="term-welcome">║  Java Socket + Multithreading + synchronized      ║</span>
+              </div>
+              <div class="term-line welcome">
+                <span class="term-welcome">╚══════════════════════════════════════════════════╝</span>
+              </div>
+              <div class="term-line info">输入 <code>help</code> 查看命令列表</div>
+            </div>
+            <div class="term-quickbar">
+              <span class="qk-label">快捷:</span>
+              <button class="qk-btn" data-cmd="java -jar Server.jar">server</button>
+              <button class="qk-btn" data-cmd="login alice">login</button>
+              <button class="qk-btn" data-cmd="players">players</button>
+              <button class="qk-btn" data-cmd="plant 0 0">plant</button>
+              <button class="qk-btn" data-cmd="harvest 0 0">harvest</button>
+              <button class="qk-btn" data-cmd="visit bob">visit</button>
+              <button class="qk-btn" data-cmd="steal bob">steal</button>
+              <button class="qk-btn" data-cmd="concurrent">concurrent</button>
+            </div>
+            <div class="term-input-row">
+              <span class="term-prompt-arrow">➜</span>
+              <input type="text" id="term-input" class="term-input" placeholder="输入命令..." autocomplete="off" spellcheck="false" />
+              <button id="term-send" class="term-send">↵</button>
+            </div>
+          </div>
         </div>
 
-        <!-- Terminal Output -->
-        <div id="terminal-output" class="terminal-output">
-          <div class="term-line welcome">
-            <span class="term-welcome">╔══════════════════════════════════════════════════╗</span>
-          </div>
-          <div class="term-line welcome">
-            <span class="term-welcome">║  CS209A Assignment 2 — QQ Farm Terminal v1.0     ║</span>
-          </div>
-          <div class="term-line welcome">
-            <span class="term-welcome">║  模拟 Java Socket + Multithreading + synchronized ║</span>
-          </div>
-          <div class="term-line welcome">
-            <span class="term-welcome">╚══════════════════════════════════════════════════╝</span>
-          </div>
-          <div class="term-line info"><span class="term-prompt">help</span> 查看命令列表</div>
-        </div>
-
-        <!-- Quick Buttons (acts like command shortcuts) -->
-        <div class="term-quickbar">
-          <span class="qk-label">快捷命令:</span>
-          <button class="qk-btn" data-cmd="help">help</button>
-          <button class="qk-btn" data-cmd="server">java -jar Server.jar</button>
-          <button class="qk-btn" data-cmd="login alice">登录 alice</button>
-          <button class="qk-btn" data-cmd="login bob">登录 bob</button>
-          <button class="qk-btn" data-cmd="players">players</button>
-        </div>
-
-        <!-- Terminal Input -->
-        <div class="term-input-row">
-          <span class="term-prompt-arrow">➜</span>
-          <span class="term-tilde">~</span>
-          <input type="text" id="term-input" class="term-input" placeholder="输入命令..." autocomplete="off" spellcheck="false" />
-          <button id="term-send" class="term-send">Enter ↵</button>
-        </div>
-
-        <!-- Farm visualization (shows after login) -->
-        <div id="farm-display" class="farm-display hidden">
-          <div class="fd-header">
-            <span class="fd-title">🌻 Farm View</span>
-            <span class="fd-player" id="fd-player-name">-</span>
-          </div>
-          <div id="farm-grid-term" class="farm-grid-term"></div>
-          <div class="fd-footer">
-            <span id="fd-coins">🪙 0</span>
-            <span id="fd-location">📍 未登录</span>
+        <!-- Right: JavaFX-style GUI Window -->
+        <div class="hybrid-javafx">
+          <div id="javafx-window" class="javafx-window">
+            <!-- JavaFX Title Bar -->
+            <div class="jfx-titlebar">
+              <span class="jfx-icon">🌻</span>
+              <span class="jfx-title" id="jfx-title-text">QQ Farm — Not Logged In</span>
+              <span class="jfx-controls"><span class="jfx-ctrl min">─</span><span class="jfx-ctrl max">□</span><span class="jfx-ctrl close">✕</span></span>
+            </div>
+            <!-- JavaFX Menu Bar -->
+            <div class="jfx-menubar">
+              <span class="jfx-menu">File</span>
+              <span class="jfx-menu">Actions</span>
+              <span class="jfx-menu">Help</span>
+            </div>
+            <!-- JavaFX Content -->
+            <div class="jfx-content">
+              <!-- Player Info Bar -->
+              <div class="jfx-info-bar">
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Player:</span>
+                  <span class="jfx-info-value" id="jfx-player-name">—</span>
+                </div>
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Coins:</span>
+                  <span class="jfx-info-value" id="jfx-coins">0</span>
+                </div>
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Status:</span>
+                  <span class="jfx-info-value" id="jfx-status">Waiting for login...</span>
+                </div>
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Viewing:</span>
+                  <span class="jfx-info-value" id="jfx-viewing">—</span>
+                </div>
+              </div>
+              <!-- Farm Grid (4x4) -->
+              <div class="jfx-grid-area">
+                <div class="jfx-grid-label" id="jfx-grid-label">Farm Grid</div>
+                <div id="jfx-farm-grid" class="jfx-farm-grid">
+                  <!-- Generated by JS -->
+                </div>
+              </div>
+              <!-- Action Buttons (JavaFX style) -->
+              <div class="jfx-actions">
+                <button class="jfx-btn" id="jfx-btn-plant" disabled>🌱 Plant</button>
+                <button class="jfx-btn" id="jfx-btn-harvest" disabled>🧺 Harvest</button>
+                <button class="jfx-btn" id="jfx-btn-visit" disabled>👥 Visit</button>
+                <button class="jfx-btn steal" id="jfx-btn-steal" disabled>🦹 Steal</button>
+                <button class="jfx-btn home" id="jfx-btn-home" disabled>🏠 Home</button>
+              </div>
+              <!-- Status Bar (JavaFX bottom) -->
+              <div class="jfx-statusbar">
+                <span id="jfx-statusbar-msg">Ready. Type "help" in terminal for commands.</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Command Reference -->
-      <div class="cmd-reference">
-        <h3>📖 命令参考</h3>
-        <div class="cmd-grid">
-          <div class="cmd-item"><code>help</code><span>显示所有命令</span></div>
-          <div class="cmd-item"><code>server</code><span>启动服务器</span></div>
-          <div class="cmd-item"><code>login &lt;name&gt;</code><span>登录/创建玩家</span></div>
-          <div class="cmd-item"><code>players</code><span>列出所有玩家</span></div>
-          <div class="cmd-item"><code>plant &lt;r&gt; &lt;c&gt;</code><span>在 (r,c) 种植 (-5币)</span></div>
-          <div class="cmd-item"><code>harvest &lt;r&gt; &lt;c&gt;</code><span>收获成熟作物 (+12币)</span></div>
-          <div class="cmd-item"><code>visit &lt;name&gt;</code><span>查看别人农场</span></div>
-          <div class="cmd-item"><code>steal &lt;name&gt;</code><span>偷别人的菜 (+3币)</span></div>
-          <div class="cmd-item"><code>look</code><span>查看当前农场</span></div>
-          <div class="cmd-item"><code>concurrent</code><span>CountDownLatch 并发测试</span></div>
-          <div class="cmd-item"><code>clear</code><span>清空终端</span></div>
-          <div class="cmd-item"><code>about</code><span>关于本演示</span></div>
+      <div class="cmd-ref-bottom">
+        <h4>📖 Command Reference</h4>
+        <div class="cmd-ref-grid">
+          <span class="cmd-ref-item"><code>java -jar Server.jar</code> Start server</span>
+          <span class="cmd-ref-item"><code>login &lt;name&gt;</code> Connect as player</span>
+          <span class="cmd-ref-item"><code>plant &lt;r&gt; &lt;c&gt;</code> Plant crop (-5 coins)</span>
+          <span class="cmd-ref-item"><code>harvest &lt;r&gt; &lt;c&gt;</code> Harvest ripe crop (+12)</span>
+          <span class="cmd-ref-item"><code>visit &lt;name&gt;</code> Visit friend's farm</span>
+          <span class="cmd-ref-item"><code>steal &lt;name&gt;</code> Steal from friend (+3)</span>
+          <span class="cmd-ref-item"><code>look</code> View own farm</span>
+          <span class="cmd-ref-item"><code>concurrent</code> CountDownLatch test</span>
         </div>
       </div>
     </section>
@@ -130,32 +179,28 @@
     <section class="demo-section concurrency-explained">
       <div class="section-header">
         <span class="eyebrow">CONCURRENCY CONTROLS</span>
-        <h2>本演示模拟的并发机制</h2>
+        <h2>Simulated Java Concurrency Mechanisms</h2>
       </div>
       <div class="conc-grid">
         <div class="conc-card">
           <span class="conc-icon">🔐</span>
           <h4>synchronized(victim)</h4>
-          <p>同一时间只能有一个线程进入临界区操作 victim 的农场。其他线程必须等待锁释放。</p>
-          <code class="conc-code">[Thread-X] synchronized(victim) ENTER / EXIT</code>
+          <p>Only one thread can enter critical section per victim. Others wait for lock release.</p>
         </div>
         <div class="conc-card">
           <span class="conc-icon">📊</span>
-          <h4>Session 偷菜上限 25%</h4>
-          <p>每次 "session"（离开再回来）最多偷 25% 的成熟作物。本演示：6 棵成熟 → 最多偷 1 棵。</p>
-          <code class="conc-code">maxSteal = floor(ripe × 0.25)</code>
+          <h4>25% Session Steal Limit</h4>
+          <p>Each session (visit → leave → revisit) can steal at most 25% of ripe crops.</p>
         </div>
         <div class="conc-card">
           <span class="conc-icon">⏱️</span>
           <h4>CountDownLatch</h4>
-          <p>两个客户端同时发起 steal，服务器通过互斥锁保证操作原子性，只有一个能成功。</p>
-          <code class="conc-code">CountDownLatch(1).await()</code>
+          <p>Two clients steal simultaneously — server uses mutex for atomic updates.</p>
         </div>
         <div class="conc-card">
           <span class="conc-icon">🏠</span>
-          <h4>Victim At Home</h4>
-          <p>如果受害者正在查看自己的农场，所有 steal 请求被拒绝。NPC 默认不在家。</p>
-          <code class="conc-code">if (currentView.get(v) == v) deny()</code>
+          <h4>Victim-At-Home Protection</h4>
+          <p>If victim views own farm, all steal requests are rejected automatically.</p>
         </div>
       </div>
     </section>
@@ -163,12 +208,12 @@
 
   <footer class="footer">
     <div class="footer-content">
-      <span>CS209A · QQ Farm Terminal Concurrency Demo</span>
+      <span>CS209A · QQ Farm Terminal + JavaFX GUI Demo</span>
       <a href="https://github.com/csgrace/CS209A" target="_blank" rel="noopener">View on GitHub ↗</a>
     </div>
   </footer>
 
   <script src="js/qq-farm-engine.js"></script>
-  <script src="js/qq-farm-terminal.js"></script>
+  <script src="js/qq-farm-hybrid.js"></script>
 </body>
 </html>

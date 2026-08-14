@@ -94,12 +94,14 @@
   class FarmServer {
     constructor() {
       this.farms = new Map();          // playerName → Game
+      this.users = new Map();          // playerName → { coins, name }
       this.currentView = new Map();    // playerName → viewingPlayerName
       this.canStealThisCycle = new Map(); // playerName → Map<victim, boolean>
       this.sessionStealCounts = new Map();  // playerName → Map<victim, count>
       this.globalMutex = new Mutex();  // Simulates synchronized(victim)
       this.log = [];                   // Server log for display
       this.listeners = [];
+      this._running = false;
     }
 
     onEvent(fn) { this.listeners.push(fn); }
@@ -123,6 +125,76 @@
       return [...this.farms.keys()];
     }
 
+    start() {
+      this._running = true;
+      this.logMsg('SERVER', 'Server started on port 5050', 'SYSTEM');
+    }
+
+    isRunning() { return this._running; }
+
+    countRipe(name) {
+      const farm = this.getFarm(name);
+      return farm.getRipeCount();
+    }
+
+    visit(viewer, target) {
+      this.currentView.set(viewer, target);
+      this.logMsg('VIEW', `${viewer} visits ${target}'s farm`, viewer);
+    }
+
+    newSession(thief) {
+      // Reset steal session for all victims
+      if (this.sessionStealCounts.has(thief)) {
+        this.sessionStealCounts.delete(thief);
+      }
+      if (this.canStealThisCycle.has(thief)) {
+        this.canStealThisCycle.delete(thief);
+      }
+    }
+
+    // Concurrent steal with callback for live logging
+    async concurrentSteal(thieves, victim, onLog) {
+      const msg = (m, type) => {
+        this.logMsg('CONCURRENT', m, 'SYSTEM');
+        if (onLog) on(m, type);
+      };
+
+      msg(`=== Concurrent Steal Test: ${thieves.join(' & ')} stealing from ${victim} ===`);
+      msg('Preparing CountDownLatch(1)...', 'thread');
+
+      const ready = {};
+      thieves.forEach(t => { ready[t] = false; });
+
+      const stealAttempt = async (thiefName) => {
+        ready[thiefName] = true;
+        msg(`[Thread-${thiefName}] Ready, waiting for countdown...`, 'thread');
+        // Wait for all ready
+        while (!thieves.every(t => ready[t])) { await new Promise(r => setTimeout(r, 5)); }
+        // Small extra delay to ensure both are in the race
+        await new Promise(r => setTimeout(r, 10));
+        try {
+          const result = await this.steal(thiefName, victim);
+          return { thief: thiefName, ...result };
+        } catch (e) {
+          return { thief: thiefName, success: false, reason: e.message };
+        }
+      };
+
+      const promises = thieves.map(t => stealAttempt(t));
+
+      await new Promise(r => setTimeout(r, 200));
+      msg('>>> CountDownLatch.countDown() — GO!', 'thread');
+
+      const results = await Promise.all(promises);
+
+      results.forEach(r => {
+        msg(`[${r.thief}] ${r.success ? '✓ SUCCESS' : '✗ FAILED: ' + r.reason}`, r.success ? 'ok' : 'err');
+      });
+
+      msg('=== Concurrent test complete ===', 'info');
+      return results;
+    }
+
     isVictimAtHome(victimName) {
       return this.currentView.get(victimName) === victimName;
     }
@@ -131,6 +203,7 @@
     login(playerName) {
       const farm = this.getFarm(playerName);
       this.currentView.set(playerName, playerName);
+      this.users.set(playerName, { name: playerName, coins: farm.coins });
       this.logMsg('LOGIN', `${playerName} 已登录`, playerName);
       return { player: playerName, snapshot: farm.snapshot() };
     }
@@ -174,43 +247,63 @@
     plant(playerName, row, col) {
       const farm = this.getFarm(playerName);
       const idx = row * 4 + col;
-      const coins = farm.plant(idx);
-      // Reset steal cycles for all other players
-      for (const [thief, map] of this.canStealThisCycle) {
-        if (thief !== playerName) {
-          if (!map) { /* noop */ }
-          map.set(playerName, true);
-          if (!this.sessionStealCounts.has(thief)) {
-            this.sessionStealCounts.set(thief, new Map());
-          }
-          this.sessionStealCounts.get(thief).set(playerName, 0);
+      try {
+        const coins = farm.plant(idx);
+        // Update user coins
+        if (this.users.has(playerName)) {
+          this.users.get(playerName).coins = farm.coins;
         }
+        // Reset steal cycles for all other players
+        for (const [thief, map] of this.canStealThisCycle) {
+          if (thief !== playerName) {
+            if (!map) { /* noop */ }
+            map.set(playerName, true);
+            if (!this.sessionStealCounts.has(thief)) {
+              this.sessionStealCounts.set(thief, new Map());
+            }
+            this.sessionStealCounts.get(thief).set(playerName, 0);
+          }
+        }
+        this.logMsg('PLANT', `${playerName} 在 (${row},${col}) 种植, 金币=${coins}`, playerName);
+        return true;
+      } catch (e) {
+        this.logMsg('PLANT-FAIL', `${playerName} 种植失败: ${e.message}`, playerName);
+        return false;
       }
-      this.logMsg('PLANT', `${playerName} 在 (${row},${col}) 种植, 金币=${coins}`, playerName);
-      return farm.snapshot();
     }
 
     harvest(playerName, row, col) {
       const farm = this.getFarm(playerName);
       const idx = row * 4 + col;
-      const coins = farm.harvest(idx);
-      this.logMsg('HARVEST', `${playerName} 收获 (${row},${col}), 金币=${coins}`, playerName);
-      return farm.snapshot();
+      try {
+        const coins = farm.harvest(idx);
+        // Update user coins
+        if (this.users.has(playerName)) {
+          this.users.get(playerName).coins = farm.coins;
+        }
+        this.logMsg('HARVEST', `${playerName} 收获 (${row},${col}), 金币=${coins}`, playerName);
+        return true;
+      } catch (e) {
+        this.logMsg('HARVEST-FAIL', `${playerName} 收获失败: ${e.message}`, playerName);
+        return false;
+      }
     }
 
     // ── STEAL: the key concurrency-controlled operation ──
     async steal(thiefName, victimName) {
-      if (victimName === thiefName) throw new Error('不能偷自己');
+      if (victimName === thiefName) {
+        return { success: false, reason: '不能偷自己' };
+      }
 
       // Check: must be viewing victim
       if (this.currentView.get(thiefName) !== victimName) {
-        throw new Error('必须 VIEW 受害者之后才能偷菜');
+        return { success: false, reason: '必须 VIEW 受害者之后才能偷菜' };
       }
 
       // Check: victim at home?
       if (this.isVictimAtHome(victimName)) {
         this.logMsg('STEAL-DENY', `${thiefName} 偷 ${victimName} 失败 → 受害者在家`, thiefName);
-        throw new Error('受害者在家，无法偷菜');
+        return { success: false, reason: '受害者在家，无法偷菜' };
       }
 
       // Check: cycle allowed?
@@ -218,7 +311,7 @@
       const allowed = thiefCanMap.get(victimName) ?? true;
       if (!allowed) {
         this.logMsg('STEAL-DENY', `${thiefName} 偷 ${victimName} 失败 → 本轮禁止`, thiefName);
-        throw new Error('本轮不能偷，等受害者种新作后再试');
+        return { success: false, reason: '本轮不能偷，等受害者种新作后再试' };
       }
 
       // ★ CRITICAL SECTION: synchronized(victim) ★
@@ -263,6 +356,11 @@
           this.canStealThisCycle.get(thiefName).set(victimName, false);
         }
 
+        // Update users Map
+        if (this.users.has(thiefName)) {
+          this.users.get(thiefName).coins = thief.coins;
+        }
+
         this.logMsg('STEAL-SUCCESS',
           `${thiefName} 偷了 ${victimName} 的地块#${stolenIdx}！session=${newCount}/${maxSteal}`,
           thiefName);
@@ -274,13 +372,13 @@
           maxSteal,
           thiefCoins: thief.coins,
           victimRipe: victim.getRipeCount(),
+          victimRipeLeft: victim.getRipeCount(),
           preRipe,
         };
       });
 
       if (!result.success) {
         this.logMsg('STEAL-FAIL', `${thiefName} 偷 ${victimName}: ${result.reason}`, thiefName);
-        throw new Error(result.reason);
       }
 
       return result;
