@@ -280,7 +280,7 @@
     }, 200);
   }
 
-  function cmdSteal(parts) {
+  async function cmdSteal(parts) {
     if (!currentUser) { termLog('Please login first.', 'err'); return; }
     if (parts.length < 2) { termLog('Usage: steal <name>', 'err'); return; }
     const victim = parts[1].toLowerCase();
@@ -293,7 +293,7 @@
     // Show mutex lock in terminal
     termLog(`[Thread-${currentUser}] Entering synchronized(${victim})...`, 'thread');
     
-    const result = server.steal(currentUser, victim);
+    const result = await server.steal(currentUser, victim);
     if (result.success) {
       const user = server.users.get(currentUser);
       termLog(`[Thread-${currentUser}] synchronized(${victim}) ACQUIRED`, 'thread');
