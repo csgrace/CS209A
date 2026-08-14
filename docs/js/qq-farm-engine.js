@@ -128,6 +128,16 @@
     start() {
       this._running = true;
       this.logMsg('SERVER', 'Server started on port 5050', 'SYSTEM');
+      // Auto-plant crops for NPCs so there's something to steal
+      ['bob', 'charlie', 'diana'].forEach(npc => {
+        const farm = this.getFarm(npc);
+        // Give NPCs some starting coins and plant 5 crops
+        farm._coins = 40;
+        [0, 1, 2, 4, 5].forEach(i => {
+          farm.board[i] = PlotState.RIPE;
+        });
+        this.logMsg('SERVER', `NPC ${npc} connected with ${farm.getRipeCount()} ripe crops`, 'SYSTEM');
+      });
     }
 
     isRunning() { return this._running; }
