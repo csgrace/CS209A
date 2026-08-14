@@ -144,8 +144,9 @@
     termPrint('<code>visit &lt;name&gt;</code> — Visit friend\'s farm', 'info');
     termPrint('<code>steal &lt;name&gt;</code> — Steal from friend (+3)', 'info');
     termPrint('<code>look</code> — View own farm', 'info');
-    termPrint('<code>concurrent</code> — CountDownLatch concurrent test', 'info');
-    termPrint('<code>help</code> — Show this help', 'info');
+termPrint('<code>concurrent</code> — CountDownLatch concurrent test', 'info');
+termPrint('<code>demo</code> — Auto-run a successful steal scenario', 'info');
+termPrint('<code>help</code> — Show this help', 'info');
   }
 
   function cmdServer() {
@@ -337,15 +338,17 @@
     if (!server.users.has(victim)) {
       server.login(victim);
     }
-    // Plant some crops for victim
-    [[0,0],[0,1],[0,2],[1,0],[1,1],[2,2],[3,3]].forEach(([r,c]) => server.plant(victim, r, c));
+    // Plant plenty of crops for victim
+    const farm = server.getFarm(victim);
+    for (let i = 0; i < 10; i++) {
+      if (farm.board[i] === 'EMPTY') farm.board[i] = 'RIPE';
+    }
 
-    // Create two temporary thieves that are properly set up
+    // Create two temporary thieves
     const thiefA = currentUser + '_A';
     const thiefB = currentUser + '_B';
     server.login(thiefA);
     server.login(thiefB);
-    // Make them visit victim so they can steal
     server.currentView.set(thiefA, victim);
     server.currentView.set(thiefB, victim);
 
@@ -354,18 +357,71 @@
     termLog(`[Main] Preparing CountDownLatch(1)...`, 'thread');
     termLog(`[Thread-${thiefA}] Ready to steal from ${victim}`, 'thread');
     termLog(`[Thread-${thiefB}] Ready to steal from ${victim}`, 'thread');
-    termLog(`[Main] CountDownLatch.countDown() — FIRE!`, 'thread');
-    setStatusMsg('Concurrent steal test running...');
 
-    // Use engine's concurrent steal
-    await server.concurrentSteal([thiefA, thiefB], victim, async (msg, type) => {
-      termLog(msg, type || 'thread');
-      // Small delay for visible effect
-      await new Promise(r => setTimeout(r, 80));
-    });
+    await new Promise(r => setTimeout(r, 300));
+    termLog(`[Main] CountDownLatch.countDown() — GO!`, 'thread');
 
-    termPrint('<strong>✅ Concurrent test complete. Check results above.</strong>', 'ok');
+    // Run both steals "simultaneously" via Promise.all
+    const [resultA, resultB] = await Promise.all([
+      server.steal(thiefA, victim),
+      server.steal(thiefB, victim)
+    ]);
+
+    // Show results
+    await new Promise(r => setTimeout(r, 100));
+    termLog(`[Result] ${thiefA}: ${resultA.success ? '✓ SUCCESS +3 coins' : '✗ FAILED - ' + resultA.reason}`, resultA.success ? 'ok' : 'err');
+    termLog(`[Result] ${thiefB}: ${resultB.success ? '✓ SUCCESS +3 coins' : '✗ FAILED - ' + resultB.reason}`, resultB.success ? 'ok' : 'err');
+
+    if (resultA.success && resultB.success) {
+      termLog(`[Analysis] Both succeeded! Mutex serialized: one went first, then the other.`, 'info');
+    } else if (resultA.success || resultB.success) {
+      termLog(`[Analysis] Only one succeeded — mutex ensured atomic access.`, 'info');
+    }
+
+    termPrint('<strong>✅ Concurrent test complete.</strong>', 'ok');
     setStatusMsg('Concurrent test complete.');
+    updateJavaFX();
+  }
+
+  // Demo: a successful steal scenario
+  async function cmdDemo() {
+    if (!server) { termLog('Start server first.', 'err'); return; }
+    if (!currentUser) { termLog('Login first.', 'err'); return; }
+
+    termPrint('<strong>🎬 STEAL DEMO — A successful steal scenario</strong>', 'info');
+
+    // 1. Check victim
+    const victim = 'bob';
+    if (!server.users.has(victim)) {
+      server.login(victim);
+    }
+    // Make sure bob has crops
+    const vfarm = server.getFarm(victim);
+    vfarm.board[0] = 'RIPE';
+    vfarm.board[1] = 'RIPE';
+    vfarm.board[2] = 'RIPE';
+
+    termLog(`[Step 1] Ensure ${victim} has ripe crops → ${vfarm.getRipeCount()} ripe`, 'info');
+    await new Promise(r => setTimeout(r, 400));
+
+    // 2. Visit
+    termLog(`[Step 2] visit ${victim} — enter victim's farm`, 'info');
+    server.visit(currentUser, victim);
+    currentFarm = victim;
+    server.newSession(currentUser);
+    await new Promise(r => setTimeout(r, 400));
+
+    // 3. Steal
+    termLog(`[Step 3] steal ${victim} — enter synchronized(victim)`, 'info');
+    const result = await server.steal(currentUser, victim);
+    if (result.success) {
+      const user = server.users.get(currentUser);
+      termLog(`[Result] ✓ Stole from ${victim}! Session: ${result.sessionCount}/${result.maxSteal}, Coins: ${user.coins}`, 'ok');
+      termLog(`[Analysis] Mutex acquired → checked limit → stole crop → released lock`, 'info');
+    } else {
+      termLog(`[Result] ✗ ${result.reason}`, 'err');
+    }
+
     updateJavaFX();
   }
 
@@ -396,6 +452,7 @@
       case 'steal': cmdSteal(parts); break;
       case 'look': cmdLook(); break;
       case 'concurrent': cmdConcurrent(); break;
+      case 'demo': cmdDemo(); break;
       case 'cls': case 'clear':
         termOutput.innerHTML = ''; break;
       default: cmdUnknown(raw);

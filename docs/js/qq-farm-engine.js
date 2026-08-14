@@ -206,6 +206,8 @@
     }
 
     isVictimAtHome(victimName) {
+      // NPCs are never "at home" - they're always vulnerable
+      if (['bob', 'charlie', 'diana'].includes(victimName)) return false;
       return this.currentView.get(victimName) === victimName;
     }
 
