@@ -339,17 +339,26 @@
     }
     // Plant some crops for victim
     [[0,0],[0,1],[0,2],[1,0],[1,1],[2,2],[3,3]].forEach(([r,c]) => server.plant(victim, r, c));
-    
+
+    // Create two temporary thieves that are properly set up
+    const thiefA = currentUser + '_A';
+    const thiefB = currentUser + '_B';
+    server.login(thiefA);
+    server.login(thiefB);
+    // Make them visit victim so they can steal
+    server.currentView.set(thiefA, victim);
+    server.currentView.set(thiefB, victim);
+
     termPrint('<strong>⚡ CONCURRENT STEAL TEST (CountDownLatch simulation)</strong>', 'warn');
     termLog('Two threads try to steal from same victim simultaneously...', 'warn');
     termLog(`[Main] Preparing CountDownLatch(1)...`, 'thread');
-    termLog(`[Thread-${currentUser}] Ready to steal from ${victim}`, 'thread');
-    termLog(`[Thread-${currentUser}b] Ready to steal from ${victim}`, 'thread');
+    termLog(`[Thread-${thiefA}] Ready to steal from ${victim}`, 'thread');
+    termLog(`[Thread-${thiefB}] Ready to steal from ${victim}`, 'thread');
     termLog(`[Main] CountDownLatch.countDown() — FIRE!`, 'thread');
     setStatusMsg('Concurrent steal test running...');
 
     // Use engine's concurrent steal
-    await server.concurrentSteal([`${currentUser}a`, `${currentUser}b`], victim, async (msg, type) => {
+    await server.concurrentSteal([thiefA, thiefB], victim, async (msg, type) => {
       termLog(msg, type || 'thread');
       // Small delay for visible effect
       await new Promise(r => setTimeout(r, 80));

@@ -55,7 +55,7 @@
       if (this.board[i] !== PlotState.EMPTY) throw new Error('地块已被占用');
       if (this._coins < PLANT_COST) throw new Error('金币不足');
       this._coins -= PLANT_COST;
-      this.board[i] = PlotState.GROWING;
+      this.board[i] = PlotState.RIPE; // Demo: instant growth
       this.timestamps[i] = Date.now();
       return this._coins;
     }
