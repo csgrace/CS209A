@@ -23,64 +23,37 @@
   </nav>
 
   <main class="demo-page hybrid-page">
-    <!-- Hero -->
-    <section class="demo-hero hybrid-hero">
+    <!-- Hero — Slim -->
+    <section class="demo-hero farm-hero">
       <div class="hero-content">
         <div class="demo-kicker">CS209A · ASSIGNMENT 2 · CONCURRENCY IN ACTION</div>
         <h1>QQ 农场 · Terminal + JavaFX GUI</h1>
         <p class="hero-desc">模拟 Java Socket + 多线程 + synchronized 互斥锁。左边终端输入命令，右边 JavaFX 风格窗口实时显示农场状态。</p>
-        <div class="demo-jump-links">
-          <a href="#demo-main" class="jump-btn farm-btn">🖥️ 开始体验</a>
-          <a href="https://github.com/csgrace/CS209A/tree/main/assignment/assignment2" target="_blank" rel="noopener" class="jump-btn outline-btn">☕ Java 源码 ↗</a>
-        </div>
-      </div>
-      <div class="hero-visual hybrid-visual">
-        <div class="hybrid-preview">
-          <div class="hp-terminal">
-            <div class="hp-term-h"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-            <div class="hp-term-line">$ login alice</div>
-            <div class="hp-term-line ok">$ steal bob</div>
-            <div class="hp-term-line">[Thread-5] synchronized ENTER</div>
-          </div>
-          <div class="hp-javafx">
-            <div class="hp-jfx-h">🌻 QQ Farm - alice</div>
-            <div class="hp-jfx-grid">
-              <span class="hp-cell ripe">🌻</span><span class="hp-cell ripe">🌻</span><span class="hp-cell">⬛</span><span class="hp-cell">⬛</span>
-              <span class="hp-cell">🌱</span><span class="hp-cell">⬛</span><span class="hp-cell ripe">🌻</span><span class="hp-cell">⬛</span>
-              <span class="hp-cell">⬛</span><span class="hp-cell">🌱</span><span class="hp-cell">⬛</span><span class="hp-cell ripe">🌻</span>
-              <span class="hp-cell">⬛</span><span class="hp-cell">⬛</span><span class="hp-cell">⬛</span><span class="hp-cell">🌱</span>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
-    <!-- Concurrency Controls (brief) -->
-    <section class="demo-section concurrency-explained">
-      <div class="section-header">
-        <span class="eyebrow">CONCURRENCY CONTROLS</span>
-        <h2>Simulated Java Concurrency Mechanisms</h2>
-      </div>
-      <div class="conc-grid">
-        <div class="conc-card">
-          <span class="conc-icon">🔐</span>
-          <h4>synchronized(victim)</h4>
-          <p>Only one thread can enter critical section per victim. Others wait for lock release.</p>
+    <!-- How It Works — Explanation of rules -->
+    <section class="demo-section hybrid-rules">
+      <div class="rules-grid">
+        <div class="rule-card">
+          <div class="rule-icon">🔐</div>
+          <h4>synchronized 互斥锁</h4>
+          <p>每个受害者（victim）对应一个锁。同一时间只有一个线程能进入临界区执行偷菜操作，其他线程必须等待锁释放。</p>
         </div>
-        <div class="conc-card">
-          <span class="conc-icon">📊</span>
-          <h4>25% Session Steal Limit</h4>
-          <p>Each session (visit → leave → revisit) can steal at most 25% of ripe crops.</p>
+        <div class="rule-card">
+          <div class="rule-icon">🏠</div>
+          <h4>在家保护机制</h4>
+          <p>如果受害者正在查看自己的农场（viewing own farm），所有偷菜请求都会被<strong>拒绝</strong>。只有受害者不在家时才能被偷。</p>
         </div>
-        <div class="conc-card">
-          <span class="conc-icon">⏱️</span>
-          <h4>CountDownLatch</h4>
-          <p>Two clients steal simultaneously — server uses mutex for atomic updates.</p>
+        <div class="rule-card">
+          <div class="rule-icon">📊</div>
+          <h4>25% 偷菜上限</h4>
+          <p>每次访问会话（visit → leave → revisit）最多只能偷走成熟作物的 25%。离开再回来算新会话。</p>
         </div>
-        <div class="conc-card">
-          <span class="conc-icon">🏠</span>
-          <h4>Victim-At-Home Protection</h4>
-          <p>If victim views own farm, all steal requests are rejected automatically.</p>
+        <div class="rule-card">
+          <div class="rule-icon">⚡</div>
+          <h4>CountDownLatch 并发测试</h4>
+          <p>两个客户端同时偷菜 — 使用 Promise.all 模拟 CountDownLatch，观察 mutex 如何序列化并发访问。</p>
         </div>
       </div>
     </section>
@@ -97,7 +70,7 @@
             <div class="wt-num">1</div>
             <div class="wt-body">
               <div class="wt-cmd"><code>java -jar Server.jar</code></div>
-              <div class="wt-desc">Start the server. Simulates <code>ServerSocket</code> on port 5050. NPCs (bob, charlie, diana) connect automatically.</div>
+              <div class="wt-desc">启动服务器。模拟 <code>ServerSocket</code> 在 5050 端口监听。NPC（bob, charlie, diana）自动连接。</div>
               <button class="wt-run" data-cmd="java -jar Server.jar">▶ Run</button>
             </div>
           </div>
@@ -105,7 +78,7 @@
             <div class="wt-num">2</div>
             <div class="wt-body">
               <div class="wt-cmd"><code>login alice</code></div>
-              <div class="wt-desc">Connect as "alice". Start with 40 coins. JavaFX window shows your farm.</div>
+              <div class="wt-desc">以 "alice" 身份登录。初始 40 金币。JavaFX 窗口显示你的农场。</div>
               <button class="wt-run" data-cmd="login alice">▶ Run</button>
             </div>
           </div>
@@ -113,7 +86,7 @@
             <div class="wt-num">3</div>
             <div class="wt-body">
               <div class="wt-cmd"><code>plant 0 0</code></div>
-              <div class="wt-desc">Plant at (0,0). Costs 5 coins. Crop grows instantly to 🌻 RIPE.</div>
+              <div class="wt-desc">在 (0,0) 种菜。花费 5 金币。作物立即成熟为 🌻。</div>
               <button class="wt-run" data-cmd="plant 0 0">▶ Run</button>
             </div>
           </div>
@@ -121,56 +94,44 @@
             <div class="wt-num">4</div>
             <div class="wt-body">
               <div class="wt-cmd"><code>plant 1 1</code></div>
-              <div class="wt-desc">Plant at (1,1). Now you have 2 ripe crops ready.</div>
+              <div class="wt-desc">在 (1,1) 种菜。现在你有 2 个成熟作物了。</div>
               <button class="wt-run" data-cmd="plant 1 1">▶ Run</button>
             </div>
           </div>
           <div class="wt-step" data-step="5">
             <div class="wt-num">5</div>
             <div class="wt-body">
-              <div class="wt-cmd"><code>harvest 0 0</code></div>
-              <div class="wt-desc">Harvest ripe crop at (0,0). Earns +12 coins.</div>
-              <button class="wt-run" data-cmd="harvest 0 0">▶ Run</button>
+              <div class="wt-cmd"><code>visit bob</code></div>
+              <div class="wt-desc">访问 bob 的农场。JavaFX 切换到 bob 的作物。开始新的偷菜会话。</div>
+              <button class="wt-run" data-cmd="visit bob">▶ Run</button>
             </div>
           </div>
           <div class="wt-step" data-step="6">
             <div class="wt-num">6</div>
             <div class="wt-body">
-              <div class="wt-cmd"><code>visit bob</code></div>
-              <div class="wt-desc">Visit bob's farm. JavaFX switches to bob's crops. New steal session starts.</div>
-              <button class="wt-run" data-cmd="visit bob">▶ Run</button>
+              <div class="wt-cmd"><code>steal bob</code></div>
+              <div class="wt-desc">偷 bob 的菜！进入 <code>synchronized(victim)</code> 临界区。获得 +3 金币。</div>
+              <button class="wt-run" data-cmd="steal bob">▶ Run</button>
             </div>
           </div>
           <div class="wt-step" data-step="7">
             <div class="wt-num">7</div>
             <div class="wt-body">
-              <div class="wt-cmd"><code>steal bob</code></div>
-              <div class="wt-desc">Steal from bob! Enters <code>synchronized(victim)</code>. Earns +3 coins.</div>
-              <button class="wt-run" data-cmd="steal bob">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="8">
-            <div class="wt-num">8</div>
-            <div class="wt-body">
               <div class="wt-cmd"><code>concurrent</code></div>
-              <div class="wt-desc">⚡ CountDownLatch! Two threads steal simultaneously. Watch the mutex serialize access.</div>
+              <div class="wt-desc">⚡ CountDownLatch！两个线程同时偷菜，观察互斥锁如何序列化访问。</div>
               <button class="wt-run" data-cmd="concurrent">▶ Run</button>
             </div>
           </div>
         </div>
         <div class="wt-auto">
           <button id="wt-autorun" class="wt-autorun-btn">▶▶ Auto-Run All Steps</button>
-          <span class="wt-auto-hint">Watch the full demo automatically</span>
+          <span class="wt-auto-hint">自动执行完整演示</span>
         </div>
       </div>
     </section>
 
     <!-- Main Demo: Terminal + JavaFX GUI -->
     <section id="demo-main" class="demo-section hybrid-section">
-      <div class="section-header">
-        <span class="eyebrow">INTERACTIVE DEMO</span>
-        <h2>Terminal + JavaFX GUI</h2>
-      </div>
       <div class="hybrid-layout">
         <!-- Left: Terminal -->
         <div class="hybrid-terminal">
