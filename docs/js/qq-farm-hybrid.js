@@ -465,6 +465,89 @@
     handleCommand();
   });
 
+  // ── Walkthrough ──
+  const wtSteps = document.querySelectorAll('.wt-step');
+  let wtAutoRunning = false;
+
+  wtSteps.forEach(step => {
+    const runBtn = step.querySelector('.wt-run');
+    if (!runBtn) return;
+    
+    // Run button click
+    runBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (wtAutoRunning) return;
+      const cmd = runBtn.dataset.cmd;
+      termInput.value = cmd;
+      handleCommand();
+      // Mark previous steps as done
+      markStepDone(step);
+    });
+
+    // Step card click - highlight
+    step.addEventListener('click', () => {
+      if (wtAutoRunning) return;
+      wtSteps.forEach(s => s.classList.remove('active'));
+      step.classList.add('active');
+    });
+  });
+
+  function markStepDone(currentStep) {
+    wtSteps.forEach(s => {
+      if (s === currentStep || Array.from(wtSteps).indexOf(s) < Array.from(wtSteps).indexOf(currentStep)) {
+        s.classList.add('done');
+        s.classList.remove('active');
+      }
+    });
+  }
+
+  // Auto-run all steps
+  const wtAutorunBtn = document.getElementById('wt-autorun');
+  if (wtAutorunBtn) {
+    wtAutorunBtn.addEventListener('click', async () => {
+      if (wtAutoRunning) {
+        wtAutoRunning = false;
+        wtAutorunBtn.textContent = '▶▶ Auto-Run All Steps';
+        wtAutorunBtn.classList.remove('running');
+        return;
+      }
+
+      wtAutoRunning = true;
+      wtAutorunBtn.textContent = '⏹ Stop';
+      wtAutorunBtn.classList.add('running');
+
+      const allSteps = document.querySelectorAll('.wt-step');
+      const commands = [];
+      allSteps.forEach(s => {
+        const btn = s.querySelector('.wt-run');
+        if (btn) commands.push(btn.dataset.cmd);
+      });
+
+      for (let i = 0; i < commands.length; i++) {
+        if (!wtAutoRunning) break;
+        const step = allSteps[i];
+        // Highlight current step
+        wtSteps.forEach(s => s.classList.remove('active'));
+        step.classList.add('active');
+        
+        // Run command
+        termInput.value = commands[i];
+        handleCommand();
+        
+        // Wait between steps
+        await new Promise(r => setTimeout(r, 1200));
+        
+        // Mark done
+        step.classList.add('done');
+        step.classList.remove('active');
+      }
+
+      wtAutoRunning = false;
+      wtAutorunBtn.textContent = '▶▶ Auto-Run All Steps';
+      wtAutorunBtn.classList.remove('running');
+    });
+  }
+
   // ── Initialize GUI ──
   renderEmptyGrid();
   disableAllButtons();
