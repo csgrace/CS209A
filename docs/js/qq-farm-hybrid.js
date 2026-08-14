@@ -99,15 +99,15 @@
     for (let r = 0; r < 4; r++) {
       for (let c = 0; c < 4; c++) {
         const cell = document.createElement('div');
-        const plot = farm[r][c];
+        const plot = farm.board[r * 4 + c];
         let cls = 'jfx-cell';
         let content = '⬛';
-        if (plot === 1) { cls += ' sprout'; content = '🌱'; }
-        else if (plot === 2) { cls += ' ripe'; content = '🌻'; }
+        if (plot === 'GROWING') { cls += ' sprout'; content = '🌱'; }
+        else if (plot === 'RIPE') { cls += ' ripe'; content = '🌻'; }
         else { cls += ' empty'; }
         cell.className = cls;
         cell.textContent = content;
-        cell.title = `Row ${r}, Col ${c} — ${plot === 2 ? 'RIPE' : plot === 1 ? 'Growing' : 'Empty'}`;
+        cell.title = `Row ${r}, Col ${c} — ${plot === 'RIPE' ? 'RIPE' : plot === 'GROWING' ? 'Growing' : 'Empty'}`;
         jfxFarmGrid.appendChild(cell);
       }
     }
@@ -319,9 +319,9 @@
     for (let r = 0; r < 4; r++) {
       let row = '  ';
       for (let c = 0; c < 4; c++) {
-        const v = farm[r][c];
-        row += v === 2 ? '🌻 ' : v === 1 ? '🌱 ' : '⬛ ';
-        if (v === 2) ripeCount++;
+        const v = farm.board[r * 4 + c];
+        row += v === 'RIPE' ? '🌻 ' : v === 'GROWING' ? '🌱 ' : '⬛ ';
+        if (v === 'RIPE') ripeCount++;
       }
       termLog(row, 'info');
     }
@@ -415,12 +415,11 @@
 
   // JavaFX buttons drive terminal commands
   btnPlant.addEventListener('click', () => {
-    // Find first empty plot
     if (!currentUser || currentFarm !== currentUser) return;
     const farm = server.getFarm(currentUser);
     for (let r = 0; r < 4; r++) {
       for (let c = 0; c < 4; c++) {
-        if (farm[r][c] === 0) {
+        if (farm.board[r * 4 + c] === 'EMPTY') {
           termInput.value = `plant ${r} ${c}`;
           handleCommand();
           return;
@@ -435,7 +434,7 @@
     const farm = server.getFarm(currentUser);
     for (let r = 0; r < 4; r++) {
       for (let c = 0; c < 4; c++) {
-        if (farm[r][c] === 2) {
+        if (farm.board[r * 4 + c] === 'RIPE') {
           termInput.value = `harvest ${r} ${c}`;
           handleCommand();
           return;

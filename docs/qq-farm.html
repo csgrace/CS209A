@@ -28,7 +28,7 @@
       <div class="hero-content">
         <div class="demo-kicker">CS209A · ASSIGNMENT 2 · CONCURRENCY IN ACTION</div>
         <h1>QQ 农场 · Terminal + JavaFX GUI</h1>
-        <p class="hero-desc">左边终端输入命令，右边 JavaFX 风格窗口实时显示农场状态。体验 synchronized 互斥锁、session 限制、CountDownLatch 并发测试。</p>
+        <p class="hero-desc">模拟 Java Socket + 多线程 + synchronized 互斥锁。左边终端输入命令，右边 JavaFX 风格窗口实时显示农场状态。</p>
         <div class="demo-jump-links">
           <a href="#demo-main" class="jump-btn farm-btn">🖥️ 开始体验</a>
           <a href="https://github.com/csgrace/CS209A/tree/main/assignment/assignment2" target="_blank" rel="noopener" class="jump-btn outline-btn">☕ Java 源码 ↗</a>
@@ -55,187 +55,7 @@
       </div>
     </section>
 
-    <!-- Main Demo Area -->
-    <section id="demo-main" class="demo-section hybrid-section">
-      <div class="hybrid-layout">
-        <!-- Left: Terminal -->
-        <div class="hybrid-terminal">
-          <div class="term-box">
-            <div class="term-box-header">
-              <span class="term-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
-              <span class="term-box-title">Client.java — alice@localhost</span>
-            </div>
-            <div id="terminal-output" class="terminal-output">
-              <div class="term-line welcome">
-                <span class="term-welcome">╔══════════════════════════════════════════════════╗</span>
-              </div>
-              <div class="term-line welcome">
-                <span class="term-welcome">║  CS209A Assignment 2 — QQ Farm Terminal v1.0     ║</span>
-              </div>
-              <div class="term-line welcome">
-                <span class="term-welcome">║  Java Socket + Multithreading + synchronized      ║</span>
-              </div>
-              <div class="term-line welcome">
-                <span class="term-welcome">╚══════════════════════════════════════════════════╝</span>
-              </div>
-              <div class="term-line info">输入 <code>help</code> 查看命令列表</div>
-            </div>
-            <div class="term-quickbar">
-              <span class="qk-label">快捷:</span>
-              <button class="qk-btn" data-cmd="java -jar Server.jar">server</button>
-              <button class="qk-btn" data-cmd="login alice">login</button>
-              <button class="qk-btn" data-cmd="players">players</button>
-              <button class="qk-btn" data-cmd="plant 0 0">plant</button>
-              <button class="qk-btn" data-cmd="harvest 0 0">harvest</button>
-              <button class="qk-btn" data-cmd="visit bob">visit</button>
-              <button class="qk-btn" data-cmd="steal bob">steal</button>
-              <button class="qk-btn" data-cmd="concurrent">concurrent</button>
-            </div>
-            <div class="term-input-row">
-              <span class="term-prompt-arrow">➜</span>
-              <input type="text" id="term-input" class="term-input" placeholder="输入命令..." autocomplete="off" spellcheck="false" />
-              <button id="term-send" class="term-send">↵</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: JavaFX-style GUI Window -->
-        <div class="hybrid-javafx">
-          <div id="javafx-window" class="javafx-window">
-            <!-- JavaFX Title Bar -->
-            <div class="jfx-titlebar">
-              <span class="jfx-icon">🌻</span>
-              <span class="jfx-title" id="jfx-title-text">QQ Farm — Not Logged In</span>
-              <span class="jfx-controls"><span class="jfx-ctrl min">─</span><span class="jfx-ctrl max">□</span><span class="jfx-ctrl close">✕</span></span>
-            </div>
-            <!-- JavaFX Menu Bar -->
-            <div class="jfx-menubar">
-              <span class="jfx-menu">File</span>
-              <span class="jfx-menu">Actions</span>
-              <span class="jfx-menu">Help</span>
-            </div>
-            <!-- JavaFX Content -->
-            <div class="jfx-content">
-              <!-- Player Info Bar -->
-              <div class="jfx-info-bar">
-                <div class="jfx-info-item">
-                  <span class="jfx-info-label">Player:</span>
-                  <span class="jfx-info-value" id="jfx-player-name">—</span>
-                </div>
-                <div class="jfx-info-item">
-                  <span class="jfx-info-label">Coins:</span>
-                  <span class="jfx-info-value" id="jfx-coins">0</span>
-                </div>
-                <div class="jfx-info-item">
-                  <span class="jfx-info-label">Status:</span>
-                  <span class="jfx-info-value" id="jfx-status">Waiting for login...</span>
-                </div>
-                <div class="jfx-info-item">
-                  <span class="jfx-info-label">Viewing:</span>
-                  <span class="jfx-info-value" id="jfx-viewing">—</span>
-                </div>
-              </div>
-              <!-- Farm Grid (4x4) -->
-              <div class="jfx-grid-area">
-                <div class="jfx-grid-label" id="jfx-grid-label">Farm Grid</div>
-                <div id="jfx-farm-grid" class="jfx-farm-grid">
-                  <!-- Generated by JS -->
-                </div>
-              </div>
-              <!-- Action Buttons (JavaFX style) -->
-              <div class="jfx-actions">
-                <button class="jfx-btn" id="jfx-btn-plant" disabled>🌱 Plant</button>
-                <button class="jfx-btn" id="jfx-btn-harvest" disabled>🧺 Harvest</button>
-                <button class="jfx-btn" id="jfx-btn-visit" disabled>👥 Visit</button>
-                <button class="jfx-btn steal" id="jfx-btn-steal" disabled>🦹 Steal</button>
-                <button class="jfx-btn home" id="jfx-btn-home" disabled>🏠 Home</button>
-              </div>
-              <!-- Status Bar (JavaFX bottom) -->
-              <div class="jfx-statusbar">
-                <span id="jfx-statusbar-msg">Ready. Type "help" in terminal for commands.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step-by-Step Walkthrough -->
-      <div class="walkthrough">
-        <h4>📋 Step-by-Step Walkthrough — click each step to run</h4>
-        <div class="wt-steps">
-          <div class="wt-step" data-step="1">
-            <div class="wt-num">1</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>java -jar Server.jar</code></div>
-              <div class="wt-desc">Start the server. This simulates <code>ServerSocket</code> listening on port 5050. NPCs (bob, charlie, diana) will connect automatically.</div>
-              <button class="wt-run" data-cmd="java -jar Server.jar">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="2">
-            <div class="wt-num">2</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>login alice</code></div>
-              <div class="wt-desc">Connect as player "alice". You start with 40 coins. The JavaFX window will show your farm status.</div>
-              <button class="wt-run" data-cmd="login alice">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="3">
-            <div class="wt-num">3</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>plant 0 0</code></div>
-              <div class="wt-desc">Plant a crop at row 0, col 0. Costs 5 coins. In this demo crops grow instantly to 🌻 RIPE state.</div>
-              <button class="wt-run" data-cmd="plant 0 0">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="4">
-            <div class="wt-num">4</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>plant 1 1</code></div>
-              <div class="wt-desc">Plant another crop at row 1, col 1. Now you have 2 ripe crops ready for harvest.</div>
-              <button class="wt-run" data-cmd="plant 1 1">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="5">
-            <div class="wt-num">5</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>harvest 0 0</code></div>
-              <div class="wt-desc">Harvest the ripe crop at (0,0). Earns +12 coins. Demonstrates the harvest operation from Game.java.</div>
-              <button class="wt-run" data-cmd="harvest 0 0">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="6">
-            <div class="wt-num">6</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>visit bob</code></div>
-              <div class="wt-desc">Visit bob's farm. The JavaFX window switches to show bob's crops. A new "steal session" starts (max 25% of ripe).</div>
-              <button class="wt-run" data-cmd="visit bob">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="7">
-            <div class="wt-num">7</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>steal bob</code></div>
-              <div class="wt-desc">Steal from bob! This enters <code>synchronized(victim)</code> — only one thread at a time. Earns +3 coins.</div>
-              <button class="wt-run" data-cmd="steal bob">▶ Run</button>
-            </div>
-          </div>
-          <div class="wt-step" data-step="8">
-            <div class="wt-num">8</div>
-            <div class="wt-body">
-              <div class="wt-cmd"><code>concurrent</code></div>
-              <div class="wt-desc">⚡ CountDownLatch test! Two threads steal from the same victim simultaneously. Watch the mutex serialize access.</div>
-              <button class="wt-run" data-cmd="concurrent">▶ Run</button>
-            </div>
-          </div>
-        </div>
-        <div class="wt-auto">
-          <button id="wt-autorun" class="wt-autorun-btn">▶▶ Auto-Run All Steps</button>
-          <span class="wt-auto-hint">Watch the full demo automatically</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Concurrency Explained -->
+    <!-- Concurrency Controls (brief) -->
     <section class="demo-section concurrency-explained">
       <div class="section-header">
         <span class="eyebrow">CONCURRENCY CONTROLS</span>
@@ -261,6 +81,187 @@
           <span class="conc-icon">🏠</span>
           <h4>Victim-At-Home Protection</h4>
           <p>If victim views own farm, all steal requests are rejected automatically.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Walkthrough Steps -->
+    <section class="demo-section walkthrough-section">
+      <div class="section-header">
+        <span class="eyebrow">STEP-BY-STEP GUIDE</span>
+        <h2>Click each step to run the command</h2>
+      </div>
+      <div class="walkthrough">
+        <div class="wt-steps">
+          <div class="wt-step" data-step="1">
+            <div class="wt-num">1</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>java -jar Server.jar</code></div>
+              <div class="wt-desc">Start the server. Simulates <code>ServerSocket</code> on port 5050. NPCs (bob, charlie, diana) connect automatically.</div>
+              <button class="wt-run" data-cmd="java -jar Server.jar">▶ Run</button>
+            </div>
+          </div>
+          <div class="wt-step" data-step="2">
+            <div class="wt-num">2</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>login alice</code></div>
+              <div class="wt-desc">Connect as "alice". Start with 40 coins. JavaFX window shows your farm.</div>
+              <button class="wt-run" data-cmd="login alice">▶ Run</button>
+            </div>
+          </div>
+          <div class="wt-step" data-step="3">
+            <div class="wt-num">3</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>plant 0 0</code></div>
+              <div class="wt-desc">Plant at (0,0). Costs 5 coins. Crop grows instantly to 🌻 RIPE.</div>
+              <button class="wt-run" data-cmd="plant 0 0">▶ Run</button>
+            </div>
+          </div>
+          <div class="wt-step" data-step="4">
+            <div class="wt-num">4</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>plant 1 1</code></div>
+              <div class="wt-desc">Plant at (1,1). Now you have 2 ripe crops ready.</div>
+              <button class="wt-run" data-cmd="plant 1 1">▶ Run</button>
+            </div>
+          </div>
+          <div class="wt-step" data-step="5">
+            <div class="wt-num">5</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>harvest 0 0</code></div>
+              <div class="wt-desc">Harvest ripe crop at (0,0). Earns +12 coins.</div>
+              <button class="wt-run" data-cmd="harvest 0 0">▶ Run</button>
+            </div>
+          </div>
+          <div class="wt-step" data-step="6">
+            <div class="wt-num">6</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>visit bob</code></div>
+              <div class="wt-desc">Visit bob's farm. JavaFX switches to bob's crops. New steal session starts.</div>
+              <button class="wt-run" data-cmd="visit bob">▶ Run</button>
+            </div>
+          </div>
+          <div class="wt-step" data-step="7">
+            <div class="wt-num">7</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>steal bob</code></div>
+              <div class="wt-desc">Steal from bob! Enters <code>synchronized(victim)</code>. Earns +3 coins.</div>
+              <button class="wt-run" data-cmd="steal bob">▶ Run</button>
+            </div>
+          </div>
+          <div class="wt-step" data-step="8">
+            <div class="wt-num">8</div>
+            <div class="wt-body">
+              <div class="wt-cmd"><code>concurrent</code></div>
+              <div class="wt-desc">⚡ CountDownLatch! Two threads steal simultaneously. Watch the mutex serialize access.</div>
+              <button class="wt-run" data-cmd="concurrent">▶ Run</button>
+            </div>
+          </div>
+        </div>
+        <div class="wt-auto">
+          <button id="wt-autorun" class="wt-autorun-btn">▶▶ Auto-Run All Steps</button>
+          <span class="wt-auto-hint">Watch the full demo automatically</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Demo: Terminal + JavaFX GUI -->
+    <section id="demo-main" class="demo-section hybrid-section">
+      <div class="section-header">
+        <span class="eyebrow">INTERACTIVE DEMO</span>
+        <h2>Terminal + JavaFX GUI</h2>
+      </div>
+      <div class="hybrid-layout">
+        <!-- Left: Terminal -->
+        <div class="hybrid-terminal">
+          <div class="term-box">
+            <div class="term-box-header">
+              <span class="term-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
+              <span class="term-box-title">Client.java — localhost:5050</span>
+            </div>
+            <div id="terminal-output" class="terminal-output">
+              <div class="term-line welcome">
+                <span class="term-welcome">╔══════════════════════════════════════════════════╗</span>
+              </div>
+              <div class="term-line welcome">
+                <span class="term-welcome">║  CS209A Assignment 2 — QQ Farm Terminal v1.0     ║</span>
+              </div>
+              <div class="term-line welcome">
+                <span class="term-welcome">║  Java Socket + Multithreading + synchronized      ║</span>
+              </div>
+              <div class="term-line welcome">
+                <span class="term-welcome">╚══════════════════════════════════════════════════╝</span>
+              </div>
+              <div class="term-line info">输入 <code>help</code> 查看命令列表，或点击上方步骤按钮开始</div>
+            </div>
+            <div class="term-quickbar">
+              <span class="qk-label">快捷:</span>
+              <button class="qk-btn" data-cmd="java -jar Server.jar">server</button>
+              <button class="qk-btn" data-cmd="login alice">login</button>
+              <button class="qk-btn" data-cmd="players">players</button>
+              <button class="qk-btn" data-cmd="plant 0 0">plant</button>
+              <button class="qk-btn" data-cmd="harvest 0 0">harvest</button>
+              <button class="qk-btn" data-cmd="visit bob">visit</button>
+              <button class="qk-btn" data-cmd="steal bob">steal</button>
+              <button class="qk-btn" data-cmd="concurrent">concurrent</button>
+            </div>
+            <div class="term-input-row">
+              <span class="term-prompt-arrow">➜</span>
+              <input type="text" id="term-input" class="term-input" placeholder="输入命令..." autocomplete="off" spellcheck="false" />
+              <button id="term-send" class="term-send">↵</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: JavaFX-style GUI Window -->
+        <div class="hybrid-javafx">
+          <div id="javafx-window" class="javafx-window">
+            <div class="jfx-titlebar">
+              <span class="jfx-icon">🌻</span>
+              <span class="jfx-title" id="jfx-title-text">QQ Farm — Not Logged In</span>
+              <span class="jfx-controls"><span class="jfx-ctrl min">─</span><span class="jfx-ctrl max">□</span><span class="jfx-ctrl close">✕</span></span>
+            </div>
+            <div class="jfx-menubar">
+              <span class="jfx-menu">File</span>
+              <span class="jfx-menu">Actions</span>
+              <span class="jfx-menu">Help</span>
+            </div>
+            <div class="jfx-content">
+              <div class="jfx-info-bar">
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Player:</span>
+                  <span class="jfx-info-value" id="jfx-player-name">—</span>
+                </div>
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Coins:</span>
+                  <span class="jfx-info-value" id="jfx-coins">0</span>
+                </div>
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Status:</span>
+                  <span class="jfx-info-value" id="jfx-status">Waiting for login...</span>
+                </div>
+                <div class="jfx-info-item">
+                  <span class="jfx-info-label">Viewing:</span>
+                  <span class="jfx-info-value" id="jfx-viewing">—</span>
+                </div>
+              </div>
+              <div class="jfx-grid-area">
+                <div class="jfx-grid-label" id="jfx-grid-label">Farm Grid</div>
+                <div id="jfx-farm-grid" class="jfx-farm-grid">
+                </div>
+              </div>
+              <div class="jfx-actions">
+                <button class="jfx-btn" id="jfx-btn-plant" disabled>🌱 Plant</button>
+                <button class="jfx-btn" id="jfx-btn-harvest" disabled>🧺 Harvest</button>
+                <button class="jfx-btn" id="jfx-btn-visit" disabled>👥 Visit</button>
+                <button class="jfx-btn steal" id="jfx-btn-steal" disabled>🦹 Steal</button>
+                <button class="jfx-btn home" id="jfx-btn-home" disabled>🏠 Home</button>
+              </div>
+              <div class="jfx-statusbar">
+                <span id="jfx-statusbar-msg">Ready. Click a step above or type a command.</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
